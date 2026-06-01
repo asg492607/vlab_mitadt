@@ -3395,6 +3395,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     </div>
                 </div>
             </div>
+        `;
     };
 
     // --- OPERATING SYSTEMS SIMULATORS ---

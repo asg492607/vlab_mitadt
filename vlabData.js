@@ -558,7 +558,6 @@ window.VLAB_DATA = {
             "How does BGP prevent routing loops between Autonomous Systems?",
             "Explain the difference between eBGP and iBGP."
         ]
-    }
     },
     cpu_scheduling: {
         title: "CPU Scheduling Algorithms",
