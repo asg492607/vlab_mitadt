@@ -20,9 +20,9 @@
             position: relative;
         }
         .auth-card {
-            background: var(--glass);
+            background: var(--glass-bg);
             backdrop-filter: blur(20px);
-            border: 1px solid var(--border);
+            border: 1px solid var(--glass-border);
             padding: 40px;
             border-radius: 32px;
             width: 100%;
@@ -117,7 +117,7 @@
             font-size: 15px;
         }
         .btn-auth:hover {
-            background: var(--primary-hover);
+            background: var(--primary-dark);
             transform: translateY(-2px);
             box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.4);
         }
@@ -142,6 +142,16 @@
             z-index: 1;
             filter: blur(80px);
             pointer-events: none;
+        }
+        @media (max-width: 480px) {
+            .auth-card {
+                padding: 24px 16px;
+                border-radius: 20px;
+                max-width: calc(100vw - 32px);
+            }
+            .auth-brand {
+                font-size: 24px;
+            }
         }
     </style>
     <script>

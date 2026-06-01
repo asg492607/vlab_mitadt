@@ -559,6 +559,211 @@ window.VLAB_DATA = {
             "Explain the difference between eBGP and iBGP."
         ]
     }
+    },
+    cpu_scheduling: {
+        title: "CPU Scheduling Algorithms",
+        aim: "To study and analyze CPU scheduling algorithms (FCFS, SJF, and Round Robin) to calculate waiting time, turnaround time, and CPU utilization.",
+        theory: {
+            intro: "CPU Scheduling is the process by which the operating system decides which process in the ready queue gets the CPU. In multiprogramming, it maximizes CPU utilization.",
+            cards: [
+                {
+                    title: "1. FCFS & SJF Scheduling",
+                    content: "**First-Come, First-Served (FCFS)**: Non-preemptive scheduling where the process that requests the CPU first gets it first. Simple but prone to Convoy Effect.\\n\\n**Shortest Job First (SJF)**: Selects the process with the shortest CPU burst time. Proven to yield optimal average waiting time."
+                },
+                {
+                    title: "2. Round Robin (RR) & Time Quantum",
+                    content: "**Round Robin (RR)**: Designed for time-sharing systems. Each process gets a small unit of CPU time (time quantum), then is preempted and put back in the ready queue."
+                },
+                {
+                    title: "3. Formulas",
+                    content: "$$\\text{Turnaround Time (TAT)} = \\text{Completion Time (CT)} - \\text{Arrival Time (AT)}$$\\n$$\\text{Waiting Time (WT)} = \\text{Turnaround Time (TAT)} - \\text{Burst Time (BT)}$$"
+                }
+            ]
+        },
+        pretest: [
+            { q: "Which CPU scheduling algorithm leads to the Convoy Effect?", options: ["FCFS", "SJF", "Round Robin", "Priority"], correct: 0 },
+            { q: "What is the primary goal of CPU scheduling?", options: ["To maximize throughput and CPU utilization", "To increase page faults", "To synchronize physical devices", "To prevent deadlocks"], correct: 0 },
+            { q: "Which scheduling algorithm is optimal in terms of average waiting time?", options: ["FCFS", "SJF", "Round Robin", "FIFO"], correct: 1 }
+        ],
+        procedure: [
+            "1. Enter the number of processes to schedule.",
+            "2. Input the Arrival Time and Burst Time for each process.",
+            "3. Choose the Scheduling Algorithm: FCFS, SJF, or Round Robin (and input Time Quantum).",
+            "4. Click Run to generate the Gantt chart and step-by-step timeline.",
+            "5. Analyze the Turnaround Time (TAT), Waiting Time (WT), and average statistics."
+        ],
+        posttest: [
+            { q: "In Round Robin scheduling, what happens if the time quantum is extremely large?", options: ["It behaves like FCFS", "It behaves like SJF", "It causes deadlock", "It reduces waiting time to zero"], correct: 0 },
+            { q: "Waiting Time is defined as?", options: ["TAT - Burst Time", "Completion Time - Arrival Time", "Burst Time - Arrival Time", "None of these"], correct: 0 },
+            { q: "Which scheduler selects from among the processes that are ready to execute and allocates the CPU to one of them?", options: ["Short-term scheduler", "Medium-term scheduler", "Long-term scheduler", "Device scheduler"], correct: 0 }
+        ],
+        simType: "cpu_scheduling",
+        practice_commands: ["ps -aux", "top", "renice", "nice -n 10 ./process"],
+        practice_questions: ["Calculate average waiting time for FCFS with processes P1(BT=24), P2(BT=3), P3(BT=3) arriving at 0.", "Why is preemptive SJF also known as Shortest Remaining Time First (SRTF)?"]
+    },
+    process_sync: {
+        title: "Process Synchronization & Semaphores",
+        aim: "To study and simulate process synchronization using the classical Producer-Consumer Problem solved with Mutex and Semaphores.",
+        theory: {
+            intro: "Process synchronization is the coordination of execution of multiple processes in a shared address space to maintain data consistency. The Producer-Consumer problem is a classic multi-process synchronization problem.",
+            cards: [
+                {
+                    title: "1. Critical Section Problem",
+                    content: "A critical section is a code segment where shared resources are accessed. To prevent race conditions, solutions must satisfy Mutual Exclusion, Progress, and Bounded Waiting."
+                },
+                {
+                    title: "2. Semaphores",
+                    content: "A semaphore is an integer variable accessed via atomic operations: `wait()` (or P) which decrements, and `signal()` (or V) which increments. Binary semaphores act as Mutexes."
+                },
+                {
+                    title: "3. Producer-Consumer Problem",
+                    content: "A producer puts items into a shared buffer, and a consumer removes them. Synchronized using semaphores: `empty` (empty slots), `full` (filled slots), and `mutex` (mutual exclusion)."
+                }
+            ]
+        },
+        pretest: [
+            { q: "What is a race condition?", options: ["When multiple processes access and manipulate the same data concurrently", "When one process runs faster than another", "A deadlock situation", "When CPU speed is high"], correct: 0 },
+            { q: "Which semaphore operation decrements the semaphore value?", options: ["wait()", "signal()", "post()", "get()"], correct: 0 },
+            { q: "The Producer-Consumer problem is also known as?", options: ["Bounded Buffer problem", "Readers-Writers problem", "Dining Philosophers problem", "Sleeping Barber problem"], correct: 0 }
+        ],
+        procedure: [
+            "1. Set the buffer capacity limit.",
+            "2. Click 'Produce' to insert an item into the buffer (decrements empty, increments full).",
+            "3. Click 'Consume' to remove an item from the buffer (decrements full, increments empty).",
+            "4. Try to Produce when the buffer is full or Consume when empty, and observe semaphore states.",
+            "5. Study the log trace showing P/V operation states."
+        ],
+        posttest: [
+            { q: "If the buffer is full, what state does the Producer enter?", options: ["Blocked/Waiting", "Running", "Terminated", "Ready"], correct: 0 },
+            { q: "What is the initial value of the 'empty' semaphore for a buffer of size N?", options: ["N", "0", "1", "N-1"], correct: 0 },
+            { q: "Which of the following is NOT a requirement for a critical section solution?", options: ["Mutual Exclusion", "Progress", "Bounded Waiting", "Spinlock Capability"], correct: 3 }
+        ],
+        simType: "process_sync",
+        practice_commands: ["ipcs -s", "ipcrm -s", "pthread_mutex_init", "sem_wait"],
+        practice_questions: ["Explain the difference between binary semaphore and mutex.", "How does busy waiting waste CPU cycles?"]
+    },
+    deadlock_avoidance: {
+        title: "Deadlock Avoidance (Banker's Algorithm)",
+        aim: "To simulate Banker's Algorithm to determine if a resource allocation request leads to a safe or unsafe state, preventing deadlock.",
+        theory: {
+            intro: "Deadlock is a state where a set of processes are blocked because each process is holding a resource and waiting for another resource held by another process. Banker's Algorithm is a deadlock avoidance algorithm.",
+            cards: [
+                {
+                    title: "1. Banker's Algorithm matrices",
+                    content: "Uses matrices: `Allocation` (resources currently allocated), `Max` (maximum resources required), `Need` (remaining resources needed = Max - Allocation), and `Available` vector."
+                },
+                {
+                    title: "2. Safety Algorithm",
+                    content: "Checks if the system is in a safe state. A state is safe if there exists a safe sequence $P_1, P_2, \\dots, P_n$ where all processes can finish executing without deadlock."
+                },
+                {
+                    title: "3. Resource Request Algorithm",
+                    content: "Determines if a request can be safely granted immediately. If allocating the requested resources leaves the system in a safe state, the request is granted."
+                }
+            ]
+        },
+        pretest: [
+            { q: "What are the four necessary conditions for deadlock?", options: ["Mutual exclusion, hold and wait, no preemption, circular wait", "Starvation, race condition, critical section, spinlock", "Allocation, request, available, need", "None of the above"], correct: 0 },
+            { q: "Banker's Algorithm is used for?", options: ["Deadlock Avoidance", "Deadlock Detection", "Deadlock Recovery", "Deadlock Prevention"], correct: 0 },
+            { q: "If a system is in an unsafe state, does it mean deadlock is guaranteed?", options: ["No, it just means there is a possibility of deadlock", "Yes, deadlock will definitely occur immediately", "It depends on CPU speed", "Unsafe state is the same as deadlock"], correct: 0 }
+        ],
+        procedure: [
+            "1. Enter the Allocation and Max matrices for 3 to 5 processes and 3 resource types.",
+            "2. Input the Available resource vector.",
+            "3. Click 'Check Safety' to trace the step-by-step verification of a safe sequence.",
+            "4. Trigger a resource request from a process and verify if the system can safely grant it."
+        ],
+        posttest: [
+            { q: "Need matrix is calculated as?", options: ["Max - Allocation", "Max + Allocation", "Allocation - Max", "Available - Allocation"], correct: 0 },
+            { q: "What does the Banker's algorithm do when a process requests resources?", options: ["Simulates allocation and checks if the resulting state is safe", "Grants the request immediately", "Blocks the process permanently", "Terminates the process"], correct: 0 },
+            { q: "Which data structure is NOT used in Banker's algorithm?", options: ["Allocation matrix", "Max matrix", "Process table", "Available vector"], correct: 2 }
+        ],
+        simType: "bankers",
+        practice_commands: ["ulimit -a", "sysctl -a | grep sem", "kill -9"],
+        practice_questions: ["Given Allocation=[0 1 0], Max=[7 5 3], Available=[3 3 2], calculate the Need matrix.", "Compare deadlock prevention with deadlock avoidance."]
+    },
+    page_replacement: {
+        title: "Page Replacement Algorithms",
+        aim: "To analyze page replacement algorithms (FIFO, LRU, and Optimal) to count page hits, page faults, and calculate the page fault ratio.",
+        theory: {
+            intro: "Page replacement occurs when a page fault happens and there are no free frames. The OS must select a page in memory to replace with the requested page.",
+            cards: [
+                {
+                    title: "1. FIFO & LRU Algorithms",
+                    content: "**First-In-First-Out (FIFO)**: Replaces the oldest page. Easy to implement but suffers from Belady's Anomaly.\\n\\n**Least Recently Used (LRU)**: Replaces the page that has not been used for the longest period of time. Approximates optimal replacement."
+                },
+                {
+                    title: "2. Optimal Algorithm",
+                    content: "**Optimal Page Replacement**: Replaces the page that will not be used for the longest period in the future. Serves as a benchmark with the minimum page fault rate."
+                },
+                {
+                    title: "3. Belady's Anomaly",
+                    content: "For some page replacement algorithms (like FIFO), the page fault rate may increase as the number of allocated physical frames increases. This is known as Belady's Anomaly."
+                }
+            ]
+        },
+        pretest: [
+            { q: "Which algorithm suffers from Belady's Anomaly?", options: ["FIFO", "LRU", "Optimal", "LFU"], correct: 0 },
+            { q: "A page fault occurs when?", options: ["A page referenced is not present in main memory", "A page is written to disk", "The CPU executes a branch", "Virtual memory is disabled"], correct: 0 },
+            { q: "Which page replacement algorithm is used as a benchmark for comparison?", options: ["Optimal", "LRU", "FIFO", "MRU"], correct: 0 }
+        ],
+        procedure: [
+            "1. Enter the reference string of page numbers.",
+            "2. Input the number of physical frames.",
+            "3. Select the algorithm: FIFO, LRU, or Optimal.",
+            "4. Step through the execution to watch pages load into frames and identify hits/faults.",
+            "5. Review total page faults and final page fault ratio."
+        ],
+        posttest: [
+            { q: "What is the Optimal page replacement criteria?", options: ["Replace page that will not be used for the longest period in the future", "Replace page that has been in memory longest", "Replace page that was least recently used", "Replace page with lowest frequency of use"], correct: 0 },
+            { q: "If page references are 7,0,1,2,0,3 and frame size is 3, what is the frame status in FIFO after loading 7,0,1?", options: ["[7, 0, 1]", "[0, 1, 2]", "[7, 0, 3]", "Empty"], correct: 0 },
+            { q: "LRU stands for?", options: ["Least Recently Used", "Last Random Unit", "Least Random Utilized", "List Reference Unit"], correct: 0 }
+        ],
+        simType: "page_replacement",
+        practice_commands: ["vmstat", "free -m", "sar -B", "swapon -s"],
+        practice_questions: ["Demonstrate Belady's Anomaly using the reference string 1,2,3,4,1,2,5,1,2,3,4,5 with FIFO for 3 and 4 frames.", "Explain how Page Table Entry (PTE) reference bits help approximate LRU."]
+    },
+    disk_scheduling: {
+        title: "Disk Scheduling Algorithms",
+        aim: "To analyze disk scheduling algorithms (FCFS, SSTF, and SCAN) to calculate the total head movement of the disk read/write head.",
+        theory: {
+            intro: "Disk scheduling is done by operating systems to schedule I/O requests arriving for the disk. It reduces disk seek time, which is the time taken to locate the track.",
+            cards: [
+                {
+                    title: "1. FCFS & SSTF Algorithms",
+                    content: "**First-Come, First-Served (FCFS)**: Services requests in the order they arrive. Simple, fair, but does not optimize head movement.\\n\\n**Shortest Seek Time First (SSTF)**: Selects the request closest to the current head position, minimizing immediate seek time but may cause starvation."
+                },
+                {
+                    title: "2. SCAN (Elevator) Algorithm",
+                    content: "**SCAN**: The disk head moves in one direction, servicing requests, until it reaches the end of the disk, then reverses direction and services requests in the opposite direction."
+                },
+                {
+                    title: "3. Seek Time Definition",
+                    content: "Seek time is the primary component of disk access latency. Minimizing total head movement directly reduces seek time and improves system throughput."
+                }
+            ]
+        },
+        pretest: [
+            { q: "What is the main objective of disk scheduling?", options: ["To minimize disk seek time (head movement)", "To maximize storage capacity", "To encrypt disk sectors", "To backup data"], correct: 0 },
+            { q: "Which disk scheduling algorithm is also known as the Elevator Algorithm?", options: ["SCAN", "FCFS", "SSTF", "C-LOOK"], correct: 0 },
+            { q: "Which algorithm selects requests closest to the current head position?", options: ["SSTF", "FCFS", "SCAN", "LOOK"], correct: 0 }
+        ],
+        procedure: [
+            "1. Enter the list of requested disk cylinder tracks.",
+            "2. Input the initial head position and direction of head movement.",
+            "3. Choose the Algorithm: FCFS, SSTF, or SCAN.",
+            "4. Run the simulation to plot the head movement path on the grid.",
+            "5. Compare total cylinder head movements across different algorithms."
+        ],
+        posttest: [
+            { q: "SSTF scheduling may lead to?", options: ["Starvation of requests far from the head", "Deadlock", "High overhead", "Equal seek times for all requests"], correct: 0 },
+            { q: "In SCAN scheduling, what boundary must the head reach before reversing?", options: ["The extreme end of the disk (0 or Max)", "The first pending request", "The middle cylinder", "It reverses randomly"], correct: 0 },
+            { q: "Seek time is the time taken to?", options: ["Position the head over the desired track/cylinder", "Rotate the disk to the desired sector", "Transfer data to memory", "Initialize the disk controller"], correct: 0 }
+        ],
+        simType: "disk_scheduling",
+        practice_commands: ["iostat", "lsblk", "fdisk -l", "hdparm -t /dev/sda"],
+        practice_questions: ["Why does SCAN prevent starvation compared to SSTF?", "Calculate total head movement for FCFS with requests: 98, 183, 37, 122, 14, 124, 65, 67 and head starting at 53."]
+    }
 };
 
 // Add practice data to other labs

@@ -597,6 +597,7 @@ export class SimEngine {
   }
 
   pickSourceL3(srcEp) {
+    if (!srcEp) return { ip: "", mask: "" };
     if (typeof srcEp.ip === "string" && srcEp.ip.trim()) {
       return { ip: srcEp.ip.trim(), mask: typeof srcEp.mask === "string" ? srcEp.mask.trim() : "" };
     }

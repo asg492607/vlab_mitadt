@@ -3065,7 +3065,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                     status.textContent = `Incorrect. Correct: ${q.options[q.correct]}`; status.style.color = 'var(--danger)';
                 }
             });
-            currentScore += (Math.round((correctCount / questions.length) * 100));
+            const scorePercent = questions.length ? Math.round((correctCount / questions.length) * 100) : 100;
+            currentScore += scorePercent;
             document.getElementById('scoreDisplay').innerHTML = `<span>🏆</span> Score: ${currentScore}`;
             if (correctCount >= 0) {
                 // Save state to unlock next sections
@@ -3075,33 +3076,33 @@ document.addEventListener('DOMContentLoaded', async () => {
                     state.pretest = true;
                     localStorage.setItem(`vlab_state_${labId}`, JSON.stringify(state));
                     alert(`Pretest Submitted! Simulation and Experiment sections are now UNLOCKED for this lab. 🚀`);
-                    syncProgress(labId, { pretest: true, pretestScore: Math.round((correctCount / questions.length) * 100) });
+                    syncProgress(labId, { pretest: true, pretestScore: scorePercent });
                 }
-
+ 
                 if (prefix === 'post') {
                     const labId = document.getElementById('labSelect').value;
                     const feedback = document.getElementById('student-feedback')?.value || "";
                     const labData = window.VLAB_DATA[labId] || { title: "Custom Experiment" };
-
+ 
                     syncProgress(labId, {
                         posttest: true,
-                        posttestScore: Math.round((correctCount / questions.length) * 100),
+                        posttestScore: scorePercent,
                         completed: true,
                         feedback: feedback
                     });
-
+ 
                     document.getElementById('cert-user-name').textContent = localStorage.getItem('vlab_user_name') || 'Atharva Gandhi';
                     document.getElementById('cert-lab-name').textContent = labData.title;
                     document.getElementById('cert-date').textContent = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
-
+ 
                     // Auto-generate report in background and prompt user
                     console.log("Auto-capturing simulation state for report...");
-
+ 
                     setTimeout(() => {
                         document.getElementById('certModal').style.display = 'flex';
                     }, 1000);
                 } else {
-                    alert(`Section Complete! Accuracy: ${Math.round((correctCount / questions.length) * 100)}%`);
+                    alert(`Section Complete! Accuracy: ${scorePercent}%`);
                 }
             }
         });
@@ -3394,14 +3395,1068 @@ document.addEventListener('DOMContentLoaded', async () => {
                     </div>
                 </div>
             </div>
-        `;
     };
 
-    const initSimulation = (id) => {
-        const data = window.VLAB_DATA[id];
-        const container = document.getElementById('dynamic-sim-ui');
+    // --- OPERATING SYSTEMS SIMULATORS ---
+    const initCpuSchedulingSim = (container) => {
+        container.innerHTML = `
+            <div class="sim-toolbar">
+                <div class="section-title" style="font-size:22px; margin:0; color:var(--primary);">CPU Scheduling Visualizer</div>
+            </div>
+            <div class="sim-workspace" style="padding:20px; gap:20px; flex-direction:column; overflow-y:auto;">
+                <div style="display:flex; gap:20px; flex-wrap:wrap; width:100%;">
+                    <div class="theory-card" style="flex:1.5; min-width:300px; margin:0;">
+                        <h3 style="color:var(--primary); margin-bottom:15px; display:flex; justify-content:space-between; align-items:center;">
+                            <span>Processes Configuration</span>
+                            <span style="font-size:12px; font-weight:normal; color:var(--text-muted);">Configure ready queue processes</span>
+                        </h3>
+                        <table class="sim-table" style="width:100%; border-collapse:collapse; margin-bottom:15px; text-align:left;">
+                            <thead>
+                                <tr style="border-bottom:2px solid var(--border);">
+                                    <th style="padding:8px;">PID</th>
+                                    <th style="padding:8px;">Arrival Time (AT)</th>
+                                    <th style="padding:8px;">Burst Time (BT)</th>
+                                    <th style="padding:8px;">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="cpuProcessRows">
+                                <tr style="border-bottom:1px solid var(--border);">
+                                    <td style="padding:8px; font-weight:bold;">P1</td>
+                                    <td style="padding:8px;"><input type="number" class="sim-select" style="width:80px;" value="0" min="0" id="at-P1"></td>
+                                    <td style="padding:8px;"><input type="number" class="sim-select" style="width:80px;" value="4" min="1" id="bt-P1"></td>
+                                    <td style="padding:8px;"><button class="btn-sim" style="padding:4px 8px; font-size:11px;" onclick="this.closest('tr').remove();">Delete</button></td>
+                                </tr>
+                                <tr style="border-bottom:1px solid var(--border);">
+                                    <td style="padding:8px; font-weight:bold;">P2</td>
+                                    <td style="padding:8px;"><input type="number" class="sim-select" style="width:80px;" value="1" min="0" id="at-P2"></td>
+                                    <td style="padding:8px;"><input type="number" class="sim-select" style="width:80px;" value="3" min="1" id="bt-P2"></td>
+                                    <td style="padding:8px;"><button class="btn-sim" style="padding:4px 8px; font-size:11px;" onclick="this.closest('tr').remove();">Delete</button></td>
+                                </tr>
+                                <tr style="border-bottom:1px solid var(--border);">
+                                    <td style="padding:8px; font-weight:bold;">P3</td>
+                                    <td style="padding:8px;"><input type="number" class="sim-select" style="width:80px;" value="2" min="0" id="at-P3"></td>
+                                    <td style="padding:8px;"><input type="number" class="sim-select" style="width:80px;" value="1" min="1" id="bt-P3"></td>
+                                    <td style="padding:8px;"><button class="btn-sim" style="padding:4px 8px; font-size:11px;" onclick="this.closest('tr').remove();">Delete</button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div style="display:flex; gap:10px;">
+                            <button id="btnAddProcess" class="btn-sim" style="flex:1;">+ Add Process</button>
+                            <button id="btnRunCpuSim" class="btn-sim primary" style="flex:1;">Run Scheduler</button>
+                        </div>
+                    </div>
+                    
+                    <div class="theory-card" style="flex:1; min-width:250px; margin:0;">
+                        <h3 style="color:var(--primary); margin-bottom:15px;">Algorithm Settings</h3>
+                        <div style="margin-bottom:15px;">
+                            <label style="display:block; margin-bottom:5px; font-size:12px; font-weight:800;">Scheduling Algorithm:</label>
+                            <select id="cpuAlgoSelect" class="sim-select" style="width:100%;">
+                                <option value="fcfs">First-Come, First-Served (FCFS)</option>
+                                <option value="sjf">Shortest Job First (SJF)</option>
+                                <option value="rr">Round Robin (RR)</option>
+                            </select>
+                        </div>
+                        <div style="margin-bottom:15px; display:none;" id="quantumContainer">
+                            <label style="display:block; margin-bottom:5px; font-size:12px; font-weight:800;">Time Quantum:</label>
+                            <input type="number" id="cpuQuantum" class="sim-select" style="width:100%;" value="2" min="1">
+                        </div>
+                        <div style="padding:15px; background:rgba(168,85,247,0.05); border:1px solid var(--border); border-radius:12px; font-size:12px; line-height:1.5;">
+                            <b>Convoy Effect:</b> When short processes wait behind long ones (FCFS).<br>
+                            <b>SJF Optimal:</b> SJF is mathematically optimal for minimizing average waiting times.
+                        </div>
+                    </div>
+                </div>
 
-        if (!data) {
+                <div class="theory-card" id="cpuResultsPanel" style="width:100%; margin:0; display:none; animation: fadeIn 0.4s;">
+                    <h3 style="color:var(--success); margin-bottom:15px;">Execution Gantt Chart</h3>
+                    <div id="ganttChartContainer" style="display:flex; align-items:center; background:var(--bg-page); border:1px solid var(--border); border-radius:12px; height:80px; overflow-x:auto; margin-bottom:20px; padding:10px; position:relative;">
+                        <!-- Gantt blocks injected dynamically -->
+                    </div>
+                    
+                    <h3 style="color:var(--primary); margin-bottom:15px;">Detailed Analysis Matrix</h3>
+                    <table class="sim-table" style="width:100%; border-collapse:collapse; text-align:left; font-family:var(--font-mono); font-size:13px; margin-bottom:20px;">
+                        <thead>
+                            <tr style="border-bottom:2px solid var(--border);">
+                                <th style="padding:8px;">PID</th>
+                                <th style="padding:8px;">Arrival (AT)</th>
+                                <th style="padding:8px;">Burst (BT)</th>
+                                <th style="padding:8px;">Completion (CT)</th>
+                                <th style="padding:8px;">Turnaround (TAT)</th>
+                                <th style="padding:8px;">Waiting (WT)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="cpuAnalysisRows">
+                        </tbody>
+                    </table>
+                    
+                    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:15px;">
+                        <div style="padding:15px; background:rgba(37,99,235,0.05); border:1px solid rgba(37,99,235,0.2); border-radius:10px; text-align:center;">
+                            <div style="font-size:12px; color:var(--text-muted); font-weight:800; text-transform:uppercase;">Average Turnaround Time</div>
+                            <div id="cpuAvgTAT" style="font-size:24px; font-weight:800; color:var(--primary); margin-top:5px;">0.00</div>
+                        </div>
+                        <div style="padding:15px; background:rgba(16,185,129,0.05); border:1px solid rgba(16,185,129,0.2); border-radius:10px; text-align:center;">
+                            <div style="font-size:12px; color:var(--text-muted); font-weight:800; text-transform:uppercase;">Average Waiting Time</div>
+                            <div id="cpuAvgWT" style="font-size:24px; font-weight:800; color:var(--success); margin-top:5px;">0.00</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        const cpuAlgoSelect = document.getElementById('cpuAlgoSelect');
+        const quantumContainer = document.getElementById('quantumContainer');
+        const cpuProcessRows = document.getElementById('cpuProcessRows');
+        const btnAddProcess = document.getElementById('btnAddProcess');
+        const btnRunCpuSim = document.getElementById('btnRunCpuSim');
+        let procCounter = 3;
+
+        cpuAlgoSelect.addEventListener('change', () => {
+            quantumContainer.style.display = cpuAlgoSelect.value === 'rr' ? 'block' : 'none';
+        });
+
+        btnAddProcess.addEventListener('click', () => {
+            procCounter++;
+            const row = document.createElement('tr');
+            row.style.borderBottom = '1px solid var(--border)';
+            row.innerHTML = `
+                <td style="padding:8px; font-weight:bold;">P${procCounter}</td>
+                <td style="padding:8px;"><input type="number" class="sim-select" style="width:80px;" value="0" min="0" id="at-P${procCounter}"></td>
+                <td style="padding:8px;"><input type="number" class="sim-select" style="width:80px;" value="3" min="1" id="bt-P${procCounter}"></td>
+                <td style="padding:8px;"><button class="btn-sim" style="padding:4px 8px; font-size:11px;" onclick="this.closest('tr').remove();">Delete</button></td>
+            `;
+            cpuProcessRows.appendChild(row);
+        });
+
+        btnRunCpuSim.addEventListener('click', () => {
+            const processes = [];
+            const rows = cpuProcessRows.querySelectorAll('tr');
+            rows.forEach(row => {
+                const pid = row.cells[0].textContent;
+                const at = parseInt(row.querySelector(`[id^="at-"]`).value) || 0;
+                const bt = parseInt(row.querySelector(`[id^="bt-"]`).value) || 0;
+                processes.push({ pid, at, bt, tempBt: bt, ct: 0, tat: 0, wt: 0 });
+            });
+
+            if (processes.length === 0) return alert("Please configure at least one process.");
+
+            const algo = cpuAlgoSelect.value;
+            const gantt = [];
+            let currentTime = 0;
+
+            if (algo === 'fcfs') {
+                processes.sort((a, b) => a.at - b.at);
+                processes.forEach(p => {
+                    if (currentTime < p.at) {
+                        gantt.push({ pid: 'Idle', start: currentTime, end: p.at });
+                        currentTime = p.at;
+                    }
+                    gantt.push({ pid: p.pid, start: currentTime, end: currentTime + p.bt });
+                    currentTime += p.bt;
+                    p.ct = currentTime;
+                    p.tat = p.ct - p.at;
+                    p.wt = p.tat - p.bt;
+                });
+            } else if (algo === 'sjf') {
+                // Non-preemptive Shortest Job First
+                let completed = 0;
+                const n = processes.length;
+                const isCompleted = new Array(n).fill(false);
+                
+                while (completed < n) {
+                    let minIdx = -1;
+                    let minBt = Infinity;
+                    
+                    for (let i = 0; i < n; i++) {
+                        if (processes[i].at <= currentTime && !isCompleted[i]) {
+                            if (processes[i].bt < minBt) {
+                                minBt = processes[i].bt;
+                                minIdx = i;
+                            }
+                        }
+                    }
+                    
+                    if (minIdx === -1) {
+                        gantt.push({ pid: 'Idle', start: currentTime, end: currentTime + 1 });
+                        currentTime++;
+                    } else {
+                        const p = processes[minIdx];
+                        gantt.push({ pid: p.pid, start: currentTime, end: currentTime + p.bt });
+                        currentTime += p.bt;
+                        p.ct = currentTime;
+                        p.tat = p.ct - p.at;
+                        p.wt = p.tat - p.bt;
+                        isCompleted[minIdx] = true;
+                        completed++;
+                    }
+                }
+            } else if (algo === 'rr') {
+                const quantum = parseInt(document.getElementById('cpuQuantum').value) || 2;
+                let queue = [];
+                processes.sort((a, b) => a.at - b.at);
+                let completed = 0;
+                const n = processes.length;
+                let isVisited = new Array(n).fill(false);
+                
+                currentTime = processes[0].at;
+                if (currentTime > 0) {
+                    gantt.push({ pid: 'Idle', start: 0, end: currentTime });
+                }
+                
+                queue.push(0);
+                isVisited[0] = true;
+                
+                while (completed < n) {
+                    if (queue.length === 0) {
+                        let nextArr = Infinity;
+                        for(let i=0; i<n; i++) {
+                            if(!isVisited[i] && processes[i].at < nextArr) {
+                                nextArr = processes[i].at;
+                            }
+                        }
+                        gantt.push({ pid: 'Idle', start: currentTime, end: nextArr });
+                        currentTime = nextArr;
+                        for(let i=0; i<n; i++) {
+                            if(processes[i].at <= currentTime && !isVisited[i]) {
+                                queue.push(i);
+                                isVisited[i] = true;
+                            }
+                        }
+                    }
+                    
+                    const idx = queue.shift();
+                    const p = processes[idx];
+                    const runTime = Math.min(p.tempBt, quantum);
+                    
+                    gantt.push({ pid: p.pid, start: currentTime, end: currentTime + runTime });
+                    currentTime += runTime;
+                    p.tempBt -= runTime;
+                    
+                    // Add newly arrived processes to queue
+                    for (let i = 0; i < n; i++) {
+                        if (processes[i].at <= currentTime && !isVisited[i] && processes[i].tempBt > 0) {
+                            queue.push(i);
+                            isVisited[i] = true;
+                        }
+                    }
+                    
+                    if (p.tempBt > 0) {
+                        queue.push(idx);
+                    } else {
+                        p.ct = currentTime;
+                        p.tat = p.ct - p.at;
+                        p.wt = p.tat - p.bt;
+                        completed++;
+                    }
+                }
+            }
+
+            // Render Gantt
+            const ganttBox = document.getElementById('ganttChartContainer');
+            ganttBox.innerHTML = '';
+            const totalDuration = currentTime;
+            
+            gantt.forEach(block => {
+                const percent = ((block.end - block.start) / totalDuration) * 100;
+                const div = document.createElement('div');
+                const isIdle = block.pid === 'Idle';
+                div.style.width = `${percent}%`;
+                div.style.height = '100%';
+                div.style.background = isIdle ? '#475569' : (currentSubject === 'os' ? '#a855f7' : '#2563eb');
+                div.style.color = '#fff';
+                div.style.display = 'flex';
+                div.style.flexDirection = 'column';
+                div.style.alignItems = 'center';
+                div.style.justifyContent = 'center';
+                div.style.borderRight = '1px solid var(--border)';
+                div.style.flexShrink = '0';
+                div.innerHTML = `
+                    <span style="font-weight:bold; font-size:14px;">${block.pid}</span>
+                    <span style="font-size:10px; opacity:0.8;">${block.start}-${block.end}</span>
+                `;
+                ganttBox.appendChild(div);
+            });
+
+            // Render table
+            const analysisRows = document.getElementById('cpuAnalysisRows');
+            analysisRows.innerHTML = '';
+            let sumTAT = 0, sumWT = 0;
+            
+            processes.forEach(p => {
+                sumTAT += p.tat;
+                sumWT += p.wt;
+                analysisRows.innerHTML += `
+                    <tr style="border-bottom:1px solid var(--border);">
+                        <td style="padding:8px; font-weight:bold; color:var(--primary);">${p.pid}</td>
+                        <td style="padding:8px;">${p.at}</td>
+                        <td style="padding:8px;">${p.bt}</td>
+                        <td style="padding:8px;">${p.ct}</td>
+                        <td style="padding:8px;">${p.tat}</td>
+                        <td style="padding:8px;">${p.wt}</td>
+                    </tr>
+                `;
+            });
+
+            document.getElementById('cpuAvgTAT').textContent = (sumTAT / processes.length).toFixed(2);
+            document.getElementById('cpuAvgWT').textContent = (sumWT / processes.length).toFixed(2);
+            document.getElementById('cpuResultsPanel').style.display = 'block';
+        });
+    };
+
+    const initProcessSyncSim = (container) => {
+        container.innerHTML = `
+            <div class="sim-toolbar">
+                <div class="section-title" style="font-size:22px; margin:0; color:var(--primary);">Producer-Consumer Semaphore Sim</div>
+            </div>
+            <div class="sim-workspace" style="padding:20px; gap:20px; flex-direction:column; overflow-y:auto;">
+                <div style="display:flex; gap:20px; flex-wrap:wrap; width:100%;">
+                    <div class="theory-card" style="flex:1.5; min-width:300px; margin:0; text-align:center;">
+                        <h3 style="color:var(--primary); margin-bottom:20px;">Shared Circular Buffer</h3>
+                        <div id="bufferSlots" style="display:flex; justify-content:center; gap:15px; margin-bottom:30px;">
+                            <!-- Circular slots populated dynamically -->
+                        </div>
+                        <div style="display:flex; justify-content:center; gap:15px; margin-bottom:20px;">
+                            <button id="btnProduceSync" class="btn-sim primary">Produce Item</button>
+                            <button id="btnConsumeSync" class="btn-sim success">Consume Item</button>
+                            <button id="btnAutoSync" class="btn-sim">Toggle Auto Play</button>
+                        </div>
+                    </div>
+                    
+                    <div class="theory-card" style="flex:1; min-width:250px; margin:0;">
+                        <h3 style="color:var(--primary); margin-bottom:15px;">Semaphores status</h3>
+                        <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:20px;">
+                            <div style="display:flex; justify-content:space-between; padding:10px; background:var(--bg-page); border:1px solid var(--border); border-radius:8px;">
+                                <span><b>Mutex (Mutual Exclusion):</b></span>
+                                <span id="syncMutex" style="font-family:var(--font-mono); font-weight:800; color:var(--success);">1</span>
+                            </div>
+                            <div style="display:flex; justify-content:space-between; padding:10px; background:var(--bg-page); border:1px solid var(--border); border-radius:8px;">
+                                <span><b>Empty Slots Semaphore:</b></span>
+                                <span id="syncEmpty" style="font-family:var(--font-mono); font-weight:800; color:var(--primary);">5</span>
+                            </div>
+                            <div style="display:flex; justify-content:space-between; padding:10px; background:var(--bg-page); border:1px solid var(--border); border-radius:8px;">
+                                <span><b>Full Slots Semaphore:</b></span>
+                                <span id="syncFull" style="font-family:var(--font-mono); font-weight:800; color:var(--warning);">0</span>
+                            </div>
+                        </div>
+                        <div style="padding:12px; background:rgba(16,185,129,0.05); border:1px solid var(--border); border-radius:10px; font-size:12px; line-height:1.4;">
+                            • <b>empty</b> blocks producer when buffer is full (0).<br>
+                            • <b>full</b> blocks consumer when buffer is empty (0).<br>
+                            • <b>mutex</b> ensures critical section exclusivity.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="theory-card" style="width:100%; margin:0;">
+                    <h3 style="color:var(--primary); margin-bottom:15px;">Pedagogical Operation Logger</h3>
+                    <div id="syncLog" style="height:150px; background:var(--bg-page); border:1px solid var(--border); border-radius:12px; padding:15px; font-family:var(--font-mono); font-size:12px; overflow-y:auto; color:var(--text-main); text-align:left;">
+                        <div style="color:var(--text-muted);">&gt; Semaphores initialized. Buffer empty. Waiting for operations...</div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        const bufferSlots = document.getElementById('bufferSlots');
+        const syncMutex = document.getElementById('syncMutex');
+        const syncEmpty = document.getElementById('syncEmpty');
+        const syncFull = document.getElementById('syncFull');
+        const syncLog = document.getElementById('syncLog');
+
+        const bufferSize = 5;
+        let buffer = new Array(bufferSize).fill(null);
+        let inPtr = 0;
+        let outPtr = 0;
+        let count = 0;
+
+        let autoPlayTimer = null;
+
+        const updateBufferUI = () => {
+            bufferSlots.innerHTML = '';
+            for (let i = 0; i < bufferSize; i++) {
+                const slot = document.createElement('div');
+                slot.style.cssText = `
+                    width: 60px; height: 60px; border-radius: 12px;
+                    border: 2px solid ${buffer[i] ? 'var(--primary)' : 'var(--border)'};
+                    display: flex; align-items: center; justify-content: center;
+                    font-size: 24px; position: relative; background: var(--container-bg);
+                    transition: all 0.3s ease;
+                `;
+                if (buffer[i]) {
+                    slot.style.boxShadow = '0 0 15px rgba(168,85,247,0.2)';
+                    slot.innerHTML = '📦';
+                    const idx = document.createElement('span');
+                    idx.textContent = `Item ${buffer[i]}`;
+                    idx.style.cssText = 'font-size:9px; position:absolute; bottom:2px; color:var(--text-muted);';
+                    slot.appendChild(idx);
+                } else {
+                    slot.innerHTML = '⚙️';
+                    slot.style.opacity = '0.4';
+                }
+                bufferSlots.appendChild(slot);
+            }
+            syncMutex.textContent = '1';
+            syncEmpty.textContent = bufferSize - count;
+            syncFull.textContent = count;
+        };
+
+        const logOp = (msg, type = 'info') => {
+            const div = document.createElement('div');
+            const color = type === 'produce' ? 'var(--primary)' : (type === 'consume' ? 'var(--success)' : 'var(--danger)');
+            div.innerHTML = `<span style="color:${color}; font-weight:800;">&gt;</span> ${msg}`;
+            syncLog.appendChild(div);
+            syncLog.scrollTop = syncLog.scrollHeight;
+        };
+
+        updateBufferUI();
+
+        document.getElementById('btnProduceSync').addEventListener('click', () => {
+            if (count >= bufferSize) {
+                logOp("PRODUCER BLOCKED: Buffer is full! (empty semaphore = 0)", "error");
+                return;
+            }
+            const itemId = Math.floor(Math.random() * 900) + 100;
+            logOp(`Producer calls wait(empty) -> empty=${bufferSize - count - 1}`, "info");
+            logOp(`Producer enters critical section: wait(mutex)`, "info");
+            buffer[inPtr] = itemId;
+            logOp(`Producer added Item ${itemId} at slot ${inPtr + 1}`, "produce");
+            inPtr = (inPtr + 1) % bufferSize;
+            count++;
+            logOp(`Producer exits critical section: signal(mutex)`, "info");
+            logOp(`Producer signals full -> full=${count}`, "info");
+            updateBufferUI();
+        });
+
+        document.getElementById('btnConsumeSync').addEventListener('click', () => {
+            if (count === 0) {
+                logOp("CONSUMER BLOCKED: Buffer is empty! (full semaphore = 0)", "error");
+                return;
+            }
+            logOp(`Consumer calls wait(full) -> full=${count - 1}`, "info");
+            logOp(`Consumer enters critical section: wait(mutex)`, "info");
+            const item = buffer[outPtr];
+            buffer[outPtr] = null;
+            logOp(`Consumer retrieved Item ${item} from slot ${outPtr + 1}`, "consume");
+            outPtr = (outPtr + 1) % bufferSize;
+            count--;
+            logOp(`Consumer exits critical section: signal(mutex)`, "info");
+            logOp(`Consumer signals empty -> empty=${bufferSize - count}`, "info");
+            updateBufferUI();
+        });
+
+        document.getElementById('btnAutoSync').addEventListener('click', () => {
+            const btn = document.getElementById('btnAutoSync');
+            if (autoPlayTimer) {
+                clearInterval(autoPlayTimer);
+                autoPlayTimer = null;
+                btn.textContent = "Toggle Auto Play";
+                btn.classList.remove('primary');
+            } else {
+                btn.textContent = "Stop Auto Play";
+                btn.classList.add('primary');
+                autoPlayTimer = setInterval(() => {
+                    if (Math.random() > 0.4) {
+                        document.getElementById('btnProduceSync').click();
+                    } else {
+                        document.getElementById('btnConsumeSync').click();
+                    }
+                }, 1500);
+            }
+        });
+    };
+
+    const initBankersSim = (container) => {
+        container.innerHTML = `
+            <div class="sim-toolbar">
+                <div class="section-title" style="font-size:22px; margin:0; color:var(--primary);">Banker's Deadlock Avoidance Sim</div>
+            </div>
+            <div class="sim-workspace" style="padding:20px; gap:20px; flex-direction:column; overflow-y:auto;">
+                <div style="display:flex; gap:20px; flex-wrap:wrap; width:100%;">
+                    <div class="theory-card" style="flex:2; min-width:300px; margin:0;">
+                        <h3 style="color:var(--primary); margin-bottom:15px;">System Resource State</h3>
+                        <table class="sim-table" style="width:100%; border-collapse:collapse; font-size:12px; text-align:center;">
+                            <thead>
+                                <tr style="border-bottom:2px solid var(--border);">
+                                    <th style="padding:6px;">Process</th>
+                                    <th style="padding:6px; background:rgba(37,99,235,0.05);">Allocation (A B C)</th>
+                                    <th style="padding:6px; background:rgba(168,85,247,0.05);">Max Demand (A B C)</th>
+                                    <th style="padding:6px; background:rgba(245,158,11,0.05);">Remaining Need (A B C)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr style="border-bottom:1px solid var(--border);">
+                                    <td style="padding:6px; font-weight:bold;">P0</td>
+                                    <td style="padding:6px; background:rgba(37,99,235,0.02);"><input type="text" id="alloc-P0" class="sim-select" style="width:60px; text-align:center;" value="0 1 0"></td>
+                                    <td style="padding:6px; background:rgba(168,85,247,0.02);"><input type="text" id="max-P0" class="sim-select" style="width:60px; text-align:center;" value="7 5 3"></td>
+                                    <td style="padding:6px; background:rgba(245,158,11,0.02); font-family:var(--font-mono); font-weight:bold;" id="need-P0">7 4 3</td>
+                                </tr>
+                                <tr style="border-bottom:1px solid var(--border);">
+                                    <td style="padding:6px; font-weight:bold;">P1</td>
+                                    <td style="padding:6px; background:rgba(37,99,235,0.02);"><input type="text" id="alloc-P1" class="sim-select" style="width:60px; text-align:center;" value="2 0 0"></td>
+                                    <td style="padding:6px; background:rgba(168,85,247,0.02);"><input type="text" id="max-P1" class="sim-select" style="width:60px; text-align:center;" value="3 2 2"></td>
+                                    <td style="padding:6px; background:rgba(245,158,11,0.02); font-family:var(--font-mono); font-weight:bold;" id="need-P1">1 2 2</td>
+                                </tr>
+                                <tr style="border-bottom:1px solid var(--border);">
+                                    <td style="padding:6px; font-weight:bold;">P2</td>
+                                    <td style="padding:6px; background:rgba(37,99,235,0.02);"><input type="text" id="alloc-P2" class="sim-select" style="width:60px; text-align:center;" value="3 0 2"></td>
+                                    <td style="padding:6px; background:rgba(168,85,247,0.02);"><input type="text" id="max-P2" class="sim-select" style="width:60px; text-align:center;" value="9 0 2"></td>
+                                    <td style="padding:6px; background:rgba(245,158,11,0.02); font-family:var(--font-mono); font-weight:bold;" id="need-P2">6 0 0</td>
+                                </tr>
+                                <tr style="border-bottom:1px solid var(--border);">
+                                    <td style="padding:6px; font-weight:bold;">P3</td>
+                                    <td style="padding:6px; background:rgba(37,99,235,0.02);"><input type="text" id="alloc-P3" class="sim-select" style="width:60px; text-align:center;" value="2 1 1"></td>
+                                    <td style="padding:6px; background:rgba(168,85,247,0.02);"><input type="text" id="max-P3" class="sim-select" style="width:60px; text-align:center;" value="2 2 2"></td>
+                                    <td style="padding:6px; background:rgba(245,158,11,0.02); font-family:var(--font-mono); font-weight:bold;" id="need-P3">0 1 1</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="theory-card" style="flex:1; min-width:250px; margin:0;">
+                        <h3 style="color:var(--primary); margin-bottom:15px;">System Vectors</h3>
+                        <div style="margin-bottom:15px;">
+                            <label style="display:block; margin-bottom:5px; font-size:12px; font-weight:800;">Available Resources (A B C):</label>
+                            <input type="text" id="bankersAvail" class="sim-select" style="width:100%; text-align:center; font-family:var(--font-mono); font-weight:800;" value="3 3 2">
+                        </div>
+                        <div style="display:flex; gap:10px; margin-bottom:15px;">
+                            <button id="btnRecalcNeed" class="btn-sim" style="flex:1;">Recalculate Need</button>
+                            <button id="btnCheckSafety" class="btn-sim primary" style="flex:1;">Check Safety</button>
+                        </div>
+                        <div id="safetyResultBox" style="padding:12px; background:rgba(16,185,129,0.05); border:1px solid var(--border); border-radius:10px; font-size:12px; line-height:1.4; font-weight:800; display:none; text-align:center;">
+                            <!-- Safety result loaded dynamically -->
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display:flex; gap:20px; width:100%; flex-wrap:wrap;">
+                    <div class="theory-card" style="flex:1; min-width:300px; margin:0;">
+                        <h3 style="color:var(--primary); margin-bottom:12px;">Safety Verification Trace Log</h3>
+                        <div id="bankersLog" style="height:140px; background:var(--bg-page); border:1px solid var(--border); border-radius:12px; padding:15px; font-family:var(--font-mono); font-size:12px; overflow-y:auto; color:var(--text-main); text-align:left;">
+                            <div style="color:var(--text-muted);">&gt; System state initialized. Ready for safety test.</div>
+                        </div>
+                    </div>
+                    <div class="theory-card" style="flex:1; min-width:250px; margin:0;">
+                        <h3 style="color:var(--warning); margin-bottom:12px;">Simulate Resource Request</h3>
+                        <div style="display:flex; gap:10px; align-items:center; margin-bottom:12px;">
+                            <select id="reqPid" class="sim-select" style="width:80px;">
+                                <option value="0">P0</option>
+                                <option value="1">P1</option>
+                                <option value="2">P2</option>
+                                <option value="3">P3</option>
+                            </select>
+                            <input type="text" id="reqVector" class="sim-select" style="flex:1; text-align:center; font-family:var(--font-mono);" value="1 0 2" placeholder="e.g. 1 0 2">
+                        </div>
+                        <button id="btnRequestBankers" class="btn-sim warning" style="width:100%;">Evaluate Request</button>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        const logBankers = (msg, type = 'info') => {
+            const div = document.createElement('div');
+            const color = type === 'success' ? 'var(--success)' : (type === 'danger' ? 'var(--danger)' : 'var(--text-main)');
+            div.innerHTML = `<span style="color:${color}; font-weight:800;">&gt;</span> ${msg}`;
+            const logBox = document.getElementById('bankersLog');
+            logBox.appendChild(div);
+            logBox.scrollTop = logBox.scrollHeight;
+        };
+
+        const getMatrices = () => {
+            const alloc = [], max = [], need = [];
+            const avail = document.getElementById('bankersAvail').value.trim().split(/\s+/).map(Number);
+            
+            for (let i = 0; i < 4; i++) {
+                const a = document.getElementById(`alloc-P${i}`).value.trim().split(/\s+/).map(Number);
+                const m = document.getElementById(`max-P${i}`).value.trim().split(/\s+/).map(Number);
+                const n = m.map((val, idx) => val - a[idx]);
+                alloc.push(a);
+                max.push(m);
+                need.push(n);
+                document.getElementById(`need-P${i}`).textContent = n.join(' ');
+            }
+            return { alloc, max, need, avail };
+        };
+
+        document.getElementById('btnRecalcNeed').addEventListener('click', () => {
+            getMatrices();
+            logBankers("Recalculated process remaining need vectors successfully.");
+        });
+
+        const checkSafetyState = () => {
+            const { alloc, need, avail } = getMatrices();
+            const work = [...avail];
+            const finish = new Array(4).fill(false);
+            const safeSeq = [];
+            
+            logBankers(`Safety Algorithm started. Work vector: [${work.join(', ')}]`);
+            let count = 0;
+            
+            while (count < 4) {
+                let found = false;
+                for (let i = 0; i < 4; i++) {
+                    if (!finish[i]) {
+                        // Check if Need <= Work
+                        let possible = true;
+                        for (let j = 0; j < 3; j++) {
+                            if (need[i][j] > work[j]) {
+                                possible = false;
+                                break;
+                            }
+                        }
+                        
+                        if (possible) {
+                            logBankers(`Process P${i} requirements [${need[i].join(', ')}] are <= Work [${work.join(', ')}]. Process can run.`);
+                            for (let j = 0; j < 3; j++) {
+                                work[j] += alloc[i][j];
+                            }
+                            finish[i] = true;
+                            safeSeq.push(`P${i}`);
+                            logBankers(`P${i} released resources. New Work: [${work.join(', ')}]`);
+                            found = true;
+                            count++;
+                            break;
+                        }
+                    }
+                }
+                if (!found) break;
+            }
+
+            const resultBox = document.getElementById('safetyResultBox');
+            resultBox.style.display = 'block';
+            if (count === 4) {
+                resultBox.style.background = 'rgba(16,185,129,0.1)';
+                resultBox.style.borderColor = 'var(--success)';
+                resultBox.style.color = 'var(--success)';
+                resultBox.innerHTML = `SAFE STATE DETECTED<br>Sequence: &lt;${safeSeq.join(', ')}&gt;`;
+                logBankers(`SYSTEM SAFE: Safe sequence found: <${safeSeq.join(', ')}>`, 'success');
+                return true;
+            } else {
+                resultBox.style.background = 'rgba(239,68,68,0.1)';
+                resultBox.style.borderColor = 'var(--danger)';
+                resultBox.style.color = 'var(--danger)';
+                resultBox.innerHTML = `UNSAFE STATE DETECTED<br>Potential Deadlock State!`;
+                logBankers("SYSTEM UNSAFE: No valid scheduling execution sequence avoids circular dependency!", "danger");
+                return false;
+            }
+        };
+
+        document.getElementById('btnCheckSafety').addEventListener('click', checkSafetyState);
+
+        document.getElementById('btnRequestBankers').addEventListener('click', () => {
+            const reqPid = parseInt(document.getElementById('reqPid').value);
+            const req = document.getElementById('reqVector').value.trim().split(/\s+/).map(Number);
+            const { alloc, need, avail } = getMatrices();
+
+            logBankers(`Resource Request Evaluation: P${reqPid} requests [${req.join(', ')}]`);
+            
+            // Check if Request <= Need
+            for (let j = 0; j < 3; j++) {
+                if (req[j] > need[reqPid][j]) {
+                    logBankers(`Error: Process P${reqPid} requested more than its maximum need!`, 'danger');
+                    return;
+                }
+            }
+
+            // Check if Request <= Available
+            for (let j = 0; j < 3; j++) {
+                if (req[j] > avail[j]) {
+                    logBankers(`Process P${reqPid} must wait: resources unavailable immediately.`, 'danger');
+                    return;
+                }
+            }
+
+            // Pretend to allocate
+            for (let j = 0; j < 3; j++) {
+                avail[j] -= req[j];
+                alloc[reqPid][j] += req[j];
+                need[reqPid][j] -= req[j];
+            }
+
+            // Apply to UI fields temporarily
+            document.getElementById('bankersAvail').value = avail.join(' ');
+            document.getElementById(`alloc-P${reqPid}`).value = alloc[reqPid].join(' ');
+            getMatrices();
+
+            logBankers("Pretending to allocate resources. Running safety algorithm check...");
+            const safe = checkSafetyState();
+
+            if (safe) {
+                logBankers("Request Approved: Safe state preserved. Allocation complete.", 'success');
+            } else {
+                logBankers("Request Denied: Reverting allocation. Deadlock danger detected.", 'danger');
+                // Revert
+                for (let j = 0; j < 3; j++) {
+                    avail[j] += req[j];
+                    alloc[reqPid][j] -= req[j];
+                }
+                document.getElementById('bankersAvail').value = avail.join(' ');
+                document.getElementById(`alloc-P${reqPid}`).value = alloc[reqPid].join(' ');
+                getMatrices();
+                checkSafetyState();
+            }
+        });
+    };
+
+    const initPageReplacementSim = (container) => {
+        container.innerHTML = `
+            <div class="sim-toolbar">
+                <div class="section-title" style="font-size:22px; margin:0; color:var(--primary);">Page Replacement Visualizer</div>
+            </div>
+            <div class="sim-workspace" style="padding:20px; gap:20px; flex-direction:column; overflow-y:auto;">
+                <div style="display:flex; gap:20px; flex-wrap:wrap; width:100%;">
+                    <div class="theory-card" style="flex:1.5; min-width:300px; margin:0;">
+                        <h3 style="color:var(--primary); margin-bottom:15px;">Algorithm & Reference Parameters</h3>
+                        <div style="margin-bottom:15px;">
+                            <label style="display:block; margin-bottom:5px; font-size:12px; font-weight:800;">Reference String (comma separated):</label>
+                            <input type="text" id="refString" class="sim-select" style="width:100%; font-family:var(--font-mono);" value="7,0,1,2,0,3,0,4,2,3,0,3,2">
+                        </div>
+                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-bottom:15px;">
+                            <div>
+                                <label style="display:block; margin-bottom:5px; font-size:12px; font-weight:800;">Number of Frames (2-6):</label>
+                                <input type="number" id="frameLimit" class="sim-select" style="width:100%;" value="3" min="2" max="6">
+                            </div>
+                            <div>
+                                <label style="display:block; margin-bottom:5px; font-size:12px; font-weight:800;">Replacement Algorithm:</label>
+                                <select id="pageAlgoSelect" class="sim-select" style="width:100%;">
+                                    <option value="fifo">First-In-First-Out (FIFO)</option>
+                                    <option value="lru">Least Recently Used (LRU)</option>
+                                    <option value="optimal">Optimal</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div style="display:flex; gap:10px;">
+                            <button id="btnResetPageSim" class="btn-sim" style="flex:1;">Reset</button>
+                            <button id="btnStepPageSim" class="btn-sim primary" style="flex:1;">Next Step</button>
+                        </div>
+                    </div>
+                    
+                    <div class="theory-card" style="flex:1; min-width:250px; margin:0; text-align:center; display:flex; flex-direction:column; justify-content:center;">
+                        <div style="margin-bottom:15px;">
+                            <div style="font-size:12px; color:var(--text-muted); font-weight:800;">PAGE FAULTS COUNT</div>
+                            <div id="statPageFaults" style="font-size:42px; font-weight:800; color:var(--danger);">0</div>
+                        </div>
+                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                            <div style="padding:10px; background:var(--bg-page); border:1px solid var(--border); border-radius:8px;">
+                                <div style="font-size:10px; color:var(--text-muted);">PAGE HITS</div>
+                                <div id="statPageHits" style="font-size:18px; font-weight:800; color:var(--success);">0</div>
+                            </div>
+                            <div style="padding:10px; background:var(--bg-page); border:1px solid var(--border); border-radius:8px;">
+                                <div style="font-size:10px; color:var(--text-muted);">FAULT RATIO</div>
+                                <div id="statPageRatio" style="font-size:18px; font-weight:800; color:var(--danger);">0%</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="theory-card" id="pageTimelinePanel" style="width:100%; margin:0; overflow-x:auto;">
+                    <h3 style="color:var(--primary); margin-bottom:15px;">Paging Execution Matrix</h3>
+                    <div id="pageTableWrapper">
+                        <table class="sim-table" style="border-collapse:collapse; text-align:center; font-family:var(--font-mono); font-size:14px; min-width:100%;">
+                            <thead id="pageHeaderRow"></thead>
+                            <tbody id="pageFramesBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        const refInput = document.getElementById('refString');
+        const frameLimitInput = document.getElementById('frameLimit');
+        const pageAlgoSelect = document.getElementById('pageAlgoSelect');
+        const btnStepPageSim = document.getElementById('btnStepPageSim');
+        const btnResetPageSim = document.getElementById('btnResetPageSim');
+
+        let stepIndex = 0;
+        let pageFaults = 0;
+        let pageHits = 0;
+        let framesState = [];
+        let stepsLog = [];
+
+        const resetPageSim = () => {
+            stepIndex = 0;
+            pageFaults = 0;
+            pageHits = 0;
+            framesState = new Array(parseInt(frameLimitInput.value) || 3).fill(null);
+            stepsLog = [];
+            
+            document.getElementById('statPageFaults').textContent = '0';
+            document.getElementById('statPageHits').textContent = '0';
+            document.getElementById('statPageRatio').textContent = '0%';
+            
+            document.getElementById('pageHeaderRow').innerHTML = '';
+            document.getElementById('pageFramesBody').innerHTML = '';
+        };
+
+        btnResetPageSim.addEventListener('click', resetPageSim);
+        frameLimitInput.addEventListener('change', resetPageSim);
+        pageAlgoSelect.addEventListener('change', resetPageSim);
+
+        btnStepPageSim.addEventListener('click', () => {
+            const pages = refInput.value.trim().split(',').map(s => parseInt(s.trim()));
+            const framesCount = parseInt(frameLimitInput.value) || 3;
+            const algo = pageAlgoSelect.value;
+            
+            if (stepIndex >= pages.length) return alert("Finished reference string traversal.");
+
+            const currentPage = pages[stepIndex];
+            let isHit = framesState.includes(currentPage);
+            let replacedIdx = -1;
+
+            if (isHit) {
+                pageHits++;
+            } else {
+                pageFaults++;
+                // Find empty slot
+                let emptyIdx = framesState.indexOf(null);
+                if (emptyIdx !== -1) {
+                    framesState[emptyIdx] = currentPage;
+                    replacedIdx = emptyIdx;
+                } else {
+                    // Evict depending on algorithm
+                    if (algo === 'fifo') {
+                        // FIFO Replacement: Replace first entered
+                        // Queue indices simply rotate: pageFaults mod framesCount
+                        const idxToEvict = (pageFaults - 1) % framesCount;
+                        framesState[idxToEvict] = currentPage;
+                        replacedIdx = idxToEvict;
+                    } else if (algo === 'lru') {
+                        // LRU Replacement: Replace least recently used
+                        let oldestAccess = Infinity;
+                        let idxToEvict = -1;
+                        for (let f = 0; f < framesCount; f++) {
+                            const val = framesState[f];
+                            // Find last index of val in processed list
+                            const lastIdx = pages.slice(0, stepIndex).lastIndexOf(val);
+                            if (lastIdx < oldestAccess) {
+                                oldestAccess = lastIdx;
+                                idxToEvict = f;
+                            }
+                        }
+                        framesState[idxToEvict] = currentPage;
+                        replacedIdx = idxToEvict;
+                    } else if (algo === 'optimal') {
+                        // Optimal Replacement: Replace one that won't be used longest in future
+                        let farthestUsage = -1;
+                        let idxToEvict = -1;
+                        for (let f = 0; f < framesCount; f++) {
+                            const val = framesState[f];
+                            let nextUsage = pages.slice(stepIndex + 1).indexOf(val);
+                            if (nextUsage === -1) {
+                                idxToEvict = f;
+                                break; // Unused in future has highest replacement priority
+                            }
+                            if (nextUsage > farthestUsage) {
+                                farthestUsage = nextUsage;
+                                idxToEvict = f;
+                            }
+                        }
+                        framesState[idxToEvict] = currentPage;
+                        replacedIdx = idxToEvict;
+                    }
+                }
+            }
+
+            stepsLog.push({
+                page: currentPage,
+                hit: isHit,
+                replacedIdx,
+                frames: [...framesState]
+            });
+
+            // Re-render Page Table Matrix
+            const head = document.getElementById('pageHeaderRow');
+            head.innerHTML = '<th style="padding:10px; border:1px solid var(--border);">Req Page</th>' + 
+                stepsLog.map((log, idx) => `<th style="padding:10px; border:1px solid var(--border); background:${log.hit ? 'rgba(16,185,129,0.08)' : 'rgba(239,68,68,0.08)'};">${log.page}</th>`).join('');
+
+            const body = document.getElementById('pageFramesBody');
+            body.innerHTML = '';
+            for (let f = 0; f < framesCount; f++) {
+                let row = `<td style="padding:10px; font-weight:bold; border:1px solid var(--border);">Frame ${f + 1}</td>`;
+                stepsLog.forEach(log => {
+                    const isAllocated = log.frames[f] !== null && log.frames[f] !== undefined;
+                    const val = isAllocated ? log.frames[f] : '-';
+                    const isReplaced = log.replacedIdx === f && !log.hit;
+                    row += `<td style="padding:10px; border:1px solid var(--border); font-weight:${isReplaced ? '800' : 'normal'}; color:${isReplaced ? 'var(--danger)' : 'var(--text-main)'}; background:${isReplaced ? 'rgba(239,68,68,0.15)' : 'none'};">${val}</td>`;
+                });
+                body.innerHTML += `<tr>${row}</tr>`;
+            }
+
+            // Append status row
+            let statusRow = '<td style="padding:10px; font-weight:bold; border:1px solid var(--border);">Status</td>';
+            stepsLog.forEach(log => {
+                statusRow += `<td style="padding:10px; border:1px solid var(--border); font-weight:800; color:${log.hit ? 'var(--success)' : 'var(--danger)'};">${log.hit ? 'HIT' : 'FAULT'}</td>`;
+            });
+            body.innerHTML += `<tr>${statusRow}</tr>`;
+
+            document.getElementById('statPageFaults').textContent = pageFaults;
+            document.getElementById('statPageHits').textContent = pageHits;
+            const total = pageFaults + pageHits;
+            document.getElementById('statPageRatio').textContent = ((pageFaults / total) * 100).toFixed(1) + '%';
+
+            stepIndex++;
+        });
+
+        resetPageSim();
+    };
+
+    const initDiskSchedulingSim = (container) => {
+        container.innerHTML = `
+            <div class="sim-toolbar">
+                <div class="section-title" style="font-size:22px; margin:0; color:var(--primary);">Disk Cylinder Scheduling Sim</div>
+            </div>
+            <div class="sim-workspace" style="padding:20px; gap:20px; flex-direction:column; overflow-y:auto;">
+                <div style="display:flex; gap:20px; flex-wrap:wrap; width:100%;">
+                    <div class="theory-card" style="flex:1.5; min-width:300px; margin:0;">
+                        <h3 style="color:var(--primary); margin-bottom:15px;">Disk Request Settings</h3>
+                        <div style="margin-bottom:15px;">
+                            <label style="display:block; margin-bottom:5px; font-size:12px; font-weight:800;">Request Queue (tracks separated by commas):</label>
+                            <input type="text" id="diskQueue" class="sim-select" style="width:100%; font-family:var(--font-mono);" value="98, 183, 37, 122, 14, 124, 65, 67">
+                        </div>
+                        <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:15px; margin-bottom:15px;">
+                            <div>
+                                <label style="display:block; margin-bottom:5px; font-size:12px; font-weight:800;">Initial Head Position:</label>
+                                <input type="number" id="diskInitialHead" class="sim-select" style="width:100%;" value="53" min="0" max="199">
+                            </div>
+                            <div>
+                                <label style="display:block; margin-bottom:5px; font-size:12px; font-weight:800;">Disk Scheduling Algorithm:</label>
+                                <select id="diskAlgoSelect" class="sim-select" style="width:100%;">
+                                    <option value="fcfs">FCFS (First-Come, First-Served)</option>
+                                    <option value="sstf">SSTF (Shortest Seek Time First)</option>
+                                    <option value="scan">SCAN (Elevator Algorithm)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label style="display:block; margin-bottom:5px; font-size:12px; font-weight:800;">SCAN Direction:</label>
+                                <select id="diskScanDir" class="sim-select" style="width:100%;">
+                                    <option value="left">Left (Towards cylinder 0)</option>
+                                    <option value="right">Right (Towards cylinder 199)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button id="btnRunDiskSim" class="btn-sim primary" style="width:100%;">Map Seek Path</button>
+                    </div>
+                    
+                    <div class="theory-card" style="flex:1; min-width:250px; margin:0; text-align:center; display:flex; flex-direction:column; justify-content:center;">
+                        <div style="margin-bottom:15px;">
+                            <div style="font-size:12px; color:var(--text-muted); font-weight:800;">TOTAL HEAD MOVEMENT</div>
+                            <div id="statDiskSeek" style="font-size:42px; font-weight:800; color:var(--primary);">0</div>
+                            <div style="font-size:12px; color:var(--text-muted); font-weight:600;">cylinders</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="theory-card" style="width:100%; margin:0;">
+                    <h3 style="color:var(--primary); margin-bottom:15px;">Seek Trace Graph</h3>
+                    <div style="background:var(--bg-page); padding:20px; border-radius:12px; border:1px solid var(--border); display:flex; justify-content:center;">
+                        <canvas id="diskCanvas" width="600" height="300" style="max-width:100%; background:var(--dashboard-bg); border-radius:8px;"></canvas>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        const btnRunDiskSim = document.getElementById('btnRunDiskSim');
+        const diskQueueInput = document.getElementById('diskQueue');
+        const diskInitialHeadInput = document.getElementById('diskInitialHead');
+        const diskAlgoSelect = document.getElementById('diskAlgoSelect');
+        const diskScanDir = document.getElementById('diskScanDir');
+        const canvas = document.getElementById('diskCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Draw initial track guidelines
+        const drawGrid = () => {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+            ctx.lineWidth = 1;
+            for (let i = 0; i <= 200; i += 20) {
+                const x = 50 + (i / 200) * 500;
+                ctx.beginPath();
+                ctx.moveTo(x, 20);
+                ctx.lineTo(x, 280);
+                ctx.stroke();
+                ctx.fillStyle = 'var(--text-muted)';
+                ctx.font = '9px Outfit';
+                ctx.fillText(i, x - 6, 15);
+            }
+        };
+
+        drawGrid();
+
+        btnRunDiskSim.addEventListener('click', () => {
+            const queue = diskQueueInput.value.trim().split(',').map(s => parseInt(s.trim()));
+            const initialHead = parseInt(diskInitialHeadInput.value) || 53;
+            const algo = diskAlgoSelect.value;
+            const direction = diskScanDir.value;
+
+            if (queue.some(isNaN)) return alert("Please specify a valid numeric cylinder request list.");
+
+            let seekSeq = [initialHead];
+            let head = initialHead;
+
+            if (algo === 'fcfs') {
+                seekSeq = [initialHead, ...queue];
+            } else if (algo === 'sstf') {
+                let remaining = [...queue];
+                while (remaining.length > 0) {
+                    remaining.sort((a, b) => Math.abs(a - head) - Math.abs(b - head));
+                    const next = remaining.shift();
+                    seekSeq.push(next);
+                    head = next;
+                }
+            } else if (algo === 'scan') {
+                const left = [], right = [];
+                queue.forEach(q => {
+                    if (q < initialHead) left.push(q);
+                    else right.push(q);
+                });
+                left.sort((a, b) => b - a); // descending
+                right.sort((a, b) => a - b); // ascending
+
+                if (direction === 'left') {
+                    seekSeq = [initialHead, ...left, 0, ...right];
+                } else {
+                    seekSeq = [initialHead, ...right, 199, ...left];
+                }
+            }
+
+            // Calculate movement
+            let movement = 0;
+            for (let i = 0; i < seekSeq.length - 1; i++) {
+                movement += Math.abs(seekSeq[i] - seekSeq[i+1]);
+            }
+            document.getElementById('statDiskSeek').textContent = movement;
+
+            // Draw seek trace on Canvas
+            drawGrid();
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = currentSubject === 'os' ? '#a855f7' : '#2563eb';
+            ctx.fillStyle = currentSubject === 'os' ? '#c084fc' : '#60a5fa';
+
+            const startX = 50 + (seekSeq[0] / 200) * 500;
+            const yStep = 240 / (seekSeq.length - 1);
+            
+            // Draw lines
+            ctx.beginPath();
+            ctx.moveTo(startX, 40);
+            for (let i = 1; i < seekSeq.length; i++) {
+                const x = 50 + (seekSeq[i] / 200) * 500;
+                const y = 40 + i * yStep;
+                ctx.lineTo(x, y);
+            }
+            ctx.stroke();
+
+            // Draw points
+            for (let i = 0; i < seekSeq.length; i++) {
+                const x = 50 + (seekSeq[i] / 200) * 500;
+                const y = 40 + i * yStep;
+                ctx.beginPath();
+                ctx.arc(x, y, 4, 0, Math.PI * 2);
+                ctx.fill();
+                
+                ctx.fillStyle = '#fff';
+                ctx.font = '10px Outfit';
+                ctx.fillText(`P(${seekSeq[i]})`, x + 8, y + 3);
+                ctx.fillStyle = currentSubject === 'os' ? '#c084fc' : '#60a5fa';
+            }
+        });
+    };
+
             container.innerHTML = `
                 <div class="sim-placeholder" style="text-align:center; padding:100px; color:var(--text-muted);">
                     <div style="font-size:48px; margin-bottom:20px;">🛡️</div>
@@ -3409,6 +4464,31 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <p>This is a free-form Practice Lab. Switch to the <b>Experiment</b> tab to build your network.</p>
                 </div>
             `;
+            return;
+        }
+
+        if (data.simType === 'cpu_scheduling') {
+            initCpuSchedulingSim(container);
+            return;
+        }
+
+        if (data.simType === 'process_sync') {
+            initProcessSyncSim(container);
+            return;
+        }
+
+        if (data.simType === 'bankers') {
+            initBankersSim(container);
+            return;
+        }
+
+        if (data.simType === 'page_replacement') {
+            initPageReplacementSim(container);
+            return;
+        }
+
+        if (data.simType === 'disk_scheduling') {
+            initDiskSchedulingSim(container);
             return;
         }
 
@@ -3499,9 +4579,136 @@ document.addEventListener('DOMContentLoaded', async () => {
         }, 100);
     };
 
+    const handleOsCommand = (cmdStr, outputEl) => {
+        const parts = cmdStr.split(/\s+/);
+        const baseCmd = parts[0].toLowerCase();
+        const args = parts.slice(1);
+        let output = `\nstudent@mitadt-os:~$ ${cmdStr}\n`;
+        
+        switch (baseCmd) {
+            case 'help':
+                output += `Available commands:\n` +
+                          `  help                  - List all commands\n` +
+                          `  clear                 - Clear terminal screen\n` +
+                          `  ls                    - List workspace code files\n` +
+                          `  cat [filename]        - Display code of a file\n` +
+                          `  ps                    - List active processes in system\n` +
+                          `  top                   - Show real-time CPU resource usage\n` +
+                          `  ipcs                  - List active semaphores and shared memory segments\n` +
+                          `  nice -n [val] [proc]  - Adjust process execution priority`;
+                break;
+            case 'clear':
+                outputEl.innerHTML = `Welcome to the MIT ADT OS Shell v2.1 (Kernel: NetForge-OS)\nType 'help' to list available academic commands.\n\nstudent@mitadt-os:~$ `;
+                return;
+            case 'ls':
+                output += `process.c    sem_prod_cons.c    banker.py    page_replacement.c    disk_sched.c`;
+                break;
+            case 'cat':
+                if (!args[0]) {
+                    output += `Usage: cat [filename]`;
+                } else {
+                    const fn = args[0].toLowerCase();
+                    if (fn === 'process.c') {
+                        output += `/* CPU Scheduling Algorithm implementation */\n#include <stdio.h>\nint main() {\n    printf("Running FCFS / SJF Scheduler...\\n");\n    return 0;\n}`;
+                    } else if (fn === 'sem_prod_cons.c') {
+                        output += `/* Semaphore Producer-Consumer Synchronization */\n#include <pthread.h>\n#include <semaphore.h>\nsem_t empty, full;\npthread_mutex_t mutex;`;
+                    } else if (fn === 'banker.py') {
+                        output += `# Banker's Algorithm Deadlock Avoidance\ndef check_safety(allocation, max_need, available):\n    # safety checking logic`;
+                    } else if (fn === 'page_replacement.c') {
+                        output += `/* Page Replacement Simulation - FIFO/LRU */\nvoid replace_page(int page, int frames[]) {\n    // replacement algorithm\n}`;
+                    } else if (fn === 'disk_sched.c') {
+                        output += `/* Disk Scheduling cylinder sweep */\nint calculate_seek_time(int queue[], int head) {\n    return total_head_movement;\n}`;
+                    } else {
+                        output += `cat: ${args[0]}: No such file in user workspace.`;
+                    }
+                }
+                break;
+            case 'ps':
+                output += `PID   TTY      TIME     CMD       PRIORITY  STATUS\n` +
+                          `1     tty1     00:00:02 init      20        RUNNING\n` +
+                          `142   tty1     00:00:01 bash      20        SLEEPING\n` +
+                          `205   tty1     00:00:00 ps        20        RUNNING\n` +
+                          `304   tty1     00:00:05 kworker   15        IDLE`;
+                break;
+            case 'top':
+                output += `OS Load average: 0.12, 0.08, 0.02\n` +
+                          `Tasks: 4 total, 2 running, 2 sleeping\n` +
+                          `CPU utilization: 4.8% user, 1.2% system, 94.0% idle\n\n` +
+                          `PID   USER      PR  NI    VIRT    RES    SHR S  %CPU  %MEM     TIME+ COMMAND\n` +
+                          `1     student   20   0    4200   1200   1000 R   0.2   0.1   0:02.10 init\n` +
+                          `142   student   20   0    5100   2100   1800 S   0.0   0.2   0:01.45 bash\n` +
+                          `304   root      15  -5       0      0      0 S   0.5   0.0   0:05.12 kworker\n` +
+                          `312   student   20   0    9100   3400   2100 R   4.1   0.3   0:00.08 top`;
+                break;
+            case 'ipcs':
+                output += `------ Shared Memory Segments ------\n` +
+                          `key        shmid      owner      perms      bytes      nattch     status\n` +
+                          `0x00007f12 65536      student    660        1024       2\n\n` +
+                          `------ Semaphore Arrays ------\n` +
+                          `key        semid      owner      perms      nsems\n` +
+                          `0x00007f13 98304      student    660        3\n` +
+                          `  [empty: 5, full: 0, mutex: 1]`;
+                break;
+            case 'nice':
+                if (args.length < 3 || args[0] !== '-n') {
+                    output += `Usage: nice -n [increment] [process_name]`;
+                } else {
+                    output += `Adjusted scheduling priority for process '${args[2]}' by ${args[1]}. New Nice value: ${args[1]}.`;
+                }
+                break;
+            default:
+                output += `bash: ${baseCmd}: command not found. Type 'help' to see valid commands.`;
+        }
+        
+        outputEl.textContent += output + '\nstudent@mitadt-os:~$ ';
+        outputEl.scrollTop = outputEl.scrollHeight;
+    };
+
     const initExperiment = (id) => {
         if (window.currentTopo) window.currentTopo.destroy();
         const container = document.getElementById('topology-builder-ui');
+        if (!container) return;
+
+        const currentSubject = localStorage.getItem('vlab_current_subject') || 'networking';
+        if (currentSubject === 'os') {
+            container.innerHTML = `
+                <div class="terminal-workspace" style="height:100%; display:flex; flex-direction:column; background:#0b0f19; border-radius:12px; border:1px solid var(--border); overflow:hidden; font-family:var(--font-mono); color:#10b981; min-height:400px;">
+                    <div style="background:#131824; padding:10px 15px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+                        <span style="color:var(--text-muted); font-size:12px; font-weight:800;">OS INTERACTIVE CLI TERMINAL</span>
+                        <div style="display:flex; gap:6px;">
+                            <span style="width:10px; height:10px; background:#ef4444; border-radius:50%; display:inline-block;"></span>
+                            <span style="width:10px; height:10px; background:#fbbf24; border-radius:50%; display:inline-block;"></span>
+                            <span style="width:10px; height:10px; background:#10b981; border-radius:50%; display:inline-block;"></span>
+                        </div>
+                    </div>
+                    <div id="osTerminalOutput" style="flex:1; padding:20px; overflow-y:auto; font-size:13px; line-height:1.6; white-space:pre-wrap; text-align:left; font-family:var(--font-mono); color:#10b981;">Welcome to the MIT ADT OS Shell v2.1 (Kernel: NetForge-OS)
+Type 'help' to list available academic commands.
+
+student@mitadt-os:~$ </div>
+                    <div style="display:flex; background:#131824; border-top:1px solid var(--border); padding:10px 15px; align-items:center; gap:10px;">
+                        <span style="font-weight:800; color:#a855f7;">student@mitadt-os:~$</span>
+                        <input type="text" id="osTerminalInput" style="flex:1; background:transparent; border:none; color:#10b981; outline:none; font-family:var(--font-mono); font-size:13px;" placeholder="Type a command and press Enter..." autocomplete="off">
+                    </div>
+                </div>
+            `;
+            
+            const termInput = document.getElementById('osTerminalInput');
+            const termOutput = document.getElementById('osTerminalOutput');
+            
+            if (termInput) {
+                termInput.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        const cmd = termInput.value.trim();
+                        termInput.value = '';
+                        if (cmd) {
+                            handleOsCommand(cmd, termOutput);
+                        }
+                    }
+                });
+            }
+            return;
+        }
+
         if (container) {
             const topo = new TopologySimulation(container);
             window.currentTopo = topo;
@@ -3631,9 +4838,56 @@ document.addEventListener('DOMContentLoaded', async () => {
     }, true);
     document.getElementById('btnHome').addEventListener('click', () => window.location.href = 'dashboard.html');
 
-    const initialLab = localStorage.getItem('vlab_current_lab') || 'csma';
+    const currentSubject = localStorage.getItem('vlab_current_subject') || 'networking';
+    const labSelectEl = document.getElementById('labSelect');
+    if (labSelectEl) {
+        let optionsHtml = '';
+        if (currentSubject === 'os') {
+            optionsHtml = `
+                <option value="cpu_scheduling">1. CPU Scheduling Algorithms</option>
+                <option value="process_sync">2. Process Synchronization & Semaphores</option>
+                <option value="deadlock_avoidance">3. Deadlock Avoidance (Banker's)</option>
+                <option value="page_replacement">4. Page Replacement Algorithms</option>
+                <option value="disk_scheduling">5. Disk Scheduling Algorithms</option>
+            `;
+            const crumbs = document.querySelectorAll('.breadcrumb .crumb');
+            if (crumbs.length >= 2) {
+                crumbs[1].textContent = "Operating Systems Lab";
+            }
+            document.documentElement.style.setProperty('--primary', '#a855f7');
+            document.documentElement.style.setProperty('--primary-rgb', '168, 85, 247');
+            document.documentElement.style.setProperty('--accent', '#c084fc');
+            document.title = "MIT ADT VLAB - Operating Systems";
+        } else {
+            optionsHtml = `
+                <option value="cables_devices">1. Cables, Connectors and Networking Devices</option>
+                <option value="modulation">2. Modulation Techniques (AM, FM, PCM)</option>
+                <option value="net_commands">3. Networking Commands & Utilities</option>
+                <option value="ip_class">4. IPv4 Address Classification</option>
+                <option value="csma">5. CSMA/CD Simulation</option>
+                <option value="csma_ca">6. CSMA/CA Simulation</option>
+                <option value="subnet">7. Subnetting & Network Design</option>
+                <option value="vlan">8. VLAN (Virtual LAN) Configuration</option>
+                <option value="routing_protocols">9. Dynamic Routing (OSPF & BGP)</option>
+                <option value="routing_dv">10. Distance Vector Routing Algorithm</option>
+                <option value="routing_ls">11. Link State Routing Algorithm</option>
+                <option value="udp">12. Chat Application using UDP</option>
+                <option value="tcp">13. File Transfer using TCP</option>
+                <option value="dns">14. Domain Name System (DNS)</option>
+                <option value="practice" style="display:none;">Practice Lab</option>
+            `;
+            const crumbs = document.querySelectorAll('.breadcrumb .crumb');
+            if (crumbs.length >= 2) {
+                crumbs[1].textContent = "Computer Networks Lab";
+            }
+            document.title = "MIT ADT VLAB - Computer Networks";
+        }
+        labSelectEl.innerHTML = optionsHtml;
+    }
+
+    const initialLab = localStorage.getItem('vlab_current_lab') || (currentSubject === 'os' ? 'cpu_scheduling' : 'csma');
     const initialMode = localStorage.getItem('vlab_current_mode') || 'learning';
-    document.getElementById('labSelect').value = initialLab;
+    if (labSelectEl) labSelectEl.value = initialLab;
     loadLab(initialLab);
 
     // Aggressive Sandbox Mode: Preserve essential UI components while clearing workspace

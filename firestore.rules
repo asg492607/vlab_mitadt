@@ -21,18 +21,22 @@ service cloud.firestore {
       allow read: if isAuthenticated() && (request.auth.uid == userId || isTeacher());
       allow write: if isAuthenticated() && request.auth.uid == userId;
 
-      // Rules for user subcollections (progress, topologies, evaluation)
-      match /{allSubcollections=**} {
-        // Users can read and write their own subcollections
-        // Teachers can read all student subcollections
+      // Explicit rules for user progress
+      match /progress/{labId} {
         allow read: if isAuthenticated() && (request.auth.uid == userId || isTeacher());
-        
-        // Only the user themselves can write to progress and topologies
-        // Exception: Teachers can write to the 'evaluation' subcollection
-        allow write: if isAuthenticated() && (
-          request.auth.uid == userId || 
-          (isTeacher() && (request.path[6] == 'evaluation'))
-        );
+        allow write: if isAuthenticated() && request.auth.uid == userId;
+      }
+
+      // Explicit rules for user custom network topologies
+      match /topologies/{topoId} {
+        allow read: if isAuthenticated() && (request.auth.uid == userId || isTeacher());
+        allow write: if isAuthenticated() && request.auth.uid == userId;
+      }
+
+      // Explicit rules for teacher evaluations (teachers can write, students can read)
+      match /evaluation/{evalDocId} {
+        allow read: if isAuthenticated() && (request.auth.uid == userId || isTeacher());
+        allow write: if isAuthenticated() && isTeacher();
       }
     }
   }

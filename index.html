@@ -26,7 +26,21 @@
             </div>
             <button class="btn-primary" onclick="location.href='login.html'">Launch Lab</button>
         </div>
+        <!-- Mobile Menu Toggle Button -->
+        <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Toggle Navigation Menu">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
     </nav>
+
+    <!-- Mobile Navigation Drawer -->
+    <div class="mobile-nav-panel" id="mobileNavPanel">
+        <a href="#features" onclick="toggleMobileMenu()">Features</a>
+        <a href="#experiments" onclick="toggleMobileMenu()">Experiments</a>
+        <a href="#how-to-use" onclick="toggleMobileMenu()">How it Works</a>
+        <button class="btn-primary" style="width: 100%; margin-top: 10px;" onclick="location.href='login.html'">Launch Lab</button>
+    </div>
 
     <div class="grid-bg"></div>
     <!-- Hero Section -->
@@ -107,6 +121,7 @@
                 <h3>Visual Topology Builder</h3>
                 <p>Drag and drop industry-standard nodes. Configure IP addresses, subnet masks, and physical cabling in an interactive sandbox.</p>
             </div>
+            <div class="modern-card reveal">
                 <div class="card-icon">📊</div>
                 <h3>Protocol Animation</h3>
                 <p>Watch packets move through the OSI layers. Visualize collisions (CSMA/CD), handshakes (TCP), and routing convergence in real-time.</p>
@@ -385,6 +400,29 @@
                     behavior: 'smooth'
                 });
             });
+        });
+
+        // Mobile Navigation Toggle Logic
+        const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+        const mobileNavPanel = document.getElementById('mobileNavPanel');
+        
+        window.toggleMobileMenu = function() {
+            mobileMenuToggle.classList.toggle('open');
+            mobileNavPanel.classList.toggle('open');
+            document.body.classList.toggle('no-scroll');
+        };
+        
+        mobileMenuToggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            toggleMobileMenu();
+        });
+
+        document.addEventListener('click', (e) => {
+            if (mobileNavPanel.classList.contains('open') && 
+                !mobileNavPanel.contains(e.target) && 
+                !mobileMenuToggle.contains(e.target)) {
+                toggleMobileMenu();
+            }
         });
 
         // Theme Toggle Logic

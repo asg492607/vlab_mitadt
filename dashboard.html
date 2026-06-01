@@ -17,6 +17,7 @@
             --container-border: rgba(255, 255, 255, 0.05);
             --muted-text: #94a3b8;
             --badge-bg: rgba(255, 255, 255, 0.05);
+            --glass: rgba(15, 23, 42, 0.6);
         }
 
         [data-theme="light"] {
@@ -29,6 +30,7 @@
             --container-border: #e2e8f0;
             --muted-text: #64748b;
             --badge-bg: #f1f5f9;
+            --glass: rgba(255, 255, 255, 0.7);
         }
 
         body { 
@@ -210,11 +212,176 @@
         }
         .theme-toggle-btn:hover {
             transform: scale(1.1) rotate(15deg);
-            border-color: #2563eb;
+            border-color: var(--primary-accent, #2563eb);
         }
         .theme-toggle-btn .sun { display: none; }
         [data-theme="light"] .theme-toggle-btn .sun { display: block; }
         [data-theme="light"] .theme-toggle-btn .moon { display: none; }
+
+        /* Subject Selection Premium Styling */
+        .subject-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            margin-top: 12px;
+            margin-bottom: 24px;
+            animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .subject-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            padding: 28px;
+            border-radius: 24px;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            cursor: pointer;
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+            position: relative;
+            overflow: hidden;
+            text-align: left;
+        }
+        .subject-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 4px; height: 100%;
+            background: transparent;
+            transition: background 0.3s;
+        }
+        .subject-card[data-subject="networking"]:hover::before {
+            background: #2563eb;
+        }
+        .subject-card[data-subject="os"]:hover::before {
+            background: #a855f7;
+        }
+        .subject-card:hover {
+            transform: translateY(-8px);
+            background: var(--card-hover-bg);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        }
+        .subject-card.locked {
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+        .subject-card.locked:hover {
+            transform: none;
+            box-shadow: none;
+            background: var(--card-bg);
+        }
+        .subject-icon {
+            font-size: 32px;
+            width: 64px;
+            height: 64px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: all 0.3s ease;
+        }
+        .subject-card:hover .subject-icon {
+            transform: scale(1.1);
+        }
+        .subject-info h3 {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            margin-top: 0;
+        }
+        .subject-info p {
+            color: var(--muted-text);
+            font-size: 13px;
+            line-height: 1.5;
+            margin-bottom: 16px;
+            margin-top: 0;
+        }
+        .subject-meta {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+        .badge-lab-count {
+            background: var(--badge-bg);
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--muted-text);
+        }
+        .subject-status {
+            color: #10b981;
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .subject-status-locked {
+            color: var(--muted-text);
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .btn-back-subjects {
+            background: transparent;
+            border: 1px solid var(--container-border);
+            color: var(--muted-text);
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            margin-bottom: 24px;
+            font-weight: 600;
+        }
+        .btn-back-subjects:hover {
+            color: var(--dashboard-text);
+            border-color: var(--dashboard-text);
+            background: var(--card-hover-bg);
+            transform: translateX(-4px);
+        }
+
+        /* Mobile adaptation for dashboard */
+        @media (max-width: 768px) {
+            body {
+                padding: 16px 0;
+                align-items: flex-start;
+                height: auto;
+                min-height: 100vh;
+                overflow-y: auto;
+            }
+            .dashboard-container {
+                padding: 24px 16px;
+                border-radius: 24px;
+                margin: 16px auto;
+                width: calc(100% - 32px);
+            }
+            .welcome-header h1 {
+                font-size: 28px;
+            }
+            .welcome-header p {
+                font-size: 14px;
+            }
+            .mode-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+                margin-bottom: 32px;
+            }
+            .subject-grid {
+                grid-template-columns: 1fr;
+            }
+            .lab-selection {
+                grid-template-columns: 1fr;
+            }
+            .btn-start {
+                width: 100%;
+                padding: 16px 24px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -252,89 +419,108 @@
             </div>
         </header>
 
-        <div class="mode-grid">
-            <div class="mode-card active" id="cardVlab" onclick="setMainPath('vlab')">
-                <div class="mode-icon">🎓</div>
-                <h3>VLAB</h3>
-                <p>Curriculum-aligned experiments (CSMA, Routing, TCP/UDP) with guided procedures and assessments.</p>
-            </div>
-            <div class="mode-card" id="cardPractice" onclick="setMainPath('practice')">
-                <div class="mode-icon">🛠️</div>
-                <h3>PRACTICE LAB</h3>
-                <p>Free-form network topology builder (Packet Tracer style). Build, connect, and configure your own networks.</p>
-            </div>
-        </div>
-
-        <div id="vlabSelection">
-            <h2 style="margin-bottom: 24px;">Select Curriculum Experiment</h2>
-            <div class="lab-selection">
-                <div class="lab-card" data-id="cables_devices" onclick="selectLab('cables_devices')">
-                    <div class="lab-num">1</div>
-                    <div class="lab-info"><h4>Cables & Devices</h4><div class="lab-meta"><span>Physical Layer</span> <div class="status-badge locked">Not Started</div></div></div>
+        <!-- Subject Selection View -->
+        <div id="subject-view">
+            <h2 style="margin-bottom: 24px; text-align: center; font-weight: 800; font-size: 26px;">Select Academic Track</h2>
+            <div class="subject-grid">
+                <div class="subject-card" data-subject="networking" onclick="selectSubject('networking')">
+                    <div class="subject-icon" style="background: rgba(37, 99, 235, 0.1); color: #2563eb;">🌐</div>
+                    <div class="subject-info">
+                        <h3>Computer Networks</h3>
+                        <p>Simulate Carrier Sensing (CSMA/CD, CSMA/CA), dynamic routing (OSPF, BGP), UDP and TCP protocols.</p>
+                        <div class="subject-meta">
+                            <span class="badge-lab-count">14 Labs</span>
+                            <span class="subject-status">Ready</span>
+                        </div>
+                    </div>
                 </div>
-                <div class="lab-card" data-id="modulation" onclick="selectLab('modulation')">
-                    <div class="lab-num">2</div>
-                    <div class="lab-info"><h4>Modulation</h4><div class="lab-meta"><span>Signal Techniques</span> <div class="status-badge locked">Not Started</div></div></div>
+                <div class="subject-card" data-subject="os" onclick="selectSubject('os')">
+                    <div class="subject-icon" style="background: rgba(168, 85, 247, 0.1); color: #a855f7;">💻</div>
+                    <div class="subject-info">
+                        <h3>Operating Systems</h3>
+                        <p>Analyze CPU scheduling, process synchronization with semaphores, deadlock avoidance, page replacement, and disk scheduling.</p>
+                        <div class="subject-meta">
+                            <span class="badge-lab-count">5 Labs</span>
+                            <span class="subject-status">Ready</span>
+                        </div>
+                    </div>
                 </div>
-                <div class="lab-card" data-id="net_commands" onclick="selectLab('net_commands')">
-                    <div class="lab-num">3</div>
-                    <div class="lab-info"><h4>Net Commands</h4><div class="lab-meta"><span>Utilities & Tools</span> <div class="status-badge locked">Not Started</div></div></div>
-                </div>
-                <div class="lab-card" data-id="ip_class" onclick="selectLab('ip_class')">
-                    <div class="lab-num">4</div>
-                    <div class="lab-info"><h4>IP Classification</h4><div class="lab-meta"><span>Network ID & Host ID</span> <div class="status-badge locked">Not Started</div></div></div>
-                </div>
-                <div class="lab-card" data-id="csma" onclick="selectLab('csma')">
-                    <div class="lab-num">5</div>
-                    <div class="lab-info"><h4>CSMA/CD</h4><div class="lab-meta"><span>Collision Detection</span> <div class="status-badge locked">Not Started</div></div></div>
-                </div>
-                <div class="lab-card" data-id="csma_ca" onclick="selectLab('csma_ca')">
-                    <div class="lab-num">6</div>
-                    <div class="lab-info"><h4>CSMA/CA</h4><div class="lab-meta"><span>Collision Avoidance</span> <div class="status-badge locked">Not Started</div></div></div>
-                </div>
-                <div class="lab-card" data-id="subnet" onclick="selectLab('subnet')">
-                    <div class="lab-num">7</div>
-                    <div class="lab-info"><h4>Subnetting</h4><div class="lab-meta"><span>IP Architecture</span> <div class="status-badge locked">Not Started</div></div></div>
-                </div>
-                <div class="lab-card" data-id="vlan" onclick="selectLab('vlan')">
-                    <div class="lab-num">8</div>
-                    <div class="lab-info"><h4>VLAN</h4><div class="lab-meta"><span>Logical Segmentation</span> <div class="status-badge locked">Not Started</div></div></div>
-                </div>
-                <div class="lab-card" data-id="routing_protocols" onclick="selectLab('routing_protocols')">
-                    <div class="lab-num">9</div>
-                    <div class="lab-info"><h4>OSPF & BGP</h4><div class="lab-meta"><span>Advanced Routing</span> <div class="status-badge locked">Not Started</div></div></div>
-                </div>
-                <div class="lab-card" data-id="routing_dv" onclick="selectLab('routing_dv')">
-                    <div class="lab-num">10</div>
-                    <div class="lab-info"><h4>Routing (DV)</h4><div class="lab-meta"><span>Distance Vector</span> <div class="status-badge locked">Not Started</div></div></div>
-                </div>
-                <div class="lab-card" data-id="routing_ls" onclick="selectLab('routing_ls')">
-                    <div class="lab-num">11</div>
-                    <div class="lab-info"><h4>Routing (LS)</h4><div class="lab-meta"><span>Link State</span> <div class="status-badge locked">Not Started</div></div></div>
-                </div>
-                <div class="lab-card" data-id="udp" onclick="selectLab('udp')">
-                    <div class="lab-num">12</div>
-                    <div class="lab-info"><h4>UDP Chat</h4><div class="lab-meta"><span>Connectionless</span> <div class="status-badge locked">Not Started</div></div></div>
-                </div>
-                <div class="lab-card" data-id="tcp" onclick="selectLab('tcp')">
-                    <div class="lab-num">13</div>
-                    <div class="lab-info"><h4>TCP Transfer</h4><div class="lab-meta"><span>Reliable GBN</span> <div class="status-badge locked">Not Started</div></div></div>
-                </div>
-                <div class="lab-card" data-id="dns" onclick="selectLab('dns')">
-                    <div class="lab-num">14</div>
-                    <div class="lab-info"><h4>DNS</h4><div class="lab-meta"><span>Domain Resolution</span> <div class="status-badge locked">Not Started</div></div></div>
+                <div class="subject-card locked">
+                    <div class="subject-icon" style="background: rgba(245, 158, 11, 0.1); color: #f59e0b;">🗄️</div>
+                    <div class="subject-info">
+                        <h3>Database Systems</h3>
+                        <p>Learn relational schemas, transactions, SQL engine optimizations, indexing tree structures, and normalization.</p>
+                        <div class="subject-meta">
+                            <span class="badge-lab-count">Coming Soon</span>
+                            <span class="subject-status-locked">Locked</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div style="text-align: center;">
-            <button class="btn-start" onclick="launch()">Launch Selected Lab</button>
+        <!-- Mode Grid, Lab Selection, and Launch Action (hidden initially) -->
+        <div id="subject-dashboard-view" style="display: none;">
+            <button class="btn-back-subjects" onclick="showSubjectView()">
+                <span>←</span> Back to Subject Tracks
+            </button>
+
+            <div class="mode-grid" id="mode-selection-container">
+                <div class="mode-card active" id="cardVlab" onclick="setMainPath('vlab')">
+                    <div class="mode-icon">🎓</div>
+                    <h3>VLAB</h3>
+                    <p>Curriculum-aligned experiments with guided procedures, pretests, simulators, and assessments.</p>
+                </div>
+                <div class="mode-card" id="cardPractice" onclick="setMainPath('practice')">
+                    <div class="mode-icon">🛠️</div>
+                    <h3>PRACTICE LAB</h3>
+                    <p>Free-form network topology builder (Packet Tracer style). Build, connect, and configure your own networks.</p>
+                </div>
+            </div>
+
+            <div id="vlabSelection">
+                <h2 style="margin-bottom: 24px;" id="curriculumHeader">Select Curriculum Experiment</h2>
+                <div class="lab-selection">
+                    <!-- Populated dynamically via JS -->
+                </div>
+            </div>
+
+            <div style="text-align: center; margin-top: 40px;" id="launchBtnContainer">
+                <button class="btn-start" onclick="launch()">Launch Selected Lab</button>
+            </div>
         </div>
     </div>
 
     <script>
-        let selectedLab = 'csma';
+        let selectedLab = '';
         let currentPath = 'vlab';
+        let currentSubject = 'networking';
+
+        const SUBJECT_LABS = {
+            networking: [
+                { id: 'cables_devices', num: 1, name: 'Cables & Devices', category: 'Physical Layer' },
+                { id: 'modulation', num: 2, name: 'Modulation', category: 'Signal Techniques' },
+                { id: 'net_commands', num: 3, name: 'Net Commands', category: 'Utilities & Tools' },
+                { id: 'ip_class', num: 4, name: 'IP Classification', category: 'Network ID & Host ID' },
+                { id: 'csma', num: 5, name: 'CSMA/CD', category: 'Collision Detection' },
+                { id: 'csma_ca', num: 6, name: 'CSMA/CA', category: 'Collision Avoidance' },
+                { id: 'subnet', num: 7, name: 'Subnetting', category: 'IP Architecture' },
+                { id: 'vlan', num: 8, name: 'VLAN', category: 'Logical Segmentation' },
+                { id: 'routing_protocols', num: 9, name: 'OSPF & BGP', category: 'Advanced Routing' },
+                { id: 'routing_dv', num: 10, name: 'Routing (DV)', category: 'Distance Vector' },
+                { id: 'routing_ls', num: 11, name: 'Routing (LS)', category: 'Link State' },
+                { id: 'udp', num: 12, name: 'UDP Chat', category: 'Connectionless' },
+                { id: 'tcp', num: 13, name: 'TCP Transfer', category: 'Reliable GBN' },
+                { id: 'dns', num: 14, name: 'DNS', category: 'Domain Resolution' }
+            ],
+            os: [
+                { id: 'cpu_scheduling', num: 1, name: 'CPU Scheduling', category: 'Process Mgmt' },
+                { id: 'process_sync', num: 2, name: 'Process Sync', category: 'Concurrency' },
+                { id: 'deadlock_avoidance', num: 3, name: 'Deadlock Avoidance', category: 'Resource Allocation' },
+                { id: 'page_replacement', num: 4, name: 'Page Replacement', category: 'Memory Mgmt' },
+                { id: 'disk_scheduling', num: 5, name: 'Disk Scheduling', category: 'Storage Mgmt' }
+            ]
+        };
 
         // Theme Handling
         function initTheme() {
@@ -351,10 +537,87 @@
 
         initTheme();
 
+        function showSubjectView() {
+            document.getElementById('subject-view').style.display = 'block';
+            document.getElementById('subject-dashboard-view').style.display = 'none';
+            localStorage.removeItem('vlab_current_subject');
+        }
+
+        function selectSubject(subject) {
+            currentSubject = subject;
+            localStorage.setItem('vlab_current_subject', subject);
+            
+            document.getElementById('subject-view').style.display = 'none';
+            document.getElementById('subject-dashboard-view').style.display = 'block';
+
+            // Practice lab mode is only relevant/supported for Computer Networks topology building
+            const practiceCard = document.getElementById('cardPractice');
+            if (subject === 'os') {
+                if (practiceCard) practiceCard.style.display = 'none';
+                setMainPath('vlab');
+                document.getElementById('mode-selection-container').style.display = 'none';
+            } else {
+                if (practiceCard) practiceCard.style.display = 'block';
+                document.getElementById('mode-selection-container').style.display = 'grid';
+            }
+
+            renderLabs(subject);
+
+            // Change color scheme and apply dynamic style adjustments
+            const accentColor = subject === 'os' ? '#a855f7' : '#2563eb';
+            const accentHover = subject === 'os' ? '#9333ea' : '#1d4ed8';
+            document.documentElement.style.setProperty('--primary-accent', accentColor);
+            
+            let styleTag = document.getElementById('subject-dynamic-style');
+            if (!styleTag) {
+                styleTag = document.createElement('style');
+                styleTag.id = 'subject-dynamic-style';
+                document.head.appendChild(styleTag);
+            }
+            styleTag.textContent = `
+                .welcome-header span, .gradient-text { color: ${accentColor} !important; }
+                .mode-card.active { border-color: ${accentColor} !important; background: ${accentColor}1a !important; box-shadow: 0 0 30px ${accentColor}1a !important; }
+                .mode-card:hover { border-color: ${accentColor} !important; }
+                .lab-card:hover { border-color: ${accentColor} !important; }
+                .lab-num { background: ${accentColor}1a !important; color: ${accentColor} !important; }
+                .btn-start { background: ${accentColor} !important; }
+                .btn-start:hover { background: ${accentHover} !important; box-shadow: 0 10px 20px -5px ${accentColor}80 !important; }
+                .theme-toggle-btn:hover { border-color: ${accentColor} !important; }
+            `;
+        }
+
+        function renderLabs(subject) {
+            const labs = SUBJECT_LABS[subject] || [];
+            const container = document.querySelector('.lab-selection');
+            if (!container) return;
+
+            container.innerHTML = labs.map(lab => {
+                return `
+                    <div class="lab-card" data-id="${lab.id}" onclick="selectLab('${lab.id}')">
+                        <div class="lab-num">${lab.num}</div>
+                        <div class="lab-info">
+                            <h4>${lab.name}</h4>
+                            <div class="lab-meta">
+                                <span>${lab.category}</span>
+                                <div class="status-badge locked">Not Started</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            if (labs.length > 0) {
+                selectLab(labs[0].id);
+            }
+
+            updateProgressUI();
+        }
+
         function setMainPath(path) {
             currentPath = path;
             document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('active'));
-            document.getElementById(path === 'vlab' ? 'cardVlab' : 'cardPractice').classList.add('active');
+            const activeCard = document.getElementById(path === 'vlab' ? 'cardVlab' : 'cardPractice');
+            if (activeCard) activeCard.classList.add('active');
             document.getElementById('vlabSelection').style.display = path === 'vlab' ? 'block' : 'none';
         }
 
@@ -364,14 +627,18 @@
                 c.style.borderColor = 'var(--container-border)';
                 c.style.background = 'var(--container-bg)';
             });
-            event.currentTarget.style.borderColor = '#2563eb';
-            event.currentTarget.style.background = 'rgba(37, 99, 235, 0.1)';
+            const card = document.querySelector(`.lab-card[data-id="${id}"]`);
+            if (card) {
+                const accentColor = currentSubject === 'os' ? '#a855f7' : '#2563eb';
+                card.style.borderColor = accentColor;
+                card.style.background = `${accentColor}1a`;
+            }
         }
 
         function launch() {
             if (currentPath === 'practice') {
                 localStorage.setItem('vlab_current_mode', 'sandbox');
-                localStorage.setItem('vlab_current_lab', 'practice'); // Meta-lab
+                localStorage.setItem('vlab_current_lab', 'practice'); 
             } else {
                 localStorage.setItem('vlab_current_mode', 'learning');
                 localStorage.setItem('vlab_current_lab', selectedLab);
@@ -381,6 +648,7 @@
 
         function logout() {
             localStorage.removeItem('vlab_user');
+            localStorage.removeItem('vlab_current_subject');
             location.href = 'index.html';
         }
 
@@ -412,7 +680,6 @@
                 const db = getFirestore(app);
                 const auth = getAuth(app);
 
-                // Wait for Auth to initialize
                 const user = await new Promise((resolve) => {
                     const unsubscribe = onAuthStateChanged(auth, (user) => {
                         unsubscribe();
@@ -437,7 +704,6 @@
                     document.getElementById('evalDate').textContent = new Date(data.timestamp).toLocaleDateString();
                 }
 
-                // Fetch Progress
                 const progSnap = await getDocs(collection(db, "users", user.uid, "progress"));
                 progSnap.forEach(doc => {
                     localStorage.setItem(`vlab_state_${doc.id}`, JSON.stringify(doc.data()));
@@ -452,6 +718,8 @@
         const userRole = localStorage.getItem('vlab_user_role');
         if (userRole === 'teacher') {
             document.getElementById('btnTeacherPanel').style.display = 'block';
+            document.getElementById('subject-view').style.display = 'none';
+            document.getElementById('subject-dashboard-view').style.display = 'block';
             document.querySelector('.mode-grid').style.display = 'none';
             document.getElementById('vlabSelection').innerHTML = `
                 <div class="theory-card" style="text-align:center; padding:60px; background:var(--glass); border:1px solid var(--primary);">
@@ -465,6 +733,12 @@
             `;
             document.getElementById('vlabSelection').style.display = 'block';
             document.querySelector('.welcome-header p').innerHTML = `Welcome, <span id="userNameDisplay" style="color:var(--dashboard-text); font-weight:700;">${userName}</span>. You are in Instructor Mode.`;
+        } else {
+            // Restore active subject session if available
+            const activeSub = localStorage.getItem('vlab_current_subject');
+            if (activeSub) {
+                selectSubject(activeSub);
+            }
         }
 
         function updateProgressUI() {
@@ -472,6 +746,7 @@
                 const id = card.getAttribute('data-id');
                 const state = JSON.parse(localStorage.getItem('vlab_state_' + id) || '{}');
                 const badge = card.querySelector('.status-badge');
+                if (!badge) return;
                 
                 if (state.completed) {
                     badge.textContent = 'Completed';
@@ -485,8 +760,6 @@
                 }
             });
         }
-
-        updateProgressUI();
     </script>
 </body>
 </html>
