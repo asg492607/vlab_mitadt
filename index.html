@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MIT ADT VLAB | Advanced Networking Simulation Platform</title>
+    <meta name="description" content="Master complex networking protocols through high-fidelity simulations, interactive labs, and real-time analysis at MIT ADT VLab.">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌐</text></svg>">
+    <link rel="stylesheet" href="landing.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Premium Navigation -->
+    <nav class="navbar" id="navbar">
+        <div class="nav-brand" onclick="location.href='index.html'">
+            <div class="logo-icon">M</div>
+            MIT ADT <span>VLAB</span>
+        </div>
+        <div class="nav-links">
+            <a href="#features">Features</a>
+            <a href="#experiments">Experiments</a>
+            <a href="#how-to-use">How it Works</a>
+            <div class="theme-toggle" id="themeToggle" title="Toggle Theme">
+                <span class="sun">☀️</span>
+                <span class="moon">🌙</span>
+            </div>
+            <button class="btn-primary" onclick="location.href='login.html'">Launch Lab</button>
+        </div>
+    </nav>
+
+    <div class="grid-bg"></div>
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <div class="badge reveal">
+                <span class="pulse"></span>
+                v2.0 Platinum Edition
+            </div>
+            <h1 class="reveal">The Gold Standard in <br><span class="gradient-text">Networking Simulations</span></h1>
+            <div class="terminal-text reveal">
+                <span class="prompt">></span> <span id="typewriter">Mounting DPI Packet Inspector v2.4...</span>
+            </div>
+            <p class="reveal" style="margin-top: 20px;">Master the complex protocols of the digital age. MIT ADT VLab offers high-fidelity simulations, real-time Deep Packet Inspection (DPI), and professional network telemetry for the engineers of tomorrow.</p>
+            <div class="hero-actions reveal">
+                <button onclick="location.href='login.html'" class="btn-primary btn-hero-lg">Launch Simulation Hub</button>
+                <button onclick="location.href='#features'" class="btn-outline">Explore Capabilities</button>
+            </div>
+            
+            <div class="stats-bar reveal">
+                <div class="stat-item">
+                    <span class="stat-val">14+</span>
+                    <span class="stat-lbl">Core Labs</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-val">Real-time</span>
+                    <span class="stat-lbl">DPI Analysis</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-val">100%</span>
+                    <span class="stat-lbl">Institution Verified</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="hero-visual reveal">
+            <div class="hero-image-wrapper">
+                <img src="hero_vlab_3d_network_1777896875805.png" alt="Networking Simulation" class="hero-main-img" style="border: 1px solid var(--border); box-shadow: 0 30px 60px rgba(0,0,0,0.4);">
+                <div class="glass-card floating-card-1">
+                    <div class="card-icon-small">⚡</div>
+                    <div class="card-text">
+                        <span>Throughput</span>
+                        <b>1.2 Gbps</b>
+                    </div>
+                </div>
+                <div class="glass-card floating-card-2">
+                    <div class="card-icon-small">📊</div>
+                    <div class="card-text">
+                        <span>Packet Loss</span>
+                        <b>0.001%</b>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Core Features Showcase -->
+    <section id="features" class="section-padding">
+        <div class="text-center">
+            <span class="section-tag">Academic Excellence</span>
+            <h2 class="section-title reveal">Professional <span class="gradient-text">Engineering Suite</span></h2>
+            <p class="section-desc reveal">Experience a high-fidelity environment designed for both beginners and advanced students.</p>
+        </div>
+
+        <div class="feature-cards-grid">
+            <div class="modern-card reveal">
+                <div class="card-icon">🔍</div>
+                <h3>Deep Packet Inspection</h3>
+                <p>Analyze Layer 2-4 headers in real-time. Inspect hexadecimal frame data and analyze protocol-specific metadata during live transmission.</p>
+            </div>
+            <div class="modern-card reveal">
+                <div class="card-icon">📈</div>
+                <h3>Live Network Telemetry</h3>
+                <p>Visualize performance with real-time throughput sparklines and latency graphs embedded directly into the simulation workspace.</p>
+            </div>
+            <div class="modern-card reveal">
+                <div class="card-icon">🏗️</div>
+                <h3>Visual Topology Builder</h3>
+                <p>Drag and drop industry-standard nodes. Configure IP addresses, subnet masks, and physical cabling in an interactive sandbox.</p>
+            </div>
+                <div class="card-icon">📊</div>
+                <h3>Protocol Animation</h3>
+                <p>Watch packets move through the OSI layers. Visualize collisions (CSMA/CD), handshakes (TCP), and routing convergence in real-time.</p>
+            </div>
+            <div class="modern-card reveal">
+                <div class="card-icon">📜</div>
+                <h3>Automated Lab Reports</h3>
+                <p>Generate professional PDF reports including your AIM, theory, procedure, and simulation outcomes with a single click.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- OSI Model Deep Dive -->
+    <section class="osi-section section-padding">
+        <div class="text-center">
+            <span class="section-tag">Academic Framework</span>
+            <h2 class="section-title reveal">Full Stack <span class="gradient-text">Protocol Simulation</span></h2>
+            <p class="section-desc reveal">We map every experiment to the standard OSI model, ensuring a comprehensive understanding of data flow.</p>
+        </div>
+        <div class="osi-container reveal">
+            <div class="osi-layer">
+                <div class="layer-num">7</div>
+                <div class="layer-info">
+                    <h4>Application Layer</h4>
+                    <p>DNS Resolution & HTTP Flow</p>
+                </div>
+            </div>
+            <div class="osi-layer active">
+                <div class="layer-num">4</div>
+                <div class="layer-info">
+                    <h4>Transport Layer</h4>
+                    <p>TCP Reliable Transfer & UDP Datagrams</p>
+                </div>
+            </div>
+            <div class="osi-layer">
+                <div class="layer-num">3</div>
+                <div class="layer-info">
+                    <h4>Network Layer</h4>
+                    <p>IP Subnetting & DV/LS Routing</p>
+                </div>
+            </div>
+            <div class="osi-layer">
+                <div class="layer-num">2</div>
+                <div class="layer-info">
+                    <h4>Data Link Layer</h4>
+                    <p>CSMA/CD Collision Detection</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Detailed Showcase Section -->
+    <section class="detailed-showcase section-padding">
+        <div class="showcase-container reveal">
+            <div class="showcase-text">
+                <span class="section-tag">Realistic Simulation</span>
+                <h2>Industry Standard <span class="gradient-text">Simulation Logic</span></h2>
+                <p>Our engine doesn't just show animations; it processes actual networking logic. From Bellman-Ford updates to Go-Back-N sliding windows, every interaction is academically accurate.</p>
+                <div class="showcase-features">
+                    <div class="sf-item">
+                        <b>✓ Accurate Timing</b>
+                        <span>Propagation delays and backoff timers modeled precisely.</span>
+                    </div>
+                    <div class="sf-item">
+                        <b>✓ Event Logging</b>
+                        <span>Detailed protocol logs for every packet sent, received, or dropped.</span>
+                    </div>
+                </div>
+            </div>
+            <div class="showcase-visual">
+                <img src="vlab_simulation_ui_detail_1777897329600.png" alt="Simulation Engine" class="showcase-img" style="border: 1px solid var(--border); border-radius: var(--radius-md);">
+            </div>
+        </div>
+    </section>
+
+
+    <!-- Tech Stack Section -->
+    <section class="tech-stack section-padding">
+        <div class="text-center">
+            <span class="section-tag">Powering the Future</span>
+            <h2 class="section-title reveal" style="font-size: 32px;">Built with <span class="gradient-text">Modern Standards</span></h2>
+        </div>
+        <div class="tech-grid reveal">
+            <div class="tech-item">
+                <div class="tech-icon">🔥</div>
+                <span>Firebase Cloud</span>
+            </div>
+            <div class="tech-item">
+                <div class="tech-icon">⚡</div>
+                <span>ES6+ Modules</span>
+            </div>
+            <div class="tech-item">
+                <div class="tech-icon">🎨</div>
+                <span>CSS3 Glassmorphism</span>
+            </div>
+            <div class="tech-item">
+                <div class="tech-icon">🖼️</div>
+                <span>HTML5 Canvas</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Experiments Grid -->
+    <section id="experiments" class="section-padding exp-showcase">
+        <div class="text-center">
+            <span class="section-tag">The Lab Catalog</span>
+            <h2 class="section-title reveal">High-Fidelity <span class="gradient-text">Lab Modules</span></h2>
+            <p class="section-desc reveal">A complete suite of networking experiments aligned with international academic standards.</p>
+        </div>
+
+        <div class="exp-grid">
+            <div class="exp-item reveal">
+                <div class="exp-icon">🛰️</div>
+                <span class="exp-badge">Physical Layer</span>
+                <h4>CSMA/CD & CSMA/CA</h4>
+                <p>Analyze collisions and avoidance mechanisms in real-world scenarios.</p>
+            </div>
+            <div class="exp-item reveal">
+                <div class="exp-icon">🌐</div>
+                <span class="exp-badge">Network Layer</span>
+                <h4>Subnetting & VLSM</h4>
+                <p>Master the art of address space optimization with interactive tools.</p>
+            </div>
+            <div class="exp-item reveal">
+                <div class="exp-icon">📡</div>
+                <span class="exp-badge">Routing</span>
+                <h4>DV & LS Routing</h4>
+                <p>Visualize the Bellman-Ford and Dijkstra algorithms as they converge.</p>
+            </div>
+            <div class="exp-item reveal">
+                <div class="exp-icon">🚀</div>
+                <span class="exp-badge">Transport</span>
+                <h4>TCP & UDP Analysis</h4>
+                <p>Compare reliability, flow control, and congestion avoidance logic.</p>
+            </div>
+            <div class="exp-item reveal">
+                <div class="exp-icon">☁️</div>
+                <span class="exp-badge">Application</span>
+                <h4>DNS Hierarchy</h4>
+                <p>Trace recursive queries through Root, TLD, and Authoritative servers.</p>
+            </div>
+            <div class="exp-item reveal" style="border-style: dashed; opacity: 0.6;">
+                <div class="exp-icon">🛠️</div>
+                <span class="exp-badge">Advanced</span>
+                <h4>SDN & Cloud</h4>
+                <p>The next generation of networking labs are coming soon.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- How to Use Section -->
+    <section id="how-to-use" class="section-padding">
+        <div class="text-center">
+            <span class="section-tag reveal">Getting Started</span>
+            <h2 class="section-title reveal">How it <span class="gradient-text">Works</span></h2>
+            <p class="section-desc reveal">Follow these simple steps to start your networking journey.</p>
+        </div>
+        
+        <div class="steps-container reveal">
+            <div class="step">
+                <div class="step-num">1</div>
+                <h3>Select Experiment</h3>
+                <p>Choose from our comprehensive library of protocols (TCP, CSMA/CD, Subnetting, etc.) from the lab menu.</p>
+            </div>
+            <div class="step">
+                <div class="step-num">2</div>
+                <h3>Complete Pretest</h3>
+                <p>Test your initial understanding to unlock the simulation environment.</p>
+            </div>
+            <div class="step">
+                <div class="step-num">3</div>
+                <h3>Run Simulation</h3>
+                <p>Interact with the network, drop packets to test reliability, and analyze the event logs.</p>
+            </div>
+            <div class="step">
+                <div class="step-num">4</div>
+                <h3>Final Evaluation</h3>
+                <p>Submit your posttest to track your learning progress and earn your session certificate.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-top">
+            <div class="footer-info">
+                <div class="footer-logo">MIT ADT <span>VLAB</span></div>
+                <p class="footer-desc">Empowering the next generation of Network Engineers through immersive, high-fidelity virtual laboratory simulations.</p>
+                <div class="social-links">
+                    <!-- Social icons could go here -->
+                </div>
+            </div>
+            
+            <div class="footer-nav">
+                <h4 class="footer-h">Platform</h4>
+                <ul class="footer-links">
+                    <li><a href="#features">Features</a></li>
+                    <li><a href="#experiments">Experiments</a></li>
+                    <li><a href="login.html">Login</a></li>
+                    <li><a href="teacher.html">Teacher Portal</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-nav">
+                <h4 class="footer-h">Resources</h4>
+                <ul class="footer-links">
+                    <li><a href="#">Documentation</a></li>
+                    <li><a href="#">Lab Manual</a></li>
+                    <li><a href="#">API Reference</a></li>
+                    <li><a href="#">Support</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-contributors">
+                <h4 class="footer-h">Developed By</h4>
+                <div class="contributor-list">
+                    <div class="c-item">
+                        <span class="c-name">Dr. Nilesh Thorat</span>
+                        <span class="c-role">Mentor & Project Lead</span>
+                    </div>
+                    <div class="c-item">
+                        <span class="c-name">Atharva Gandhi</span>
+                        <span class="c-role">Student Lead</span>
+                    </div>
+                    <div class="c-item">
+                        <span class="c-name">Nayan Solanki</span>
+                        <span class="c-role">Student Lead</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <p>&copy; 2026 MIT ADT University. All rights reserved by Department of CSE.</p>
+            <div class="footer-legal">
+                <a href="SECURITY.md" style="color: inherit; text-decoration: none; margin-right: 20px;">Security</a>
+                <a href="#" style="color: inherit; text-decoration: none;">Privacy Policy</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Scroll Header Effect
+        const navbar = document.getElementById('navbar');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+
+        // Reveal Animations (Fix for blank page)
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+        // Smooth Scroll
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                if (targetId === "#") return;
+                document.querySelector(targetId).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+
+        // Theme Toggle Logic
+        const themeToggle = document.getElementById('themeToggle');
+        
+        // Check saved theme
+        const savedTheme = localStorage.getItem('vlab_theme') || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('vlab_theme', newTheme);
+        });
+
+        // Typewriter Effect
+        const phrases = [
+            "Initializing academic simulation engine...",
+            "Connecting to MIT ADT Node-1...",
+            "Loading CSMA/CD protocol logic...",
+            "Ready for high-fidelity experimentation."
+        ];
+        let pIndex = 0;
+        let charIndex = 0;
+        const target = document.getElementById('typewriter');
+
+        function type() {
+            if (charIndex < phrases[pIndex].length) {
+                target.textContent += phrases[pIndex].charAt(charIndex);
+                charIndex++;
+                setTimeout(type, 50);
+            } else {
+                setTimeout(erase, 2000);
+            }
+        }
+
+        function erase() {
+            if (charIndex > 0) {
+                target.textContent = phrases[pIndex].substring(0, charIndex - 1);
+                charIndex--;
+                setTimeout(erase, 30);
+            } else {
+                pIndex = (pIndex + 1) % phrases.length;
+                setTimeout(type, 500);
+            }
+        }
+        
+        target.textContent = "";
+        type();
+    </script>
+</body>
+</html>

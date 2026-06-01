@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MIT ADT VLAB - Computer Networks</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔬</text></svg>">
+    <link rel="stylesheet" href="vlab.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="splash-screen" class="splash-screen">
+        <div class="splash-content">
+            <div class="splash-logo">MIT ADT<span>VLab</span></div>
+            <div class="loader-bar"></div>
+            <div class="splash-status">Initializing Simulation Engine...</div>
+        </div>
+    </div>
+    <div id="vlab-app">
+        <header class="vlab-header">
+            <div class="breadcrumb">
+                <span class="crumb">MIT ADT UNIVERSITY</span>
+                <span class="separator">&rsaquo;</span>
+                <span class="crumb">Computer Networks Lab</span>
+                <span class="separator">&rsaquo;</span>
+                <span class="crumb active">Experiments</span>
+            </div>
+            <div class="header-actions">
+                <select id="labSelect" class="sim-select" style="margin-right: 16px; font-weight: 800;">
+                    <option value="cables_devices">1. Cables, Connectors and Networking Devices</option>
+                    <option value="modulation">2. Modulation Techniques (AM, FM, PCM)</option>
+                    <option value="net_commands">3. Networking Commands & Utilities</option>
+                    <option value="ip_class">4. IPv4 Address Classification</option>
+                    <option value="csma">5. CSMA/CD Simulation</option>
+                    <option value="csma_ca">6. CSMA/CA Simulation</option>
+                    <option value="subnet">7. Subnetting & Network Design</option>
+                    <option value="vlan">8. VLAN (Virtual LAN) Configuration</option>
+                    <option value="routing_protocols">9. Dynamic Routing (OSPF & BGP)</option>
+                    <option value="routing_dv">10. Distance Vector Routing Algorithm</option>
+                    <option value="routing_ls">11. Link State Routing Algorithm</option>
+                    <option value="udp">12. Chat Application using UDP</option>
+                    <option value="tcp">13. File Transfer using TCP</option>
+                    <option value="dns">14. Domain Name System (DNS)</option>
+                    <option value="practice" style="display:none;">Practice Lab</option>
+                </select>
+                <div class="score-pill" id="scoreDisplay">Score: 0</div>
+                <button id="btnHome" class="btn-icon" title="Go Home">🏠</button>
+                <div class="theme-toggle" id="themeToggle">🌓</div>
+            </div>
+        </header>
+
+        <div class="vlab-container">
+            <aside class="vlab-sidebar">
+                <nav>
+                    <ul>
+                        <li class="nav-item active" data-section="aim"><span class="nav-icon">🎯</span> Aim</li>
+                        <li class="nav-item" data-section="theory"><span class="nav-icon">📚</span> Theory</li>
+                        <li class="nav-item" data-section="procedure"><span class="nav-icon">📋</span> Procedure</li>
+                        <li class="nav-item" data-section="pretest"><span class="nav-icon">📝</span> Pretest</li>
+                        <li class="nav-item" data-section="simulation"><span class="nav-icon">⚙️</span> Simulation</li>
+                        <li class="nav-item" data-section="experiment"><span class="nav-icon">🔬</span> Experiment</li>
+                        <li class="nav-item" data-section="posttest"><span class="nav-icon">📊</span> Posttest</li>
+                        <li class="nav-item" data-section="practice_tasks"><span class="nav-icon">💡</span> Practice Tasks</li>
+                        <li class="nav-item" data-section="references"><span class="nav-icon">🔗</span> References</li>
+                        <li class="nav-item" data-section="contributors"><span class="nav-icon">👥</span> Contribution</li>
+                        <li class="nav-item" data-section="feedback"><span class="nav-icon">💬</span> Feedback</li>
+                    </ul>
+                </nav>
+            </aside>
+
+            <main class="vlab-content">
+                <header class="content-header">
+                    <div class="header-left">
+                        <div class="breadcrumb">
+                            <a href="dashboard.html">Dashboard</a> <span>/</span> 
+                            <a href="#">VLab</a> <span>/</span> 
+                            <b id="breadcrumb-lab">Networking</b>
+                        </div>
+                        <h1 id="lab-title-display">Protocol Simulation</h1>
+                    </div>
+                    <div class="header-right">
+                        <div class="session-info">
+                            <div class="info-item">
+                                <span class="info-label">STATUS</span>
+                                <span class="info-value live">LIVE</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">ELAPSED</span>
+                                <span id="sessionTimer" class="info-value">00:00</span>
+                            </div>
+                        </div>
+                    </div>
+                </header>
+                <div id="content-display" style="transition: opacity 0.3s ease;">
+                    <section id="section-aim" class="content-section active">
+                        <h1 class="section-title">Transmission Control Protocol</h1>
+                        <div class="section-body">
+                            <h3>Aim</h3>
+                            <p>To understand the working of Transmission Control Protocol (TCP) and its flow control mechanisms like Stop and Wait and Go-Back-N (GBN).</p>
+                        </div>
+                    </section>
+
+                    <section id="section-theory" class="content-section">
+                        <h1 class="section-title">Theory</h1>
+                        <div class="section-body">
+                            <h3>Introduction to TCP</h3>
+                            <p>TCP (Transmission Control Protocol) is one of the main protocols of the Internet Protocol Suite. It originated in the initial network implementation in which it complemented the Internet Protocol (IP). Therefore, the entire suite is commonly referred to as TCP/IP.</p>
+                            <h4>Flow Control Mechanisms</h4>
+                            <div class="theory-card">
+                                <strong>Stop and Wait</strong>
+                                <p>The sender sends one packet and waits for an acknowledgment (ACK) from the receiver before sending the next packet. If the ACK does not arrive within a timeout period, the sender resends the packet.</p>
+                            </div>
+                            <div class="theory-card">
+                                <strong>Go-Back-N (GBN)</strong>
+                                <p>The sender can send multiple packets (up to a window size N) without waiting for an ACK. If a packet is lost, the sender resends all packets starting from the lost packet.</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section id="section-pretest" class="content-section">
+                        <h1 class="section-title">Pretest</h1>
+                        <div class="section-body">
+                            <div class="theory-card">
+                                <strong>Question 1: What is the main difference between TCP and UDP?</strong>
+                                <p>A) TCP is connectionless, UDP is connection-oriented</p>
+                                <p>B) TCP is reliable, UDP is not</p>
+                                <p>C) UDP is slower than TCP</p>
+                                <p>D) None of the above</p>
+                            </div>
+                            <div class="theory-card">
+                                <strong>Question 2: In Stop and Wait protocol, what happens if an ACK is lost?</strong>
+                                <p>A) Sender waits forever</p>
+                                <p>B) Sender resends the packet after timeout</p>
+                                <p>C) Receiver requests the packet again</p>
+                                <p>D) The connection is closed</p>
+                            </div>
+                            <button class="btn-sim primary" style="margin-top: 20px;">Submit Pretest</button>
+                        </div>
+                    </section>
+
+                    <section id="section-procedure" class="content-section">
+                        <h1 class="section-title">Procedure</h1>
+                        <div class="section-body">
+                            <ol>
+                                <li>Navigate to the <b>Simulation</b> tab in the sidebar.</li>
+                                <li>Select the protocol type: <b>Stop and Wait</b> or <b>Go-Back-N</b>.</li>
+                                <li>Observe the <b>Sliding Window</b> indicator on Host A to see active packets.</li>
+                                <li>Watch the <b>Timer Bar</b> above Host A; if it reaches 100% without an ACK, a timeout occurs.</li>
+                                <li>Click on a moving <b>Packet</b> (blue square) with <b>Shift + Click</b> to simulate network loss.</li>
+                                <li>Observe how the <b>Go-Back-N</b> protocol resends all unacknowledged packets from the base of the window after a timeout.</li>
+                                <li>Check the <b>Event List</b> for detailed timing and protocol logs.</li>
+                            </ol>
+                        </div>
+                    </section>
+
+                    <section id="section-simulation" class="content-section">
+                        <h1 class="section-title">Simulation</h1>
+                        <div class="simulation-container">
+                            <div id="dynamic-sim-ui">
+                                <!-- Dynamic Protocol Animation UI -->
+                            </div>
+                        </div>
+                    </section>
+
+                    <section id="section-experiment" class="content-section">
+                        <h1 class="section-title">Experiment</h1>
+                        <div class="simulation-container">
+                            <div id="topology-builder-ui" style="height: 100%; width: 100%;">
+                                <!-- Topology Builder will be injected here -->
+                            </div>
+                        </div>
+                    </section>
+
+                    <section id="section-posttest" class="content-section">
+                        <h1 class="section-title">Posttest</h1>
+                        <div class="section-body">
+                            <p>Verify your technical understanding with the following assessment.</p>
+                            <div id="post-mcq-container">
+                                <!-- MCQ Injected via JS -->
+                            </div>
+                            <div class="theory-card" style="margin-top: 20px;">
+                                <strong>Laboratory Feedback</strong>
+                                <p style="font-size:12px; color:var(--text-muted);">Share your technical experience or any difficulties encountered during this lab.</p>
+                                <textarea id="student-feedback" class="sim-select" style="width: 100%; height: 100px; margin-top: 10px;" placeholder="Type your feedback here..."></textarea>
+                            </div>
+                            <button id="submit-post" class="btn-sim primary" style="margin-top: 20px;">Finish & Submit Experiment</button>
+                        </div>
+                    </section>
+ 
+                    <section id="section-practice_tasks" class="content-section">
+                        <h1 class="section-title">Practice Tasks</h1>
+                        <div class="section-body">
+                            <div id="practice-commands-container" class="theory-card" style="background:var(--bg-page); border:1px solid var(--border);">
+                                <h3 style="color:var(--primary); margin-bottom:15px; display:flex; align-items:center; gap:8px;">
+                                    <span>⌨️</span> Recommended Commands
+                                </h3>
+                                <div id="practice-commands-list" style="font-family:var(--font-mono); font-size:13px; line-height:1.8; color:var(--text-main);">
+                                    <!-- Injected via JS -->
+                                </div>
+                            </div>
+                            <div id="practice-questions-container" class="theory-card" style="margin-top:20px;">
+                                <h3 style="color:var(--accent); margin-bottom:15px; display:flex; align-items:center; gap:8px;">
+                                    <span>❓</span> Practice Questions
+                                </h3>
+                                <div id="practice-questions-list">
+                                    <!-- Injected via JS -->
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section id="section-references" class="content-section">
+                        <h1 class="section-title">References</h1>
+                        <div class="section-body">
+                            <ul>
+                                <li>Computer Networking: A Top-Down Approach by Kurose and Ross</li>
+                                <li>Data Communications and Networking by Behrouz A. Forouzan</li>
+                                <li>RFC 793 - Transmission Control Protocol</li>
+                            </ul>
+                        </div>
+                    </section>
+
+                    <section id="section-contributors" class="content-section">
+                        <h1 class="section-title">Contributors</h1>
+                        <div class="section-body">
+                            <div class="theory-card">
+                                <strong>Developed by</strong>
+                                <p>MIT ADT UNIVERSITY - Department of Computer Science & Engineering</p>
+                                <p>Virtual Labs Research Initiative</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section id="section-feedback" class="content-section">
+                        <h1 class="section-title">Feedback</h1>
+                        <div class="section-body">
+                            <textarea class="sim-select" style="width: 100%; height: 100px; margin-top: 10px;" placeholder="Share your experience..."></textarea>
+                            <button class="btn-sim primary" style="margin-top: 20px;">Submit Feedback</button>
+                        </div>
+                    </section>
+                </div>
+            </main>
+        </div>
+    </div>
+    <!-- Certificate Modal -->
+    <div id="certModal" class="cert-modal">
+        <div class="cert-container">
+            <div class="cert-frame">
+                <div class="cert-inner">
+                    <div class="cert-header">
+                        <div class="cert-logo">MIT ADT <span>UNIVERSITY</span></div>
+                        <div class="cert-title">CERTIFICATE OF COMPLETION</div>
+                    </div>
+                    <div class="cert-body">
+                        <p class="cert-intro">This is to certify that</p>
+                        <h2 id="cert-user-name">Atharva Gandhi</h2>
+                        <p class="cert-desc">has successfully completed the virtual laboratory experiment on</p>
+                        <h3 id="cert-lab-name">CSMA/CD Simulation</h3>
+                        <p class="cert-details">Conducted at the MIT ADT Virtual Networking Lab</p>
+                    </div>
+                    <div class="cert-footer">
+                        <div class="footer-sign">
+                            <div class="sign-line"></div>
+                            <span>Dr. Nilesh Thorat</span>
+                            <small>Supervisor, MIT ADT VLab</small>
+                        </div>
+                        <div class="footer-date">
+                            <div class="sign-line"></div>
+                            <span id="cert-date">May 1, 2026</span>
+                            <small>Date of Completion</small>
+                        </div>
+                    </div>
+                    <div class="cert-seal">🛡️</div>
+                </div>
+            </div>
+            <div class="cert-actions">
+                <button class="btn-sim primary" onclick="downloadReport()">Download Lab Report (Manual)</button>
+                <button class="btn-sim primary" style="background:#fbbf24;" onclick="downloadCertificate()">Download Certificate</button>
+                <button class="btn-sim" onclick="document.getElementById('certModal').style.display='none'">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- UI Components for Topology Builder -->
+    <div id="contextMenu" class="context-menu" style="display:none;">
+        <div class="menu-item" onclick="window.currentTopo.deleteNode()">🗑️ Delete Node</div>
+        <div class="menu-item" onclick="window.currentTopo.deleteLinks()">✂️ Delete All Links</div>
+        <div class="menu-item" onclick="window.currentTopo.openConfig(window.currentTopo.currentContextNode)">⚙️ Configure</div>
+    </div>
+
+    <div id="topoTooltip" class="topo-tooltip" style="display:none;"></div>
+
+    <div id="configModal" class="config-modal" style="display:none;">
+        <div class="config-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">Device Configuration</h3>
+                <button class="btn-icon" onclick="document.getElementById('configModal').style.display='none'">✕</button>
+            </div>
+            <div class="terminal-area" id="terminalArea">
+                <div class="terminal-input-wrap">
+                    <span id="prompt" style="font-weight:bold; color:#fbbf24;">Router></span>
+                    <input type="text" id="terminalInput" spellcheck="false" autocomplete="off" autofocus>
+                </div>
+            </div>
+            <div class="modal-footer">
+                Type 'exit' to close CLI or use 'wr' to save configuration. Press Enter to execute command.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Theme Handling
+        function initTheme() {
+            const savedTheme = localStorage.getItem('vlab_theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+        }
+
+        function toggleTheme() {
+            const current = document.documentElement.getAttribute('data-theme');
+            const target = current === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', target);
+            localStorage.setItem('vlab_theme', target);
+        }
+
+        initTheme();
+        // Theme toggle listener is handled in vlab.js to avoid double-firing events
+
+        function downloadReport() {
+            const labId = document.getElementById('labSelect').value;
+            window.generatePDFReport(labId);
+        }
+        function downloadCertificate() {
+            const labId = document.getElementById('labSelect').value;
+            window.generateCertificate(labId);
+        }
+    </script>
+
+    <!-- External Libraries for Academic Fidelity -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
+    <script src="vlabData.js"></script>
+    <script src="vlab.js" type="module"></script>
+</body>
+</html>

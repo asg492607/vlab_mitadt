@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - MIT ADT VLAB</title>
+    <link rel="stylesheet" href="landing.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background: var(--bg-page);
+            background-image: radial-gradient(circle at top right, var(--bg-alt), var(--bg-page));
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            color: var(--text-main);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        .auth-card {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            padding: 40px;
+            border-radius: 32px;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: var(--shadow-lg);
+            text-align: center;
+            animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            z-index: 10;
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .auth-brand {
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--text-main);
+            margin-bottom: 8px;
+            cursor: pointer;
+        }
+        .auth-brand span { color: var(--primary); }
+        .auth-subtitle {
+            color: var(--text-muted);
+            margin-bottom: 32px;
+            font-size: 15px;
+        }
+        .role-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 24px;
+            background: var(--bg-alt);
+            padding: 4px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+        .role-btn {
+            flex: 1;
+            padding: 12px;
+            border-radius: 8px;
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            font-weight: 700;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .role-btn.active {
+            background: var(--bg-page);
+            color: var(--primary);
+            box-shadow: var(--shadow-sm);
+        }
+        .input-group {
+            text-align: left;
+            margin-bottom: 20px;
+        }
+        .input-group label {
+            display: block;
+            color: var(--text-main);
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            margin-left: 4px;
+        }
+        .input-group input {
+            width: 100%;
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            padding: 14px 18px;
+            border-radius: 12px;
+            color: var(--text-main);
+            font-family: inherit;
+            transition: all 0.3s ease;
+        }
+        .input-group input:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: var(--bg-page);
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+        }
+        .btn-auth {
+            width: 100%;
+            padding: 16px;
+            border-radius: 12px;
+            border: none;
+            background: var(--primary);
+            color: white;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 12px;
+            font-size: 15px;
+        }
+        .btn-auth:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.4);
+        }
+        .auth-footer {
+            margin-top: 24px;
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+        .auth-footer a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .auth-footer a:hover { text-decoration: underline; }
+        
+        .floating-blob {
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(37, 99, 235, 0.12) 0%, transparent 70%);
+            border-radius: 50%;
+            z-index: 1;
+            filter: blur(80px);
+            pointer-events: none;
+        }
+    </style>
+    <script>
+        function initTheme() {
+            const savedTheme = localStorage.getItem('vlab_theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+        }
+        initTheme();
+        
+        let currentRole = 'student';
+        let isSignUp = false;
+
+        function setRole(role) {
+            currentRole = role;
+            document.querySelectorAll('.role-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`role-${role}`).classList.add('active');
+            updateSubtitle();
+        }
+
+        function updateSubtitle() {
+            const subtitle = document.getElementById('auth-subtitle');
+            if (isSignUp) {
+                subtitle.textContent = `Create your ${currentRole} account to get started.`;
+            } else {
+                subtitle.textContent = `Access your ${currentRole === 'student' ? 'networking laboratories' : 'instructor dashboard'}.`;
+            }
+        }
+
+        function toggleAuthMode() {
+            isSignUp = !isSignUp;
+            document.getElementById('nameGroup').style.display = isSignUp ? 'block' : 'none';
+            document.getElementById('toggleMode').textContent = isSignUp ? 'Login' : 'Sign Up';
+            document.getElementById('auth-btn-text').textContent = isSignUp ? 'Create Account' : 'Login to Dashboard';
+            document.querySelector('.auth-footer span').textContent = isSignUp ? 'Already have an account? ' : "Don't have an account? ";
+            updateSubtitle();
+        }
+    </script>
+</head>
+<body>
+    <div class="floating-blob" style="top: -10%; left: -10%;"></div>
+    <div class="floating-blob" style="bottom: -10%; right: -10%;"></div>
+
+    <div class="auth-card">
+        <div class="auth-brand" onclick="location.href='index.html'">MIT ADT <span>VLAB</span></div>
+        <p class="auth-subtitle" id="auth-subtitle">Access your networking laboratories.</p>
+
+        <div class="role-selector">
+            <button class="role-btn active" id="role-student" onclick="setRole('student')">🎓 Student</button>
+            <button class="role-btn" id="role-teacher" onclick="setRole('teacher')">👨‍🏫 Teacher</button>
+        </div>
+
+        <form id="authForm">
+            <div class="input-group" id="nameGroup" style="display: none;">
+                <label>Full Name</label>
+                <input type="text" id="fullName" placeholder="e.g. Atharva Gandhi">
+            </div>
+            <div class="input-group">
+                <label>Email Address</label>
+                <input type="email" id="email" placeholder="name@university.edu" required>
+            </div>
+            <div class="input-group">
+                <label>Password</label>
+                <input type="password" id="password" placeholder="••••••••" required>
+            </div>
+            <button type="submit" class="btn-auth"><span id="auth-btn-text">Login to Dashboard</span></button>
+        </form>
+
+        <div class="auth-footer">
+            <span>Don't have an account? </span><a href="javascript:void(0)" id="toggleMode" onclick="toggleAuthMode()">Sign Up</a>
+        </div>
+    </div>
+
+    <div class="theme-toggle" id="themeToggle" style="position:fixed; top:20px; right:20px; z-index:1000; cursor:pointer; font-size:24px;">
+        🌙
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBaYFXyCpq60TC-op86g5cO5laHA5_bC10",
+            authDomain: "vlab-b1761.firebaseapp.com",
+            projectId: "vlab-b1761",
+            storageBucket: "vlab-b1761.firebasestorage.app",
+            messagingSenderId: "83114402229",
+            appId: "1:83114402229:web:be4e43415868e57ecaf9fc"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Theme Toggle Logic
+        const themeBtn = document.getElementById('themeToggle');
+        themeBtn.addEventListener('click', () => {
+            const current = document.documentElement.getAttribute('data-theme');
+            const target = current === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', target);
+            localStorage.setItem('vlab_theme', target);
+            themeBtn.textContent = target === 'dark' ? '🌙' : '☀️';
+        });
+        themeBtn.textContent = (localStorage.getItem('vlab_theme') === 'light') ? '☀️' : '🌙';
+
+        // Auth Logic
+        document.getElementById('authForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const btn = e.target.querySelector('button');
+            btn.disabled = true;
+            btn.textContent = isSignUp ? 'Creating Account...' : 'Authenticating...';
+
+            try {
+                if (isSignUp) {
+                    const name = document.getElementById('fullName').value;
+                    const res = await createUserWithEmailAndPassword(auth, email, password);
+                    await updateProfile(res.user, { displayName: name });
+                    await setDoc(doc(db, "users", res.user.uid), {
+                        name: name,
+                        email: email,
+                        role: currentRole,
+                        createdAt: new Date().toISOString()
+                    });
+                    localStorage.setItem('vlab_user_name', name);
+                    localStorage.setItem('vlab_user_role', currentRole);
+                    localStorage.setItem('vlab_user_uid', res.user.uid);
+                } else {
+                    const res = await signInWithEmailAndPassword(auth, email, password);
+                    const userDoc = await getDoc(doc(db, "users", res.user.uid));
+                    if (userDoc.exists()) {
+                        const userData = userDoc.data();
+                        localStorage.setItem('vlab_user_name', userData.name);
+                        localStorage.setItem('vlab_user_role', userData.role);
+                        localStorage.setItem('vlab_user_uid', res.user.uid);
+                    }
+                }
+                localStorage.setItem('vlab_user', 'authenticated');
+                if (currentRole === 'teacher') {
+                    location.href = 'teacher.html';
+                } else {
+                    location.href = 'dashboard.html';
+                }
+            } catch (error) {
+                alert(error.message);
+                btn.disabled = false;
+                btn.textContent = isSignUp ? 'Create Account' : 'Login to Dashboard';
+            }
+        });
+    </script>
+</body>
+</html>

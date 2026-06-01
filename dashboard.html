@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - MIT ADT VLAB</title>
+    <link rel="stylesheet" href="landing.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --dashboard-bg: #0f172a;
+            --dashboard-text: #ffffff;
+            --card-bg: rgba(255, 255, 255, 0.03);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --card-hover-bg: rgba(255, 255, 255, 0.06);
+            --container-bg: rgba(255, 255, 255, 0.02);
+            --container-border: rgba(255, 255, 255, 0.05);
+            --muted-text: #94a3b8;
+            --badge-bg: rgba(255, 255, 255, 0.05);
+        }
+
+        [data-theme="light"] {
+            --dashboard-bg: #f8fafc;
+            --dashboard-text: #0f172a;
+            --card-bg: #ffffff;
+            --card-border: #e2e8f0;
+            --card-hover-bg: #f1f5f9;
+            --container-bg: #ffffff;
+            --container-border: #e2e8f0;
+            --muted-text: #64748b;
+            --badge-bg: #f1f5f9;
+        }
+
+        body { 
+            background: var(--dashboard-bg); 
+            color: var(--dashboard-text); 
+            min-height: 100vh; 
+            overflow-x: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.3s, color 0.3s;
+        }
+        .bg-blobs {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+        .blob {
+            position: absolute;
+            width: 500px; height: 500px;
+            background: radial-gradient(circle, rgba(37, 99, 235, 0.15) 0%, transparent 70%);
+            border-radius: 50%;
+            filter: blur(80px);
+            animation: move 20s infinite alternate;
+        }
+        @keyframes move {
+            from { transform: translate(-10%, -10%); }
+            to { transform: translate(20%, 20%); }
+        }
+
+        .dashboard-container {
+            max-width: 1000px;
+            width: 100%;
+            padding: 40px;
+            background: var(--container-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--container-border);
+            border-radius: 40px;
+            box-shadow: 0 50px 100px -20px rgba(0,0,0,0.1);
+            animation: fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .welcome-header {
+            text-align: center;
+            margin-bottom: 48px;
+        }
+        .welcome-header h1 { font-size: 40px; font-weight: 800; letter-spacing: -1px; }
+        .welcome-header span { color: #2563eb; }
+        
+        .mode-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 48px;
+        }
+        .mode-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            padding: 32px;
+            border-radius: 24px;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer;
+            text-align: center;
+        }
+        .mode-card:hover {
+            transform: translateY(-10px);
+            background: var(--card-hover-bg);
+            border-color: #2563eb;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        .mode-card.active { 
+            border-color: #2563eb; 
+            background: rgba(37, 99, 235, 0.1); 
+            box-shadow: 0 0 30px rgba(37, 99, 235, 0.1);
+        }
+        .mode-icon { font-size: 48px; margin-bottom: 24px; display: block; }
+        .mode-card h3 { font-size: 22px; margin-bottom: 12px; }
+        .mode-card p { color: var(--muted-text); font-size: 14px; line-height: 1.6; }
+        
+        .lab-selection {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 16px;
+            margin-top: 24px;
+        }
+        .lab-card {
+            background: var(--container-bg);
+            border: 1px solid var(--container-border);
+            padding: 20px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .lab-card:hover {
+            background: var(--card-hover-bg);
+            transform: scale(1.02);
+            border-color: #2563eb;
+        }
+        .lab-num {
+            width: 40px;
+            height: 40px;
+            background: rgba(37, 99, 235, 0.1);
+            color: #2563eb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            font-weight: 800;
+            font-size: 18px;
+        }
+        .lab-info h4 { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+        .lab-info span { font-size: 12px; color: var(--muted-text); text-transform: uppercase; letter-spacing: 1px; }
+
+        .btn-start {
+            margin-top: 40px;
+            padding: 16px 48px;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+        .btn-start:hover {
+            background: #1d4ed8;
+            box-shadow: 0 10px 20px -5px rgba(37, 99, 235, 0.5);
+        }
+        .logout-btn {
+            background: transparent;
+            border: 1px solid var(--container-border);
+            color: var(--muted-text);
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .logout-btn:hover { color: var(--dashboard-text); border-color: var(--dashboard-text); }
+        .status-badge {
+            font-size: 9px;
+            font-weight: 800;
+            padding: 4px 8px;
+            border-radius: 6px;
+            text-transform: uppercase;
+            margin-top: 4px;
+            display: inline-block;
+        }
+        .status-badge.completed { background: rgba(16, 185, 129, 0.15); color: #10b981; }
+        .status-badge.pending { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
+        .status-badge.locked { background: var(--badge-bg); color: var(--muted-text); }
+
+        .theme-toggle-btn {
+            position: absolute;
+            top: 30px;
+            right: 30px;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            color: var(--dashboard-text);
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 20px;
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+        .theme-toggle-btn:hover {
+            transform: scale(1.1) rotate(15deg);
+            border-color: #2563eb;
+        }
+        .theme-toggle-btn .sun { display: none; }
+        [data-theme="light"] .theme-toggle-btn .sun { display: block; }
+        [data-theme="light"] .theme-toggle-btn .moon { display: none; }
+    </style>
+</head>
+<body>
+    <div class="bg-blobs">
+        <div class="blob" style="top: -10%; left: -10%; animation-delay: 0s;"></div>
+        <div class="blob" style="bottom: -10%; right: -10%; animation-delay: -5s;"></div>
+        <div class="blob" style="top: 40%; left: 30%; animation-duration: 30s;"></div>
+    </div>
+    <div class="dashboard-container">
+        <button class="theme-toggle-btn" onclick="toggleTheme()" title="Toggle Light/Dark Mode">
+            <span class="moon">🌙</span>
+            <span class="sun">☀️</span>
+        </button>
+        <header class="welcome-header">
+            <div id="evalAlert" class="theory-card" style="display:none; margin-bottom:30px; border:1px solid var(--border); background:rgba(37, 99, 235, 0.05); text-align:left; animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                    <h4 style="color:var(--primary); margin:0; display:flex; align-items:center; gap:8px;"><span>👨‍🏫</span> Instructor Feedback</h4>
+                    <span id="evalStatus" class="status-badge" style="background:var(--primary); color:white;">APPROVED</span>
+                </div>
+                <p id="evalComment" style="font-size:14px; color:var(--dashboard-text); margin-bottom:10px;">Your laboratory performance has been reviewed.</p>
+                <small style="color:var(--muted-text);">Evaluated by <b id="evalTeacher">Dr. Thorat</b> on <span id="evalDate">May 4, 2026</span></small>
+            </div>
+
+            <div class="badge" style="margin-bottom: 16px;">
+                <span class="pulse"></span>
+                System Operational
+            </div>
+            <div onclick="location.href='index.html'" style="cursor:pointer">
+                <h1>MIT ADT <span class="gradient-text">VLAB HUB</span></h1>
+                <p style="color: var(--muted-text); margin-top: 8px; font-size: 16px;">Welcome back, <span id="userNameDisplay" style="color:var(--dashboard-text); font-weight:700;">Student</span>. Choose your environment.</p>
+            </div>
+            <div style="display: flex; gap: 12px; margin-top: 24px; justify-content: center;">
+                <button id="btnTeacherPanel" class="btn-outline" style="display: none; padding: 10px 20px; font-size: 14px;" onclick="location.href='teacher.html'">Teacher Portal</button>
+                <button class="btn-outline" style="padding: 10px 20px; font-size: 14px;" onclick="logout()">Sign Out</button>
+            </div>
+        </header>
+
+        <div class="mode-grid">
+            <div class="mode-card active" id="cardVlab" onclick="setMainPath('vlab')">
+                <div class="mode-icon">🎓</div>
+                <h3>VLAB</h3>
+                <p>Curriculum-aligned experiments (CSMA, Routing, TCP/UDP) with guided procedures and assessments.</p>
+            </div>
+            <div class="mode-card" id="cardPractice" onclick="setMainPath('practice')">
+                <div class="mode-icon">🛠️</div>
+                <h3>PRACTICE LAB</h3>
+                <p>Free-form network topology builder (Packet Tracer style). Build, connect, and configure your own networks.</p>
+            </div>
+        </div>
+
+        <div id="vlabSelection">
+            <h2 style="margin-bottom: 24px;">Select Curriculum Experiment</h2>
+            <div class="lab-selection">
+                <div class="lab-card" data-id="cables_devices" onclick="selectLab('cables_devices')">
+                    <div class="lab-num">1</div>
+                    <div class="lab-info"><h4>Cables & Devices</h4><div class="lab-meta"><span>Physical Layer</span> <div class="status-badge locked">Not Started</div></div></div>
+                </div>
+                <div class="lab-card" data-id="modulation" onclick="selectLab('modulation')">
+                    <div class="lab-num">2</div>
+                    <div class="lab-info"><h4>Modulation</h4><div class="lab-meta"><span>Signal Techniques</span> <div class="status-badge locked">Not Started</div></div></div>
+                </div>
+                <div class="lab-card" data-id="net_commands" onclick="selectLab('net_commands')">
+                    <div class="lab-num">3</div>
+                    <div class="lab-info"><h4>Net Commands</h4><div class="lab-meta"><span>Utilities & Tools</span> <div class="status-badge locked">Not Started</div></div></div>
+                </div>
+                <div class="lab-card" data-id="ip_class" onclick="selectLab('ip_class')">
+                    <div class="lab-num">4</div>
+                    <div class="lab-info"><h4>IP Classification</h4><div class="lab-meta"><span>Network ID & Host ID</span> <div class="status-badge locked">Not Started</div></div></div>
+                </div>
+                <div class="lab-card" data-id="csma" onclick="selectLab('csma')">
+                    <div class="lab-num">5</div>
+                    <div class="lab-info"><h4>CSMA/CD</h4><div class="lab-meta"><span>Collision Detection</span> <div class="status-badge locked">Not Started</div></div></div>
+                </div>
+                <div class="lab-card" data-id="csma_ca" onclick="selectLab('csma_ca')">
+                    <div class="lab-num">6</div>
+                    <div class="lab-info"><h4>CSMA/CA</h4><div class="lab-meta"><span>Collision Avoidance</span> <div class="status-badge locked">Not Started</div></div></div>
+                </div>
+                <div class="lab-card" data-id="subnet" onclick="selectLab('subnet')">
+                    <div class="lab-num">7</div>
+                    <div class="lab-info"><h4>Subnetting</h4><div class="lab-meta"><span>IP Architecture</span> <div class="status-badge locked">Not Started</div></div></div>
+                </div>
+                <div class="lab-card" data-id="vlan" onclick="selectLab('vlan')">
+                    <div class="lab-num">8</div>
+                    <div class="lab-info"><h4>VLAN</h4><div class="lab-meta"><span>Logical Segmentation</span> <div class="status-badge locked">Not Started</div></div></div>
+                </div>
+                <div class="lab-card" data-id="routing_protocols" onclick="selectLab('routing_protocols')">
+                    <div class="lab-num">9</div>
+                    <div class="lab-info"><h4>OSPF & BGP</h4><div class="lab-meta"><span>Advanced Routing</span> <div class="status-badge locked">Not Started</div></div></div>
+                </div>
+                <div class="lab-card" data-id="routing_dv" onclick="selectLab('routing_dv')">
+                    <div class="lab-num">10</div>
+                    <div class="lab-info"><h4>Routing (DV)</h4><div class="lab-meta"><span>Distance Vector</span> <div class="status-badge locked">Not Started</div></div></div>
+                </div>
+                <div class="lab-card" data-id="routing_ls" onclick="selectLab('routing_ls')">
+                    <div class="lab-num">11</div>
+                    <div class="lab-info"><h4>Routing (LS)</h4><div class="lab-meta"><span>Link State</span> <div class="status-badge locked">Not Started</div></div></div>
+                </div>
+                <div class="lab-card" data-id="udp" onclick="selectLab('udp')">
+                    <div class="lab-num">12</div>
+                    <div class="lab-info"><h4>UDP Chat</h4><div class="lab-meta"><span>Connectionless</span> <div class="status-badge locked">Not Started</div></div></div>
+                </div>
+                <div class="lab-card" data-id="tcp" onclick="selectLab('tcp')">
+                    <div class="lab-num">13</div>
+                    <div class="lab-info"><h4>TCP Transfer</h4><div class="lab-meta"><span>Reliable GBN</span> <div class="status-badge locked">Not Started</div></div></div>
+                </div>
+                <div class="lab-card" data-id="dns" onclick="selectLab('dns')">
+                    <div class="lab-num">14</div>
+                    <div class="lab-info"><h4>DNS</h4><div class="lab-meta"><span>Domain Resolution</span> <div class="status-badge locked">Not Started</div></div></div>
+                </div>
+            </div>
+        </div>
+
+        <div style="text-align: center;">
+            <button class="btn-start" onclick="launch()">Launch Selected Lab</button>
+        </div>
+    </div>
+
+    <script>
+        let selectedLab = 'csma';
+        let currentPath = 'vlab';
+
+        // Theme Handling
+        function initTheme() {
+            const savedTheme = localStorage.getItem('vlab_theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+        }
+
+        function toggleTheme() {
+            const current = document.documentElement.getAttribute('data-theme');
+            const target = current === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', target);
+            localStorage.setItem('vlab_theme', target);
+        }
+
+        initTheme();
+
+        function setMainPath(path) {
+            currentPath = path;
+            document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('active'));
+            document.getElementById(path === 'vlab' ? 'cardVlab' : 'cardPractice').classList.add('active');
+            document.getElementById('vlabSelection').style.display = path === 'vlab' ? 'block' : 'none';
+        }
+
+        function selectLab(id) {
+            selectedLab = id;
+            document.querySelectorAll('.lab-card').forEach(c => {
+                c.style.borderColor = 'var(--container-border)';
+                c.style.background = 'var(--container-bg)';
+            });
+            event.currentTarget.style.borderColor = '#2563eb';
+            event.currentTarget.style.background = 'rgba(37, 99, 235, 0.1)';
+        }
+
+        function launch() {
+            if (currentPath === 'practice') {
+                localStorage.setItem('vlab_current_mode', 'sandbox');
+                localStorage.setItem('vlab_current_lab', 'practice'); // Meta-lab
+            } else {
+                localStorage.setItem('vlab_current_mode', 'learning');
+                localStorage.setItem('vlab_current_lab', selectedLab);
+            }
+            location.href = 'vlab.html';
+        }
+
+        function logout() {
+            localStorage.removeItem('vlab_user');
+            location.href = 'index.html';
+        }
+
+        if (localStorage.getItem('vlab_user') !== 'authenticated') location.href = 'login.html';
+        
+        // Populate User Info
+        const userName = localStorage.getItem('vlab_user_name') || 'Student';
+        const userUid = localStorage.getItem('vlab_user_uid');
+        document.getElementById('userNameDisplay').textContent = userName;
+
+        // Fetch Evaluation Data
+        async function fetchEvaluation() {
+            if (!userUid) return;
+            try {
+                const { initializeApp } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js");
+                const { getFirestore, doc, getDoc, collection, getDocs } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
+                const { getAuth, onAuthStateChanged } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js");
+                
+                const firebaseConfig = {
+                    apiKey: "AIzaSyBaYFXyCpq60TC-op86g5cO5laHA5_bC10",
+                    authDomain: "vlab-b1761.firebaseapp.com",
+                    projectId: "vlab-b1761",
+                    storageBucket: "vlab-b1761.firebasestorage.app",
+                    messagingSenderId: "83114402229",
+                    appId: "1:83114402229:web:be4e43415868e57ecaf9fc"
+                };
+
+                const app = initializeApp(firebaseConfig);
+                const db = getFirestore(app);
+                const auth = getAuth(app);
+
+                // Wait for Auth to initialize
+                const user = await new Promise((resolve) => {
+                    const unsubscribe = onAuthStateChanged(auth, (user) => {
+                        unsubscribe();
+                        resolve(user);
+                    });
+                });
+
+                if (!user) {
+                    console.warn("User not authenticated with Firebase Auth");
+                    return;
+                }
+
+                const evalSnap = await getDoc(doc(db, "users", user.uid, "evaluation", "final"));
+                if (evalSnap.exists()) {
+                    const data = evalSnap.data();
+                    const alert = document.getElementById('evalAlert');
+                    alert.style.display = 'block';
+                    document.getElementById('evalStatus').textContent = data.status.toUpperCase();
+                    document.getElementById('evalStatus').className = `status-badge ${data.status === 'Approved' ? 'status-complete' : 'status-pending'}`;
+                    document.getElementById('evalComment').textContent = data.comment;
+                    document.getElementById('evalTeacher').textContent = data.instructorName;
+                    document.getElementById('evalDate').textContent = new Date(data.timestamp).toLocaleDateString();
+                }
+
+                // Fetch Progress
+                const progSnap = await getDocs(collection(db, "users", user.uid, "progress"));
+                progSnap.forEach(doc => {
+                    localStorage.setItem(`vlab_state_${doc.id}`, JSON.stringify(doc.data()));
+                });
+                updateProgressUI();
+
+            } catch (e) { console.warn("Sync error", e); }
+        }
+        fetchEvaluation();
+
+        // Role-based UI updates
+        const userRole = localStorage.getItem('vlab_user_role');
+        if (userRole === 'teacher') {
+            document.getElementById('btnTeacherPanel').style.display = 'block';
+            document.querySelector('.mode-grid').style.display = 'none';
+            document.getElementById('vlabSelection').innerHTML = `
+                <div class="theory-card" style="text-align:center; padding:60px; background:var(--glass); border:1px solid var(--primary);">
+                    <div style="font-size:48px; margin-bottom:20px;">👨‍🏫</div>
+                    <h2 style="margin-bottom:12px;">Instructor Action Center</h2>
+                    <p style="color:var(--muted-text); margin-bottom:30px; max-width:400px; margin-left:auto; margin-right:auto;">
+                        Welcome to the administrative hub. From here, you can monitor student progress, review lab reports, and submit academic evaluations.
+                    </p>
+                    <button class="btn-auth" style="max-width:280px; margin:0 auto;" onclick="location.href='teacher.html'">Open Teacher Portal</button>
+                </div>
+            `;
+            document.getElementById('vlabSelection').style.display = 'block';
+            document.querySelector('.welcome-header p').innerHTML = `Welcome, <span id="userNameDisplay" style="color:var(--dashboard-text); font-weight:700;">${userName}</span>. You are in Instructor Mode.`;
+        }
+
+        function updateProgressUI() {
+            document.querySelectorAll('.lab-card').forEach(card => {
+                const id = card.getAttribute('data-id');
+                const state = JSON.parse(localStorage.getItem('vlab_state_' + id) || '{}');
+                const badge = card.querySelector('.status-badge');
+                
+                if (state.completed) {
+                    badge.textContent = 'Completed';
+                    badge.className = 'status-badge completed';
+                } else if (state.pretest || state.simulation) {
+                    badge.textContent = 'In Progress';
+                    badge.className = 'status-badge pending';
+                } else {
+                    badge.textContent = 'Not Started';
+                    badge.className = 'status-badge locked';
+                }
+            });
+        }
+
+        updateProgressUI();
+    </script>
+</body>
+</html>
