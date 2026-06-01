@@ -4891,7 +4891,23 @@ student@mitadt-os:~$ </div>
         labSelectEl.innerHTML = optionsHtml;
     }
 
-    const initialLab = localStorage.getItem('vlab_current_lab') || (currentSubject === 'os' ? 'cpu_scheduling' : 'csma');
+    // Sanitize initial lab variable by active subject track to prevent cross-subject loading bugs
+    const osLabs = ['cpu_scheduling', 'process_sync', 'deadlock_avoidance', 'page_replacement', 'disk_scheduling'];
+    const netLabs = ['cables_devices', 'modulation', 'net_commands', 'ip_class', 'csma', 'csma_ca', 'subnet', 'vlan', 'routing_protocols', 'routing_dv', 'routing_ls', 'udp', 'tcp', 'dns', 'practice'];
+    
+    let initialLab = localStorage.getItem('vlab_current_lab');
+    if (currentSubject === 'os') {
+        if (!osLabs.includes(initialLab)) {
+            initialLab = 'cpu_scheduling';
+            localStorage.setItem('vlab_current_lab', 'cpu_scheduling');
+        }
+    } else {
+        if (!netLabs.includes(initialLab)) {
+            initialLab = 'csma';
+            localStorage.setItem('vlab_current_lab', 'csma');
+        }
+    }
+
     const initialMode = localStorage.getItem('vlab_current_mode') || 'learning';
     if (labSelectEl) labSelectEl.value = initialLab;
     loadLab(initialLab);
