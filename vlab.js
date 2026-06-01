@@ -2,8 +2,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import { getFirestore, doc, setDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-import { evaluateLab } from "./evaluate.js";
-import { LABS } from "./labs/index.js";
+// evaluate.js and labs/index.js loaded on-demand if needed
 
 const firebaseConfig = {
     apiKey: "AIzaSyBaYFXyCpq60TC-op86g5cO5laHA5_bC10",
@@ -113,7 +112,7 @@ if (!CanvasRenderingContext2D.prototype.roundRect) {
 const generatePDFReport = async (labId) => {
     // Show Loading Overlay
     const loader = document.createElement('div');
-    loader.style.cssText = "position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.9); z-index:10000; display:flex; flex-direction:column; align-items:center; justify-content:center; color:white; font-family:var(--font-sans); backdrop-filter:blur(8px);";
+    loader.style.cssText = "position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.9); z-index:10000; display:flex; flex-direction:column; align-items:center; justify-content:center; color:white; font-family:Outfit, sans-serif; backdrop-filter:blur(8px);";
     loader.innerHTML = `
         <div class="pulse" style="width:80px; height:80px; background:var(--primary); border-radius:50%; margin-bottom:20px; box-shadow: 0 0 40px var(--primary);"></div>
         <h2 style="margin:0; font-size:24px;">Generating Academic Report</h2>
@@ -1040,33 +1039,7 @@ class TopologySimulation {
         div.style.userSelect = 'none';
         div.innerHTML = `<div class="d-icon">${node.icon}</div><div class="d-label">${node.label}</div>`;
 
-        div.addEventListener('mouseenter', (e) => {
-            const tip = document.getElementById('topoTooltip');
-            if (tip) {
-                tip.style.display = 'block';
-                let content = `<strong>${node.label}</strong><br><small>${node.type.toUpperCase()} ${node.model || ''}</small>`;
-                if (node.config?.interfaces) {
-                    Object.keys(node.config.interfaces).forEach(iface => {
-                        const i = node.config.interfaces[iface];
-                        if (i.ip && i.ip !== 'unassigned') content += `<br><span style="color:#10b981; font-size:10px;">• ${iface}: ${i.ip}</span>`;
-                    });
-                }
-                tip.innerHTML = content;
-            }
-        });
-
-        div.addEventListener('mousemove', (e) => {
-            const tip = document.getElementById('topoTooltip');
-            if (tip) {
-                tip.style.left = (e.clientX + 15) + 'px';
-                tip.style.top = (e.clientY + 15) + 'px';
-            }
-        });
-
-        div.addEventListener('mouseleave', () => {
-            const tip = document.getElementById('topoTooltip');
-            if (tip) tip.style.display = 'none';
-        });
+        // Tooltip handlers (single set — see below for implementation)
 
         let moved = false;
         div.addEventListener('mousedown', (e) => {
@@ -1094,7 +1067,7 @@ class TopologySimulation {
                         this.showHint(`Connection failed: No available ports.`);
                     }
 
-                    this.cableStartNode.el.classList.remove('cabling-source');
+                    this.cableStartNode.el?.classList.remove('cabling-source');
                     this.cableStartNode = null;
                     this.ghostLine.active = false;
                     this.render();
@@ -1840,7 +1813,7 @@ class TopologySimulation {
                 this.ctx.stroke();
             }
 
-            this.ctx.font = "bold 9px var(--font-mono)";
+            this.ctx.font = "bold 9px 'JetBrains Mono', monospace";
             this.ctx.fillStyle = "#64748b";
             const labelDist = 18;
             this.ctx.fillText(link.fromPort, fx + Math.cos(angle) * labelDist, fy + Math.sin(angle) * labelDist);
@@ -1995,7 +1968,7 @@ class NetworkingSim {
         this.isRunning = false;
         this.isDestroyed = true;
         this.timerActive = false;
-        if (this.aniId) cancelAnimationFrame(this.aniId);
+        if (this.aniId) { cancelAnimationFrame(this.aniId); this.aniId = null; }
         window.removeEventListener('resize', this.resize);
     }
 
@@ -2168,7 +2141,7 @@ class NetworkingSim {
 
         // Draw Watermark for Screenshot Authenticity
         this.ctx.fillStyle = "rgba(100, 116, 139, 0.2)";
-        this.ctx.font = "800 24px var(--font-sans)";
+        this.ctx.font = "800 24px Outfit, sans-serif";
         this.ctx.textAlign = "right";
         this.ctx.fillText("MIT ADT VLAB - OFFICIAL SIMULATION", this.canvas.width - 20, this.canvas.height - 20);
 
@@ -2213,7 +2186,7 @@ class NetworkingSim {
 
             // Draw protocol title
             this.ctx.fillStyle = "var(--text-main)";
-            this.ctx.font = "bold 16px var(--font-sans)";
+            this.ctx.font = "bold 16px Outfit, sans-serif";
             this.ctx.textAlign = "left";
             if (mode === 'collision') this.ctx.fillText("CSMA/CD: Collision Detection on Shared Ethernet", 100, 40);
             else if (mode === 'csma_ca') this.ctx.fillText("CSMA/CA: RTS/CTS Collision Avoidance (802.11)", 100, 40);
@@ -2337,7 +2310,7 @@ class NetworkingSim {
         }
 
         this.ctx.fillStyle = color;
-        this.ctx.font = "bold 14px var(--font-sans)";
+        this.ctx.font = "bold 14px Outfit, sans-serif";
         this.ctx.fillText(title, 50, startY + spacing - 45);
     }
 
@@ -2353,19 +2326,15 @@ class NetworkingSim {
         }
         this.ctx.stroke();
         this.ctx.fillStyle = color;
-        this.ctx.font = "bold 14px var(--font-sans)";
+        this.ctx.font = "bold 14px Outfit, sans-serif";
         this.ctx.fillText(label, xStart, yCenter - 45);
     }
 
-    destroy() {
-        this.isRunning = false;
-        if (this.aniId) cancelAnimationFrame(this.aniId);
-        window.removeEventListener('resize', this.resize);
-    }
+    // destroy() is defined above at first occurrence — this duplicate removed
 
     drawWindow() {
         const x = this.senderPos.x - 100, y = this.senderPos.y + 80, size = 30;
-        this.ctx.font = "bold 11px var(--font-sans)"; this.ctx.fillStyle = "var(--text-muted)"; this.ctx.fillText("Active Window", x + 60, y - 15);
+        this.ctx.font = "bold 11px Outfit, sans-serif"; this.ctx.fillStyle = "var(--text-muted)"; this.ctx.fillText("Active Window", x + 60, y - 15);
         for (let i = 0; i < this.windowSize; i++) {
             const seq = this.base + i; const isSent = seq < this.nextSeqNum;
             this.ctx.strokeStyle = isSent ? "var(--primary)" : "var(--border)";
@@ -2405,7 +2374,7 @@ class NetworkingSim {
 
         // Label
         this.ctx.fillStyle = "var(--text-main)";
-        this.ctx.font = "bold 13px var(--font-sans)";
+        this.ctx.font = "bold 13px Outfit, sans-serif";
         this.ctx.textAlign = "center";
         this.ctx.textBaseline = "top";
         this.ctx.fillText(label, 0, 45);
@@ -2413,7 +2382,7 @@ class NetworkingSim {
         // TX/RX Role Indicator
         const role = (lowerLabel.includes("sender") || lowerLabel.includes("a") || lowerLabel.includes("client") || lowerLabel.includes("1")) ? "TX" : "RX";
         this.ctx.fillStyle = color;
-        this.ctx.font = "bold 9px var(--font-mono)";
+        this.ctx.font = "bold 9px 'JetBrains Mono', monospace";
         this.ctx.fillText(role, 0, -40);
 
         this.ctx.restore();
@@ -2480,7 +2449,7 @@ class NetworkingSim {
         this.ctx.shadowBlur = 0;
         
         // Icon on PDU
-        this.ctx.fillStyle = "white"; this.ctx.font = "bold 14px var(--font-mono)";
+        this.ctx.fillStyle = "white"; this.ctx.font = "bold 14px 'JetBrains Mono', monospace";
         this.ctx.textAlign = "center"; this.ctx.textBaseline = "middle";
         this.ctx.fillText(p.type === 'ack' ? "A" : "D", 0, 0);
         
@@ -2488,7 +2457,7 @@ class NetworkingSim {
         this.ctx.fillStyle = "rgba(15, 23, 42, 0.95)"; 
         this.ctx.beginPath(); this.ctx.roundRect(14, -22, 22, 16, 4); this.ctx.fill();
         this.ctx.fillStyle = "white"; 
-        this.ctx.font = "bold 10px var(--font-mono)"; 
+        this.ctx.font = "bold 10px 'JetBrains Mono', monospace"; 
         this.ctx.fillText(p.seq, 25, -14);
         
         this.ctx.restore();
@@ -2497,7 +2466,7 @@ class NetworkingSim {
     drawVlanSim() {
         const time = Date.now() / 1000;
         this.ctx.fillStyle = "var(--text-main)";
-        this.ctx.font = "bold 16px var(--font-sans)";
+        this.ctx.font = "bold 16px Outfit, sans-serif";
         this.ctx.textAlign = "left";
         this.ctx.fillText("VLAN: IEEE 802-1Q Frame Tagging and Trunk Segmentation", 80, 40);
 
@@ -2601,7 +2570,7 @@ class NetworkingSim {
         this.ctx.fillText(tag, px, py + 24);
 
         this.ctx.fillStyle = "var(--text-main)";
-        this.ctx.font = "italic 11px var(--font-sans)";
+        this.ctx.font = "italic 11px Outfit, sans-serif";
         this.ctx.fillText(targetLabel, px, py + 45);
     }
 
@@ -2611,7 +2580,7 @@ class NetworkingSim {
         this.drawNode(this.receiverPos.x, this.receiverPos.y, "Receiver (App)", "#1e293b");
 
         this.ctx.fillStyle = "var(--text-main)";
-        this.ctx.font = "bold 16px var(--font-sans)";
+        this.ctx.font = "bold 16px Outfit, sans-serif";
         this.ctx.fillText("UDP: Unreliable 'Fire-and-Forget' Datagrams", 100, 50);
         
         const cycle = time % 6;
@@ -2646,7 +2615,7 @@ class NetworkingSim {
         if (cycle < 6) {
             // Handshake Phase
             this.ctx.fillStyle = "var(--primary)";
-            this.ctx.font = "bold 16px var(--font-sans)";
+            this.ctx.font = "bold 16px Outfit, sans-serif";
             this.ctx.fillText("PHASE 1: 3-Way Handshake (Connection Establishment)", 100, 50);
             const sub = (cycle % 6) / 2;
             const p = sub % 1;
@@ -2663,7 +2632,7 @@ class NetworkingSim {
         } else if (cycle < 16) {
             // Data Transfer Phase (GBN/Congestion Control)
             this.ctx.fillStyle = "#10b981";
-            this.ctx.font = "bold 16px var(--font-sans)";
+            this.ctx.font = "bold 16px Outfit, sans-serif";
             this.ctx.fillText("PHASE 2: Data Transfer (Windowing & Congestion Control)", 100, 50);
             
             const p = ((cycle - 6) % 2) / 2;
@@ -2682,7 +2651,7 @@ class NetworkingSim {
         } else {
             // Closing Phase
             this.ctx.fillStyle = "#ef4444";
-            this.ctx.font = "bold 16px var(--font-sans)";
+            this.ctx.font = "bold 16px Outfit, sans-serif";
             this.ctx.fillText("PHASE 3: 4-Way Handshake (Connection Termination)", 100, 50);
             const p = (cycle - 16) / 4;
             px = this.senderPos.x + (this.receiverPos.x - this.senderPos.x) * p; py = this.senderPos.y;
@@ -2713,7 +2682,7 @@ class NetworkingSim {
         this.drawCostLink(400, 450, 650, 300, "Cost: 20");
 
         this.ctx.fillStyle = "var(--text-main)";
-        this.ctx.font = "bold 16px var(--font-sans)";
+        this.ctx.font = "bold 16px Outfit, sans-serif";
 
         if (this.mode === 'dv_sim') {
             this.ctx.fillText("Distance Vector (RIPv2): Iterative Bellman-Ford Table Exchange", 100, 50);
@@ -2783,7 +2752,7 @@ class NetworkingSim {
             this.ctx.fillStyle = "#f59e0b";
             this.ctx.beginPath(); this.ctx.arc(px, py, 8, 0, Math.PI * 2); this.ctx.fill();
             this.ctx.fillStyle = "var(--text-main)";
-            this.ctx.font = "bold 10px var(--font-sans)";
+            this.ctx.font = "bold 10px Outfit, sans-serif";
             this.ctx.fillText("Best Path (Metric: 15)", px, py + 20);
         }
     }
@@ -2802,7 +2771,7 @@ class NetworkingSim {
         this.ctx.fill();
 
         this.ctx.fillStyle = "#fff";
-        this.ctx.font = "bold 11px var(--font-mono)";
+        this.ctx.font = "bold 11px 'JetBrains Mono', monospace";
         this.ctx.textAlign = "center";
         this.ctx.fillText(label, (x1 + x2) / 2, (y1 + y2) / 2 - 10);
     }
@@ -2817,7 +2786,7 @@ class NetworkingSim {
         this.drawNode(this.receiverPos.x, this.receiverPos.y, "Server", "#1e293b");
         const stage = Math.floor((time % 9) / 3);
         this.ctx.fillStyle = "var(--text-main)";
-        this.ctx.font = "bold 16px var(--font-sans)";
+        this.ctx.font = "bold 16px Outfit, sans-serif";
         this.ctx.fillText("TCP Reno Connection (3-Way Handshake)", 100, 50);
         this.ctx.font = "12px monospace";
         this.ctx.fillText(`MSS: 1460 bytes | RTT: 20ms | Window: ${this.windowSize}`, 100, 70);
@@ -2875,7 +2844,7 @@ class NetworkingSim {
             this.ctx.fillStyle = "rgba(239, 68, 68, 0.2)";
             this.ctx.beginPath(); this.ctx.arc(this.senderPos.x, this.senderPos.y, 60, 0, Math.PI * 2); this.ctx.fill();
             this.ctx.fillStyle = "#ef4444";
-            this.ctx.font = "bold 12px var(--font-sans)";
+            this.ctx.font = "bold 12px Outfit, sans-serif";
             this.ctx.fillText("NAV ACTIVE (Waiting...)", this.senderPos.x, this.senderPos.y - 60);
         }
     }
@@ -3167,7 +3136,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                                 ${(pData.practice_commands || []).map(cmd => `
                                     <div class="theory-card" style="border-left:4px solid var(--primary); padding:15px;">
                                         <div style="font-size:10px; color:var(--text-muted); margin-bottom:5px; font-weight:800;">CLI EXERCISE</div>
-                                        <code style="background:#000; color:#10b981; padding:6px 10px; border-radius:6px; display:block; font-size:12px; font-family:var(--font-mono);">${cmd}</code>
+                                        <code style="background:#000; color:#10b981; padding:6px 10px; border-radius:6px; display:block; font-size:12px; font-family:'JetBrains Mono', monospace;">${cmd}</code>
                                     </div>
                                 `).join('')}
                             </div>
@@ -3188,218 +3157,501 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     });
     const initSubnetCalc = (container) => {
+        const ipToUint = (ip) => ip.split('.').reduce((acc, o) => (acc << 8) + parseInt(o, 10), 0) >>> 0;
+        const uintToIp = (u) => [(u >>> 24) & 0xff, (u >>> 16) & 0xff, (u >>> 8) & 0xff, u & 0xff].join('.');
+        const toBin8 = (n) => (n & 0xff).toString(2).padStart(8, '0');
+
+        const challenges = [
+            { q: 'How many usable hosts are in a /24 network?', ans: ['254','254 hosts'], exp: '2^8 - 2 = 254. /24 leaves 8 host bits.' },
+            { q: 'What CIDR gives exactly 30 usable hosts per subnet?', ans: ['/27','27','255.255.255.224'], exp: '/27 → 2^5 − 2 = 30 hosts.' },
+            { q: 'What subnet mask corresponds to /28?', ans: ['255.255.255.240','/28'], exp: '11110000 in last octet = 255.255.255.240' },
+            { q: 'How many /26 subnets fit inside one /24?', ans: ['4','4 subnets'], exp: '/26 borrows 2 bits → 2^2 = 4 subnets, 62 hosts each.' },
+            { q: 'What class is 172.31.0.1?', ans: ['class b','b','class-b'], exp: '172.x.x.x (128-191) = Class B.' },
+            { q: 'What is the broadcast address of 192.168.10.0/27?', ans: ['192.168.10.31'], exp: 'Block size 32 → network .0, broadcast .31.' },
+            { q: 'How many hosts can a /30 subnet support?', ans: ['2','2 hosts'], exp: '/30 → 2^2 − 2 = 2. Used for P2P WAN links.' },
+            { q: 'What CIDR gives 510 hosts?', ans: ['/23','23'], exp: '/23 → 2^9 − 2 = 510 hosts.' },
+        ];
+        let cIdx = 0, challengeScore = 0;
+
         container.innerHTML = `
-            <div class="sim-toolbar"><div class="section-title" style="font-size:24px; margin:0;">IP Subnetting & Addressing Lab</div></div>
-            <div class="sim-workspace" style="gap:20px; padding:20px;">
-                <div class="theory-card" style="flex:1; max-width:500px;">
-                    <h3 style="margin-bottom:15px; color:var(--primary);">Subnet Calculator</h3>
-                    <div style="margin-bottom:15px;">
-                        <label style="display:block; margin-bottom:5px; font-size:12px; font-weight:800;">Network IP:</label>
-                        <input type="text" id="calcIP" class="sim-select" style="width:100%;" placeholder="e.g. 192.168.1.0">
-                    </div>
-                    <div style="margin-bottom:15px;">
-                        <label style="display:block; margin-bottom:5px; font-size:12px; font-weight:800;">Subnet Mask:</label>
-                        <select id="calcMask" class="sim-select" style="width:100%;">
-                            <option value="24">/24 (255.255.255.0)</option>
-                            <option value="25">/25 (255.255.255.128)</option>
-                            <option value="26">/26 (255.255.255.192)</option>
-                            <option value="27">/27 (255.255.255.224)</option>
-                            <option value="28">/28 (255.255.255.240)</option>
-                        </select>
-                    </div>
-                    <button id="btnCalc" class="btn-sim primary" style="width:100%;">Analyze Network</button>
-                    <div id="calcResult" style="margin-top:20px; font-family:var(--font-mono); font-size:12px; display:none;">
-                        <div style="padding:15px; background:rgba(37,99,235,0.05); border:1px solid var(--primary); border-radius:10px;">
-                            <p><b>Network ID:</b> <span id="resNet" style="color:var(--primary);"></span></p>
-                            <p><b>Broadcast:</b> <span id="resBroad" style="color:var(--danger);"></span></p>
-                            <p><b>Valid Hosts:</b> <span id="resRange"></span></p>
-                            <p><b>Capacity:</b> <span id="resHosts"></span> hosts</p>
+            <div class="sim-toolbar"><div class="section-title" style="font-size:22px; margin:0; color:var(--primary);">IP Subnetting & Addressing Lab</div></div>
+            <div class="sim-workspace" style="flex-direction:column; gap:20px; padding:20px; overflow-y:auto;">
+                <div style="display:flex; gap:20px; flex-wrap:wrap; width:100%;">
+                    <div class="theory-card" style="flex:1.5; min-width:300px; margin:0;">
+                        <h3 style="margin-bottom:15px; color:var(--primary);">Live Subnet Calculator</h3>
+                        <div style="margin-bottom:15px;">
+                            <label style="display:block; margin-bottom:5px; font-size:12px; font-weight:800;">Network IP Address:</label>
+                            <input type="text" id="calcIP" class="sim-select" style="width:100%; font-family:'JetBrains Mono', monospace;" placeholder="e.g. 192.168.10.0">
+                        </div>
+                        <div style="margin-bottom:20px;">
+                            <label style="display:block; margin-bottom:5px; font-size:12px; font-weight:800;">CIDR Prefix: <span id="cidrLabel" style="color:var(--primary); font-size:16px; font-family:'JetBrains Mono', monospace;">/24</span></label>
+                            <input type="range" id="cidrSlider" min="8" max="30" value="24" style="width:100%; accent-color:var(--primary);">
+                            <div style="display:flex; justify-content:space-between; font-size:10px; color:var(--text-muted); margin-top:4px;"><span>/8 Class A</span><span>/16 Class B</span><span>/24 Class C</span><span>/30 P2P</span></div>
+                        </div>
+                        <button id="btnCalc" class="btn-sim primary" style="width:100%;">Analyze Network ▶</button>
+                        <div id="calcResult" style="margin-top:20px; display:none;">
+                            <div style="background:rgba(37,99,235,0.05); border:1px solid var(--primary); border-radius:12px; padding:15px;">
+                                <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; font-family:'JetBrains Mono', monospace; font-size:12px;">
+                                    <div style="padding:10px; background:var(--bg-page); border-radius:8px;"><div style="font-size:10px; color:var(--text-muted); font-weight:800;">NETWORK ADDRESS</div><div id="resNet" style="font-weight:800; color:var(--primary); font-size:15px; margin-top:4px;"></div></div>
+                                    <div style="padding:10px; background:var(--bg-page); border-radius:8px;"><div style="font-size:10px; color:var(--text-muted); font-weight:800;">BROADCAST ADDRESS</div><div id="resBroad" style="font-weight:800; color:var(--danger); font-size:15px; margin-top:4px;"></div></div>
+                                    <div style="padding:10px; background:var(--bg-page); border-radius:8px;"><div style="font-size:10px; color:var(--text-muted); font-weight:800;">FIRST USABLE HOST</div><div id="resFirst" style="font-weight:800; color:var(--success); font-size:13px; margin-top:4px;"></div></div>
+                                    <div style="padding:10px; background:var(--bg-page); border-radius:8px;"><div style="font-size:10px; color:var(--text-muted); font-weight:800;">LAST USABLE HOST</div><div id="resLast" style="font-weight:800; color:var(--success); font-size:13px; margin-top:4px;"></div></div>
+                                    <div style="padding:10px; background:rgba(37,99,235,0.08); border-radius:8px; grid-column:1/-1; text-align:center;"><div style="font-size:10px; color:var(--text-muted); font-weight:800;">USABLE HOST COUNT</div><div id="resHosts" style="font-weight:800; font-size:24px; color:var(--primary); margin-top:4px;"></div></div>
+                                </div>
+                            </div>
+                            <div style="margin-top:12px; background:#0b0f19; border-radius:12px; padding:15px; font-family:'JetBrains Mono', monospace; font-size:11px; line-height:2;">
+                                <div style="color:#64748b; font-size:10px; font-weight:800; margin-bottom:6px;">▸ BINARY REPRESENTATION (Network=<span style='color:#10b981'>■</span> Host=<span style='color:#ef4444'>■</span>)</div>
+                                <div id="binaryBreakdown" style="word-break:break-all; line-height:1.8;"></div>
+                            </div>
+                            <div style="margin-top:10px; display:flex; gap:10px; flex-wrap:wrap;">
+                                <div style="padding:8px 14px; background:rgba(37,99,235,0.08); border:1px solid rgba(37,99,235,0.2); border-radius:8px; font-size:12px;">Class: <b id="resClass" style="font-family:'JetBrains Mono', monospace;"></b></div>
+                                <div style="padding:8px 14px; background:rgba(16,185,129,0.08); border:1px solid rgba(16,185,129,0.2); border-radius:8px; font-size:12px;">Type: <b id="resType" style="font-family:'JetBrains Mono', monospace; color:var(--success);"></b></div>
+                                <div style="padding:8px 14px; background:rgba(245,158,11,0.08); border:1px solid rgba(245,158,11,0.2); border-radius:8px; font-size:12px;">Subnet Mask: <b id="resMask" style="font-family:'JetBrains Mono', monospace; color:var(--warning);"></b></div>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div class="theory-card" style="flex:1; background:var(--glass);">
-                    <h3 style="margin-bottom:15px; color:var(--success);">Practice Challenge</h3>
-                    <div id="challengeBox">
-                        <p id="challengeText" style="font-size:14px; margin-bottom:20px;"><b>Task:</b> Divide 192.168.10.0 into subnets that can hold 30 hosts each. What is the required CIDR?</p>
+                    <div class="theory-card" style="flex:1; min-width:250px; margin:0; display:flex; flex-direction:column; gap:12px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <h3 style="margin:0; color:var(--success);">Challenge Mode 🎯</h3>
+                            <div style="font-size:22px; font-weight:800; color:var(--primary);">Score: <span id="challengeScore">0</span></div>
+                        </div>
+                        <div style="font-size:11px; color:var(--text-muted);">Question <span id="challengeNum">1</span> of ${challenges.length}</div>
+                        <div style="padding:15px; background:rgba(245,158,11,0.05); border:1px solid rgba(245,158,11,0.3); border-radius:12px;">
+                            <div style="font-size:10px; color:var(--warning); font-weight:800; margin-bottom:8px;">CHALLENGE QUESTION</div>
+                            <p id="challengeText" style="font-size:13px; line-height:1.6; margin:0;"></p>
+                        </div>
                         <div style="display:flex; gap:10px;">
-                            <input type="text" id="challengeAns" class="sim-select" style="flex:1;" placeholder="Enter CIDR (e.g. /26)">
+                            <input type="text" id="challengeAns" class="sim-select" style="flex:1; font-family:'JetBrains Mono', monospace;" placeholder="Your answer...">
                             <button id="btnCheckChallenge" class="btn-sim success">Submit</button>
                         </div>
-                        <div id="challengeFeedback" style="margin-top:15px; font-weight:700;"></div>
+                        <div id="challengeFeedback" style="font-weight:700; font-size:12px; min-height:18px;"></div>
+                        <button id="btnNextChallenge" class="btn-sim primary" style="display:none;">Next Question →</button>
                     </div>
                 </div>
             </div>
         `;
-        const btn = document.getElementById('btnCalc');
-        btn.onclick = () => {
-            const ip = document.getElementById('calcIP').value;
-            const mask = parseInt(document.getElementById('calcMask').value);
-            if (!/^\d+\.\d+\.\d+\.\d+$/.test(ip)) { alert("Invalid IP"); return; }
-            const ipToUint = (ip) => ip.split('.').reduce((acc, octet) => (acc << 8) + parseInt(octet, 10), 0) >>> 0;
-            const uintToIp = (u) => [(u >>> 24) & 0xff, (u >>> 16) & 0xff, (u >>> 8) & 0xff, u & 0xff].join('.');
+
+        const cidrSlider = document.getElementById('cidrSlider');
+        cidrSlider.oninput = () => document.getElementById('cidrLabel').textContent = `/${cidrSlider.value}`;
+
+        document.getElementById('btnCalc').onclick = () => {
+            const ip = document.getElementById('calcIP').value.trim();
+            const mask = parseInt(cidrSlider.value);
+            if (!/^\d+\.\d+\.\d+\.\d+$/.test(ip)) { alert('Invalid IP address. Use dotted decimal: e.g. 192.168.1.0'); return; }
+            const parts = ip.split('.').map(Number);
+            if (parts.some(p => p < 0 || p > 255)) { alert('Each octet must be 0–255'); return; }
             const ipUint = ipToUint(ip);
             const maskUint = ((0xffffffff << (32 - mask)) >>> 0);
             const netUint = (ipUint & maskUint) >>> 0;
-            const broadUint = (netUint | ~maskUint) >>> 0;
-            const res = document.getElementById('calcResult');
-            res.style.display = 'block';
-            document.getElementById('resNet').textContent = `${uintToIp(netUint)} /${mask}`;
+            const broadUint = (netUint | (~maskUint >>> 0)) >>> 0;
+            const hosts = Math.max(0, Math.pow(2, 32 - mask) - 2);
+            document.getElementById('resNet').textContent = uintToIp(netUint) + ` /${mask}`;
             document.getElementById('resBroad').textContent = uintToIp(broadUint);
-            document.getElementById('resRange').textContent = `${uintToIp(netUint + 1)} - ${uintToIp(broadUint - 1)}`;
-            document.getElementById('resHosts').textContent = Math.pow(2, 32 - mask) - 2;
+            document.getElementById('resFirst').textContent = hosts > 0 ? uintToIp(netUint + 1) : 'N/A';
+            document.getElementById('resLast').textContent = hosts > 0 ? uintToIp(broadUint - 1) : 'N/A';
+            document.getElementById('resHosts').textContent = hosts.toLocaleString() + ' hosts';
+            document.getElementById('resMask').textContent = uintToIp(maskUint);
+
+            // Binary breakdown with color coding
+            const netParts = uintToIp(netUint).split('.').map(Number);
+            const maskParts = uintToIp(maskUint).split('.').map(Number);
+            const fullBin = netParts.map(toBin8).join('');
+            const coloredBits = fullBin.split('').map((b, i) =>
+                `<span style="color:${i < mask ? '#10b981' : '#ef4444'};">${b}</span>`).join('');
+            const octets = [0, 8, 16, 24].map(s => coloredBits.slice(s * 18, s * 18 + 8 * 18)).join('<span style="color:#64748b;">.</span>');
+            document.getElementById('binaryBreakdown').innerHTML =
+                `<div><span style="color:#64748b; font-size:10px;">IP:   </span>${octets}</div>` +
+                `<div><span style="color:#64748b; font-size:10px;">MASK: </span><span style="color:#f59e0b;">${maskParts.map(toBin8).join('.')}</span></div>`;
+
+            const first = parts[0];
+            const cls = first < 128 ? 'Class A' : first < 192 ? 'Class B' : first < 224 ? 'Class C' : first < 240 ? 'Class D (Multicast)' : 'Class E';
+            let type = 'Public';
+            if (first === 10 || (first === 172 && parts[1] >= 16 && parts[1] <= 31) || (first === 192 && parts[1] === 168)) type = 'Private (RFC 1918)';
+            else if (first === 127) type = 'Loopback';
+            else if (first >= 224) type = 'Special / Reserved';
+            document.getElementById('resClass').textContent = cls;
+            document.getElementById('resType').textContent = type;
+            document.getElementById('calcResult').style.display = 'block';
         };
 
-        const btnCheck = document.getElementById('btnCheckChallenge');
-        if (btnCheck) {
-            btnCheck.onclick = () => {
-                const ans = document.getElementById('challengeAns').value.trim();
-                const feedback = document.getElementById('challengeFeedback');
-                if (ans === '/27' || ans === '27') {
-                    feedback.textContent = "✅ Correct! 2^(32-27) - 2 = 30 usable hosts.";
-                    feedback.style.color = "#10b981";
-                } else {
-                    feedback.textContent = "❌ Incorrect. Try again. (Hint: 2^5 = 32)";
-                    feedback.style.color = "#ef4444";
-                }
-            };
-        }
+        const loadChallenge = () => {
+            const c = challenges[cIdx % challenges.length];
+            document.getElementById('challengeNum').textContent = (cIdx % challenges.length) + 1;
+            document.getElementById('challengeText').textContent = c.q;
+            document.getElementById('challengeAns').value = '';
+            document.getElementById('challengeFeedback').textContent = '';
+            document.getElementById('btnNextChallenge').style.display = 'none';
+        };
+        loadChallenge();
+
+        document.getElementById('btnCheckChallenge').onclick = () => {
+            const ans = document.getElementById('challengeAns').value.trim().toLowerCase();
+            const c = challenges[cIdx % challenges.length];
+            const ok = c.ans.some(a => a.toLowerCase() === ans);
+            const fb = document.getElementById('challengeFeedback');
+            if (ok) { challengeScore += 10; document.getElementById('challengeScore').textContent = challengeScore; fb.style.color = 'var(--success)'; fb.textContent = `✅ ${c.exp}`; }
+            else { fb.style.color = 'var(--danger)'; fb.textContent = `❌ ${c.exp} (Answer: ${c.ans[0]})`; }
+            document.getElementById('btnNextChallenge').style.display = 'block';
+        };
+        document.getElementById('btnNextChallenge').onclick = () => { cIdx++; loadChallenge(); };
     };
 
     const initIpSorter = (container) => {
+        const ipPool = [
+            { ip: '10.0.0.1',    cls: 'A', type: 'Private' },
+            { ip: '172.16.0.1',  cls: 'B', type: 'Private' },
+            { ip: '192.168.1.1', cls: 'C', type: 'Private' },
+            { ip: '8.8.8.8',     cls: 'A', type: 'Public' },
+            { ip: '128.0.0.1',   cls: 'B', type: 'Public' },
+            { ip: '200.1.1.1',   cls: 'C', type: 'Public' },
+            { ip: '127.0.0.1',   cls: 'A', type: 'Loopback' },
+            { ip: '224.0.0.1',   cls: 'D', type: 'Multicast' },
+        ];
+        const classLabels = { A:'1–126', B:'128–191', C:'192–223', D:'224–239' };
         container.innerHTML = `
-            <div class="sim-toolbar"><div class="section-title" style="font-size:24px; margin:0;">IP Class Sorter Challenge</div></div>
-            <div class="sim-workspace" style="flex-direction:column; align-items:center; padding:40px;">
-                <p style="margin-bottom:20px; color:var(--text-muted);">Drag the IP addresses into their correct Class buckets.</p>
-                <div id="ip-pool" style="display:flex; gap:10px; margin-bottom:40px; flex-wrap:wrap; justify-content:center;">
-                    ${['10.0.0.1', '172.16.0.1', '192.168.1.1', '8.8.8.8', '128.0.0.1', '200.1.1.1'].map(ip => `<div class="btn-sim" draggable="true" ondragstart="event.dataTransfer.setData('text', '${ip}')">${ip}</div>`).join('')}
+            <div class="sim-toolbar"><div class="section-title" style="font-size:22px; margin:0; color:var(--primary);">IPv4 Address Classification Lab 🏷️</div></div>
+            <div class="sim-workspace" style="flex-direction:column; align-items:center; padding:25px; overflow-y:auto; gap:20px;">
+                <p style="color:var(--text-muted); margin:0;">Drag each IP address into its correct IPv4 Class bucket. Binary (first octet) shown as tooltip.</p>
+                <div id="ip-pool" style="display:flex; gap:10px; flex-wrap:wrap; justify-content:center;">
+                    ${ipPool.map(item => `
+                        <div class="btn-sim" draggable="true" data-ip="${item.ip}" style="cursor:grab; font-family:'JetBrains Mono', monospace;" title="First octet binary: ${parseInt(item.ip.split('.')[0]).toString(2).padStart(8,'0')}">
+                            <div>${item.ip}</div>
+                            <div style="font-size:9px; opacity:0.5; font-family:'JetBrains Mono', monospace;">${parseInt(item.ip.split('.')[0]).toString(2).padStart(8,'0')}…</div>
+                        </div>`).join('')}
                 </div>
-                <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:20px; width:100%; max-width:800px;">
-                    <div class="theory-card bucket" data-class="A" ondragover="event.preventDefault()" ondrop="handleIpDrop(event, 'A')" style="text-align:center;"><strong>Class A</strong><div class="bucket-list"></div></div>
-                    <div class="theory-card bucket" data-class="B" ondragover="event.preventDefault()" ondrop="handleIpDrop(event, 'B')" style="text-align:center;"><strong>Class B</strong><div class="bucket-list"></div></div>
-                    <div class="theory-card bucket" data-class="C" ondragover="event.preventDefault()" ondrop="handleIpDrop(event, 'C')" style="text-align:center;"><strong>Class C</strong><div class="bucket-list"></div></div>
+                <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:15px; width:100%; max-width:960px;">
+                    ${['A','B','C','D'].map(cls => `
+                        <div class="theory-card bucket" data-class="${cls}" ondragover="event.preventDefault()" ondrop="handleIpDrop(event,'${cls}')" style="min-height:120px; text-align:center; transition:border-color 0.2s; border:2px dashed var(--border);">
+                            <div style="font-weight:800; color:var(--primary); margin-bottom:6px;">Class ${cls}</div>
+                            <div style="font-size:11px; color:var(--text-muted); margin-bottom:10px;">${classLabels[cls]}</div>
+                            <div class="bucket-list" style="display:flex; flex-direction:column; gap:5px; align-items:center;"></div>
+                        </div>`).join('')}
                 </div>
-                <button class="btn-sim primary" style="margin-top:40px;" id="btnCheckSorter">Check Results</button>
+                <div style="display:flex; gap:15px; align-items:center; flex-wrap:wrap; justify-content:center;">
+                    <button class="btn-sim primary" id="btnCheckSorter">Check Answers ✓</button>
+                    <button class="btn-sim" id="btnResetSorter">Reset ↺</button>
+                    <div style="font-size:20px; font-weight:800; color:var(--primary);">Score: <span id="sorterScore">0</span>/${ipPool.length * 10}</div>
+                </div>
+                <div id="sorterResult" style="width:100%; max-width:960px; display:none;">
+                    <div class="theory-card" style="margin:0;">
+                        <h3 style="color:var(--primary); margin-bottom:15px;">Detailed IP Analysis</h3>
+                        <table class="sim-table" style="width:100%; border-collapse:collapse; font-family:'JetBrains Mono', monospace; font-size:12px; text-align:left;">
+                            <thead><tr style="border-bottom:2px solid var(--border);">
+                                <th style="padding:8px;">IP Address</th><th style="padding:8px;">Class</th>
+                                <th style="padding:8px;">Type</th><th style="padding:8px;">First Octet (Binary)</th><th style="padding:8px;">Range</th>
+                            </tr></thead>
+                            <tbody id="ipDetailRows"></tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         `;
+
+        document.querySelectorAll('#ip-pool .btn-sim').forEach(item => {
+            item.addEventListener('dragstart', e => e.dataTransfer.setData('text', e.currentTarget.dataset.ip));
+        });
+
         window.handleIpDrop = (e, targetClass) => {
             e.preventDefault();
             const ip = e.dataTransfer.getData('text');
+            if (!ip) return;
             const bucket = e.currentTarget.querySelector('.bucket-list');
+            if ([...bucket.querySelectorAll('[data-ip]')].some(el => el.dataset.ip === ip)) return;
             const el = document.createElement('div');
             el.className = 'btn-sim';
-            el.style.margin = '5px auto';
+            el.style.cssText = 'margin:2px; font-family:'JetBrains Mono', monospace; font-size:11px; padding:4px 10px; cursor:default;';
             el.textContent = ip;
             el.dataset.ip = ip;
             bucket.appendChild(el);
-            document.querySelectorAll('#ip-pool .btn-sim').forEach(item => { if (item.textContent === ip) item.style.display = 'none'; });
+            document.querySelectorAll(`#ip-pool [data-ip="${ip}"]`).forEach(item => item.style.display = 'none');
+            e.currentTarget.style.borderColor = 'var(--primary)';
         };
+
         document.getElementById('btnCheckSorter').onclick = () => {
             let correct = 0;
+            const tbody = document.getElementById('ipDetailRows');
+            tbody.innerHTML = '';
             document.querySelectorAll('.bucket').forEach(bucket => {
                 const target = bucket.dataset.class;
                 bucket.querySelectorAll('[data-ip]').forEach(item => {
-                    const firstOctet = parseInt(item.dataset.ip.split('.')[0]);
-                    let actual = '';
-                    if (firstOctet >= 1 && firstOctet <= 126) actual = 'A';
-                    else if (firstOctet >= 128 && firstOctet <= 191) actual = 'B';
-                    else if (firstOctet >= 192 && firstOctet <= 223) actual = 'C';
-                    if (actual === target) { correct++; item.style.color = '#10b981'; }
-                    else item.style.color = '#ef4444';
+                    const ip = item.dataset.ip;
+                    const first = parseInt(ip.split('.')[0]);
+                    const actual = first >= 1 && first <= 126 ? 'A' : first >= 128 && first <= 191 ? 'B' : first >= 192 && first <= 223 ? 'C' : first >= 224 && first <= 239 ? 'D' : 'E';
+                    const ok = actual === target;
+                    if (ok) { correct++; item.style.color='var(--success)'; item.style.borderColor='var(--success)'; } else { item.style.color='var(--danger)'; item.style.borderColor='var(--danger)'; }
+                    const pd = ipPool.find(p => p.ip === ip);
+                    tbody.innerHTML += `<tr style="border-bottom:1px solid var(--border);">
+                        <td style="padding:8px; font-weight:bold; color:${ok ? 'var(--success)' : 'var(--danger)'}">${ip} ${ok ? '✓' : '✗'}</td>
+                        <td style="padding:8px;">Class ${actual}</td>
+                        <td style="padding:8px; color:${pd?.type==='Private'?'var(--warning)':'var(--primary)'}">${pd?.type||'Public'}</td>
+                        <td style="padding:8px;">${first.toString(2).padStart(8,'0')}</td>
+                        <td style="padding:8px;">${classLabels[actual]||'N/A'}</td>
+                    </tr>`;
                 });
             });
-            alert(`You got ${correct} IPs correctly classified!`);
+            document.getElementById('sorterScore').textContent = correct * 10;
+            document.getElementById('sorterResult').style.display = 'block';
+            document.getElementById('sorterResult').scrollIntoView({ behavior: 'smooth' });
+            if (!document.querySelector('[data-ip]')) alert('Drag all IPs into their Class buckets first!');
+        };
+
+        document.getElementById('btnResetSorter').onclick = () => {
+            document.querySelectorAll('.bucket-list').forEach(b => b.innerHTML = '');
+            document.querySelectorAll('.bucket').forEach(b => b.style.borderColor = '');
+            document.querySelectorAll('#ip-pool .btn-sim').forEach(item => item.style.display = '');
+            document.getElementById('sorterScore').textContent = '0';
+            document.getElementById('sorterResult').style.display = 'none';
         };
     };
 
     const initCmdChallenge = (container) => {
+        const levels = [
+            { task: "Check the reachability of '127.0.0.1' using ping", cmd: 'ping 127.0.0.1', hint: "Syntax: ping <IP>", out: "Pinging 127.0.0.1 with 32 bytes of data:\nReply from 127.0.0.1: bytes=32 time<1ms TTL=128\nReply from 127.0.0.1: bytes=32 time<1ms TTL=128\n\nPing statistics: Sent=4, Received=4, Lost=0 (0% loss)\nApproximate round trip times: Min=0ms, Max=0ms, Avg=0ms" },
+            { task: "Display your current network IP configuration", cmd: 'ipconfig', hint: "Windows: ipconfig  |  Linux: ifconfig", out: "Windows IP Configuration\n\nEthernet adapter Local Area Connection:\n   IPv4 Address  . . . . : 192.168.1.100\n   Subnet Mask . . . . . : 255.255.255.0\n   Default Gateway . . . : 192.168.1.1" },
+            { task: "Resolve hostname 'google.com' to its IP address using DNS", cmd: 'nslookup google.com', hint: "Syntax: nslookup <hostname>", out: "Server:  mitadt-dns.edu.in\nAddress: 192.168.1.1\n\nNon-authoritative answer:\nName:    google.com\nAddresses: 142.250.77.110\n           2404:6800:4009:808::200e" },
+            { task: "Display the system's current IP routing table", cmd: 'route print', hint: "Windows: route print  |  Linux: netstat -r", out: "IPv4 Route Table\n=============================================================\nActive Routes:\nNetwork Dest.     Netmask          Gateway        Interface   Metric\n0.0.0.0           0.0.0.0          192.168.1.1    192.168.1.100  25\n127.0.0.0         255.0.0.0        On-link        127.0.0.1   306\n192.168.1.0       255.255.255.0    On-link        192.168.1.100 281" },
+            { task: "Trace the route to 'mitadt.edu.in' showing all intermediate hops", cmd: 'tracert mitadt.edu.in', hint: "Windows: tracert  |  Linux: traceroute", out: "Tracing route to mitadt.edu.in [103.21.58.100]:\n  1    1ms   <1ms    192.168.1.1     [Local Gateway]\n  2    8ms    7ms    10.100.0.1      [ISP Edge]\n  3   15ms   14ms    203.88.32.1     [ISP Core Router]\n  4   22ms   21ms    103.21.58.100   [Destination]\n\nTrace complete." },
+            { task: "Show all active TCP/UDP network connections and listening ports", cmd: 'netstat -an', hint: "Syntax: netstat -an", out: "Active Connections\nProto  Local Address           Foreign Address       State\nTCP    0.0.0.0:80              0.0.0.0:0             LISTENING\nTCP    0.0.0.0:443             0.0.0.0:0             LISTENING\nTCP    192.168.1.100:52341     142.250.77.110:443    ESTABLISHED\nUDP    0.0.0.0:53              *:*" },
+            { task: "Display the ARP cache showing MAC-to-IP mappings", cmd: 'arp -a', hint: "Syntax: arp -a", out: "Interface: 192.168.1.100\n  Internet Address      Physical Address      Type\n  192.168.1.1           00-11-22-33-44-55     dynamic\n  192.168.1.255         ff-ff-ff-ff-ff-ff     static" },
+        ];
+        let lvl = 0, score = 0, timerInterval = null, timeLeft = 60;
+
         container.innerHTML = `
-            <div class="sim-toolbar"><div class="section-title" style="font-size:24px; margin:0;">Terminal Command Challenge</div></div>
-            <div class="sim-workspace" style="padding:40px; justify-content:center;">
-                <div class="theory-card" style="width:100%; max-width:700px;">
-                    <div id="cmdTask" style="margin-bottom:20px; font-weight:800; color:#2563eb;">Task: Check the reachability of '127.0.0.1'</div>
-                    <div class="terminal-area" style="height:300px; background:#000; border-radius:10px; overflow-y:auto; padding:20px; font-family:monospace;">
-                        <div id="cmdOutput">C:\\Users\\Student> _</div>
-                        <div style="display:flex; gap:10px; margin-top:10px;">
-                            <input type="text" id="cmdChallengeInput" class="sim-select" style="background:#000; color:#0f0; border:none; flex:1; outline:none;" placeholder="Type command here...">
+            <div class="sim-toolbar">
+                <div class="section-title" style="font-size:22px; margin:0; color:var(--primary);">Network Commands Challenge 🖥️</div>
+            </div>
+            <div class="sim-workspace" style="padding:20px; gap:20px; flex-direction:column; overflow-y:auto;">
+                <div style="display:flex; gap:20px; flex-wrap:wrap; width:100%;">
+                    <div class="theory-card" style="flex:1.5; min-width:300px; margin:0;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px;">
+                            <div>
+                                <div style="font-size:11px; color:var(--text-muted); font-weight:800;">LEVEL <span id="cmdLvlNum">1</span>/${levels.length}</div>
+                                <div style="font-size:22px; font-weight:800; color:var(--primary);">Score: <span id="cmdScore">0</span></div>
+                            </div>
+                            <div style="text-align:center; background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.3); border-radius:12px; padding:10px 18px;">
+                                <div style="font-size:10px; color:var(--text-muted);">TIME LEFT</div>
+                                <div id="cmdTimer" style="font-size:28px; font-weight:800; font-family:'JetBrains Mono', monospace; color:var(--danger);">60s</div>
+                            </div>
                         </div>
+                        <div style="padding:14px; background:rgba(245,158,11,0.07); border:1px solid rgba(245,158,11,0.3); border-radius:12px; margin-bottom:15px;">
+                            <div style="font-size:10px; color:var(--warning); font-weight:800; margin-bottom:6px;">📋 CURRENT TASK</div>
+                            <div id="cmdTask" style="font-size:14px; font-weight:600; line-height:1.5;"></div>
+                        </div>
+                        <div style="background:#0b0f19; border-radius:12px; border:1px solid var(--border); overflow:hidden;">
+                            <div style="background:#131824; padding:8px 14px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border);">
+                                <span style="font-size:11px; color:var(--text-muted);">MIT ADT VLab Terminal</span>
+                                <div style="display:flex; gap:5px;"><span style="width:8px;height:8px;background:#ef4444;border-radius:50%;display:inline-block;"></span><span style="width:8px;height:8px;background:#fbbf24;border-radius:50%;display:inline-block;"></span><span style="width:8px;height:8px;background:#10b981;border-radius:50%;display:inline-block;"></span></div>
+                            </div>
+                            <div id="cmdOutput" style="height:260px; overflow-y:auto; padding:14px; font-family:'JetBrains Mono', monospace; font-size:12px; color:#10b981; white-space:pre-wrap; line-height:1.6;"></div>
+                            <div style="display:flex; align-items:center; gap:8px; padding:10px 14px; border-top:1px solid rgba(255,255,255,0.05); background:#0e1420;">
+                                <span style="color:#a855f7; font-weight:800; font-family:'JetBrains Mono', monospace; font-size:12px; white-space:nowrap;">C:\\Users\\Student&gt;</span>
+                                <input type="text" id="cmdChallengeInput" style="flex:1; background:transparent; border:none; color:#10b981; outline:none; font-family:'JetBrains Mono', monospace; font-size:12px;" placeholder="Type the correct command and press Enter..." autocomplete="off">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="theory-card" style="flex:1; min-width:220px; margin:0; display:flex; flex-direction:column; gap:10px;">
+                        <h3 style="color:var(--primary); margin:0;">Quick Reference 📚</h3>
+                        <div style="display:flex; flex-direction:column; gap:8px; flex:1; overflow-y:auto;">
+                            ${[['ping &lt;IP&gt;','Test host reachability'],['ipconfig','Show IP config (Windows)'],['ifconfig','Show interfaces (Linux)'],['nslookup &lt;host&gt;','DNS lookup'],['tracert &lt;host&gt;','Trace route (Windows)'],['netstat -an','Show all connections'],['route print','Display routing table'],['arp -a','Display ARP cache']].map(([cmd,desc])=>`
+                            <div style="padding:8px 12px; background:var(--bg-page); border:1px solid var(--border); border-radius:8px; cursor:pointer;" onclick="document.getElementById('cmdChallengeInput').value='${cmd.replace(/&lt;/g,'<').replace(/&gt;/g,'>')}'; document.getElementById('cmdChallengeInput').focus();">
+                                <code style="color:var(--primary); font-size:11px;">${cmd}</code>
+                                <div style="font-size:10px; color:var(--text-muted); margin-top:2px;">${desc}</div>
+                            </div>`).join('')}
+                        </div>
+                        <button id="cmdHintBtn" class="btn-sim" style="margin-top:4px;">💡 Show Hint (−5 pts)</button>
+                        <div id="cmdWinBanner" style="display:none; padding:12px; background:rgba(16,185,129,0.1); border:1px solid var(--success); border-radius:10px; text-align:center; font-weight:800; color:var(--success); font-size:13px;"></div>
                     </div>
                 </div>
             </div>
         `;
-        const input = document.getElementById('cmdChallengeInput');
-        const output = document.getElementById('cmdOutput');
-        input.onkeydown = (e) => {
-            if (e.key === 'Enter') {
-                const cmd = input.value.trim().toLowerCase();
-                output.innerHTML += `<div>C:\\Users\\Student> ${cmd}</div>`;
-                if (cmd === 'ping 127.0.0.1') {
-                    output.innerHTML += `<div style="color:#0f0;">Pinging 127.0.0.1 with 32 bytes of data:<br>Reply from 127.0.0.1: bytes=32 time<1ms TTL=128<br>...Success! Task Completed.</div>`;
-                    document.getElementById('cmdTask').textContent = "Task: Display your current network configuration";
-                } else if (cmd === 'ipconfig') {
-                    output.innerHTML += `<div style="color:#0f0;">Ethernet adapter Ethernet:<br>   IPv4 Address. . . . . . . . . . . : 192.168.1.100<br>   Subnet Mask . . . . . . . . . . . : 255.255.255.0</div>`;
-                } else {
-                    output.innerHTML += `<div style="color:#f00;">'${cmd}' is not recognized as an internal or external command.</div>`;
+
+        const loadLevel = (idx) => {
+            const lv = levels[idx];
+            document.getElementById('cmdLvlNum').textContent = idx + 1;
+            document.getElementById('cmdTask').textContent = lv.task;
+            document.getElementById('cmdOutput').textContent = `MIT ADT VLab Terminal v2.0\n${'─'.repeat(38)}\nLevel ${idx + 1} of ${levels.length}: ${lv.task}\n\nC:\\Users\\Student> `;
+            clearInterval(timerInterval);
+            timeLeft = 60;
+            const timerEl = document.getElementById('cmdTimer');
+            timerEl.textContent = '60s';
+            timerEl.style.color = 'var(--danger)';
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                timerEl.textContent = timeLeft + 's';
+                if (timeLeft <= 10) timerEl.style.color = '#ef4444';
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    document.getElementById('cmdOutput').textContent += `\n\n⏰ TIME'S UP! Correct answer was: ${lv.cmd}\n\nC:\\Users\\Student> `;
+                    setTimeout(() => { if (lvl < levels.length - 1) { lvl++; loadLevel(lvl); } }, 2000);
                 }
-                input.value = '';
+            }, 1000);
+        };
+
+        loadLevel(0);
+
+        const otherCmds = {
+            'ipconfig': 'Windows IP Configuration\n   IPv4 Address: 192.168.1.100\n   Subnet Mask:  255.255.255.0\n   Gateway:      192.168.1.1',
+            'ifconfig': 'eth0: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>\n     inet 192.168.1.100 netmask 255.255.255.0',
+            'arp -a': 'Interface: 192.168.1.100\n  192.168.1.1     00-11-22-33-44-55  dynamic\n  192.168.1.255   ff-ff-ff-ff-ff-ff  static',
+            'netstat -an': 'Active Connections\n  TCP  0.0.0.0:80    LISTENING\n  TCP  0.0.0.0:443   LISTENING',
+        };
+
+        document.getElementById('cmdChallengeInput').onkeydown = (e) => {
+            if (e.key !== 'Enter') return;
+            const input = document.getElementById('cmdChallengeInput');
+            const output = document.getElementById('cmdOutput');
+            const cmd = input.value.trim();
+            input.value = '';
+            if (!cmd) return;
+            const lv = levels[lvl];
+            output.textContent += `${cmd}\n`;
+            if (cmd.toLowerCase() === lv.cmd.toLowerCase()) {
+                clearInterval(timerInterval);
+                const pts = Math.max(10, timeLeft);
+                score += pts;
+                document.getElementById('cmdScore').textContent = score;
+                output.textContent += `\n${lv.out}\n\n✅ CORRECT! +${pts} points (${timeLeft}s remaining)\n\nC:\\Users\\Student> `;
                 output.scrollTop = output.scrollHeight;
+                setTimeout(() => {
+                    if (lvl < levels.length - 1) { lvl++; loadLevel(lvl); }
+                    else {
+                        clearInterval(timerInterval);
+                        const banner = document.getElementById('cmdWinBanner');
+                        banner.style.display = 'block';
+                        banner.textContent = `🏆 Challenge Complete! Final Score: ${score}/${levels.length * 60}`;
+                    }
+                }, 2200);
+            } else {
+                const known = otherCmds[cmd.toLowerCase()];
+                if (known) output.textContent += `\n${known}\n\nC:\\Users\\Student> `;
+                else output.textContent += `\n'${cmd}' — not the right command for this task. Try again!\n\nC:\\Users\\Student> `;
             }
+            output.scrollTop = output.scrollHeight;
+        };
+
+        document.getElementById('cmdHintBtn').onclick = () => {
+            score = Math.max(0, score - 5);
+            document.getElementById('cmdScore').textContent = score;
+            const out = document.getElementById('cmdOutput');
+            out.textContent += `\n💡 HINT: ${levels[lvl].hint}\n\nC:\\Users\\Student> `;
+            out.scrollTop = out.scrollHeight;
         };
     };
 
     const initMediaStudy = (container) => {
+        const media = [
+            { name:'UTP Cat6', color:'#3b82f6', icon:'🔵', speed:'10 Gbps', dist:'100m', freq:'250 MHz', imp:'100Ω', pro:'Affordable, easy to install, widely used in LAN', con:'Susceptible to EMI, limited distance' },
+            { name:'STP Cat7', color:'#8b5cf6', icon:'🟣', speed:'10 Gbps', dist:'100m', freq:'600 MHz', imp:'100Ω', pro:'Better shielding than UTP, lower crosstalk', con:'More expensive, thicker and harder to route' },
+            { name:'Coaxial', color:'#f59e0b', icon:'🟡', speed:'10 Mbps', dist:'500m', freq:'~1 GHz', imp:'50/75Ω', pro:'Long distance, good noise immunity, used in cable TV', con:'Bulky, difficult termination, replaced by fiber' },
+            { name:'Fiber (SMF)', color:'#10b981', icon:'🟢', speed:'100+ Gbps', dist:'80km+', freq:'200+ THz', imp:'N/A', pro:'Highest bandwidth, immune to EMI, long distances', con:'Expensive splicing, fragile, costly equipment' },
+            { name:'Fiber (MMF)', color:'#06b6d4', icon:'🔷', speed:'10 Gbps', dist:'550m', freq:'200+ THz', imp:'N/A', pro:'Cheaper than SMF, easier to connect', con:'Modal dispersion limits bandwidth over distance' },
+            { name:'Wi-Fi 6 (Radio)', color:'#ec4899', icon:'📡', speed:'9.6 Gbps', dist:'~150m', freq:'2.4/5/6 GHz', imp:'N/A', pro:'No cables, mobile, covers large areas', con:'Interference, security concerns, shared medium' },
+        ];
+        let selectedIdx = 0;
+        const wiring = [
+            { name:'T568A', colors:['W/Green','Green','W/Orange','Blue','W/Blue','Orange','W/Brown','Brown'] },
+            { name:'T568B', colors:['W/Orange','Orange','W/Green','Blue','W/Blue','Green','W/Brown','Brown'] },
+        ];
+        const pinColors = { 'W/Green':'#d4fce8', 'Green':'#10b981', 'W/Orange':'#fde8d0', 'Orange':'#f97316', 'Blue':'#3b82f6', 'W/Blue':'#bfdbfe', 'W/Brown':'#ede0d4', 'Brown':'#92400e' };
+
+        const renderMedia = (idx) => {
+            const m = media[idx];
+            document.getElementById('mediaDetail').innerHTML = `
+                <div style="display:flex; align-items:center; gap:15px; margin-bottom:18px;">
+                    <div style="width:50px; height:50px; border-radius:50%; background:${m.color}22; border:2px solid ${m.color}; display:flex; align-items:center; justify-content:center; font-size:24px;">${m.icon}</div>
+                    <div><div style="font-size:18px; font-weight:800; color:${m.color};">${m.name}</div><div style="font-size:11px; color:var(--text-muted);">Physical Layer Transmission Medium</div></div>
+                </div>
+                <div style="display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin-bottom:15px; font-size:12px;">
+                    <div style="padding:10px; background:var(--bg-page); border-radius:8px; border-left:3px solid ${m.color};"><div style="color:var(--text-muted); font-weight:800; font-size:10px;">MAX SPEED</div><div style="font-weight:800; color:${m.color}; margin-top:4px;">${m.speed}</div></div>
+                    <div style="padding:10px; background:var(--bg-page); border-radius:8px; border-left:3px solid ${m.color};"><div style="color:var(--text-muted); font-weight:800; font-size:10px;">MAX DISTANCE</div><div style="font-weight:800; color:${m.color}; margin-top:4px;">${m.dist}</div></div>
+                    <div style="padding:10px; background:var(--bg-page); border-radius:8px; border-left:3px solid ${m.color};"><div style="color:var(--text-muted); font-weight:800; font-size:10px;">BANDWIDTH / FREQ</div><div style="font-weight:800; color:${m.color}; margin-top:4px;">${m.freq}</div></div>
+                    <div style="padding:10px; background:var(--bg-page); border-radius:8px; border-left:3px solid ${m.color};"><div style="color:var(--text-muted); font-weight:800; font-size:10px;">IMPEDANCE</div><div style="font-weight:800; color:${m.color}; margin-top:4px;">${m.imp}</div></div>
+                </div>
+                <div style="padding:10px; background:rgba(16,185,129,0.05); border-radius:8px; font-size:12px; margin-bottom:8px;"><b style="color:var(--success);">✅ Pros:</b> ${m.pro}</div>
+                <div style="padding:10px; background:rgba(239,68,68,0.05); border-radius:8px; font-size:12px;"><b style="color:var(--danger);">❌ Cons:</b> ${m.con}</div>
+            `;
+        };
+
         container.innerHTML = `
-            <div class="sim-toolbar"><div class="section-title" style="font-size:24px; margin:0;">Physical Layer Hardware Study</div></div>
-            <div class="sim-workspace" style="padding:40px; gap:30px; overflow-y:auto; justify-content:center; align-items:flex-start;">
-                <div class="theory-card" style="flex:1; min-width:280px; transition:transform 0.3s; cursor:pointer;" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
-                    <div style="background: linear-gradient(135deg, #3b82f6, #2563eb); padding:30px; border-radius:12px; margin-bottom:20px; display:flex; justify-content:center;">
-                        <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M12 2v20M2 12h20M5.5 5.5l13 13M18.5 5.5l-13 13"/></svg>
+            <div class="sim-toolbar"><div class="section-title" style="font-size:22px; margin:0; color:var(--primary);">Physical Layer & Transmission Media Study</div></div>
+            <div class="sim-workspace" style="flex-direction:column; padding:20px; gap:20px; overflow-y:auto;">
+                <div style="display:flex; gap:20px; flex-wrap:wrap; width:100%;">
+                    <div class="theory-card" style="flex:1; min-width:260px; margin:0;">
+                        <h3 style="color:var(--primary); margin-bottom:15px;">Select Medium</h3>
+                        <div style="display:flex; flex-direction:column; gap:8px;" id="mediaList">
+                            ${media.map((m,i)=>`<div onclick="document.getElementById('mediaList').querySelectorAll('.media-item').forEach(el=>el.style.borderColor='var(--border)'); this.style.borderColor='${m.color}'; document.querySelector('[data-render-media]').dataset.renderMedia='${i}';" class="media-item" style="padding:12px; background:var(--bg-page); border:1px solid var(--border); border-radius:10px; cursor:pointer; display:flex; align-items:center; gap:10px; transition:border-color 0.2s;"
+                                ><span style="font-size:20px;">${m.icon}</span><div><div style="font-weight:800; font-size:13px;">${m.name}</div><div style="font-size:10px; color:var(--text-muted);">${m.speed} · ${m.dist}</div></div></div>`).join('')}
+                        </div>
                     </div>
-                    <h3 style="color:var(--primary); margin-bottom:10px;">UTP (Category 6)</h3>
-                    <p style="font-size:13px; line-height:1.6; color:var(--text-muted);">Unshielded Twisted Pair. Uses differential signaling to cancel electromagnetic interference. Supports 10Gbps up to 55 meters.</p>
-                    <ul style="font-size:12px; margin-top:15px; color:var(--primary); font-weight:700;">
-                        <li>• Max Distance: 100m</li>
-                        <li>• Bandwidth: 250 MHz</li>
-                        <li>• Impedance: 100 Ohms</li>
-                    </ul>
-                </div>
-                <div class="theory-card" style="flex:1; min-width:280px; transition:transform 0.3s; cursor:pointer;" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
-                    <div style="background: linear-gradient(135deg, #f59e0b, #d97706); padding:30px; border-radius:12px; margin-bottom:20px; display:flex; justify-content:center;">
-                        <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2v20M2 12h20"/></svg>
+                    <div class="theory-card" style="flex:2; min-width:300px; margin:0;" id="mediaDetail" data-render-media="0">
                     </div>
-                    <h3 style="color:#d97706; margin-bottom:10px;">Fiber Optic (Single-Mode)</h3>
-                    <p style="font-size:13px; line-height:1.6; color:var(--text-muted);">Transmits data as light pulses through a glass core. Immune to EMI and supports extremely high bandwidth over long distances.</p>
-                    <ul style="font-size:12px; margin-top:15px; color:#d97706; font-weight:700;">
-                        <li>• Max Distance: 40km+</li>
-                        <li>• Light Source: Laser</li>
-                        <li>• Core Diameter: 9 Microns</li>
-                    </ul>
                 </div>
-                <div class="theory-card" style="flex:1; min-width:280px; transition:transform 0.3s; cursor:pointer;" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
-                    <div style="background: linear-gradient(135deg, #10b981, #059669); padding:30px; border-radius:12px; margin-bottom:20px; display:flex; justify-content:center;">
-                        <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M18 10h.01M15 10h.01M12 10h.01M9 10h.01"/></svg>
+                <div class="theory-card" style="width:100%; margin:0;">
+                    <h3 style="color:var(--primary); margin-bottom:15px;">RJ-45 Wiring Standards: T568A vs T568B</h3>
+                    <div style="display:flex; gap:20px; flex-wrap:wrap;">
+                        ${wiring.map(w=>`<div style="flex:1; min-width:200px;">
+                            <div style="font-weight:800; color:var(--primary); margin-bottom:10px;">${w.name}</div>
+                            <div style="display:flex; gap:4px; align-items:flex-end; height:80px;">
+                                ${w.colors.map((c,i)=>`<div style="display:flex; flex-direction:column; align-items:center; gap:3px; flex:1;">
+                                    <div style="font-size:8px; color:var(--text-muted); writing-mode:vertical-rl; transform:rotate(180deg); white-space:nowrap;">${c}</div>
+                                    <div style="flex:1; width:100%; background:${pinColors[c]||'#888'}; border-radius:2px 2px 0 0; min-height:30px; border:1px solid rgba(255,255,255,0.1);"></div>
+                                    <div style="font-size:9px; font-weight:800; color:var(--text-muted);">${i+1}</div>
+                                </div>`).join('')}
+                            </div>
+                        </div>`).join('<div style="padding:10px; display:flex; align-items:center; font-weight:800; color:var(--text-muted);">VS</div>')}
                     </div>
-                    <h3 style="color:#059669; margin-bottom:10px;">RJ-45 Connector</h3>
-                    <p style="font-size:13px; line-height:1.6; color:var(--text-muted);">Standard 8P8C connector used for Ethernet cabling. Follows T568A or T568B wiring standards for pinout configuration.</p>
-                    <ul style="font-size:12px; margin-top:15px; color:#059669; font-weight:700;">
-                        <li>• Pins: 8</li>
-                        <li>• Material: Polycarbonate</li>
-                        <li>• Standard: IEC 60603-7</li>
-                    </ul>
+                    <div style="margin-top:15px; padding:12px; background:rgba(37,99,235,0.05); border-radius:10px; font-size:12px; line-height:1.6;">
+                        <b style="color:var(--primary);">Straight-Through:</b> Both ends use same standard (T568B↔T568B). Used: PC→Switch, Switch→Router.<br>
+                        <b style="color:var(--warning);">Crossover:</b> One end T568A, other T568B. Used: PC↔PC, Switch↔Switch, Router↔Router (same device type).<br>
+                        <b style="color:var(--success);">Modern Note:</b> Auto-MDI/MDIX ports on modern switches detect and swap automatically.
+                    </div>
                 </div>
-                <div class="theory-card" style="width:100%; margin-top:20px; border:2px dashed var(--primary); text-align:center;">
-                    <h3 style="color:var(--primary); margin-bottom:10px;">Interactive Challenge: Straight vs Crossover</h3>
-                    <p style="font-size:14px; margin-bottom:15px;">Which cable connects a <b>Router</b> to a <b>PC</b>?</p>
-                    <div style="display:flex; justify-content:center; gap:20px;">
-                        <button class="btn-sim" onclick="alert('Correct! Router to PC requires a Crossover cable (Different Layers, but Routers and PCs are both MDI devices).')">Crossover</button>
-                        <button class="btn-sim" onclick="alert('Incorrect. Router and PC are both MDI (pin 1,2 TX), so they need a crossover to align TX to RX.')">Straight-Through</button>
+                <div class="theory-card" style="width:100%; margin:0;">
+                    <h3 style="color:var(--primary); margin-bottom:12px;">Cable Type Quick Quiz 🎯</h3>
+                    <div style="display:flex; gap:10px; flex-wrap:wrap;" id="cableQuiz">
+                        ${[
+                            { q:'PC → Switch', correct:'Straight-Through', opts:['Straight-Through','Crossover','Rollover'] },
+                            { q:'Router → Router', correct:'Crossover', opts:['Straight-Through','Crossover','Rollover'] },
+                            { q:'PC → Router (Console)', correct:'Rollover', opts:['Straight-Through','Crossover','Rollover'] },
+                            { q:'Switch → Switch', correct:'Crossover', opts:['Straight-Through','Crossover','Rollover'] },
+                        ].map((q,qi)=>`<div class="theory-card" style="flex:1; min-width:180px; margin:0; padding:12px;">
+                            <div style="font-size:12px; font-weight:800; color:var(--primary); margin-bottom:10px;">${q.q}</div>
+                            ${q.opts.map(o=>`<button class="btn-sim" style="display:block; width:100%; margin-bottom:5px; font-size:11px; text-align:left; padding:6px 10px;" onclick="(function(btn,correct,container){
+                                container.querySelectorAll('.btn-sim').forEach(b=>b.style.borderColor='');
+                                if(btn.textContent.trim()===correct){btn.style.borderColor='var(--success)';btn.style.color='var(--success)';}
+                                else{btn.style.borderColor='var(--danger)';btn.style.color='var(--danger)'; container.querySelectorAll('.btn-sim').forEach(b=>{if(b.textContent.trim()===correct){b.style.borderColor='var(--success)';b.style.color='var(--success)';}});}
+                            })(this,'${q.correct}',this.parentElement);">${o}</button>`).join('')}
+                        </div>`).join('')}
                     </div>
                 </div>
             </div>
         `;
+
+        // Wire up media selection
+        const mediaDetail = document.getElementById('mediaDetail');
+        renderMedia(0);
+        const mediaItems = document.querySelectorAll('.media-item');
+        mediaItems[0].style.borderColor = media[0].color;
+
+        const obs = new MutationObserver(() => {
+            const idx = parseInt(mediaDetail.dataset.renderMedia);
+            renderMedia(idx);
+            mediaItems.forEach((el, i) => el.style.borderColor = i === idx ? media[i].color : 'var(--border)');
+        });
+        obs.observe(mediaDetail, { attributes: true, attributeFilter: ['data-render-media'] });
     };
+
 
     // --- OPERATING SYSTEMS SIMULATORS ---
     const initCpuSchedulingSim = (container) => {
+        const COLORS = ['#2563eb','#10b981','#f59e0b','#ef4444','#8b5cf6','#06b6d4','#ec4899','#84cc16'];
+        const algoInfoMap = {
+            fcfs: '<b>FCFS:</b> Processes run in arrival order. Non-preemptive. Simple but can cause convoy effect.',
+            sjf: '<b>SJF:</b> Picks the shortest burst time. Non-preemptive. Optimal avg waiting time.',
+            srtf: '<b>SRTF:</b> Preemptive SJF. Interrupts running process if a new shorter one arrives.',
+            rr: '<b>Round Robin:</b> Each process gets a fixed time quantum. Fair, set quantum below.',
+            priority: '<b>Priority:</b> Lower number = higher priority. Non-preemptive.',
+        };
         container.innerHTML = `
             <div class="sim-toolbar">
                 <div class="section-title" style="font-size:22px; margin:0; color:var(--primary);">CPU Scheduling Visualizer</div>
@@ -3407,97 +3659,96 @@ document.addEventListener('DOMContentLoaded', async () => {
             <div class="sim-workspace" style="padding:20px; gap:20px; flex-direction:column; overflow-y:auto;">
                 <div style="display:flex; gap:20px; flex-wrap:wrap; width:100%;">
                     <div class="theory-card" style="flex:1.5; min-width:300px; margin:0;">
-                        <h3 style="color:var(--primary); margin-bottom:15px; display:flex; justify-content:space-between; align-items:center;">
-                            <span>Processes Configuration</span>
-                            <span style="font-size:12px; font-weight:normal; color:var(--text-muted);">Configure ready queue processes</span>
-                        </h3>
+                        <h3 style="color:var(--primary); margin-bottom:15px;">Processes Configuration</h3>
                         <table class="sim-table" style="width:100%; border-collapse:collapse; margin-bottom:15px; text-align:left;">
                             <thead>
                                 <tr style="border-bottom:2px solid var(--border);">
                                     <th style="padding:8px;">PID</th>
-                                    <th style="padding:8px;">Arrival Time (AT)</th>
-                                    <th style="padding:8px;">Burst Time (BT)</th>
-                                    <th style="padding:8px;">Action</th>
+                                    <th style="padding:8px;">Arrival (AT)</th>
+                                    <th style="padding:8px;">Burst (BT)</th>
+                                    <th style="padding:8px; display:none;" id="priorityHeader">Priority</th>
+                                    <th style="padding:8px;">✕</th>
                                 </tr>
                             </thead>
                             <tbody id="cpuProcessRows">
                                 <tr style="border-bottom:1px solid var(--border);">
-                                    <td style="padding:8px; font-weight:bold;">P1</td>
-                                    <td style="padding:8px;"><input type="number" class="sim-select" style="width:80px;" value="0" min="0" id="at-P1"></td>
-                                    <td style="padding:8px;"><input type="number" class="sim-select" style="width:80px;" value="4" min="1" id="bt-P1"></td>
-                                    <td style="padding:8px;"><button class="btn-sim" style="padding:4px 8px; font-size:11px;" onclick="this.closest('tr').remove();">Delete</button></td>
+                                    <td style="padding:8px; font-weight:bold; color:#2563eb;">P1</td>
+                                    <td style="padding:8px;"><input type="number" class="sim-select" style="width:70px;" value="0" min="0" id="at-P1"></td>
+                                    <td style="padding:8px;"><input type="number" class="sim-select" style="width:70px;" value="4" min="1" id="bt-P1"></td>
+                                    <td style="padding:8px; display:none;" class="priority-col"><input type="number" class="sim-select" style="width:60px;" value="2" min="1" id="pr-P1"></td>
+                                    <td style="padding:8px;"><button class="btn-sim" style="padding:3px 8px; font-size:11px;" onclick="this.closest('tr').remove();">✕</button></td>
                                 </tr>
                                 <tr style="border-bottom:1px solid var(--border);">
-                                    <td style="padding:8px; font-weight:bold;">P2</td>
-                                    <td style="padding:8px;"><input type="number" class="sim-select" style="width:80px;" value="1" min="0" id="at-P2"></td>
-                                    <td style="padding:8px;"><input type="number" class="sim-select" style="width:80px;" value="3" min="1" id="bt-P2"></td>
-                                    <td style="padding:8px;"><button class="btn-sim" style="padding:4px 8px; font-size:11px;" onclick="this.closest('tr').remove();">Delete</button></td>
+                                    <td style="padding:8px; font-weight:bold; color:#10b981;">P2</td>
+                                    <td style="padding:8px;"><input type="number" class="sim-select" style="width:70px;" value="1" min="0" id="at-P2"></td>
+                                    <td style="padding:8px;"><input type="number" class="sim-select" style="width:70px;" value="3" min="1" id="bt-P2"></td>
+                                    <td style="padding:8px; display:none;" class="priority-col"><input type="number" class="sim-select" style="width:60px;" value="1" min="1" id="pr-P2"></td>
+                                    <td style="padding:8px;"><button class="btn-sim" style="padding:3px 8px; font-size:11px;" onclick="this.closest('tr').remove();">✕</button></td>
                                 </tr>
                                 <tr style="border-bottom:1px solid var(--border);">
-                                    <td style="padding:8px; font-weight:bold;">P3</td>
-                                    <td style="padding:8px;"><input type="number" class="sim-select" style="width:80px;" value="2" min="0" id="at-P3"></td>
-                                    <td style="padding:8px;"><input type="number" class="sim-select" style="width:80px;" value="1" min="1" id="bt-P3"></td>
-                                    <td style="padding:8px;"><button class="btn-sim" style="padding:4px 8px; font-size:11px;" onclick="this.closest('tr').remove();">Delete</button></td>
+                                    <td style="padding:8px; font-weight:bold; color:#f59e0b;">P3</td>
+                                    <td style="padding:8px;"><input type="number" class="sim-select" style="width:70px;" value="2" min="0" id="at-P3"></td>
+                                    <td style="padding:8px;"><input type="number" class="sim-select" style="width:70px;" value="1" min="1" id="bt-P3"></td>
+                                    <td style="padding:8px; display:none;" class="priority-col"><input type="number" class="sim-select" style="width:60px;" value="3" min="1" id="pr-P3"></td>
+                                    <td style="padding:8px;"><button class="btn-sim" style="padding:3px 8px; font-size:11px;" onclick="this.closest('tr').remove();">✕</button></td>
                                 </tr>
                             </tbody>
                         </table>
                         <div style="display:flex; gap:10px;">
                             <button id="btnAddProcess" class="btn-sim" style="flex:1;">+ Add Process</button>
-                            <button id="btnRunCpuSim" class="btn-sim primary" style="flex:1;">Run Scheduler</button>
+                            <button id="btnRunCpuSim" class="btn-sim primary" style="flex:1;">▶ Run Scheduler</button>
                         </div>
                     </div>
-                    
                     <div class="theory-card" style="flex:1; min-width:250px; margin:0;">
                         <h3 style="color:var(--primary); margin-bottom:15px;">Algorithm Settings</h3>
                         <div style="margin-bottom:15px;">
                             <label style="display:block; margin-bottom:5px; font-size:12px; font-weight:800;">Scheduling Algorithm:</label>
                             <select id="cpuAlgoSelect" class="sim-select" style="width:100%;">
                                 <option value="fcfs">First-Come, First-Served (FCFS)</option>
-                                <option value="sjf">Shortest Job First (SJF)</option>
-                                <option value="rr">Round Robin (RR)</option>
+                                <option value="sjf">Shortest Job First (SJF) — Non-Preemptive</option>
+                                <option value="srtf">Shortest Remaining Time (SRTF) — Preemptive</option>
+                                <option value="rr">Round Robin (RR) — Preemptive</option>
+                                <option value="priority">Priority Scheduling — Non-Preemptive</option>
                             </select>
                         </div>
                         <div style="margin-bottom:15px; display:none;" id="quantumContainer">
                             <label style="display:block; margin-bottom:5px; font-size:12px; font-weight:800;">Time Quantum:</label>
                             <input type="number" id="cpuQuantum" class="sim-select" style="width:100%;" value="2" min="1">
                         </div>
-                        <div style="padding:15px; background:rgba(168,85,247,0.05); border:1px solid var(--border); border-radius:12px; font-size:12px; line-height:1.5;">
-                            <b>Convoy Effect:</b> When short processes wait behind long ones (FCFS).<br>
-                            <b>SJF Optimal:</b> SJF is mathematically optimal for minimizing average waiting times.
+                        <div style="padding:12px; background:rgba(168,85,247,0.05); border:1px solid var(--border); border-radius:10px; font-size:11px; line-height:1.6;" id="algoInfo">
+                            <b>FCFS:</b> Processes run in arrival order. Non-preemptive. Simple but can cause convoy effect.
                         </div>
                     </div>
                 </div>
-
                 <div class="theory-card" id="cpuResultsPanel" style="width:100%; margin:0; display:none; animation: fadeIn 0.4s;">
                     <h3 style="color:var(--success); margin-bottom:15px;">Execution Gantt Chart</h3>
-                    <div id="ganttChartContainer" style="display:flex; align-items:center; background:var(--bg-page); border:1px solid var(--border); border-radius:12px; height:80px; overflow-x:auto; margin-bottom:20px; padding:10px; position:relative;">
-                        <!-- Gantt blocks injected dynamically -->
-                    </div>
-                    
+                    <div id="ganttChartContainer" style="display:flex; align-items:center; background:var(--bg-page); border:1px solid var(--border); border-radius:12px; height:80px; overflow-x:auto; margin-bottom:20px; padding:10px; gap:1px;"></div>
                     <h3 style="color:var(--primary); margin-bottom:15px;">Detailed Analysis Matrix</h3>
-                    <table class="sim-table" style="width:100%; border-collapse:collapse; text-align:left; font-family:var(--font-mono); font-size:13px; margin-bottom:20px;">
+                    <table class="sim-table" style="width:100%; border-collapse:collapse; text-align:left; font-family:'JetBrains Mono', monospace; font-size:13px; margin-bottom:20px;">
                         <thead>
                             <tr style="border-bottom:2px solid var(--border);">
-                                <th style="padding:8px;">PID</th>
-                                <th style="padding:8px;">Arrival (AT)</th>
-                                <th style="padding:8px;">Burst (BT)</th>
-                                <th style="padding:8px;">Completion (CT)</th>
-                                <th style="padding:8px;">Turnaround (TAT)</th>
-                                <th style="padding:8px;">Waiting (WT)</th>
+                                <th style="padding:8px;">PID</th><th style="padding:8px;">AT</th><th style="padding:8px;">BT</th>
+                                <th style="padding:8px;">CT</th><th style="padding:8px;">TAT</th><th style="padding:8px;">WT</th><th style="padding:8px;">RT</th>
                             </tr>
                         </thead>
-                        <tbody id="cpuAnalysisRows">
-                        </tbody>
+                        <tbody id="cpuAnalysisRows"></tbody>
                     </table>
-                    
-                    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:15px;">
+                    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap:12px;">
                         <div style="padding:15px; background:rgba(37,99,235,0.05); border:1px solid rgba(37,99,235,0.2); border-radius:10px; text-align:center;">
-                            <div style="font-size:12px; color:var(--text-muted); font-weight:800; text-transform:uppercase;">Average Turnaround Time</div>
-                            <div id="cpuAvgTAT" style="font-size:24px; font-weight:800; color:var(--primary); margin-top:5px;">0.00</div>
+                            <div style="font-size:11px; color:var(--text-muted); font-weight:800;">AVG TURNAROUND</div>
+                            <div id="cpuAvgTAT" style="font-size:22px; font-weight:800; color:var(--primary); margin-top:5px;">0.00</div>
                         </div>
                         <div style="padding:15px; background:rgba(16,185,129,0.05); border:1px solid rgba(16,185,129,0.2); border-radius:10px; text-align:center;">
-                            <div style="font-size:12px; color:var(--text-muted); font-weight:800; text-transform:uppercase;">Average Waiting Time</div>
-                            <div id="cpuAvgWT" style="font-size:24px; font-weight:800; color:var(--success); margin-top:5px;">0.00</div>
+                            <div style="font-size:11px; color:var(--text-muted); font-weight:800;">AVG WAITING</div>
+                            <div id="cpuAvgWT" style="font-size:22px; font-weight:800; color:var(--success); margin-top:5px;">0.00</div>
+                        </div>
+                        <div style="padding:15px; background:rgba(245,158,11,0.05); border:1px solid rgba(245,158,11,0.2); border-radius:10px; text-align:center;">
+                            <div style="font-size:11px; color:var(--text-muted); font-weight:800;">AVG RESPONSE</div>
+                            <div id="cpuAvgRT" style="font-size:22px; font-weight:800; color:var(--warning); margin-top:5px;">0.00</div>
+                        </div>
+                        <div style="padding:15px; background:rgba(168,85,247,0.05); border:1px solid rgba(168,85,247,0.2); border-radius:10px; text-align:center;">
+                            <div style="font-size:11px; color:var(--text-muted); font-weight:800;">CPU UTILIZATION</div>
+                            <div id="cpuUtil" style="font-size:22px; font-weight:800; color:#a855f7; margin-top:5px;">0%</div>
                         </div>
                     </div>
                 </div>
@@ -3512,196 +3763,148 @@ document.addEventListener('DOMContentLoaded', async () => {
         let procCounter = 3;
 
         cpuAlgoSelect.addEventListener('change', () => {
-            quantumContainer.style.display = cpuAlgoSelect.value === 'rr' ? 'block' : 'none';
+            const val = cpuAlgoSelect.value;
+            quantumContainer.style.display = val === 'rr' ? 'block' : 'none';
+            document.getElementById('algoInfo').innerHTML = algoInfoMap[val] || '';
+            const showP = val === 'priority';
+            document.getElementById('priorityHeader').style.display = showP ? '' : 'none';
+            document.querySelectorAll('.priority-col').forEach(el => el.style.display = showP ? '' : 'none');
         });
 
         btnAddProcess.addEventListener('click', () => {
             procCounter++;
+            const color = COLORS[(procCounter - 1) % COLORS.length];
+            const showP = cpuAlgoSelect.value === 'priority';
             const row = document.createElement('tr');
             row.style.borderBottom = '1px solid var(--border)';
             row.innerHTML = `
-                <td style="padding:8px; font-weight:bold;">P${procCounter}</td>
-                <td style="padding:8px;"><input type="number" class="sim-select" style="width:80px;" value="0" min="0" id="at-P${procCounter}"></td>
-                <td style="padding:8px;"><input type="number" class="sim-select" style="width:80px;" value="3" min="1" id="bt-P${procCounter}"></td>
-                <td style="padding:8px;"><button class="btn-sim" style="padding:4px 8px; font-size:11px;" onclick="this.closest('tr').remove();">Delete</button></td>
+                <td style="padding:8px; font-weight:bold; color:${color};">P${procCounter}</td>
+                <td style="padding:8px;"><input type="number" class="sim-select" style="width:70px;" value="0" min="0" id="at-P${procCounter}"></td>
+                <td style="padding:8px;"><input type="number" class="sim-select" style="width:70px;" value="3" min="1" id="bt-P${procCounter}"></td>
+                <td style="padding:8px; display:${showP ? '' : 'none'};" class="priority-col"><input type="number" class="sim-select" style="width:60px;" value="1" min="1" id="pr-P${procCounter}"></td>
+                <td style="padding:8px;"><button class="btn-sim" style="padding:3px 8px; font-size:11px;" onclick="this.closest('tr').remove();">✕</button></td>
             `;
             cpuProcessRows.appendChild(row);
         });
 
         btnRunCpuSim.addEventListener('click', () => {
             const processes = [];
-            const rows = cpuProcessRows.querySelectorAll('tr');
-            rows.forEach(row => {
-                const pid = row.cells[0].textContent;
-                const at = parseInt(row.querySelector(`[id^="at-"]`).value) || 0;
-                const bt = parseInt(row.querySelector(`[id^="bt-"]`).value) || 0;
-                processes.push({ pid, at, bt, tempBt: bt, ct: 0, tat: 0, wt: 0 });
+            cpuProcessRows.querySelectorAll('tr').forEach((row, i) => {
+                const pid = row.cells[0].textContent.trim();
+                const at = parseInt(row.querySelector('[id^="at-"]')?.value) || 0;
+                const bt = parseInt(row.querySelector('[id^="bt-"]')?.value) || 1;
+                const pr = parseInt(row.querySelector('[id^="pr-"]')?.value) || 1;
+                processes.push({ pid, at, bt, pr, color: COLORS[i % COLORS.length], ct: 0, tat: 0, wt: 0, rt: -1 });
             });
-
-            if (processes.length === 0) return alert("Please configure at least one process.");
+            if (!processes.length) return alert('Please configure at least one process.');
 
             const algo = cpuAlgoSelect.value;
             const gantt = [];
-            let currentTime = 0;
+            const n = processes.length;
+            let t = 0;
 
             if (algo === 'fcfs') {
                 processes.sort((a, b) => a.at - b.at);
                 processes.forEach(p => {
-                    if (currentTime < p.at) {
-                        gantt.push({ pid: 'Idle', start: currentTime, end: p.at });
-                        currentTime = p.at;
-                    }
-                    gantt.push({ pid: p.pid, start: currentTime, end: currentTime + p.bt });
-                    currentTime += p.bt;
-                    p.ct = currentTime;
-                    p.tat = p.ct - p.at;
-                    p.wt = p.tat - p.bt;
+                    if (t < p.at) { gantt.push({ pid: 'Idle', start: t, end: p.at, color: '#374151' }); t = p.at; }
+                    if (p.rt < 0) p.rt = t - p.at;
+                    gantt.push({ pid: p.pid, start: t, end: t + p.bt, color: p.color });
+                    t += p.bt; p.ct = t; p.tat = p.ct - p.at; p.wt = p.tat - p.bt;
                 });
             } else if (algo === 'sjf') {
-                // Non-preemptive Shortest Job First
-                let completed = 0;
-                const n = processes.length;
-                const isCompleted = new Array(n).fill(false);
-                
-                while (completed < n) {
-                    let minIdx = -1;
-                    let minBt = Infinity;
-                    
-                    for (let i = 0; i < n; i++) {
-                        if (processes[i].at <= currentTime && !isCompleted[i]) {
-                            if (processes[i].bt < minBt) {
-                                minBt = processes[i].bt;
-                                minIdx = i;
-                            }
-                        }
+                const done = new Array(n).fill(false); let comp = 0;
+                while (comp < n) {
+                    let mi = -1, mb = Infinity;
+                    for (let i = 0; i < n; i++) { if (!done[i] && processes[i].at <= t && processes[i].bt < mb) { mb = processes[i].bt; mi = i; } }
+                    if (mi < 0) { gantt.push({ pid: 'Idle', start: t, end: t + 1, color: '#374151' }); t++; }
+                    else {
+                        const p = processes[mi]; if (p.rt < 0) p.rt = t - p.at;
+                        gantt.push({ pid: p.pid, start: t, end: t + p.bt, color: p.color });
+                        t += p.bt; p.ct = t; p.tat = p.ct - p.at; p.wt = p.tat - p.bt; done[mi] = true; comp++;
                     }
-                    
-                    if (minIdx === -1) {
-                        gantt.push({ pid: 'Idle', start: currentTime, end: currentTime + 1 });
-                        currentTime++;
-                    } else {
-                        const p = processes[minIdx];
-                        gantt.push({ pid: p.pid, start: currentTime, end: currentTime + p.bt });
-                        currentTime += p.bt;
-                        p.ct = currentTime;
-                        p.tat = p.ct - p.at;
-                        p.wt = p.tat - p.bt;
-                        isCompleted[minIdx] = true;
-                        completed++;
-                    }
+                }
+            } else if (algo === 'srtf') {
+                const rem = processes.map(p => p.bt); const done = new Array(n).fill(false); let comp = 0;
+                while (comp < n) {
+                    let mi = -1, mr = Infinity;
+                    for (let i = 0; i < n; i++) { if (!done[i] && processes[i].at <= t && rem[i] < mr) { mr = rem[i]; mi = i; } }
+                    if (mi < 0) { gantt.push({ pid: 'Idle', start: t, end: t + 1, color: '#374151' }); t++; continue; }
+                    const p = processes[mi]; if (p.rt < 0) p.rt = t - p.at;
+                    if (gantt.length && gantt[gantt.length - 1].pid === p.pid) gantt[gantt.length - 1].end++;
+                    else gantt.push({ pid: p.pid, start: t, end: t + 1, color: p.color });
+                    rem[mi]--; t++;
+                    if (rem[mi] === 0) { done[mi] = true; comp++; p.ct = t; p.tat = p.ct - p.at; p.wt = p.tat - p.bt; }
                 }
             } else if (algo === 'rr') {
                 const quantum = parseInt(document.getElementById('cpuQuantum').value) || 2;
-                let queue = [];
-                processes.sort((a, b) => a.at - b.at);
-                let completed = 0;
-                const n = processes.length;
-                let isVisited = new Array(n).fill(false);
-                
-                currentTime = processes[0].at;
-                if (currentTime > 0) {
-                    gantt.push({ pid: 'Idle', start: 0, end: currentTime });
+                const rem = processes.map(p => p.bt); processes.sort((a, b) => a.at - b.at);
+                const vis = new Array(n).fill(false); const q = [0]; vis[0] = true;
+                t = processes[0].at; if (t > 0) gantt.push({ pid: 'Idle', start: 0, end: t, color: '#374151' });
+                let comp = 0;
+                while (comp < n) {
+                    if (!q.length) {
+                        const nx = Math.min(...processes.filter((_, i) => !vis[i]).map(p => p.at));
+                        gantt.push({ pid: 'Idle', start: t, end: nx, color: '#374151' }); t = nx;
+                        for (let i = 0; i < n; i++) { if (processes[i].at <= t && !vis[i]) { q.push(i); vis[i] = true; } }
+                    }
+                    const idx = q.shift(); const p = processes[idx];
+                    if (p.rt < 0) p.rt = t - p.at;
+                    const run = Math.min(rem[idx], quantum);
+                    gantt.push({ pid: p.pid, start: t, end: t + run, color: p.color }); t += run; rem[idx] -= run;
+                    for (let i = 0; i < n; i++) { if (processes[i].at <= t && !vis[i]) { q.push(i); vis[i] = true; } }
+                    if (rem[idx] > 0) q.push(idx);
+                    else { p.ct = t; p.tat = p.ct - p.at; p.wt = p.tat - p.bt; comp++; }
                 }
-                
-                queue.push(0);
-                isVisited[0] = true;
-                
-                while (completed < n) {
-                    if (queue.length === 0) {
-                        let nextArr = Infinity;
-                        for(let i=0; i<n; i++) {
-                            if(!isVisited[i] && processes[i].at < nextArr) {
-                                nextArr = processes[i].at;
-                            }
-                        }
-                        gantt.push({ pid: 'Idle', start: currentTime, end: nextArr });
-                        currentTime = nextArr;
-                        for(let i=0; i<n; i++) {
-                            if(processes[i].at <= currentTime && !isVisited[i]) {
-                                queue.push(i);
-                                isVisited[i] = true;
-                            }
-                        }
-                    }
-                    
-                    const idx = queue.shift();
-                    const p = processes[idx];
-                    const runTime = Math.min(p.tempBt, quantum);
-                    
-                    gantt.push({ pid: p.pid, start: currentTime, end: currentTime + runTime });
-                    currentTime += runTime;
-                    p.tempBt -= runTime;
-                    
-                    // Add newly arrived processes to queue
-                    for (let i = 0; i < n; i++) {
-                        if (processes[i].at <= currentTime && !isVisited[i] && processes[i].tempBt > 0) {
-                            queue.push(i);
-                            isVisited[i] = true;
-                        }
-                    }
-                    
-                    if (p.tempBt > 0) {
-                        queue.push(idx);
-                    } else {
-                        p.ct = currentTime;
-                        p.tat = p.ct - p.at;
-                        p.wt = p.tat - p.bt;
-                        completed++;
+            } else if (algo === 'priority') {
+                const done = new Array(n).fill(false); let comp = 0;
+                while (comp < n) {
+                    let mi = -1, mp = Infinity;
+                    for (let i = 0; i < n; i++) { if (!done[i] && processes[i].at <= t && processes[i].pr < mp) { mp = processes[i].pr; mi = i; } }
+                    if (mi < 0) { gantt.push({ pid: 'Idle', start: t, end: t + 1, color: '#374151' }); t++; }
+                    else {
+                        const p = processes[mi]; if (p.rt < 0) p.rt = t - p.at;
+                        gantt.push({ pid: p.pid, start: t, end: t + p.bt, color: p.color });
+                        t += p.bt; p.ct = t; p.tat = p.ct - p.at; p.wt = p.tat - p.bt; done[mi] = true; comp++;
                     }
                 }
             }
 
-            // Render Gantt
             const ganttBox = document.getElementById('ganttChartContainer');
             ganttBox.innerHTML = '';
-            const totalDuration = currentTime;
-            
             gantt.forEach(block => {
-                const percent = ((block.end - block.start) / totalDuration) * 100;
+                const pct = Math.max(((block.end - block.start) / t) * 100, 1.5);
                 const div = document.createElement('div');
-                const isIdle = block.pid === 'Idle';
-                div.style.width = `${percent}%`;
-                div.style.height = '100%';
-                div.style.background = isIdle ? '#475569' : (currentSubject === 'os' ? '#a855f7' : '#2563eb');
-                div.style.color = '#fff';
-                div.style.display = 'flex';
-                div.style.flexDirection = 'column';
-                div.style.alignItems = 'center';
-                div.style.justifyContent = 'center';
-                div.style.borderRight = '1px solid var(--border)';
-                div.style.flexShrink = '0';
-                div.innerHTML = `
-                    <span style="font-weight:bold; font-size:14px;">${block.pid}</span>
-                    <span style="font-size:10px; opacity:0.8;">${block.start}-${block.end}</span>
-                `;
+                div.style.cssText = `width:${pct}%; height:100%; background:${block.color}; color:#fff; display:flex; flex-direction:column; align-items:center; justify-content:center; border-radius:4px; flex-shrink:0; transition:transform 0.2s; cursor:default;`;
+                div.title = `${block.pid}: t=${block.start}→${block.end} (Δ=${block.end - block.start})`;
+                div.innerHTML = `<span style="font-weight:800; font-size:12px; white-space:nowrap; overflow:hidden; max-width:95%;">${block.pid}</span><span style="font-size:9px; opacity:0.8;">${block.start}→${block.end}</span>`;
+                div.onmouseenter = () => div.style.transform = 'scaleY(1.08)';
+                div.onmouseleave = () => div.style.transform = '';
                 ganttBox.appendChild(div);
             });
 
-            // Render table
-            const analysisRows = document.getElementById('cpuAnalysisRows');
-            analysisRows.innerHTML = '';
-            let sumTAT = 0, sumWT = 0;
-            
+            const tbody = document.getElementById('cpuAnalysisRows');
+            tbody.innerHTML = '';
+            let sTAT = 0, sWT = 0, sRT = 0, idle = 0;
+            gantt.forEach(b => { if (b.pid === 'Idle') idle += b.end - b.start; });
             processes.forEach(p => {
-                sumTAT += p.tat;
-                sumWT += p.wt;
-                analysisRows.innerHTML += `
-                    <tr style="border-bottom:1px solid var(--border);">
-                        <td style="padding:8px; font-weight:bold; color:var(--primary);">${p.pid}</td>
-                        <td style="padding:8px;">${p.at}</td>
-                        <td style="padding:8px;">${p.bt}</td>
-                        <td style="padding:8px;">${p.ct}</td>
-                        <td style="padding:8px;">${p.tat}</td>
-                        <td style="padding:8px;">${p.wt}</td>
-                    </tr>
-                `;
+                sTAT += p.tat; sWT += p.wt; sRT += Math.max(0, p.rt);
+                tbody.innerHTML += `<tr style="border-bottom:1px solid var(--border);">
+                    <td style="padding:8px; font-weight:bold; color:${p.color};">${p.pid}</td>
+                    <td style="padding:8px;">${p.at}</td><td style="padding:8px;">${p.bt}</td>
+                    <td style="padding:8px; color:var(--success);">${p.ct}</td>
+                    <td style="padding:8px; color:var(--primary);">${p.tat}</td>
+                    <td style="padding:8px; color:var(--warning);">${p.wt}</td>
+                    <td style="padding:8px; color:var(--danger);">${p.rt >= 0 ? p.rt : '-'}</td>
+                </tr>`;
             });
-
-            document.getElementById('cpuAvgTAT').textContent = (sumTAT / processes.length).toFixed(2);
-            document.getElementById('cpuAvgWT').textContent = (sumWT / processes.length).toFixed(2);
+            document.getElementById('cpuAvgTAT').textContent = (sTAT / n).toFixed(2);
+            document.getElementById('cpuAvgWT').textContent = (sWT / n).toFixed(2);
+            document.getElementById('cpuAvgRT').textContent = (sRT / n).toFixed(2);
+            document.getElementById('cpuUtil').textContent = (((t - idle) / t) * 100).toFixed(1) + '%';
             document.getElementById('cpuResultsPanel').style.display = 'block';
         });
     };
+
 
     const initProcessSyncSim = (container) => {
         container.innerHTML = `
@@ -3727,15 +3930,15 @@ document.addEventListener('DOMContentLoaded', async () => {
                         <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:20px;">
                             <div style="display:flex; justify-content:space-between; padding:10px; background:var(--bg-page); border:1px solid var(--border); border-radius:8px;">
                                 <span><b>Mutex (Mutual Exclusion):</b></span>
-                                <span id="syncMutex" style="font-family:var(--font-mono); font-weight:800; color:var(--success);">1</span>
+                                <span id="syncMutex" style="font-family:'JetBrains Mono', monospace; font-weight:800; color:var(--success);">1</span>
                             </div>
                             <div style="display:flex; justify-content:space-between; padding:10px; background:var(--bg-page); border:1px solid var(--border); border-radius:8px;">
                                 <span><b>Empty Slots Semaphore:</b></span>
-                                <span id="syncEmpty" style="font-family:var(--font-mono); font-weight:800; color:var(--primary);">5</span>
+                                <span id="syncEmpty" style="font-family:'JetBrains Mono', monospace; font-weight:800; color:var(--primary);">5</span>
                             </div>
                             <div style="display:flex; justify-content:space-between; padding:10px; background:var(--bg-page); border:1px solid var(--border); border-radius:8px;">
                                 <span><b>Full Slots Semaphore:</b></span>
-                                <span id="syncFull" style="font-family:var(--font-mono); font-weight:800; color:var(--warning);">0</span>
+                                <span id="syncFull" style="font-family:'JetBrains Mono', monospace; font-weight:800; color:var(--warning);">0</span>
                             </div>
                         </div>
                         <div style="padding:12px; background:rgba(16,185,129,0.05); border:1px solid var(--border); border-radius:10px; font-size:12px; line-height:1.4;">
@@ -3748,7 +3951,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 <div class="theory-card" style="width:100%; margin:0;">
                     <h3 style="color:var(--primary); margin-bottom:15px;">Pedagogical Operation Logger</h3>
-                    <div id="syncLog" style="height:150px; background:var(--bg-page); border:1px solid var(--border); border-radius:12px; padding:15px; font-family:var(--font-mono); font-size:12px; overflow-y:auto; color:var(--text-main); text-align:left;">
+                    <div id="syncLog" style="height:150px; background:var(--bg-page); border:1px solid var(--border); border-radius:12px; padding:15px; font-family:'JetBrains Mono', monospace; font-size:12px; overflow-y:auto; color:var(--text-main); text-align:left;">
                         <div style="color:var(--text-muted);">&gt; Semaphores initialized. Buffer empty. Waiting for operations...</div>
                     </div>
                 </div>
@@ -3886,25 +4089,25 @@ document.addEventListener('DOMContentLoaded', async () => {
                                     <td style="padding:6px; font-weight:bold;">P0</td>
                                     <td style="padding:6px; background:rgba(37,99,235,0.02);"><input type="text" id="alloc-P0" class="sim-select" style="width:60px; text-align:center;" value="0 1 0"></td>
                                     <td style="padding:6px; background:rgba(168,85,247,0.02);"><input type="text" id="max-P0" class="sim-select" style="width:60px; text-align:center;" value="7 5 3"></td>
-                                    <td style="padding:6px; background:rgba(245,158,11,0.02); font-family:var(--font-mono); font-weight:bold;" id="need-P0">7 4 3</td>
+                                    <td style="padding:6px; background:rgba(245,158,11,0.02); font-family:'JetBrains Mono', monospace; font-weight:bold;" id="need-P0">7 4 3</td>
                                 </tr>
                                 <tr style="border-bottom:1px solid var(--border);">
                                     <td style="padding:6px; font-weight:bold;">P1</td>
                                     <td style="padding:6px; background:rgba(37,99,235,0.02);"><input type="text" id="alloc-P1" class="sim-select" style="width:60px; text-align:center;" value="2 0 0"></td>
                                     <td style="padding:6px; background:rgba(168,85,247,0.02);"><input type="text" id="max-P1" class="sim-select" style="width:60px; text-align:center;" value="3 2 2"></td>
-                                    <td style="padding:6px; background:rgba(245,158,11,0.02); font-family:var(--font-mono); font-weight:bold;" id="need-P1">1 2 2</td>
+                                    <td style="padding:6px; background:rgba(245,158,11,0.02); font-family:'JetBrains Mono', monospace; font-weight:bold;" id="need-P1">1 2 2</td>
                                 </tr>
                                 <tr style="border-bottom:1px solid var(--border);">
                                     <td style="padding:6px; font-weight:bold;">P2</td>
                                     <td style="padding:6px; background:rgba(37,99,235,0.02);"><input type="text" id="alloc-P2" class="sim-select" style="width:60px; text-align:center;" value="3 0 2"></td>
                                     <td style="padding:6px; background:rgba(168,85,247,0.02);"><input type="text" id="max-P2" class="sim-select" style="width:60px; text-align:center;" value="9 0 2"></td>
-                                    <td style="padding:6px; background:rgba(245,158,11,0.02); font-family:var(--font-mono); font-weight:bold;" id="need-P2">6 0 0</td>
+                                    <td style="padding:6px; background:rgba(245,158,11,0.02); font-family:'JetBrains Mono', monospace; font-weight:bold;" id="need-P2">6 0 0</td>
                                 </tr>
                                 <tr style="border-bottom:1px solid var(--border);">
                                     <td style="padding:6px; font-weight:bold;">P3</td>
                                     <td style="padding:6px; background:rgba(37,99,235,0.02);"><input type="text" id="alloc-P3" class="sim-select" style="width:60px; text-align:center;" value="2 1 1"></td>
                                     <td style="padding:6px; background:rgba(168,85,247,0.02);"><input type="text" id="max-P3" class="sim-select" style="width:60px; text-align:center;" value="2 2 2"></td>
-                                    <td style="padding:6px; background:rgba(245,158,11,0.02); font-family:var(--font-mono); font-weight:bold;" id="need-P3">0 1 1</td>
+                                    <td style="padding:6px; background:rgba(245,158,11,0.02); font-family:'JetBrains Mono', monospace; font-weight:bold;" id="need-P3">0 1 1</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -3914,7 +4117,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         <h3 style="color:var(--primary); margin-bottom:15px;">System Vectors</h3>
                         <div style="margin-bottom:15px;">
                             <label style="display:block; margin-bottom:5px; font-size:12px; font-weight:800;">Available Resources (A B C):</label>
-                            <input type="text" id="bankersAvail" class="sim-select" style="width:100%; text-align:center; font-family:var(--font-mono); font-weight:800;" value="3 3 2">
+                            <input type="text" id="bankersAvail" class="sim-select" style="width:100%; text-align:center; font-family:'JetBrains Mono', monospace; font-weight:800;" value="3 3 2">
                         </div>
                         <div style="display:flex; gap:10px; margin-bottom:15px;">
                             <button id="btnRecalcNeed" class="btn-sim" style="flex:1;">Recalculate Need</button>
@@ -3929,7 +4132,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <div style="display:flex; gap:20px; width:100%; flex-wrap:wrap;">
                     <div class="theory-card" style="flex:1; min-width:300px; margin:0;">
                         <h3 style="color:var(--primary); margin-bottom:12px;">Safety Verification Trace Log</h3>
-                        <div id="bankersLog" style="height:140px; background:var(--bg-page); border:1px solid var(--border); border-radius:12px; padding:15px; font-family:var(--font-mono); font-size:12px; overflow-y:auto; color:var(--text-main); text-align:left;">
+                        <div id="bankersLog" style="height:140px; background:var(--bg-page); border:1px solid var(--border); border-radius:12px; padding:15px; font-family:'JetBrains Mono', monospace; font-size:12px; overflow-y:auto; color:var(--text-main); text-align:left;">
                             <div style="color:var(--text-muted);">&gt; System state initialized. Ready for safety test.</div>
                         </div>
                     </div>
@@ -3942,7 +4145,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                                 <option value="2">P2</option>
                                 <option value="3">P3</option>
                             </select>
-                            <input type="text" id="reqVector" class="sim-select" style="flex:1; text-align:center; font-family:var(--font-mono);" value="1 0 2" placeholder="e.g. 1 0 2">
+                            <input type="text" id="reqVector" class="sim-select" style="flex:1; text-align:center; font-family:'JetBrains Mono', monospace;" value="1 0 2" placeholder="e.g. 1 0 2">
                         </div>
                         <button id="btnRequestBankers" class="btn-sim warning" style="width:100%;">Evaluate Request</button>
                     </div>
@@ -4106,7 +4309,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         <h3 style="color:var(--primary); margin-bottom:15px;">Algorithm & Reference Parameters</h3>
                         <div style="margin-bottom:15px;">
                             <label style="display:block; margin-bottom:5px; font-size:12px; font-weight:800;">Reference String (comma separated):</label>
-                            <input type="text" id="refString" class="sim-select" style="width:100%; font-family:var(--font-mono);" value="7,0,1,2,0,3,0,4,2,3,0,3,2">
+                            <input type="text" id="refString" class="sim-select" style="width:100%; font-family:'JetBrains Mono', monospace;" value="7,0,1,2,0,3,0,4,2,3,0,3,2">
                         </div>
                         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-bottom:15px;">
                             <div>
@@ -4149,7 +4352,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <div class="theory-card" id="pageTimelinePanel" style="width:100%; margin:0; overflow-x:auto;">
                     <h3 style="color:var(--primary); margin-bottom:15px;">Paging Execution Matrix</h3>
                     <div id="pageTableWrapper">
-                        <table class="sim-table" style="border-collapse:collapse; text-align:center; font-family:var(--font-mono); font-size:14px; min-width:100%;">
+                        <table class="sim-table" style="border-collapse:collapse; text-align:center; font-family:'JetBrains Mono', monospace; font-size:14px; min-width:100%;">
                             <thead id="pageHeaderRow"></thead>
                             <tbody id="pageFramesBody"></tbody>
                         </table>
@@ -4308,7 +4511,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         <h3 style="color:var(--primary); margin-bottom:15px;">Disk Request Settings</h3>
                         <div style="margin-bottom:15px;">
                             <label style="display:block; margin-bottom:5px; font-size:12px; font-weight:800;">Request Queue (tracks separated by commas):</label>
-                            <input type="text" id="diskQueue" class="sim-select" style="width:100%; font-family:var(--font-mono);" value="98, 183, 37, 122, 14, 124, 65, 67">
+                            <input type="text" id="diskQueue" class="sim-select" style="width:100%; font-family:'JetBrains Mono', monospace;" value="98, 183, 37, 122, 14, 124, 65, 67">
                         </div>
                         <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:15px; margin-bottom:15px;">
                             <div>
@@ -4423,11 +4626,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
             document.getElementById('statDiskSeek').textContent = movement;
 
-            // Draw seek trace on Canvas
+            // Draw seek trace on Canvas — use OS purple if OS subject, blue for networking
+            const diskSubject = localStorage.getItem('vlab_current_subject') || 'networking';
             drawGrid();
             ctx.lineWidth = 2;
-            ctx.strokeStyle = currentSubject === 'os' ? '#a855f7' : '#2563eb';
-            ctx.fillStyle = currentSubject === 'os' ? '#c084fc' : '#60a5fa';
+            ctx.strokeStyle = diskSubject === 'os' ? '#a855f7' : '#2563eb';
+            ctx.fillStyle = diskSubject === 'os' ? '#c084fc' : '#60a5fa';
 
             const startX = 50 + (seekSeq[0] / 200) * 500;
             const yStep = 240 / (seekSeq.length - 1);
@@ -4453,7 +4657,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 ctx.fillStyle = '#fff';
                 ctx.font = '10px Outfit';
                 ctx.fillText(`P(${seekSeq[i]})`, x + 8, y + 3);
-                ctx.fillStyle = currentSubject === 'os' ? '#c084fc' : '#60a5fa';
+                ctx.fillStyle = diskSubject === 'os' ? '#c084fc' : '#60a5fa';
             }
         });
     };
@@ -4678,7 +4882,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const currentSubject = localStorage.getItem('vlab_current_subject') || 'networking';
         if (currentSubject === 'os') {
             container.innerHTML = `
-                <div class="terminal-workspace" style="height:100%; display:flex; flex-direction:column; background:#0b0f19; border-radius:12px; border:1px solid var(--border); overflow:hidden; font-family:var(--font-mono); color:#10b981; min-height:400px;">
+                <div class="terminal-workspace" style="height:100%; display:flex; flex-direction:column; background:#0b0f19; border-radius:12px; border:1px solid var(--border); overflow:hidden; font-family:'JetBrains Mono', monospace; color:#10b981; min-height:400px;">
                     <div style="background:#131824; padding:10px 15px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
                         <span style="color:var(--text-muted); font-size:12px; font-weight:800;">OS INTERACTIVE CLI TERMINAL</span>
                         <div style="display:flex; gap:6px;">
@@ -4687,13 +4891,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                             <span style="width:10px; height:10px; background:#10b981; border-radius:50%; display:inline-block;"></span>
                         </div>
                     </div>
-                    <div id="osTerminalOutput" style="flex:1; padding:20px; overflow-y:auto; font-size:13px; line-height:1.6; white-space:pre-wrap; text-align:left; font-family:var(--font-mono); color:#10b981;">Welcome to the MIT ADT OS Shell v2.1 (Kernel: NetForge-OS)
+                    <div id="osTerminalOutput" style="flex:1; padding:20px; overflow-y:auto; font-size:13px; line-height:1.6; white-space:pre-wrap; text-align:left; font-family:'JetBrains Mono', monospace; color:#10b981;">Welcome to the MIT ADT OS Shell v2.1 (Kernel: NetForge-OS)
 Type 'help' to list available academic commands.
 
 student@mitadt-os:~$ </div>
                     <div style="display:flex; background:#131824; border-top:1px solid var(--border); padding:10px 15px; align-items:center; gap:10px;">
                         <span style="font-weight:800; color:#a855f7;">student@mitadt-os:~$</span>
-                        <input type="text" id="osTerminalInput" style="flex:1; background:transparent; border:none; color:#10b981; outline:none; font-family:var(--font-mono); font-size:13px;" placeholder="Type a command and press Enter..." autocomplete="off">
+                        <input type="text" id="osTerminalInput" style="flex:1; background:transparent; border:none; color:#10b981; outline:none; font-family:'JetBrains Mono', monospace; font-size:13px;" placeholder="Type a command and press Enter..." autocomplete="off">
                     </div>
                 </div>
             `;

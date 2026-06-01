@@ -93,63 +93,30 @@
                 </header>
                 <div id="content-display" style="transition: opacity 0.3s ease;">
                     <section id="section-aim" class="content-section active">
-                        <h1 class="section-title">Transmission Control Protocol</h1>
-                        <div class="section-body">
-                            <h3>Aim</h3>
-                            <p>To understand the working of Transmission Control Protocol (TCP) and its flow control mechanisms like Stop and Wait and Go-Back-N (GBN).</p>
+                        <h1 class="section-title" id="aim-title">Loading...</h1>
+                        <div class="section-body" id="aim-body">
+                            <p style="color:var(--text-muted);">Loading lab content...</p>
                         </div>
                     </section>
 
                     <section id="section-theory" class="content-section">
                         <h1 class="section-title">Theory</h1>
-                        <div class="section-body">
-                            <h3>Introduction to TCP</h3>
-                            <p>TCP (Transmission Control Protocol) is one of the main protocols of the Internet Protocol Suite. It originated in the initial network implementation in which it complemented the Internet Protocol (IP). Therefore, the entire suite is commonly referred to as TCP/IP.</p>
-                            <h4>Flow Control Mechanisms</h4>
-                            <div class="theory-card">
-                                <strong>Stop and Wait</strong>
-                                <p>The sender sends one packet and waits for an acknowledgment (ACK) from the receiver before sending the next packet. If the ACK does not arrive within a timeout period, the sender resends the packet.</p>
-                            </div>
-                            <div class="theory-card">
-                                <strong>Go-Back-N (GBN)</strong>
-                                <p>The sender can send multiple packets (up to a window size N) without waiting for an ACK. If a packet is lost, the sender resends all packets starting from the lost packet.</p>
-                            </div>
+                        <div class="section-body" id="theory-body">
+                            <p style="color:var(--text-muted);">Loading theory...</p>
                         </div>
                     </section>
 
                     <section id="section-pretest" class="content-section">
                         <h1 class="section-title">Pretest</h1>
-                        <div class="section-body">
-                            <div class="theory-card">
-                                <strong>Question 1: What is the main difference between TCP and UDP?</strong>
-                                <p>A) TCP is connectionless, UDP is connection-oriented</p>
-                                <p>B) TCP is reliable, UDP is not</p>
-                                <p>C) UDP is slower than TCP</p>
-                                <p>D) None of the above</p>
-                            </div>
-                            <div class="theory-card">
-                                <strong>Question 2: In Stop and Wait protocol, what happens if an ACK is lost?</strong>
-                                <p>A) Sender waits forever</p>
-                                <p>B) Sender resends the packet after timeout</p>
-                                <p>C) Receiver requests the packet again</p>
-                                <p>D) The connection is closed</p>
-                            </div>
-                            <button class="btn-sim primary" style="margin-top: 20px;">Submit Pretest</button>
+                        <div class="section-body" id="pretest-body">
+                            <p style="color:var(--text-muted);">Loading pretest questions...</p>
                         </div>
                     </section>
 
                     <section id="section-procedure" class="content-section">
                         <h1 class="section-title">Procedure</h1>
-                        <div class="section-body">
-                            <ol>
-                                <li>Navigate to the <b>Simulation</b> tab in the sidebar.</li>
-                                <li>Select the protocol type: <b>Stop and Wait</b> or <b>Go-Back-N</b>.</li>
-                                <li>Observe the <b>Sliding Window</b> indicator on Host A to see active packets.</li>
-                                <li>Watch the <b>Timer Bar</b> above Host A; if it reaches 100% without an ACK, a timeout occurs.</li>
-                                <li>Click on a moving <b>Packet</b> (blue square) with <b>Shift + Click</b> to simulate network loss.</li>
-                                <li>Observe how the <b>Go-Back-N</b> protocol resends all unacknowledged packets from the base of the window after a timeout.</li>
-                                <li>Check the <b>Event List</b> for detailed timing and protocol logs.</li>
-                            </ol>
+                        <div class="section-body" id="procedure-body">
+                            <p style="color:var(--text-muted);">Loading procedure...</p>
                         </div>
                     </section>
 
@@ -234,8 +201,9 @@
                     <section id="section-feedback" class="content-section">
                         <h1 class="section-title">Feedback</h1>
                         <div class="section-body">
-                            <textarea class="sim-select" style="width: 100%; height: 100px; margin-top: 10px;" placeholder="Share your experience..."></textarea>
-                            <button class="btn-sim primary" style="margin-top: 20px;">Submit Feedback</button>
+                            <p style="color:var(--text-muted); margin-bottom:15px;">Share your experience with this lab to help us improve.</p>
+                            <textarea id="feedbackText" class="sim-select" style="width: 100%; height: 120px; margin-top: 10px; resize:vertical;" placeholder="Share your experience — what worked well, what was confusing, or any suggestions..."></textarea>
+                            <button id="submitFeedbackBtn" class="btn-sim primary" style="margin-top: 15px;" onclick="(function(){ const t = document.getElementById('feedbackText'); if(!t || !t.value.trim()) { alert('Please write your feedback before submitting.'); return; } const labId = document.getElementById('labSelect').value; const fb = { feedback: t.value.trim(), lab: labId, timestamp: new Date().toISOString() }; try { localStorage.setItem('vlab_feedback_' + labId, JSON.stringify(fb)); } catch(e){} t.value=''; const btn = document.getElementById('submitFeedbackBtn'); btn.textContent = '✓ Thank you!'; btn.disabled = true; setTimeout(() => { btn.textContent = 'Submit Feedback'; btn.disabled = false; }, 3000); })()">Submit Feedback</button>
                         </div>
                     </section>
                 </div>
@@ -283,9 +251,9 @@
 
     <!-- UI Components for Topology Builder -->
     <div id="contextMenu" class="context-menu" style="display:none;">
-        <div class="menu-item" onclick="window.currentTopo.deleteNode()">🗑️ Delete Node</div>
-        <div class="menu-item" onclick="window.currentTopo.deleteLinks()">✂️ Delete All Links</div>
-        <div class="menu-item" onclick="window.currentTopo.openConfig(window.currentTopo.currentContextNode)">⚙️ Configure</div>
+        <div class="menu-item" onclick="if(window.currentTopo) window.currentTopo.deleteNode()">🗑️ Delete Node</div>
+        <div class="menu-item" onclick="if(window.currentTopo) window.currentTopo.deleteLinks()">✂️ Delete All Links</div>
+        <div class="menu-item" onclick="if(window.currentTopo && window.currentTopo.currentContextNode) window.currentTopo.openConfig(window.currentTopo.currentContextNode)">⚙️ Configure</div>
     </div>
 
     <div id="topoTooltip" class="topo-tooltip" style="display:none;"></div>
@@ -326,12 +294,20 @@
         // Theme toggle listener is handled in vlab.js to avoid double-firing events
 
         function downloadReport() {
-            const labId = document.getElementById('labSelect').value;
-            window.generatePDFReport(labId);
+            const labId = document.getElementById('labSelect')?.value;
+            if (typeof window.generatePDFReport === 'function') {
+                window.generatePDFReport(labId);
+            } else {
+                alert('Report generator is still loading. Please wait a moment and try again.');
+            }
         }
         function downloadCertificate() {
-            const labId = document.getElementById('labSelect').value;
-            window.generateCertificate(labId);
+            const labId = document.getElementById('labSelect')?.value;
+            if (typeof window.generateCertificate === 'function') {
+                window.generateCertificate(labId);
+            } else {
+                alert('Certificate generator is still loading. Please wait a moment and try again.');
+            }
         }
     </script>
 
