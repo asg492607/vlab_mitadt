@@ -3359,7 +3359,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if ([...bucket.querySelectorAll('[data-ip]')].some(el => el.dataset.ip === ip)) return;
             const el = document.createElement('div');
             el.className = 'btn-sim';
-            el.style.cssText = 'margin:2px; font-family:'JetBrains Mono', monospace; font-size:11px; padding:4px 10px; cursor:default;';
+            el.style.cssText = "margin:2px; font-family:'JetBrains Mono', monospace; font-size:11px; padding:4px 10px; cursor:default;";
             el.textContent = ip;
             el.dataset.ip = ip;
             bucket.appendChild(el);
