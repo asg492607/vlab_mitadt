@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MIT ADT VLAB | Advanced Networking Simulation Platform</title>
-    <meta name="description" content="Master complex networking protocols through high-fidelity simulations, interactive labs, and real-time analysis at MIT ADT VLab.">
+    <title>MIT ADT VLAB | Advanced CS & Engineering Virtual Labs</title>
+    <meta name="description" content="Master complex networking protocols and operating systems algorithms through interactive high-fidelity simulations at MIT ADT VLab.">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌐</text></svg>">
     <link rel="stylesheet" href="landing.css">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
@@ -50,11 +50,11 @@
                 <span class="pulse"></span>
                 v2.0 Platinum Edition
             </div>
-            <h1 class="reveal">The Gold Standard in <br><span class="gradient-text">Networking Simulations</span></h1>
+            <h1 class="reveal">The Gold Standard in <br><span class="gradient-text">Virtual CS & Engineering Labs</span></h1>
             <div class="terminal-text reveal">
-                <span class="prompt">></span> <span id="typewriter">Mounting DPI Packet Inspector v2.4...</span>
+                <span class="prompt">></span> <span id="typewriter">Initializing Academic Lab Engine v2.4...</span>
             </div>
-            <p class="reveal" style="margin-top: 20px;">Master the complex protocols of the digital age. MIT ADT VLab offers high-fidelity simulations, real-time Deep Packet Inspection (DPI), and professional network telemetry for the engineers of tomorrow.</p>
+            <p class="reveal" style="margin-top: 20px;">Master Computer Networks and Operating Systems. MIT ADT VLab offers high-fidelity protocol animations, dynamic Gantt chart scheduling visualizers, and interactive CLI sandboxes for the engineers of tomorrow.</p>
             <div class="hero-actions reveal">
                 <button onclick="location.href='login.html'" class="btn-primary btn-hero-lg">Launch Simulation Hub</button>
                 <button onclick="location.href='#features'" class="btn-outline">Explore Capabilities</button>
@@ -62,12 +62,12 @@
             
             <div class="stats-bar reveal">
                 <div class="stat-item">
-                    <span class="stat-val">14+</span>
+                    <span class="stat-val">19+</span>
                     <span class="stat-lbl">Core Labs</span>
                 </div>
                 <div class="stat-item">
                     <span class="stat-val">Real-time</span>
-                    <span class="stat-lbl">DPI Analysis</span>
+                    <span class="stat-lbl">Simulations</span>
                 </div>
                 <div class="stat-item">
                     <span class="stat-val">100%</span>
@@ -125,6 +125,11 @@
                 <div class="card-icon">📊</div>
                 <h3>Protocol Animation</h3>
                 <p>Watch packets move through the OSI layers. Visualize collisions (CSMA/CD), handshakes (TCP), and routing convergence in real-time.</p>
+            </div>
+            <div class="modern-card reveal">
+                <div class="card-icon">⚡</div>
+                <h3>OS Algorithm Visualizers</h3>
+                <p>Observe process execution timelines, Gantt scheduling charts, Banker's Algorithm safety vectors, and disk cylinder heads in action.</p>
             </div>
             <div class="modern-card reveal">
                 <div class="card-icon">📜</div>
@@ -229,45 +234,48 @@
         <div class="text-center">
             <span class="section-tag">The Lab Catalog</span>
             <h2 class="section-title reveal">High-Fidelity <span class="gradient-text">Lab Modules</span></h2>
-            <p class="section-desc reveal">A complete suite of networking experiments aligned with international academic standards.</p>
+            <p class="section-desc reveal">A complete suite of Computer Networks and Operating Systems experiments aligned with academic standards.</p>
         </div>
 
         <div class="exp-grid">
-            <div class="exp-item reveal">
-                <div class="exp-icon">🛰️</div>
-                <span class="exp-badge">Physical Layer</span>
-                <h4>CSMA/CD & CSMA/CA</h4>
-                <p>Analyze collisions and avoidance mechanisms in real-world scenarios.</p>
-            </div>
-            <div class="exp-item reveal">
+            <!-- Networks -->
+            <div class="exp-item reveal" onclick="location.href='login.html'">
                 <div class="exp-icon">🌐</div>
-                <span class="exp-badge">Network Layer</span>
-                <h4>Subnetting & VLSM</h4>
-                <p>Master the art of address space optimization with interactive tools.</p>
+                <span class="exp-badge">Networks</span>
+                <h4>Routing & Topologies</h4>
+                <p>Simulate CSMA/CD, custom Subnetting, RIP/OSPF Routing, and GBN TCP data transfers.</p>
             </div>
-            <div class="exp-item reveal">
-                <div class="exp-icon">📡</div>
-                <span class="exp-badge">Routing</span>
-                <h4>DV & LS Routing</h4>
-                <p>Visualize the Bellman-Ford and Dijkstra algorithms as they converge.</p>
+            
+            <!-- Operating Systems -->
+            <div class="exp-item reveal" onclick="location.href='login.html'">
+                <div class="exp-icon">⚡</div>
+                <span class="exp-badge" style="background: rgba(168, 85, 247, 0.15); color: #a855f7;">OS</span>
+                <h4>CPU Scheduling</h4>
+                <p>Visualize process timelines and waiting statistics using Gantt charts (FCFS, SJF, RR).</p>
             </div>
-            <div class="exp-item reveal">
-                <div class="exp-icon">🚀</div>
-                <span class="exp-badge">Transport</span>
-                <h4>TCP & UDP Analysis</h4>
-                <p>Compare reliability, flow control, and congestion avoidance logic.</p>
+            <div class="exp-item reveal" onclick="location.href='login.html'">
+                <div class="exp-icon">🔒</div>
+                <span class="exp-badge" style="background: rgba(168, 85, 247, 0.15); color: #a855f7;">OS</span>
+                <h4>Process Sync & Deadlocks</h4>
+                <p>Model Producer-Consumer concurrency and Banker's Algorithm safety vectors.</p>
             </div>
-            <div class="exp-item reveal">
-                <div class="exp-icon">☁️</div>
-                <span class="exp-badge">Application</span>
-                <h4>DNS Hierarchy</h4>
-                <p>Trace recursive queries through Root, TLD, and Authoritative servers.</p>
+            <div class="exp-item reveal" onclick="location.href='login.html'">
+                <div class="exp-icon">💾</div>
+                <span class="exp-badge" style="background: rgba(168, 85, 247, 0.15); color: #a855f7;">OS</span>
+                <h4>Memory & Disk Schedulers</h4>
+                <p>Simulate Page Frame Replacements (FIFO, LRU) and Disk Seek patterns (SCAN, SSTF).</p>
+            </div>
+            <div class="exp-item reveal" onclick="location.href='login.html'">
+                <div class="exp-icon">💻</div>
+                <span class="exp-badge" style="background: rgba(168, 85, 247, 0.15); color: #a855f7;">OS</span>
+                <h4>UNIX Terminal CLI</h4>
+                <p>Execute mock process management and resource monitoring commands in a UNIX shell.</p>
             </div>
             <div class="exp-item reveal" style="border-style: dashed; opacity: 0.6;">
-                <div class="exp-icon">🛠️</div>
-                <span class="exp-badge">Advanced</span>
-                <h4>SDN & Cloud</h4>
-                <p>The next generation of networking labs are coming soon.</p>
+                <div class="exp-icon">🗄️</div>
+                <span class="exp-badge">DBMS</span>
+                <h4>SQL Engine & Indexing</h4>
+                <p>Relational queries and database transactions are coming soon.</p>
             </div>
         </div>
     </section>
@@ -277,7 +285,7 @@
         <div class="text-center">
             <span class="section-tag reveal">Getting Started</span>
             <h2 class="section-title reveal">How it <span class="gradient-text">Works</span></h2>
-            <p class="section-desc reveal">Follow these simple steps to start your networking journey.</p>
+            <p class="section-desc reveal">Follow these simple steps to start your virtual lab journey.</p>
         </div>
         
         <div class="steps-container reveal">
@@ -344,10 +352,6 @@
                     </div>
                     <div class="c-item">
                         <span class="c-name">Atharva Gandhi</span>
-                        <span class="c-role">Student Lead</span>
-                    </div>
-                    <div class="c-item">
-                        <span class="c-name">Nayan Solanki</span>
                         <span class="c-role">Student Lead</span>
                     </div>
                 </div>

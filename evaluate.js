@@ -17,12 +17,13 @@ export function evaluateLab({ model, lab }) {
   let total = 0;
   let earned = 0;
   for (const check of lab.checks ?? []) {
-    const res = check(model);
-    total += res.points ?? 0;
-    if (res.ok) earned += res.points ?? 0;
+    const res = check(model) ?? {};
+    const points = res.points ?? 0;
+    total += points;
+    if (res.ok) earned += points;
     details.push({
       ok: !!res.ok,
-      points: res.points ?? 0,
+      points: points,
       remark: res.remark ?? "",
     });
   }
