@@ -4458,6 +4458,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     };
 
+    const initSimulation = (id) => {
+        const data = window.VLAB_DATA[id];
+        const container = document.getElementById('dynamic-sim-ui');
+
+        if (!data) {
             container.innerHTML = `
                 <div class="sim-placeholder" style="text-align:center; padding:100px; color:var(--text-muted);">
                     <div style="font-size:48px; margin-bottom:20px;">🛡️</div>
