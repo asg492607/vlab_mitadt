@@ -4659,6 +4659,1210 @@ document.addEventListener('DOMContentLoaded', async () => {
                 ctx.fillText(`P(${seekSeq[i]})`, x + 8, y + 3);
                 ctx.fillStyle = diskSubject === 'os' ? '#c084fc' : '#60a5fa';
             }
+    const initVlanSim = (container) => {
+        container.innerHTML = `
+            <div class="sim-toolbar">
+                <div class="section-title" style="font-size:22px; margin:0; color:var(--primary);">VLAN & IEEE 802.1Q Trunking</div>
+            </div>
+            <div class="sim-workspace" style="padding:20px; gap:20px; flex-direction:column; overflow-y:auto; overflow-x:hidden;">
+                <div style="display:flex; gap:20px; flex-wrap:wrap;">
+                    <div class="theory-card" style="flex:1; min-width:400px; margin:0; position:relative; min-height:400px; overflow:hidden;">
+                        <canvas id="vlanCanvas" style="position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none;"></canvas>
+                        
+                        <div style="position:absolute; top:40%; left:30%; transform:translate(-50%,-50%); background:var(--bg-card); border:2px solid #64748b; padding:10px 20px; border-radius:8px; font-weight:800; font-family:'JetBrains Mono', monospace;" id="sw1">SW-1</div>
+                        <div style="position:absolute; top:40%; left:70%; transform:translate(-50%,-50%); background:var(--bg-card); border:2px solid #64748b; padding:10px 20px; border-radius:8px; font-weight:800; font-family:'JetBrains Mono', monospace;" id="sw2">SW-2</div>
+                        
+                        <div style="position:absolute; top:15%; left:10%; transform:translate(-50%,-50%); background:var(--bg-card); border:2px solid #3b82f6; padding:10px; border-radius:8px; text-align:center; z-index:2;" id="pc1">
+                            <div style="font-weight:800; font-size:12px;">PC-1</div>
+                            <div style="font-size:10px; background:#3b82f6; color:#fff; padding:2px 6px; border-radius:4px; margin-top:5px;">VLAN 10</div>
+                        </div>
+                        <div style="position:absolute; top:65%; left:10%; transform:translate(-50%,-50%); background:var(--bg-card); border:2px solid #ef4444; padding:10px; border-radius:8px; text-align:center; z-index:2;" id="pc3">
+                            <div style="font-weight:800; font-size:12px;">PC-3</div>
+                            <div style="font-size:10px; background:#ef4444; color:#fff; padding:2px 6px; border-radius:4px; margin-top:5px;">VLAN 20</div>
+                        </div>
+                        
+                        <div style="position:absolute; top:15%; left:90%; transform:translate(-50%,-50%); background:var(--bg-card); border:2px solid #3b82f6; padding:10px; border-radius:8px; text-align:center; z-index:2;" id="pc2">
+                            <div style="font-weight:800; font-size:12px;">PC-2</div>
+                            <div style="font-size:10px; background:#3b82f6; color:#fff; padding:2px 6px; border-radius:4px; margin-top:5px;">VLAN 10</div>
+                        </div>
+                        <div style="position:absolute; top:65%; left:90%; transform:translate(-50%,-50%); background:var(--bg-card); border:2px solid #ef4444; padding:10px; border-radius:8px; text-align:center; z-index:2;" id="pc4">
+                            <div style="font-weight:800; font-size:12px;">PC-4</div>
+                            <div style="font-size:10px; background:#ef4444; color:#fff; padding:2px 6px; border-radius:4px; margin-top:5px;">VLAN 20</div>
+                        </div>
+                        
+                        <div style="position:absolute; top:33%; left:50%; transform:translate(-50%,-50%); font-size:11px; font-weight:800; background:rgba(0,0,0,0.5); color:#fff; padding:4px 10px; border-radius:12px; border:1px solid #64748b;">802.1Q TRUNK</div>
+                    </div>
+                    
+                    <div class="theory-card" style="width:300px; margin:0; display:flex; flex-direction:column;">
+                        <h3 style="color:var(--primary); margin-bottom:15px;">Broadcast Controls</h3>
+                        <div style="display:flex; flex-direction:column; gap:10px; flex:1;">
+                            <button id="btnVlan10" class="btn-sim" style="border-color:#3b82f6; color:#3b82f6;">Broadcast from PC-1 (VLAN 10)</button>
+                            <button id="btnVlan20" class="btn-sim" style="border-color:#ef4444; color:#ef4444;">Broadcast from PC-3 (VLAN 20)</button>
+                            <button id="btnVlanCross" class="btn-sim" style="border-color:var(--warning); color:var(--warning);">Ping PC-3 from PC-1 (Cross-VLAN)</button>
+                        </div>
+                        <div id="vlanConsole" style="background:#0b0f19; border-radius:8px; padding:10px; font-family:'JetBrains Mono', monospace; font-size:11px; color:#10b981; height:140px; overflow-y:auto; margin-top:15px; border:1px solid var(--border);">
+                            > VLAN Simulator Initialized
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        const canvas = document.getElementById('vlanCanvas');
+        const ctx = canvas.getContext('2d');
+        let aniFrame = null;
+        let isSimRunning = false;
+
+        const getPos = (id) => {
+            const el = document.getElementById(id);
+            const rect = el.getBoundingClientRect();
+            const parentRect = canvas.parentElement.getBoundingClientRect();
+            return {
+                x: rect.left - parentRect.left + (rect.width/2),
+                y: rect.top - parentRect.top + (rect.height/2)
+            };
+        };
+
+        const drawLine = (p1, p2, color, isTrunk=false) => {
+            ctx.beginPath();
+            ctx.moveTo(p1.x, p1.y);
+            ctx.lineTo(p2.x, p2.y);
+            ctx.strokeStyle = color;
+            ctx.lineWidth = isTrunk ? 4 : 2;
+            if(isTrunk) ctx.setLineDash([5,5]); else ctx.setLineDash([]);
+            ctx.stroke();
+            ctx.setLineDash([]);
+        };
+
+        const drawTopology = () => {
+            canvas.width = canvas.parentElement.clientWidth;
+            canvas.height = canvas.parentElement.clientHeight;
+            ctx.clearRect(0,0, canvas.width, canvas.height);
+            
+            const sw1 = getPos('sw1'), sw2 = getPos('sw2');
+            const pc1 = getPos('pc1'), pc2 = getPos('pc2');
+            const pc3 = getPos('pc3'), pc4 = getPos('pc4');
+
+            drawLine(pc1, sw1, 'rgba(59,130,246,0.3)');
+            drawLine(pc3, sw1, 'rgba(239,68,68,0.3)');
+            drawLine(pc2, sw2, 'rgba(59,130,246,0.3)');
+            drawLine(pc4, sw2, 'rgba(239,68,68,0.3)');
+            drawLine(sw1, sw2, 'rgba(100,116,139,0.8)', true);
+        };
+        
+        setTimeout(drawTopology, 50);
+        window.addEventListener('resize', () => { if(document.getElementById('vlanCanvas')) drawTopology(); });
+        
+        const log = (msg, color='#10b981') => {
+            const c = document.getElementById('vlanConsole');
+            c.innerHTML += `<div style="color:${color}; margin-bottom:4px;">> ${msg}</div>`;
+            c.scrollTop = c.scrollHeight;
+        };
+
+        const animatePacket = (path, color, tag, onComplete) => {
+            let start = performance.now();
+            const duration = 1200; 
+            
+            const animate = (time) => {
+                if(!document.getElementById('vlanCanvas')) return;
+                let progress = (time - start) / duration;
+                if(progress > 1) progress = 1;
+                
+                drawTopology();
+                
+                const x = path[0].x + (path[1].x - path[0].x) * progress;
+                const y = path[0].y + (path[1].y - path[0].y) * progress;
+                
+                ctx.fillStyle = color;
+                ctx.beginPath();
+                ctx.arc(x, y, 8, 0, Math.PI*2);
+                ctx.fill();
+                ctx.strokeStyle = '#fff';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                
+                if(tag) {
+                    ctx.fillStyle = 'rgba(0,0,0,0.8)';
+                    ctx.fillRect(x - 20, y - 25, 40, 14);
+                    ctx.fillStyle = '#f59e0b';
+                    ctx.font = 'bold 9px Outfit, sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(tag, x, y - 15);
+                }
+                
+                if(progress < 1) {
+                    aniFrame = requestAnimationFrame(animate);
+                } else {
+                    if(onComplete) onComplete();
+                }
+            };
+            aniFrame = requestAnimationFrame(animate);
+        };
+
+        const runVlanBroadcast = (vlanId) => {
+            if(isSimRunning) return;
+            isSimRunning = true;
+            
+            const sw1 = getPos('sw1'), sw2 = getPos('sw2');
+            const pc1 = getPos('pc1'), pc2 = getPos('pc2');
+            const pc3 = getPos('pc3'), pc4 = getPos('pc4');
+
+            const isVlan10 = vlanId === 10;
+            const src = isVlan10 ? pc1 : pc3;
+            const dst = isVlan10 ? pc2 : pc4;
+            const dropped = isVlan10 ? pc3 : pc1;
+            const color = isVlan10 ? '#3b82f6' : '#ef4444';
+            
+            document.querySelectorAll('#btnVlan10, #btnVlan20, #btnVlanCross').forEach(b => b.disabled = true);
+            log(`PC-${isVlan10?1:3} sending broadcast frame...`, '#fff');
+            
+            animatePacket([src, sw1], color, null, () => {
+                log(`SW-1 received frame. Attaching 802.1Q Tag: [VLAN ${vlanId}]`, '#f59e0b');
+                
+                ctx.fillStyle = 'rgba(239,68,68,0.8)';
+                ctx.font = 'bold 20px Outfit, sans-serif';
+                ctx.fillText('X', dropped.x + 30, dropped.y);
+                log(`SW-1 drops frame for PC-${isVlan10?3:1} (Different VLAN)`, '#ef4444');
+                
+                setTimeout(() => {
+                    log(`SW-1 forwarding tagged frame across TRUNK...`);
+                    animatePacket([sw1, sw2], color, `VLAN ${vlanId}`, () => {
+                        log(`SW-2 received frame. Stripping 802.1Q Tag.`, '#f59e0b');
+                        
+                        const dropped2 = isVlan10 ? pc4 : pc2;
+                        ctx.fillStyle = 'rgba(239,68,68,0.8)';
+                        ctx.fillText('X', dropped2.x - 30, dropped2.y);
+                        log(`SW-2 drops frame for PC-${isVlan10?4:2} (Different VLAN)`, '#ef4444');
+                        
+                        setTimeout(() => {
+                            log(`SW-2 forwarding untagged frame to PC-${isVlan10?2:4}...`);
+                            animatePacket([sw2, dst], color, null, () => {
+                                log(`Broadcast successfully reached PC-${isVlan10?2:4} (VLAN ${vlanId})!`, '#3b82f6');
+                                setTimeout(()=> {
+                                    drawTopology();
+                                    isSimRunning = false;
+                                    document.querySelectorAll('#btnVlan10, #btnVlan20, #btnVlanCross').forEach(b => b.disabled = false);
+                                }, 1500);
+                            });
+                        }, 1000);
+                    });
+                }, 1000);
+            });
+        };
+
+        const runCrossVlanPing = () => {
+            if(isSimRunning) return;
+            isSimRunning = true;
+            const sw1 = getPos('sw1'), pc1 = getPos('pc1');
+            
+            document.querySelectorAll('#btnVlan10, #btnVlan20, #btnVlanCross').forEach(b => b.disabled = true);
+            log(`PC-1 (VLAN 10) pinging PC-3 (VLAN 20)...`, '#fff');
+            
+            animatePacket([pc1, sw1], '#3b82f6', null, () => {
+                log(`SW-1 checking MAC table and VLAN assignments...`, '#f59e0b');
+                setTimeout(() => {
+                    ctx.fillStyle = 'rgba(239,68,68,0.8)';
+                    ctx.font = 'bold 24px Outfit, sans-serif';
+                    ctx.fillText('DROP', sw1.x, sw1.y + 40);
+                    log(`SW-1 DROP: Cannot route between VLANs without a Router!`, '#ef4444');
+                    
+                    setTimeout(()=> {
+                        drawTopology();
+                        isSimRunning = false;
+                        document.querySelectorAll('#btnVlan10, #btnVlan20, #btnVlanCross').forEach(b => b.disabled = false);
+                    }, 2000);
+                }, 1000);
+            });
+        };
+
+        document.getElementById('btnVlan10').addEventListener('click', () => runVlanBroadcast(10));
+        document.getElementById('btnVlan20').addEventListener('click', () => runVlanBroadcast(20));
+        document.getElementById('btnVlanCross').addEventListener('click', runCrossVlanPing);
+    };
+
+    const initDnsSim = (container) => {
+        container.innerHTML = `
+            <div class="sim-toolbar">
+                <div class="section-title" style="font-size:22px; margin:0; color:var(--primary);">DNS Name Resolution</div>
+            </div>
+            <div class="sim-workspace" style="padding:20px; gap:20px; flex-direction:column; overflow-y:auto; overflow-x:hidden;">
+                <div style="display:flex; gap:20px; flex-wrap:wrap;">
+                    <div class="theory-card" style="flex:1; min-width:400px; margin:0; position:relative; min-height:450px; overflow:hidden;">
+                        <canvas id="dnsCanvas" style="position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none;"></canvas>
+                        
+                        <div style="position:absolute; top:85%; left:15%; transform:translate(-50%,-50%); background:var(--bg-card); border:2px solid #3b82f6; padding:10px; border-radius:8px; text-align:center; z-index:2;" id="dnsClient">
+                            <div style="font-size:24px;">💻</div>
+                            <div style="font-weight:800; font-size:11px;">Client</div>
+                        </div>
+                        
+                        <div style="position:absolute; top:85%; left:50%; transform:translate(-50%,-50%); background:var(--bg-card); border:2px solid #f59e0b; padding:10px; border-radius:8px; text-align:center; z-index:2;" id="dnsResolver">
+                            <div style="font-size:24px;">🌐</div>
+                            <div style="font-weight:800; font-size:11px;">Local Resolver</div>
+                            <div style="font-size:9px; color:var(--text-muted);">ISP</div>
+                        </div>
+                        
+                        <div style="position:absolute; top:15%; left:85%; transform:translate(-50%,-50%); background:var(--bg-card); border:2px solid #ef4444; padding:10px; border-radius:8px; text-align:center; z-index:2;" id="dnsRoot">
+                            <div style="font-size:24px;">🗄️</div>
+                            <div style="font-weight:800; font-size:11px;">Root Server</div>
+                            <div style="font-size:9px; color:var(--text-muted);">.</div>
+                        </div>
+                        
+                        <div style="position:absolute; top:50%; left:85%; transform:translate(-50%,-50%); background:var(--bg-card); border:2px solid #10b981; padding:10px; border-radius:8px; text-align:center; z-index:2;" id="dnsTld">
+                            <div style="font-size:24px;">🗄️</div>
+                            <div style="font-weight:800; font-size:11px;">TLD Server</div>
+                            <div style="font-size:9px; color:var(--text-muted);">.com</div>
+                        </div>
+                        
+                        <div style="position:absolute; top:85%; left:85%; transform:translate(-50%,-50%); background:var(--bg-card); border:2px solid #8b5cf6; padding:10px; border-radius:8px; text-align:center; z-index:2;" id="dnsAuth">
+                            <div style="font-size:24px;">🗄️</div>
+                            <div style="font-weight:800; font-size:11px;">Auth Server</div>
+                            <div style="font-size:9px; color:var(--text-muted);">example.com</div>
+                        </div>
+                    </div>
+                    
+                    <div class="theory-card" style="width:300px; margin:0; display:flex; flex-direction:column;">
+                        <h3 style="color:var(--primary); margin-bottom:15px;">DNS Query</h3>
+                        <div style="display:flex; flex-direction:column; gap:10px;">
+                            <input type="text" id="dnsQueryHost" class="sim-select" value="www.example.com" style="width:100%; font-family:'JetBrains Mono', monospace;" readonly>
+                            <button id="btnDnsIterative" class="btn-sim" style="border-color:#f59e0b; color:#f59e0b;">Run Iterative Query</button>
+                            <button id="btnDnsRecursive" class="btn-sim" style="border-color:#3b82f6; color:#3b82f6;">Run Recursive Query</button>
+                        </div>
+                        <div id="dnsConsole" style="background:#0b0f19; border-radius:8px; padding:10px; font-family:'JetBrains Mono', monospace; font-size:11px; color:#10b981; flex:1; overflow-y:auto; margin-top:15px; border:1px solid var(--border);">
+                            > DNS Subsystem Initialized
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        const canvas = document.getElementById('dnsCanvas');
+        const ctx = canvas.getContext('2d');
+        let aniFrame = null;
+        let isSimRunning = false;
+
+        const getPos = (id) => {
+            const el = document.getElementById(id);
+            const rect = el.getBoundingClientRect();
+            const parentRect = canvas.parentElement.getBoundingClientRect();
+            return {
+                x: rect.left - parentRect.left + (rect.width/2),
+                y: rect.top - parentRect.top + (rect.height/2)
+            };
+        };
+
+        const drawTopology = () => {
+            canvas.width = canvas.parentElement.clientWidth;
+            canvas.height = canvas.parentElement.clientHeight;
+            ctx.clearRect(0,0, canvas.width, canvas.height);
+            
+            const client = getPos('dnsClient'), res = getPos('dnsResolver');
+            const root = getPos('dnsRoot'), tld = getPos('dnsTld'), auth = getPos('dnsAuth');
+
+            ctx.lineWidth = 1;
+            ctx.setLineDash([4,4]);
+            ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+            [root, tld, auth].forEach(dest => {
+                ctx.beginPath();
+                ctx.moveTo(res.x, res.y);
+                ctx.lineTo(dest.x, dest.y);
+                ctx.stroke();
+            });
+            ctx.setLineDash([]);
+            ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+            ctx.beginPath();
+            ctx.moveTo(client.x, client.y);
+            ctx.lineTo(res.x, res.y);
+            ctx.stroke();
+        };
+        
+        setTimeout(drawTopology, 50);
+        window.addEventListener('resize', () => { if(document.getElementById('dnsCanvas')) drawTopology(); });
+        
+        const log = (msg, color='#10b981') => {
+            const c = document.getElementById('dnsConsole');
+            c.innerHTML += `<div style="color:${color}; margin-bottom:4px;">> ${msg}</div>`;
+            c.scrollTop = c.scrollHeight;
+        };
+
+        const animatePacket = (path, color, tag, isResp, onComplete) => {
+            let start = performance.now();
+            const duration = 1000; 
+            
+            const animate = (time) => {
+                if(!document.getElementById('dnsCanvas')) return;
+                let progress = (time - start) / duration;
+                if(progress > 1) progress = 1;
+                
+                drawTopology();
+                const x = path[0].x + (path[1].x - path[0].x) * progress;
+                const y = path[0].y + (path[1].y - path[0].y) * progress;
+                
+                ctx.fillStyle = color;
+                ctx.beginPath();
+                ctx.arc(x, y, 6, 0, Math.PI*2);
+                ctx.fill();
+                
+                if(tag) {
+                    ctx.fillStyle = 'rgba(0,0,0,0.8)';
+                    ctx.fillRect(x - 20, y - 25, 40, 14);
+                    ctx.fillStyle = isResp ? '#10b981' : '#f59e0b';
+                    ctx.font = 'bold 9px Outfit, sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(tag, x, y - 15);
+                }
+                
+                if(progress < 1) {
+                    aniFrame = requestAnimationFrame(animate);
+                } else {
+                    if(onComplete) onComplete();
+                }
+            };
+            aniFrame = requestAnimationFrame(animate);
+        };
+
+        const runQuery = (type) => {
+            if(isSimRunning) return;
+            isSimRunning = true;
+            document.getElementById('dnsConsole').innerHTML = '';
+            log(`Starting ${type.toUpperCase()} resolution for www.example.com...`, '#fff');
+            
+            const c = getPos('dnsClient'), r = getPos('dnsResolver');
+            const rt = getPos('dnsRoot'), tl = getPos('dnsTld'), au = getPos('dnsAuth');
+            document.querySelectorAll('#btnDnsIterative, #btnDnsRecursive').forEach(b => b.disabled = true);
+            
+            animatePacket([c, r], '#3b82f6', 'Query', false, () => {
+                log('Resolver checks cache: MISS.', '#f59e0b');
+                
+                if(type === 'iterative') {
+                    // Iterative
+                    setTimeout(() => {
+                        log('Resolver -> Root: Where is .com?', '#3b82f6');
+                        animatePacket([r, rt], '#ef4444', '?', false, () => {
+                            log('Root -> Resolver: Try TLD server.', '#10b981');
+                            animatePacket([rt, r], '#ef4444', 'TLD IP', true, () => {
+                                setTimeout(() => {
+                                    log('Resolver -> TLD: Where is example.com?', '#3b82f6');
+                                    animatePacket([r, tl], '#10b981', '?', false, () => {
+                                        log('TLD -> Resolver: Try Auth server.', '#10b981');
+                                        animatePacket([tl, r], '#10b981', 'Auth IP', true, () => {
+                                            setTimeout(() => {
+                                                log('Resolver -> Auth: What is IP of www.example.com?', '#3b82f6');
+                                                animatePacket([r, au], '#8b5cf6', '?', false, () => {
+                                                    log('Auth -> Resolver: IP is 93.184.216.34', '#10b981');
+                                                    animatePacket([au, r], '#8b5cf6', 'A Rec', true, () => {
+                                                        setTimeout(() => {
+                                                            log('Resolver caches result and replies to Client.', '#f59e0b');
+                                                            animatePacket([r, c], '#3b82f6', 'IP Ans', true, () => {
+                                                                log('Client successfully resolved www.example.com!', '#fff');
+                                                                isSimRunning = false;
+                                                                document.querySelectorAll('#btnDnsIterative, #btnDnsRecursive').forEach(b => b.disabled = false);
+                                                            });
+                                                        }, 500);
+                                                    });
+                                                });
+                                            }, 500);
+                                        });
+                                    });
+                                }, 500);
+                            });
+                        });
+                    }, 500);
+                } else {
+                    // Recursive
+                    setTimeout(() => {
+                        log('Resolver -> Root: Resolve www.example.com', '#3b82f6');
+                        animatePacket([r, rt], '#ef4444', 'Query', false, () => {
+                            log('Root -> TLD: Resolve www.example.com', '#3b82f6');
+                            animatePacket([rt, tl], '#10b981', 'Query', false, () => {
+                                log('TLD -> Auth: Resolve www.example.com', '#3b82f6');
+                                animatePacket([tl, au], '#8b5cf6', 'Query', false, () => {
+                                    log('Auth -> TLD: IP is 93.184.216.34', '#10b981');
+                                    animatePacket([au, tl], '#8b5cf6', 'A Rec', true, () => {
+                                        log('TLD -> Root: Forwarding Answer', '#10b981');
+                                        animatePacket([tl, rt], '#10b981', 'A Rec', true, () => {
+                                            log('Root -> Resolver: Forwarding Answer', '#10b981');
+                                            animatePacket([rt, r], '#ef4444', 'A Rec', true, () => {
+                                                setTimeout(() => {
+                                                    log('Resolver caches result and replies to Client.', '#f59e0b');
+                                                    animatePacket([r, c], '#3b82f6', 'IP Ans', true, () => {
+                                                        log('Client successfully resolved www.example.com!', '#fff');
+                                                        isSimRunning = false;
+                                                        document.querySelectorAll('#btnDnsIterative, #btnDnsRecursive').forEach(b => b.disabled = false);
+                                                    });
+                                                }, 500);
+                                            });
+                                        });
+                                    });
+                                });
+                            });
+                        });
+                    }, 500);
+                }
+            });
+        };
+
+        document.getElementById('btnDnsIterative').addEventListener('click', () => runQuery('iterative'));
+        document.getElementById('btnDnsRecursive').addEventListener('click', () => runQuery('recursive'));
+    };
+
+    const initRoutingSim = (container) => {
+        container.innerHTML = `
+            <div class="sim-toolbar">
+                <div class="section-title" style="font-size:22px; margin:0; color:var(--primary);">Routing Algorithm Convergence</div>
+            </div>
+            <div class="sim-workspace" style="padding:20px; gap:20px; flex-direction:column; overflow-y:auto; overflow-x:hidden;">
+                <div style="display:flex; gap:20px; flex-wrap:wrap;">
+                    <div class="theory-card" style="flex:1.5; min-width:400px; margin:0; position:relative; min-height:450px; overflow:hidden;">
+                        <canvas id="routingCanvas" style="position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none;"></canvas>
+                        
+                        <div style="position:absolute; top:20%; left:50%; transform:translate(-50%,-50%); background:var(--bg-card); border:2px solid #3b82f6; padding:10px 15px; border-radius:50%; font-weight:800; font-family:'JetBrains Mono', monospace; z-index:2; width:45px; height:45px; display:flex; align-items:center; justify-content:center;" id="rtA">A</div>
+                        
+                        <div style="position:absolute; top:50%; left:20%; transform:translate(-50%,-50%); background:var(--bg-card); border:2px solid #10b981; padding:10px 15px; border-radius:50%; font-weight:800; font-family:'JetBrains Mono', monospace; z-index:2; width:45px; height:45px; display:flex; align-items:center; justify-content:center;" id="rtB">B</div>
+                        
+                        <div style="position:absolute; top:50%; left:80%; transform:translate(-50%,-50%); background:var(--bg-card); border:2px solid #f59e0b; padding:10px 15px; border-radius:50%; font-weight:800; font-family:'JetBrains Mono', monospace; z-index:2; width:45px; height:45px; display:flex; align-items:center; justify-content:center;" id="rtC">C</div>
+                        
+                        <div style="position:absolute; top:80%; left:35%; transform:translate(-50%,-50%); background:var(--bg-card); border:2px solid #8b5cf6; padding:10px 15px; border-radius:50%; font-weight:800; font-family:'JetBrains Mono', monospace; z-index:2; width:45px; height:45px; display:flex; align-items:center; justify-content:center;" id="rtD">D</div>
+                        
+                        <div style="position:absolute; top:80%; left:65%; transform:translate(-50%,-50%); background:var(--bg-card); border:2px solid #ef4444; padding:10px 15px; border-radius:50%; font-weight:800; font-family:'JetBrains Mono', monospace; z-index:2; width:45px; height:45px; display:flex; align-items:center; justify-content:center;" id="rtE">E</div>
+                    </div>
+                    
+                    <div class="theory-card" style="width:350px; margin:0; display:flex; flex-direction:column;">
+                        <h3 style="color:var(--primary); margin-bottom:15px;">Convergence Controls</h3>
+                        <div style="display:flex; flex-direction:column; gap:10px;">
+                            <label style="font-size:12px; font-weight:800; color:var(--text-muted);">Algorithm Mode:</label>
+                            <select id="routeAlgoSelect" class="sim-select" style="width:100%;">
+                                <option value="dv">Distance Vector (Bellman-Ford)</option>
+                                <option value="ls">Link State (Dijkstra)</option>
+                            </select>
+                            <button id="btnRouteStep" class="btn-sim primary">Execute Next Step</button>
+                            <button id="btnRouteReset" class="btn-sim">Reset Topology</button>
+                        </div>
+                        
+                        <h3 style="color:var(--primary); margin-top:20px; margin-bottom:10px; font-size:14px;">Router A Routing Table</h3>
+                        <table class="sim-table" style="width:100%; border-collapse:collapse; font-family:'JetBrains Mono', monospace; font-size:12px; text-align:left;">
+                            <thead>
+                                <tr style="border-bottom:1px solid var(--border);">
+                                    <th style="padding:6px;">Dest</th>
+                                    <th style="padding:6px;">Cost</th>
+                                    <th style="padding:6px;">Next Hop</th>
+                                </tr>
+                            </thead>
+                            <tbody id="routingTableA">
+                                <!-- Dynamic rows -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        const canvas = document.getElementById('routingCanvas');
+        const ctx = canvas.getContext('2d');
+        let step = 0;
+
+        // Topology definition
+        const nodes = ['A', 'B', 'C', 'D', 'E'];
+        const edges = [
+            {n1: 'A', n2: 'B', cost: 2},
+            {n1: 'A', n2: 'C', cost: 5},
+            {n1: 'B', n2: 'C', cost: 3},
+            {n1: 'B', n2: 'D', cost: 1},
+            {n1: 'C', n2: 'E', cost: 2},
+            {n1: 'D', n2: 'E', cost: 4},
+            {n1: 'C', n2: 'D', cost: 2}
+        ];
+
+        const getPos = (id) => {
+            const el = document.getElementById('rt' + id);
+            if(!el) return {x:0,y:0};
+            const rect = el.getBoundingClientRect();
+            const parentRect = canvas.parentElement.getBoundingClientRect();
+            return {
+                x: rect.left - parentRect.left + (rect.width/2),
+                y: rect.top - parentRect.top + (rect.height/2)
+            };
+        };
+
+        const drawTopology = (activeNodes = [], activeEdges = []) => {
+            canvas.width = canvas.parentElement.clientWidth;
+            canvas.height = canvas.parentElement.clientHeight;
+            ctx.clearRect(0,0, canvas.width, canvas.height);
+            
+            edges.forEach(e => {
+                const p1 = getPos(e.n1);
+                const p2 = getPos(e.n2);
+                const isActive = activeEdges.some(ae => (ae.n1===e.n1 && ae.n2===e.n2) || (ae.n1===e.n2 && ae.n2===e.n1));
+                
+                ctx.beginPath();
+                ctx.moveTo(p1.x, p1.y);
+                ctx.lineTo(p2.x, p2.y);
+                ctx.strokeStyle = isActive ? '#10b981' : 'rgba(255,255,255,0.1)';
+                ctx.lineWidth = isActive ? 3 : 2;
+                ctx.stroke();
+                
+                // Draw cost
+                const cx = (p1.x + p2.x)/2;
+                const cy = (p1.y + p2.y)/2;
+                ctx.fillStyle = 'var(--bg-card)';
+                ctx.beginPath();
+                ctx.arc(cx, cy, 10, 0, Math.PI*2);
+                ctx.fill();
+                ctx.strokeStyle = 'var(--border)';
+                ctx.lineWidth = 1;
+                ctx.stroke();
+                
+                ctx.fillStyle = isActive ? '#10b981' : '#fff';
+                ctx.font = "bold 11px Outfit, sans-serif";
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(e.cost, cx, cy);
+            });
+            
+            // Highlight active nodes
+            nodes.forEach(n => {
+                const el = document.getElementById('rt'+n);
+                if(el) {
+                    if(activeNodes.includes(n)) {
+                        el.style.boxShadow = '0 0 15px #10b981';
+                        el.style.borderColor = '#10b981';
+                    } else {
+                        el.style.boxShadow = 'none';
+                        el.style.borderColor = n==='A'?'#3b82f6':n==='B'?'#10b981':n==='C'?'#f59e0b':n==='D'?'#8b5cf6':'#ef4444';
+                    }
+                }
+            });
+        };
+
+        const renderTableA = (data) => {
+            const tbody = document.getElementById('routingTableA');
+            tbody.innerHTML = '';
+            nodes.forEach(n => {
+                if(n==='A') return;
+                const r = data[n] || {cost: '∞', hop: '-'};
+                tbody.innerHTML += `
+                    <tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
+                        <td style="padding:6px; color:#fff;">${n}</td>
+                        <td style="padding:6px; color:#10b981;">${r.cost}</td>
+                        <td style="padding:6px; color:var(--text-muted);">${r.hop}</td>
+                    </tr>
+                `;
+            });
+        };
+
+        const resetSim = () => {
+            step = 0;
+            drawTopology();
+            renderTableA({});
+            document.getElementById('btnRouteStep').disabled = false;
+            document.getElementById('btnRouteStep').textContent = 'Execute Next Step';
+        };
+
+        setTimeout(resetSim, 50);
+        window.addEventListener('resize', () => { if(document.getElementById('routingCanvas')) drawTopology(); });
+
+        document.getElementById('btnRouteReset').addEventListener('click', resetSim);
+        document.getElementById('routeAlgoSelect').addEventListener('change', resetSim);
+
+        document.getElementById('btnRouteStep').addEventListener('click', () => {
+            const algo = document.getElementById('routeAlgoSelect').value;
+            step++;
+            
+            if(algo === 'dv') {
+                if(step === 1) {
+                    drawTopology(['A'], [{n1:'A',n2:'B'}, {n1:'A',n2:'C'}]);
+                    renderTableA({
+                        B: {cost: 2, hop: 'B'},
+                        C: {cost: 5, hop: 'C'}
+                    });
+                } else if(step === 2) {
+                    drawTopology(['A', 'B'], [{n1:'B',n2:'C'}, {n1:'B',n2:'D'}]);
+                    renderTableA({
+                        B: {cost: 2, hop: 'B'},
+                        C: {cost: 5, hop: 'C'}, // A->B->C is 2+3=5, same cost
+                        D: {cost: 3, hop: 'B'}  // A->B->D is 2+1=3
+                    });
+                } else if(step === 3) {
+                    drawTopology(['A', 'D'], [{n1:'D',n2:'E'}, {n1:'D',n2:'C'}]);
+                    renderTableA({
+                        B: {cost: 2, hop: 'B'},
+                        C: {cost: 5, hop: 'C'}, // A->B->D->C is 2+1+2=5, same cost
+                        D: {cost: 3, hop: 'B'},
+                        E: {cost: 7, hop: 'B'}  // A->B->D->E is 2+1+4=7
+                    });
+                } else if(step === 4) {
+                    drawTopology(['A', 'C'], [{n1:'C',n2:'E'}]);
+                    renderTableA({
+                        B: {cost: 2, hop: 'B'},
+                        C: {cost: 5, hop: 'C'},
+                        D: {cost: 3, hop: 'B'},
+                        E: {cost: 7, hop: 'B'} // A->C->E is 5+2=7, same cost
+                    });
+                    document.getElementById('btnRouteStep').disabled = true;
+                    document.getElementById('btnRouteStep').textContent = 'Converged';
+                }
+            } else {
+                // Link State (Dijkstra)
+                if(step === 1) {
+                    drawTopology(['A'], [{n1:'A',n2:'B'}, {n1:'A',n2:'C'}]);
+                    renderTableA({
+                        B: {cost: 2, hop: 'B'},
+                        C: {cost: 5, hop: 'C'}
+                    });
+                } else if(step === 2) {
+                    // Pick B (min cost 2)
+                    drawTopology(['A', 'B'], [{n1:'A',n2:'B'}, {n1:'B',n2:'D'}, {n1:'B',n2:'C'}]);
+                    renderTableA({
+                        B: {cost: 2, hop: 'B'},
+                        C: {cost: 5, hop: 'C'},
+                        D: {cost: 3, hop: 'B'}
+                    });
+                } else if(step === 3) {
+                    // Pick D (min cost 3)
+                    drawTopology(['A', 'B', 'D'], [{n1:'A',n2:'B'}, {n1:'B',n2:'D'}, {n1:'D',n2:'E'}, {n1:'D',n2:'C'}]);
+                    renderTableA({
+                        B: {cost: 2, hop: 'B'},
+                        C: {cost: 5, hop: 'C'}, 
+                        D: {cost: 3, hop: 'B'},
+                        E: {cost: 7, hop: 'B'}
+                    });
+                } else if(step === 4) {
+                    // Pick C (min cost 5)
+                    drawTopology(['A', 'B', 'D', 'C'], [{n1:'A',n2:'B'}, {n1:'B',n2:'D'}, {n1:'A',n2:'C'}, {n1:'C',n2:'E'}]);
+                    renderTableA({
+                        B: {cost: 2, hop: 'B'},
+                        C: {cost: 5, hop: 'C'},
+                        D: {cost: 3, hop: 'B'},
+                        E: {cost: 7, hop: 'B'}
+                    });
+                } else if(step === 5) {
+                    // Shortest Path Tree
+                    drawTopology(['A', 'B', 'C', 'D', 'E'], [{n1:'A',n2:'B'}, {n1:'B',n2:'D'}, {n1:'A',n2:'C'}, {n1:'C',n2:'E'}]);
+                    document.getElementById('btnRouteStep').disabled = true;
+                    document.getElementById('btnRouteStep').textContent = 'Shortest Path Tree Built';
+                }
+            }
+        });
+    };
+
+    const initTransportSim = (container) => {
+        container.innerHTML = `
+            <div class="sim-toolbar">
+                <div class="section-title" style="font-size:22px; margin:0; color:var(--primary);">Transport Layer: TCP vs UDP</div>
+            </div>
+            <div class="sim-workspace" style="padding:20px; gap:20px; flex-direction:column; overflow-y:auto; overflow-x:hidden;">
+                <div style="display:flex; gap:20px; flex-wrap:wrap;">
+                    <div class="theory-card" style="flex:1.5; min-width:400px; margin:0; position:relative; min-height:350px; overflow:hidden;">
+                        <canvas id="transCanvas" style="position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none;"></canvas>
+                        
+                        <div style="position:absolute; top:50%; left:20%; transform:translate(-50%,-50%); background:var(--bg-card); border:2px solid #3b82f6; padding:15px; border-radius:12px; text-align:center; z-index:2; min-width:100px;" id="transClient">
+                            <div style="font-size:32px;">💻</div>
+                            <div style="font-weight:800; font-size:14px; margin-top:5px;">Host A</div>
+                            <div id="tcpStateA" style="font-size:10px; color:#f59e0b; margin-top:5px; font-family:'JetBrains Mono', monospace; font-weight:bold;">CLOSED</div>
+                        </div>
+                        
+                        <div style="position:absolute; top:50%; left:80%; transform:translate(-50%,-50%); background:var(--bg-card); border:2px solid #10b981; padding:15px; border-radius:12px; text-align:center; z-index:2; min-width:100px;" id="transServer">
+                            <div style="font-size:32px;">🗄️</div>
+                            <div style="font-weight:800; font-size:14px; margin-top:5px;">Host B</div>
+                            <div id="tcpStateB" style="font-size:10px; color:#f59e0b; margin-top:5px; font-family:'JetBrains Mono', monospace; font-weight:bold;">LISTEN</div>
+                        </div>
+                    </div>
+                    
+                    <div class="theory-card" style="width:350px; margin:0; display:flex; flex-direction:column;">
+                        <h3 style="color:var(--primary); margin-bottom:15px;">Protocol Settings</h3>
+                        <div style="display:flex; flex-direction:column; gap:10px;">
+                            <label style="font-size:12px; font-weight:800; color:var(--text-muted);">Select Protocol:</label>
+                            <select id="transProtocol" class="sim-select" style="width:100%;">
+                                <option value="tcp">TCP (Reliable, Connection-Oriented)</option>
+                                <option value="udp">UDP (Unreliable, Connectionless)</option>
+                            </select>
+                            <button id="btnTransStart" class="btn-sim primary">Start Transmission</button>
+                        </div>
+                        
+                        <div id="transConsole" style="background:#0b0f19; border-radius:8px; padding:10px; font-family:'JetBrains Mono', monospace; font-size:11px; color:#10b981; height:180px; overflow-y:auto; margin-top:20px; border:1px solid var(--border);">
+                            > Transport Simulator Ready
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        const canvas = document.getElementById('transCanvas');
+        const ctx = canvas.getContext('2d');
+        let aniFrame = null;
+        let isSimRunning = false;
+
+        const getPos = (id) => {
+            const el = document.getElementById(id);
+            const rect = el.getBoundingClientRect();
+            const parentRect = canvas.parentElement.getBoundingClientRect();
+            return {
+                x: rect.left - parentRect.left + (rect.width/2),
+                y: rect.top - parentRect.top + (rect.height/2)
+            };
+        };
+
+        const drawTopology = () => {
+            canvas.width = canvas.parentElement.clientWidth;
+            canvas.height = canvas.parentElement.clientHeight;
+            ctx.clearRect(0,0, canvas.width, canvas.height);
+            
+            const client = getPos('transClient');
+            const server = getPos('transServer');
+
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+            ctx.beginPath();
+            ctx.moveTo(client.x, client.y);
+            ctx.lineTo(server.x, server.y);
+            ctx.stroke();
+        };
+
+        setTimeout(drawTopology, 50);
+        window.addEventListener('resize', () => { if(document.getElementById('transCanvas')) drawTopology(); });
+        
+        const log = (msg, color='#10b981') => {
+            const c = document.getElementById('transConsole');
+            c.innerHTML += `<div style="color:${color}; margin-bottom:4px;">> ${msg}</div>`;
+            c.scrollTop = c.scrollHeight;
+        };
+
+        const setTcpState = (host, state, color) => {
+            const el = document.getElementById(host === 'A' ? 'tcpStateA' : 'tcpStateB');
+            el.textContent = state;
+            el.style.color = color;
+        };
+
+        const animatePacket = (from, to, color, tag, duration, yOffset=0, onComplete) => {
+            let start = performance.now();
+            
+            const animate = (time) => {
+                if(!document.getElementById('transCanvas')) return;
+                let progress = (time - start) / duration;
+                if(progress > 1) progress = 1;
+                
+                // Don't clear canvas to allow multiple packets (UDP stream)
+                // Just clear this packet's previous position if we wanted to, but we'll re-draw full topology for simplicity in TCP. For UDP, we might just layer them.
+                // Actually, to support multiple packets cleanly without redrawing full canvas every frame (which erases other packets), we'll keep a list of active packets in the main loop. But for simplicity, we'll draw over the line.
+                
+                // Let's just redraw full canvas for TCP, and for UDP we'll manage an array.
+                
+                const p1 = getPos(from);
+                const p2 = getPos(to);
+                
+                const x = p1.x + (p2.x - p1.x) * progress;
+                const y = p1.y + (p2.y - p1.y) * progress + yOffset;
+                
+                ctx.fillStyle = color;
+                ctx.fillRect(x - 10, y - 10, 20, 20);
+                
+                if(tag) {
+                    ctx.fillStyle = '#fff';
+                    ctx.font = 'bold 9px Outfit, sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(tag, x, y);
+                }
+                
+                if(progress < 1) {
+                    requestAnimationFrame(animate);
+                } else {
+                    if(onComplete) onComplete();
+                }
+            };
+            requestAnimationFrame(animate);
+        };
+
+        let packets = [];
+        let udpInterval = null;
+
+        const loopUdp = () => {
+            if(!document.getElementById('transCanvas')) return;
+            drawTopology();
+            const now = performance.now();
+            packets = packets.filter(p => {
+                const prog = (now - p.start) / p.dur;
+                if(prog >= 1) return false;
+                const p1 = getPos('transClient'), p2 = getPos('transServer');
+                const x = p1.x + (p2.x - p1.x) * prog;
+                const y = p1.y + (p2.y - p1.y) * prog + p.yOff;
+                
+                if(p.dropped && prog > 0.5) return false; // packet drops midway
+                
+                ctx.fillStyle = p.color;
+                ctx.fillRect(x - 10, y - 10, 20, 20);
+                return true;
+            });
+            if(isSimRunning && document.getElementById('transProtocol').value === 'udp') {
+                aniFrame = requestAnimationFrame(loopUdp);
+            }
+        };
+
+        document.getElementById('btnTransStart').addEventListener('click', () => {
+            if(isSimRunning) return;
+            isSimRunning = true;
+            document.getElementById('transConsole').innerHTML = '';
+            document.getElementById('btnTransStart').disabled = true;
+            
+            const protocol = document.getElementById('transProtocol').value;
+            
+            if(protocol === 'tcp') {
+                log('Initiating TCP 3-Way Handshake...', '#fff');
+                setTcpState('A', 'SYN-SENT', '#f59e0b');
+                log('Host A: [SYN] Seq=0', '#3b82f6');
+                
+                const c = 'transClient', s = 'transServer';
+                const drawFull = () => {
+                    requestAnimationFrame(() => {
+                        if(isSimRunning) { drawTopology(); requestAnimationFrame(drawFull); }
+                    });
+                };
+                drawFull(); // Start background redraw loop
+                
+                animatePacket(c, s, '#3b82f6', 'SYN', 1500, 0, () => {
+                    setTcpState('B', 'SYN-RCVD', '#f59e0b');
+                    log('Host B: Received SYN. Sending [SYN, ACK] Seq=0, Ack=1', '#10b981');
+                    
+                    animatePacket(s, c, '#10b981', 'SYN-ACK', 1500, 0, () => {
+                        setTcpState('A', 'ESTABLISHED', '#10b981');
+                        log('Host A: Received SYN-ACK. Sending [ACK] Seq=1, Ack=1', '#3b82f6');
+                        
+                        animatePacket(c, s, '#3b82f6', 'ACK', 1500, 0, () => {
+                            setTcpState('B', 'ESTABLISHED', '#10b981');
+                            log('TCP CONNECTION ESTABLISHED', '#fff');
+                            
+                            setTimeout(() => {
+                                log('Sending Data Window (Size=3)...');
+                                animatePacket(c, s, '#8b5cf6', 'P1', 1000, -20);
+                                animatePacket(c, s, '#8b5cf6', 'P2', 1000, 0);
+                                animatePacket(c, s, '#8b5cf6', 'P3', 1000, 20, () => {
+                                    log('Host B: Received Window. Sending Cumulative [ACK 4]');
+                                    animatePacket(s, c, '#10b981', 'ACK 4', 1000, 0, () => {
+                                        log('Data transfer complete safely.', '#10b981');
+                                        isSimRunning = false;
+                                        setTcpState('A', 'CLOSED', '#ef4444');
+                                        setTcpState('B', 'LISTEN', '#f59e0b');
+                                        document.getElementById('btnTransStart').disabled = false;
+                                    });
+                                });
+                            }, 1000);
+                        });
+                    });
+                });
+            } else {
+                // UDP
+                setTcpState('A', 'N/A', '#64748b');
+                setTcpState('B', 'N/A', '#64748b');
+                log('Starting UDP Datagram Stream (Connectionless)...', '#fff');
+                log('No handshake required. Blasting packets...', '#ef4444');
+                
+                let count = 0;
+                packets = [];
+                aniFrame = requestAnimationFrame(loopUdp);
+                
+                udpInterval = setInterval(() => {
+                    if(count > 20) {
+                        clearInterval(udpInterval);
+                        setTimeout(() => {
+                            isSimRunning = false;
+                            document.getElementById('btnTransStart').disabled = false;
+                            log('UDP Stream Finished. No ACKs expected or received.', '#fff');
+                        }, 1000);
+                        return;
+                    }
+                    count++;
+                    const dropped = Math.random() < 0.2; // 20% drop rate
+                    packets.push({
+                        start: performance.now(),
+                        dur: 800 + Math.random()*400,
+                        yOff: (Math.random() - 0.5) * 80,
+                        color: dropped ? '#ef4444' : '#3b82f6',
+                        dropped: dropped
+                    });
+                    if(dropped) log(`Datagram ${count} dropped in transit. (No retransmission)`, '#ef4444');
+                }, 150);
+            }
+        });
+    };
+
+    const initCsmaSim = (container) => {
+        container.innerHTML = `
+            <div class="sim-toolbar">
+                <div class="section-title" style="font-size:22px; margin:0; color:var(--primary);">Media Access Control: CSMA</div>
+            </div>
+            <div class="sim-workspace" style="padding:20px; gap:20px; flex-direction:column; overflow-y:auto; overflow-x:hidden;">
+                <div style="display:flex; gap:20px; flex-wrap:wrap;">
+                    <div class="theory-card" style="flex:1.5; min-width:400px; margin:0; position:relative; min-height:450px; overflow:hidden;">
+                        <canvas id="csmaCanvas" style="position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:1;"></canvas>
+                        
+                        <!-- Shared Bus Line -->
+                        <div style="position:absolute; top:50%; left:10%; right:10%; height:8px; background:#1e293b; border-radius:4px; z-index:0; border:1px solid #334155;"></div>
+                        
+                        <div style="position:absolute; top:20%; left:25%; transform:translate(-50%,-50%); background:var(--bg-card); border:2px solid #3b82f6; padding:10px; border-radius:8px; text-align:center; z-index:2;" id="macNode1">
+                            <div style="font-size:24px;">💻</div>
+                            <div style="font-weight:800; font-size:11px;">Node 1</div>
+                            <div style="font-size:9px; color:var(--text-muted); font-family:'JetBrains Mono', monospace;" id="stateN1">IDLE</div>
+                        </div>
+                        
+                        <div style="position:absolute; top:80%; left:50%; transform:translate(-50%,-50%); background:var(--bg-card); border:2px solid #10b981; padding:10px; border-radius:8px; text-align:center; z-index:2;" id="macNode2">
+                            <div style="font-size:24px;">💻</div>
+                            <div style="font-weight:800; font-size:11px;">Node 2</div>
+                            <div style="font-size:9px; color:var(--text-muted); font-family:'JetBrains Mono', monospace;" id="stateN2">IDLE</div>
+                        </div>
+                        
+                        <div style="position:absolute; top:20%; left:75%; transform:translate(-50%,-50%); background:var(--bg-card); border:2px solid #f59e0b; padding:10px; border-radius:8px; text-align:center; z-index:2;" id="macNode3">
+                            <div style="font-size:24px;">💻</div>
+                            <div style="font-weight:800; font-size:11px;">Node 3</div>
+                            <div style="font-size:9px; color:var(--text-muted); font-family:'JetBrains Mono', monospace;" id="stateN3">IDLE</div>
+                        </div>
+                    </div>
+                    
+                    <div class="theory-card" style="width:300px; margin:0; display:flex; flex-direction:column;">
+                        <h3 style="color:var(--primary); margin-bottom:15px;">MAC Controls</h3>
+                        <div style="display:flex; flex-direction:column; gap:10px;">
+                            <label style="font-size:12px; font-weight:800; color:var(--text-muted);">Protocol:</label>
+                            <select id="macProtocol" class="sim-select" style="width:100%;">
+                                <option value="cd">CSMA/CD (Ethernet)</option>
+                                <option value="ca">CSMA/CA (Wi-Fi)</option>
+                            </select>
+                            
+                            <label style="font-size:12px; font-weight:800; color:var(--text-muted); margin-top:5px;">Traffic Load:</label>
+                            <input type="range" id="macLoad" min="1" max="3" value="2" style="width:100%;">
+                            <div style="display:flex; justify-content:space-between; font-size:10px; color:#64748b;">
+                                <span>Low</span><span>Med</span><span>High (Collisions!)</span>
+                            </div>
+                            
+                            <label style="font-size:12px; font-weight:800; color:var(--text-muted); margin-top:5px; display:flex; align-items:center; gap:8px;">
+                                <input type="checkbox" id="macRts" checked> Use RTS/CTS (CA Only)
+                            </label>
+                            
+                            <button id="btnMacStart" class="btn-sim primary" style="margin-top:10px;">Trigger Transmission</button>
+                        </div>
+                        
+                        <div id="macConsole" style="background:#0b0f19; border-radius:8px; padding:10px; font-family:'JetBrains Mono', monospace; font-size:11px; color:#10b981; flex:1; overflow-y:auto; margin-top:15px; border:1px solid var(--border);">
+                            > MAC Subsystem Initialized
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        const canvas = document.getElementById('csmaCanvas');
+        const ctx = canvas.getContext('2d');
+        let isSimRunning = false;
+
+        const getPos = (id) => {
+            const el = document.getElementById(id);
+            const rect = el.getBoundingClientRect();
+            const parentRect = canvas.parentElement.getBoundingClientRect();
+            return {
+                x: rect.left - parentRect.left + (rect.width/2),
+                y: rect.top - parentRect.top + (rect.height/2)
+            };
+        };
+
+        const drawTopology = () => {
+            canvas.width = canvas.parentElement.clientWidth;
+            canvas.height = canvas.parentElement.clientHeight;
+            ctx.clearRect(0,0, canvas.width, canvas.height);
+            
+            const n1 = getPos('macNode1'), n2 = getPos('macNode2'), n3 = getPos('macNode3');
+            const busY = canvas.height / 2;
+
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = '#1e293b';
+            
+            // Drop cables
+            [n1, n2, n3].forEach(n => {
+                ctx.beginPath();
+                ctx.moveTo(n.x, n.y);
+                ctx.lineTo(n.x, busY);
+                ctx.stroke();
+            });
+        };
+
+        setTimeout(drawTopology, 50);
+        window.addEventListener('resize', () => { if(document.getElementById('csmaCanvas')) drawTopology(); });
+        
+        const log = (msg, color='#10b981') => {
+            const c = document.getElementById('macConsole');
+            c.innerHTML += `<div style="color:${color}; margin-bottom:4px;">> ${msg}</div>`;
+            c.scrollTop = c.scrollHeight;
+        };
+
+        const setState = (id, state, color) => {
+            const el = document.getElementById(id);
+            el.textContent = state;
+            el.style.color = color;
+        };
+
+        const animateSignal = (srcNode, isCollision, color, tag, onComplete) => {
+            let start = performance.now();
+            const dur = 1500;
+            const srcPos = getPos(srcNode);
+            const busY = canvas.height / 2;
+            
+            const animate = (time) => {
+                if(!document.getElementById('csmaCanvas')) return;
+                let prog = (time - start) / dur;
+                if(prog > 1) prog = 1;
+                
+                drawTopology();
+                
+                // Drop to bus
+                let dropProg = Math.min(prog * 3, 1);
+                ctx.fillStyle = color;
+                ctx.fillRect(srcPos.x - 5, srcPos.y + (busY - srcPos.y)*dropProg - 5, 10, 10);
+                
+                if(prog > 0.33) {
+                    // Spread on bus
+                    let spreadProg = (prog - 0.33) * 1.5;
+                    const maxSpread = canvas.width * 0.4;
+                    ctx.fillStyle = color;
+                    ctx.globalAlpha = 0.5;
+                    ctx.fillRect(srcPos.x - maxSpread*spreadProg, busY - 4, maxSpread*spreadProg*2, 8);
+                    ctx.globalAlpha = 1.0;
+                    
+                    if(isCollision && prog > 0.6) {
+                        ctx.fillStyle = '#ef4444';
+                        ctx.beginPath();
+                        ctx.arc(srcPos.x, busY, 20 + Math.sin(time/50)*10, 0, Math.PI*2);
+                        ctx.fill();
+                        ctx.fillStyle = '#fff';
+                        ctx.font = 'bold 12px sans-serif';
+                        ctx.textAlign = 'center';
+                        ctx.fillText('COLLISION', srcPos.x, busY + 35);
+                    } else if (tag && prog > 0.5 && prog < 0.9) {
+                        ctx.fillStyle = '#fff';
+                        ctx.font = 'bold 10px monospace';
+                        ctx.fillText(tag, srcPos.x + 15, busY - 15);
+                    }
+                }
+                
+                if(prog < 1) requestAnimationFrame(animate);
+                else { drawTopology(); if(onComplete) onComplete(); }
+            };
+            requestAnimationFrame(animate);
+        };
+
+        document.getElementById('btnMacStart').addEventListener('click', () => {
+            if(isSimRunning) return;
+            isSimRunning = true;
+            document.getElementById('macConsole').innerHTML = '';
+            
+            const proto = document.getElementById('macProtocol').value;
+            const load = document.getElementById('macLoad').value;
+            const rts = document.getElementById('macRts').checked;
+            
+            document.querySelectorAll('[id^=stateN]').forEach(el => {el.textContent = 'IDLE'; el.style.color='#64748b';});
+            
+            if(proto === 'cd') {
+                log('CSMA/CD: Carrier Sense Multiple Access / Collision Detection', '#fff');
+                log('Node 1 listening to medium...');
+                setState('stateN1', 'SENSING', '#f59e0b');
+                
+                setTimeout(() => {
+                    log('Medium IDLE. Node 1 begins transmission.');
+                    setState('stateN1', 'TRANSMITTING', '#3b82f6');
+                    
+                    if(load >= 2 && Math.random() > 0.4) {
+                        // Collision Scenario
+                        log('Node 3 simultaneously transmits! (Propagation Delay)', '#ef4444');
+                        setState('stateN3', 'TRANSMITTING', '#3b82f6');
+                        animateSignal('macNode1', true, '#3b82f6', 'DATA');
+                        setTimeout(() => animateSignal('macNode3', true, '#f59e0b', 'DATA'), 200);
+                        
+                        setTimeout(() => {
+                            log('COLLISION DETECTED! Sending JAM signal.', '#ef4444');
+                            setState('stateN1', 'JAMMING', '#ef4444');
+                            setState('stateN3', 'JAMMING', '#ef4444');
+                            setTimeout(() => {
+                                log('Nodes executing Binary Exponential Backoff.');
+                                setState('stateN1', 'BACKOFF (8μs)', '#8b5cf6');
+                                setState('stateN3', 'BACKOFF (14μs)', '#8b5cf6');
+                                setTimeout(() => {
+                                    log('Node 1 timer expired. Retransmitting...', '#10b981');
+                                    setState('stateN1', 'TRANSMITTING', '#3b82f6');
+                                    setState('stateN3', 'IDLE', '#64748b');
+                                    animateSignal('macNode1', false, '#3b82f6', 'DATA', () => {
+                                        log('Transmission Complete.', '#10b981');
+                                        setState('stateN1', 'IDLE', '#64748b');
+                                        isSimRunning = false;
+                                    });
+                                }, 1500);
+                            }, 1000);
+                        }, 1200);
+                    } else {
+                        // Success Scenario
+                        animateSignal('macNode1', false, '#3b82f6', 'DATA', () => {
+                            log('Transmission completed successfully.', '#10b981');
+                            setState('stateN1', 'IDLE', '#64748b');
+                            isSimRunning = false;
+                        });
+                    }
+                }, 800);
+            } else {
+                // CA
+                log('CSMA/CA: Collision Avoidance (Wireless Mode)', '#fff');
+                log('Node 1 wants to send to Node 2.');
+                setState('stateN1', 'DIFS WAIT', '#f59e0b');
+                
+                setTimeout(() => {
+                    if(rts) {
+                        log('Node 1 sending RTS (Request to Send)...');
+                        setState('stateN1', 'RTS', '#8b5cf6');
+                        animateSignal('macNode1', false, '#8b5cf6', 'RTS', () => {
+                            log('Node 2 sending CTS (Clear to Send)...', '#10b981');
+                            setState('stateN2', 'CTS', '#10b981');
+                            setState('stateN3', 'NAV WAIT', '#ef4444');
+                            log('Node 3 updates NAV (Network Allocation Vector) and sleeps.', '#ef4444');
+                            animateSignal('macNode2', false, '#10b981', 'CTS', () => {
+                                log('Node 1 sending DATA...', '#3b82f6');
+                                setState('stateN1', 'DATA', '#3b82f6');
+                                setState('stateN2', 'RECEIVING', '#10b981');
+                                animateSignal('macNode1', false, '#3b82f6', 'DATA', () => {
+                                    log('Node 2 sending ACK.', '#10b981');
+                                    setState('stateN1', 'WAIT ACK', '#f59e0b');
+                                    setState('stateN2', 'ACK', '#10b981');
+                                    animateSignal('macNode2', false, '#10b981', 'ACK', () => {
+                                        log('CSMA/CA Exchange Complete!', '#fff');
+                                        document.querySelectorAll('[id^=stateN]').forEach(el => {el.textContent = 'IDLE'; el.style.color='#64748b';});
+                                        isSimRunning = false;
+                                    });
+                                });
+                            });
+                        });
+                    } else {
+                        log('RTS/CTS disabled. Sending DATA directly...', '#3b82f6');
+                        setState('stateN1', 'DATA', '#3b82f6');
+                        
+                        if(load >= 2 && Math.random() > 0.4) {
+                            log('Hidden Node (Node 3) also transmits! Collision occurs at Node 2!', '#ef4444');
+                            setState('stateN3', 'DATA', '#3b82f6');
+                            animateSignal('macNode1', true, '#3b82f6', 'DATA');
+                            setTimeout(() => animateSignal('macNode3', true, '#f59e0b', 'DATA'), 200);
+                            setTimeout(() => {
+                                log('Collision destroys DATA. No ACK received.', '#ef4444');
+                                setState('stateN1', 'TIMEOUT', '#ef4444');
+                                setState('stateN3', 'TIMEOUT', '#ef4444');
+                                setTimeout(() => {
+                                    log('Backoff & Retrying...', '#f59e0b');
+                                    isSimRunning = false;
+                                }, 1500);
+                            }, 1500);
+                        } else {
+                            animateSignal('macNode1', false, '#3b82f6', 'DATA', () => {
+                                log('Node 2 sending ACK.', '#10b981');
+                                setState('stateN2', 'ACK', '#10b981');
+                                animateSignal('macNode2', false, '#10b981', 'ACK', () => {
+                                    log('CSMA/CA Exchange Complete.', '#10b981');
+                                    document.querySelectorAll('[id^=stateN]').forEach(el => {el.textContent = 'IDLE'; el.style.color='#64748b';});
+                                    isSimRunning = false;
+                                });
+                            });
+                        }
+                    }
+                }, 1000);
+            }
         });
     };
 
@@ -4722,6 +5926,31 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
 
+        if (data.simType === 'vlan_sim') {
+            initVlanSim(container);
+            return;
+        }
+
+        if (data.simType === 'dns') {
+            initDnsSim(container);
+            return;
+        }
+
+        if (data.simType === 'dv_sim' || data.simType === 'ls_sim') {
+            initRoutingSim(container);
+            return;
+        }
+
+        if (data.simType === 'gbn' || data.simType === 'udp') {
+            initTransportSim(container);
+            return;
+        }
+
+        if (data.simType === 'collision' || data.simType === 'csma_ca') {
+            initCsmaSim(container);
+            return;
+        }
+
         container.innerHTML = `
             <div class="sim-toolbar">
                 <div class="sim-controls">
@@ -4731,8 +5960,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <div class="sim-title" style="flex:1; text-align:center; font-weight:800; font-size:18px; color:var(--primary);">${data.title}</div>
                 <div class="sim-options">
                     <select id="simType" class="sim-select">
-                        <option value="stop-wait">Stop and Wait</option>
-                        <option value="gbn">Go-Back-N</option>
                         <option value="collision">CSMA/CD</option>
                         <option value="csma_ca">CSMA/CA</option>
                     </select>
