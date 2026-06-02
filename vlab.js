@@ -147,7 +147,7 @@ const generatePDFReport = async (labId) => {
     const progress = loader.querySelector('#report-progress');
 
     const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
+    const pdf = new jsPDF();
     const name = localStorage.getItem('vlab_user_name') || 'Student User';
     const data = window.VLAB_DATA[labId] || { title: "Custom Experiment", aim: "N/A", theory: { intro: "", cards: [] }, procedure: [] };
 
@@ -169,9 +169,9 @@ const generatePDFReport = async (labId) => {
                     if (window.currentTopo) window.currentTopo.render();
 
                     const imgData = canvas.toDataURL('image/jpeg', 0.9);
-                    doc.setFont("helvetica", "bold"); doc.setFontSize(12);
-                    doc.text(title, 20, yPos);
-                    doc.addImage(imgData, 'JPEG', 20, yPos + 5, 170, 85);
+                    pdf.setFont("helvetica", "bold"); pdf.setFontSize(12);
+                    pdf.text(title, 20, yPos);
+                    pdf.addImage(imgData, 'JPEG', 20, yPos + 5, 170, 85);
                     return yPos + 100;
                 }
             }
@@ -190,17 +190,17 @@ const generatePDFReport = async (labId) => {
             });
 
             const imgData = canvas.toDataURL('image/jpeg', 0.8);
-            doc.setFont("helvetica", "bold"); doc.setFontSize(12);
-            doc.text(title, 20, yPos);
-            doc.addImage(imgData, 'JPEG', 20, yPos + 5, 170, 85);
+            pdf.setFont("helvetica", "bold"); pdf.setFontSize(12);
+            pdf.text(title, 20, yPos);
+            pdf.addImage(imgData, 'JPEG', 20, yPos + 5, 170, 85);
             
             if (section && !wasActive) section.style.display = 'none';
             return yPos + 100;
 
         } catch (e) {
             console.error(`Report capture failed for ${elementId}:`, e);
-            doc.setFont("helvetica", "italic"); doc.setFontSize(10);
-            doc.text(`[Image Capture Failed for ${title}]`, 20, yPos + 10);
+            pdf.setFont("helvetica", "italic"); pdf.setFontSize(10);
+            pdf.text(`[Image Capture Failed for ${title}]`, 20, yPos + 10);
             return yPos + 20;
         }
     };
@@ -208,67 +208,67 @@ const generatePDFReport = async (labId) => {
     progress.style.width = "10%";
 
     // Header
-    doc.setFillColor(30, 58, 138);
-    doc.rect(0, 0, 210, 40, 'F');
-    doc.setTextColor(255, 255, 255);
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(22);
-    doc.text("MIT ADT UNIVERSITY", 105, 20, { align: 'center' });
-    doc.setFontSize(14);
-    doc.text("VIRTUAL NETWORKING LABORATORY REPORT", 105, 30, { align: 'center' });
+    pdf.setFillColor(30, 58, 138);
+    pdf.rect(0, 0, 210, 40, 'F');
+    pdf.setTextColor(255, 255, 255);
+    pdf.setFont("helvetica", "bold");
+    pdf.setFontSize(22);
+    pdf.text("MIT ADT UNIVERSITY", 105, 20, { align: 'center' });
+    pdf.setFontSize(14);
+    pdf.text("VIRTUAL NETWORKING LABORATORY REPORT", 105, 30, { align: 'center' });
 
-    doc.setTextColor(0, 0, 0);
-    doc.setFontSize(11);
-    doc.text(`Student: ${name}`, 20, 55);
-    doc.text(`Lab: ${data.title}`, 20, 62);
-    doc.text(`Date: ${new Date().toLocaleDateString()}`, 20, 69);
+    pdf.setTextColor(0, 0, 0);
+    pdf.setFontSize(11);
+    pdf.text(`Student: ${name}`, 20, 55);
+    pdf.text(`Lab: ${data.title}`, 20, 62);
+    pdf.text(`Date: ${new Date().toLocaleDateString()}`, 20, 69);
 
     progress.style.width = "30%";
 
     // Section 1 & 2: Aim & Theory
-    doc.setFontSize(14); doc.setFont("helvetica", "bold");
-    doc.text("1. AIM", 20, 85);
-    doc.setFont("helvetica", "normal"); doc.setFontSize(11);
-    doc.text(doc.splitTextToSize(data.aim, 170), 20, 93);
+    pdf.setFontSize(14); pdf.setFont("helvetica", "bold");
+    pdf.text("1. AIM", 20, 85);
+    pdf.setFont("helvetica", "normal"); pdf.setFontSize(11);
+    pdf.text(pdf.splitTextToSize(data.aim, 170), 20, 93);
 
     let y = 115;
-    doc.setFont("helvetica", "bold"); doc.setFontSize(14);
-    doc.text("2. THEORY", 20, y); y += 8;
-    doc.setFont("helvetica", "normal"); doc.setFontSize(11);
-    const theoryLines = doc.splitTextToSize(data.theory.intro, 170);
-    doc.text(theoryLines, 20, y); y += (theoryLines.length * 6) + 5;
+    pdf.setFont("helvetica", "bold"); pdf.setFontSize(14);
+    pdf.text("2. THEORY", 20, y); y += 8;
+    pdf.setFont("helvetica", "normal"); pdf.setFontSize(11);
+    const theoryLines = pdf.splitTextToSize(data.theory.intro, 170);
+    pdf.text(theoryLines, 20, y); y += (theoryLines.length * 6) + 5;
 
     // Section 3: Procedure
-    if (y > 200) { doc.addPage(); y = 30; }
-    doc.setFont("helvetica", "bold"); doc.setFontSize(14);
-    doc.text("3. PROCEDURE", 20, y); y += 8;
-    doc.setFont("helvetica", "normal"); doc.setFontSize(11);
+    if (y > 200) { pdf.addPage(); y = 30; }
+    pdf.setFont("helvetica", "bold"); pdf.setFontSize(14);
+    pdf.text("3. PROCEDURE", 20, y); y += 8;
+    pdf.setFont("helvetica", "normal"); pdf.setFontSize(11);
     data.procedure.forEach((step, i) => {
-        const stepLines = doc.splitTextToSize(`${i + 1}. ${step}`, 165);
-        doc.text(stepLines, 25, y);
+        const stepLines = pdf.splitTextToSize(`${i + 1}. ${step}`, 165);
+        pdf.text(stepLines, 25, y);
         y += (stepLines.length * 6) + 2;
-        if (y > 270) { doc.addPage(); y = 30; }
+        if (y > 270) { pdf.addPage(); y = 30; }
     });
 
     progress.style.width = "50%";
 
     // Section 4: Visualizations
-    doc.addPage();
+    pdf.addPage();
     y = 30;
-    doc.setFont("helvetica", "bold"); doc.setFontSize(14);
-    doc.text("4. EXPERIMENT VISUALIZATIONS", 20, y); y += 15;
+    pdf.setFont("helvetica", "bold"); pdf.setFontSize(14);
+    pdf.text("4. EXPERIMENT VISUALIZATIONS", 20, y); y += 15;
     
     y = await addElementToPDF('simCanvas', "A. Protocol Animation State", y);
-    if (y > 200) { doc.addPage(); y = 30; }
+    if (y > 200) { pdf.addPage(); y = 30; }
     y = await addElementToPDF('topology-builder-ui', "B. Configured Network Topology", y);
 
     progress.style.width = "70%";
 
     // Section 5: Results Table
-    doc.addPage();
+    pdf.addPage();
     y = 30;
-    doc.setFont("helvetica", "bold"); doc.setFontSize(14);
-    doc.text("5. PERFORMANCE RESULTS", 20, y); y += 10;
+    pdf.setFont("helvetica", "bold"); pdf.setFontSize(14);
+    pdf.text("5. PERFORMANCE RESULTS", 20, y); y += 10;
 
     const stats = [
         ["Metric", "Value"],
@@ -278,18 +278,18 @@ const generatePDFReport = async (labId) => {
         ["Average Throughput", document.getElementById('statThroughput')?.textContent || "0 Bps"]
     ];
 
-    doc.autoTable({
+    pdf.autoTable({
         startY: y,
         head: [stats[0]],
         body: stats.slice(1),
         theme: 'striped',
         headStyles: { fillColor: [30, 58, 138] }
     });
-    y = doc.lastAutoTable.finalY + 20;
+    y = pdf.lastAutoTable.finalY + 20;
 
     // Section 6: Observation Log Table
-    doc.setFont("helvetica", "bold"); doc.setFontSize(14);
-    doc.text("6. PROTOCOL OBSERVATION LOG", 20, y); y += 8;
+    pdf.setFont("helvetica", "bold"); pdf.setFontSize(14);
+    pdf.text("6. PROTOCOL OBSERVATION LOG", 20, y); y += 8;
 
     const logs = Array.from(document.querySelectorAll('#eventList .event-item')).map(item => {
         const time = item.querySelector('.event-time')?.textContent || "";
@@ -299,7 +299,7 @@ const generatePDFReport = async (labId) => {
     }).slice(-15); // Take last 15 events for the report
 
     if (logs.length > 0) {
-        doc.autoTable({
+        pdf.autoTable({
             startY: y,
             head: [["Time", "Protocol", "Observation/Event Detail"]],
             body: logs,
@@ -307,86 +307,86 @@ const generatePDFReport = async (labId) => {
             styles: { fontSize: 9 },
             headStyles: { fillColor: [16, 185, 129] }
         });
-        y = doc.lastAutoTable.finalY + 20;
+        y = pdf.lastAutoTable.finalY + 20;
     } else {
-        doc.setFont("helvetica", "italic"); doc.setFontSize(10);
-        doc.text("No specific protocol events logged during this session.", 25, y);
+        pdf.setFont("helvetica", "italic"); pdf.setFontSize(10);
+        pdf.text("No specific protocol events logged during this session.", 25, y);
         y += 15;
     }
 
     // Section 7: Conclusion
-    if (y > 240) { doc.addPage(); y = 30; }
-    doc.setFont("helvetica", "bold"); doc.setFontSize(14);
-    doc.text("7. CONCLUSION", 20, y); y += 10;
-    doc.setFont("helvetica", "normal"); doc.setFontSize(11);
+    if (y > 240) { pdf.addPage(); y = 30; }
+    pdf.setFont("helvetica", "bold"); pdf.setFontSize(14);
+    pdf.text("7. CONCLUSION", 20, y); y += 10;
+    pdf.setFont("helvetica", "normal"); pdf.setFontSize(11);
     const concl = "The experiment successfully demonstrated the requested protocol behaviors. Live simulation verified packet flow, efficiency metrics, and topological connectivity in accordance with academic requirements.";
-    doc.text(doc.splitTextToSize(concl, 170), 20, y);
+    pdf.text(pdf.splitTextToSize(concl, 170), 20, y);
 
     progress.style.width = "100%";
     setTimeout(() => {
-        doc.save(`${data.title.replace(/ /g, '_')}_Academic_Report.pdf`);
+        pdf.save(`${data.title.replace(/ /g, '_')}_Academic_Report.pdf`);
         loader.remove();
     }, 500);
 };
 
 const generateCertificate = async (labId) => {
     const { jsPDF } = window.jspdf;
-    const doc = new jsPDF({ orientation: 'landscape' });
+    const pdf = new jsPDF({ orientation: 'landscape' });
     const name = localStorage.getItem('vlab_user_name') || 'Student User';
     const data = window.VLAB_DATA[labId] || { title: "Custom Experiment" };
 
     // Aesthetic Border
-    doc.setDrawColor(30, 58, 138);
-    doc.setLineWidth(5);
-    doc.rect(5, 5, 287, 200);
-    doc.setDrawColor(251, 191, 36); // Gold
-    doc.setLineWidth(1);
-    doc.rect(10, 10, 277, 190);
+    pdf.setDrawColor(30, 58, 138);
+    pdf.setLineWidth(5);
+    pdf.rect(5, 5, 287, 200);
+    pdf.setDrawColor(251, 191, 36); // Gold
+    pdf.setLineWidth(1);
+    pdf.rect(10, 10, 277, 190);
 
     // Header
-    doc.setTextColor(30, 58, 138);
-    doc.setFont("times", "bold");
-    doc.setFontSize(30);
-    doc.text("MIT ADT UNIVERSITY", 148, 40, { align: 'center' });
+    pdf.setTextColor(30, 58, 138);
+    pdf.setFont("times", "bold");
+    pdf.setFontSize(30);
+    pdf.text("MIT ADT UNIVERSITY", 148, 40, { align: 'center' });
 
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(16);
-    doc.text("CERTIFICATE OF COMPLETION", 148, 55, { align: 'center' });
+    pdf.setFont("helvetica", "normal");
+    pdf.setFontSize(16);
+    pdf.text("CERTIFICATE OF COMPLETION", 148, 55, { align: 'center' });
 
     // Body
-    doc.setFontSize(14);
-    doc.text("This is to certify that", 148, 80, { align: 'center' });
+    pdf.setFontSize(14);
+    pdf.text("This is to certify that", 148, 80, { align: 'center' });
 
-    doc.setFont("times", "bolditalic");
-    doc.setFontSize(42);
-    doc.text(name, 148, 105, { align: 'center' });
+    pdf.setFont("times", "bolditalic");
+    pdf.setFontSize(42);
+    pdf.text(name, 148, 105, { align: 'center' });
 
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(14);
-    doc.text("has successfully completed the virtual laboratory experiment on", 148, 125, { align: 'center' });
+    pdf.setFont("helvetica", "normal");
+    pdf.setFontSize(14);
+    pdf.text("has successfully completed the virtual laboratory experiment on", 148, 125, { align: 'center' });
 
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(20);
-    doc.text(data.title, 148, 140, { align: 'center' });
+    pdf.setFont("helvetica", "bold");
+    pdf.setFontSize(20);
+    pdf.text(data.title, 148, 140, { align: 'center' });
 
     // Seal/Logo Placeholder
-    doc.setFontSize(60);
-    doc.setTextColor(30, 58, 138, 0.1);
-    doc.text("MIT ADT", 148, 110, { align: 'center', angle: 45 });
+    pdf.setFontSize(60);
+    pdf.setTextColor(30, 58, 138, 0.1);
+    pdf.text("MIT ADT", 148, 110, { align: 'center', angle: 45 });
 
     // Footer
-    doc.setTextColor(0, 0, 0);
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(11);
-    doc.text("Dr. Nilesh Thorat", 60, 175);
-    doc.text("Supervisor, MIT ADT VLab", 60, 182);
-    doc.line(40, 170, 100, 170);
+    pdf.setTextColor(0, 0, 0);
+    pdf.setFont("helvetica", "normal");
+    pdf.setFontSize(11);
+    pdf.text("Dr. Nilesh Thorat", 60, 175);
+    pdf.text("Supervisor, MIT ADT VLab", 60, 182);
+    pdf.line(40, 170, 100, 170);
 
-    doc.text(new Date().toLocaleDateString(), 230, 175);
-    doc.text("Date of Issue", 230, 182);
-    doc.line(210, 170, 270, 170);
+    pdf.text(new Date().toLocaleDateString(), 230, 175);
+    pdf.text("Date of Issue", 230, 182);
+    pdf.line(210, 170, 270, 170);
 
-    doc.save(`${name.replace(/ /g, '_')}_Certificate.pdf`);
+    pdf.save(`${name.replace(/ /g, '_')}_Certificate.pdf`);
 };
 
 // Expose to global scope for HTML onclick handlers
@@ -4078,7 +4078,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
 
     const renderMCQ = (sectionId, questions, prefix) => {
-        const container = document.getElementById(sectionId).querySelector('.section-body');
+        const section = document.getElementById(sectionId);
+        if (!section) return;
+
+        let container;
+        if (prefix === 'post') {
+            container = section.querySelector('#post-mcq-container');
+        }
+        if (!container) {
+            container = section.querySelector('.section-body');
+        }
+        if (!container) return;
+
         let html = questions.map((q, i) => `
             <div class="theory-card" id="${prefix}-q${i}">
                 <strong>Q${i + 1}: ${q.q}</strong>
@@ -4092,8 +4103,16 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <div class="mcq-status" style="margin-top:12px; font-weight:800; display:none;"></div>
             </div>
         `).join('');
-        html += `<button class="btn-sim primary" style="margin-top:24px; width:100%;" id="submit-${prefix}">Submit Final Answers</button>`;
-        container.innerHTML = html;
+
+        let submitBtn;
+        if (prefix === 'post') {
+            container.innerHTML = html;
+            submitBtn = document.getElementById('submit-post');
+        } else {
+            html += `<button class="btn-sim primary" style="margin-top:24px; width:100%;" id="submit-${prefix}">Submit Final Answers</button>`;
+            container.innerHTML = html;
+            submitBtn = document.getElementById(`submit-${prefix}`);
+        }
 
         // Interactive selection feedback
         container.querySelectorAll('.mcq-option').forEach(opt => {
@@ -4104,61 +4123,69 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
         });
 
-        document.getElementById(`submit-${prefix}`).addEventListener('click', () => {
-            let correctCount = 0;
-            questions.forEach((q, i) => {
-                const selected = container.querySelector(`input[name="${prefix}-q${i}"]:checked`);
-                const status = document.getElementById(`${prefix}-q${i}`).querySelector('.mcq-status');
-                status.style.display = 'block';
-                if (selected && parseInt(selected.value) === q.correct) {
-                    correctCount++; status.textContent = 'Correct Answer ✓'; status.style.color = 'var(--success)';
-                } else {
-                    status.textContent = `Incorrect. Correct: ${q.options[q.correct]}`; status.style.color = 'var(--danger)';
+        if (submitBtn) {
+            // Remove previous event listeners by cloning the button to prevent duplicate handlers
+            const newSubmitBtn = submitBtn.cloneNode(true);
+            submitBtn.parentNode.replaceChild(newSubmitBtn, submitBtn);
+
+            newSubmitBtn.addEventListener('click', () => {
+                let correctCount = 0;
+                questions.forEach((q, i) => {
+                    const selected = container.querySelector(`input[name="${prefix}-q${i}"]:checked`);
+                    const status = document.getElementById(`${prefix}-q${i}`).querySelector('.mcq-status');
+                    if (status) {
+                        status.style.display = 'block';
+                        if (selected && parseInt(selected.value) === q.correct) {
+                            correctCount++; status.textContent = 'Correct Answer ✓'; status.style.color = 'var(--success)';
+                        } else {
+                            status.textContent = `Incorrect. Correct: ${q.options[q.correct]}`; status.style.color = 'var(--danger)';
+                        }
+                    }
+                });
+                const scorePercent = questions.length ? Math.round((correctCount / questions.length) * 100) : 100;
+                currentScore += scorePercent;
+                document.getElementById('scoreDisplay').innerHTML = `<span>🏆</span> Score: ${currentScore}`;
+                if (correctCount >= 0) {
+                    // Save state to unlock next sections
+                    if (prefix === 'pre') {
+                        const labId = document.getElementById('labSelect').value;
+                        const stateKey = getStateKey(labId);
+                        const state = JSON.parse(localStorage.getItem(`vlab_state_${stateKey}`) || '{}');
+                        state.pretest = true;
+                        localStorage.setItem(`vlab_state_${stateKey}`, JSON.stringify(state));
+                        alert(`Pretest Submitted! Simulation and Experiment sections are now UNLOCKED for this lab. 🚀`);
+                        syncProgress(labId, { pretest: true, pretestScore: scorePercent });
+                    }
+
+                    if (prefix === 'post') {
+                        const labId = document.getElementById('labSelect').value;
+                        const feedback = document.getElementById('student-feedback')?.value || "";
+                        const labData = window.VLAB_DATA[labId] || { title: "Custom Experiment" };
+                        const currentModData = labData.isMultiModule ? labData.modules[window.currentModuleIndex] : labData;
+
+                        syncProgress(labId, {
+                            posttest: true,
+                            posttestScore: scorePercent,
+                            completed: true,
+                            feedback: feedback
+                        });
+
+                        document.getElementById('cert-user-name').textContent = localStorage.getItem('vlab_user_name') || 'Atharva Gandhi';
+                        document.getElementById('cert-lab-name').textContent = labData.isMultiModule ? `${labData.title} - ${currentModData.title}` : labData.title;
+                        document.getElementById('cert-date').textContent = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+
+                        // Auto-generate report in background and prompt user
+                        console.log("Auto-capturing simulation state for report...");
+
+                        setTimeout(() => {
+                            document.getElementById('certModal').style.display = 'flex';
+                        }, 1000);
+                    } else {
+                        alert(`Section Complete! Accuracy: ${scorePercent}%`);
+                    }
                 }
             });
-            const scorePercent = questions.length ? Math.round((correctCount / questions.length) * 100) : 100;
-            currentScore += scorePercent;
-            document.getElementById('scoreDisplay').innerHTML = `<span>🏆</span> Score: ${currentScore}`;
-            if (correctCount >= 0) {
-                // Save state to unlock next sections
-                if (prefix === 'pre') {
-                    const labId = document.getElementById('labSelect').value;
-                    const stateKey = getStateKey(labId);
-                    const state = JSON.parse(localStorage.getItem(`vlab_state_${stateKey}`) || '{}');
-                    state.pretest = true;
-                    localStorage.setItem(`vlab_state_${stateKey}`, JSON.stringify(state));
-                    alert(`Pretest Submitted! Simulation and Experiment sections are now UNLOCKED for this lab. 🚀`);
-                    syncProgress(labId, { pretest: true, pretestScore: scorePercent });
-                }
- 
-                if (prefix === 'post') {
-                    const labId = document.getElementById('labSelect').value;
-                    const feedback = document.getElementById('student-feedback')?.value || "";
-                    const labData = window.VLAB_DATA[labId] || { title: "Custom Experiment" };
-                    const currentModData = labData.isMultiModule ? labData.modules[window.currentModuleIndex] : labData;
- 
-                    syncProgress(labId, {
-                        posttest: true,
-                        posttestScore: scorePercent,
-                        completed: true,
-                        feedback: feedback
-                    });
- 
-                    document.getElementById('cert-user-name').textContent = localStorage.getItem('vlab_user_name') || 'Atharva Gandhi';
-                    document.getElementById('cert-lab-name').textContent = labData.isMultiModule ? `${labData.title} - ${currentModData.title}` : labData.title;
-                    document.getElementById('cert-date').textContent = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
- 
-                    // Auto-generate report in background and prompt user
-                    console.log("Auto-capturing simulation state for report...");
- 
-                    setTimeout(() => {
-                        document.getElementById('certModal').style.display = 'flex';
-                    }, 1000);
-                } else {
-                    alert(`Section Complete! Accuracy: ${scorePercent}%`);
-                }
-            }
-        });
+        }
     };
 
     // Sidebar Navigation with Locked States
