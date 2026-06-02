@@ -7619,6 +7619,62 @@ student@mitadt-os:~$ </div>
             return context;
         };
         
+        const getCurriculumDataCorpus = () => {
+            const subject = localStorage.getItem('vlab_current_subject') || 'networking';
+            let corpus = `=== MIT ADT VLAB CURRICULUM REFERENCE MANUAL - SUBJECT: ${subject.toUpperCase()} ===\n\n`;
+            
+            const osLabs = ['cpu_scheduling', 'process_sync', 'deadlock_avoidance', 'page_replacement', 'disk_scheduling'];
+            const netLabs = ['cables_devices', 'modulation', 'net_commands', 'ip_class', 'csma', 'csma_ca', 'subnet', 'vlan', 'routing_protocols', 'routing_dv', 'routing_ls', 'udp', 'tcp', 'dns', 'practice'];
+            const progLabs = ['c_prog', 'cpp_prog', 'java_prog', 'python_prog'];
+            const dbmsLabs = ['sql_queries', 'transactions', 'indexing'];
+            
+            let targetKeys = [];
+            if (subject === 'os') targetKeys = osLabs;
+            else if (subject === 'dbms') targetKeys = dbmsLabs;
+            else if (subject === 'programming') targetKeys = progLabs;
+            else targetKeys = netLabs;
+            
+            targetKeys.forEach(key => {
+                const data = window.VLAB_DATA[key];
+                if (!data) return;
+                
+                corpus += `--- LAB ID: ${key} ---\n`;
+                corpus += `Title: ${data.title}\n`;
+                corpus += `Aim: ${data.aim}\n`;
+                if (data.theory) {
+                    corpus += `Theory Intro: ${data.theory.intro || ''}\n`;
+                    if (data.theory.cards) {
+                        data.theory.cards.forEach((c, idx) => {
+                            corpus += `Theory Concept ${idx+1}: ${c.title} - ${c.content}\n`;
+                        });
+                    }
+                }
+                if (data.procedure) {
+                    corpus += `Procedure steps:\n${data.procedure.join('\n')}\n`;
+                }
+                if (data.practice_commands) {
+                    corpus += `Practice CLI commands: ${data.practice_commands.join(', ')}\n`;
+                }
+                if (data.practice_questions) {
+                    corpus += `Practice review tasks:\n${data.practice_questions.join('\n')}\n`;
+                }
+                if (data.isMultiModule && data.modules) {
+                    corpus += `This is a multi-module lab with ${data.modules.length} modules:\n`;
+                    data.modules.forEach((mod, idx) => {
+                        corpus += `  Module ${idx+1}: ${mod.title}\n`;
+                        corpus += `    Module Aim: ${mod.aim}\n`;
+                        corpus += `    Module Procedure: ${mod.procedure ? mod.procedure.join(' -> ') : ''}\n`;
+                        if (mod.defaultCode) {
+                            corpus += `    Module Starter Code:\n${mod.defaultCode}\n`;
+                        }
+                    });
+                }
+                corpus += `\n`;
+            });
+            
+            return corpus;
+        };
+
         const executeGlobalChatQuery = async (queryText) => {
             if (!queryText.trim()) return;
             appendGlobalMessage('student', queryText);
@@ -7629,9 +7685,21 @@ student@mitadt-os:~$ </div>
             
             const key = getApiKey();
             if (key) {
-                const systemPrompt = `You are the MIT VLab Academic AI Tutor. Provide clear, step-by-step guidance to help the student learn. Do not copy-paste complete code solutions directly unless the student is very stuck and specifically requests it, and even then explain it line-by-line. Keep responses educational and relatively concise.
-Context:\n${context}
-Student Question: ${queryText}`;
+                const curriculumCorpus = getCurriculumDataCorpus();
+                const systemPrompt = `You are the MIT VLab Academic AI Tutor. You are trained and data-driven on the entire curriculum of this virtual laboratory platform.
+Use the following Curriculum Reference Manual to guide the student correctly, referencing actual aims, procedures, and concepts from the platform:
+
+${curriculumCorpus}
+
+Current Student Context:
+${context}
+
+Student Question: ${queryText}
+
+Academic Rules:
+1. Provide clear, step-by-step guidance to help the student learn.
+2. Under no circumstances should you print raw solution code directly for the active programming/SQL exercises. Instead, explain the logical building blocks and let the student code it.
+3. Be highly informative, academic, and detailed. Show that you have full knowledge of the curriculum. Keep responses educational and relatively concise.`;
                 responseText = await askGemini(systemPrompt);
             } else {
                 // Heuristic Offline Evaluation
