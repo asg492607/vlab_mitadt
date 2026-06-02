@@ -445,14 +445,25 @@
                         </div>
                     </div>
                 </div>
-                <div class="subject-card locked">
+                <div class="subject-card" data-subject="dbms" onclick="selectSubject('dbms')">
                     <div class="subject-icon" style="background: rgba(245, 158, 11, 0.1); color: #f59e0b;">🗄️</div>
                     <div class="subject-info">
                         <h3>Database Systems</h3>
                         <p>Learn relational schemas, transactions, SQL engine optimizations, indexing tree structures, and normalization.</p>
                         <div class="subject-meta">
-                            <span class="badge-lab-count">Coming Soon</span>
-                            <span class="subject-status-locked">Locked</span>
+                            <span class="badge-lab-count">3 Labs</span>
+                            <span class="subject-status">Ready</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="subject-card" data-subject="programming" onclick="selectSubject('programming')">
+                    <div class="subject-icon" style="background: rgba(16, 185, 129, 0.1); color: #10b981;">💻</div>
+                    <div class="subject-info">
+                        <h3>Computer Programming</h3>
+                        <p>Compile and run C, C++, Java, and Python with live compiler terminal execution and real-time AI Tutor support.</p>
+                        <div class="subject-meta">
+                            <span class="badge-lab-count">4 Labs</span>
+                            <span class="subject-status">Ready</span>
                         </div>
                     </div>
                 </div>
@@ -519,6 +530,17 @@
                 { id: 'deadlock_avoidance', num: 3, name: 'Deadlock Avoidance', category: 'Resource Allocation' },
                 { id: 'page_replacement', num: 4, name: 'Page Replacement', category: 'Memory Mgmt' },
                 { id: 'disk_scheduling', num: 5, name: 'Disk Scheduling', category: 'Storage Mgmt' }
+            ],
+            programming: [
+                { id: 'c_prog', num: 1, name: 'C Programming', category: 'Memory & Syntax' },
+                { id: 'cpp_prog', num: 2, name: 'C++ OOP Concepts', category: 'Classes & Objects' },
+                { id: 'java_prog', num: 3, name: 'Java Basics', category: 'JVM Logic' },
+                { id: 'python_prog', num: 4, name: 'Python Scripting', category: 'Dynamic Logic' }
+            ],
+            dbms: [
+                { id: 'sql_queries', num: 1, name: 'SQL Schema & Queries', category: 'SQL DDL/DML' },
+                { id: 'transactions', num: 2, name: 'ACID Transactions', category: 'Concurrency' },
+                { id: 'indexing', num: 3, name: 'B-Tree Indexing', category: 'Access Structures' }
             ]
         };
 
@@ -552,7 +574,7 @@
 
             // Practice lab mode is only relevant/supported for Computer Networks topology building
             const practiceCard = document.getElementById('cardPractice');
-            if (subject === 'os') {
+            if (subject === 'os' || subject === 'programming' || subject === 'dbms') {
                 if (practiceCard) practiceCard.style.display = 'none';
                 setMainPath('vlab');
                 document.getElementById('mode-selection-container').style.display = 'none';
@@ -564,8 +586,18 @@
             renderLabs(subject);
 
             // Change color scheme and apply dynamic style adjustments
-            const accentColor = subject === 'os' ? '#a855f7' : '#2563eb';
-            const accentHover = subject === 'os' ? '#9333ea' : '#1d4ed8';
+            let accentColor = '#2563eb';
+            let accentHover = '#1d4ed8';
+            if (subject === 'os') {
+                accentColor = '#a855f7';
+                accentHover = '#9333ea';
+            } else if (subject === 'programming') {
+                accentColor = '#10b981';
+                accentHover = '#059669';
+            } else if (subject === 'dbms') {
+                accentColor = '#f59e0b';
+                accentHover = '#d97706';
+            }
             document.documentElement.style.setProperty('--primary-accent', accentColor);
             
             let styleTag = document.getElementById('subject-dynamic-style');

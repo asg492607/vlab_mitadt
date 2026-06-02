@@ -804,3 +804,223 @@ window.VLAB_DATA.ip_class.practice_questions = ["Identify the class and default 
 
 window.VLAB_DATA.vlan.practice_commands = ["vlan 10", "name Marketing", "switchport mode access", "switchport access vlan 10", "show vlan brief"];
 window.VLAB_DATA.vlan.practice_questions = ["What is the purpose of a Trunk port?", "How does a VLAN reduce the size of a broadcast domain?"];
+
+// --- Programming Labs ---
+window.VLAB_DATA.c_prog = {
+    title: "C Programming & Memory Management",
+    aim: "To master basics of C syntax, standard input/output, recursive functions, and pointers.",
+    theory: {
+        intro: "C is a procedural programming language designed in 1972. It provides low-level memory access, a clean set of keywords, and a clean style that makes it ideal for system programming like OS kernels.",
+        cards: [
+            { title: "1. Pointer Basics", content: "Pointers store the memory addresses of other variables. Declared using `*` (dereference operator), and referenced using `&` (address-of operator)." },
+            { title: "2. Recursion", content: "A function that calls itself is recursive. Requires a base case to terminate execution and prevent stack overflow errors." },
+            { title: "3. Standard I/O", content: "Uses `scanf` for formatted input reading from stdin and `printf` for formatted output writing to stdout." }
+        ]
+    },
+    pretest: [
+        { q: "Which operator is used to get the memory address of a variable?", options: ["*", "&", "&&", "->"], correct: 1 },
+        { q: "What happens if a recursive function does not have a base case?", options: ["Runs normally", "Causes a syntax error", "Causes stack overflow (infinite loop)", "Returns 0"], correct: 2 }
+    ],
+    procedure: [
+        "1. Select the recursive factorial task from the code exercise selection.",
+        "2. Review the starting C code template loaded in the editor.",
+        "3. Provide integer inputs in the standard input box (e.g. 5).",
+        "4. Click 'Run Code' to execute compile-run pipeline via Piston API.",
+        "5. Click 'Submit for Grading' to execute automated test cases."
+    ],
+    posttest: [
+        { q: "What is the return size of sizeof(char) in C?", options: ["1 byte", "2 bytes", "4 bytes", "Depends on OS"], correct: 0 },
+        { q: "Which function is used for dynamic memory allocation in C?", options: ["alloc()", "malloc()", "new()", "make()"], correct: 1 }
+    ],
+    simType: "programming",
+    lang: "c",
+    version: "10.2.0",
+    defaultCode: `#include <stdio.h>\n\n// Task: Implement a recursive function to find the factorial of a number.\n// The input is read from standard input.\nint factorial(int n) {\n    if (n <= 1) return 1;\n    return n * factorial(n - 1);\n}\n\nint main() {\n    int num;\n    if (scanf("%d", &num) == 1) {\n        printf("%d\\n", factorial(num));\n    } else {\n        printf("Invalid input\\n");\n    }\n    return 0;\n}`,
+    testCases: [
+        { input: "5", expected: "120" },
+        { input: "3", expected: "6" },
+        { input: "1", expected: "1" }
+    ],
+    practice_commands: ["gcc main.c -o program", "./program", "valgrind --leak-check=full ./program"],
+    practice_questions: ["What is a segmentation fault?", "Why is memory deallocation with free() crucial?"]
+};
+
+window.VLAB_DATA.cpp_prog = {
+    title: "C++ Object Oriented Programming Concepts",
+    aim: "To demonstrate Object Oriented Programming in C++ using classes, data encapsulation, inheritance, and dynamic binding.",
+    theory: {
+        intro: "C++ is an extension of C that incorporates Object Oriented Programming (OOP) paradigms. It provides classes, encapsulation, inheritance, and polymorphism to build robust enterprise systems.",
+        cards: [
+            { title: "1. Data Encapsulation", content: "Bundling data variables and methods within a single class structure, protecting it from external access via private/protected modifiers." },
+            { title: "2. Polymorphism", content: "Ability for different classes to respond uniquely to the same method interface, implemented using virtual functions and inheritance pointers." }
+        ]
+    },
+    pretest: [
+        { q: "Which access specifier makes class variables inaccessible outside the class?", options: ["public", "protected", "private", "friend"], correct: 2 },
+        { q: "Which keyword is used to declare virtual functions for dynamic binding?", options: ["override", "virtual", "inline", "static"], correct: 1 }
+    ],
+    procedure: [
+        "1. Open C++ OOP lab and review BankAccount class structure.",
+        "2. Understand how transaction actions are read dynamically.",
+        "3. Input values in stdin (e.g. starting balance and transaction streams).",
+        "4. Run compiler and view console output."
+    ],
+    posttest: [
+        { q: "What is a constructor in C++?", options: ["A method called when object is deleted", "A method called when object is instantiated", "A special pointer", "A loop structure"], correct: 1 }
+    ],
+    simType: "programming",
+    lang: "cpp",
+    version: "10.2.0",
+    defaultCode: `#include <iostream>\nusing namespace std;\n\n// Task: Implement a class representing a Bank Account with deposit, withdraw and getBalance.\n// Stdin contains: initial balance followed by D (Deposit) or W (Withdraw) operations.\nclass BankAccount {\nprivate:\n    double balance;\npublic:\n    BankAccount(double initial) : balance(initial) {}\n    void deposit(double amt) { balance += amt; }\n    void withdraw(double amt) { if (balance >= amt) balance -= amt; }\n    double getBalance() { return balance; }\n};\n\nint main() {\n    double startBalance;\n    if (!(cin >> startBalance)) return 0;\n    BankAccount acct(startBalance);\n    char action;\n    double amount;\n    while (cin >> action >> amount) {\n        if (action == 'D') acct.deposit(amount);\n        else if (action == 'W') acct.withdraw(amount);\n    }\n    cout << acct.getBalance() << endl;\n    return 0;\n}`,
+    testCases: [
+        { input: "1000\nD 500\nW 200", expected: "1300" },
+        { input: "500\nW 600\nD 100", expected: "500" }
+    ],
+    practice_commands: ["g++ main.cpp -o program", "./program"],
+    practice_questions: ["Explain the difference between overloading and overriding.", "What is a virtual destructor?"]
+};
+
+window.VLAB_DATA.java_prog = {
+    title: "Java JVM Architecture & Basic Logic",
+    aim: "To compile and execute Java applications while studying JVM class loading and basic algorithm logic.",
+    theory: {
+        intro: "Java is a class-based, object-oriented programming language designed to have as few implementation dependencies as possible, executing via the Java Virtual Machine (JVM).",
+        cards: [
+            { title: "1. WORA principle", content: "Write Once, Run Anywhere: Java compiles code into bytecode (.class), which runs on any system with a compatible JVM." },
+            { title: "2. Garbage Collection", content: "Automated memory management that deallocates heap memory occupied by objects that are no longer referenced." }
+        ]
+    },
+    pretest: [
+        { q: "Java bytecode is executed by which component?", options: ["JDK", "JRE", "JVM", "Compiler"], correct: 2 }
+    ],
+    procedure: [
+        "1. Write Java algorithms inside the editor workspace (main class must be named Main).",
+        "2. Test sum operations or thread configurations."
+    ],
+    posttest: [
+        { q: "Which class is the root of the Java class hierarchy?", options: ["String", "Object", "System", "Class"], correct: 1 }
+    ],
+    simType: "programming",
+    lang: "java",
+    version: "15.0.2",
+    defaultCode: `import java.util.Scanner;\n\n// Task: Implement a program that reads an integer N and prints the sum from 1 to N.\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        if (!sc.hasNextInt()) return;\n        int n = sc.nextInt();\n        int sum = 0;\n        for (int i = 1; i <= n; i++) {\n            sum += i;\n        }\n        System.out.println(sum);\n    }\n}`,
+    testCases: [
+        { input: "5", expected: "15" },
+        { input: "10", expected: "55" }
+    ],
+    practice_commands: ["javac Main.java", "java Main"],
+    practice_questions: ["What is JIT compilation?", "How does Method Area differ from Stack Area in JVM?"]
+};
+
+window.VLAB_DATA.python_prog = {
+    title: "Python Data Processing & Dynamic Scripting",
+    aim: "To demonstrate Python dynamic structures including lists, dictionaries, list comprehensions, and system standard input processing.",
+    theory: {
+        intro: "Python is an interpreted, high-level, general-purpose programming language. Its design philosophy emphasizes code readability with use of significant indentation.",
+        cards: [
+            { title: "1. Dynamic Typing", content: "Variables do not require explicit type declaration; types are determined at runtime based on assigned values." },
+            { title: "2. List Comprehensions", content: "Elegant syntax to generate lists based on existing lists/iterables: `[x*2 for x in items if x > 0]`." }
+        ]
+    },
+    pretest: [
+        { q: "Is Python compiled or interpreted?", options: ["Fully compiled", "Interpreted", "Neither", "Both"], correct: 1 }
+    ],
+    procedure: [
+        "1. Construct python parsing scripts.",
+        "2. Try standard input streams."
+    ],
+    posttest: [
+        { q: "Which data structure in Python is mutable and ordered?", options: ["Tuple", "List", "Dictionary", "Set"], correct: 1 }
+    ],
+    simType: "programming",
+    lang: "python",
+    version: "3.10.0",
+    defaultCode: `# Task: Given a space-separated list of integers from stdin,\n# compute their sum and output it.\nimport sys\n\ndef main():\n    try:\n        line = sys.stdin.read().strip()\n        if not line:\n            print(0)\n            return\n        nums = [int(x) for x in line.split()]\n        print(sum(nums))\n    except Exception as e:\n        print("Error")\n\nif __name__ == "__main__":\n    main()`,
+    testCases: [
+        { input: "1 2 3 4 5", expected: "15" },
+        { input: "10 -5 20", expected: "25" }
+    ],
+    practice_commands: ["python main.py", "pip install numpy"],
+    practice_questions: ["What is PEP 8?", "Describe the difference between deep copy and shallow copy in Python."]
+};
+
+// --- Database (DBMS) Labs ---
+window.VLAB_DATA.sql_queries = {
+    title: "Relational Schemas & SQL Queries",
+    aim: "To write structured database queries using SELECT, JOIN, GROUP BY, and HAVING to fetch data from relational schemas.",
+    theory: {
+        intro: "Structured Query Language (SQL) is the standard language to manage and query relational databases.",
+        cards: [
+            { title: "1. Relational Joins", content: "Combines records from two tables using a common attribute. INNER JOIN, LEFT JOIN, and RIGHT JOIN specify selection boundaries." },
+            { title: "2. Aggregations", content: "Using functions like SUM, COUNT, AVG along with GROUP BY to group records and HAVING to filter aggregated results." }
+        ]
+    },
+    pretest: [
+        { q: "Which clause is used to filter aggregated data?", options: ["WHERE", "HAVING", "GROUP BY", "ORDER BY"], correct: 1 }
+    ],
+    procedure: [
+        "1. Review the relational database schema diagram on the screen.",
+        "2. Construct a SELECT query in the SQL editor.",
+        "3. Click 'Run SQL' to execute the query against the relational database mock.",
+        "4. View the matching rows printed in the table output."
+    ],
+    posttest: [
+        { q: "What is a Primary Key?", options: ["A key that allows duplicates", "A unique identifier for each record in a table", "An index helper only", "A foreign connector"], correct: 1 }
+    ],
+    simType: "dbms_sql",
+    practice_commands: ["SELECT * FROM Students;", "SELECT name, course FROM Students JOIN Enrollments ON Students.id = Enrollments.student_id;"],
+    practice_questions: ["What is the difference between WHERE and HAVING?", "Explain 1NF, 2NF, and 3NF normalization rules."]
+};
+
+window.VLAB_DATA.transactions = {
+    title: "Database Transactions & ACID Properties",
+    aim: "To simulate database transactions to examine concurrency control, rollback operations, and commit points that guarantee ACID properties.",
+    theory: {
+        intro: "A database transaction is a unit of work performed against a database. ACID properties ensure database reliability and consistency during transactions.",
+        cards: [
+            { title: "1. Atomicity", content: "Guarantees that all operations in a transaction are completed successfully, or the entire transaction is rolled back (All-or-Nothing)." },
+            { title: "2. Concurrency Isolation", content: "Ensures that concurrent execution of transactions leaves the database in the same state as if they were executed sequentially." }
+        ]
+    },
+    pretest: [
+        { q: "What does the 'A' in ACID stand for?", options: ["Authorization", "Atomicity", "Algorithm", "Architecture"], correct: 1 }
+    ],
+    procedure: [
+        "1. Set transaction bounds by clicking BEGIN TRANSACTION.",
+        "2. Execute update statements (e.g. transfer money).",
+        "3. Check the intermediate dirty states of the tables.",
+        "4. Perform COMMIT to save permanently or ROLLBACK to discard modifications."
+    ],
+    posttest: [
+        { q: "Which command is used to undo transaction changes?", options: ["COMMIT", "SAVEPOINT", "ROLLBACK", "DELETE"], correct: 2 }
+    ],
+    simType: "dbms_transactions",
+    practice_commands: ["BEGIN TRANSACTION;", "UPDATE Accounts SET balance = balance - 100 WHERE id = 1;", "COMMIT;", "ROLLBACK;"],
+    practice_questions: ["Explain Dirty Read and Non-Repeatable Read.", "What are shared and exclusive locks?"]
+};
+
+window.VLAB_DATA.indexing = {
+    title: "Database Indexing Structures (B-Trees)",
+    aim: "To analyze search complexity in relational tables and visualize B-Tree indexing structures during dynamic insertions.",
+    theory: {
+        intro: "Indexing speeds up database search operations by creating pointers to data blocks, commonly modeled using balanced B-Tree or B+ Tree structures.",
+        cards: [
+            { title: "1. B-Tree Structure", content: "A self-balancing search tree where each node contains multiple keys and children pointers. Keeps data sorted and allows search, sequential access, insertions, and deletions in logarithmic time." },
+            { title: "2. Node Splits", content: "When a node exceeds its key capacity limit (order M), it splits into two nodes, promoting the median key to the parent node. This maintains balance." }
+        ]
+    },
+    pretest: [
+        { q: "What is the primary benefit of creating a database index?", options: ["Increases storage space", "Speeds up data retrieval queries", "Ensures data encryption", "Prevents database crashes"], correct: 1 }
+    ],
+    procedure: [
+        "1. Enter integer keys to insert into the B-Tree structure.",
+        "2. Observe how the tree balances itself and splits nodes when capacity is exceeded.",
+        "3. Verify how search operations traverse the tree in O(log N) operations."
+    ],
+    posttest: [
+        { q: "In a B-Tree of order 3, what is the maximum number of keys in a node?", options: ["1", "2", "3", "4"], correct: 1 }
+    ],
+    simType: "dbms_indexing",
+    practice_commands: ["CREATE INDEX idx_student_name ON Students(name);", "DROP INDEX idx_student_name;"],
+    practice_questions: ["Why is a B+ Tree preferred over a B-Tree for relational indexing?", "What is a clustered index?"]
+};

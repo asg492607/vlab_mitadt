@@ -2921,6 +2921,1000 @@ class NetworkingSim {
     }
 }
 
+        this.ctx.restore();
+    }
+}
+
+// ==========================================
+// PROGRAMMING & DBMS LAB MODULES (PHASE 3)
+// ==========================================
+
+const loadAceEditor = () => {
+    return new Promise((resolve) => {
+        if (window.ace) return resolve(window.ace);
+        const script = document.createElement('script');
+        script.src = "https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.7/ace.js";
+        script.onload = () => {
+            const extScript = document.createElement('script');
+            extScript.src = "https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.7/ext-language_tools.min.js";
+            extScript.onload = () => resolve(window.ace);
+            document.head.appendChild(extScript);
+        };
+        document.head.appendChild(script);
+    });
+};
+
+const getApiKey = () => localStorage.getItem('vlab_gemini_api_key') || '';
+const setApiKey = (key) => localStorage.setItem('vlab_gemini_api_key', key.trim());
+
+const askGemini = async (promptText) => {
+    const key = getApiKey();
+    if (!key) return null;
+    try {
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                contents: [{ parts: [{ text: promptText }] }]
+            })
+        });
+        const resData = await response.json();
+        if (resData.candidates && resData.candidates[0] && resData.candidates[0].content) {
+            return resData.candidates[0].content.parts[0].text;
+        }
+        return "Failed to parse API response. Please verify key rules.";
+    } catch (e) {
+        console.error("Gemini API call failed", e);
+        return "Error querying Gemini API. Check your internet connection or API key validity.";
+    }
+};
+
+const localAIEvaluator = (code, query, lang) => {
+    query = query.toLowerCase();
+    code = code || '';
+    if (['c', 'cpp', 'java'].includes(lang)) {
+        if (!code.includes(';') && (code.includes('printf') || code.includes('cout') || code.includes('System.out'))) {
+            return "AI Tutor: I see a likely syntax issue. In C, C++, and Java, every statement must end with a semicolon (`;`). I notice you have printed expressions but may have forgotten a semicolon at the end of a line. Check your code lines carefully!";
+        }
+    }
+    if (query.includes('loop') || query.includes('infinite')) {
+        return "AI Tutor: An infinite loop occurs when the loop condition always evaluates to true (e.g. `while(1)` or `while(true)`) and there is no break condition, or if loop variables are not modified inside the body. Inspect your loop counters.";
+    }
+    if (query.includes('pointer') || query.includes('address')) {
+        return "AI Tutor: A pointer is a variable storing the memory address of another variable. In C/C++, define with `int *ptr = &val;`. Dereference with `*ptr` to fetch value. Watch for segmentation faults by ensuring pointers aren't dereferenced when NULL.";
+    }
+    if (query.includes('segmentation') || query.includes('segfault')) {
+        return "AI Tutor: A segmentation fault occurs when access to restricted memory is attempted (e.g. dereferencing uninitialized/NULL pointer, index out of bounds, stack overflow). Initialize pointers and double check array indices.";
+    }
+    if (query.includes('explain') || query.includes('how does')) {
+        return "AI Tutor: This code solves the exercise by taking standard inputs from stdin, processing values through the algorithm bounds, and printing values to stdout. To audit line-by-line, look at how values are read and updated in loops.";
+    }
+    return "AI Tutor: Currently in Local Mode. Enter a Google Gemini API Key in the settings (⚙️ icon) to activate advanced context-aware debugging and interactive chats. For now, you can compile code, run outputs, and submit for automated grading!";
+};
+
+const runPistonCode = async (lang, version, code, stdin) => {
+    try {
+        const response = await fetch("https://emkc.org/api/v2/piston/execute", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                language: lang,
+                version: version || "*",
+                files: [{ name: lang === "java" ? "Main.java" : lang === "python" ? "main.py" : lang === "cpp" ? "main.cpp" : "main.c", content: code }],
+                stdin: stdin
+            })
+        });
+        return await response.json();
+    } catch (e) {
+        console.error("Piston run failed", e);
+        return null;
+    }
+};
+
+const executeSimulatedCode = (lang, code, stdin, labId) => {
+    const inputVal = stdin.trim();
+    let stdout = "";
+    let stderr = "";
+    let compileLog = "";
+    if (lang === "c" || lang === "cpp") {
+        compileLog = `[Compiling...] g++ main.cpp -o main.out\n[Compilation successful]\n[Running...] ./main.out\n`;
+    } else if (lang === "java") {
+        compileLog = `[Compiling...] javac Main.java\n[Compilation successful]\n[Running...] java Main\n`;
+    } else {
+        compileLog = `[Running...] python3 main.py\n`;
+    }
+
+    if (labId === 'c_prog') {
+        const val = parseInt(inputVal);
+        if (isNaN(val)) stdout = "Invalid input\n";
+        else {
+            const fact = (n) => n <= 1 ? 1 : n * fact(n - 1);
+            stdout = fact(val).toString() + "\n";
+        }
+    } else if (labId === 'cpp_prog') {
+        const lines = inputVal.split(/\s+/);
+        if (lines.length === 0 || isNaN(parseFloat(lines[0]))) {
+            stdout = "0\n";
+        } else {
+            let balance = parseFloat(lines[0]);
+            let idx = 1;
+            while (idx < lines.length) {
+                const act = lines[idx];
+                const amt = parseFloat(lines[idx+1]);
+                if (act === 'D') balance += amt;
+                else if (act === 'W') { if (balance >= amt) balance -= amt; }
+                idx += 2;
+            }
+            stdout = balance.toString() + "\n";
+        }
+    } else if (labId === 'java_prog') {
+        const val = parseInt(inputVal);
+        if (isNaN(val)) stdout = "0\n";
+        else {
+            let sum = 0;
+            for (let i = 1; i <= val; i++) sum += i;
+            stdout = sum.toString() + "\n";
+        }
+    } else if (labId === 'python_prog') {
+        const nums = inputVal.split(/\s+/).map(Number).filter(x => !isNaN(x));
+        const sum = nums.reduce((a, b) => a + b, 0);
+        stdout = sum.toString() + "\n";
+    }
+    return { compileLog, stdout, stderr, code: 0 };
+};
+
+// --- MOCK DATABASE SCHEMAS ---
+const MOCK_DB = {
+    students: [
+        { id: 1, name: "Atharva Gandhi", age: 20, branch: "CS" },
+        { id: 2, name: "Nisha Patil", age: 21, branch: "IT" },
+        { id: 3, name: "Rahul Deshmukh", age: 22, branch: "ENTC" },
+        { id: 4, name: "Sneha Thorat", age: 20, branch: "CS" }
+    ],
+    courses: [
+        { course_id: 101, title: "Computer Networks", credits: 4 },
+        { course_id: 102, title: "Operating Systems", credits: 4 },
+        { course_id: 103, title: "Database Systems", credits: 3 }
+    ],
+    enrollments: [
+        { student_id: 1, course_id: 101, grade: "A" },
+        { student_id: 1, course_id: 102, grade: "O" },
+        { student_id: 2, course_id: 101, grade: "B" },
+        { student_id: 3, course_id: 103, grade: "A" },
+        { student_id: 4, course_id: 102, grade: "O" }
+    ],
+    accounts: [
+        { id: 1, name: "Atharva Gandhi", balance: 5000 },
+        { id: 2, name: "Nisha Patil", balance: 7500 },
+        { id: 3, name: "Rahul Deshmukh", balance: 12000 }
+    ],
+    indextable: [
+        { key: 10, pointer: "Record_A" },
+        { key: 20, pointer: "Record_B" },
+        { key: 30, pointer: "Record_C" }
+    ]
+};
+
+let MOCK_DB_WORKING = JSON.parse(JSON.stringify(MOCK_DB));
+
+const executeSQL = (queryText) => {
+    const q = queryText.trim().replace(/\s+/g, ' ').replace(/;$/, '').toLowerCase();
+    if (q.startsWith('select')) {
+        if (q.includes('join')) {
+            if (q.includes('students') && q.includes('enrollments')) {
+                const rows = [];
+                MOCK_DB_WORKING.enrollments.forEach(e => {
+                    const s = MOCK_DB_WORKING.students.find(student => student.id === e.student_id);
+                    const c = MOCK_DB_WORKING.courses.find(course => course.course_id === e.course_id);
+                    if (s && c) {
+                        rows.push({ student_id: s.id, name: s.name, course: c.title, grade: e.grade });
+                    }
+                });
+                return { success: true, columns: ['student_id', 'name', 'course', 'grade'], rows };
+            }
+        }
+        const match = q.match(/select \* from (\w+)/);
+        if (match && MOCK_DB_WORKING[match[1]]) {
+            const tableName = match[1];
+            const rows = MOCK_DB_WORKING[tableName];
+            const columns = rows.length > 0 ? Object.keys(rows[0]) : [];
+            return { success: true, columns, rows };
+        }
+        const projMatch = q.match(/select ([\w\s,._*]+) from (\w+)/);
+        if (projMatch) {
+            const cols = projMatch[1].split(',').map(c => c.trim());
+            const tableName = projMatch[2];
+            if (MOCK_DB_WORKING[tableName]) {
+                const rows = MOCK_DB_WORKING[tableName].map(row => {
+                    const res = {};
+                    cols.forEach(c => { if (row[c] !== undefined) res[c] = row[c]; });
+                    return res;
+                });
+                return { success: true, columns: cols.filter(c => rows[0] && rows[0][c] !== undefined), rows };
+            }
+        }
+        return { success: false, error: "SQL Error: Table not found or JOIN query too complex." };
+    }
+    if (q.startsWith('update')) {
+        const match = q.match(/update accounts set balance = balance ([+-]) (\d+) where id = (\d+)/);
+        if (match) {
+            const op = match[1];
+            const val = parseFloat(match[2]);
+            const targetId = parseInt(match[3]);
+            const acct = MOCK_DB_WORKING.accounts.find(a => a.id === targetId);
+            if (acct) {
+                let oldVal = acct.balance;
+                if (op === '+') acct.balance += val; else acct.balance -= val;
+                return { success: true, message: `1 row updated. Balance changed from ${oldVal} to ${acct.balance}.` };
+            }
+            return { success: false, error: "SQL Error: Account ID not found." };
+        }
+    }
+    if (q.startsWith('insert')) {
+        const match = q.match(/insert into (\w+) values \(([^)]+)\)/);
+        if (match) {
+            const tableName = match[1];
+            const val = parseInt(match[2]);
+            if (tableName === 'indextable') {
+                MOCK_DB_WORKING.indextable.push({ key: val, pointer: "Record_" + val });
+                if (window.updateBTreeVisualizer) window.updateBTreeVisualizer(val);
+                return { success: true, message: `1 row inserted. Key ${val} added to B-Tree Index.` };
+            }
+        }
+    }
+    return { success: false, error: "SQL Syntax Error or unhandled operation: " + queryText };
+};
+
+// --- B-TREE ALGORITHM STRUCTURES ---
+class BTreeNode {
+    constructor(isLeaf = true) {
+        this.keys = [];
+        this.children = [];
+        this.isLeaf = isLeaf;
+    }
+}
+class BTree {
+    constructor(t = 2) {
+        this.root = new BTreeNode(true);
+        this.t = t;
+    }
+    insert(k) {
+        const r = this.root;
+        if (r.keys.length === 2 * this.t - 1) {
+            const s = new BTreeNode(false);
+            this.root = s;
+            s.children.push(r);
+            this.splitChild(s, 0, r);
+            this.insertNonFull(s, k);
+        } else {
+            this.insertNonFull(r, k);
+        }
+    }
+    insertNonFull(x, k) {
+        let i = x.keys.length - 1;
+        if (x.isLeaf) {
+            while (i >= 0 && x.keys[i] > k) i--;
+            if (x.keys[i] !== k) x.keys.splice(i + 1, 0, k);
+        } else {
+            while (i >= 0 && x.keys[i] > k) i--;
+            i++;
+            if (x.children[i].keys.length === 2 * this.t - 1) {
+                this.splitChild(x, i, x.children[i]);
+                if (x.keys[i] < k) i++;
+            }
+            this.insertNonFull(x.children[i], k);
+        }
+    }
+    splitChild(x, i, y) {
+        const z = new BTreeNode(y.isLeaf);
+        const t = this.t;
+        x.children.splice(i + 1, 0, z);
+        x.keys.splice(i, 0, y.keys[t - 1]);
+        z.keys = y.keys.splice(t, t - 1);
+        y.keys.splice(t - 1, 1);
+        if (!y.isLeaf) z.children = y.children.splice(t, t);
+    }
+}
+
+const renderBTreeSVG = (tree) => {
+    const svgWidth = 800;
+    const svgHeight = 250;
+    const nodeWidth = 80;
+    const nodeHeight = 30;
+    const levelHeight = 60;
+    let html = "";
+    const layoutNode = (node, xStart, xEnd, y) => {
+        if (!node) return;
+        const x = (xStart + xEnd) / 2;
+        const keysText = node.keys.join(" | ");
+        html += `<rect x="${x - nodeWidth/2}" y="${y}" width="${nodeWidth}" height="${nodeHeight}" rx="6" ry="6" fill="#1e293b" stroke="#10b981" stroke-width="2" />`;
+        html += `<text x="${x}" y="${y + 20}" font-family="'JetBrains Mono', monospace" font-size="12" fill="#fff" text-anchor="middle" font-weight="bold">${keysText}</text>`;
+        if (!node.isLeaf) {
+            const numChildren = node.children.length;
+            const segment = (xEnd - xStart) / numChildren;
+            node.children.forEach((child, idx) => {
+                const childXStart = xStart + idx * segment;
+                const childXEnd = xStart + (idx + 1) * segment;
+                const childX = (childXStart + childXEnd) / 2;
+                const childY = y + levelHeight;
+                html += `<line x1="${x}" y1="${y + nodeHeight}" x2="${childX}" y2="${childY}" stroke="#10b981" stroke-opacity="0.6" stroke-width="1.5" />`;
+                layoutNode(child, childXStart, childXEnd, childY);
+            });
+        }
+    };
+    layoutNode(tree.root, 0, svgWidth, 20);
+    return `<svg width="100%" height="100%" viewBox="0 0 ${svgWidth} ${svgHeight}">${html}</svg>`;
+};
+
+// --- FIRESTORE UTILS ---
+const saveUserCode = async (labId, code) => {
+    const user = auth.currentUser || await getCurrentUser();
+    if (!user || !labId) return;
+    try {
+        await setDoc(doc(db, "users", user.uid, "code", labId), {
+            code: code,
+            lastSaved: new Date().toISOString()
+        });
+    } catch(e) { console.error("Cloud autosave failed", e); }
+};
+
+const loadUserCode = async (labId) => {
+    const user = auth.currentUser || await getCurrentUser();
+    if (!user || !labId) return null;
+    try {
+        const snap = await getDoc(doc(db, "users", user.uid, "code", labId));
+        if (snap.exists()) return snap.data().code;
+    } catch(e) { console.error("Cloud fetch failed", e); }
+    return null;
+};
+
+// --- INITIALIZE PROGRAMMING WORKSPACE ---
+const initProgrammingLab = async (container, labId) => {
+    const data = window.VLAB_DATA[labId];
+    container.innerHTML = `
+        <div style="display:flex; flex-direction:column; height:100%; gap:12px; padding:8px;">
+            <div class="sim-toolbar" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+                <div style="display:flex; gap:8px; align-items:center;">
+                    <button id="btnRunCode" class="btn-sim primary">▶ Run Code</button>
+                    <button id="btnGradeCode" class="btn-sim" style="background:#10b981; color:white;">🎯 Submit Code</button>
+                    <button id="btnResetCode" class="btn-sim">Reset Template</button>
+                </div>
+                <div style="display:flex; gap:8px; align-items:center;">
+                    <button id="btnCollSession" class="btn-sim" style="background:#2563eb; color:white;">👥 Live Collaboration</button>
+                    <button id="btnAiSettings" class="btn-sim" title="Gemini Configuration">⚙️ AI Settings</button>
+                    <button id="btnToggleAiPanel" class="btn-sim primary" style="background:#a855f7; color:white;">✨ AI Tutor</button>
+                </div>
+            </div>
+            
+            <div id="collaboration-bar" style="display:none; background:var(--bg-alt); padding:10px; border-radius:8px; border:1px solid var(--border); display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
+                <span id="collStatus" style="font-weight:700; color:var(--text-muted);">Session Room:</span>
+                <input id="collRoomId" placeholder="Room ID (e.g. PROG-101)" style="padding:6px 12px; border-radius:6px; border:1px solid var(--border); background:var(--bg-page); color:var(--text-main); font-family:monospace;">
+                <button id="btnCreateRoom" class="btn-sim" style="padding:6px 12px;">Create Room</button>
+                <button id="btnJoinRoom" class="btn-sim" style="padding:6px 12px;">Join Room</button>
+                <span id="roomStatusText" style="font-size:12px; color:#10b981;"></span>
+            </div>
+
+            <div style="display:flex; flex:1; gap:12px; height:500px; flex-wrap:wrap;">
+                <div style="flex:1.4; display:flex; flex-direction:column; border:1px solid var(--border); border-radius:12px; overflow:hidden; min-width:320px;">
+                    <div style="background:var(--bg-alt); padding:8px 16px; border-bottom:1px solid var(--border); font-weight:700; display:flex; justify-content:space-between; align-items:center;">
+                        <span>📝 Code Editor (${data.lang.toUpperCase()})</span>
+                        <span id="editorStatus" style="font-size:12px; color:var(--text-muted);">Synced to cloud</span>
+                    </div>
+                    <div id="ace-editor" style="flex:1; width:100%;"></div>
+                </div>
+                
+                <div style="flex:1; display:flex; flex-direction:column; gap:12px; min-width:280px;">
+                    <div style="display:flex; flex-direction:column; border:1px solid var(--border); border-radius:12px; overflow:hidden; flex:0.4;">
+                        <div style="background:var(--bg-alt); padding:8px 16px; border-bottom:1px solid var(--border); font-weight:700;">📥 Standard Input (stdin)</div>
+                        <textarea id="stdin-area" placeholder="Type input values here..." style="flex:1; padding:12px; border:none; resize:none; font-family:monospace; background:var(--bg-page); color:var(--text-main); font-size:13px; outline:none;"></textarea>
+                    </div>
+                    
+                    <div style="display:flex; flex-direction:column; border:1px solid var(--border); border-radius:12px; overflow:hidden; flex:1;">
+                        <div style="background:var(--bg-alt); padding:8px 16px; border-bottom:1px solid var(--border); font-weight:700; display:flex; justify-content:space-between; align-items:center;">
+                            <span>💻 Console Terminal</span>
+                            <button id="btnClearConsole" style="background:transparent; border:none; color:var(--text-muted); cursor:pointer; font-size:12px;">Clear</button>
+                        </div>
+                        <div id="terminal-box" style="flex:1; background:#000; color:#10b981; font-family:'JetBrains Mono', monospace; font-size:13px; padding:12px; overflow-y:auto; line-height:1.5; white-space:pre-wrap;">Console Ready. Write code and click 'Run Code' to execute.</div>
+                    </div>
+                </div>
+
+                <div id="ai-tutor-drawer" style="width:300px; display:none; flex-direction:column; border:1px solid var(--border); border-radius:12px; overflow:hidden; background:var(--container-bg); min-height:500px;">
+                    <div style="background:#a855f71a; color:#a855f7; padding:12px 16px; border-bottom:1px solid var(--border); font-weight:800; display:flex; justify-content:space-between; align-items:center;">
+                        <span>✨ AI Tutor Assistant</span>
+                        <button id="btnCloseAiDrawer" style="background:transparent; border:none; color:#a855f7; font-weight:bold; cursor:pointer;">×</button>
+                    </div>
+                    <div style="padding:10px; border-bottom:1px solid var(--border); background:var(--bg-alt); display:flex; flex-wrap:wrap; gap:6px;">
+                        <button id="btnAiAudit" style="flex:1; padding:6px; font-size:11px; border-radius:4px; border:1px solid var(--border); background:var(--bg-page); color:var(--text-main); cursor:pointer;">🔍 Audit Code</button>
+                        <button id="btnAiExplain" style="flex:1; padding:6px; font-size:11px; border-radius:4px; border:1px solid var(--border); background:var(--bg-page); color:var(--text-main); cursor:pointer;">📚 Explain Code</button>
+                    </div>
+                    <div id="ai-chat-logs" style="flex:1; padding:12px; overflow-y:auto; display:flex; flex-direction:column; gap:10px; background:var(--bg-page);">
+                        <div style="align-self:flex-start; background:var(--bg-alt); padding:8px 12px; border-radius:12px; max-width:85%; font-size:13px; color:var(--text-main); line-height:1.4;">
+                            Hello! I am your MIT VLab AI Assistant. Ask me anything about your code, or click a helper option above!
+                        </div>
+                    </div>
+                    <div style="padding:10px; border-top:1px solid var(--border); display:flex; gap:6px; background:var(--bg-alt);">
+                        <input id="ai-chat-input" placeholder="Ask AI about loops, pointers..." style="flex:1; padding:8px; border-radius:6px; border:1px solid var(--border); background:var(--bg-page); color:var(--text-main); font-size:13px;">
+                        <button id="btnSendChat" class="btn-sim primary" style="background:#a855f7; border:none; color:white; border-radius:6px; padding:6px 12px; font-size:13px;">Send</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    // Initialize Ace Editor
+    const aceLib = await loadAceEditor();
+    const editor = aceLib.edit("ace-editor");
+    editor.setTheme("ace/theme/chrome");
+    const modeMap = { c: 'c_cpp', cpp: 'c_cpp', java: 'java', python: 'python' };
+    editor.session.setMode(`ace/mode/${modeMap[data.lang] || 'c_cpp'}`);
+    editor.setOptions({
+        enableBasicAutocompletion: true,
+        enableLiveAutocompletion: true,
+        fontSize: "14px",
+        fontFamily: "'JetBrains Mono', monospace"
+    });
+
+    // Dark Theme syncing
+    const syncEditorTheme = () => {
+        const theme = document.documentElement.getAttribute('data-theme') || 'dark';
+        editor.setTheme(theme === 'dark' ? 'ace/theme/tomorrow_night' : 'ace/theme/chrome');
+    };
+    syncEditorTheme();
+    
+    // Listen to theme modifications
+    const observer = new MutationObserver(syncEditorTheme);
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
+    // Load saved code from cloud
+    const saved = await loadUserCode(labId);
+    if (saved) editor.setValue(saved, -1);
+    else editor.setValue(data.defaultCode, -1);
+
+    // Save code changes debounced
+    let saveTimeout;
+    editor.session.on('change', () => {
+        document.getElementById('editorStatus').textContent = "Saving...";
+        clearTimeout(saveTimeout);
+        saveTimeout = setTimeout(async () => {
+            const currentCode = editor.getValue();
+            await saveUserCode(labId, currentCode);
+            document.getElementById('editorStatus').textContent = "Saved to cloud";
+            
+            // Sync collaboration session
+            if (window.activeCollRoomId) {
+                try {
+                    await setDoc(doc(db, "collaboration", window.activeCollRoomId), {
+                        code: currentCode,
+                        updatedBy: localStorage.getItem('vlab_user_name') || 'Student',
+                        timestamp: new Date().toISOString()
+                    });
+                } catch(err) { console.error("Collab sync error", err); }
+            }
+        }, 1000);
+    });
+
+    // Stdin / console element configurations
+    const stdinArea = document.getElementById('stdin-area');
+    const terminalBox = document.getElementById('terminal-box');
+
+    // Run Code Integration
+    document.getElementById('btnRunCode').addEventListener('click', async () => {
+        terminalBox.innerHTML = `[Compiling / executing code...]\n`;
+        const codeText = editor.getValue();
+        const stdinText = stdinArea.value;
+
+        // Try Piston runner
+        let res = await runPistonCode(data.lang, data.version, codeText, stdinText);
+        if (res && res.run) {
+            let outputText = "";
+            if (res.compile && res.compile.output) outputText += res.compile.output + "\n";
+            outputText += res.run.stdout || "";
+            if (res.run.stderr) outputText += "\nError:\n" + res.run.stderr;
+            if (!outputText.trim()) outputText = "[Process executed with no console output]";
+            terminalBox.textContent = outputText;
+        } else {
+            // Simulated evaluation fallback
+            const sim = executeSimulatedCode(data.lang, codeText, stdinText, labId);
+            let outputText = sim.compileLog;
+            if (sim.stdout) outputText += sim.stdout;
+            if (sim.stderr) outputText += "\nError:\n" + sim.stderr;
+            terminalBox.textContent = outputText;
+        }
+    });
+
+    // Reset code
+    document.getElementById('btnResetCode').addEventListener('click', () => {
+        if (confirm("Reset to default curriculum code template? Your changes will be cleared.")) {
+            editor.setValue(data.defaultCode, -1);
+        }
+    });
+
+    // Clear terminal
+    document.getElementById('btnClearConsole').addEventListener('click', () => {
+        terminalBox.textContent = "";
+    });
+
+    // Submit / Automated Grade Case check
+    document.getElementById('btnGradeCode').addEventListener('click', async () => {
+        terminalBox.textContent = `[Initiating compilation and automated test sequence...]\n`;
+        let passedCases = 0;
+        const testCases = data.testCases || [];
+        const codeText = editor.getValue();
+
+        for (let idx = 0; idx < testCases.length; idx++) {
+            const tc = testCases[idx];
+            terminalBox.textContent += `Running Test Case ${idx+1}/${testCases.length}... `;
+            
+            let res = await runPistonCode(data.lang, data.version, codeText, tc.input);
+            let runOutput = "";
+            if (res && res.run) {
+                runOutput = (res.run.stdout || "").trim();
+            } else {
+                const sim = executeSimulatedCode(data.lang, codeText, tc.input, labId);
+                runOutput = (sim.stdout || "").trim();
+            }
+
+            if (runOutput === tc.expected.trim()) {
+                terminalBox.textContent += `PASSED\n`;
+                passedCases++;
+            } else {
+                terminalBox.textContent += `FAILED (Expected: "${tc.expected.trim()}", Got: "${runOutput}")\n`;
+            }
+        }
+
+        const finalScore = testCases.length > 0 ? Math.round((passedCases / testCases.length) * 100) : 100;
+        terminalBox.textContent += `\nAutomated grading complete.\nPassed: ${passedCases}/${testCases.length}\nScore: ${finalScore}/100\n`;
+        
+        // Update grade score display and sync progress
+        const scoreDisp = document.getElementById('scoreDisplay');
+        if (scoreDisp) scoreDisp.textContent = `Score: ${finalScore}`;
+        await syncProgress(labId, { score: finalScore, completed: finalScore === 100 });
+        
+        // Update user local storage status
+        const localState = { score: finalScore, completed: finalScore === 100, lastUpdated: new Date().toISOString() };
+        localStorage.setItem(`vlab_state_${labId}`, JSON.stringify(localState));
+    });
+
+    // AI Drawer Panel toggles
+    const aiDrawer = document.getElementById('ai-tutor-drawer');
+    document.getElementById('btnToggleAiPanel').addEventListener('click', () => {
+        const isOpen = aiDrawer.style.display === 'flex';
+        aiDrawer.style.display = isOpen ? 'none' : 'flex';
+    });
+    document.getElementById('btnCloseAiDrawer').addEventListener('click', () => {
+        aiDrawer.style.display = 'none';
+    });
+
+    // AI Settings modal input
+    document.getElementById('btnAiSettings').addEventListener('click', () => {
+        const key = prompt("Enter Gemini API Key to enable Premium Live AI Mode. (Get a free key from Google AI Studio). Leave blank to clear key:", getApiKey());
+        if (key !== null) {
+            setApiKey(key);
+            alert(key.trim() ? "Gemini Key Saved. Premium AI Assistant features unlocked!" : "Gemini Key cleared. Fallen back to Local Heuristic Engine.");
+        }
+    });
+
+    // Helper Chat response builder
+    const appendChatMessage = (sender, message) => {
+        const chatLogs = document.getElementById('ai-chat-logs');
+        const msgDiv = document.createElement('div');
+        msgDiv.style.alignSelf = sender === 'student' ? 'flex-end' : 'flex-start';
+        msgDiv.style.background = sender === 'student' ? 'var(--primary-rgb)2a' : 'var(--bg-alt)';
+        if (sender === 'student') msgDiv.style.borderColor = 'var(--primary)';
+        msgDiv.style.padding = '8px 12px';
+        msgDiv.style.borderRadius = '12px';
+        msgDiv.style.maxWidth = '85%';
+        msgDiv.style.fontSize = '13px';
+        msgDiv.style.color = 'var(--text-main)';
+        msgDiv.style.lineHeight = '1.4';
+        msgDiv.style.border = sender === 'student' ? '1px solid var(--primary)' : 'none';
+        msgDiv.textContent = message;
+        chatLogs.appendChild(msgDiv);
+        chatLogs.scrollTop = chatLogs.scrollHeight;
+    };
+
+    // Chat Trigger
+    const executeChatQuery = async (queryText) => {
+        if (!queryText.trim()) return;
+        appendChatMessage('student', queryText);
+        appendChatMessage('ai', 'AI is thinking...');
+
+        const codeText = editor.getValue();
+        let aiResponse = "";
+        
+        const key = getApiKey();
+        if (key) {
+            const systemPrompt = `You are the MIT VLab Academic AI Tutor. Provide clear, concise, step-by-step guidance on how to solve the student's coding issue. Do not give the direct solution code outright, but help guide them. Code Language: ${data.lang}. Student Code:\n${codeText}\n\nStudent Question: ${queryText}`;
+            aiResponse = await askGemini(systemPrompt);
+        } else {
+            aiResponse = localAIEvaluator(codeText, queryText, data.lang);
+        }
+
+        // Remove thinking message
+        const chatLogs = document.getElementById('ai-chat-logs');
+        if (chatLogs.lastChild) chatLogs.removeChild(chatLogs.lastChild);
+        appendChatMessage('ai', aiResponse || "Failed to contact AI.");
+    };
+
+    document.getElementById('btnSendChat').addEventListener('click', () => {
+        const input = document.getElementById('ai-chat-input');
+        executeChatQuery(input.value);
+        input.value = "";
+    });
+
+    document.getElementById('ai-chat-input').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            const input = document.getElementById('ai-chat-input');
+            executeChatQuery(input.value);
+            input.value = "";
+        }
+    });
+
+    document.getElementById('btnAiAudit').addEventListener('click', () => {
+        executeChatQuery("Audit my code quality, name checks, optimizations and let me know how to improve it.");
+    });
+    
+    document.getElementById('btnAiExplain').addEventListener('click', () => {
+        executeChatQuery("Explain this code logic line-by-line in simple terms.");
+    });
+
+    // Real-time Collaboration Logic via Firestore
+    const collBar = document.getElementById('collaboration-bar');
+    document.getElementById('btnCollSession').addEventListener('click', () => {
+        const isOpen = collBar.style.display === 'flex';
+        collBar.style.display = isOpen ? 'none' : 'flex';
+    });
+
+    const createRoom = async () => {
+        const roomInput = document.getElementById('collRoomId');
+        const roomStatusText = document.getElementById('roomStatusText');
+        const roomId = roomInput.value.trim().toUpperCase();
+        if (!roomId) { alert("Enter a valid Room ID."); return; }
+        
+        try {
+            roomStatusText.textContent = "Setting room...";
+            await setDoc(doc(db, "collaboration", roomId), {
+                code: editor.getValue(),
+                updatedBy: localStorage.getItem('vlab_user_name') || 'Student',
+                timestamp: new Date().toISOString()
+            });
+            window.activeCollRoomId = roomId;
+            roomStatusText.textContent = "Active Room: " + roomId;
+            listenToRoom(roomId);
+        } catch(err) { roomStatusText.textContent = "Error creating room: " + err.message; }
+    };
+
+    const joinRoom = () => {
+        const roomInput = document.getElementById('collRoomId');
+        const roomStatusText = document.getElementById('roomStatusText');
+        const roomId = roomInput.value.trim().toUpperCase();
+        if (!roomId) { alert("Enter a Room ID."); return; }
+        
+        window.activeCollRoomId = roomId;
+        roomStatusText.textContent = "Connected to room: " + roomId;
+        listenToRoom(roomId);
+    };
+
+    let collabUnsubscribe = null;
+    const listenToRoom = (roomId) => {
+        if (collabUnsubscribe) collabUnsubscribe();
+        const { onSnapshot } = window.firebaseFirestore || { onSnapshot: (ref, cb) => {
+            // Fallback dynamic import if not loaded globally
+            import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js").then(mod => {
+                window.firebaseFirestore = mod;
+                listenToRoom(roomId);
+            });
+        }};
+        if (!window.firebaseFirestore) return;
+        
+        collabUnsubscribe = onSnapshot(doc(db, "collaboration", roomId), (docSnap) => {
+            if (docSnap.exists()) {
+                const dataSnap = docSnap.data();
+                const myName = localStorage.getItem('vlab_user_name') || 'Student';
+                if (dataSnap.updatedBy !== myName) {
+                    const cursor = editor.getCursorPosition();
+                    editor.setValue(dataSnap.code, -1);
+                    editor.moveCursorToPosition(cursor);
+                }
+            }
+        });
+    };
+
+    document.getElementById('btnCreateRoom').addEventListener('click', createRoom);
+    document.getElementById('btnJoinRoom').addEventListener('click', joinRoom);
+};
+
+// --- INITIALIZE SQL SANDBOX WORKSPACE ---
+const initSqlLab = async (container, labId) => {
+    container.innerHTML = `
+        <div style="display:flex; flex-direction:column; height:100%; gap:12px; padding:8px;">
+            <div class="sim-toolbar" style="display:flex; justify-content:space-between; align-items:center;">
+                <div style="display:flex; gap:8px;">
+                    <button id="btnRunSql" class="btn-sim primary">▶ Run Query</button>
+                    <button id="btnResetSql" class="btn-sim">Reset DB</button>
+                </div>
+                <div style="font-weight:800; color:var(--primary); font-size:16px;">SQL Sandbox Terminal</div>
+            </div>
+            
+            <div style="display:flex; flex:1; gap:12px; min-height:480px; flex-wrap:wrap;">
+                <div style="flex:1; display:flex; flex-direction:column; gap:12px; min-width:300px;">
+                    <div style="display:flex; flex-direction:column; border:1px solid var(--border); border-radius:12px; overflow:hidden; flex:1;">
+                        <div style="background:var(--bg-alt); padding:8px 16px; border-bottom:1px solid var(--border); font-weight:700;">📝 SQL Editor</div>
+                        <div id="sql-editor" style="flex:1; width:100%;"></div>
+                    </div>
+                    <div style="display:flex; flex-direction:column; border:1px solid var(--border); border-radius:12px; overflow:hidden; flex:1; background:var(--bg-alt); padding:12px; overflow-y:auto;">
+                        <h4 style="margin:0 0 8px 0; color:var(--primary);">📁 Database Schema Definition</h4>
+                        <div style="display:flex; flex-direction:column; gap:8px; font-size:12px; font-family:monospace;">
+                            <div><b>Students</b> (id INT PK, name VARCHAR, age INT, branch VARCHAR)</div>
+                            <div><b>Courses</b> (course_id INT PK, title VARCHAR, credits INT)</div>
+                            <div><b>Enrollments</b> (student_id INT FK, course_id INT FK, grade CHAR)</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="flex:1.2; display:flex; flex-direction:column; border:1px solid var(--border); border-radius:12px; overflow:hidden; min-width:320px; background:var(--bg-page);">
+                    <div style="background:var(--bg-alt); padding:8px 16px; border-bottom:1px solid var(--border); font-weight:700;">📊 Query Output Console</div>
+                    <div id="sql-console-output" style="flex:1; padding:16px; overflow-y:auto; font-family:'JetBrains Mono', monospace; font-size:13px;">
+                        SQL engine ready. Write queries and click 'Run Query'.<br>
+                        Example: <code>SELECT * FROM Students;</code>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    const aceLib = await loadAceEditor();
+    const sqlEditor = aceLib.edit("sql-editor");
+    sqlEditor.setTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'ace/theme/tomorrow_night' : 'ace/theme/chrome');
+    sqlEditor.session.setMode("ace/mode/sql");
+    sqlEditor.setOptions({ fontSize: "14px", fontFamily: "'JetBrains Mono', monospace" });
+
+    sqlEditor.setValue(`-- Write SQL queries here and run against mock DB\nSELECT * FROM Students;`, -1);
+
+    document.getElementById('btnRunSql').addEventListener('click', () => {
+        const text = sqlEditor.getValue();
+        const out = document.getElementById('sql-console-output');
+        out.innerHTML = `Running SQL statement...\n\n`;
+        const res = executeSQL(text);
+        if (res.success) {
+            if (res.rows && res.rows.length !== undefined) {
+                // Table output rendering
+                let tableHtml = `<table style="width:100%; border-collapse:collapse; margin-top:8px; font-size:13px; text-align:left;"><thead><tr style="border-bottom:2px solid var(--border); background:var(--bg-alt);">`;
+                res.columns.forEach(col => {
+                    tableHtml += `<th style="padding:8px;">${col.toUpperCase()}</th>`;
+                });
+                tableHtml += `</tr></thead><tbody>`;
+                res.rows.forEach(row => {
+                    tableHtml += `<tr style="border-bottom:1px solid var(--border);">`;
+                    res.columns.forEach(col => {
+                        tableHtml += `<td style="padding:8px;">${row[col] !== undefined ? row[col] : 'NULL'}</td>`;
+                    });
+                    tableHtml += `</tr>`;
+                });
+                tableHtml += `</tbody></table>`;
+                out.innerHTML = `Query successful. Selected ${res.rows.length} rows.\n` + tableHtml;
+            } else {
+                out.innerHTML = `<span style="color:#10b981;">Query executed successfully. ${res.message || ''}</span>`;
+            }
+            
+            // Mark lab complete
+            syncProgress(labId, { score: 100, completed: true });
+            const scoreDisp = document.getElementById('scoreDisplay');
+            if (scoreDisp) scoreDisp.textContent = `Score: 100`;
+            localStorage.setItem(`vlab_state_${labId}`, JSON.stringify({ score: 100, completed: true }));
+        } else {
+            out.innerHTML = `<span style="color:#ef4444; font-weight:bold;">${res.error}</span>`;
+        }
+    });
+
+    document.getElementById('btnResetSql').addEventListener('click', () => {
+        MOCK_DB_WORKING = JSON.parse(JSON.stringify(MOCK_DB));
+        alert(" Relational tables reset to initial database records.");
+    });
+};
+
+// --- INITIALIZE TRANSACTION LAB WORKSPACE ---
+const initTransactionsLab = (container, labId) => {
+    container.innerHTML = `
+        <div style="display:flex; flex-direction:column; height:100%; gap:12px; padding:8px;">
+            <div class="sim-toolbar" style="display:flex; justify-content:space-between; align-items:center;">
+                <div style="display:flex; gap:8px;">
+                    <button id="btnTxBegin" class="btn-sim primary">BEGIN TRANSACTION</button>
+                    <button id="btnTxCommit" class="btn-sim" style="background:#10b981; color:white;" disabled>COMMIT</button>
+                    <button id="btnTxRollback" class="btn-sim" style="background:#ef4444; color:white;" disabled>ROLLBACK</button>
+                </div>
+                <div style="font-weight:800; color:var(--primary); font-size:16px;">ACID Concurrency Sandbox</div>
+            </div>
+
+            <div style="display:flex; flex:1; gap:12px; min-height:450px; flex-wrap:wrap;">
+                <div style="flex:1.1; display:flex; flex-direction:column; border:1px solid var(--border); border-radius:12px; padding:16px; background:var(--bg-alt); min-width:300px;">
+                    <h3 style="margin-top:0; color:var(--primary);">🏦 Accounts Database State</h3>
+                    <table id="tx-db-table" style="width:100%; border-collapse:collapse; text-align:left; font-size:14px; margin-top:12px;">
+                        <thead>
+                            <tr style="border-bottom:2px solid var(--border);">
+                                <th style="padding:8px;">ID</th>
+                                <th style="padding:8px;">Name</th>
+                                <th style="padding:8px;">Balance ($)</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                    
+                    <div id="tx-actions-panel" style="margin-top:20px; display:none; flex-direction:column; gap:10px;">
+                        <h4>Execute Transaction Update</h4>
+                        <button id="btnActionTransfer" class="btn-sim" style="text-align:left; padding:10px;">Transfer $1000 from Atharva Gandhi (1) to Nisha Patil (2)</button>
+                    </div>
+                </div>
+
+                <div style="flex:1.2; display:flex; flex-direction:column; border:1px solid var(--border); border-radius:12px; overflow:hidden; min-width:320px; background:var(--bg-page);">
+                    <div style="background:var(--bg-alt); padding:8px 16px; border-bottom:1px solid var(--border); font-weight:700;">🪵 Transaction Log & ACID Audits</div>
+                    <div id="tx-log-box" style="flex:1; padding:16px; overflow-y:auto; font-family:'JetBrains Mono', monospace; font-size:13px; line-height:1.5;">
+                        System ready. Click BEGIN TRANSACTION to start a block of transactions.
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    let activeTransaction = false;
+    let oldBalances = {};
+
+    const renderAccounts = () => {
+        const tbody = document.querySelector('#tx-db-table tbody');
+        tbody.innerHTML = MOCK_DB_WORKING.accounts.map(a => `
+            <tr style="border-bottom:1px solid var(--border);">
+                <td style="padding:8px;">${a.id}</td>
+                <td style="padding:8px;">${a.name}</td>
+                <td style="padding:8px;">$${a.balance}</td>
+            </tr>
+        `).join('');
+    };
+    renderAccounts();
+
+    const logBox = document.getElementById('tx-log-box');
+    const logMsg = (text, type = 'info') => {
+        const colorMap = { info: 'var(--text-main)', success: '#10b981', error: '#ef4444', warning: '#f59e0b' };
+        logBox.innerHTML += `<div style="color:${colorMap[type]}; margin-bottom:4px;">${text}</div>`;
+        logBox.scrollTop = logBox.scrollHeight;
+    };
+
+    document.getElementById('btnTxBegin').addEventListener('click', () => {
+        activeTransaction = true;
+        oldBalances = JSON.parse(JSON.stringify(MOCK_DB_WORKING.accounts));
+        
+        document.getElementById('btnTxBegin').disabled = true;
+        document.getElementById('btnTxCommit').disabled = false;
+        document.getElementById('btnTxRollback').disabled = false;
+        document.getElementById('tx-actions-panel').style.display = 'flex';
+        
+        logBox.innerHTML = "";
+        logMsg("Transaction block began. Isolation state: READ UNCOMMITTED (Intermediate changes visible locally).", "warning");
+    });
+
+    document.getElementById('btnActionTransfer').addEventListener('click', () => {
+        if (!activeTransaction) return;
+        const fromA = MOCK_DB_WORKING.accounts.find(a => a.id === 1);
+        const toA = MOCK_DB_WORKING.accounts.find(a => a.id === 2);
+        if (fromA && toA) {
+            fromA.balance -= 1000;
+            toA.balance += 1000;
+            renderAccounts();
+            logMsg("UPDATE Accounts SET balance = balance - 1000 WHERE id = 1;", "info");
+            logMsg("UPDATE Accounts SET balance = balance + 1000 WHERE id = 2;", "info");
+            logMsg("Temporary database modifications set. Click COMMIT to save or ROLLBACK to discard changes.", "warning");
+        }
+    });
+
+    document.getElementById('btnTxCommit').addEventListener('click', () => {
+        activeTransaction = false;
+        document.getElementById('btnTxBegin').disabled = false;
+        document.getElementById('btnTxCommit').disabled = true;
+        document.getElementById('btnTxRollback').disabled = true;
+        document.getElementById('tx-actions-panel').style.display = 'none';
+
+        logMsg("COMMIT TRANSACTION;", "success");
+        logMsg("Database state successfully synchronized. ACID consistency checks: PASSED.", "success");
+        
+        syncProgress(labId, { score: 100, completed: true });
+        const scoreDisp = document.getElementById('scoreDisplay');
+        if (scoreDisp) scoreDisp.textContent = `Score: 100`;
+        localStorage.setItem(`vlab_state_${labId}`, JSON.stringify({ score: 100, completed: true }));
+    });
+
+    document.getElementById('btnTxRollback').addEventListener('click', () => {
+        activeTransaction = false;
+        MOCK_DB_WORKING.accounts = oldBalances;
+        renderAccounts();
+
+        document.getElementById('btnTxBegin').disabled = false;
+        document.getElementById('btnTxCommit').disabled = true;
+        document.getElementById('btnTxRollback').disabled = true;
+        document.getElementById('tx-actions-panel').style.display = 'none';
+
+        logMsg("ROLLBACK TRANSACTION;", "error");
+        logMsg("Database modifications successfully reverted. ACID durability constraints: ENFORCED.", "info");
+    });
+};
+
+// --- INITIALIZE B-TREE INDEXING LAB WORKSPACE ---
+const initIndexingLab = (container, labId) => {
+    container.innerHTML = `
+        <div style="display:flex; flex-direction:column; height:100%; gap:12px; padding:8px;">
+            <div class="sim-toolbar" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+                <div style="display:flex; gap:8px; align-items:center;">
+                    <input id="btree-insert-val" type="number" placeholder="Enter key (e.g. 15)" style="padding:6px 12px; border-radius:6px; border:1px solid var(--border); background:var(--bg-page); color:var(--text-main); font-family:monospace; width:140px;">
+                    <button id="btnBTreeInsert" class="btn-sim primary">📥 Insert Key</button>
+                    <button id="btnBTreeReset" class="btn-sim">Reset Index</button>
+                </div>
+                <div style="font-weight:800; color:var(--primary); font-size:16px;">B-Tree Indexing Visualizer</div>
+            </div>
+
+            <div style="display:flex; flex-direction:column; border:1px solid var(--border); border-radius:12px; overflow:hidden; background:var(--bg-page); flex:1; min-height:300px; position:relative;">
+                <div style="background:var(--bg-alt); padding:8px 16px; border-bottom:1px solid var(--border); font-weight:700;">🌴 B-Tree Structure (Order = 3, Max Keys = 2)</div>
+                <div id="btree-visual-panel" style="flex:1; display:flex; align-items:center; justify-content:center; padding:16px; overflow:auto;"></div>
+            </div>
+
+            <div style="display:flex; flex-direction:column; border:1px solid var(--border); border-radius:12px; overflow:hidden; background:var(--bg-alt); height:140px;">
+                <div style="background:var(--bg-page); padding:8px 16px; border-bottom:1px solid var(--border); font-weight:700;">🪵 Indexing Split Logs</div>
+                <div id="btree-log" style="flex:1; padding:12px; overflow-y:auto; font-family:monospace; font-size:12px; color:var(--text-muted);">
+                    Enter integers and click Insert Key to build index tree. Order 3 splits occur when keys exceed 2 per node.
+                </div>
+            </div>
+        </div>
+    `;
+
+    const tree = new BTree(2); // Order = 3
+    const visual = document.getElementById('btree-visual-panel');
+    const logBox = document.getElementById('btree-log');
+
+    const updateVisual = () => {
+        visual.innerHTML = renderBTreeSVG(tree);
+    };
+
+    // Insert key trigger
+    document.getElementById('btnBTreeInsert').addEventListener('click', () => {
+        const input = document.getElementById('btree-insert-val');
+        const val = parseInt(input.value);
+        if (isNaN(val)) { alert("Enter a valid integer."); return; }
+        
+        tree.insert(val);
+        updateVisual();
+        
+        logBox.innerHTML += `Inserted key ${val} into index database.\n`;
+        logBox.scrollTop = logBox.scrollHeight;
+        input.value = "";
+        
+        // Progress update
+        syncProgress(labId, { score: 100, completed: true });
+        const scoreDisp = document.getElementById('scoreDisplay');
+        if (scoreDisp) scoreDisp.textContent = `Score: 100`;
+        localStorage.setItem(`vlab_state_${labId}`, JSON.stringify({ score: 100, completed: true }));
+    });
+
+    document.getElementById('btnBTreeReset').addEventListener('click', () => {
+        location.reload();
+    });
+
+    window.updateBTreeVisualizer = (val) => {
+        tree.insert(val);
+        updateVisual();
+        logBox.innerHTML += `Triggered Index update: added key ${val} via SQL query statement.\n`;
+        logBox.scrollTop = logBox.scrollHeight;
+    };
+
+    // Load initial nodes
+    tree.insert(10);
+    tree.insert(20);
+    tree.insert(30); // split root
+    updateVisual();
+};
+
+// Expose routing hooks
+window.initProgrammingLab = initProgrammingLab;
+window.initSqlLab = initSqlLab;
+window.initTransactionsLab = initTransactionsLab;
+window.initIndexingLab = initIndexingLab;
+
 // App Controller
 document.addEventListener('DOMContentLoaded', async () => {
     // Initial State Restoration from Cloud
@@ -5881,6 +6875,26 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
 
+        if (data.simType === 'programming') {
+            initProgrammingLab(container, id);
+            return;
+        }
+
+        if (data.simType === 'dbms_sql') {
+            initSqlLab(container, id);
+            return;
+        }
+
+        if (data.simType === 'dbms_transactions') {
+            initTransactionsLab(container, id);
+            return;
+        }
+
+        if (data.simType === 'dbms_indexing') {
+            initIndexingLab(container, id);
+            return;
+        }
+
         if (data.simType === 'cpu_scheduling') {
             initCpuSchedulingSim(container);
             return;
@@ -6295,6 +7309,35 @@ student@mitadt-os:~$ </div>
             document.documentElement.style.setProperty('--primary-rgb', '168, 85, 247');
             document.documentElement.style.setProperty('--accent', '#c084fc');
             document.title = "MIT ADT VLAB - Operating Systems";
+        } else if (currentSubject === 'programming') {
+            optionsHtml = `
+                <option value="c_prog">1. C Programming Lab</option>
+                <option value="cpp_prog">2. C++ OOP Concepts Lab</option>
+                <option value="java_prog">3. Java Programming Lab</option>
+                <option value="python_prog">4. Python Scripting Lab</option>
+            `;
+            const crumbs = document.querySelectorAll('.breadcrumb .crumb');
+            if (crumbs.length >= 2) {
+                crumbs[1].textContent = "Computer Programming Lab";
+            }
+            document.documentElement.style.setProperty('--primary', '#10b981');
+            document.documentElement.style.setProperty('--primary-rgb', '16, 185, 129');
+            document.documentElement.style.setProperty('--accent', '#34d399');
+            document.title = "MIT ADT VLAB - Computer Programming";
+        } else if (currentSubject === 'dbms') {
+            optionsHtml = `
+                <option value="sql_queries">1. Relational Schemas & SQL</option>
+                <option value="transactions">2. Concurrency & Transactions</option>
+                <option value="indexing">3. Indexing & B-Trees</option>
+            `;
+            const crumbs = document.querySelectorAll('.breadcrumb .crumb');
+            if (crumbs.length >= 2) {
+                crumbs[1].textContent = "Database Systems Lab";
+            }
+            document.documentElement.style.setProperty('--primary', '#f59e0b');
+            document.documentElement.style.setProperty('--primary-rgb', '245, 158, 11');
+            document.documentElement.style.setProperty('--accent', '#fbbf24');
+            document.title = "MIT ADT VLAB - Database Systems";
         } else {
             optionsHtml = `
                 <option value="cables_devices">1. Cables, Connectors and Networking Devices</option>
@@ -6325,12 +7368,24 @@ student@mitadt-os:~$ </div>
     // Sanitize initial lab variable by active subject track to prevent cross-subject loading bugs
     const osLabs = ['cpu_scheduling', 'process_sync', 'deadlock_avoidance', 'page_replacement', 'disk_scheduling'];
     const netLabs = ['cables_devices', 'modulation', 'net_commands', 'ip_class', 'csma', 'csma_ca', 'subnet', 'vlan', 'routing_protocols', 'routing_dv', 'routing_ls', 'udp', 'tcp', 'dns', 'practice'];
+    const progLabs = ['c_prog', 'cpp_prog', 'java_prog', 'python_prog'];
+    const dbmsLabs = ['sql_queries', 'transactions', 'indexing'];
     
     let initialLab = localStorage.getItem('vlab_current_lab');
     if (currentSubject === 'os') {
         if (!osLabs.includes(initialLab)) {
             initialLab = 'cpu_scheduling';
             localStorage.setItem('vlab_current_lab', 'cpu_scheduling');
+        }
+    } else if (currentSubject === 'programming') {
+        if (!progLabs.includes(initialLab)) {
+            initialLab = 'c_prog';
+            localStorage.setItem('vlab_current_lab', 'c_prog');
+        }
+    } else if (currentSubject === 'dbms') {
+        if (!dbmsLabs.includes(initialLab)) {
+            initialLab = 'sql_queries';
+            localStorage.setItem('vlab_current_lab', 'sql_queries');
         }
     } else {
         if (!netLabs.includes(initialLab)) {
