@@ -26,6 +26,27 @@ const getCurrentUser = () => {
     });
 };
 
+const getStateKey = (labId) => {
+    const data = window.VLAB_DATA ? window.VLAB_DATA[labId] : null;
+    if (data && data.isMultiModule) {
+        let modIdx = window.currentModuleIndex;
+        if (modIdx === undefined || modIdx === null) {
+            const modSelect = document.getElementById('moduleSelect');
+            if (modSelect && modSelect.style.display !== 'none' && modSelect.value !== '') {
+                modIdx = parseInt(modSelect.value, 10);
+            } else {
+                const savedIdx = localStorage.getItem(`${labId}_active_module`);
+                modIdx = savedIdx ? parseInt(savedIdx, 10) : 0;
+            }
+        }
+        if (isNaN(modIdx)) {
+            modIdx = 0;
+        }
+        return `${labId}_mod_${modIdx}`;
+    }
+    return labId;
+};
+
 const syncProgress = async (labId, data) => {
     const user = auth.currentUser || await getCurrentUser();
     if (!user || !labId) {
@@ -33,7 +54,8 @@ const syncProgress = async (labId, data) => {
         return;
     }
     try {
-        await setDoc(doc(db, "users", user.uid, "progress", labId), {
+        const pathKey = getStateKey(labId);
+        await setDoc(doc(db, "users", user.uid, "progress", pathKey), {
             ...data,
             lastUpdated: new Date().toISOString()
         }, { merge: true });
@@ -3251,7 +3273,8 @@ const saveUserCode = async (labId, code) => {
     const user = auth.currentUser || await getCurrentUser();
     if (!user || !labId) return;
     try {
-        await setDoc(doc(db, "users", user.uid, "code", labId), {
+        const pathKey = getStateKey(labId);
+        await setDoc(doc(db, "users", user.uid, "code", pathKey), {
             code: code,
             lastSaved: new Date().toISOString()
         });
@@ -3262,7 +3285,8 @@ const loadUserCode = async (labId) => {
     const user = auth.currentUser || await getCurrentUser();
     if (!user || !labId) return null;
     try {
-        const snap = await getDoc(doc(db, "users", user.uid, "code", labId));
+        const pathKey = getStateKey(labId);
+        const snap = await getDoc(doc(db, "users", user.uid, "code", pathKey));
         if (snap.exists()) return snap.data().code;
     } catch(e) { console.error("Cloud fetch failed", e); }
     return null;
@@ -3270,7 +3294,11 @@ const loadUserCode = async (labId) => {
 
 // --- INITIALIZE PROGRAMMING WORKSPACE ---
 const initProgrammingLab = async (container, labId) => {
-    const data = window.VLAB_DATA[labId];
+    let data = window.VLAB_DATA[labId];
+    if (data && data.isMultiModule) {
+        const modIdx = window.currentModuleIndex !== undefined && window.currentModuleIndex !== null ? window.currentModuleIndex : 0;
+        data = data.modules[modIdx];
+    }
     container.innerHTML = `
         <div style="display:flex; flex-direction:column; height:100%; gap:12px; padding:8px;">
             <div class="sim-toolbar" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
@@ -3472,7 +3500,7 @@ const initProgrammingLab = async (container, labId) => {
         
         // Update user local storage status
         const localState = { score: finalScore, completed: finalScore === 100, lastUpdated: new Date().toISOString() };
-        localStorage.setItem(`vlab_state_${labId}`, JSON.stringify(localState));
+        localStorage.setItem(`vlab_state_${getStateKey(labId)}`, JSON.stringify(localState));
     });
 
     // AI Drawer Panel toggles
@@ -3942,6 +3970,49 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         if (!data) return;
 
+        let parentTitle = data.title;
+        let isMulti = data.isMultiModule;
+        let activeIndex = 0;
+
+        if (isMulti) {
+            const modSelect = document.getElementById('moduleSelect');
+            if (modSelect) {
+                modSelect.style.display = 'inline-block';
+                if (modSelect.getAttribute('data-current-lab') !== id) {
+                    modSelect.innerHTML = data.modules.map((m, idx) => `<option value="${idx}">${m.title}</option>`).join('');
+                    modSelect.setAttribute('data-current-lab', id);
+                    
+                    const savedIdx = localStorage.getItem(`${id}_active_module`);
+                    activeIndex = savedIdx ? parseInt(savedIdx, 10) : 0;
+                    if (activeIndex >= data.modules.length) activeIndex = 0;
+                    modSelect.value = activeIndex;
+                } else {
+                    activeIndex = parseInt(modSelect.value, 10) || 0;
+                }
+            }
+            window.currentModuleIndex = activeIndex;
+            
+            const parentLang = data.lang;
+            const parentVersion = data.version;
+            const parentSimType = data.simType;
+            
+            data = {
+                ...data,
+                ...data.modules[activeIndex]
+            };
+            
+            if (!data.lang && parentLang) data.lang = parentLang;
+            if (!data.version && parentVersion) data.version = parentVersion;
+            if (!data.simType && parentSimType) data.simType = parentSimType;
+        } else {
+            const modSelect = document.getElementById('moduleSelect');
+            if (modSelect) {
+                modSelect.style.display = 'none';
+                modSelect.removeAttribute('data-current-lab');
+            }
+            window.currentModuleIndex = null;
+        }
+
         // Dynamic content population with fade-in effect
         const content = document.getElementById('content-display');
         if (!content) return;
@@ -3949,7 +4020,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         // Sync the main header title
         const mainTitle = document.getElementById('lab-title-display');
-        if (mainTitle) mainTitle.textContent = data.title;
+        if (mainTitle) {
+            if (isMulti) {
+                mainTitle.textContent = `${parentTitle} - ${data.title}`;
+            } else {
+                mainTitle.textContent = data.title;
+            }
+        }
 
         setTimeout(() => {
             document.querySelectorAll('.section-title').forEach(el => el.textContent = data.title);
@@ -4035,9 +4112,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                 // Save state to unlock next sections
                 if (prefix === 'pre') {
                     const labId = document.getElementById('labSelect').value;
-                    const state = JSON.parse(localStorage.getItem(`vlab_state_${labId}`) || '{}');
+                    const stateKey = getStateKey(labId);
+                    const state = JSON.parse(localStorage.getItem(`vlab_state_${stateKey}`) || '{}');
                     state.pretest = true;
-                    localStorage.setItem(`vlab_state_${labId}`, JSON.stringify(state));
+                    localStorage.setItem(`vlab_state_${stateKey}`, JSON.stringify(state));
                     alert(`Pretest Submitted! Simulation and Experiment sections are now UNLOCKED for this lab. 🚀`);
                     syncProgress(labId, { pretest: true, pretestScore: scorePercent });
                 }
@@ -4046,6 +4124,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     const labId = document.getElementById('labSelect').value;
                     const feedback = document.getElementById('student-feedback')?.value || "";
                     const labData = window.VLAB_DATA[labId] || { title: "Custom Experiment" };
+                    const currentModData = labData.isMultiModule ? labData.modules[window.currentModuleIndex] : labData;
  
                     syncProgress(labId, {
                         posttest: true,
@@ -4055,7 +4134,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     });
  
                     document.getElementById('cert-user-name').textContent = localStorage.getItem('vlab_user_name') || 'Atharva Gandhi';
-                    document.getElementById('cert-lab-name').textContent = labData.title;
+                    document.getElementById('cert-lab-name').textContent = labData.isMultiModule ? `${labData.title} - ${currentModData.title}` : labData.title;
                     document.getElementById('cert-date').textContent = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
  
                     // Auto-generate report in background and prompt user
@@ -4076,7 +4155,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         item.addEventListener('click', () => {
             const sid = item.getAttribute('data-section');
             const labId = document.getElementById('labSelect').value;
-            const state = JSON.parse(localStorage.getItem(`vlab_state_${labId}`) || '{"pretest":false}');
+            const stateKey = getStateKey(labId);
+            const state = JSON.parse(localStorage.getItem(`vlab_state_${stateKey}`) || '{"pretest":false}');
 
             const initialMode = localStorage.getItem('vlab_current_mode') || 'learning';
             
@@ -7265,6 +7345,25 @@ student@mitadt-os:~$ </div>
             }
         }, 1200);
     });
+
+    const moduleSelectEl = document.getElementById('moduleSelect');
+    if (moduleSelectEl) {
+        moduleSelectEl.addEventListener('change', (e) => {
+            const labId = document.getElementById('labSelect').value;
+            const newIndex = parseInt(e.target.value, 10);
+            localStorage.setItem(`${labId}_active_module`, newIndex);
+            window.currentModuleIndex = newIndex;
+            
+            // Reload active lab details
+            loadLab(labId);
+            
+            // Re-trigger click on active nav item to refresh the panel and check lock status
+            const activeSectionEl = document.querySelector('.nav-item.active');
+            if (activeSectionEl) {
+                activeSectionEl.click();
+            }
+        });
+    }
 
     document.getElementById('themeToggle').addEventListener('click', () => {
         const current = document.documentElement.getAttribute('data-theme');

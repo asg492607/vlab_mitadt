@@ -806,142 +806,618 @@ window.VLAB_DATA.vlan.practice_commands = ["vlan 10", "name Marketing", "switchp
 window.VLAB_DATA.vlan.practice_questions = ["What is the purpose of a Trunk port?", "How does a VLAN reduce the size of a broadcast domain?"];
 
 // --- Programming Labs ---
+// --- Programming Labs ---
 window.VLAB_DATA.c_prog = {
-    title: "C Programming & Memory Management",
-    aim: "To master basics of C syntax, standard input/output, recursive functions, and pointers.",
-    theory: {
-        intro: "C is a procedural programming language designed in 1972. It provides low-level memory access, a clean set of keywords, and a clean style that makes it ideal for system programming like OS kernels.",
-        cards: [
-            { title: "1. Pointer Basics", content: "Pointers store the memory addresses of other variables. Declared using `*` (dereference operator), and referenced using `&` (address-of operator)." },
-            { title: "2. Recursion", content: "A function that calls itself is recursive. Requires a base case to terminate execution and prevent stack overflow errors." },
-            { title: "3. Standard I/O", content: "Uses `scanf` for formatted input reading from stdin and `printf` for formatted output writing to stdout." }
-        ]
-    },
-    pretest: [
-        { q: "Which operator is used to get the memory address of a variable?", options: ["*", "&", "&&", "->"], correct: 1 },
-        { q: "What happens if a recursive function does not have a base case?", options: ["Runs normally", "Causes a syntax error", "Causes stack overflow (infinite loop)", "Returns 0"], correct: 2 }
-    ],
-    procedure: [
-        "1. Select the recursive factorial task from the code exercise selection.",
-        "2. Review the starting C code template loaded in the editor.",
-        "3. Provide integer inputs in the standard input box (e.g. 5).",
-        "4. Click 'Run Code' to execute compile-run pipeline via Piston API.",
-        "5. Click 'Submit for Grading' to execute automated test cases."
-    ],
-    posttest: [
-        { q: "What is the return size of sizeof(char) in C?", options: ["1 byte", "2 bytes", "4 bytes", "Depends on OS"], correct: 0 },
-        { q: "Which function is used for dynamic memory allocation in C?", options: ["alloc()", "malloc()", "new()", "make()"], correct: 1 }
-    ],
-    simType: "programming",
-    lang: "c",
-    version: "10.2.0",
-    defaultCode: `#include <stdio.h>\n\n// Task: Implement a recursive function to find the factorial of a number.\n// The input is read from standard input.\nint factorial(int n) {\n    if (n <= 1) return 1;\n    return n * factorial(n - 1);\n}\n\nint main() {\n    int num;\n    if (scanf("%d", &num) == 1) {\n        printf("%d\\n", factorial(num));\n    } else {\n        printf("Invalid input\\n");\n    }\n    return 0;\n}`,
-    testCases: [
-        { input: "5", expected: "120" },
-        { input: "3", expected: "6" },
-        { input: "1", expected: "1" }
-    ],
-    practice_commands: ["gcc main.c -o program", "./program", "valgrind --leak-check=full ./program"],
-    practice_questions: ["What is a segmentation fault?", "Why is memory deallocation with free() crucial?"]
+    title: "C Programming Lab",
+    isMultiModule: true,
+    modules: [
+        {
+            title: "Module 1: Basic I/O & Arithmetic",
+            aim: "To learn basic C syntax, standard input/output, and arithmetic operations.",
+            theory: {
+                intro: "C uses printf() for standard output and scanf() for standard input. It supports standard operators like +, -, *, /, and %.",
+                cards: [{ title: "Arithmetic Sum", content: "Write a program that takes two integers from standard input and prints their sum." }]
+            },
+            pretest: [{ q: "Which format specifier is used for integers in C?", options: ["%d", "%f", "%c", "%s"], correct: 0 }],
+            procedure: ["1. Read two integers.", "2. Print their sum."],
+            posttest: [{ q: "What does scanf() return?", options: ["Value read", "Number of successfully matched items", "0", "Void"], correct: 1 }],
+            lang: "c", version: "10.2.0",
+            defaultCode: `#include <stdio.h>\n\nint main() {\n    int a, b;\n    if (scanf("%d %d", &a, &b) == 2) {\n        printf("%d\\n", a + b);\n    }\n    return 0;\n}`,
+            testCases: [{ input: "5 10", expected: "15" }, { input: "20 -5", expected: "15" }],
+            practice_commands: ["gcc main.c", "./a.out"], practice_questions: ["What is the range of a standard 32-bit signed integer?"]
+        },
+        {
+            title: "Module 2: Control Flow & Grade Calculator",
+            aim: "To use if-else decision statements in C to evaluate conditions.",
+            theory: {
+                intro: "If-else statements execute specific blocks of code depending on whether a boolean expression is true or false.",
+                cards: [{ title: "Decision Making", content: "Check score and return letter grades: A (>=80), B (>=60), else F." }]
+            },
+            pretest: [{ q: "Which symbol represents logical AND in C?", options: ["&", "&&", "|", "||"], correct: 1 }],
+            procedure: ["1. Read score.", "2. Use if-else statements to print 'Grade A', 'Grade B', or 'Grade F'."],
+            posttest: [{ q: "What is the result of non-zero integer evaluation in C conditional tests?", options: ["True", "False", "Error", "Undefined"], correct: 0 }],
+            lang: "c", version: "10.2.0",
+            defaultCode: `#include <stdio.h>\n\nint main() {\n    int score;\n    if (scanf("%d", &score) == 1) {\n        if (score >= 80) printf("Grade A\\n");\n        else if (score >= 60) printf("Grade B\\n");\n        else printf("Grade F\\n");\n    }\n    return 0;\n}`,
+            testCases: [{ input: "85", expected: "Grade A" }, { input: "70", expected: "Grade B" }, { input: "45", expected: "Grade F" }],
+            practice_commands: ["gcc main.c"], practice_questions: ["Explain the difference between if-else and switch-case."]
+        },
+        {
+            title: "Module 3: Loops & Prime Checker",
+            aim: "To implement iterative control loops (for, while) to check number states.",
+            theory: {
+                intro: "Loops execute a set of statements repeatedly until a termination condition is met.",
+                cards: [{ title: "Prime Checker", content: "An integer >1 is prime if it has no positive divisors other than 1 and itself." }]
+            },
+            pretest: [{ q: "Which loop guarantees execution of its body at least once?", options: ["for", "while", "do-while", "none"], correct: 2 }],
+            procedure: ["1. Read N.", "2. Check factors from 2 to sqrt(N). Print 'Prime' or 'Not Prime'."],
+            posttest: [{ q: "What is the time complexity of checking prime factors up to sqrt(N)?", options: ["O(N)", "O(log N)", "O(sqrt(N))", "O(1)"], correct: 2 }],
+            lang: "c", version: "10.2.0",
+            defaultCode: `#include <stdio.h>\n\nint main() {\n    int n, isPrime = 1;\n    if (scanf("%d", &n) == 1) {\n        if (n <= 1) isPrime = 0;\n        for (int i = 2; i * i <= n; i++) {\n            if (n % i == 0) { isPrime = 0; break; }\n        }\n        if (isPrime) printf("Prime\\n");\n        else printf("Not Prime\\n");\n    }\n    return 0;\n}`,
+            testCases: [{ input: "7", expected: "Prime" }, { input: "4", expected: "Not Prime" }],
+            practice_commands: ["gcc main.c"], practice_questions: ["Why is loop termination check vital?"]
+        },
+        {
+            title: "Module 4: Functions & Modularity (Factorials)",
+            aim: "To divide code into modular functions and understand parameter passing.",
+            theory: {
+                intro: "Functions bundle repetitive code. In C, parameters are passed by value by default.",
+                cards: [{ title: "Factorial Recursion", content: "n! = n * (n-1)! with base case 1! = 1." }]
+            },
+            pretest: [{ q: "Can a C function return multiple values directly without pointers?", options: ["Yes", "No", "Depends on type", "Only arrays"], correct: 1 }],
+            procedure: ["1. Define factorial function.", "2. Read N, call function, print output."],
+            posttest: [{ q: "Where are local function parameters stored in memory?", options: ["Heap", "Stack", "Data Segment", "BSS Segment"], correct: 1 }],
+            lang: "c", version: "10.2.0",
+            defaultCode: `#include <stdio.h>\n\nint factorial(int n) {\n    if (n <= 1) return 1;\n    return n * factorial(n - 1);\n}\n\nint main() {\n    int n;\n    if (scanf("%d", &n) == 1) {\n        printf("%d\\n", factorial(n));\n    }\n    return 0;\n}`,
+            testCases: [{ input: "5", expected: "120" }, { input: "3", expected: "6" }],
+            practice_commands: ["gcc main.c"], practice_questions: ["What is recursion stack overhead?"]
+        },
+        {
+            title: "Module 5: Arrays & Palindromes",
+            aim: "To index lists of characters and identify palindromic patterns.",
+            theory: {
+                intro: "Arrays store contiguous blocks of memory. A palindrome is a word that reads the same backward as forward.",
+                cards: [{ title: "String Indexing", content: "Compare characters from index 0 and length-1 inwards." }]
+            },
+            pretest: [{ q: "Which character terminates strings in C?", options: ["\\0", "\\n", "EOF", "Space"], correct: 0 }],
+            procedure: ["1. Read character string.", "2. Compare matching bounds to verify palindrome status."],
+            posttest: [{ q: "If string length is L, how many comparisons are needed in the worst case?", options: ["L", "L/2", "L^2", "1"], correct: 1 }],
+            lang: "c", version: "10.2.0",
+            defaultCode: `#include <stdio.h>\n#include <string.h>\n\nint main() {\n    char str[100];\n    if (scanf("%99s", str) == 1) {\n        int len = strlen(str);\n        int isPal = 1;\n        for (int i = 0; i < len / 2; i++) {\n            if (str[i] != str[len - 1 - i]) { isPal = 0; break; }\n        }\n        if (isPal) printf("Palindrome\\n");\n        else printf("Not Palindrome\\n");\n    }\n    return 0;\n}`,
+            testCases: [{ input: "radar", expected: "Palindrome" }, { input: "hello", expected: "Not Palindrome" }],
+            practice_commands: ["gcc main.c"], practice_questions: ["Why is array bounds checking necessary in C?"]
+        },
+        {
+            title: "Module 6: Advanced Memory & Pointers",
+            aim: "To demonstrate passing variables by reference using pointers to modify original variables.",
+            theory: {
+                intro: "Pointers hold addresses. Passing pointers as parameters allows functions to alter variables in the caller's stack frame.",
+                cards: [{ title: "Swapping Values", content: "Use a temporary storage variable dereferencing memory addresses." }]
+            },
+            pretest: [{ q: "What does the dereference operator (*) do?", options: ["Gets variable address", "Accesses the value at the pointer's target address", "Multiplies two pointers", "Declares null pointer"], correct: 1 }],
+            procedure: ["1. Define swap function taking two integer pointers.", "2. Swaps values dereferenced and prints output."],
+            posttest: [{ q: "What happens if you dereference a NULL pointer?", options: ["Returns 0", "Causes a compiler error", "Causes a runtime Segmentation Fault", "Returns garbage value"], correct: 2 }],
+            lang: "c", version: "10.2.0",
+            defaultCode: `#include <stdio.h>\n\nvoid swap(int *x, int *y) {\n    int temp = *x;\n    *x = *y;\n    *y = temp;\n}\n\nint main() {\n    int a, b;\n    if (scanf("%d %d", &a, &b) == 2) {\n        swap(&a, &b);\n        printf("%d %d\\n", a, b);\n    }\n    return 0;\n}`,
+            testCases: [{ input: "10 20", expected: "20 10" }],
+            practice_commands: ["gcc main.c"], practice_questions: ["Compare stack vs heap memory allocations."]
+        },
+        {
+            title: "Module 7: Error Handling & Safe Division",
+            aim: "To handle logical runtime division errors gracefully.",
+            theory: {
+                intro: "C has no built-in Exception Block handlers, so checks must verify denominators before executing division statements.",
+                cards: [{ title: "Division Guarding", content: "Return 'Error: Division by Zero' when denominator is 0." }]
+            },
+            pretest: [{ q: "What happens when a C program executes division by integer 0?", options: ["Returns infinity", "Triggers floating point exception / crash", "Returns 0", "Saves to registry"], correct: 1 }],
+            procedure: ["1. Read numerator and denominator.", "2. Guard check if denominator is zero."],
+            posttest: [{ q: "Which header is commonly used to log error codes to the standard error stream in C?", options: ["stdio.h", "stderr.h", "errno.h", "stddef.h"], correct: 2 }],
+            lang: "c", version: "10.2.0",
+            defaultCode: `#include <stdio.h>\n\nint main() {\n    int num, den;\n    if (scanf("%d %d", &num, &den) == 2) {\n        if (den == 0) printf("Error: Division by Zero\\n");\n        else printf("%d\\n", num / den);\n    }\n    return 0;\n}`,
+            testCases: [{ input: "10 2", expected: "5" }, { input: "10 0", expected: "Error: Division by Zero" }],
+            practice_commands: ["gcc main.c"], practice_questions: ["What is standard error stream (stderr)?"]
+        },
+        {
+            title: "Module 8: Mock File Streams",
+            aim: "To understand file pointers and stream operations in standard C library.",
+            theory: {
+                intro: "C uses fopen() and fprintf() to write text streams to virtual or physical files.",
+                cards: [{ title: "File Operations", content: "Write records to streams and close file pointers using fclose()." }]
+            },
+            pretest: [{ q: "Which structure represents file descriptors in C?", options: ["FILE", "DESCRIPTOR", "STREAM", "FSTREAM"], correct: 0 }],
+            procedure: ["1. Parse stream input.", "2. Print virtual write confirmation."],
+            posttest: [{ q: "Which mode flag is used to append content to an existing file?", options: ["r", "w", "a", "x"], correct: 2 }],
+            lang: "c", version: "10.2.0",
+            defaultCode: `#include <stdio.h>\n\nint main() {\n    char record[100];\n    if (scanf("%99s", record) == 1) {\n        printf("File Write: %s\\n", record);\n    }\n    return 0;\n}`,
+            testCases: [{ input: "Atharva", expected: "File Write: Atharva" }],
+            practice_commands: ["gcc main.c"], practice_questions: ["Explain buffer flushing in C streams."]
+        },
+        {
+            title: "Module 9: Bubble Sorting Algorithms",
+            aim: "To implement basic sorting algorithms on integer arrays.",
+            theory: {
+                intro: "Bubble sort repeatedly steps through the list, compares adjacent elements, and swaps them if they are in the wrong order.",
+                cards: [{ title: "Bubble Sort", content: "Sorting N items requires N-1 passes." }]
+            },
+            pretest: [{ q: "What is the average time complexity of Bubble Sort?", options: ["O(N log N)", "O(N)", "O(N^2)", "O(1)"], correct: 2 }],
+            procedure: ["1. Read array size N and its elements.", "2. Execute Bubble Sort passes and print sorted sequence."],
+            posttest: [{ q: "Bubble Sort is an in-place sort, meaning?", options: ["Requires O(N) extra space", "Requires O(1) extra space", "Requires sorting network", "Is non-adaptive"], correct: 1 }],
+            lang: "c", version: "10.2.0",
+            defaultCode: `#include <stdio.h>\n\nint main() {\n    int n;\n    if (scanf("%d", &n) == 1) {\n        int arr[100];\n        for (int i = 0; i < n; i++) scanf("%d", &arr[i]);\n        for (int i = 0; i < n - 1; i++) {\n            for (int j = 0; j < n - i - 1; j++) {\n                if (arr[j] > arr[j+1]) {\n                    int temp = arr[j];\n                    arr[j] = arr[j+1];\n                    arr[j+1] = temp;\n                }\n            }\n        }\n        for (int i = 0; i < n; i++) printf("%d ", arr[i]);\n        printf("\\n");\n    }\n    return 0;\n}`,
+            testCases: [{ input: "4\n5 2 9 1", expected: "1 2 5 9" }],
+            practice_commands: ["gcc main.c"], practice_questions: ["How to optimize Bubble Sort if array becomes sorted early?"]
+        }
+    ]
 };
 
 window.VLAB_DATA.cpp_prog = {
-    title: "C++ Object Oriented Programming Concepts",
-    aim: "To demonstrate Object Oriented Programming in C++ using classes, data encapsulation, inheritance, and dynamic binding.",
-    theory: {
-        intro: "C++ is an extension of C that incorporates Object Oriented Programming (OOP) paradigms. It provides classes, encapsulation, inheritance, and polymorphism to build robust enterprise systems.",
-        cards: [
-            { title: "1. Data Encapsulation", content: "Bundling data variables and methods within a single class structure, protecting it from external access via private/protected modifiers." },
-            { title: "2. Polymorphism", content: "Ability for different classes to respond uniquely to the same method interface, implemented using virtual functions and inheritance pointers." }
-        ]
-    },
-    pretest: [
-        { q: "Which access specifier makes class variables inaccessible outside the class?", options: ["public", "protected", "private", "friend"], correct: 2 },
-        { q: "Which keyword is used to declare virtual functions for dynamic binding?", options: ["override", "virtual", "inline", "static"], correct: 1 }
-    ],
-    procedure: [
-        "1. Open C++ OOP lab and review BankAccount class structure.",
-        "2. Understand how transaction actions are read dynamically.",
-        "3. Input values in stdin (e.g. starting balance and transaction streams).",
-        "4. Run compiler and view console output."
-    ],
-    posttest: [
-        { q: "What is a constructor in C++?", options: ["A method called when object is deleted", "A method called when object is instantiated", "A special pointer", "A loop structure"], correct: 1 }
-    ],
-    simType: "programming",
-    lang: "cpp",
-    version: "10.2.0",
-    defaultCode: `#include <iostream>\nusing namespace std;\n\n// Task: Implement a class representing a Bank Account with deposit, withdraw and getBalance.\n// Stdin contains: initial balance followed by D (Deposit) or W (Withdraw) operations.\nclass BankAccount {\nprivate:\n    double balance;\npublic:\n    BankAccount(double initial) : balance(initial) {}\n    void deposit(double amt) { balance += amt; }\n    void withdraw(double amt) { if (balance >= amt) balance -= amt; }\n    double getBalance() { return balance; }\n};\n\nint main() {\n    double startBalance;\n    if (!(cin >> startBalance)) return 0;\n    BankAccount acct(startBalance);\n    char action;\n    double amount;\n    while (cin >> action >> amount) {\n        if (action == 'D') acct.deposit(amount);\n        else if (action == 'W') acct.withdraw(amount);\n    }\n    cout << acct.getBalance() << endl;\n    return 0;\n}`,
-    testCases: [
-        { input: "1000\nD 500\nW 200", expected: "1300" },
-        { input: "500\nW 600\nD 100", expected: "500" }
-    ],
-    practice_commands: ["g++ main.cpp -o program", "./program"],
-    practice_questions: ["Explain the difference between overloading and overriding.", "What is a virtual destructor?"]
+    title: "C++ Programming Lab",
+    isMultiModule: true,
+    modules: [
+        {
+            title: "Module 1: Basic I/O & Arithmetic",
+            aim: "To learn stream standard input/output in C++ using cin and cout.",
+            theory: {
+                intro: "C++ streams values through standard library namespace std. cin parses input, cout prints outputs.",
+                cards: [{ title: "Basic Streams", content: "Write C++ code to read two integers and return their sum." }]
+            },
+            pretest: [{ q: "Which stream operator represents stream extraction?", options: ["<<", ">>", "::", "->"], correct: 1 }],
+            procedure: ["1. Read inputs.", "2. Sum and print output."],
+            posttest: [{ q: "What does std::endl do?", options: ["Ends compiler block", "Flushes stream buffer and inserts newline", "Terminates main()", "Cleans stack space"], correct: 1 }],
+            lang: "cpp", version: "10.2.0",
+            defaultCode: `#include <iostream>\nusing namespace std;\n\nint main() {\n    int a, b;\n    if (cin >> a >> b) {\n        cout << (a + b) << endl;\n    }\n    return 0;\n}`,
+            testCases: [{ input: "5 10", expected: "15" }],
+            practice_commands: ["g++ main.cpp", "./a.out"], practice_questions: ["What is the namespace std?"]
+        },
+        {
+            title: "Module 2: Control Flow",
+            aim: "To implement conditional controls in C++.",
+            theory: {
+                intro: "Evaluates score values and outputs grades.",
+                cards: [{ title: "Grade Check", content: "Score >= 80: Grade A, Score >= 60: Grade B, else Grade F." }]
+            },
+            pretest: [{ q: "Which expression represents inequality check in C++?", options: ["=", "==", "!=", "!"], correct: 2 }],
+            procedure: ["1. Read score.", "2. Output grade."],
+            posttest: [{ q: "What is the return type of boolean checks in C++?", options: ["int", "bool", "char", "void"], correct: 1 }],
+            lang: "cpp", version: "10.2.0",
+            defaultCode: `#include <iostream>\nusing namespace std;\n\nint main() {\n    int score;\n    if (cin >> score) {\n        if (score >= 80) cout << "Grade A" << endl;\n        else if (score >= 60) cout << "Grade B" << endl;\n        else cout << "Grade F" << endl;\n    }\n    return 0;\n}`,
+            testCases: [{ input: "85", expected: "Grade A" }, { input: "45", expected: "Grade F" }],
+            practice_commands: ["g++ main.cpp"], practice_questions: ["Explain Ternary Operators in C++."]
+        },
+        {
+            title: "Module 3: Loops & Iteration",
+            aim: "To check Prime state using for loops in C++.",
+            theory: {
+                intro: "Check factors iteratively.",
+                cards: [{ title: "Loop Checker", content: "Verify factor modular checks." }]
+            },
+            pretest: [{ q: "Which keyword breaks out of a loop immediately?", options: ["continue", "exit", "break", "return"], correct: 2 }],
+            procedure: ["1. Read input.", "2. Loop to check prime state."],
+            posttest: [{ q: "What does continue do?", options: ["Breaks loop", "Skips remainder of current iteration and returns to loop condition check", "Terminates application", "None"], correct: 1 }],
+            lang: "cpp", version: "10.2.0",
+            defaultCode: `#include <iostream>\nusing namespace std;\n\nint main() {\n    int n, isPrime = 1;\n    if (cin >> n) {\n        if (n <= 1) isPrime = 0;\n        for (int i = 2; i * i <= n; i++) {\n            if (n % i == 0) { isPrime = 0; break; }\n        }\n        if (isPrime) cout << "Prime" << endl;\n        else cout << "Not Prime" << endl;\n    }\n    return 0;\n}`,
+            testCases: [{ input: "7", expected: "Prime" }, { input: "4", expected: "Not Prime" }],
+            practice_commands: ["g++ main.cpp"], practice_questions: ["Explain post-increment vs pre-increment."]
+        },
+        {
+            title: "Module 4: Functions & Modularity",
+            aim: "To calculate factorials using functions.",
+            theory: {
+                intro: "Write modular recursive functions.",
+                cards: [{ title: "Modular Functions", content: "Verify factorials." }]
+            },
+            pretest: [{ q: "What is call-by-reference using & in C++?", options: ["Passes a copy", "Passes the actual variable reference directly", "Slows compilation", "None"], correct: 1 }],
+            procedure: ["1. Define function.", "2. Read inputs, print factorial."],
+            posttest: [{ q: "Can C++ function signatures have default parameter values?", options: ["Yes", "No", "Only main()", "Only template functions"], correct: 0 }],
+            lang: "cpp", version: "10.2.0",
+            defaultCode: `#include <iostream>\nusing namespace std;\n\nint factorial(int n) {\n    if (n <= 1) return 1;\n    return n * factorial(n - 1);\n}\n\nint main() {\n    int n;\n    if (cin >> n) cout << factorial(n) << endl;\n    return 0;\n}`,
+            testCases: [{ input: "5", expected: "120" }],
+            practice_commands: ["g++ main.cpp"], practice_questions: ["What is inline function optimization?"]
+        },
+        {
+            title: "Module 5: Arrays & Strings",
+            aim: "To verify Palindrome status in strings.",
+            theory: {
+                intro: "Check sequence structures.",
+                cards: [{ title: "C++ String operations", content: "Access characters using index bounds." }]
+            },
+            pretest: [{ q: "Which standard header defines the std::string type in C++?", options: ["string.h", "string", "cstring", "iostream"], correct: 1 }],
+            procedure: ["1. Read string.", "2. Compare bounds."],
+            posttest: [{ q: "Is std::string mutable in C++?", options: ["Yes", "No", "Depends on const key", "Only character vectors are mutable"], correct: 0 }],
+            lang: "cpp", version: "10.2.0",
+            defaultCode: `#include <iostream>\n#include <string>\nusing namespace std;\n\nint main() {\n    string str;\n    if (cin >> str) {\n        int len = str.length();\n        int isPal = 1;\n        for (int i = 0; i < len / 2; i++) {\n            if (str[i] != str[len - 1 - i]) { isPal = 0; break; }\n        }\n        if (isPal) cout << "Palindrome" << endl;\n        else cout << "Not Palindrome" << endl;\n    }\n    return 0;\n}`,
+            testCases: [{ input: "radar", expected: "Palindrome" }, { input: "hello", expected: "Not Palindrome" }],
+            practice_commands: ["g++ main.cpp"], practice_questions: ["What is std::string::substr?"]
+        },
+        {
+            title: "Module 6: Object-Oriented Programming (Basic)",
+            aim: "To design structures using classes, attributes and methods.",
+            theory: {
+                intro: "Object-oriented programming focuses on modeling real entities using classes.",
+                cards: [{ title: "BankAccount Class", content: "Implement balance modifications." }]
+            },
+            pretest: [{ q: "What is encapsulation?", options: ["Merging multiple files", "Wrapping data variables and methods in a single class", "Inheriting behaviors", "Dynamically casting types"], correct: 1 }],
+            procedure: ["1. Define BankAccount class.", "2. Perform deposits and withdrawals."],
+            posttest: [{ q: "Which constructor is called automatically if no initial values are provided?", options: ["Parameter constructor", "Copy constructor", "Default constructor", "Destructor"], correct: 2 }],
+            lang: "cpp", version: "10.2.0",
+            defaultCode: `#include <iostream>\nusing namespace std;\n\nclass BankAccount {\nprivate:\n    double balance;\npublic:\n    BankAccount(double initial) : balance(initial) {}\n    void deposit(double amt) { balance += amt; }\n    void withdraw(double amt) { if (balance >= amt) balance -= amt; }\n    double getBalance() { return balance; }\n};\n\nint main() {\n    double initB;\n    if (cin >> initB) {\n        BankAccount acct(initB);\n        char act;\n        double amt;\n        while (cin >> act >> amt) {\n            if (act == 'D') acct.deposit(amt);\n            else if (act == 'W') acct.withdraw(amt);\n        }\n        cout << acct.getBalance() << endl;\n    }\n    return 0;\n}`,
+            testCases: [{ input: "1000\nD 500\nW 200", expected: "1300" }],
+            practice_commands: ["g++ main.cpp"], practice_questions: ["What are access modifiers?"]
+        },
+        {
+            title: "Module 7: Advanced OOP Concepts (Inheritance)",
+            aim: "To demonstrate inheritance, dynamic polymorphism, and virtual methods.",
+            theory: {
+                intro: "Inheritance allows subclasses to inherit parameters from base classes. Virtual methods enable runtime polymorphism.",
+                cards: [{ title: "Game Hierarchy", content: "Base class Enemy, subclasses Zombie and Vampire override attack method." }]
+            },
+            pretest: [{ q: "Which keyword permits dynamic method binding at runtime?", options: ["static", "virtual", "inline", "friend"], correct: 1 }],
+            procedure: ["1. Define Enemy base class with virtual attack().", "2. Inherit Zombie and Vampire classes.", "3. Call attack dynamically based on type code."],
+            posttest: [{ q: "What is an abstract class in C++?", options: ["Contains no data members", "Contains at least one pure virtual function (= 0)", "Has only private variables", "None"], correct: 1 }],
+            lang: "cpp", version: "10.2.0",
+            defaultCode: `#include <iostream>\n#include <string>\nusing namespace std;\n\nclass Enemy {\npublic:\n    virtual void attack() = 0;\n};\n\nclass Zombie : public Enemy {\npublic:\n    void attack() override { cout << "Zombie bite" << endl; }\n};\n\nclass Vampire : public Enemy {\npublic:\n    void attack() override { cout << "Vampire drain" << endl; }\n};\n\nint main() {\n    char type;\n    if (cin >> type) {\n        Enemy *e;\n        if (type == 'Z') e = new Zombie();\n        else e = new Vampire();\n        e->attack();\n        delete e;\n    }\n    return 0;\n}`,
+            testCases: [{ input: "Z", expected: "Zombie bite" }, { input: "V", expected: "Vampire drain" }],
+            practice_commands: ["g++ main.cpp"], practice_questions: ["What is dynamic_cast in C++?"]
+        },
+        {
+            title: "Module 8: Exception Handling",
+            aim: "To use try, throw, and catch blocks to intercept division by zero errors.",
+            theory: {
+                intro: "Exceptions signal runtime errors. Handled gracefully without crash templates.",
+                cards: [{ title: "Exception Safety", content: "Catch standard errors using block structures." }]
+            },
+            pretest: [{ q: "Which block captures thrown exception types?", options: ["try", "throw", "catch", "finally"], correct: 2 }],
+            procedure: ["1. Try division statement.", "2. Throw exception if denominator is zero."],
+            posttest: [{ q: "What happens if a thrown exception is not caught anywhere?", options: ["Program continues", "Compiler issue", "Program terminates immediately (std::terminate)", "Re-thrown automatically"], correct: 2 }],
+            lang: "cpp", version: "10.2.0",
+            defaultCode: `#include <iostream>\nusing namespace std;\n\nint main() {\n    int num, den;\n    if (cin >> num >> den) {\n        try {\n            if (den == 0) throw "Error: Division by Zero";\n            cout << (num / den) << endl;\n        } catch (const char *e) {\n            cout << e << endl;\n        }\n    }\n    return 0;\n}`,
+            testCases: [{ input: "10 2", expected: "5" }, { input: "10 0", expected: "Error: Division by Zero" }],
+            practice_commands: ["g++ main.cpp"], practice_questions: ["Explain standard exception classes hierarchy in C++."]
+        },
+        {
+            title: "Module 9: Mock File streams",
+            aim: "To write structured logs to output stream targets.",
+            theory: {
+                intro: "C++ uses fstream subclasses to manage file logs.",
+                cards: [{ title: "File Streams", content: "Write records to streams." }]
+            },
+            pretest: [{ q: "Which class represents write-only file streams in C++?", options: ["ifstream", "ofstream", "fstream", "ostream"], correct: 1 }],
+            procedure: ["1. Read input.", "2. Print mock stream save output."],
+            posttest: [{ q: "Which method verifies stream open success?", options: ["good()", "is_open()", "valid()", "verify()"], correct: 1 }],
+            lang: "cpp", version: "10.2.0",
+            defaultCode: `#include <iostream>\n#include <string>\nusing namespace std;\n\nint main() {\n    string record;\n    if (cin >> record) {\n        cout << "File Write: " << record << endl;\n    }\n    return 0;\n}`,
+            testCases: [{ input: "Atharva", expected: "File Write: Atharva" }],
+            practice_commands: ["g++ main.cpp"], practice_questions: ["What is file pointer seekg/seekp?"]
+        },
+        {
+            title: "Module 10: Bubble Sorting Algorithms",
+            aim: "To verify Bubble Sort algorithms in C++.",
+            theory: {
+                intro: "Bubble sort shifts adjacent items.",
+                cards: [{ title: "C++ Vectors/Arrays", content: "Manipulate array bounds iteratively." }]
+            },
+            pretest: [{ q: "What is the worst-case space complexity of Bubble Sort?", options: ["O(N)", "O(1)", "O(N^2)", "O(log N)"], correct: 1 }],
+            procedure: ["1. Read inputs.", "2. Execute sort, print elements."],
+            posttest: [{ q: "Is bubble sort stable?", options: ["Yes, equal keys preserve relative order", "No", "Depends on compiler", "Only for floats"], correct: 0 }],
+            lang: "cpp", version: "10.2.0",
+            defaultCode: `#include <iostream>\n#include <vector>\nusing namespace std;\n\nint main() {\n    int n;\n    if (cin >> n) {\n        vector<int> arr(n);\n        for (int i = 0; i < n; i++) cin >> arr[i];\n        for (int i = 0; i < n - 1; i++) {\n            for (int j = 0; j < n - i - 1; j++) {\n                if (arr[j] > arr[j+1]) swap(arr[j], arr[j+1]);\n            }\n        }\n        for (int i = 0; i < n; i++) cout << arr[i] << " ";\n        cout << endl;\n    }\n    return 0;\n}`,
+            testCases: [{ input: "4\n5 2 9 1", expected: "1 2 5 9" }],
+            practice_commands: ["g++ main.cpp"], practice_questions: ["Explain average sorting boundaries."]
+        }
+    ]
 };
 
 window.VLAB_DATA.java_prog = {
-    title: "Java JVM Architecture & Basic Logic",
-    aim: "To compile and execute Java applications while studying JVM class loading and basic algorithm logic.",
-    theory: {
-        intro: "Java is a class-based, object-oriented programming language designed to have as few implementation dependencies as possible, executing via the Java Virtual Machine (JVM).",
-        cards: [
-            { title: "1. WORA principle", content: "Write Once, Run Anywhere: Java compiles code into bytecode (.class), which runs on any system with a compatible JVM." },
-            { title: "2. Garbage Collection", content: "Automated memory management that deallocates heap memory occupied by objects that are no longer referenced." }
-        ]
-    },
-    pretest: [
-        { q: "Java bytecode is executed by which component?", options: ["JDK", "JRE", "JVM", "Compiler"], correct: 2 }
-    ],
-    procedure: [
-        "1. Write Java algorithms inside the editor workspace (main class must be named Main).",
-        "2. Test sum operations or thread configurations."
-    ],
-    posttest: [
-        { q: "Which class is the root of the Java class hierarchy?", options: ["String", "Object", "System", "Class"], correct: 1 }
-    ],
-    simType: "programming",
-    lang: "java",
-    version: "15.0.2",
-    defaultCode: `import java.util.Scanner;\n\n// Task: Implement a program that reads an integer N and prints the sum from 1 to N.\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        if (!sc.hasNextInt()) return;\n        int n = sc.nextInt();\n        int sum = 0;\n        for (int i = 1; i <= n; i++) {\n            sum += i;\n        }\n        System.out.println(sum);\n    }\n}`,
-    testCases: [
-        { input: "5", expected: "15" },
-        { input: "10", expected: "55" }
-    ],
-    practice_commands: ["javac Main.java", "java Main"],
-    practice_questions: ["What is JIT compilation?", "How does Method Area differ from Stack Area in JVM?"]
+    title: "Java Programming Lab",
+    isMultiModule: true,
+    modules: [
+        {
+            title: "Module 1: Basic I/O & Sum",
+            aim: "To check basic standard Scanner inputs and print outputs in Java.",
+            theory: {
+                intro: "Java uses System.out.println() to print to stdout. Uses java.util.Scanner to read values from System.in.",
+                cards: [{ title: "Scanner Class", content: "Sum values using Scanner class." }]
+            },
+            pretest: [{ q: "Which class is used to read inputs in Java?", options: ["System.in", "Scanner", "Console", "Reader"], correct: 1 }],
+            procedure: ["1. Read two integers.", "2. Print sum."],
+            posttest: [{ q: "What package contains Scanner class?", options: ["java.lang", "java.io", "java.util", "java.net"], correct: 2 }],
+            lang: "java", version: "15.0.2",
+            defaultCode: `import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        if (sc.hasNextInt()) {\n            int a = sc.nextInt();\n            int b = sc.nextInt();\n            System.out.println(a + b);\n        }\n    }\n}`,
+            testCases: [{ input: "5 10", expected: "15" }],
+            practice_commands: ["javac Main.java", "java Main"], practice_questions: ["Why is Scanner initialization required?"]
+        },
+        {
+            title: "Module 2: Control Flow",
+            aim: "To write grades checks based on scoring parameters.",
+            theory: {
+                intro: "Grade bounds representation.",
+                cards: [{ title: "Decisions in Java", content: "Verify conditional block matches." }]
+            },
+            pretest: [{ q: "Can we use strings in Java switch statements?", options: ["Yes, since Java 7", "No", "Only bytes", "Only char"], correct: 0 }],
+            procedure: ["1. Read input score.", "2. Print Grade matching benchmarks."],
+            posttest: [{ q: "What does break do in switch case block?", options: ["Halts application", "Exits switch block immediately", "Throws error", "Iterates to next case"], correct: 1 }],
+            lang: "java", version: "15.0.2",
+            defaultCode: `import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        if (sc.hasNextInt()) {\n            int score = sc.nextInt();\n            if (score >= 80) System.out.println("Grade A");\n            else if (score >= 60) System.out.println("Grade B");\n            else System.out.println("Grade F");\n        }\n    }\n}`,
+            testCases: [{ input: "85", expected: "Grade A" }, { input: "45", expected: "Grade F" }],
+            practice_commands: ["javac Main.java"], practice_questions: ["Explain if-else chain efficiency optimizations."]
+        },
+        {
+            title: "Module 3: Loops & Iteration",
+            aim: "To verify Prime status using loops in Java.",
+            theory: {
+                intro: "Check factors iteratively using java structures.",
+                cards: [{ title: "Java Prime loop checks", content: "Verify factor modulus matches." }]
+            },
+            pretest: [{ q: "Which loop evaluates condition *after* body execution?", options: ["for", "while", "do-while", "for-each"], correct: 2 }],
+            procedure: ["1. Read input number.", "2. Calculate prime bounds, print status."],
+            posttest: [{ q: "Which loop is specialized for traversing arrays or collections in Java?", options: ["while", "for-each", "do-while", "nested for"], correct: 1 }],
+            lang: "java", version: "15.0.2",
+            defaultCode: `import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        if (sc.hasNextInt()) {\n            int n = sc.nextInt();\n            boolean isPrime = true;\n            if (n <= 1) isPrime = false;\n            for (int i = 2; i * i <= n; i++) {\n                if (n % i == 0) { isPrime = false; break; }\n            }\n            if (isPrime) System.out.println("Prime");\n            else System.out.println("Not Prime");\n        }\n    }\n}`,
+            testCases: [{ input: "7", expected: "Prime" }, { input: "4", expected: "Not Prime" }],
+            practice_commands: ["javac Main.java"], practice_questions: ["Compare time complexity limits."]
+        },
+        {
+            title: "Module 4: Functions & Modularity",
+            aim: "To construct modular methods calculating factorials in Java.",
+            theory: {
+                intro: "Java methods belong inside classes. Parameters are passed by value.",
+                cards: [{ title: "Static Methods", content: "Access factorial calculation functions directly." }]
+            },
+            pretest: [{ q: "Which keyword lets us call a class method without instantiating the class?", options: ["final", "static", "public", "abstract"], correct: 1 }],
+            procedure: ["1. Define static factorial method.", "2. Call method in main class, print value."],
+            posttest: [{ q: "What does the return keyword do inside a void method?", options: ["Throws error", "Exits the method immediately", "Returns zero", "None"], correct: 1 }],
+            lang: "java", version: "15.0.2",
+            defaultCode: `import java.util.Scanner;\n\npublic class Main {\n    public static int factorial(int n) {\n        if (n <= 1) return 1;\n        return n * factorial(n - 1);\n    }\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        if (sc.hasNextInt()) {\n            int n = sc.nextInt();\n            System.out.println(factorial(n));\n        }\n    }\n}`,
+            testCases: [{ input: "5", expected: "120" }],
+            practice_commands: ["javac Main.java"], practice_questions: ["Explain Stack Overflow exception conditions."]
+        },
+        {
+            title: "Module 5: Arrays & Strings",
+            aim: "To parse arrays of characters and identify Palindromes.",
+            theory: {
+                intro: "Java strings are immutable. Modify or compare indexes carefully.",
+                cards: [{ title: "Java Strings", content: "Access character indexes using String.charAt()." }]
+            },
+            pretest: [{ q: "Which method is used to get the length of a string in Java?", options: ["length", "length()", "size()", "count"], correct: 1 }],
+            procedure: ["1. Read string.", "2. Iterate index boundaries inwards."],
+            posttest: [{ q: "How to compare two String values for content equality in Java?", options: ["==", "equals()", "compare()", "equalsTo()"], correct: 1 }],
+            lang: "java", version: "15.0.2",
+            defaultCode: `import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        if (sc.hasNext()) {\n            String str = sc.next();\n            int len = str.length();\n            boolean isPal = true;\n            for (int i = 0; i < len / 2; i++) {\n                if (str.charAt(i) != str.charAt(len - 1 - i)) { isPal = false; break; }\n            }\n            if (isPal) System.out.println("Palindrome");\n            else System.out.println("Not Palindrome");\n        }\n    }\n}`,
+            testCases: [{ input: "radar", expected: "Palindrome" }, { input: "hello", expected: "Not Palindrome" }],
+            practice_commands: ["javac Main.java"], practice_questions: ["Why are Java Strings immutable?"]
+        },
+        {
+            title: "Module 6: Object-Oriented Programming (Basic)",
+            aim: "To create classes, setters/getters, and object records in Java.",
+            theory: {
+                intro: "Java is pure object-oriented. Classes act as blueprint models for objects.",
+                cards: [{ title: "BankAccount Encapsulation", content: "Configure deposits and withdrawals safely." }]
+            },
+            pretest: [{ q: "Which keyword instantiates objects in Java?", options: ["new", "create", "instantiate", "make"], correct: 0 }],
+            procedure: ["1. Define BankAccount model with private attributes.", "2. Access using public getters and setters."],
+            posttest: [{ q: "What is the default access modifier of variables if none is specified in Java?", options: ["public", "private", "protected", "default (package-private)"], correct: 3 }],
+            lang: "java", version: "15.0.2",
+            defaultCode: `import java.util.Scanner;\n\nclass BankAccount {\n    private double balance;\n    public BankAccount(double initial) { balance = initial; }\n    public void deposit(double amt) { balance += amt; }\n    public void withdraw(double amt) { if (balance >= amt) balance -= amt; }\n    public double getBalance() { return balance; }\n}\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        if (sc.hasNextDouble()) {\n            double initB = sc.nextDouble();\n            BankAccount acct = new BankAccount(initB);\n            while (sc.hasNext()) {\n                String act = sc.next();\n                double amt = sc.nextDouble();\n                if (act.equals("D")) acct.deposit(amt);\n                else if (act.equals("W")) acct.withdraw(amt);\n            }\n            System.out.println(acct.getBalance());\n        }\n    }\n}`,
+            testCases: [{ input: "1000\nD 500\nW 200", expected: "1300.0" }],
+            practice_commands: ["javac Main.java"], practice_questions: ["What is standard heap garbage collection?"]
+        },
+        {
+            title: "Module 7: Advanced OOP Concepts (Inheritance)",
+            aim: "To verify Inheritance and Polymorphism in Java.",
+            theory: {
+                intro: "Subclasses extend parent structures, overriding methods dynamically.",
+                cards: [{ title: "Attack Hierarchy", content: "Create Zombie and Vampire extending abstract Enemy class." }]
+            },
+            pretest: [{ q: "Which keyword represents inheritance in Java class signatures?", options: ["implements", "extends", "inherits", "extendsFrom"], correct: 1 }],
+            procedure: ["1. Define abstract class Enemy.", "2. Inherit Zombie and Vampire classes, override attack().", "3. Call method dynamically based on input command."],
+            posttest: [{ q: "Can a Java class extend multiple parent classes directly?", options: ["Yes", "No, multiple inheritance is not supported directly in classes", "Only abstract classes", "Only via interfaces"], correct: 1 }],
+            lang: "java", version: "15.0.2",
+            defaultCode: `import java.util.Scanner;\n\nabstract class Enemy {\n    public abstract void attack();\n}\n\nclass Zombie extends Enemy {\n    public void attack() { System.out.println("Zombie bite"); }\n}\n\nclass Vampire extends Enemy {\n    public void attack() { System.out.println("Vampire drain"); }\n}\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        if (sc.hasNext()) {\n            String type = sc.next();\n            Enemy e;\n            if (type.equals("Z")) e = new Zombie();\n            else e = new Vampire();\n            e.attack();\n        }\n    }\n}`,
+            testCases: [{ input: "Z", expected: "Zombie bite" }, { input: "V", expected: "Vampire drain" }],
+            practice_commands: ["javac Main.java"], practice_questions: ["Compare Abstract Classes vs Interfaces."]
+        },
+        {
+            title: "Module 8: Exception Handling",
+            aim: "To capture runtime division exceptions in Java using try-catch blocks.",
+            theory: {
+                intro: "Java divides exceptions into Checked and Unchecked categories.",
+                cards: [{ title: "Try-Catch Blocks", content: "Intercept ArithmeticException when dividing by zero." }]
+            },
+            pretest: [{ q: "Which block always executes regardless of whether an exception is thrown or caught?", options: ["try", "catch", "finally", "throws"], correct: 2 }],
+            procedure: ["1. Try division statement.", "2. Catch ArithmeticException and print error string."],
+            posttest: [{ q: "Which base class represents all exception structures in Java?", options: ["Exception", "Throwable", "Error", "RuntimeException"], correct: 1 }],
+            lang: "java", version: "15.0.2",
+            defaultCode: `import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        if (sc.hasNextInt()) {\n            int num = sc.nextInt();\n            int den = sc.nextInt();\n            try {\n                if (den == 0) throw new ArithmeticException("Error: Division by Zero");\n                System.out.println(num / den);\n            } catch (ArithmeticException e) {\n                System.out.println(e.getMessage());\n            }\n        }\n    }\n}`,
+            testCases: [{ input: "10 2", expected: "5" }, { input: "10 0", expected: "Error: Division by Zero" }],
+            practice_commands: ["javac Main.java"], practice_questions: ["What is the Difference between throw and throws?"]
+        },
+        {
+            title: "Module 9: Mock File streams",
+            aim: "To demonstrate log saving streams in Java.",
+            theory: {
+                intro: "Java uses FileWriter and BufferedWriter to write standard logs.",
+                cards: [{ title: "Java IO Streams", content: "Flush output records dynamically." }]
+            },
+            pretest: [{ q: "Which class writes character streams directly to text files in Java?", options: ["FileInputStream", "FileWriter", "PrintWriter", "BufferedWriter"], correct: 1 }],
+            procedure: ["1. Read record inputs.", "2. Print mock save logs."],
+            posttest: [{ q: "Which method must be called to guarantee that buffered text streams are flushed and saved?", options: ["close()", "flush()", "write()", "sync()"], correct: 0 }],
+            lang: "java", version: "15.0.2",
+            defaultCode: `import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        if (sc.hasNext()) {\n            String record = sc.next();\n            System.out.println("File Write: " + record);\n        }\n    }\n}`,
+            testCases: [{ input: "Atharva", expected: "File Write: Atharva" }],
+            practice_commands: ["javac Main.java"], practice_questions: ["What is standard NIO package in Java?"]
+        },
+        {
+            title: "Module 10: Bubble Sorting Algorithms",
+            aim: "To verify Bubble Sort algorithms in Java.",
+            theory: {
+                intro: "Bubble sort iterates elements, sorting adjacent keys.",
+                cards: [{ title: "Array Manipulation", content: "Verify sorted order indices." }]
+            },
+            pretest: [{ q: "What is the best-case time complexity of optimized Bubble Sort?", options: ["O(N^2)", "O(N)", "O(N log N)", "O(1)"], correct: 1 }],
+            procedure: ["1. Read array sizes N and elements.", "2. Bubble sort entries, print sorted elements."],
+            posttest: [{ q: "Is java array size dynamically mutable after instantiation?", options: ["Yes", "No", "Depends on JVM config", "Only via dynamic casting"], correct: 1 }],
+            lang: "java", version: "15.0.2",
+            defaultCode: `import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        if (sc.hasNextInt()) {\n            int n = sc.nextInt();\n            int[] arr = new int[n];\n            for (int i = 0; i < n; i++) arr[i] = sc.nextInt();\n            for (int i = 0; i < n - 1; i++) {\n                for (int j = 0; j < n - i - 1; j++) {\n                    if (arr[j] > arr[j+1]) {\n                        int temp = arr[j];\n                        arr[j] = arr[j+1];\n                        arr[j+1] = temp;\n                    }\n                }\n            }\n            for (int i = 0; i < n; i++) System.out.print(arr[i] + " ");\n            System.out.println();\n        }\n    }\n}`,
+            testCases: [{ input: "4\n5 2 9 1", expected: "1 2 5 9" }],
+            practice_commands: ["javac Main.java"], practice_questions: ["What are sorting algorithm invariants?"]
+        }
+    ]
 };
 
 window.VLAB_DATA.python_prog = {
-    title: "Python Data Processing & Dynamic Scripting",
-    aim: "To demonstrate Python dynamic structures including lists, dictionaries, list comprehensions, and system standard input processing.",
-    theory: {
-        intro: "Python is an interpreted, high-level, general-purpose programming language. Its design philosophy emphasizes code readability with use of significant indentation.",
-        cards: [
-            { title: "1. Dynamic Typing", content: "Variables do not require explicit type declaration; types are determined at runtime based on assigned values." },
-            { title: "2. List Comprehensions", content: "Elegant syntax to generate lists based on existing lists/iterables: `[x*2 for x in items if x > 0]`." }
-        ]
-    },
-    pretest: [
-        { q: "Is Python compiled or interpreted?", options: ["Fully compiled", "Interpreted", "Neither", "Both"], correct: 1 }
-    ],
-    procedure: [
-        "1. Construct python parsing scripts.",
-        "2. Try standard input streams."
-    ],
-    posttest: [
-        { q: "Which data structure in Python is mutable and ordered?", options: ["Tuple", "List", "Dictionary", "Set"], correct: 1 }
-    ],
-    simType: "programming",
-    lang: "python",
-    version: "3.10.0",
-    defaultCode: `# Task: Given a space-separated list of integers from stdin,\n# compute their sum and output it.\nimport sys\n\ndef main():\n    try:\n        line = sys.stdin.read().strip()\n        if not line:\n            print(0)\n            return\n        nums = [int(x) for x in line.split()]\n        print(sum(nums))\n    except Exception as e:\n        print("Error")\n\nif __name__ == "__main__":\n    main()`,
-    testCases: [
-        { input: "1 2 3 4 5", expected: "15" },
-        { input: "10 -5 20", expected: "25" }
-    ],
-    practice_commands: ["python main.py", "pip install numpy"],
-    practice_questions: ["What is PEP 8?", "Describe the difference between deep copy and shallow copy in Python."]
+    title: "Python Scripting Lab",
+    isMultiModule: true,
+    modules: [
+        {
+            title: "Module 1: Basic I/O & Sum",
+            aim: "To learn Python dynamic inputs using input() and formatting using f-strings.",
+            theory: {
+                intro: "Python reads standard inputs using input(), which returns strings. Convert using int() to perform mathematical sums.",
+                cards: [{ title: "Python I/O", content: "Write Python scripts to read integers and print their sum." }]
+            },
+            pretest: [{ q: "What data type does input() return by default in Python 3?", options: ["int", "str", "float", "list"], correct: 1 }],
+            procedure: ["1. Read inputs.", "2. Convert variables, print sum."],
+            posttest: [{ q: "Which syntax represents f-string formatting in Python?", options: ["f'Hello {name}'", "'Hello %s' % name", "'Hello {}'.format(name)", "all of the above"], correct: 3 }],
+            lang: "python", version: "3.10.0",
+            defaultCode: `import sys\n\ndef main():\n    try:\n        line = sys.stdin.read().strip()\n        if line:\n            a, b = map(int, line.split())\n            print(a + b)\n    except Exception:\n        pass\n\nif __name__ == "__main__":\n    main()`,
+            testCases: [{ input: "5 10", expected: "15" }],
+            practice_commands: ["python main.py"], practice_questions: ["Explain Python dynamic type binding rules."]
+        },
+        {
+            title: "Module 2: Control Flow",
+            aim: "To evaluate score boundaries in Python using if-elif-else statements.",
+            theory: {
+                intro: "Indentation marks logical blocks in Python control structures.",
+                cards: [{ title: "If-Elif-Else Chain", content: "Return letter Grade mappings." }]
+            },
+            pretest: [{ q: "How is a conditional block demarcated in Python?", options: ["Braces {}", "Parentheses ()", "Colon and Indentation", "End keyword"], correct: 2 }],
+            procedure: ["1. Read score input.", "2. Print matching grade label."],
+            posttest: [{ q: "Which keyword matches else if checks in Python?", options: ["elseif", "elif", "elsif", "else if"], correct: 1 }],
+            lang: "python", version: "3.10.0",
+            defaultCode: `import sys\n\ndef main():\n    line = sys.stdin.read().strip()\n    if line:\n        score = int(line)\n        if score >= 80:\n            print("Grade A")\n        elif score >= 60:\n            print("Grade B")\n        else:\n            print("Grade F")\n\nif __name__ == "__main__":\n    main()`,
+            testCases: [{ input: "85", expected: "Grade A" }, { input: "45", expected: "Grade F" }],
+            practice_commands: ["python main.py"], practice_questions: ["Describe logical operator evaluation orders in Python."]
+        },
+        {
+            title: "Module 3: Loops & Iteration",
+            aim: "To iterate values and verify Prime numbers in Python.",
+            theory: {
+                intro: "Python supports standard while and for loops.",
+                cards: [{ title: "Loops in Python", content: "Verify prime factors." }]
+            },
+            pretest: [{ q: "What does range(1, 5) yield?", options: ["1, 2, 3, 4, 5", "1, 2, 3, 4", "0, 1, 2, 3, 4", "1, 5"], correct: 1 }],
+            procedure: ["1. Read input integer.", "2. Loop to check Prime status."],
+            posttest: [{ q: "What does the loop 'else' block do in Python?", options: ["Runs if loop is exited via break", "Runs if loop completes all iterations without encountering a break statement", "Triggers errors", "None"], correct: 1 }],
+            lang: "python", version: "3.10.0",
+            defaultCode: `import sys\n\ndef main():\n    line = sys.stdin.read().strip()\n    if line:\n        n = int(line)\n        is_prime = True\n        if n <= 1:\n            is_prime = False\n        for i in range(2, int(n**0.5) + 1):\n            if n % i == 0:\n                is_prime = False\n                break\n        if is_prime:\n            print("Prime")\n        else:\n            print("Not Prime")\n\nif __name__ == "__main__":\n    main()`,
+            testCases: [{ input: "7", expected: "Prime" }, { input: "4", expected: "Not Prime" }],
+            practice_commands: ["python main.py"], practice_questions: ["Compare Python range vs list sizing memory footprint."]
+        },
+        {
+            title: "Module 4: Functions & Modularity",
+            aim: "To implement recursive function parameters in Python.",
+            theory: {
+                intro: "Functions are declared using def keyword in Python.",
+                cards: [{ title: "Recursion in Python", content: "Calculate factorials recursively." }]
+            },
+            pretest: [{ q: "Which keyword defines functions in Python?", options: ["function", "def", "func", "define"], correct: 1 }],
+            procedure: ["1. Define recursive factorial method.", "2. Read input, print factorial value."],
+            posttest: [{ q: "What is default return value of a Python function containing no return statement?", options: ["0", "None", "False", "Void"], correct: 1 }],
+            lang: "python", version: "3.10.0",
+            defaultCode: `import sys\n\ndef factorial(n):\n    if n <= 1:\n        return 1\n    return n * factorial(n - 1)\n\ndef main():\n    line = sys.stdin.read().strip()\n    if line:\n        n = int(line)\n        print(factorial(n))\n\nif __name__ == "__main__":\n    main()`,
+            testCases: [{ input: "5", expected: "120" }],
+            practice_commands: ["python main.py"], practice_questions: ["Explain Python global interpreter locks."]
+        },
+        {
+            title: "Module 5: Arrays & Strings",
+            aim: "To index string segments and find Palindromes.",
+            theory: {
+                intro: "Python strings support slice features: string[::-1] reverses strings.",
+                cards: [{ title: "Python Slicing", content: "Verify palindromic sequences easily using string slices." }]
+            },
+            pretest: [{ q: "How to reverse string 's' using slice index syntax in Python?", options: ["s.reverse()", "s[::-1]", "s[-1:0:-1]", "s[::1]"], correct: 1 }],
+            procedure: ["1. Read input string.", "2. Check equality of string slices to verify palindrome."],
+            posttest: [{ q: "Are Python strings mutable?", options: ["Yes", "No", "Depends on encoding", "Only byte strings are mutable"], correct: 1 }],
+            lang: "python", version: "3.10.0",
+            defaultCode: `import sys\n\ndef main():\n    line = sys.stdin.read().strip()\n    if line:\n        if line == line[::-1]:\n            print("Palindrome")\n        else:\n            print("Not Palindrome")\n\nif __name__ == "__main__":\n    main()`,
+            testCases: [{ input: "radar", expected: "Palindrome" }, { input: "hello", expected: "Not Palindrome" }],
+            practice_commands: ["python main.py"], practice_questions: ["Compare python lists vs string immutability variables."]
+        },
+        {
+            title: "Module 6: Object-Oriented Programming (Basic)",
+            aim: "To define classes, constructors and attributes in Python.",
+            theory: {
+                intro: "Constructors are represented using __init__(self) method in Python.",
+                cards: [{ title: "Self reference", content: "Self parameters point to the current object instance during method calls." }]
+            },
+            pretest: [{ q: "Which method represents constructor declaration in Python classes?", options: ["__init__", "constructor", "new", "main"], correct: 0 }],
+            procedure: ["1. Declare BankAccount class with __init__ balance.", "2. Define deposit and withdraw methods."],
+            posttest: [{ q: "How to declare a variable 'private' by convention in Python class specifications?", options: ["private key", "Prefix with double underscores (e.g. __balance)", "Use @private decorator", "None of the above"], correct: 1 }],
+            lang: "python", version: "3.10.0",
+            defaultCode: `import sys\n\nclass BankAccount:\n    def __init__(self, initial):\n        self.__balance = initial\n    def deposit(self, amt):\n        self.__balance += amt\n    def withdraw(self, amt):\n        if self.__balance >= amt:\n            self.__balance -= amt\n    def get_balance(self):\n        return self.__balance\n\ndef main():\n    lines = sys.stdin.read().split()\n    if lines:\n        init_b = float(lines[0])\n        acct = BankAccount(init_b)\n        idx = 1\n        while idx < len(lines):\n            act = lines[idx]\n            amt = float(lines[idx+1])\n            if act == "D":\n                acct.deposit(amt)\n            elif act == "W":\n                acct.withdraw(amt)\n            idx += 2\n        print(acct.get_balance())\n\nif __name__ == "__main__":\n    main()`,
+            testCases: [{ input: "1000 D 500 W 200", expected: "1300.0" }],
+            practice_commands: ["python main.py"], practice_questions: ["Explain name mangling in Python classes."]
+        },
+        {
+            title: "Module 7: Advanced OOP Concepts (Inheritance)",
+            aim: "To implement base classes, super() links, and polymorphism in Python.",
+            theory: {
+                intro: "Subclasses inherit parent methods, overriding them dynamically in Python.",
+                cards: [{ title: "Enemy classes", content: "Verify Zombie and Vampire subclasses inherit base Enemy class." }]
+            },
+            pretest: [{ q: "How does Python call parent constructors inside subclass methods?", options: ["parent.__init__()", "super().__init__()", "this.__init__()", "class.init()"], correct: 1 }],
+            procedure: ["1. Declare base Enemy class.", "2. Inherit Zombie and Vampire, override attack().", "3. Call attack dynamically based on type key."],
+            posttest: [{ q: "Does Python support multiple inheritance in class signatures?", options: ["Yes, uses Method Resolution Order (MRO)", "No", "Only for abstract classes", "Only via interfaces"], correct: 0 }],
+            lang: "python", version: "3.10.0",
+            defaultCode: `import sys\n\nclass Enemy:\n    def attack(self):\n        pass\n\nclass Zombie(Enemy):\n    def attack(self):\n        print("Zombie bite")\n\nclass Vampire(Enemy):\n    def attack(self):\n        print("Vampire drain")\n\ndef main():\n    line = sys.stdin.read().strip()\n    if line:\n        if line == "Z":\n            e = Zombie()\n        else:\n            e = Vampire()\n        e.attack()\n\nif __name__ == "__main__":\n    main()`,
+            testCases: [{ input: "Z", expected: "Zombie bite" }, { input: "V", expected: "Vampire drain" }],
+            practice_commands: ["python main.py"], practice_questions: ["What is Method Resolution Order (MRO)?"]
+        },
+        {
+            title: "Module 8: Exception Handling",
+            aim: "To use try, except, and raise blocks to manage division errors in Python.",
+            theory: {
+                intro: "Python intercepts exceptions in except blocks, maintaining application stability.",
+                cards: [{ title: "Except Handling", content: "Catch ZeroDivisionError parameters." }]
+            },
+            pretest: [{ q: "Which keyword captures exception types in Python blocks?", options: ["catch", "except", "try", "rescue"], correct: 1 }],
+            procedure: ["1. Try division block.", "2. Intercept ZeroDivisionError and print error message."],
+            posttest: [{ q: "Which block executes regardless of whether an exception is raised or caught?", options: ["finally", "else", "except", "try"], correct: 0 }],
+            lang: "python", version: "3.10.0",
+            defaultCode: `import sys\n\ndef main():\n    lines = sys.stdin.read().split()\n    if len(lines) == 2:\n        num, den = map(int, lines)\n        try:\n            if den == 0:\n                raise ZeroDivisionError("Error: Division by Zero")\n            print(num // den)\n        except ZeroDivisionError as e:\n            print(e)\n\nif __name__ == "__main__":\n    main()`,
+            testCases: [{ input: "10 2", expected: "5" }, { input: "10 0", expected: "Error: Division by Zero" }],
+            practice_commands: ["python main.py"], practice_questions: ["What are custom Exception class declarations?"]
+        },
+        {
+            title: "Module 9: Mock File streams",
+            aim: "To write structured logs to stream targets in Python.",
+            theory: {
+                intro: "Python uses open(file, 'w') with blocks to execute file I/O safely.",
+                cards: [{ title: "With statement", content: "Using 'with' statement auto-closes file pointers when blocks exit." }]
+            },
+            pretest: [{ q: "Which function is used to open files in Python?", options: ["open()", "file()", "read()", "fopen()"], correct: 0 }],
+            procedure: ["1. Read record strings.", "2. Output file write confirmation logs."],
+            posttest: [{ q: "Which mode flag is used to append text to existing files?", options: ["r", "w", "a", "x"], correct: 2 }],
+            lang: "python", version: "3.10.0",
+            defaultCode: `import sys\n\ndef main():\n    line = sys.stdin.read().strip()\n    if line:\n        print(f"File Write: {line}")\n\nif __name__ == "__main__":\n    main()`,
+            testCases: [{ input: "Atharva", expected: "File Write: Atharva" }],
+            practice_commands: ["python main.py"], practice_questions: ["Explain python context managers."]
+        },
+        {
+            title: "Module 10: Bubble Sorting Algorithms",
+            aim: "To verify Bubble Sort algorithms in Python.",
+            theory: {
+                intro: "Bubble sort shifts adjacent keys in Python lists.",
+                cards: [{ title: "List Sort", content: "Swap values inside index loops." }]
+            },
+            pretest: [{ q: "What is time complexity of bubble sort in worst case?", options: ["O(N log N)", "O(N)", "O(N^2)", "O(1)"], correct: 2 }],
+            procedure: ["1. Read inputs.", "2. Sort list and print elements."],
+            posttest: [{ q: "How to swap two elements in a python list cleanly without temp variables?", options: ["arr[i], arr[i+1] = arr[i+1], arr[i]", "arr.swap(i, i+1)", "swap(arr[i], arr[i+1])", "None of these"], correct: 0 }],
+            lang: "python", version: "3.10.0",
+            defaultCode: `import sys\n\ndef main():\n    lines = list(map(int, sys.stdin.read().split()))\n    if lines:\n        n = lines[0]\n        arr = lines[1:]\n        for i in range(n - 1):\n            for j in range(n - i - 1):\n                if arr[j] > arr[j+1]:\n                    arr[j], arr[j+1] = arr[j+1], arr[j]\n        print(" ".join(map(str, arr)) + " ")\n\nif __name__ == "__main__":\n    main()`,
+            testCases: [{ input: "4\n5 2 9 1", expected: "1 2 5 9" }],
+            practice_commands: ["python main.py"], practice_questions: ["What are adaptive sorting algorithms?"]
+        }
+    ]
 };
 
 // --- Database (DBMS) Labs ---
