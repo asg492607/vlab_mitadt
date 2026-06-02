@@ -3506,11 +3506,22 @@ const initProgrammingLab = async (container, labId) => {
     // AI Drawer Panel toggles
     const aiDrawer = document.getElementById('ai-tutor-drawer');
     document.getElementById('btnToggleAiPanel').addEventListener('click', () => {
-        const isOpen = aiDrawer.style.display === 'flex';
-        aiDrawer.style.display = isOpen ? 'none' : 'flex';
+        const globalDrawer = document.getElementById('global-ai-drawer');
+        const bubble = document.getElementById('global-ai-bubble');
+        if (globalDrawer) {
+            const isOpen = globalDrawer.style.display === 'flex';
+            globalDrawer.style.display = isOpen ? 'none' : 'flex';
+            if (bubble) {
+                if (isOpen) bubble.classList.remove('active');
+                else bubble.classList.add('active');
+            }
+        }
     });
     document.getElementById('btnCloseAiDrawer').addEventListener('click', () => {
-        aiDrawer.style.display = 'none';
+        const globalDrawer = document.getElementById('global-ai-drawer');
+        if (globalDrawer) globalDrawer.style.display = 'none';
+        const bubble = document.getElementById('global-ai-bubble');
+        if (bubble) bubble.classList.remove('active');
     });
 
     // AI Settings modal input
@@ -7526,5 +7537,185 @@ student@mitadt-os:~$ </div>
         // Start on Aim for learning mode to avoid immediate "Locked" screen confusion
         const aimTab = document.querySelector('.nav-item[data-section="aim"]');
         if (aimTab) aimTab.click();
+    }
+
+    // ==========================================
+    // GLOBAL AI TUTOR ASSISTANT LOGIC
+    // ==========================================
+    const globalBubble = document.getElementById('global-ai-bubble');
+    const globalDrawer = document.getElementById('global-ai-drawer');
+    const btnGlobalAiClose = document.getElementById('btnGlobalAiClose');
+    const btnGlobalAiSend = document.getElementById('btnGlobalAiSend');
+    const globalAiInput = document.getElementById('global-ai-chat-input');
+    const globalChatLogs = document.getElementById('global-ai-chat-logs');
+    
+    if (globalBubble && globalDrawer) {
+        globalBubble.addEventListener('click', () => {
+            const isOpen = globalDrawer.style.display === 'flex';
+            globalDrawer.style.display = isOpen ? 'none' : 'flex';
+            if (isOpen) {
+                globalBubble.classList.remove('active');
+            } else {
+                globalBubble.classList.add('active');
+                globalAiInput.focus();
+            }
+        });
+        
+        btnGlobalAiClose.addEventListener('click', () => {
+            globalDrawer.style.display = 'none';
+            globalBubble.classList.remove('active');
+        });
+        
+        const appendGlobalMessage = (sender, message) => {
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `global-ai-msg ${sender}`;
+            msgDiv.textContent = message;
+            globalChatLogs.appendChild(msgDiv);
+            globalChatLogs.scrollTop = globalChatLogs.scrollHeight;
+        };
+        
+        const getActiveContext = () => {
+            const subject = localStorage.getItem('vlab_current_subject') || 'networking';
+            const labId = document.getElementById('labSelect').value;
+            const labData = window.VLAB_DATA ? window.VLAB_DATA[labId] : null;
+            const labTitle = labData ? labData.title : 'Custom Lab';
+            const activeSectionEl = document.querySelector('.nav-item.active');
+            const activeTab = activeSectionEl ? activeSectionEl.getAttribute('data-section') : 'aim';
+            
+            let context = `Active Subject: ${subject}. Active Lab: ${labTitle}. Current Screen: ${activeTab}.\n`;
+            
+            // Check if programming/multi-module
+            if (labData && labData.isMultiModule) {
+                const modIdx = window.currentModuleIndex !== undefined && window.currentModuleIndex !== null ? window.currentModuleIndex : 0;
+                const modData = labData.modules[modIdx];
+                context += `Active Sub-Module: ${modData ? modData.title : 'N/A'}.\n`;
+            }
+            
+            // Extract code context if in programming sandbox or DBMS editor
+            const aceEl = document.getElementById('ace-editor');
+            if (aceEl && window.ace) {
+                try {
+                    const editor = window.ace.edit("ace-editor");
+                    const code = editor.getValue();
+                    if (code && code.trim()) {
+                        context += `Student's current editor code:\n${code.substring(0, 1000)}\n`;
+                    }
+                } catch(e) {}
+            }
+            
+            // Extract SQL query if active
+            const sqlTextarea = document.getElementById('sql-query-input');
+            if (sqlTextarea && sqlTextarea.value.trim()) {
+                context += `Student's SQL query:\n${sqlTextarea.value.trim()}\n`;
+            }
+            
+            // Extract topology nodes/connections if in network editor
+            if (window.currentTopo && window.currentTopo.nodes) {
+                const nodesCount = window.currentTopo.nodes.length;
+                const linksCount = window.currentTopo.links ? window.currentTopo.links.length : 0;
+                context += `Network Topology: ${nodesCount} nodes, ${linksCount} links. Node names: ${window.currentTopo.nodes.map(n => n.name).join(', ')}.\n`;
+            }
+            
+            return context;
+        };
+        
+        const executeGlobalChatQuery = async (queryText) => {
+            if (!queryText.trim()) return;
+            appendGlobalMessage('student', queryText);
+            appendGlobalMessage('ai', 'AI Tutor is writing a response...');
+            
+            const context = getActiveContext();
+            let responseText = "";
+            
+            const key = getApiKey();
+            if (key) {
+                const systemPrompt = `You are the MIT VLab Academic AI Tutor. Provide clear, step-by-step guidance to help the student learn. Do not copy-paste complete code solutions directly unless the student is very stuck and specifically requests it, and even then explain it line-by-line. Keep responses educational and relatively concise.
+Context:\n${context}
+Student Question: ${queryText}`;
+                responseText = await askGemini(systemPrompt);
+            } else {
+                // Heuristic Offline Evaluation
+                const subject = localStorage.getItem('vlab_current_subject') || 'networking';
+                
+                responseText = localAIEvaluator("", queryText, "");
+                
+                // Subject-Specific Local Heuristics
+                const queryLower = queryText.toLowerCase();
+                if (responseText.includes("Currently in Local Mode")) {
+                    let subjectHelp = "";
+                    if (subject === 'os') {
+                        if (queryLower.includes('scheduling') || queryLower.includes('cpu')) {
+                            subjectHelp = "AI Tutor: CPU Scheduling algorithms decide which process in the ready queue is allocated the CPU. FCFS is non-preemptive and has a convoy effect. SJF (Shortest Job First) is optimal for minimizing average waiting time. Round Robin uses time-quanta slicing for fair CPU sharing.";
+                        } else if (queryLower.includes('deadlock') || queryLower.includes('banker')) {
+                            subjectHelp = "AI Tutor: Banker's algorithm is a deadlock avoidance method that simulates resource allocation for each process. It determines if an allocation is 'safe' by checking if a safe sequence exists where all processes can run to completion.";
+                        } else if (queryLower.includes('page') || queryLower.includes('replacement') || queryLower.includes('fifo') || queryLower.includes('lru')) {
+                            subjectHelp = "AI Tutor: Page replacement algorithms decide which memory page to swap out when a new page is needed. FIFO swaps the oldest page (can experience Belady's anomaly). LRU swaps the page that hasn't been accessed for the longest time.";
+                        } else {
+                            subjectHelp = "AI Tutor (OS Mode): How can I help you with operating system algorithms? Ask about CPU Scheduling, Process Semaphores, Deadlocks, Page Replacements, or Disk Head movements!";
+                        }
+                    } else if (subject === 'dbms') {
+                        if (queryLower.includes('sql') || queryLower.includes('select') || queryLower.includes('join')) {
+                            subjectHelp = "AI Tutor: SQL queries fetch relational data. Use SELECT to project columns, WHERE to filter rows, INNER JOIN to match keys, and GROUP BY with HAVING to filter aggregates.";
+                        } else if (queryLower.includes('acid') || queryLower.includes('transaction') || queryLower.includes('concurrency')) {
+                            subjectHelp = "AI Tutor: Database transactions must guarantee ACID properties: Atomicity (all-or-nothing), Consistency (integrity constraints), Isolation (independent concurrent execution), and Durability (permanent saves).";
+                        } else if (queryLower.includes('index') || queryLower.includes('b-tree')) {
+                            subjectHelp = "AI Tutor: A B-Tree index keeps records sorted and allows search, insertion, and deletion in O(log N) operations. Nodes split when capacity is exceeded to remain balanced.";
+                        } else {
+                            subjectHelp = "AI Tutor (DBMS Mode): How can I help you with database concepts? Ask about SQL joins, ACID properties, Transaction rollbacks, or B-Tree visualizers!";
+                        }
+                    } else if (subject === 'networking') {
+                        if (queryLower.includes('subnet') || queryLower.includes('cidr') || queryLower.includes('mask')) {
+                            subjectHelp = "AI Tutor: Subnetting divides a larger network into smaller, efficient subnets. A /24 CIDR prefix represents a 255.255.255.0 mask with 8 host bits, yielding 2^8 - 2 = 254 usable host addresses.";
+                        } else if (queryLower.includes('vlan')) {
+                            subjectHelp = "AI Tutor: A Virtual Local Area Network (VLAN) groups devices on separate physical networks into a single logical broadcast domain, improving security and reducing broadcast traffic.";
+                        } else if (queryLower.includes('dns')) {
+                            subjectHelp = "AI Tutor: The Domain Name System (DNS) translates human-readable domain names (e.g. google.com) to machine-readable IP addresses using a hierarchical distributed database of servers.";
+                        } else {
+                            subjectHelp = "AI Tutor (Networking Mode): How can I help you with networking topologies? Ask about subnet masking, VLAN tagging, Routing tables (OSPF/RIP), DNS resolution, or CSMA collision controls!";
+                        }
+                    }
+                    if (subjectHelp) {
+                        responseText = subjectHelp + "\n\n(Tip: Save a Gemini API Key in the programming settings (⚙️) to unlock premium live conversational queries across all labs!)";
+                    }
+                }
+            }
+            
+            // Remove thinking message
+            if (globalChatLogs.lastChild) globalChatLogs.removeChild(globalChatLogs.lastChild);
+            appendGlobalMessage('ai', responseText || "Error communicating with AI.");
+        };
+        
+        btnGlobalAiSend.addEventListener('click', () => {
+            const query = globalAiInput.value;
+            globalAiInput.value = "";
+            executeGlobalChatQuery(query);
+        });
+        
+        globalAiInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                const query = globalAiInput.value;
+                globalAiInput.value = "";
+                executeGlobalChatQuery(query);
+            }
+        });
+        
+        // Quick tools triggers
+        document.getElementById('btnGlobalAiExplain').addEventListener('click', () => {
+            const labId = document.getElementById('labSelect').value;
+            const labData = window.VLAB_DATA ? window.VLAB_DATA[labId] : null;
+            const title = labData ? labData.title : 'this lab';
+            executeGlobalChatQuery(`Explain the core theory and learning objectives of ${title} in simple terms with analogies.`);
+        });
+        
+        document.getElementById('btnGlobalAiAudit').addEventListener('click', () => {
+            const subject = localStorage.getItem('vlab_current_subject') || 'networking';
+            if (subject === 'programming') {
+                executeGlobalChatQuery("Audit my current code editor quality, efficiency, name checks, optimizations and show me how to improve it.");
+            } else if (subject === 'dbms') {
+                executeGlobalChatQuery("Check my SQL query syntax and let me know if it matches the schema specifications.");
+            } else {
+                executeGlobalChatQuery("Review my topology design or configuration parameters for errors.");
+            }
+        });
     }
 });

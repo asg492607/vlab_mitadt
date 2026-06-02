@@ -319,6 +319,27 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
     <script src="vlabData.js"></script>
+    
+    <!-- Global AI Tutor Assistant HTML Components -->
+    <div id="global-ai-bubble" class="global-ai-bubble" title="Ask MIT VLab AI Tutor">✨</div>
+    <div id="global-ai-drawer" class="global-ai-drawer">
+        <div class="global-ai-header">
+            <span>✨ Academic AI Tutor Assistant</span>
+            <button id="btnGlobalAiClose" class="global-ai-close-btn">&times;</button>
+        </div>
+        <div class="global-ai-toolbar">
+            <button id="btnGlobalAiExplain" class="global-ai-tool-btn">📖 Explain Theory</button>
+            <button id="btnGlobalAiAudit" class="global-ai-tool-btn">🔍 Check My Work</button>
+        </div>
+        <div id="global-ai-chat-logs" class="global-ai-chat-logs">
+            <div class="global-ai-msg ai">Hello! I am your MIT VLab Academic AI Tutor. I can help guide you through configurations, CLI logs, SQL queries, or CPU scheduling concepts. How can I assist you today?</div>
+        </div>
+        <div class="global-ai-input-area">
+            <input id="global-ai-chat-input" type="text" placeholder="Ask about loops, subnets, CPU scheduling...">
+            <button id="btnGlobalAiSend" class="btn-sim primary" style="background:#a855f7; border:none; color:white; border-radius:6px; padding:6px 12px; font-size:13px; cursor:pointer;">Send</button>
+        </div>
+    </div>
+
     <script src="vlab.js" type="module"></script>
 </body>
 </html>
