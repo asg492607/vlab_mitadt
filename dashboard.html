@@ -467,7 +467,51 @@
                         </div>
                     </div>
                 </div>
-            </div>
+                <div class="subject-card" data-subject="toc" onclick="selectSubject('toc')">
+                    <div class="subject-icon" style="background: rgba(13, 148, 136, 0.1); color: #0d9488;">🧠</div>
+                    <div class="subject-info">
+                        <h3>Theory of Computation</h3>
+                        <p>Simulate Finite Automata (DFA, NFA), regular expressions, context-free grammars, pushdown automata stacks, and Turing machines.</p>
+                        <div class="subject-meta">
+                            <span class="badge-lab-count">7 Labs</span>
+                            <span class="subject-status">Ready</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="subject-card" data-subject="ai" onclick="selectSubject('ai')">
+                    <div class="subject-icon" style="background: rgba(249, 115, 22, 0.1); color: #f97316;">🤖</div>
+                    <div class="subject-info">
+                        <h3>Artificial Intelligence</h3>
+                        <p>Explore BFS/DFS/A* search, CSP (N-Queens), Minimax, Naïve Bayes, KNN, K-Means, Neural Networks, Backpropagation, Fuzzy Logic, Genetic Algorithms, and Expert Systems.</p>
+                        <div class="subject-meta">
+                            <span class="badge-lab-count">12 Labs</span>
+                            <span class="subject-status">Ready</span>
+                        </div>
+                    </div>
+                </div>
+                            <div class="subject-card" data-subject="cloud" onclick="selectSubject('cloud')">
+                    <div class="subject-icon" style="background: rgba(14, 165, 233, 0.1); color: #0ea5e9;">☁️</div>
+                    <div class="subject-info">
+                        <h3>Cloud Computing</h3>
+                        <p>Explore virtualization, containers, load balancing, autoscaling, storage, CDN, IAM, serverless, SLA monitoring, MapReduce, and Kubernetes.</p>
+                        <div class="subject-meta">
+                            <span class="badge-lab-count">11 Labs</span>
+                            <span class="subject-status">Ready</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="subject-card" data-subject="cyber" onclick="selectSubject('cyber')">
+                    <div class="subject-icon" style="background: rgba(239, 68, 68, 0.1); color: #ef4444;">🔐</div>
+                    <div class="subject-info">
+                        <h3>Cybersecurity</h3>
+                        <p>Learn about classic ciphers, RSA, AES, hashing, firewalls, IDS, SQL injection, XSS, MITM, steganography, and network scanning.</p>
+                        <div class="subject-meta">
+                            <span class="badge-lab-count">12 Labs</span>
+                            <span class="subject-status">Ready</span>
+                        </div>
+                    </div>
+                </div>
+</div>
         </div>
 
         <!-- Mode Grid, Lab Selection, and Launch Action (hidden initially) -->
@@ -541,7 +585,57 @@
                 { id: 'sql_queries', num: 1, name: 'SQL Schema & Queries', category: 'SQL DDL/DML' },
                 { id: 'transactions', num: 2, name: 'ACID Transactions', category: 'Concurrency' },
                 { id: 'indexing', num: 3, name: 'B-Tree Indexing', category: 'Access Structures' }
-            ]
+            ],
+            toc: [
+                { id: 'dfa_sim', num: 1, name: 'DFA Simulator', category: 'Finite Automata' },
+                { id: 'nfa_to_dfa', num: 2, name: 'NFA to DFA Converter', category: 'Automata Equivalence' },
+                { id: 'regex_thompson', num: 3, name: 'Regex to NFA', category: 'Formal Languages' },
+                { id: 'cfg_parser', num: 4, name: 'CFG & Parse Trees', category: 'Context-Free Grammars' },
+                { id: 'pda_stack', num: 5, name: 'PDA Stack Simulator', category: 'Pushdown Automata' },
+                { id: 'turing_machine', num: 6, name: 'Turing Machine', category: 'Computability Theory' },
+                { id: 'dfa_minimization', num: 7, name: 'DFA Minimization', category: 'Automata Optimization' }
+            ],
+            ai: [
+                { id: 'ai_search',      num: 1,  name: 'BFS / DFS / A* Search',       category: 'Search Algorithms' },
+                { id: 'ai_heuristic',   num: 2,  name: 'Heuristic & Informed Search',  category: 'Greedy / A*' },
+                { id: 'ai_csp',         num: 3,  name: 'CSP — N-Queens',               category: 'Constraint Satisfaction' },
+                { id: 'ai_minimax',     num: 4,  name: 'Minimax & Alpha-Beta',         category: 'Game Trees' },
+                { id: 'ai_naive_bayes', num: 5,  name: 'Naïve Bayes Classifier',       category: 'Probabilistic ML' },
+                { id: 'ai_knn',         num: 6,  name: 'K-Nearest Neighbors',          category: 'Instance-Based' },
+                { id: 'ai_kmeans',      num: 7,  name: 'K-Means Clustering',           category: 'Unsupervised ML' },
+                { id: 'ai_ann',         num: 8,  name: 'Perceptron (ANN)',             category: 'Neural Networks' },
+                { id: 'ai_backprop',    num: 9,  name: 'Backpropagation & GD',         category: 'Deep Learning' },
+                { id: 'ai_fuzzy',       num: 10, name: 'Fuzzy Logic System',           category: 'Fuzzy Inference' },
+                { id: 'ai_genetic',     num: 11, name: 'Genetic Algorithm',            category: 'Evolutionary AI' },
+                { id: 'ai_expert',      num: 12, name: 'Expert System',                category: 'Rule-Based AI' }
+                        ],
+            cloud: [
+                { id: 'cloud_virtualization', num: 1, name: 'Virtualization & VM Lifecycle', category: 'Cloud Infra' },
+                { id: 'cloud_docker', num: 2, name: 'Docker Container Orchestration', category: 'Containers' },
+                { id: 'cloud_loadbalancer', num: 3, name: 'Load Balancing', category: 'Network Services' },
+                { id: 'cloud_autoscaling', num: 4, name: 'Auto-Scaling Policies', category: 'Resource Management' },
+                { id: 'cloud_storage', num: 5, name: 'Distributed Object Storage', category: 'Storage' },
+                { id: 'cloud_cdn', num: 6, name: 'Content Delivery Network', category: 'CDN' },
+                { id: 'cloud_iam', num: 7, name: 'Identity & Access Management', category: 'Security' },
+                { id: 'cloud_serverless', num: 8, name: 'Serverless Functions', category: 'Compute' },
+                { id: 'cloud_sla', num: 9, name: 'SLA Monitoring & Fault Tolerance', category: 'Reliability' },
+                { id: 'cloud_mapreduce', num: 10, name: 'MapReduce Parallel Processing', category: 'Big Data' },
+                { id: 'cloud_kubernetes', num: 11, name: 'Kubernetes Pod Scheduling', category: 'Orchestration' }
+            ],
+            cyber: [
+                { id: 'cyber_caesar', num: 1, name: 'Caesar Cipher & ROT13', category: 'Classic Ciphers' },
+                { id: 'cyber_vigenere', num: 2, name: 'Vigenère Cipher', category: 'Polyalphabetic Cipher' },
+                { id: 'cyber_rsa', num: 3, name: 'RSA Public-Key Encryption', category: 'Public-Key Crypto' },
+                { id: 'cyber_aes', num: 4, name: 'AES Block Cipher', category: 'Symmetric Crypto' },
+                { id: 'cyber_hashing', num: 5, name: 'Hashing Algorithms', category: 'Integrity' },
+                { id: 'cyber_firewall', num: 6, name: 'Firewall Rule Engine', category: 'Network Security' },
+                { id: 'cyber_ids', num: 7, name: 'Intrusion Detection System', category: 'Threat Detection' },
+                { id: 'cyber_sql_inject', num: 8, name: 'SQL Injection Attack', category: 'Web Security' },
+                { id: 'cyber_xss', num: 9, name: 'Cross-Site Scripting (XSS)', category: 'Web Security' },
+                { id: 'cyber_mitm', num: 10, name: 'Man-in-the-Middle (MITM)', category: 'Network Attack' },
+                { id: 'cyber_steganography', num: 11, name: 'Steganography (LSB)', category: 'Data Hiding' },
+                { id: 'cyber_network_scan', num: 12, name: 'Port Scanner & Vulnerability Assessment', category: 'Reconnaissance' }
+            ],
         };
 
         // Theme Handling
@@ -574,7 +668,7 @@
 
             // Practice lab mode is only relevant/supported for Computer Networks topology building
             const practiceCard = document.getElementById('cardPractice');
-            if (subject === 'os' || subject === 'programming' || subject === 'dbms') {
+            if (subject === 'os' || subject === 'programming' || subject === 'dbms' || subject === 'toc' || subject === 'ai' || subject === 'cloud' || subject === 'cyber') {
                 if (practiceCard) practiceCard.style.display = 'none';
                 setMainPath('vlab');
                 document.getElementById('mode-selection-container').style.display = 'none';
@@ -597,6 +691,18 @@
             } else if (subject === 'dbms') {
                 accentColor = '#f59e0b';
                 accentHover = '#d97706';
+            } else if (subject === 'toc') {
+                accentColor = '#0d9488';
+                accentHover = '#0f766e';
+            } else if (subject === 'ai') {
+                accentColor = '#f97316';
+                accentHover = '#ea6c0a';
+            } else if (subject === 'cloud') {
+                accentColor = '#0ea5e9';
+                accentHover = '#0284c7';
+            } else if (subject === 'cyber') {
+                accentColor = '#ef4444';
+                accentHover = '#dc2626';
             }
             document.documentElement.style.setProperty('--primary-accent', accentColor);
             
@@ -661,7 +767,8 @@
             });
             const card = document.querySelector(`.lab-card[data-id="${id}"]`);
             if (card) {
-                const accentColor = currentSubject === 'os' ? '#a855f7' : '#2563eb';
+                const accentMap = { os:'#a855f7', programming:'#10b981', dbms:'#f59e0b', toc:'#0d9488', ai:'#f97316', cloud:'#0ea5e9', cyber:'#ef4444' };
+                const accentColor = accentMap[currentSubject] || '#2563eb';
                 card.style.borderColor = accentColor;
                 card.style.background = `${accentColor}1a`;
             }

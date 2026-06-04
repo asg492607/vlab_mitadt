@@ -2943,10 +2943,6 @@ class NetworkingSim {
     }
 }
 
-        this.ctx.restore();
-    }
-}
-
 // ==========================================
 // PROGRAMMING & DBMS LAB MODULES (PHASE 3)
 // ==========================================
@@ -3956,6 +3952,38 @@ window.initIndexingLab = initIndexingLab;
 
 // App Controller
 document.addEventListener('DOMContentLoaded', async () => {
+    // Local timer tracking for lab cleanup
+    const activeLabIntervals = [];
+    const activeLabTimeouts = [];
+    const activeLabFrames = [];
+
+    const setInterval = (fn, delay, ...args) => {
+        const id = window.setInterval(fn, delay, ...args);
+        activeLabIntervals.push(id);
+        return id;
+    };
+
+    const setTimeout = (fn, delay, ...args) => {
+        const id = window.setTimeout(fn, delay, ...args);
+        activeLabTimeouts.push(id);
+        return id;
+    };
+
+    const requestAnimationFrame = (fn) => {
+        const id = window.requestAnimationFrame(fn);
+        activeLabFrames.push(id);
+        return id;
+    };
+
+    const clearAllLabTimers = () => {
+        activeLabIntervals.forEach(window.clearInterval);
+        activeLabIntervals.length = 0;
+        activeLabTimeouts.forEach(window.clearTimeout);
+        activeLabTimeouts.length = 0;
+        activeLabFrames.forEach(window.cancelAnimationFrame);
+        activeLabFrames.length = 0;
+    };
+
     // Initial State Restoration from Cloud
     await fetchProgress();
 
@@ -4074,6 +4102,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             content.style.opacity = '1';
         }, 200);
 
+        clearAllLabTimers();
         if (window.currentSim) window.currentSim.destroy();
     };
 
@@ -5015,167 +5044,599 @@ document.addEventListener('DOMContentLoaded', async () => {
             document.getElementById('cpuUtil').textContent = (((t - idle) / t) * 100).toFixed(1) + '%';
             document.getElementById('cpuResultsPanel').style.display = 'block';
         });
+
+        // Pre-select algorithm based on active module index
+        if (window.currentModuleIndex === 0) {
+            cpuAlgoSelect.value = 'fcfs';
+        } else if (window.currentModuleIndex === 1) {
+            cpuAlgoSelect.value = 'sjf';
+        } else if (window.currentModuleIndex === 2) {
+            cpuAlgoSelect.value = 'rr';
+        }
+        cpuAlgoSelect.dispatchEvent(new Event('change'));
     };
 
 
     const initProcessSyncSim = (container) => {
-        container.innerHTML = `
-            <div class="sim-toolbar">
-                <div class="section-title" style="font-size:22px; margin:0; color:var(--primary);">Producer-Consumer Semaphore Sim</div>
-            </div>
-            <div class="sim-workspace" style="padding:20px; gap:20px; flex-direction:column; overflow-y:auto;">
-                <div style="display:flex; gap:20px; flex-wrap:wrap; width:100%;">
-                    <div class="theory-card" style="flex:1.5; min-width:300px; margin:0; text-align:center;">
-                        <h3 style="color:var(--primary); margin-bottom:20px;">Shared Circular Buffer</h3>
-                        <div id="bufferSlots" style="display:flex; justify-content:center; gap:15px; margin-bottom:30px;">
-                            <!-- Circular slots populated dynamically -->
+        const modIdx = window.currentModuleIndex !== undefined && window.currentModuleIndex !== null ? window.currentModuleIndex : 0;
+        
+        if (modIdx === 0) {
+            container.innerHTML = `
+                <div class="sim-toolbar">
+                    <div class="section-title" style="font-size:22px; margin:0; color:var(--primary);">Producer-Consumer Semaphore Sim</div>
+                </div>
+                <div class="sim-workspace" style="padding:20px; gap:20px; flex-direction:column; overflow-y:auto;">
+                    <div style="display:flex; gap:20px; flex-wrap:wrap; width:100%;">
+                        <div class="theory-card" style="flex:1.5; min-width:300px; margin:0; text-align:center;">
+                            <h3 style="color:var(--primary); margin-bottom:20px;">Shared Circular Buffer</h3>
+                            <div id="bufferSlots" style="display:flex; justify-content:center; gap:15px; margin-bottom:30px;">
+                                <!-- Circular slots populated dynamically -->
+                            </div>
+                            <div style="display:flex; justify-content:center; gap:15px; margin-bottom:20px;">
+                                <button id="btnProduceSync" class="btn-sim primary">Produce Item</button>
+                                <button id="btnConsumeSync" class="btn-sim success">Consume Item</button>
+                                <button id="btnAutoSync" class="btn-sim">Toggle Auto Play</button>
+                            </div>
                         </div>
-                        <div style="display:flex; justify-content:center; gap:15px; margin-bottom:20px;">
-                            <button id="btnProduceSync" class="btn-sim primary">Produce Item</button>
-                            <button id="btnConsumeSync" class="btn-sim success">Consume Item</button>
-                            <button id="btnAutoSync" class="btn-sim">Toggle Auto Play</button>
+                        
+                        <div class="theory-card" style="flex:1; min-width:250px; margin:0;">
+                            <h3 style="color:var(--primary); margin-bottom:15px;">Semaphores status</h3>
+                            <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:20px;">
+                                <div style="display:flex; justify-content:space-between; padding:10px; background:var(--bg-page); border:1px solid var(--border); border-radius:8px;">
+                                    <span><b>Mutex (Mutual Exclusion):</b></span>
+                                    <span id="syncMutex" style="font-family:'JetBrains Mono', monospace; font-weight:800; color:var(--success);">1</span>
+                                </div>
+                                <div style="display:flex; justify-content:space-between; padding:10px; background:var(--bg-page); border:1px solid var(--border); border-radius:8px;">
+                                    <span><b>Empty Slots Semaphore:</b></span>
+                                    <span id="syncEmpty" style="font-family:'JetBrains Mono', monospace; font-weight:800; color:var(--primary);">5</span>
+                                </div>
+                                <div style="display:flex; justify-content:space-between; padding:10px; background:var(--bg-page); border:1px solid var(--border); border-radius:8px;">
+                                    <span><b>Full Slots Semaphore:</b></span>
+                                    <span id="syncFull" style="font-family:'JetBrains Mono', monospace; font-weight:800; color:var(--warning);">0</span>
+                                </div>
+                            </div>
+                            <div style="padding:12px; background:rgba(16,185,129,0.05); border:1px solid var(--border); border-radius:10px; font-size:12px; line-height:1.4;">
+                                • <b>empty</b> blocks producer when buffer is full (0).<br>
+                                • <b>full</b> blocks consumer when buffer is empty (0).<br>
+                                • <b>mutex</b> ensures critical section exclusivity.
+                            </div>
+                        </div>
+                    </div>
+    
+                    <div class="theory-card" style="width:100%; margin:0;">
+                        <h3 style="color:var(--primary); margin-bottom:15px;">Pedagogical Operation Logger</h3>
+                        <div id="syncLog" style="height:150px; background:var(--bg-page); border:1px solid var(--border); border-radius:12px; padding:15px; font-family:'JetBrains Mono', monospace; font-size:12px; overflow-y:auto; color:var(--text-main); text-align:left;">
+                            <div style="color:var(--text-muted);">&gt; Semaphores initialized. Buffer empty. Waiting for operations...</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+    
+            const bufferSlots = document.getElementById('bufferSlots');
+            const syncMutex = document.getElementById('syncMutex');
+            const syncEmpty = document.getElementById('syncEmpty');
+            const syncFull = document.getElementById('syncFull');
+            const syncLog = document.getElementById('syncLog');
+    
+            const bufferSize = 5;
+            let buffer = new Array(bufferSize).fill(null);
+            let inPtr = 0;
+            let outPtr = 0;
+            let count = 0;
+    
+            let autoPlayTimer = null;
+    
+            const updateBufferUI = () => {
+                bufferSlots.innerHTML = '';
+                for (let i = 0; i < bufferSize; i++) {
+                    const slot = document.createElement('div');
+                    slot.style.cssText = `
+                        width: 60px; height: 60px; border-radius: 12px;
+                        border: 2px solid ${buffer[i] ? 'var(--primary)' : 'var(--border)'};
+                        display: flex; align-items: center; justify-content: center;
+                        font-size: 24px; position: relative; background: var(--container-bg);
+                        transition: all 0.3s ease;
+                    `;
+                    if (buffer[i]) {
+                        slot.style.boxShadow = '0 0 15px rgba(168,85,247,0.2)';
+                        slot.innerHTML = '📦';
+                        const idx = document.createElement('span');
+                        idx.textContent = `Item ${buffer[i]}`;
+                        idx.style.cssText = 'font-size:9px; position:absolute; bottom:2px; color:var(--text-muted);';
+                        slot.appendChild(idx);
+                    } else {
+                        slot.innerHTML = '⚙️';
+                        slot.style.opacity = '0.4';
+                    }
+                    bufferSlots.appendChild(slot);
+                }
+                syncMutex.textContent = '1';
+                syncEmpty.textContent = bufferSize - count;
+                syncFull.textContent = count;
+            };
+    
+            const logOp = (msg, type = 'info') => {
+                const div = document.createElement('div');
+                const color = type === 'produce' ? 'var(--primary)' : (type === 'consume' ? 'var(--success)' : 'var(--danger)');
+                div.innerHTML = `<span style="color:${color}; font-weight:800;">&gt;</span> ${msg}`;
+                syncLog.appendChild(div);
+                syncLog.scrollTop = syncLog.scrollHeight;
+            };
+    
+            updateBufferUI();
+    
+            document.getElementById('btnProduceSync').addEventListener('click', () => {
+                if (count >= bufferSize) {
+                    logOp("PRODUCER BLOCKED: Buffer is full! (empty semaphore = 0)", "error");
+                    return;
+                }
+                const itemId = Math.floor(Math.random() * 900) + 100;
+                logOp(`Producer calls wait(empty) -> empty=${bufferSize - count - 1}`, "info");
+                logOp(`Producer enters critical section: wait(mutex)`, "info");
+                buffer[inPtr] = itemId;
+                logOp(`Producer added Item ${itemId} at slot ${inPtr + 1}`, "produce");
+                inPtr = (inPtr + 1) % bufferSize;
+                count++;
+                logOp(`Producer exits critical section: signal(mutex)`, "info");
+                logOp(`Producer signals full -> full=${count}`, "info");
+                updateBufferUI();
+            });
+    
+            document.getElementById('btnConsumeSync').addEventListener('click', () => {
+                if (count === 0) {
+                    logOp("CONSUMER BLOCKED: Buffer is empty! (full semaphore = 0)", "error");
+                    return;
+                }
+                logOp(`Consumer calls wait(full) -> full=${count - 1}`, "info");
+                logOp(`Consumer enters critical section: wait(mutex)`, "info");
+                const item = buffer[outPtr];
+                buffer[outPtr] = null;
+                logOp(`Consumer retrieved Item ${item} from slot ${outPtr + 1}`, "consume");
+                outPtr = (outPtr + 1) % bufferSize;
+                count--;
+                logOp(`Consumer exits critical section: signal(mutex)`, "info");
+                logOp(`Consumer signals empty -> empty=${bufferSize - count}`, "info");
+                updateBufferUI();
+            });
+    
+            document.getElementById('btnAutoSync').addEventListener('click', () => {
+                const btn = document.getElementById('btnAutoSync');
+                if (autoPlayTimer) {
+                    clearInterval(autoPlayTimer);
+                    autoPlayTimer = null;
+                    btn.textContent = "Toggle Auto Play";
+                    btn.classList.remove('primary');
+                } else {
+                    btn.textContent = "Stop Auto Play";
+                    btn.classList.add('primary');
+                    autoPlayTimer = setInterval(() => {
+                        if (Math.random() > 0.4) {
+                            document.getElementById('btnProduceSync').click();
+                        } else {
+                            document.getElementById('btnConsumeSync').click();
+                        }
+                    }, 1500);
+                }
+            });
+        } else if (modIdx === 1) {
+            container.innerHTML = `
+                <div class="sim-toolbar">
+                    <div class="section-title" style="font-size:22px; margin:0; color:var(--primary);">Readers-Writers Mutex Sim</div>
+                </div>
+                <div class="sim-workspace" style="padding:20px; gap:20px; flex-direction:column; overflow-y:auto;">
+                    <div style="display:flex; gap:20px; flex-wrap:wrap; width:100%;">
+                        <div class="theory-card" style="flex:1.5; min-width:300px; margin:0; text-align:center;">
+                            <h3 style="color:var(--primary); margin-bottom:20px;">Database Resource Status</h3>
+                            <div style="display:flex; justify-content:center; gap:20px; margin-bottom:20px;">
+                                <div id="dbResourceState" style="width:140px; height:140px; border-radius:50%; border:4px solid var(--border); display:flex; flex-direction:column; align-items:center; justify-content:center; background:var(--container-bg); transition:all 0.3s ease; box-shadow:0 0 15px rgba(0,0,0,0.1);">
+                                    <span id="dbStateIcon" style="font-size:42px;">🟢</span>
+                                    <span id="dbStateText" style="font-weight:800; font-size:12px; margin-top:5px; text-transform:uppercase; color:var(--success);">Idle / Free</span>
+                                </div>
+                            </div>
+                            <div style="display:flex; justify-content:center; gap:10px; margin-bottom:20px; flex-wrap:wrap;">
+                                <button id="btnAddReader" class="btn-sim primary">+ Add Reader</button>
+                                <button id="btnRemoveReader" class="btn-sim success">- Remove Reader</button>
+                                <button id="btnAddWriter" class="btn-sim warning">+ Add Writer</button>
+                                <button id="btnRemoveWriter" class="btn-sim" style="border-color:#ef4444; color:#ef4444;">- Remove Writer</button>
+                            </div>
+                            <div id="readersListContainer" style="text-align:left; background:var(--bg-page); padding:10px; border-radius:8px; border:1px solid var(--border); min-height:60px;">
+                                <strong>Active Readers:</strong> <span id="activeReadersText" style="color:var(--primary); font-family:monospace;">None</span>
+                            </div>
+                            <div id="writersQueueContainer" style="text-align:left; background:var(--bg-page); padding:10px; border-radius:8px; border:1px solid var(--border); margin-top:10px; min-height:60px;">
+                                <strong>Writers Queue:</strong> <span id="writersQueueText" style="color:var(--warning); font-family:monospace;">None</span>
+                            </div>
+                        </div>
+                        
+                        <div class="theory-card" style="flex:1; min-width:250px; margin:0;">
+                            <h3 style="color:var(--primary); margin-bottom:15px;">Lock Variables</h3>
+                            <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:20px;">
+                                <div style="display:flex; justify-content:space-between; padding:10px; background:var(--bg-page); border:1px solid var(--border); border-radius:8px;">
+                                    <span><b>readcount (Readers Count):</b></span>
+                                    <span id="rwReadCount" style="font-family:'JetBrains Mono', monospace; font-weight:800; color:var(--primary);">0</span>
+                                </div>
+                                <div style="display:flex; justify-content:space-between; padding:10px; background:var(--bg-page); border:1px solid var(--border); border-radius:8px;">
+                                    <span><b>mutex (Protect readcount):</b></span>
+                                    <span id="rwMutex" style="font-family:'JetBrains Mono', monospace; font-weight:800; color:var(--success);">1</span>
+                                </div>
+                                <div style="display:flex; justify-content:space-between; padding:10px; background:var(--bg-page); border:1px solid var(--border); border-radius:8px;">
+                                    <span><b>wrt (Exclusive Access):</b></span>
+                                    <span id="rwWrt" style="font-family:'JetBrains Mono', monospace; font-weight:800; color:var(--warning);">1</span>
+                                </div>
+                            </div>
+                            <div style="padding:12px; background:rgba(168,85,247,0.05); border:1px solid var(--border); border-radius:10px; font-size:12px; line-height:1.4;">
+                                • Multiple <b>Readers</b> can access the resource simultaneously if <code>wrt</code> is free.<br>
+                                • First Reader locks <code>wrt</code> (wrt=0). Last Reader releases it (wrt=1).<br>
+                                • <b>Writers</b> require exclusive lock on <code>wrt</code> and block both readers and other writers.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="theory-card" style="width:100%; margin:0;">
+                        <h3 style="color:var(--primary); margin-bottom:15px;">Pedagogical Operation Logger</h3>
+                        <div id="rwLog" style="height:150px; background:var(--bg-page); border:1px solid var(--border); border-radius:12px; padding:15px; font-family:'JetBrains Mono', monospace; font-size:12px; overflow-y:auto; color:var(--text-main); text-align:left;">
+                            <div style="color:var(--text-muted);">&gt; Readers-Writers system initialized. Database is idle.</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+    
+            const rwLog = document.getElementById('rwLog');
+            const rwReadCount = document.getElementById('rwReadCount');
+            const rwMutex = document.getElementById('rwMutex');
+            const rwWrt = document.getElementById('rwWrt');
+            const dbResourceState = document.getElementById('dbResourceState');
+            const dbStateIcon = document.getElementById('dbStateIcon');
+            const dbStateText = document.getElementById('dbStateText');
+            const activeReadersText = document.getElementById('activeReadersText');
+            const writersQueueText = document.getElementById('writersQueueText');
+    
+            let readers = [];
+            let writersQueue = [];
+            let activeWriter = null;
+            let readcount = 0;
+            let mutex = 1;
+            let wrt = 1;
+            let nextReaderId = 1;
+            let nextWriterId = 1;
+    
+            const logRw = (msg, type = 'info') => {
+                const div = document.createElement('div');
+                let color = 'var(--text-main)';
+                if (type === 'read') color = 'var(--primary)';
+                else if (type === 'write') color = 'var(--warning)';
+                else if (type === 'error') color = 'var(--danger)';
+                div.innerHTML = `<span style="color:${color}; font-weight:800;">&gt;</span> ${msg}`;
+                rwLog.appendChild(div);
+                rwLog.scrollTop = rwLog.scrollHeight;
+            };
+    
+            const updateRwUI = () => {
+                rwReadCount.textContent = readcount;
+                rwMutex.textContent = mutex;
+                rwWrt.textContent = wrt;
+                
+                if (activeWriter) {
+                    dbResourceState.style.borderColor = 'var(--warning)';
+                    dbStateIcon.textContent = '📝';
+                    dbStateText.textContent = `Writer ${activeWriter} active`;
+                    dbStateText.style.color = 'var(--warning)';
+                } else if (readcount > 0) {
+                    dbResourceState.style.borderColor = 'var(--primary)';
+                    dbStateIcon.textContent = '📖';
+                    dbStateText.textContent = `${readcount} Reader(s) active`;
+                    dbStateText.style.color = 'var(--primary)';
+                } else {
+                    dbResourceState.style.borderColor = 'var(--success)';
+                    dbStateIcon.textContent = '🟢';
+                    dbStateText.textContent = 'Idle / Free';
+                    dbStateText.style.color = 'var(--success)';
+                }
+    
+                activeReadersText.textContent = readers.length > 0 ? readers.map(r => `Reader ${r}`).join(', ') : 'None';
+                writersQueueText.textContent = writersQueue.length > 0 ? writersQueue.map(w => `Writer ${w}`).join(', ') : 'None';
+            };
+    
+            document.getElementById('btnAddReader').addEventListener('click', () => {
+                const rId = nextReaderId++;
+                logRw(`Reader ${rId} arrives at database.`, 'info');
+                if (activeWriter || writersQueue.length > 0) {
+                    logRw(`Reader ${rId} blocked. Writer active or waiting.`, 'error');
+                } else {
+                    logRw(`Reader ${rId} executes wait(mutex) -> locking readcount.`, 'info');
+                    mutex = 0;
+                    readcount++;
+                    if (readcount === 1) {
+                        logRw(`First Reader ${rId} calls wait(wrt) -> locking database.`, 'info');
+                        wrt = 0;
+                    }
+                    mutex = 1;
+                    logRw(`Reader ${rId} executes signal(mutex) -> releasing readcount.`, 'info');
+                    readers.push(rId);
+                    logRw(`Reader ${rId} starts reading database.`, 'read');
+                }
+                updateRwUI();
+            });
+    
+            document.getElementById('btnRemoveReader').addEventListener('click', () => {
+                if (readers.length === 0) return;
+                const rId = readers.shift();
+                logRw(`Reader ${rId} finishes reading.`, 'info');
+                logRw(`Reader ${rId} executes wait(mutex) -> locking readcount.`, 'info');
+                mutex = 0;
+                readcount--;
+                if (readcount === 0) {
+                    logRw(`Last Reader ${rId} calls signal(wrt) -> releasing database lock.`, 'info');
+                    wrt = 1;
+                    if (writersQueue.length > 0) {
+                        const wId = writersQueue.shift();
+                        activeWriter = wId;
+                        wrt = 0;
+                        logRw(`Waiting Writer ${wId} scheduled. calls wait(wrt) -> DB locked.`, 'write');
+                    }
+                }
+                mutex = 1;
+                logRw(`Reader ${rId} executes signal(mutex) -> releasing readcount.`, 'info');
+                updateRwUI();
+            });
+    
+            document.getElementById('btnAddWriter').addEventListener('click', () => {
+                const wId = nextWriterId++;
+                logRw(`Writer ${wId} requests database write access.`, 'info');
+                if (wrt === 0 || readcount > 0 || activeWriter) {
+                    logRw(`Database busy. Writer ${wId} queued in waiting line.`, 'error');
+                    writersQueue.push(wId);
+                } else {
+                    wrt = 0;
+                    activeWriter = wId;
+                    logRw(`Writer ${wId} acquires wrt lock -> database locked.`, 'write');
+                }
+                updateRwUI();
+            });
+    
+            document.getElementById('btnRemoveWriter').addEventListener('click', () => {
+                if (!activeWriter) return;
+                const wId = activeWriter;
+                activeWriter = null;
+                wrt = 1;
+                logRw(`Writer ${wId} finishes writing and releases wrt lock (signal(wrt)).`, 'info');
+                
+                if (writersQueue.length > 0) {
+                    const nextW = writersQueue.shift();
+                    activeWriter = nextW;
+                    wrt = 0;
+                    logRw(`Waiting Writer ${nextW} starts writing immediately (acquires wrt lock).`, 'write');
+                } else {
+                    logRw("Database is now completely free.", 'info');
+                }
+                updateRwUI();
+            });
+        } else if (modIdx === 2) {
+            container.innerHTML = `
+                <div class="sim-toolbar">
+                    <div class="section-title" style="font-size:22px; margin:0; color:var(--primary);">Dining Philosophers Visualizer</div>
+                </div>
+                <div class="sim-workspace" style="padding:20px; gap:20px; flex-direction:column; overflow-y:auto;">
+                    <div style="display:flex; gap:20px; flex-wrap:wrap; width:100%;">
+                        <div class="theory-card" style="flex:1.5; min-width:300px; margin:0; text-align:center; display:flex; flex-direction:column; align-items:center;">
+                            <h3 style="color:var(--primary); margin-bottom:15px;">The Dining Table</h3>
+                            
+                            <svg width="280" height="280" style="margin:20px 0;">
+                                <circle cx="140" cy="140" r="70" fill="var(--bg-page)" stroke="var(--border)" stroke-width="4" />
+                                <text x="140" y="145" text-anchor="middle" font-size="12px" font-weight="bold" fill="var(--text-main)">SPAGHETTI</text>
+                                
+                                <line id="chopstickLine0" x1="140" y1="60" x2="140" y2="80" stroke="var(--success)" stroke-width="6" stroke-linecap="round" />
+                                <line id="chopstickLine1" x1="210" y1="120" x2="190" y2="125" stroke="var(--success)" stroke-width="6" stroke-linecap="round" />
+                                <line id="chopstickLine2" x1="180" y1="200" x2="170" y2="185" stroke="var(--success)" stroke-width="6" stroke-linecap="round" />
+                                <line id="chopstickLine3" x1="100" y1="200" x2="110" y2="185" stroke="var(--success)" stroke-width="6" stroke-linecap="round" />
+                                <line id="chopstickLine4" x1="70" y1="120" x2="90" y2="125" stroke="var(--success)" stroke-width="6" stroke-linecap="round" />
+                                
+                                <circle id="philoCircle0" cx="140" cy="30" r="22" fill="var(--bg-card)" stroke="var(--border)" stroke-width="3" />
+                                <text x="140" y="34" text-anchor="middle" font-size="10px" font-weight="bold" fill="var(--text-main)">P0</text>
+                                
+                                <circle id="philoCircle1" cx="235" cy="100" r="22" fill="var(--bg-card)" stroke="var(--border)" stroke-width="3" />
+                                <text x="235" y="104" text-anchor="middle" font-size="10px" font-weight="bold" fill="var(--text-main)">P1</text>
+                                
+                                <circle id="philoCircle2" cx="200" cy="210" r="22" fill="var(--bg-card)" stroke="var(--border)" stroke-width="3" />
+                                <text x="200" y="214" text-anchor="middle" font-size="10px" font-weight="bold" fill="var(--text-main)">P2</text>
+                                
+                                <circle id="philoCircle3" cx="80" cy="210" r="22" fill="var(--bg-card)" stroke="var(--border)" stroke-width="3" />
+                                <text x="80" y="214" text-anchor="middle" font-size="10px" font-weight="bold" fill="var(--text-main)">P3</text>
+                                
+                                <circle id="philoCircle4" cx="45" cy="100" r="22" fill="var(--bg-card)" stroke="var(--border)" stroke-width="3" />
+                                <text x="45" y="104" text-anchor="middle" font-size="10px" font-weight="bold" fill="var(--text-main)">P4</text>
+                            </svg>
+                            
+                            <div style="display:flex; justify-content:center; gap:8px; margin-bottom:15px; flex-wrap:wrap;">
+                                <button id="btnPhiloAuto" class="btn-sim primary">Toggle Auto Run</button>
+                                <button id="btnPhiloReset" class="btn-sim">Reset Table</button>
+                            </div>
+                        </div>
+                        
+                        <div class="theory-card" style="flex:1; min-width:250px; margin:0;">
+                            <h3 style="color:var(--primary); margin-bottom:15px;">Chopstick Semaphores</h3>
+                            <div style="display:flex; flex-direction:column; gap:8px;" id="chopsticksList">
+                                <!-- Chopstick Semaphores generated dynamically -->
+                            </div>
+                            <div style="margin-top:15px; padding:12px; background:rgba(16,185,129,0.05); border:1px solid var(--border); border-radius:10px; font-size:11px; line-height:1.4;">
+                                • <b>Asymmetric rule</b> implemented: Odd philosophers pick Left first, then Right; Even philosophers pick Right first, then Left. This breaks the circular wait condition and prevents deadlocks!
+                            </div>
                         </div>
                     </div>
                     
-                    <div class="theory-card" style="flex:1; min-width:250px; margin:0;">
-                        <h3 style="color:var(--primary); margin-bottom:15px;">Semaphores status</h3>
-                        <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:20px;">
-                            <div style="display:flex; justify-content:space-between; padding:10px; background:var(--bg-page); border:1px solid var(--border); border-radius:8px;">
-                                <span><b>Mutex (Mutual Exclusion):</b></span>
-                                <span id="syncMutex" style="font-family:'JetBrains Mono', monospace; font-weight:800; color:var(--success);">1</span>
-                            </div>
-                            <div style="display:flex; justify-content:space-between; padding:10px; background:var(--bg-page); border:1px solid var(--border); border-radius:8px;">
-                                <span><b>Empty Slots Semaphore:</b></span>
-                                <span id="syncEmpty" style="font-family:'JetBrains Mono', monospace; font-weight:800; color:var(--primary);">5</span>
-                            </div>
-                            <div style="display:flex; justify-content:space-between; padding:10px; background:var(--bg-page); border:1px solid var(--border); border-radius:8px;">
-                                <span><b>Full Slots Semaphore:</b></span>
-                                <span id="syncFull" style="font-family:'JetBrains Mono', monospace; font-weight:800; color:var(--warning);">0</span>
-                            </div>
-                        </div>
-                        <div style="padding:12px; background:rgba(16,185,129,0.05); border:1px solid var(--border); border-radius:10px; font-size:12px; line-height:1.4;">
-                            • <b>empty</b> blocks producer when buffer is full (0).<br>
-                            • <b>full</b> blocks consumer when buffer is empty (0).<br>
-                            • <b>mutex</b> ensures critical section exclusivity.
+                    <div class="theory-card" style="width:100%; margin:0;">
+                        <h3 style="color:var(--primary); margin-bottom:15px;">Philosophers State Logs</h3>
+                        <div id="philoLog" style="height:140px; background:var(--bg-page); border:1px solid var(--border); border-radius:12px; padding:15px; font-family:'JetBrains Mono', monospace; font-size:12px; overflow-y:auto; color:var(--text-main); text-align:left;">
+                            <div style="color:var(--text-muted);">&gt; Dinner is served. All 5 philosophers are thinking...</div>
                         </div>
                     </div>
                 </div>
-
-                <div class="theory-card" style="width:100%; margin:0;">
-                    <h3 style="color:var(--primary); margin-bottom:15px;">Pedagogical Operation Logger</h3>
-                    <div id="syncLog" style="height:150px; background:var(--bg-page); border:1px solid var(--border); border-radius:12px; padding:15px; font-family:'JetBrains Mono', monospace; font-size:12px; overflow-y:auto; color:var(--text-main); text-align:left;">
-                        <div style="color:var(--text-muted);">&gt; Semaphores initialized. Buffer empty. Waiting for operations...</div>
-                    </div>
-                </div>
-            </div>
-        `;
-
-        const bufferSlots = document.getElementById('bufferSlots');
-        const syncMutex = document.getElementById('syncMutex');
-        const syncEmpty = document.getElementById('syncEmpty');
-        const syncFull = document.getElementById('syncFull');
-        const syncLog = document.getElementById('syncLog');
-
-        const bufferSize = 5;
-        let buffer = new Array(bufferSize).fill(null);
-        let inPtr = 0;
-        let outPtr = 0;
-        let count = 0;
-
-        let autoPlayTimer = null;
-
-        const updateBufferUI = () => {
-            bufferSlots.innerHTML = '';
-            for (let i = 0; i < bufferSize; i++) {
-                const slot = document.createElement('div');
-                slot.style.cssText = `
-                    width: 60px; height: 60px; border-radius: 12px;
-                    border: 2px solid ${buffer[i] ? 'var(--primary)' : 'var(--border)'};
-                    display: flex; align-items: center; justify-content: center;
-                    font-size: 24px; position: relative; background: var(--container-bg);
-                    transition: all 0.3s ease;
-                `;
-                if (buffer[i]) {
-                    slot.style.boxShadow = '0 0 15px rgba(168,85,247,0.2)';
-                    slot.innerHTML = '📦';
-                    const idx = document.createElement('span');
-                    idx.textContent = `Item ${buffer[i]}`;
-                    idx.style.cssText = 'font-size:9px; position:absolute; bottom:2px; color:var(--text-muted);';
-                    slot.appendChild(idx);
-                } else {
-                    slot.innerHTML = '⚙️';
-                    slot.style.opacity = '0.4';
-                }
-                bufferSlots.appendChild(slot);
-            }
-            syncMutex.textContent = '1';
-            syncEmpty.textContent = bufferSize - count;
-            syncFull.textContent = count;
-        };
-
-        const logOp = (msg, type = 'info') => {
-            const div = document.createElement('div');
-            const color = type === 'produce' ? 'var(--primary)' : (type === 'consume' ? 'var(--success)' : 'var(--danger)');
-            div.innerHTML = `<span style="color:${color}; font-weight:800;">&gt;</span> ${msg}`;
-            syncLog.appendChild(div);
-            syncLog.scrollTop = syncLog.scrollHeight;
-        };
-
-        updateBufferUI();
-
-        document.getElementById('btnProduceSync').addEventListener('click', () => {
-            if (count >= bufferSize) {
-                logOp("PRODUCER BLOCKED: Buffer is full! (empty semaphore = 0)", "error");
-                return;
-            }
-            const itemId = Math.floor(Math.random() * 900) + 100;
-            logOp(`Producer calls wait(empty) -> empty=${bufferSize - count - 1}`, "info");
-            logOp(`Producer enters critical section: wait(mutex)`, "info");
-            buffer[inPtr] = itemId;
-            logOp(`Producer added Item ${itemId} at slot ${inPtr + 1}`, "produce");
-            inPtr = (inPtr + 1) % bufferSize;
-            count++;
-            logOp(`Producer exits critical section: signal(mutex)`, "info");
-            logOp(`Producer signals full -> full=${count}`, "info");
-            updateBufferUI();
-        });
-
-        document.getElementById('btnConsumeSync').addEventListener('click', () => {
-            if (count === 0) {
-                logOp("CONSUMER BLOCKED: Buffer is empty! (full semaphore = 0)", "error");
-                return;
-            }
-            logOp(`Consumer calls wait(full) -> full=${count - 1}`, "info");
-            logOp(`Consumer enters critical section: wait(mutex)`, "info");
-            const item = buffer[outPtr];
-            buffer[outPtr] = null;
-            logOp(`Consumer retrieved Item ${item} from slot ${outPtr + 1}`, "consume");
-            outPtr = (outPtr + 1) % bufferSize;
-            count--;
-            logOp(`Consumer exits critical section: signal(mutex)`, "info");
-            logOp(`Consumer signals empty -> empty=${bufferSize - count}`, "info");
-            updateBufferUI();
-        });
-
-        document.getElementById('btnAutoSync').addEventListener('click', () => {
-            const btn = document.getElementById('btnAutoSync');
-            if (autoPlayTimer) {
-                clearInterval(autoPlayTimer);
-                autoPlayTimer = null;
-                btn.textContent = "Toggle Auto Play";
-                btn.classList.remove('primary');
-            } else {
-                btn.textContent = "Stop Auto Play";
-                btn.classList.add('primary');
-                autoPlayTimer = setInterval(() => {
-                    if (Math.random() > 0.4) {
-                        document.getElementById('btnProduceSync').click();
-                    } else {
-                        document.getElementById('btnConsumeSync').click();
+            `;
+    
+            const philoLog = document.getElementById('philoLog');
+            const chopsticksList = document.getElementById('chopsticksList');
+            
+            let philoStates = new Array(5).fill('thinking'); // thinking, hungry, eating
+            let chopsticks = new Array(5).fill(1); // 1 = available, 0 = taken
+            let philoEatingTimers = new Array(5).fill(null);
+            let philoAutoTimer = null;
+    
+            const logPhilo = (msg, type = 'info') => {
+                const div = document.createElement('div');
+                let color = 'var(--text-main)';
+                if (type === 'eat') color = 'var(--primary)';
+                else if (type === 'hungry') color = 'var(--warning)';
+                else if (type === 'deadlock') color = 'var(--danger)';
+                div.innerHTML = `<span style="color:${color}; font-weight:800;">&gt;</span> ${msg}`;
+                philoLog.appendChild(div);
+                philoLog.scrollTop = philoLog.scrollHeight;
+            };
+    
+            const updatePhiloUI = () => {
+                chopsticksList.innerHTML = '';
+                for (let i = 0; i < 5; i++) {
+                    chopsticksList.innerHTML += `
+                        <div style="display:flex; justify-content:space-between; padding:6px 12px; background:var(--bg-page); border:1px solid var(--border); border-radius:6px; font-size:11px;">
+                            <span><b>Chopstick ${i}:</b></span>
+                            <span style="font-family:monospace; font-weight:800; color:${chopsticks[i] === 1 ? 'var(--success)' : 'var(--danger)'};">
+                                ${chopsticks[i] === 1 ? 'AVAILABLE (1)' : 'TAKEN (0)'}
+                            </span>
+                        </div>
+                    `;
+                    
+                    const line = document.getElementById(`chopstickLine${i}`);
+                    if (line) {
+                        line.setAttribute('stroke', chopsticks[i] === 1 ? 'var(--success)' : 'var(--danger)');
                     }
-                }, 1500);
+                }
+    
+                for (let i = 0; i < 5; i++) {
+                    const circle = document.getElementById(`philoCircle${i}`);
+                    if (circle) {
+                        if (philoStates[i] === 'eating') {
+                            circle.setAttribute('fill', '#a855f7');
+                            circle.setAttribute('stroke', '#c084fc');
+                        } else if (philoStates[i] === 'hungry') {
+                            circle.setAttribute('fill', '#f59e0b');
+                            circle.setAttribute('stroke', '#fbbf24');
+                        } else {
+                            circle.setAttribute('fill', 'var(--bg-card)');
+                            circle.setAttribute('stroke', 'var(--border)');
+                        }
+                    }
+                }
+            };
+    
+            const tryEat = (philoIdx) => {
+                if (philoStates[philoIdx] !== 'hungry') return;
+    
+                const left = philoIdx;
+                const right = (philoIdx + 1) % 5;
+    
+                if (philoIdx % 2 !== 0) {
+                    if (chopsticks[left] === 1) {
+                        logPhilo(`Philosopher ${philoIdx} (Odd) picks up Left Chopstick ${left}.`, 'info');
+                        if (chopsticks[right] === 1) {
+                            chopsticks[left] = 0;
+                            chopsticks[right] = 0;
+                            philoStates[philoIdx] = 'eating';
+                            logPhilo(`Philosopher ${philoIdx} picks up Right Chopstick ${right} and starts EATING.`, 'eat');
+                            startEatingTimer(philoIdx);
+                        } else {
+                            logPhilo(`Philosopher ${philoIdx} waiting for Right Chopstick ${right}...`, 'hungry');
+                        }
+                    }
+                } else {
+                    if (chopsticks[right] === 1) {
+                        logPhilo(`Philosopher ${philoIdx} (Even) picks up Right Chopstick ${right}.`, 'info');
+                        if (chopsticks[left] === 1) {
+                            chopsticks[right] = 0;
+                            chopsticks[left] = 0;
+                            philoStates[philoIdx] = 'eating';
+                            logPhilo(`Philosopher ${philoIdx} picks up Left Chopstick ${left} and starts EATING.`, 'eat');
+                            startEatingTimer(philoIdx);
+                        } else {
+                            logPhilo(`Philosopher ${philoIdx} waiting for Left Chopstick ${left}...`, 'hungry');
+                        }
+                    }
+                }
+                updatePhiloUI();
+            };
+    
+            const startEatingTimer = (philoIdx) => {
+                if (philoEatingTimers[philoIdx]) clearTimeout(philoEatingTimers[philoIdx]);
+                philoEatingTimers[philoIdx] = setTimeout(() => {
+                    philoStates[philoIdx] = 'thinking';
+                    const left = philoIdx;
+                    const right = (philoIdx + 1) % 5;
+                    chopsticks[left] = 1;
+                    chopsticks[right] = 1;
+                    logPhilo(`Philosopher ${philoIdx} finished eating. Released Chopsticks ${left} and ${right}.`, 'info');
+                    updatePhiloUI();
+                    
+                    const leftNeighbor = (philoIdx + 4) % 5;
+                    const rightNeighbor = (philoIdx + 1) % 5;
+                    tryEat(leftNeighbor);
+                    tryEat(rightNeighbor);
+                }, 3000);
+            };
+    
+            for (let i = 0; i < 5; i++) {
+                const circle = document.getElementById(`philoCircle${i}`);
+                if (circle) {
+                    circle.style.cursor = 'pointer';
+                    circle.addEventListener('click', () => {
+                        if (philoStates[i] === 'thinking') {
+                            philoStates[i] = 'hungry';
+                            logPhilo(`Philosopher ${i} gets HUNGRY.`, 'hungry');
+                            updatePhiloUI();
+                            tryEat(i);
+                        }
+                    });
+                }
             }
-        });
+    
+            document.getElementById('btnPhiloReset').addEventListener('click', () => {
+                philoStates.fill('thinking');
+                chopsticks.fill(1);
+                philoEatingTimers.forEach(t => { if (t) clearTimeout(t); });
+                philoEatingTimers.fill(null);
+                if (philoAutoTimer) {
+                    clearInterval(philoAutoTimer);
+                    philoAutoTimer = null;
+                    document.getElementById('btnPhiloAuto').textContent = "Toggle Auto Run";
+                    document.getElementById('btnPhiloAuto').classList.remove('primary');
+                }
+                logPhilo("Dining philosophers visualizer reset.", 'info');
+                updatePhiloUI();
+            });
+    
+            document.getElementById('btnPhiloAuto').addEventListener('click', () => {
+                const btn = document.getElementById('btnPhiloAuto');
+                if (philoAutoTimer) {
+                    clearInterval(philoAutoTimer);
+                    philoAutoTimer = null;
+                    btn.textContent = "Toggle Auto Run";
+                    btn.classList.remove('primary');
+                } else {
+                    btn.textContent = "Stop Auto Run";
+                    btn.classList.add('primary');
+                    philoAutoTimer = setInterval(() => {
+                        const thinkingPhils = [];
+                        for (let i = 0; i < 5; i++) {
+                            if (philoStates[i] === 'thinking') thinkingPhils.push(i);
+                        }
+                        if (thinkingPhils.length > 0) {
+                            const randomPhil = thinkingPhils[Math.floor(Math.random() * thinkingPhils.length)];
+                            philoStates[randomPhil] = 'hungry';
+                            logPhilo(`Philosopher ${randomPhil} gets HUNGRY.`, 'hungry');
+                            updatePhiloUI();
+                            tryEat(randomPhil);
+                        }
+                    }, 1500);
+                }
+            });
+    
+            updatePhiloUI();
+        }
     };
 
     const initBankersSim = (container) => {
@@ -5609,6 +6070,17 @@ document.addEventListener('DOMContentLoaded', async () => {
             stepIndex++;
         });
 
+        // Pre-select based on active module index
+        if (window.currentModuleIndex === 0) {
+            pageAlgoSelect.value = 'fifo';
+            refInput.value = '1,2,3,4,1,2,5,1,2,3,4,5'; // Belady's anomaly reference string
+        } else if (window.currentModuleIndex === 1) {
+            pageAlgoSelect.value = 'lru';
+            refInput.value = '7,0,1,2,0,3,0,4,2,3,0,3,2';
+        } else if (window.currentModuleIndex === 2) {
+            pageAlgoSelect.value = 'optimal';
+            refInput.value = '7,0,1,2,0,3,0,4,2,3,0,3,2';
+        }
         resetPageSim();
     };
 
@@ -5636,6 +6108,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                                     <option value="fcfs">FCFS (First-Come, First-Served)</option>
                                     <option value="sstf">SSTF (Shortest Seek Time First)</option>
                                     <option value="scan">SCAN (Elevator Algorithm)</option>
+                                    <option value="cscan">C-SCAN (Circular SCAN)</option>
+                                    <option value="look">LOOK (Optimized SCAN)</option>
                                 </select>
                             </div>
                             <div>
@@ -5729,6 +6203,46 @@ document.addEventListener('DOMContentLoaded', async () => {
                 } else {
                     seekSeq = [initialHead, ...right, 199, ...left];
                 }
+            } else if (algo === 'cscan') {
+                const left = [], right = [];
+                queue.forEach(q => {
+                    if (q < initialHead) left.push(q);
+                    else right.push(q);
+                });
+                left.sort((a, b) => a - b); // ascending
+                right.sort((a, b) => a - b); // ascending
+
+                if (direction === 'left') {
+                    const leftDesc = [...left].sort((a, b) => b - a);
+                    const rightDesc = [...right].sort((a, b) => b - a);
+                    seekSeq = [initialHead, ...leftDesc, 0, 199, ...rightDesc];
+                } else {
+                    seekSeq = [initialHead, ...right, 199, 0, ...left];
+                }
+            } else if (algo === 'look') {
+                const left = [], right = [];
+                queue.forEach(q => {
+                    if (q < initialHead) left.push(q);
+                    else right.push(q);
+                });
+                left.sort((a, b) => b - a); // descending
+                right.sort((a, b) => a - b); // ascending
+
+                if (direction === 'left') {
+                    if (left.length > 0) {
+                        seekSeq = [initialHead, ...left];
+                        if (right.length > 0) seekSeq.push(...right);
+                    } else {
+                        seekSeq = [initialHead, ...right];
+                    }
+                } else {
+                    if (right.length > 0) {
+                        seekSeq = [initialHead, ...right];
+                        if (left.length > 0) seekSeq.push(...left);
+                    } else {
+                        seekSeq = [initialHead, ...left];
+                    }
+                }
             }
 
             // Calculate movement
@@ -5771,6 +6285,20 @@ document.addEventListener('DOMContentLoaded', async () => {
                 ctx.fillText(`P(${seekSeq[i]})`, x + 8, y + 3);
                 ctx.fillStyle = diskSubject === 'os' ? '#c084fc' : '#60a5fa';
             }
+        });
+
+        // Pre-select based on active module index
+        if (window.currentModuleIndex === 0) {
+            diskAlgoSelect.value = 'fcfs';
+        } else if (window.currentModuleIndex === 1) {
+            diskAlgoSelect.value = 'scan';
+        } else if (window.currentModuleIndex === 2) {
+            diskAlgoSelect.value = 'look';
+        }
+        
+        drawGrid();
+    };
+
     const initVlanSim = (container) => {
         container.innerHTML = `
             <div class="sim-toolbar">
@@ -6978,6 +7506,2880 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     };
 
+    const initDfaSim = (container) => {
+        container.innerHTML = `
+            <div class="sim-toolbar" style="border-bottom:1px solid rgba(255,255,255,0.1); padding:10px 20px;">
+                <div class="sim-title" style="font-weight:800; font-size:18px; color:var(--primary);">DFA Simulator - Lang: { w | w contains '01' }</div>
+            </div>
+            <div class="sim-workspace" style="display:flex; flex-direction:column; padding:20px; gap:20px; overflow-y:auto; height: calc(100% - 50px);">
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; width:100%;">
+                    <div class="theory-card" style="margin:0; padding:20px; display:flex; flex-direction:column; gap:15px;">
+                        <h3 style="color:var(--primary); margin:0;">Configuration & Controls</h3>
+                        <div>
+                            <label style="display:block; font-size:12px; font-weight:800; margin-bottom:5px; color:var(--text-muted);">Binary Input String:</label>
+                            <input type="text" id="dfaInputString" class="sim-select" style="width:100%; font-family:monospace; padding:8px;" value="10101">
+                        </div>
+                        <div style="display:flex; gap:10px;">
+                            <button id="btnDfaReset" class="btn-sim" style="flex:1;">Reset</button>
+                            <button id="btnDfaStep" class="btn-sim primary" style="flex:1;">Next Step</button>
+                            <button id="btnDfaRun" class="btn-sim success" style="flex:1;">Auto Run</button>
+                        </div>
+                        <div id="dfaStatus" style="font-family:monospace; padding:10px; border-radius:8px; text-align:center; font-weight:800; background:rgba(255,255,255,0.05);">
+                            State: <span id="dfaCurrentState" style="color:var(--primary);">q0</span>
+                        </div>
+                        <div style="font-family:monospace; font-size:12px; display:flex; flex-direction:column; gap:5px; height:120px; overflow-y:auto; background:#0b0f19; padding:10px; border-radius:8px;" id="dfaTraceLog">
+                            <div style="color:#64748b;">[System] Enter a binary string and click Next Step.</div>
+                        </div>
+                    </div>
+                    
+                    <div class="theory-card" style="margin:0; padding:20px; display:flex; flex-direction:column; justify-content:center; align-items:center; min-height:300px;">
+                        <h3 style="color:var(--primary); margin-bottom:20px; align-self:flex-start;">Automaton Transition Graph</h3>
+                        <svg id="dfaSvg" width="100%" height="100%" viewBox="0 0 500 250" style="background:#0e1320; border-radius:12px; border:1px solid rgba(255,255,255,0.05);">
+                            <!-- Start edge -->
+                            <path d="M 30,125 L 70,125" stroke="#475569" stroke-width="2.5" fill="none" marker-end="url(#arrow)"/>
+                            
+                            <!-- State q0 -->
+                            <circle id="node-q0" cx="100" cy="125" r="30" stroke="#475569" stroke-width="3" fill="#1e293b" style="transition: all 0.3s; cursor:pointer;"/>
+                            <text x="100" y="130" fill="#fff" font-size="14" font-weight="bold" text-anchor="middle" style="pointer-events:none;">q0</text>
+                            <!-- Self loop on q0 (input 1) -->
+                            <path d="M 90,96 C 80,60, 120,60, 110,96" stroke="#475569" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+                            <text x="100" y="55" fill="#94a3b8" font-size="11" text-anchor="middle">1</text>
+                            
+                            <!-- Transition q0 -> q1 (input 0) -->
+                            <path id="edge-q0-q1" d="M 130,125 L 220,125" stroke="#475569" stroke-width="2.5" fill="none" marker-end="url(#arrow)"/>
+                            <text x="175" y="115" fill="#94a3b8" font-size="12" font-weight="bold" text-anchor="middle">0</text>
+                            
+                            <!-- State q1 -->
+                            <circle id="node-q1" cx="250" cy="125" r="30" stroke="#475569" stroke-width="3" fill="#1e293b" style="transition: all 0.3s; cursor:pointer;"/>
+                            <text x="250" y="130" fill="#fff" font-size="14" font-weight="bold" text-anchor="middle" style="pointer-events:none;">q1</text>
+                            <!-- Self loop on q1 (input 0) -->
+                            <path d="M 240,96 C 230,60, 270,60, 260,96" stroke="#475569" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+                            <text x="250" y="55" fill="#94a3b8" font-size="11" text-anchor="middle">0</text>
+                            
+                            <!-- Transition q1 -> q2 (input 1) -->
+                            <path id="edge-q1-q2" d="M 280,125 L 370,125" stroke="#475569" stroke-width="2.5" fill="none" marker-end="url(#arrow)"/>
+                            <text x="325" y="115" fill="#94a3b8" font-size="12" font-weight="bold" text-anchor="middle">1</text>
+                            
+                            <!-- State q2 (Accepting) -->
+                            <circle id="node-q2" cx="400" cy="125" r="30" stroke="#475569" stroke-width="3" fill="#1e293b" style="transition: all 0.3s; cursor:pointer;"/>
+                            <circle id="node-q2-inner" cx="400" cy="125" r="25" stroke="#475569" stroke-width="2" fill="none" style="transition: all 0.3s;"/>
+                            <text x="400" y="130" fill="#fff" font-size="14" font-weight="bold" text-anchor="middle" style="pointer-events:none;">q2</text>
+                            <!-- Self loop on q2 (input 0,1) -->
+                            <path d="M 390,96 C 380,60, 420,60, 410,96" stroke="#475569" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+                            <text x="400" y="55" fill="#94a3b8" font-size="11" text-anchor="middle">0,1</text>
+                            
+                            <!-- SVG Marker Definition for Arrows -->
+                            <defs>
+                                <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569" />
+                                </marker>
+                            </defs>
+                        </svg>
+                    </div>
+                </div>
+                
+                <!-- Input Tape Viewer -->
+                <div class="theory-card" style="margin:0; padding:20px; display:flex; flex-direction:column; gap:10px; width:100%;">
+                    <h4 style="margin:0; color:var(--text-muted); font-size:12px; font-weight:800; letter-spacing:1px; text-transform:uppercase;">Input Tape Ribbon</h4>
+                    <div id="dfaTapeContainer" style="display:flex; gap:8px; padding:10px 0; overflow-x:auto;">
+                    </div>
+                </div>
+            </div>
+        `;
+
+        let inputStr = "10101";
+        let activeIdx = -1;
+        let currentState = "q0";
+        let intervalId = null;
+
+        const updateTape = () => {
+            const containerTape = document.getElementById('dfaTapeContainer');
+            containerTape.innerHTML = '';
+            for (let i = 0; i < inputStr.length; i++) {
+                const isActive = i === activeIdx;
+                const isProcessed = i < activeIdx;
+                const charEl = document.createElement('div');
+                charEl.style.cssText = `
+                    min-width: 45px;
+                    height: 45px;
+                    border: 2px solid ${isActive ? 'var(--primary)' : (isProcessed ? '#475569' : 'rgba(255,255,255,0.05)')};
+                    background: ${isActive ? 'rgba(13,148,136,0.15)' : (isProcessed ? 'rgba(255,255,255,0.02)' : '#0e1320')};
+                    color: ${isActive ? 'var(--primary)' : '#fff'};
+                    border-radius: 8px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 18px;
+                    font-weight: 800;
+                    font-family: monospace;
+                    transition: all 0.2s;
+                    position: relative;
+                `;
+                charEl.textContent = inputStr[i];
+                if (isActive) {
+                    const arrow = document.createElement('div');
+                    arrow.style.cssText = `
+                        position: absolute;
+                        bottom: -15px;
+                        left: 50%;
+                        transform: translateX(-50%);
+                        font-size: 12px;
+                        color: var(--primary);
+                    `;
+                    arrow.textContent = '▲';
+                    charEl.appendChild(arrow);
+                }
+                containerTape.appendChild(charEl);
+            }
+        };
+
+        const highlightState = (state) => {
+            const states = ['q0', 'q1', 'q2'];
+            states.forEach(s => {
+                const el = document.getElementById(`node-${s}`);
+                const inner = document.getElementById(`node-${s}-inner`);
+                if (s === state) {
+                    el.setAttribute('fill', 'rgba(13,148,136,0.2)');
+                    el.setAttribute('stroke', 'var(--primary)');
+                    if (inner) inner.setAttribute('stroke', 'var(--primary)');
+                } else {
+                    el.setAttribute('fill', '#1e293b');
+                    el.setAttribute('stroke', '#475569');
+                    if (inner) inner.setAttribute('stroke', '#475569');
+                }
+            });
+            document.getElementById('dfaCurrentState').textContent = state;
+        };
+
+        const addLog = (msg, color = '#fff') => {
+            const log = document.getElementById('dfaTraceLog');
+            const div = document.createElement('div');
+            div.style.color = color;
+            div.style.marginBottom = '4px';
+            div.textContent = msg;
+            log.appendChild(div);
+            log.scrollTop = log.scrollHeight;
+        };
+
+        const resetDfa = () => {
+            clearInterval(intervalId);
+            intervalId = null;
+            document.getElementById('btnDfaRun').textContent = "Auto Run";
+            inputStr = document.getElementById('dfaInputString').value.trim();
+            if (!/^[01]*\$/.test(inputStr)) {
+                addLog("[Error] Input string must only contain 0s and 1s.", "#ef4444");
+                return;
+            }
+            activeIdx = -1;
+            currentState = "q0";
+            highlightState("q0");
+            updateTape();
+            document.getElementById('dfaTraceLog').innerHTML = `<div style="color:#64748b;">[System] Reset completed. Ready to step.</div>`;
+        };
+
+        const stepDfa = () => {
+            if (activeIdx >= inputStr.length - 1) {
+                if (currentState === 'q2') {
+                    addLog(`[Success] String finished. DFA is in accepting state q2. String ACCEPTED!`, '#10b981');
+                } else {
+                    addLog(`[Reject] String finished. DFA is in state ${currentState} which is NOT accepting. String REJECTED!`, '#ef4444');
+                }
+                clearInterval(intervalId);
+                return false;
+            }
+            activeIdx++;
+            const symbol = inputStr[activeIdx];
+            const oldState = currentState;
+            
+            if (currentState === 'q0') {
+                if (symbol === '0') currentState = 'q1';
+                else currentState = 'q0';
+            } else if (currentState === 'q1') {
+                if (symbol === '1') currentState = 'q2';
+                else currentState = 'q1';
+            } else if (currentState === 'q2') {
+                currentState = 'q2';
+            }
+            
+            highlightState(currentState);
+            updateTape();
+            addLog(`Read '${symbol}' from ${oldState} → transitioned to ${currentState}`, '#3b82f6');
+            
+            if (activeIdx === inputStr.length - 1) {
+                setTimeout(() => {
+                    if (currentState === 'q2') {
+                        addLog(`[Success] Traversal complete. DFA ended in accepting state q2. String ACCEPTED!`, '#10b981');
+                    } else {
+                        addLog(`[Reject] Traversal complete. DFA ended in non-accepting state ${currentState}. String REJECTED!`, '#ef4444');
+                    }
+                }, 400);
+            }
+            return true;
+        };
+
+        const runDfa = () => {
+            if (intervalId) {
+                clearInterval(intervalId);
+                intervalId = null;
+                document.getElementById('btnDfaRun').textContent = "Auto Run";
+            } else {
+                document.getElementById('btnDfaRun').textContent = "Pause";
+                intervalId = setInterval(() => {
+                    const hasNext = stepDfa();
+                    if (!hasNext) {
+                        clearInterval(intervalId);
+                        intervalId = null;
+                        document.getElementById('btnDfaRun').textContent = "Auto Run";
+                    }
+                }, 1000);
+            }
+        };
+
+        document.getElementById('btnDfaReset').addEventListener('click', resetDfa);
+        document.getElementById('btnDfaStep').addEventListener('click', stepDfa);
+        document.getElementById('btnDfaRun').addEventListener('click', runDfa);
+        resetDfa();
+    };
+
+    const initNfaToDfaSim = (container) => {
+        container.innerHTML = `
+            <div class="sim-toolbar" style="border-bottom:1px solid rgba(255,255,255,0.1); padding:10px 20px;">
+                <div class="sim-title" style="font-weight:800; font-size:18px; color:var(--primary);">NFA to DFA Subset Construction</div>
+            </div>
+            <div class="sim-workspace" style="display:flex; flex-direction:column; padding:20px; gap:20px; overflow-y:auto; height: calc(100% - 50px);">
+                <div style="display:grid; grid-template-columns:1fr 1.2fr; gap:20px; width:100%;">
+                    <div class="theory-card" style="margin:0; padding:20px; display:flex; flex-direction:column; gap:15px;">
+                        <h3 style="color:var(--primary); margin:0;">Source NFA Transition Table</h3>
+                        <table style="width:100%; border-collapse:collapse; text-align:left; font-family:monospace; font-size:13px; color:#fff;">
+                            <thead>
+                                <tr style="border-bottom:2px solid rgba(255,255,255,0.15);">
+                                    <th style="padding:8px;">State</th>
+                                    <th style="padding:8px;">on 0</th>
+                                    <th style="padding:8px;">on 1</th>
+                                    <th style="padding:8px;">on ε</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
+                                    <td style="padding:8px; font-weight:800; color:var(--primary);">→ A</td>
+                                    <td style="padding:8px;">{A, B}</td>
+                                    <td style="padding:8px;">{A}</td>
+                                    <td style="padding:8px;">∅</td>
+                                </tr>
+                                <tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
+                                    <td style="padding:8px; font-weight:800;">B</td>
+                                    <td style="padding:8px;">∅</td>
+                                    <td style="padding:8px;">{C}</td>
+                                    <td style="padding:8px; color:var(--accent); font-weight:bold;">{C}</td>
+                                </tr>
+                                <tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
+                                    <td style="padding:8px; font-weight:800; color:var(--success);">* C (Accept)</td>
+                                    <td style="padding:8px;">∅</td>
+                                    <td style="padding:8px;">∅</td>
+                                    <td style="padding:8px;">∅</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div style="font-size:12px; color:var(--text-muted); line-height:1.5;">
+                            <b>Epsilon closures:</b><br>
+                            • e-closure(A) = {A}<br>
+                            • e-closure(B) = {B, C}<br>
+                            • e-closure(C) = {C}
+                        </div>
+                        <div style="display:flex; gap:10px; margin-top:10px;">
+                            <button id="btnNfaReset" class="btn-sim" style="flex:1;">Reset</button>
+                            <button id="btnNfaStep" class="btn-sim primary" style="flex:1;">Step Construction</button>
+                        </div>
+                        <div style="font-family:monospace; font-size:12px; height:120px; overflow-y:auto; background:#0b0f19; padding:10px; border-radius:8px;" id="nfaTraceLog">
+                            <div style="color:#64748b;">[System] Click Step Construction to begin subset conversion.</div>
+                        </div>
+                    </div>
+                    
+                    <div class="theory-card" style="margin:0; padding:20px; display:flex; flex-direction:column; gap:15px;">
+                        <h3 style="color:var(--primary); margin:0;">Equivalent Converted DFA</h3>
+                        <table style="width:100%; border-collapse:collapse; text-align:left; font-family:monospace; font-size:13px; color:#fff;" id="dfaResultTable">
+                            <thead>
+                                <tr style="border-bottom:2px solid rgba(255,255,255,0.15);">
+                                    <th style="padding:8px;">DFA State</th>
+                                    <th style="padding:8px;">Subset</th>
+                                    <th style="padding:8px;">on 0</th>
+                                    <th style="padding:8px;">on 1</th>
+                                    <th style="padding:8px;">Accepting?</th>
+                                </tr>
+                            </thead>
+                            <tbody id="dfaResultBody">
+                            </tbody>
+                        </table>
+                        <div id="nfaCompletedPill" style="display:none; text-align:center; padding:10px; background:rgba(16,185,129,0.15); border:1px solid var(--success); border-radius:8px; color:var(--success); font-weight:800; font-size:14px;">
+                            ✓ Powerset Construction Complete!
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        let steps = [
+            {
+                state: "q0",
+                subset: "{A}",
+                on0: "{A, B, C}",
+                on1: "{A}",
+                accept: "No",
+                log: "Initialize DFA start state q0 = e-closure(A) = {A}. Compute transition on 0: closure(δ(A,0)) = closure({A,B}) = {A,B,C}. Compute transition on 1: closure(δ(A,1)) = {A}."
+            },
+            {
+                state: "q1",
+                subset: "{A, B, C}",
+                on0: "{A, B, C}",
+                on1: "{A, C}",
+                accept: "Yes (contains C)",
+                log: "Process queue subset {A,B,C} (q1). Transition on 0: δ(A,0)={A,B}, δ(B,0)=∅, δ(C,0)=∅. closure({A,B}) = {A,B,C} = q1. Transition on 1: δ(A,1)={A}, δ(B,1)={C}, δ(C,1)=∅. closure({A,C}) = {A,C} = new state q2."
+            },
+            {
+                state: "q2",
+                subset: "{A, C}",
+                on0: "{A, B, C}",
+                on1: "{A}",
+                accept: "Yes (contains C)",
+                log: "Process queue subset {A,C} (q2). Transition on 0: δ(A,0)={A,B}, δ(C,0)=∅. closure({A,B}) = {A,B,C} = q1. Transition on 1: δ(A,1)={A}, δ(C,1)=∅. closure({A}) = {A} = q0. Queue is now empty!"
+            }
+        ];
+        let currentStepIdx = 0;
+
+        const updateTable = () => {
+            const tbody = document.getElementById('dfaResultBody');
+            tbody.innerHTML = '';
+            for (let i = 0; i < currentStepIdx; i++) {
+                const s = steps[i];
+                const tr = document.createElement('tr');
+                tr.style.borderBottom = '1px solid rgba(255,255,255,0.05)';
+                tr.innerHTML = `
+                    <td style="padding:8px; font-weight:800; color:var(--primary);">${s.state}</td>
+                    <td style="padding:8px; font-family:monospace;">${s.subset}</td>
+                    <td style="padding:8px; font-family:monospace;">${s.on0}</td>
+                    <td style="padding:8px; font-family:monospace;">${s.on1}</td>
+                    <td style="padding:8px; font-weight:bold; color:${s.accept.startsWith('Yes') ? 'var(--success)' : '#94a3b8'}">${s.accept}</td>
+                `;
+                tbody.appendChild(tr);
+            }
+        };
+
+        const addLog = (msg, color = '#fff') => {
+            const log = document.getElementById('nfaTraceLog');
+            const div = document.createElement('div');
+            div.style.color = color;
+            div.style.marginBottom = '6px';
+            div.textContent = msg;
+            log.appendChild(div);
+            log.scrollTop = log.scrollHeight;
+        };
+
+        const resetSim = () => {
+            currentStepIdx = 0;
+            updateTable();
+            document.getElementById('dfaResultBody').innerHTML = '';
+            document.getElementById('nfaTraceLog').innerHTML = `<div style="color:#64748b;">[System] Click Step Construction to begin subset conversion.</div>`;
+            document.getElementById('nfaCompletedPill').style.display = 'none';
+            document.getElementById('btnNfaStep').disabled = false;
+        };
+
+        const runStep = () => {
+            if (currentStepIdx < steps.length) {
+                const s = steps[currentStepIdx];
+                currentStepIdx++;
+                updateTable();
+                addLog(`[Step ${currentStepIdx}] ${s.log}`, 'var(--primary)');
+                if (currentStepIdx === steps.length) {
+                    addLog("✓ All reachable subsets processed. Construction completed.", "var(--success)");
+                    document.getElementById('nfaCompletedPill').style.display = 'block';
+                    document.getElementById('btnNfaStep').disabled = true;
+                }
+            }
+        };
+
+        document.getElementById('btnNfaReset').addEventListener('click', resetSim);
+        document.getElementById('btnNfaStep').addEventListener('click', runStep);
+        resetSim();
+    };
+
+    const initRegexThompsonSim = (container) => {
+        container.innerHTML = `
+            <div class="sim-toolbar" style="border-bottom:1px solid rgba(255,255,255,0.1); padding:10px 20px;">
+                <div class="sim-title" style="font-weight:800; font-size:18px; color:var(--primary);">Regex to NFA (Thompson's Construction)</div>
+            </div>
+            <div class="sim-workspace" style="display:flex; flex-direction:column; padding:20px; gap:20px; overflow-y:auto; height: calc(100% - 50px);">
+                <div style="display:grid; grid-template-columns:1fr 1.5fr; gap:20px; width:100%;">
+                    <div class="theory-card" style="margin:0; padding:20px; display:flex; flex-direction:column; gap:15px;">
+                        <h3 style="color:var(--primary); margin:0;">Regex Configuration</h3>
+                        <div>
+                            <label style="display:block; font-size:12px; font-weight:800; margin-bottom:5px; color:var(--text-muted);">Select Regular Expression:</label>
+                            <select id="regexChoice" class="sim-select" style="width:100%;">
+                                <option value="union">a | b (Alternation)</option>
+                                <option value="star">a* (Kleene Star)</option>
+                                <option value="concat">a · b (Concatenation)</option>
+                                <option value="star_concat">a* · b (Combination)</option>
+                            </select>
+                        </div>
+                        <div style="display:flex; gap:10px;">
+                            <button id="btnRegexReset" class="btn-sim" style="flex:1;">Reset</button>
+                            <button id="btnRegexStep" class="btn-sim primary" style="flex:1;">Step Graph</button>
+                        </div>
+                        <div style="font-family:monospace; font-size:12px; height:140px; overflow-y:auto; background:#0b0f19; padding:10px; border-radius:8px;" id="regexTraceLog">
+                            <div style="color:#64748b;">[System] Select expression and click Step Graph.</div>
+                        </div>
+                    </div>
+                    
+                    <div class="theory-card" style="margin:0; padding:20px; display:flex; flex-direction:column; justify-content:center; align-items:center; min-height:300px;">
+                        <h3 style="color:var(--primary); margin-bottom:20px; align-self:flex-start;">Thompson e-NFA Graph Visualization</h3>
+                        <svg id="regexSvg" width="100%" height="220" viewBox="0 0 500 220" style="background:#0e1320; border-radius:12px; border:1px solid rgba(255,255,255,0.05);">
+                            <defs>
+                                <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#64748b" />
+                                </marker>
+                            </defs>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        let currentStep = 0;
+        let selectedRegex = "union";
+
+        const addLog = (msg, color = '#fff') => {
+            const log = document.getElementById('regexTraceLog');
+            const div = document.createElement('div');
+            div.style.color = color;
+            div.style.marginBottom = '5px';
+            div.textContent = msg;
+            log.appendChild(div);
+            log.scrollTop = log.scrollHeight;
+        };
+
+        const renderGraph = () => {
+            const svg = document.getElementById('regexSvg');
+            svg.innerHTML = `
+                <defs>
+                    <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                        <path d="M 0 1 L 10 5 L 0 9 z" fill="#64748b" />
+                    </marker>
+                </defs>
+            `;
+
+            if (selectedRegex === "union") {
+                if (currentStep >= 1) {
+                    svg.innerHTML += `
+                        <circle cx="150" cy="70" r="16" fill="#1e293b" stroke="#475569" stroke-width="2"/>
+                        <text x="150" y="74" fill="#fff" font-size="11" text-anchor="middle">q1</text>
+                        <circle cx="250" cy="70" r="16" fill="#1e293b" stroke="#475569" stroke-width="2"/>
+                        <text x="250" y="74" fill="#fff" font-size="11" text-anchor="middle">q2</text>
+                        <path d="M 166,70 L 234,70" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arrow)"/>
+                        <text x="200" y="62" fill="var(--primary)" font-size="11" font-weight="bold" text-anchor="middle">a</text>
+                    `;
+                }
+                if (currentStep >= 2) {
+                    svg.innerHTML += `
+                        <circle cx="150" cy="150" r="16" fill="#1e293b" stroke="#475569" stroke-width="2"/>
+                        <text x="150" y="154" fill="#fff" font-size="11" text-anchor="middle">q3</text>
+                        <circle cx="250" cy="150" r="16" fill="#1e293b" stroke="#475569" stroke-width="2"/>
+                        <text x="250" y="154" fill="#fff" font-size="11" text-anchor="middle">q4</text>
+                        <path d="M 166,150 L 234,150" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arrow)"/>
+                        <text x="200" y="142" fill="var(--primary)" font-size="11" font-weight="bold" text-anchor="middle">b</text>
+                    `;
+                }
+                if (currentStep >= 3) {
+                    svg.innerHTML += `
+                        <circle cx="50" cy="110" r="16" fill="rgba(13,148,136,0.1)" stroke="var(--primary)" stroke-width="2"/>
+                        <text x="50" y="114" fill="#fff" font-size="11" text-anchor="middle">q0</text>
+                        
+                        <circle cx="350" cy="110" r="16" fill="#1e293b" stroke="var(--primary)" stroke-width="2"/>
+                        <circle cx="350" cy="110" r="12" fill="none" stroke="var(--primary)" stroke-width="1"/>
+                        <text x="350" y="114" fill="#fff" font-size="11" text-anchor="middle">q5</text>
+                        
+                        <path d="M 64,100 L 136,76" stroke="#64748b" stroke-width="1.5" stroke-dasharray="4,4" marker-end="url(#arrow)"/>
+                        <text x="95" y="80" fill="#94a3b8" font-size="10">ε</text>
+                        
+                        <path d="M 64,120 L 136,144" stroke="#64748b" stroke-width="1.5" stroke-dasharray="4,4" marker-end="url(#arrow)"/>
+                        <text x="95" y="144" fill="#94a3b8" font-size="10">ε</text>
+                        
+                        <path d="M 266,76 L 336,100" stroke="#64748b" stroke-width="1.5" stroke-dasharray="4,4" marker-end="url(#arrow)"/>
+                        <text x="305" y="80" fill="#94a3b8" font-size="10">ε</text>
+                        
+                        <path d="M 266,144 L 336,120" stroke="#64748b" stroke-width="1.5" stroke-dasharray="4,4" marker-end="url(#arrow)"/>
+                        <text x="305" y="144" fill="#94a3b8" font-size="10">ε</text>
+                    `;
+                }
+            } else if (selectedRegex === "star") {
+                if (currentStep >= 1) {
+                    svg.innerHTML += `
+                        <circle cx="200" cy="110" r="16" fill="#1e293b" stroke="#475569" stroke-width="2"/>
+                        <text x="200" y="114" fill="#fff" font-size="11" text-anchor="middle">q1</text>
+                        <circle cx="300" cy="110" r="16" fill="#1e293b" stroke="#475569" stroke-width="2"/>
+                        <text x="300" y="114" fill="#fff" font-size="11" text-anchor="middle">q2</text>
+                        <path d="M 216,110 L 284,110" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arrow)"/>
+                        <text x="250" y="102" fill="var(--primary)" font-size="11" font-weight="bold" text-anchor="middle">a</text>
+                    `;
+                }
+                if (currentStep >= 2) {
+                    svg.innerHTML += `
+                        <circle cx="100" cy="110" r="16" fill="rgba(13,148,136,0.1)" stroke="var(--primary)" stroke-width="2"/>
+                        <text x="100" y="114" fill="#fff" font-size="11" text-anchor="middle">q0</text>
+                        
+                        <circle cx="400" cy="110" r="16" fill="#1e293b" stroke="var(--primary)" stroke-width="2"/>
+                        <circle cx="400" cy="110" r="12" fill="none" stroke="var(--primary)" stroke-width="1"/>
+                        <text x="400" y="114" fill="#fff" font-size="11" text-anchor="middle">q3</text>
+                        
+                        <path d="M 116,110 L 184,110" stroke="#64748b" stroke-width="1.5" stroke-dasharray="4,4" marker-end="url(#arrow)"/>
+                        <text x="150" y="102" fill="#94a3b8" font-size="10">ε</text>
+                        
+                        <path d="M 316,110 L 384,110" stroke="#64748b" stroke-width="1.5" stroke-dasharray="4,4" marker-end="url(#arrow)"/>
+                        <text x="350" y="102" fill="#94a3b8" font-size="10">ε</text>
+                        
+                        <path d="M 300,94 C 300,50, 200,50, 200,94" stroke="#64748b" stroke-width="1.5" stroke-dasharray="4,4" marker-end="url(#arrow)"/>
+                        <text x="250" y="62" fill="#94a3b8" font-size="10">ε</text>
+                        
+                        <path d="M 100,126 C 100,180, 400,180, 400,126" stroke="#64748b" stroke-width="1.5" stroke-dasharray="4,4" marker-end="url(#arrow)"/>
+                        <text x="250" y="172" fill="#94a3b8" font-size="10">ε</text>
+                    `;
+                }
+            } else if (selectedRegex === "concat") {
+                if (currentStep >= 1) {
+                    svg.innerHTML += `
+                        <circle cx="100" cy="110" r="16" fill="rgba(13,148,136,0.1)" stroke="var(--primary)" stroke-width="2"/>
+                        <text x="100" y="114" fill="#fff" font-size="11" text-anchor="middle">q0</text>
+                        <circle cx="230" cy="110" r="16" fill="#1e293b" stroke="#475569" stroke-width="2"/>
+                        <text x="230" y="114" fill="#fff" font-size="11" text-anchor="middle">q1</text>
+                        <path d="M 116,110 L 214,110" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arrow)"/>
+                        <text x="165" y="102" fill="var(--primary)" font-size="11" font-weight="bold" text-anchor="middle">a</text>
+                    `;
+                }
+                if (currentStep >= 2) {
+                    svg.innerHTML += `
+                        <circle cx="360" cy="110" r="16" fill="#1e293b" stroke="var(--primary)" stroke-width="2"/>
+                        <circle cx="360" cy="110" r="12" fill="none" stroke="var(--primary)" stroke-width="1"/>
+                        <text x="360" y="114" fill="#fff" font-size="11" text-anchor="middle">q2</text>
+                        <path d="M 246,110 L 344,110" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arrow)"/>
+                        <text x="295" y="102" fill="var(--primary)" font-size="11" font-weight="bold" text-anchor="middle">b</text>
+                    `;
+                }
+            } else if (selectedRegex === "star_concat") {
+                if (currentStep >= 1) {
+                    svg.innerHTML += `
+                        <circle cx="60" cy="110" r="16" fill="rgba(13,148,136,0.1)" stroke="var(--primary)" stroke-width="2"/>
+                        <text x="60" y="114" fill="#fff" font-size="11" text-anchor="middle">q0</text>
+                        <circle cx="150" cy="110" r="16" fill="#1e293b" stroke="#475569" stroke-width="2"/>
+                        <text x="150" y="114" fill="#fff" font-size="11" text-anchor="middle">q1</text>
+                        <circle cx="240" cy="110" r="16" fill="#1e293b" stroke="#475569" stroke-width="2"/>
+                        <text x="240" y="114" fill="#fff" font-size="11" text-anchor="middle">q2</text>
+                        <circle cx="330" cy="110" r="16" fill="#1e293b" stroke="#475569" stroke-width="2"/>
+                        <text x="330" y="114" fill="#fff" font-size="11" text-anchor="middle">q3</text>
+                        
+                        <path d="M 76,110 L 134,110" stroke="#64748b" stroke-width="1.5" stroke-dasharray="4,4" marker-end="url(#arrow)"/>
+                        <path d="M 166,110 L 224,110" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arrow)"/>
+                        <text x="195" y="102" fill="var(--primary)" font-size="10" font-weight="bold">a</text>
+                        <path d="M 256,110 L 314,110" stroke="#64748b" stroke-width="1.5" stroke-dasharray="4,4" marker-end="url(#arrow)"/>
+                        
+                        <path d="M 240,94 C 240,50, 150,50, 150,94" stroke="#64748b" stroke-width="1.5" stroke-dasharray="4,4" marker-end="url(#arrow)"/>
+                        <text x="195" y="62" fill="#94a3b8" font-size="10">ε</text>
+                        <path d="M 60,126 C 60,175, 330,175, 330,126" stroke="#64748b" stroke-width="1.5" stroke-dasharray="4,4" marker-end="url(#arrow)"/>
+                        <text x="195" y="165" fill="#94a3b8" font-size="10">ε</text>
+                    `;
+                }
+                if (currentStep >= 2) {
+                    svg.innerHTML += `
+                        <circle cx="440" cy="110" r="16" fill="#1e293b" stroke="var(--primary)" stroke-width="2"/>
+                        <circle cx="440" cy="110" r="12" fill="none" stroke="var(--primary)" stroke-width="1"/>
+                        <text x="440" y="114" fill="#fff" font-size="11" text-anchor="middle">q4</text>
+                        <path d="M 346,110 L 424,110" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arrow)"/>
+                        <text x="385" y="102" fill="var(--primary)" font-size="11" font-weight="bold" text-anchor="middle">b</text>
+                    `;
+                }
+            }
+        };
+
+        const resetSim = () => {
+            currentStep = 0;
+            selectedRegex = document.getElementById('regexChoice').value;
+            renderGraph();
+            document.getElementById('regexTraceLog').innerHTML = `<div style="color:#64748b;">[System] Ready to construct e-NFA. Click Step.</div>`;
+            document.getElementById('btnRegexStep').disabled = false;
+        };
+
+        const runStep = () => {
+            currentStep++;
+            renderGraph();
+            if (selectedRegex === "union") {
+                if (currentStep === 1) {
+                    addLog("Step 1: Construct NFA sub-graph for base symbol 'a' (states q1 → q2).", "var(--primary)");
+                } else if (currentStep === 2) {
+                    addLog("Step 2: Construct NFA sub-graph for base symbol 'b' (states q3 → q4).", "var(--primary)");
+                } else if (currentStep === 3) {
+                    addLog("Step 3: Combine using Alternation rule (|). Add new start q0 pointing to both subgraphs via ε, and link their accepts to new accept state q5 via ε.", "var(--success)");
+                    document.getElementById('btnRegexStep').disabled = true;
+                }
+            } else if (selectedRegex === "star") {
+                if (currentStep === 1) {
+                    addLog("Step 1: Construct NFA sub-graph for base symbol 'a' (states q1 → q2).", "var(--primary)");
+                } else if (currentStep === 2) {
+                    addLog("Step 2: Apply Kleene Star (*). Add new start q0, accept q3, ε-loopback (q2 → q1) and ε-bypass (q0 → q3).", "var(--success)");
+                    document.getElementById('btnRegexStep').disabled = true;
+                }
+            } else if (selectedRegex === "concat") {
+                if (currentStep === 1) {
+                    addLog("Step 1: Construct first NFA symbol 'a' (states q0 → q1).", "var(--primary)");
+                } else if (currentStep === 2) {
+                    addLog("Step 2: Concatenate with 'b' (states q1 → q2). Accept of 'a' merges with start of 'b'.", "var(--success)");
+                    document.getElementById('btnRegexStep').disabled = true;
+                }
+            } else if (selectedRegex === "star_concat") {
+                if (currentStep === 1) {
+                    addLog("Step 1: Construct Kleene Star graph for 'a*' (states q0 → q3).", "var(--primary)");
+                } else if (currentStep === 2) {
+                    addLog("Step 2: Concatenate the NFA of 'b' (states q3 → q4) to the accept state of 'a*'.", "var(--success)");
+                    document.getElementById('btnRegexStep').disabled = true;
+                }
+            }
+        };
+
+        document.getElementById('regexChoice').addEventListener('change', resetSim);
+        document.getElementById('btnRegexReset').addEventListener('click', resetSim);
+        document.getElementById('btnRegexStep').addEventListener('click', runStep);
+        resetSim();
+    };
+
+    const initCfgParserSim = (container) => {
+        container.innerHTML = `
+            <div class="sim-toolbar" style="border-bottom:1px solid rgba(255,255,255,0.1); padding:10px 20px;">
+                <div class="sim-title" style="font-weight:800; font-size:18px; color:var(--primary);">CFG & Derivation Trees</div>
+            </div>
+            <div class="sim-workspace" style="display:flex; flex-direction:column; padding:20px; gap:20px; overflow-y:auto; height: calc(100% - 50px);">
+                <div style="display:grid; grid-template-columns:1fr 1.3fr; gap:20px; width:100%;">
+                    <div class="theory-card" style="margin:0; padding:20px; display:flex; flex-direction:column; gap:15px;">
+                        <h3 style="color:var(--primary); margin:0;">Context-Free Grammar Parser</h3>
+                        <div>
+                            <label style="display:block; font-size:12px; font-weight:800; margin-bottom:5px; color:var(--text-muted);">Grammar Rules:</label>
+                            <select id="cfgGrammar" class="sim-select" style="width:100%;">
+                                <option value="anbn">S → aSb | ε  (Equal number of a and b)</option>
+                                <option value="paren">S → (S) | ε  (Nested Parentheses)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="display:block; font-size:12px; font-weight:800; margin-bottom:5px; color:var(--text-muted);">Input String:</label>
+                            <input type="text" id="cfgInput" class="sim-select" style="width:100%; font-family:monospace;" value="aabb">
+                        </div>
+                        <div style="display:flex; gap:10px;">
+                            <button id="btnCfgReset" class="btn-sim" style="flex:1;">Reset</button>
+                            <button id="btnCfgStep" class="btn-sim primary" style="flex:1;">Next Derivation</button>
+                        </div>
+                        <div style="font-family:monospace; font-size:12px; height:120px; overflow-y:auto; background:#0b0f19; padding:10px; border-radius:8px;" id="cfgTraceLog">
+                            <div style="color:#64748b;">[System] Enter string matching selected grammar rules.</div>
+                        </div>
+                    </div>
+                    
+                    <div class="theory-card" style="margin:0; padding:20px; display:flex; flex-direction:column; justify-content:center; align-items:center; min-height:320px;">
+                        <h3 style="color:var(--primary); margin-bottom:20px; align-self:flex-start;">Derivation Parse Tree</h3>
+                        <svg id="cfgSvg" width="100%" height="250" viewBox="0 0 500 250" style="background:#0e1320; border-radius:12px; border:1px solid rgba(255,255,255,0.05);">
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        let currentLevel = 0;
+        let inputVal = "aabb";
+        let grammarType = "anbn";
+
+        const addLog = (msg, color = '#fff') => {
+            const log = document.getElementById('cfgTraceLog');
+            const div = document.createElement('div');
+            div.style.color = color;
+            div.style.marginBottom = '5px';
+            div.textContent = msg;
+            log.appendChild(div);
+            log.scrollTop = log.scrollHeight;
+        };
+
+        const renderTree = () => {
+            const svg = document.getElementById('cfgSvg');
+            svg.innerHTML = '';
+            
+            svg.innerHTML += `
+                <circle cx="250" cy="30" r="14" fill="#1e293b" stroke="var(--primary)" stroke-width="2"/>
+                <text x="250" y="34" fill="#fff" font-size="11" font-weight="bold" text-anchor="middle">S</text>
+            `;
+
+            if (grammarType === "anbn") {
+                const maxLevel = Math.min(3, inputVal.length / 2);
+                
+                for (let lvl = 1; lvl <= currentLevel; lvl++) {
+                    const py = 30 + (lvl - 1) * 50;
+                    const cy = 30 + lvl * 50;
+                    
+                    if (lvl <= maxLevel) {
+                        const px = 250;
+                        const ax = 250 - lvl * 40;
+                        svg.innerHTML += `
+                            <line x1="${px}" y1="${py + 14}" x2="${ax}" y2="${cy - 14}" stroke="#64748b" stroke-width="1.5"/>
+                            <circle cx="${ax}" cy="${cy}" r="12" fill="#0b0f19" stroke="var(--success)" stroke-width="1.5"/>
+                            <text x="${ax}" y="${cy + 4}" fill="#10b981" font-size="10" font-weight="bold" text-anchor="middle">a</text>
+                        `;
+                        
+                        svg.innerHTML += `
+                            <line x1="${px}" y1="${py + 14}" x2="250" y2="${cy - 14}" stroke="#64748b" stroke-width="1.5"/>
+                            <circle cx="250" cy="${cy}" r="14" fill="#1e293b" stroke="var(--primary)" stroke-width="2"/>
+                            <text x="250" y="${cy + 4}" fill="#fff" font-size="11" font-weight="bold" text-anchor="middle">S</text>
+                        `;
+
+                        const bx = 250 + lvl * 40;
+                        svg.innerHTML += `
+                            <line x1="${px}" y1="${py + 14}" x2="${bx}" y2="${cy - 14}" stroke="#64748b" stroke-width="1.5"/>
+                            <circle cx="${bx}" cy="${cy}" r="12" fill="#0b0f19" stroke="var(--success)" stroke-width="1.5"/>
+                            <text x="${bx}" y="${cy + 4}" fill="#10b981" font-size="10" font-weight="bold" text-anchor="middle">b</text>
+                        `;
+                    }
+                    
+                    if (lvl > maxLevel) {
+                        svg.innerHTML += `
+                            <line x1="250" y1="${py + 14}" x2="250" y2="${cy - 12}" stroke="#64748b" stroke-width="1.5"/>
+                            <circle cx="250" cy="${cy}" r="12" fill="#0b0f19" stroke="#94a3b8" stroke-width="1.5"/>
+                            <text x="250" y="${cy + 4}" fill="#94a3b8" font-size="12" font-weight="bold" text-anchor="middle">ε</text>
+                        `;
+                    }
+                }
+            } else {
+                const maxLevel = Math.min(3, inputVal.length / 2);
+                for (let lvl = 1; lvl <= currentLevel; lvl++) {
+                    const py = 30 + (lvl - 1) * 50;
+                    const cy = 30 + lvl * 50;
+                    
+                    if (lvl <= maxLevel) {
+                        const px = 250;
+                        const ax = 250 - lvl * 40;
+                        svg.innerHTML += `
+                            <line x1="${px}" y1="${py + 14}" x2="${ax}" y2="${cy - 14}" stroke="#64748b" stroke-width="1.5"/>
+                            <circle cx="${ax}" cy="${cy}" r="12" fill="#0b0f19" stroke="var(--success)" stroke-width="1.5"/>
+                            <text x="${ax}" y="${cy + 4}" fill="#10b981" font-size="10" font-weight="bold" text-anchor="middle">(</text>
+                        `;
+                        
+                        svg.innerHTML += `
+                            <line x1="${px}" y1="${py + 14}" x2="250" y2="${cy - 14}" stroke="#64748b" stroke-width="1.5"/>
+                            <circle cx="250" cy="${cy}" r="14" fill="#1e293b" stroke="var(--primary)" stroke-width="2"/>
+                            <text x="250" y="${cy + 4}" fill="#fff" font-size="11" font-weight="bold" text-anchor="middle">S</text>
+                        `;
+
+                        const bx = 250 + lvl * 40;
+                        svg.innerHTML += `
+                            <line x1="${px}" y1="${py + 14}" x2="${bx}" y2="${cy - 14}" stroke="#64748b" stroke-width="1.5"/>
+                            <circle cx="${bx}" cy="${cy}" r="12" fill="#0b0f19" stroke="var(--success)" stroke-width="1.5"/>
+                            <text x="${bx}" y="${cy + 4}" fill="#10b981" font-size="10" font-weight="bold" text-anchor="middle">)</text>
+                        `;
+                    }
+                    
+                    if (lvl > maxLevel) {
+                        svg.innerHTML += `
+                            <line x1="250" y1="${py + 14}" x2="250" y2="${cy - 12}" stroke="#64748b" stroke-width="1.5"/>
+                            <circle cx="250" cy="${cy}" r="12" fill="#0b0f19" stroke="#94a3b8" stroke-width="1.5"/>
+                            <text x="250" y="${cy + 4}" fill="#94a3b8" font-size="12" font-weight="bold" text-anchor="middle">ε</text>
+                        `;
+                    }
+                }
+            }
+        };
+
+        const resetSim = () => {
+            currentLevel = 0;
+            grammarType = document.getElementById('cfgGrammar').value;
+            inputVal = document.getElementById('cfgInput').value.trim();
+            
+            if (grammarType === "anbn") {
+                if (!/^[ab]*\$/.test(inputVal) || inputVal.length % 2 !== 0) {
+                    addLog("[Error] Input must be format a^n b^n (even length of a's and b's)", "#ef4444");
+                    return;
+                }
+            } else {
+                if (!/^[()]*\$/.test(inputVal) || inputVal.length % 2 !== 0) {
+                    addLog("[Error] Input must contain nested parentheses only.", "#ef4444");
+                    return;
+                }
+            }
+
+            renderTree();
+            document.getElementById('cfgTraceLog').innerHTML = `<div style="color:#64748b;">[System] Grammar loaded. Click Next Derivation.</div>`;
+            document.getElementById('btnCfgStep').disabled = false;
+        };
+
+        const runStep = () => {
+            const maxLvl = Math.min(3, inputVal.length / 2) + 1;
+            if (currentLevel < maxLvl) {
+                currentLevel++;
+                renderTree();
+                const count = Math.min(3, inputVal.length / 2);
+                if (currentLevel <= count) {
+                    if (grammarType === "anbn") {
+                        addLog(`[Step ${currentLevel}] Expand leftmost variable: S ⇒ aSb`, "var(--primary)");
+                    } else {
+                        addLog(`[Step ${currentLevel}] Expand leftmost variable: S ⇒ (S)`, "var(--primary)");
+                    }
+                } else {
+                    addLog(`[Step ${currentLevel}] Base condition reached. Replace final S with ε. Derivation complete!`, "var(--success)");
+                    document.getElementById('btnCfgStep').disabled = true;
+                }
+            }
+        };
+
+        document.getElementById('btnCfgReset').addEventListener('click', resetSim);
+        document.getElementById('btnCfgStep').addEventListener('click', runStep);
+        document.getElementById('cfgGrammar').addEventListener('change', () => {
+            const type = document.getElementById('cfgGrammar').value;
+            document.getElementById('cfgInput').value = type === "anbn" ? "aabb" : "(())";
+            resetSim();
+        });
+        resetSim();
+    };
+
+    const initPdaStackSim = (container) => {
+        container.innerHTML = `
+            <div class="sim-toolbar" style="border-bottom:1px solid rgba(255,255,255,0.1); padding:10px 20px;">
+                <div class="sim-title" style="font-weight:800; font-size:18px; color:var(--primary);">PDA Stack Simulator - a^n b^n</div>
+            </div>
+            <div class="sim-workspace" style="display:flex; flex-direction:column; padding:20px; gap:20px; overflow-y:auto; height: calc(100% - 50px);">
+                <div style="display:grid; grid-template-columns:1.2fr 1fr; gap:20px; width:100%;">
+                    <div class="theory-card" style="margin:0; padding:20px; display:flex; flex-direction:column; gap:15px;">
+                        <h3 style="color:var(--primary); margin:0;">PDA Controls</h3>
+                        <div>
+                            <label style="display:block; font-size:12px; font-weight:800; margin-bottom:5px; color:var(--text-muted);">Binary Input (a^n b^n):</label>
+                            <input type="text" id="pdaInput" class="sim-select" style="width:100%; font-family:monospace;" value="aaabbb">
+                        </div>
+                        <div style="display:flex; gap:10px;">
+                            <button id="btnPdaReset" class="btn-sim" style="flex:1;">Reset</button>
+                            <button id="btnPdaStep" class="btn-sim primary" style="flex:1;">Next Step</button>
+                        </div>
+                        <div id="pdaStateBox" style="font-family:monospace; padding:10px; border-radius:8px; text-align:center; font-weight:800; background:rgba(255,255,255,0.05); display:flex; justify-content:space-around;">
+                            <span>State: <b id="pdaState" style="color:var(--primary);">q0</b></span>
+                            <span>Input Head: <b id="pdaHead" style="color:var(--accent);">-</b></span>
+                        </div>
+                        <div style="font-family:monospace; font-size:12px; height:120px; overflow-y:auto; background:#0b0f19; padding:10px; border-radius:8px;" id="pdaTraceLog">
+                            <div style="color:#64748b;">[System] Ready to run PDA simulation.</div>
+                        </div>
+                    </div>
+                    
+                    <div class="theory-card" style="margin:0; padding:20px; display:flex; flex-direction:column; align-items:center;">
+                        <h3 style="color:var(--primary); margin-bottom:20px; align-self:flex-start;">PDA Memory Stack</h3>
+                        <div id="pdaStackContainer" style="width:140px; height:200px; border:4px solid #475569; border-top:none; border-radius:0 0 16px 16px; background:#0b0f19; display:flex; flex-direction:column-reverse; padding:10px; gap:6px; overflow-y:auto; justify-content:flex-start; align-items:center;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        let inputStr = "aaabbb";
+        let activeIdx = -1;
+        let pdaState = "q0";
+        let stack = ["Z0"];
+
+        const updateStackUI = () => {
+            const container = document.getElementById('pdaStackContainer');
+            container.innerHTML = '';
+            stack.forEach(val => {
+                const el = document.createElement('div');
+                el.style.cssText = `
+                    width: 100px;
+                    padding: 8px 0;
+                    text-align: center;
+                    font-family: monospace;
+                    font-size: 14px;
+                    font-weight: 800;
+                    border-radius: 6px;
+                    border: 1px solid ${val === 'Z0' ? '#64748b' : 'var(--primary)'};
+                    background: ${val === 'Z0' ? '#1e293b' : 'rgba(13,148,136,0.15)'};
+                    color: ${val === 'Z0' ? '#94a3b8' : 'var(--primary)'};
+                `;
+                el.textContent = val;
+                container.appendChild(el);
+            });
+        };
+
+        const addLog = (msg, color = '#fff') => {
+            const log = document.getElementById('pdaTraceLog');
+            const div = document.createElement('div');
+            div.style.color = color;
+            div.style.marginBottom = '5px';
+            div.textContent = msg;
+            log.appendChild(div);
+            log.scrollTop = log.scrollHeight;
+        };
+
+        const resetSim = () => {
+            inputStr = document.getElementById('pdaInput').value.trim();
+            if (!/^[ab]*\$/.test(inputStr)) {
+                addLog("[Error] Input string must only contain 'a' and 'b'.", "#ef4444");
+                return;
+            }
+            activeIdx = -1;
+            pdaState = "q0";
+            stack = ["Z0"];
+            updateStackUI();
+            document.getElementById('pdaState').textContent = "q0";
+            document.getElementById('pdaHead').textContent = "-";
+            document.getElementById('pdaTraceLog').innerHTML = `<div style="color:#64748b;">[System] PDA reset complete. Z0 pushed.</div>`;
+            document.getElementById('btnPdaStep').disabled = false;
+        };
+
+        const runStep = () => {
+            if (activeIdx >= inputStr.length - 1) {
+                if (stack.length === 1 && stack[0] === 'Z0' && pdaState === 'q1') {
+                    pdaState = "q2";
+                    document.getElementById('pdaState').textContent = "q2";
+                    addLog("✓ Input complete. Stack contains Z0. State transitioned to accepting state q2. String ACCEPTED!", "var(--success)");
+                } else {
+                    addLog("✗ Finished parsing but stack is not empty or is in invalid state. String REJECTED!", "#ef4444");
+                }
+                document.getElementById('btnPdaStep').disabled = true;
+                return;
+            }
+
+            activeIdx++;
+            const char = inputStr[activeIdx];
+            document.getElementById('pdaHead').textContent = `${char} (Pos: ${activeIdx + 1})`;
+
+            if (pdaState === 'q0') {
+                if (char === 'a') {
+                    stack.push('A');
+                    updateStackUI();
+                    addLog(`Read 'a' in q0: Push 'A' to stack. Transition: δ(q0, a, Z0/A) → (q0, Push A)`, 'var(--primary)');
+                } else if (char === 'b') {
+                    if (stack.length > 1) {
+                        stack.pop();
+                        updateStackUI();
+                        pdaState = "q1";
+                        document.getElementById('pdaState').textContent = "q1";
+                        addLog(`Read 'b' in q0: Pop 'A' from stack. Transition state to q1.`, 'var(--accent)');
+                    } else {
+                        addLog("✗ Stack underflow! Read 'b' but no 'A' left to pop. REJECTED!", "#ef4444");
+                        document.getElementById('btnPdaStep').disabled = true;
+                    }
+                }
+            } else if (pdaState === 'q1') {
+                if (char === 'a') {
+                    addLog("✗ Non-regular format error: Read 'a' after 'b' was already read. REJECTED!", "#ef4444");
+                    document.getElementById('btnPdaStep').disabled = true;
+                } else if (char === 'b') {
+                    if (stack.length > 1) {
+                        stack.pop();
+                        updateStackUI();
+                        addLog(`Read 'b' in q1: Pop 'A' from stack.`, 'var(--accent)');
+                    } else {
+                        addLog("✗ Stack underflow! Read 'b' but stack only contains Z0. REJECTED!", "#ef4444");
+                        document.getElementById('btnPdaStep').disabled = true;
+                    }
+                }
+            }
+        };
+
+        document.getElementById('btnPdaReset').addEventListener('click', resetSim);
+        document.getElementById('btnPdaStep').addEventListener('click', runStep);
+        resetSim();
+    };
+
+    const initTuringMachineSim = (container) => {
+        container.innerHTML = `
+            <div class="sim-toolbar" style="border-bottom:1px solid rgba(255,255,255,0.1); padding:10px 20px;">
+                <div class="sim-title" style="font-weight:800; font-size:18px; color:var(--primary);">Turing Machine Tape Simulator (Binary Increment)</div>
+            </div>
+            <div class="sim-workspace" style="display:flex; flex-direction:column; padding:20px; gap:20px; overflow-y:auto; height: calc(100% - 50px);">
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; width:100%;">
+                    <div class="theory-card" style="margin:0; padding:20px; display:flex; flex-direction:column; gap:15px;">
+                        <h3 style="color:var(--primary); margin:0;">Configuration & Trace</h3>
+                        <div>
+                            <label style="display:block; font-size:12px; font-weight:800; margin-bottom:5px; color:var(--text-muted);">Binary Number (Input):</label>
+                            <input type="text" id="tmInput" class="sim-select" style="width:100%; font-family:monospace;" value="1011">
+                        </div>
+                        <div style="display:flex; gap:10px;">
+                            <button id="btnTmReset" class="btn-sim" style="flex:1;">Reset</button>
+                            <button id="btnTmStep" class="btn-sim primary" style="flex:1;">Step TM</button>
+                        </div>
+                        <div id="tmStateBox" style="font-family:monospace; padding:10px; border-radius:8px; text-align:center; font-weight:800; background:rgba(255,255,255,0.05); display:flex; justify-content:space-around; font-size:13px;">
+                            <span>State: <b id="tmState" style="color:var(--primary);">q0_find_end</b></span>
+                            <span>Head Pos: <b id="tmHeadIdx" style="color:var(--accent);">0</b></span>
+                        </div>
+                        <div style="font-family:monospace; font-size:12px; height:120px; overflow-y:auto; background:#0b0f19; padding:10px; border-radius:8px;" id="tmTraceLog">
+                            <div style="color:#64748b;">[System] Initialize binary value and step the Turing Machine tape.</div>
+                        </div>
+                    </div>
+                    
+                    <div class="theory-card" style="margin:0; padding:20px; display:flex; flex-direction:column; gap:15px; justify-content:center; align-items:center;">
+                        <h3 style="color:var(--primary); align-self:flex-start; margin:0;">Infinite Tape Ribbon</h3>
+                        <div style="position:relative; width:100%; overflow:hidden; padding:20px 0; display:flex; justify-content:center;">
+                            <div id="tmTapeWrapper" style="display:flex; gap:4px; transition: transform 0.3s ease;">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        let tape = [];
+        let headPos = 2;
+        let tmState = "q0_find_end";
+
+        const updateTapeUI = () => {
+            const wrapper = document.getElementById('tmTapeWrapper');
+            wrapper.innerHTML = '';
+            
+            for (let i = 0; i < tape.length; i++) {
+                const cell = document.createElement('div');
+                const isHead = i === headPos;
+                cell.style.cssText = `
+                    min-width: 45px;
+                    height: 45px;
+                    border: 2px solid ${isHead ? 'var(--primary)' : 'rgba(255,255,255,0.05)'};
+                    background: ${isHead ? 'rgba(13,148,136,0.15)' : '#0b0f19'};
+                    color: ${isHead ? 'var(--primary)' : '#fff'};
+                    border-radius: 6px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 18px;
+                    font-weight: 800;
+                    font-family: monospace;
+                    position: relative;
+                `;
+                cell.textContent = tape[i] === 'B' ? '␣' : tape[i];
+                if (isHead) {
+                    const arrow = document.createElement('div');
+                    arrow.style.cssText = `
+                        position: absolute;
+                        bottom: -16px;
+                        color: var(--primary);
+                        font-size: 11px;
+                    `;
+                    arrow.textContent = '▲';
+                    cell.appendChild(arrow);
+                }
+                wrapper.appendChild(cell);
+            }
+            
+            const offset = (5 - headPos) * 49;
+            wrapper.style.transform = `translateX(${offset}px)`;
+        };
+
+        const addLog = (msg, color = '#fff') => {
+            const log = document.getElementById('tmTraceLog');
+            const div = document.createElement('div');
+            div.style.color = color;
+            div.style.marginBottom = '5px';
+            div.textContent = msg;
+            log.appendChild(div);
+            log.scrollTop = log.scrollHeight;
+        };
+
+        const resetSim = () => {
+            const input = document.getElementById('tmInput').value.trim();
+            if (!/^[01]*\$/.test(input) || input.length === 0) {
+                addLog("[Error] Input must be a non-empty binary string.", "#ef4444");
+                return;
+            }
+            tape = ['B', 'B', ...input.split(''), 'B', 'B', 'B'];
+            headPos = 2;
+            tmState = "q0_find_end";
+            
+            document.getElementById('tmState').textContent = tmState;
+            document.getElementById('tmHeadIdx').textContent = headPos - 2;
+            updateTapeUI();
+            
+            document.getElementById('tmTraceLog').innerHTML = `<div style="color:#64748b;">[System] TM initialized. Pos centered at starting cell.</div>`;
+            document.getElementById('btnTmStep').disabled = false;
+        };
+
+        const runStep = () => {
+            const symbol = tape[headPos];
+            const oldPos = headPos;
+
+            if (tmState === 'q_halt') {
+                addLog("Turing Machine halted. Output complete.", "var(--success)");
+                document.getElementById('btnTmStep').disabled = true;
+                return;
+            }
+
+            if (tmState === 'q0_find_end') {
+                if (symbol === '0' || symbol === '1') {
+                    headPos++;
+                    addLog(`[State: q0] Read '${symbol}'. Action: Write '${symbol}', Move Right. Stay in q0.`, '#94a3b8');
+                } else if (symbol === 'B') {
+                    headPos--;
+                    tmState = "q1_carry";
+                    addLog(`[State: q0] Read '␣'. End found. Action: Write '␣', Move Left. Transition state to q1_carry.`, 'var(--accent)');
+                }
+            } else if (tmState === 'q1_carry') {
+                if (symbol === '1') {
+                    tape[headPos] = '0';
+                    headPos--;
+                    addLog(`[State: q1] Read '1'. Action: Write '0' (Carry), Move Left. Stay in q1.`, 'var(--primary)');
+                } else if (symbol === '0' || symbol === 'B') {
+                    tape[headPos] = '1';
+                    headPos++;
+                    tmState = "q_halt";
+                    addLog(`[State: q1] Read '${symbol === 'B' ? '␣' : '0'}'. Action: Write '1' (No Carry), Move Right. Transition to q_halt.`, 'var(--success)');
+                }
+            }
+
+            document.getElementById('tmState').textContent = tmState;
+            document.getElementById('tmHeadIdx').textContent = headPos - 2;
+            updateTapeUI();
+            
+            if (tmState === 'q_halt') {
+                setTimeout(() => {
+                    const result = tape.slice(2, -2).join('').replace(/B/g, ' ').trim();
+                    addLog(`✓ Halt state reached successfully! Final Tape Output: ${result}`, 'var(--success)');
+                }, 400);
+            }
+        };
+
+        document.getElementById('btnTmReset').addEventListener('click', resetSim);
+        document.getElementById('btnTmStep').addEventListener('click', runStep);
+        resetSim();
+    };
+
+    const initDfaMinimizationSim = (container) => {
+        container.innerHTML = `
+            <div class="sim-toolbar" style="border-bottom:1px solid rgba(255,255,255,0.1); padding:10px 20px;">
+                <div class="sim-title" style="font-weight:800; font-size:18px; color:var(--primary);">DFA Minimization (Table-Filling Algorithm)</div>
+            </div>
+            <div class="sim-workspace" style="display:flex; flex-direction:column; padding:20px; gap:20px; overflow-y:auto; height: calc(100% - 50px);">
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; width:100%;">
+                    <div class="theory-card" style="margin:0; padding:20px; display:flex; flex-direction:column; gap:15px;">
+                        <h3 style="color:var(--primary); margin:0;">Algorithm Steps</h3>
+                        <p style="font-size:12px; color:var(--text-muted); line-height:1.5;">
+                            <b>DFA States:</b> A, B, C, D (non-final), E (final).<br>
+                            We build a triangular distinguishability grid.
+                        </p>
+                        <div style="display:flex; gap:10px;">
+                            <button id="btnMinReset" class="btn-sim" style="flex:1;">Reset</button>
+                            <button id="btnMinStep" class="btn-sim primary" style="flex:2;">Next Step</button>
+                        </div>
+                        <div style="font-family:monospace; font-size:12px; height:120px; overflow-y:auto; background:#0b0f19; padding:10px; border-radius:8px;" id="minTraceLog">
+                            <div style="color:#64748b;">[System] Click Next Step to start state pair distinguishability checking.</div>
+                        </div>
+                        <div id="minResultPill" style="display:none; text-align:center; padding:10px; background:rgba(16,185,129,0.15); border:1px solid var(--success); border-radius:8px; color:var(--success); font-weight:800; font-size:13px;">
+                            ✓ Equivalences Found: B ≡ C. Merging them yields 4-state minimized DFA.
+                        </div>
+                    </div>
+                    
+                    <div class="theory-card" style="margin:0; padding:20px; display:flex; flex-direction:column; align-items:center;">
+                        <h3 style="color:var(--primary); align-self:flex-start; margin-bottom:15px;">Myhill-Nerode Triangular Grid</h3>
+                        <div style="font-family:monospace; color:#fff; display:grid; grid-template-columns:30px repeat(4, 40px); gap:6px; font-size:13px; text-align:center; align-items:center;">
+                            <div></div>
+                            <div style="font-weight:bold; color:var(--primary);">A</div>
+                            <div style="font-weight:bold; color:var(--primary);">B</div>
+                            <div style="font-weight:bold; color:var(--primary);">C</div>
+                            <div style="font-weight:bold; color:var(--primary);">D</div>
+                            
+                            <div style="font-weight:bold; color:var(--primary);">B</div>
+                            <div id="cell-BA" style="border:1px solid rgba(255,255,255,0.1); padding:8px 0; background:#0b0f19; font-weight:800;">-</div>
+                            <div style="background:rgba(255,255,255,0.02);"></div><div style="background:rgba(255,255,255,0.02);"></div><div style="background:rgba(255,255,255,0.02);"></div>
+                            
+                            <div style="font-weight:bold; color:var(--primary);">C</div>
+                            <div id="cell-CA" style="border:1px solid rgba(255,255,255,0.1); padding:8px 0; background:#0b0f19; font-weight:800;">-</div>
+                            <div id="cell-CB" style="border:1px solid rgba(255,255,255,0.1); padding:8px 0; background:#0b0f19; font-weight:800;">-</div>
+                            <div style="background:rgba(255,255,255,0.02);"></div><div style="background:rgba(255,255,255,0.02);"></div>
+                            
+                            <div style="font-weight:bold; color:var(--primary);">D</div>
+                            <div id="cell-DA" style="border:1px solid rgba(255,255,255,0.1); padding:8px 0; background:#0b0f19; font-weight:800;">-</div>
+                            <div id="cell-DB" style="border:1px solid rgba(255,255,255,0.1); padding:8px 0; background:#0b0f19; font-weight:800;">-</div>
+                            <div id="cell-DC" style="border:1px solid rgba(255,255,255,0.1); padding:8px 0; background:#0b0f19; font-weight:800;">-</div>
+                            <div style="background:rgba(255,255,255,0.02);"></div>
+                            
+                            <div style="font-weight:bold; color:var(--primary);">E</div>
+                            <div id="cell-EA" style="border:1px solid rgba(255,255,255,0.1); padding:8px 0; background:#0b0f19; font-weight:800;">-</div>
+                            <div id="cell-EB" style="border:1px solid rgba(255,255,255,0.1); padding:8px 0; background:#0b0f19; font-weight:800;">-</div>
+                            <div id="cell-EC" style="border:1px solid rgba(255,255,255,0.1); padding:8px 0; background:#0b0f19; font-weight:800;">-</div>
+                            <div id="cell-ED" style="border:1px solid rgba(255,255,255,0.1); padding:8px 0; background:#0b0f19; font-weight:800;">-</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        let currentStep = 0;
+
+        const addLog = (msg, color = '#fff') => {
+            const log = document.getElementById('minTraceLog');
+            const div = document.createElement('div');
+            div.style.color = color;
+            div.style.marginBottom = '5px';
+            div.textContent = msg;
+            log.appendChild(div);
+            log.scrollTop = log.scrollHeight;
+        };
+
+        const resetSim = () => {
+            currentStep = 0;
+            const cells = ['BA', 'CA', 'CB', 'DA', 'DB', 'DC', 'EA', 'EB', 'EC', 'ED'];
+            cells.forEach(c => {
+                const el = document.getElementById(`cell-${c}`);
+                if (el) {
+                    el.textContent = '-';
+                    el.style.background = '#0b0f19';
+                    el.style.color = '#fff';
+                }
+            });
+            document.getElementById('minTraceLog').innerHTML = `<div style="color:#64748b;">[System] Reset complete. Grid initialized.</div>`;
+            document.getElementById('minResultPill').style.display = 'none';
+            document.getElementById('btnMinStep').disabled = false;
+        };
+
+        const runStep = () => {
+            currentStep++;
+            if (currentStep === 1) {
+                const finalPairs = ['EA', 'EB', 'EC', 'ED'];
+                finalPairs.forEach(c => {
+                    const el = document.getElementById(`cell-${c}`);
+                    if (el) {
+                        el.textContent = 'X';
+                        el.style.background = 'rgba(239, 68, 68, 0.15)';
+                        el.style.color = '#ef4444';
+                    }
+                });
+                addLog("[Step 1: Base Case] Mark all final and non-final state splits: (E, A), (E, B), (E, C), and (E, D) are distinguishable.", "var(--primary)");
+            } else if (currentStep === 2) {
+                const pairs = ['DA', 'DB', 'DC'];
+                pairs.forEach(c => {
+                    const el = document.getElementById(`cell-${c}`);
+                    if (el) {
+                        el.textContent = 'X';
+                        el.style.background = 'rgba(239, 68, 68, 0.15)';
+                        el.style.color = '#ef4444';
+                    }
+                });
+                addLog("[Step 2: Induction 1] Check remaining pairs on transitions. (A, D) on input 1 goes to (C, E), which is already marked. So mark (A, D). Similarly, mark (B, D) and (C, D).", "var(--accent)");
+            } else if (currentStep === 3) {
+                const pairs = ['BA', 'CA'];
+                pairs.forEach(c => {
+                    const el = document.getElementById(`cell-${c}`);
+                    if (el) {
+                        el.textContent = 'X';
+                        el.style.background = 'rgba(239, 68, 68, 0.15)';
+                        el.style.color = '#ef4444';
+                    }
+                });
+                addLog("[Step 3: Induction 2] Check remaining pairs. (A, B) transitions to (C, D) on input 1. Since (C, D) was marked, mark (A, B). Similarly, mark (A, C).", "var(--accent)");
+            } else if (currentStep === 4) {
+                const el = document.getElementById('cell-CB');
+                if (el) {
+                    el.textContent = '≡';
+                    el.style.background = 'rgba(16, 185, 129, 0.15)';
+                    el.style.color = '#10b981';
+                }
+                addLog("[Step 4: Completion] No more pairs can be marked! Unmarked cells are equivalent. State B and C are equivalent (B ≡ C) and can be merged.", "var(--success)");
+                document.getElementById('minResultPill').style.display = 'block';
+                document.getElementById('btnMinStep').disabled = true;
+            }
+        };
+
+        document.getElementById('btnMinReset').addEventListener('click', resetSim);
+        document.getElementById('btnMinStep').addEventListener('click', runStep);
+        resetSim();
+    };
+
+
+
+    // ============================================================
+    // AI TRACK — 12 Simulation Functions
+    // ============================================================
+
+    const initAiSearchSim = (container) => {
+        const AC = '#f97316';
+        const nodes = [
+            {id:'S',x:80,y:200,h:7},{id:'A',x:200,y:100,h:5},{id:'B',x:200,y:300,h:6},
+            {id:'C',x:340,y:80,h:3},{id:'D',x:340,y:200,h:4},{id:'E',x:340,y:320,h:5},
+            {id:'G',x:480,y:200,h:0}
+        ];
+        const edges = [
+            {f:'S',t:'A',w:2},{f:'S',t:'B',w:3},{f:'A',t:'C',w:1},{f:'A',t:'D',w:3},
+            {f:'B',t:'D',w:2},{f:'B',t:'E',w:4},{f:'C',t:'G',w:5},{f:'D',t:'G',w:2},{f:'E',t:'G',w:3}
+        ];
+        container.innerHTML = `
+        <div style="padding:20px; font-family:var(--font-sans);">
+            <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:16px;">
+                <select id="ai-search-algo" style="padding:8px 12px;border-radius:8px;border:1px solid ${AC};background:var(--bg-card);color:var(--text-main);font-weight:700;">
+                    <option value="bfs">BFS (Breadth-First)</option>
+                    <option value="dfs">DFS (Depth-First)</option>
+                    <option value="astar">A* Search</option>
+                </select>
+                <button id="ai-search-run" style="padding:8px 20px;border-radius:8px;background:${AC};color:#fff;border:none;font-weight:700;cursor:pointer;">▶ Run</button>
+                <button id="ai-search-reset" style="padding:8px 16px;border-radius:8px;background:transparent;color:${AC};border:1px solid ${AC};font-weight:700;cursor:pointer;">↺ Reset</button>
+                <div id="ai-search-info" style="margin-left:auto;font-weight:700;color:${AC};font-size:13px;"></div>
+            </div>
+            <div style="display:flex;gap:16px;">
+                <canvas id="ai-search-canvas" width="580" height="400" style="border-radius:12px;background:var(--bg-card);border:1px solid var(--border);flex:1;"></canvas>
+                <div style="width:200px;">
+                    <div style="font-weight:800;margin-bottom:8px;color:${AC}">Legend</div>
+                    <div style="font-size:12px;line-height:2;">
+                        <span style="display:inline-block;width:12px;height:12px;background:#64748b;border-radius:50%;margin-right:6px;"></span>Unvisited<br>
+                        <span style="display:inline-block;width:12px;height:12px;background:#fbbf24;border-radius:50%;margin-right:6px;"></span>Frontier<br>
+                        <span style="display:inline-block;width:12px;height:12px;background:${AC};border-radius:50%;margin-right:6px;"></span>Explored<br>
+                        <span style="display:inline-block;width:12px;height:12px;background:#22c55e;border-radius:50%;margin-right:6px;"></span>Path Found
+                    </div>
+                    <div style="margin-top:16px;font-weight:800;color:${AC};">Explored Order</div>
+                    <div id="ai-search-order" style="font-size:12px;font-family:var(--font-mono);margin-top:8px;line-height:1.8;"></div>
+                    <div style="margin-top:12px;" id="ai-search-stats"></div>
+                </div>
+            </div>
+        </div>`;
+        const canvas = document.getElementById('ai-search-canvas');
+        const ctx = canvas.getContext('2d');
+        let state = { visited:[], frontier:[], path:[], exploring:false };
+        const nd = (id) => nodes.find(n=>n.id===id);
+        const drawGraph = () => {
+            ctx.clearRect(0,0,canvas.width,canvas.height);
+            edges.forEach(e => {
+                const a=nd(e.f),b=nd(e.t);
+                ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y);
+                ctx.strokeStyle=state.path.includes(e.f+'→'+e.t)||state.path.includes(e.t+'→'+e.f)?'#22c55e':'var(--border)';
+                ctx.lineWidth=state.path.includes(e.f+'→'+e.t)||state.path.includes(e.t+'→'+e.f)?3:1.5;
+                ctx.stroke();
+                const mx=(a.x+b.x)/2,my=(a.y+b.y)/2;
+                ctx.fillStyle='var(--text-muted)'; ctx.font='11px monospace';
+                ctx.fillText(e.w,mx-5,my-5);
+            });
+            nodes.forEach(n => {
+                let color='#475569';
+                if(state.path.some(p=>p.includes(n.id))) color='#22c55e';
+                else if(state.visited.includes(n.id)) color=AC;
+                else if(state.frontier.includes(n.id)) color='#fbbf24';
+                ctx.beginPath(); ctx.arc(n.x,n.y,22,0,Math.PI*2);
+                ctx.fillStyle=color+'33'; ctx.fill();
+                ctx.strokeStyle=color; ctx.lineWidth=2.5; ctx.stroke();
+                ctx.fillStyle=color; ctx.font='bold 14px sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+                ctx.fillText(n.id,n.x,n.y);
+                ctx.fillStyle='var(--text-muted)'; ctx.font='10px sans-serif';
+                ctx.fillText('h='+n.h,n.x,n.y+32);
+            });
+        };
+        const sleep = ms => new Promise(r=>setTimeout(r,ms));
+        const runSearch = async () => {
+            const algo = document.getElementById('ai-search-algo').value;
+            state = {visited:[],frontier:[],path:[],exploring:true};
+            const order = []; let found=false;
+            const adj = (id) => edges.filter(e=>e.f===id).map(e=>({id:e.t,w:e.w})).concat(edges.filter(e=>e.t===id).map(e=>({id:e.f,w:e.w})));
+            if(algo==='bfs'||algo==='dfs') {
+                const queue=['S']; const parent={S:null}; const vis=new Set();
+                while(queue.length&&state.exploring) {
+                    const cur = algo==='bfs'?queue.shift():queue.pop();
+                    if(vis.has(cur))continue; vis.add(cur);
+                    state.visited=[...vis]; order.push(cur);
+                    document.getElementById('ai-search-order').innerHTML=order.join(' → ');
+                    if(cur==='G'){found=true; let n=cur; const p=[]; while(n){p.unshift(n);n=parent[n];} for(let i=0;i<p.length-1;i++)state.path.push(p[i]+'→'+p[i+1]); break;}
+                    adj(cur).forEach(nb=>{if(!vis.has(nb.id)){parent[nb.id]=cur;queue.push(nb.id);state.frontier=queue.slice();}});
+                    drawGraph(); await sleep(600);
+                }
+            } else {
+                const pq=[{id:'S',g:0,f:nd('S').h,parent:null}]; const vis={}; let found=false;
+                while(pq.length&&state.exploring) {
+                    pq.sort((a,b)=>a.f-b.f); const cur=pq.shift();
+                    if(vis[cur.id])continue; vis[cur.id]=cur;
+                    state.visited=Object.keys(vis); order.push(cur.id+'(f='+cur.f+')');
+                    document.getElementById('ai-search-order').innerHTML=order.join(' → ');
+                    if(cur.id==='G'){found=true; let n=cur; const p=[]; while(n){p.unshift(n.id);n=vis[n.parent];}; for(let i=0;i<p.length-1;i++)state.path.push(p[i]+'→'+p[i+1]); break;}
+                    adj(cur.id).forEach(nb=>{if(!vis[nb.id]){const g=cur.g+nb.w; pq.push({id:nb.id,g,f:g+nd(nb.id).h,parent:cur.id}); state.frontier=pq.map(x=>x.id);}});
+                    drawGraph(); await sleep(700);
+                }
+            }
+            state.exploring=false; drawGraph();
+            document.getElementById('ai-search-info').textContent = found?`✅ Path found! Nodes explored: ${state.visited.length}`:'❌ No path found';
+            document.getElementById('ai-search-stats').innerHTML=`<div style="font-size:12px;font-weight:700;color:#22c55e;">Path: S→...→G</div>`;
+        };
+        document.getElementById('ai-search-run').addEventListener('click', runSearch);
+        document.getElementById('ai-search-reset').addEventListener('click', ()=>{ state={visited:[],frontier:[],path:[],exploring:false}; document.getElementById('ai-search-order').innerHTML=''; document.getElementById('ai-search-info').textContent=''; drawGraph(); });
+        drawGraph();
+    };
+
+    const initAiHeuristicSim = (container) => {
+        const AC = '#f97316';
+        container.innerHTML = `
+        <div style="padding:20px;font-family:var(--font-sans);">
+            <div style="margin-bottom:16px;display:flex;gap:12px;flex-wrap:wrap;align-items:center;">
+                <select id="ai-h-algo" style="padding:8px 12px;border-radius:8px;border:1px solid ${AC};background:var(--bg-card);color:var(--text-main);font-weight:700;">
+                    <option value="greedy">Greedy Best-First</option><option value="astar">A* Search</option>
+                </select>
+                <button id="ai-h-run" style="padding:8px 20px;border-radius:8px;background:${AC};color:#fff;border:none;font-weight:700;cursor:pointer;">▶ Run</button>
+                <button id="ai-h-reset" style="padding:8px 16px;border-radius:8px;background:transparent;color:${AC};border:1px solid ${AC};cursor:pointer;font-weight:700;">↺ Reset</button>
+                <span id="ai-h-result" style="font-weight:700;color:${AC};margin-left:auto;"></span>
+            </div>
+            <div style="display:flex;gap:16px;">
+                <canvas id="ai-h-canvas" width="520" height="360" style="border-radius:12px;background:var(--bg-card);border:1px solid var(--border);"></canvas>
+                <div style="width:200px;font-size:13px;">
+                    <div style="font-weight:800;color:${AC};margin-bottom:8px;">Heuristic Values (h)</div>
+                    <div style="font-family:var(--font-mono);line-height:2.2;color:var(--text-main);" id="ai-h-table"></div>
+                    <div style="margin-top:12px;font-weight:800;color:${AC};">Step Log</div>
+                    <div id="ai-h-log" style="font-size:11px;font-family:var(--font-mono);margin-top:6px;line-height:1.9;"></div>
+                </div>
+            </div>
+        </div>`;
+        const nodes = [{id:'S',x:60,y:180,h:10},{id:'A',x:180,y:80,h:6},{id:'B',x:180,y:280,h:7},{id:'C',x:320,y:60,h:3},{id:'D',x:320,y:180,h:4},{id:'E',x:320,y:300,h:8},{id:'G',x:460,y:180,h:0}];
+        const edges=[{f:'S',t:'A',w:3},{f:'S',t:'B',w:1},{f:'A',t:'C',w:2},{f:'A',t:'D',w:5},{f:'B',t:'D',w:3},{f:'B',t:'E',w:7},{f:'C',t:'G',w:6},{f:'D',t:'G',w:2},{f:'E',t:'G',w:4}];
+        const canvas=document.getElementById('ai-h-canvas'); const ctx=canvas.getContext('2d');
+        const nd=(id)=>nodes.find(n=>n.id===id);
+        document.getElementById('ai-h-table').innerHTML=nodes.map(n=>`<div>${n.id}: <b style="color:${AC}">${n.h}</b></div>`).join('');
+        let pathEdges=[],explored=[];
+        const draw=()=>{
+            ctx.clearRect(0,0,canvas.width,canvas.height);
+            edges.forEach(e=>{const a=nd(e.f),b=nd(e.t); ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.strokeStyle=pathEdges.includes(e.f+e.t)?'#22c55e':'var(--border)'; ctx.lineWidth=pathEdges.includes(e.f+e.t)?3:1.5; ctx.stroke(); ctx.fillStyle='var(--text-muted)';ctx.font='11px monospace';ctx.fillText(e.w,(a.x+b.x)/2,(a.y+b.y)/2-6);});
+            nodes.forEach(n=>{let c=explored.includes(n.id)?AC:'#475569'; if(pathEdges.some(p=>p.includes(n.id)))c='#22c55e'; ctx.beginPath();ctx.arc(n.x,n.y,22,0,Math.PI*2);ctx.fillStyle=c+'22';ctx.fill();ctx.strokeStyle=c;ctx.lineWidth=2.5;ctx.stroke();ctx.fillStyle=c;ctx.font='bold 13px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(n.id,n.x,n.y);ctx.fillStyle='var(--text-muted)';ctx.font='10px sans-serif';ctx.fillText('h='+n.h,n.x,n.y+32);});
+        };
+        const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+        const run=async()=>{
+            pathEdges=[]; explored=[]; const log=[]; const algo=document.getElementById('ai-h-algo').value;
+            const adj=(id)=>edges.filter(e=>e.f===id).map(e=>({id:e.t,w:e.w}));
+            const pq=[{id:'S',g:0,path:['S']}]; const vis=new Set();
+            while(pq.length){
+                const fn=algo==='greedy'?(a,b)=>nd(a.id).h-nd(b.id).h:(a,b)=>(a.g+nd(a.id).h)-(b.g+nd(b.id).h);
+                pq.sort(fn); const cur=pq.shift();
+                if(vis.has(cur.id))continue; vis.add(cur.id); explored=[...vis];
+                log.push(`Expand ${cur.id} (f=${cur.g+nd(cur.id).h})`);
+                document.getElementById('ai-h-log').innerHTML=log.slice(-8).join('<br>');
+                draw(); await sleep(700);
+                if(cur.id==='G'){pathEdges=[];for(let i=0;i<cur.path.length-1;i++)pathEdges.push(cur.path[i]+cur.path[i+1]); draw(); document.getElementById('ai-h-result').textContent=`✅ Cost: ${cur.g} | Nodes: ${vis.size}`; break;}
+                adj(cur.id).forEach(nb=>{if(!vis.has(nb.id))pq.push({id:nb.id,g:cur.g+nb.w,path:[...cur.path,nb.id]});});
+            }
+        };
+        document.getElementById('ai-h-run').addEventListener('click',run);
+        document.getElementById('ai-h-reset').addEventListener('click',()=>{pathEdges=[];explored=[];document.getElementById('ai-h-log').innerHTML='';document.getElementById('ai-h-result').textContent='';draw();});
+        draw();
+    };
+
+    const initAiCspSim = (container) => {
+        const AC='#f97316';
+        container.innerHTML=`
+        <div style="padding:20px;font-family:var(--font-sans);">
+            <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:16px;">
+                <label style="font-weight:700;">N (Board Size): <input id="ai-csp-n" type="range" min="4" max="8" value="6" style="width:100px;accent-color:${AC};"> <span id="ai-csp-nval">6</span></label>
+                <button id="ai-csp-solve" style="padding:8px 20px;border-radius:8px;background:${AC};color:#fff;border:none;font-weight:700;cursor:pointer;">♛ Solve</button>
+                <button id="ai-csp-reset" style="padding:8px 16px;border-radius:8px;background:transparent;color:${AC};border:1px solid ${AC};cursor:pointer;font-weight:700;">↺ Reset</button>
+                <span id="ai-csp-info" style="margin-left:auto;font-weight:700;color:${AC};"></span>
+            </div>
+            <div style="display:flex;gap:16px;">
+                <canvas id="ai-csp-canvas" width="420" height="420" style="border-radius:12px;border:1px solid var(--border);background:var(--bg-card);"></canvas>
+                <div style="width:200px;">
+                    <div style="font-weight:800;color:${AC};margin-bottom:8px;">Backtrack Log</div>
+                    <div id="ai-csp-log" style="font-size:11px;font-family:var(--font-mono);line-height:1.8;"></div>
+                    <div style="margin-top:12px;" id="ai-csp-stats"></div>
+                </div>
+            </div>
+        </div>`;
+        const canvas=document.getElementById('ai-csp-canvas'); const ctx=canvas.getContext('2d');
+        const nInp=document.getElementById('ai-csp-n'); const nVal=document.getElementById('ai-csp-nval');
+        nInp.oninput=()=>{nVal.textContent=nInp.value;};
+        let queens=[]; let backtracks=0; let solving=false;
+        const draw=(n,qs,conflict=[])=>{
+            const cell=Math.min(420/n,70); const off=(420-cell*n)/2;
+            ctx.clearRect(0,0,canvas.width,canvas.height);
+            for(let r=0;r<n;r++)for(let c=0;c<n;c++){ctx.fillStyle=(r+c)%2===0?'#1e293b':'#0f172a'; ctx.fillRect(off+c*cell,off+r*cell,cell,cell);}
+            qs.forEach((col,row)=>{if(col===-1)return; const x=off+col*cell+cell/2,y=off+row*cell+cell/2; const isConflict=conflict.includes(row);
+            ctx.fillStyle=isConflict?'#ef4444':AC; ctx.font=`bold ${Math.round(cell*0.6)}px sans-serif`; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText('♛',x,y);});
+        };
+        const isValid=(qs,row,col)=>{for(let r=0;r<row;r++){const c=qs[r]; if(c===col||Math.abs(c-col)===Math.abs(r-row))return false;} return true;};
+        const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+        const solve=async(n,qs,row,log)=>{
+            if(row===n)return true;
+            for(let col=0;col<n;col++){
+                if(!solving)return false;
+                qs[row]=col;
+                if(isValid(qs,row,col)){
+                    log.push(`Col ${col} ✓ @ row ${row}`);
+                    document.getElementById('ai-csp-log').innerHTML=log.slice(-10).join('<br>');
+                    draw(n,qs);await sleep(120);
+                    if(await solve(n,qs,row+1,log))return true;
+                }
+                qs[row]=-1; backtracks++; draw(n,qs,[row]); await sleep(60);
+            }
+            return false;
+        };
+        document.getElementById('ai-csp-solve').addEventListener('click',async()=>{
+            const n=parseInt(nInp.value); queens=new Array(n).fill(-1); backtracks=0; solving=true;
+            document.getElementById('ai-csp-info').textContent='Solving...';
+            const log=[]; const ok=await solve(n,queens,0,log);
+            solving=false; draw(n,queens);
+            document.getElementById('ai-csp-info').textContent=ok?`✅ Solved! Backtracks: ${backtracks}`:'❌ No solution';
+            document.getElementById('ai-csp-stats').innerHTML=`<div style="font-size:12px;font-weight:700;color:#22c55e;">Total backtracks: ${backtracks}</div>`;
+        });
+        document.getElementById('ai-csp-reset').addEventListener('click',()=>{solving=false;queens=[];document.getElementById('ai-csp-log').innerHTML='';document.getElementById('ai-csp-info').textContent='';document.getElementById('ai-csp-stats').innerHTML='';ctx.clearRect(0,0,canvas.width,canvas.height);const n=parseInt(nInp.value);draw(n,new Array(n).fill(-1));});
+        draw(parseInt(nInp.value),new Array(parseInt(nInp.value)).fill(-1));
+    };
+
+    const initAiMinimaxSim = (container) => {
+        const AC='#f97316';
+        const tree={val:null,children:[{val:null,children:[{val:3,children:[]},{val:5,children:[]}]},{val:null,children:[{val:2,children:[]},{val:9,children:[]}]},{val:null,children:[{val:8,children:[]},{val:1,children:[]}]}]};
+        let evaluated=[];let pruned=[];
+        container.innerHTML=`
+        <div style="padding:20px;font-family:var(--font-sans);">
+            <div style="display:flex;gap:12px;align-items:center;margin-bottom:16px;flex-wrap:wrap;">
+                <button id="ai-mm-minimax" style="padding:8px 20px;border-radius:8px;background:${AC};color:#fff;border:none;font-weight:700;cursor:pointer;">▶ Run Minimax</button>
+                <button id="ai-mm-ab" style="padding:8px 20px;border-radius:8px;background:#6366f1;color:#fff;border:none;font-weight:700;cursor:pointer;">✂ Alpha-Beta</button>
+                <button id="ai-mm-reset" style="padding:8px 16px;border-radius:8px;background:transparent;color:${AC};border:1px solid ${AC};cursor:pointer;font-weight:700;">↺ Reset</button>
+                <span id="ai-mm-info" style="margin-left:auto;font-weight:700;color:${AC};font-size:13px;"></span>
+            </div>
+            <div style="display:flex;gap:16px;">
+                <canvas id="ai-mm-canvas" width="560" height="340" style="border-radius:12px;background:var(--bg-card);border:1px solid var(--border);flex:1;"></canvas>
+                <div style="width:200px;font-size:12px;">
+                    <div style="font-weight:800;color:${AC};margin-bottom:8px;">Node Values</div>
+                    <div id="ai-mm-log" style="font-family:var(--font-mono);line-height:1.9;"></div>
+                </div>
+            </div>
+        </div>`;
+        const canvas=document.getElementById('ai-mm-canvas'); const ctx=canvas.getContext('2d');
+        const layout=[{node:tree,x:280,y:40,level:0}];
+        const positions={};
+        const buildLayout=(node,x,y,level,spread)=>{positions[node]=({x,y,level}); node.children.forEach((c,i)=>{const cx=x-spread*(node.children.length-1)/2+i*spread; buildLayout(c,cx,y+90,level+1,spread/2);});};
+        buildLayout(tree,280,40,0,160);
+        const draw=()=>{
+            ctx.clearRect(0,0,canvas.width,canvas.height);
+            const drawNode=(node)=>{
+                const {x,y,level}=positions[node]; const isMax=level%2===0;
+                node.children.forEach(c=>{const cp=positions[c]; ctx.beginPath();ctx.moveTo(x,y+20);ctx.lineTo(cp.x,cp.y-20);ctx.strokeStyle=pruned.includes(c)?'#ef444466':'var(--border)';ctx.lineWidth=pruned.includes(c)?1:2;ctx.stroke();});
+                const color=evaluated.includes(node)?isMax?AC:'#6366f1':'#475569';
+                ctx.beginPath();ctx.arc(x,y,22,0,Math.PI*2);ctx.fillStyle=pruned.includes(node)?'#ef444422':color+'22';ctx.fill();
+                ctx.strokeStyle=pruned.includes(node)?'#ef4444':color;ctx.lineWidth=2.5;ctx.stroke();
+                const v=node.val!==null?node.val:(isMax?'MAX':'MIN');
+                ctx.fillStyle=pruned.includes(node)?'#ef4444':color;ctx.font='bold 12px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(v,x,y);
+                node.children.forEach(c=>drawNode(c));
+            };
+            drawNode(tree);
+        };
+        const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+        const resetTree=(node)=>{node.val=node.children.length?null:node.val; node.children.forEach(c=>resetTree(c));}; 
+        const leafVals=[3,5,2,9,8,1];
+        const setLeaves=(node,idx)=>{if(!node.children.length){node.val=leafVals[idx.v++];return;}node.children.forEach(c=>setLeaves(c,idx));};
+        const doReset=()=>{evaluated=[];pruned=[];const idx={v:0};setLeaves(tree,idx);draw();document.getElementById('ai-mm-log').innerHTML='';document.getElementById('ai-mm-info').textContent='';};
+        const minimax=async(node,depth,isMax)=>{evaluated.push(node);draw();await sleep(400);
+            if(!node.children.length)return node.val;
+            const vals=await Promise.all(node.children.map(c=>minimax(c,depth+1,!isMax)));
+            node.val=isMax?Math.max(...vals):Math.min(...vals);draw();return node.val;};
+        const alphabeta=async(node,depth,isMax,alpha,beta)=>{evaluated.push(node);draw();await sleep(400);
+            if(!node.children.length)return node.val;
+            let val=isMax?-Infinity:Infinity;
+            for(const c of node.children){
+                const cv=await alphabeta(c,depth+1,!isMax,alpha,beta);
+                if(isMax){val=Math.max(val,cv);alpha=Math.max(alpha,val);if(beta<=alpha){node.children.slice(node.children.indexOf(c)+1).forEach(x=>pruned.push(x));break;}}
+                else{val=Math.min(val,cv);beta=Math.min(beta,val);if(beta<=alpha){node.children.slice(node.children.indexOf(c)+1).forEach(x=>pruned.push(x));break;}}
+            }
+            node.val=val;draw();return val;};
+        doReset();
+        document.getElementById('ai-mm-minimax').addEventListener('click',async()=>{doReset();await minimax(tree,0,true);document.getElementById('ai-mm-info').textContent=`✅ Root value: ${tree.val} | Nodes evaluated: ${evaluated.length}`;});
+        document.getElementById('ai-mm-ab').addEventListener('click',async()=>{doReset();await alphabeta(tree,0,true,-Infinity,Infinity);document.getElementById('ai-mm-info').textContent=`✅ Root: ${tree.val} | Evaluated: ${evaluated.length} | Pruned: ${pruned.length}`;});
+        document.getElementById('ai-mm-reset').addEventListener('click',doReset);
+    };
+
+    const initAiNaiveBayesSim = (container) => {
+        const AC='#f97316';
+        const data=[
+            {outlook:'sunny',humidity:'high',windy:false,play:false},
+            {outlook:'sunny',humidity:'high',windy:true,play:false},
+            {outlook:'overcast',humidity:'high',windy:false,play:true},
+            {outlook:'rainy',humidity:'high',windy:false,play:true},
+            {outlook:'rainy',humidity:'normal',windy:false,play:true},
+            {outlook:'rainy',humidity:'normal',windy:true,play:false},
+            {outlook:'overcast',humidity:'normal',windy:true,play:true},
+            {outlook:'sunny',humidity:'high',windy:false,play:false},
+            {outlook:'sunny',humidity:'normal',windy:false,play:true},
+            {outlook:'rainy',humidity:'normal',windy:false,play:true},
+            {outlook:'sunny',humidity:'normal',windy:true,play:true},
+            {outlook:'overcast',humidity:'high',windy:true,play:true},
+            {outlook:'overcast',humidity:'normal',windy:false,play:true},
+            {outlook:'rainy',humidity:'high',windy:true,play:false}
+        ];
+        container.innerHTML=`
+        <div style="padding:20px;font-family:var(--font-sans);">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+                <div>
+                    <h3 style="color:${AC};margin-bottom:12px;">Training Dataset (Weather-Play)</h3>
+                    <table style="width:100%;border-collapse:collapse;font-size:12px;">
+                        <tr style="background:${AC}22;font-weight:700;"><td style="padding:6px 8px;">Outlook</td><td style="padding:6px 8px;">Humidity</td><td style="padding:6px 8px;">Windy</td><td style="padding:6px 8px;">Play?</td></tr>
+                        ${data.map(d=>`<tr style="border-bottom:1px solid var(--border);"><td style="padding:5px 8px;">${d.outlook}</td><td style="padding:5px 8px;">${d.humidity}</td><td style="padding:5px 8px;">${d.windy?'Yes':'No'}</td><td style="padding:5px 8px;font-weight:700;color:${d.play?'#22c55e':'#ef4444'}">${d.play?'Yes':'No'}</td></tr>`).join('')}
+                    </table>
+                </div>
+                <div>
+                    <h3 style="color:${AC};margin-bottom:12px;">Classify New Sample</h3>
+                    <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px;">
+                        <label style="font-weight:700;">Outlook: <select id="ai-nb-outlook" style="margin-left:8px;padding:6px;border-radius:6px;border:1px solid ${AC};background:var(--bg-card);color:var(--text-main);"><option>sunny</option><option>overcast</option><option>rainy</option></select></label>
+                        <label style="font-weight:700;">Humidity: <select id="ai-nb-humidity" style="margin-left:8px;padding:6px;border-radius:6px;border:1px solid ${AC};background:var(--bg-card);color:var(--text-main);"><option>high</option><option>normal</option></select></label>
+                        <label style="font-weight:700;">Windy: <select id="ai-nb-windy" style="margin-left:8px;padding:6px;border-radius:6px;border:1px solid ${AC};background:var(--bg-card);color:var(--text-main);"><option value="false">No</option><option value="true">Yes</option></select></label>
+                    </div>
+                    <button id="ai-nb-classify" style="padding:10px 24px;border-radius:8px;background:${AC};color:#fff;border:none;font-weight:700;cursor:pointer;width:100%;">🧮 Classify</button>
+                    <div id="ai-nb-result" style="margin-top:16px;"></div>
+                </div>
+            </div>
+        </div>`;
+        document.getElementById('ai-nb-classify').addEventListener('click',()=>{
+            const outlook=document.getElementById('ai-nb-outlook').value;
+            const humidity=document.getElementById('ai-nb-humidity').value;
+            const windy=document.getElementById('ai-nb-windy').value==='true';
+            const yes=data.filter(d=>d.play); const no=data.filter(d=>!d.play);
+            const pYes=yes.length/data.length; const pNo=no.length/data.length;
+            const L=1; const V=3;
+            const p=(arr,fn)=>(arr.filter(fn).length+L)/(arr.length+L*V);
+            const pyO=p(yes,d=>d.outlook===outlook); const pnO=p(no,d=>d.outlook===outlook);
+            const pyH=p(yes,d=>d.humidity===humidity); const pnH=p(no,d=>d.humidity===humidity);
+            const pyW=p(yes,d=>d.windy===windy); const pnW=p(no,d=>d.windy===windy);
+            const scoreYes=pYes*pyO*pyH*pyW; const scoreNo=pNo*pnO*pnH*pnW;
+            const total=scoreYes+scoreNo;
+            const pYesFinal=(scoreYes/total*100).toFixed(1); const pNoFinal=(scoreNo/total*100).toFixed(1);
+            const pred=scoreYes>scoreNo;
+            document.getElementById('ai-nb-result').innerHTML=`
+                <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:14px;font-size:12px;">
+                    <div style="font-weight:800;margin-bottom:10px;color:${AC};">Computation Steps</div>
+                    <div style="font-family:var(--font-mono);line-height:1.9;">
+                        P(Yes)=${pYes.toFixed(3)} × P(O|Y)=${pyO.toFixed(3)} × P(H|Y)=${pyH.toFixed(3)} × P(W|Y)=${pyW.toFixed(3)}<br>
+                        → Score(Yes) = <b>${scoreYes.toFixed(5)}</b><br><br>
+                        P(No)=${pNo.toFixed(3)} × P(O|N)=${pnO.toFixed(3)} × P(H|N)=${pnH.toFixed(3)} × P(W|N)=${pnW.toFixed(3)}<br>
+                        → Score(No) = <b>${scoreNo.toFixed(5)}</b>
+                    </div>
+                    <div style="margin-top:12px;font-size:16px;font-weight:800;color:${pred?'#22c55e':'#ef4444'};">
+                        Prediction: ${pred?'✅ PLAY':'❌ DON\'T PLAY'} (${pred?pYesFinal:pNoFinal}% confidence)
+                    </div>
+                    <div style="display:flex;gap:8px;margin-top:10px;">
+                        <div style="flex:${pYesFinal};height:10px;background:#22c55e;border-radius:5px;"></div>
+                        <div style="flex:${pNoFinal};height:10px;background:#ef4444;border-radius:5px;"></div>
+                    </div>
+                </div>`;
+        });
+    };
+
+    const initAiKnnSim = (container) => {
+        const AC='#f97316';
+        container.innerHTML=`
+        <div style="padding:20px;font-family:var(--font-sans);">
+            <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:16px;">
+                <label style="font-weight:700;">K = <input id="ai-knn-k" type="range" min="1" max="11" step="2" value="3" style="width:100px;accent-color:${AC};"> <span id="ai-knn-kval">3</span></label>
+                <button id="ai-knn-gen" style="padding:8px 16px;border-radius:8px;background:${AC};color:#fff;border:none;font-weight:700;cursor:pointer;">🔄 New Dataset</button>
+                <span style="font-size:12px;color:var(--text-muted);">Click canvas to classify a point</span>
+                <span id="ai-knn-result" style="margin-left:auto;font-weight:700;font-size:14px;"></span>
+            </div>
+            <canvas id="ai-knn-canvas" width="580" height="420" style="border-radius:12px;background:var(--bg-card);border:1px solid var(--border);cursor:crosshair;"></canvas>
+        </div>`;
+        const canvas=document.getElementById('ai-knn-canvas'); const ctx=canvas.getContext('2d');
+        const kInp=document.getElementById('ai-knn-k'); const kVal=document.getElementById('ai-knn-kval');
+        kInp.oninput=()=>{kVal.textContent=kInp.value;};
+        let pts=[]; let testPt=null;
+        const genData=()=>{pts=[];
+            for(let i=0;i<20;i++)pts.push({x:60+Math.random()*200,y:60+Math.random()*300,c:0});
+            for(let i=0;i<20;i++)pts.push({x:300+Math.random()*240,y:60+Math.random()*300,c:1});
+            testPt=null; draw();};
+        const dist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
+        const draw=(neighbors=[],pred=-1)=>{
+            ctx.clearRect(0,0,canvas.width,canvas.height);
+            pts.forEach(p=>{ctx.beginPath();ctx.arc(p.x,p.y,7,0,Math.PI*2);ctx.fillStyle=p.c===0?'#3b82f6':'#ef4444';ctx.fill();});
+            if(testPt){
+                neighbors.forEach(n=>{ctx.beginPath();ctx.moveTo(testPt.x,testPt.y);ctx.lineTo(n.x,n.y);ctx.strokeStyle='#fbbf24';ctx.lineWidth=1.5;ctx.setLineDash([4,4]);ctx.stroke();ctx.setLineDash([]);});
+                ctx.beginPath();ctx.arc(testPt.x,testPt.y,12,0,Math.PI*2);
+                ctx.fillStyle=pred===0?'#3b82f688':pred===1?'#ef444488':'#94a3b8';ctx.fill();
+                ctx.strokeStyle=pred===0?'#3b82f6':pred===1?'#ef4444':AC;ctx.lineWidth=3;ctx.stroke();
+                ctx.fillStyle='#fff';ctx.font='bold 11px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('?',testPt.x,testPt.y);
+            }
+        };
+        canvas.addEventListener('click',e=>{
+            const r=canvas.getBoundingClientRect(); const K=parseInt(kInp.value);
+            testPt={x:e.clientX-r.left,y:e.clientY-r.top};
+            const sorted=[...pts].sort((a,b)=>dist(a,testPt)-dist(b,testPt));
+            const knn=sorted.slice(0,K);
+            const votes=[0,0]; knn.forEach(p=>votes[p.c]++);
+            const pred=votes[0]>=votes[1]?0:1;
+            draw(knn,pred);
+            document.getElementById('ai-knn-result').innerHTML=`K=${K} → Class: <b style="color:${pred===0?'#3b82f6':'#ef4444'}">${pred===0?'Blue':'Red'}</b> (${votes[pred]}/${K} votes)`;
+        });
+        document.getElementById('ai-knn-gen').addEventListener('click',genData);
+        genData();
+    };
+
+    const initAiKmeansSim = (container) => {
+        const AC='#f97316'; const COLORS=['#3b82f6','#ef4444','#22c55e','#a855f7','#fbbf24'];
+        container.innerHTML=`
+        <div style="padding:20px;font-family:var(--font-sans);">
+            <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:16px;">
+                <label style="font-weight:700;">K = <input id="ai-km-k" type="range" min="2" max="5" value="3" style="width:80px;accent-color:${AC};"> <span id="ai-km-kval">3</span></label>
+                <button id="ai-km-gen" style="padding:8px 14px;border-radius:8px;background:${AC};color:#fff;border:none;font-weight:700;cursor:pointer;">🔄 Generate</button>
+                <button id="ai-km-init" style="padding:8px 14px;border-radius:8px;background:#6366f1;color:#fff;border:none;font-weight:700;cursor:pointer;">📍 Init Centroids</button>
+                <button id="ai-km-step" style="padding:8px 14px;border-radius:8px;background:transparent;color:${AC};border:1px solid ${AC};font-weight:700;cursor:pointer;">⏭ Step</button>
+                <button id="ai-km-run" style="padding:8px 14px;border-radius:8px;background:#22c55e;color:#fff;border:none;font-weight:700;cursor:pointer;">▶▶ Converge</button>
+                <span id="ai-km-info" style="margin-left:auto;font-weight:700;font-size:13px;color:${AC};"></span>
+            </div>
+            <canvas id="ai-km-canvas" width="580" height="420" style="border-radius:12px;background:var(--bg-card);border:1px solid var(--border);"></canvas>
+        </div>`;
+        const canvas=document.getElementById('ai-km-canvas'); const ctx=canvas.getContext('2d');
+        const kInp=document.getElementById('ai-km-k'); const kVal=document.getElementById('ai-km-kval');
+        kInp.oninput=()=>kVal.textContent=kInp.value;
+        let pts=[],centroids=[],assignments=[];
+        const gen=()=>{pts=[];const K=parseInt(kInp.value); for(let k=0;k<K;k++){const cx=80+Math.random()*420,cy=60+Math.random()*300;for(let i=0;i<15;i++)pts.push({x:cx+(Math.random()-0.5)*80,y:cy+(Math.random()-0.5)*80});}centroids=[];assignments=[];draw();};
+        const dist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
+        const draw=()=>{ctx.clearRect(0,0,canvas.width,canvas.height);
+            pts.forEach((p,i)=>{ctx.beginPath();ctx.arc(p.x,p.y,5,0,Math.PI*2);ctx.fillStyle=assignments[i]!==undefined?COLORS[assignments[i]]+'99':'#94a3b8';ctx.fill();});
+            centroids.forEach((c,k)=>{ctx.beginPath();ctx.arc(c.x,c.y,12,0,Math.PI*2);ctx.fillStyle=COLORS[k];ctx.fill();ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.stroke();ctx.fillStyle='#fff';ctx.font='bold 11px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(k+1,c.x,c.y);});};
+        const assign=()=>{assignments=pts.map(p=>centroids.reduce((bi,c,k)=>dist(p,c)<dist(p,centroids[bi])?k:bi,0));};
+        const update=()=>{const K=parseInt(kInp.value); return centroids.map((c,k)=>{const mem=pts.filter((_,i)=>assignments[i]===k);if(!mem.length)return c;return{x:mem.reduce((s,p)=>s+p.x,0)/mem.length,y:mem.reduce((s,p)=>s+p.y,0)/mem.length};});};
+        const step=()=>{if(!centroids.length)return;assign();const nc=update();const moved=nc.some((c,k)=>dist(c,centroids[k])>0.5);centroids=nc;draw();document.getElementById('ai-km-info').textContent=moved?'Centroids updated...':'✅ Converged!';return moved;};
+        const initCentroids=()=>{const K=parseInt(kInp.value);centroids=[];for(let k=0;k<K;k++)centroids.push({...pts[Math.floor(Math.random()*pts.length)]});assign();draw();};
+        document.getElementById('ai-km-gen').addEventListener('click',gen);
+        document.getElementById('ai-km-init').addEventListener('click',initCentroids);
+        document.getElementById('ai-km-step').addEventListener('click',step);
+        document.getElementById('ai-km-run').addEventListener('click',async()=>{if(!centroids.length)initCentroids();let moved=true;while(moved){moved=step();await new Promise(r=>setTimeout(r,350));}});
+        gen();
+    };
+
+    const initAiAnnSim = (container) => {
+        const AC='#f97316';
+        const datasets={AND:{pts:[{x:0,y:0,c:0},{x:0,y:1,c:0},{x:1,y:0,c:0},{x:1,y:1,c:1}],name:'AND Gate'},OR:{pts:[{x:0,y:0,c:0},{x:0,y:1,c:1},{x:1,y:0,c:1},{x:1,y:1,c:1}],name:'OR Gate'},XOR:{pts:[{x:0,y:0,c:0},{x:0,y:1,c:1},{x:1,y:0,c:1},{x:1,y:1,c:0}],name:'XOR (Unsolvable)'}};
+        container.innerHTML=`
+        <div style="padding:20px;font-family:var(--font-sans);">
+            <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:16px;">
+                <select id="ai-ann-data" style="padding:8px;border-radius:8px;border:1px solid ${AC};background:var(--bg-card);color:var(--text-main);font-weight:700;"><option value="AND">AND Gate</option><option value="OR">OR Gate</option><option value="XOR">XOR (No solution)</option></select>
+                <label style="font-weight:700;">LR: <input id="ai-ann-lr" type="range" min="0.01" max="1" step="0.01" value="0.1" style="width:80px;accent-color:${AC};"> <span id="ai-ann-lrval">0.1</span></label>
+                <button id="ai-ann-train" style="padding:8px 16px;border-radius:8px;background:${AC};color:#fff;border:none;font-weight:700;cursor:pointer;">▶ Train Epoch</button>
+                <button id="ai-ann-reset" style="padding:8px 14px;border-radius:8px;background:transparent;color:${AC};border:1px solid ${AC};cursor:pointer;font-weight:700;">↺ Reset</button>
+                <span id="ai-ann-epoch" style="margin-left:auto;font-weight:700;color:${AC};"></span>
+            </div>
+            <div style="display:flex;gap:16px;">
+                <canvas id="ai-ann-boundary" width="320" height="320" style="border-radius:12px;background:var(--bg-card);border:1px solid var(--border);"></canvas>
+                <div style="flex:1;">
+                    <div style="font-weight:800;color:${AC};margin-bottom:8px;">Perceptron Weights</div>
+                    <div id="ai-ann-weights" style="font-family:var(--font-mono);font-size:13px;line-height:2.2;"></div>
+                    <canvas id="ai-ann-loss" width="260" height="120" style="border-radius:10px;background:var(--bg-card);border:1px solid var(--border);margin-top:12px;"></canvas>
+                    <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">Loss over epochs</div>
+                    <div id="ai-ann-status" style="margin-top:10px;font-weight:700;font-size:14px;"></div>
+                </div>
+            </div>
+        </div>`;
+        let w=[Math.random()-0.5,Math.random()-0.5],b=Math.random()-0.5,epoch=0,lossHist=[];
+        const lrInp=document.getElementById('ai-ann-lr'); const lrVal=document.getElementById('ai-ann-lrval');
+        lrInp.oninput=()=>lrVal.textContent=parseFloat(lrInp.value).toFixed(2);
+        const step=(x)=>x>=0?1:0;
+        const drawBoundary=()=>{
+            const canvas=document.getElementById('ai-ann-boundary'); const ctx=canvas.getContext('2d');
+            const ds=datasets[document.getElementById('ai-ann-data').value];
+            ctx.clearRect(0,0,320,320);
+            for(let px=0;px<32;px++)for(let py=0;py<32;py++){const xi=px/31,yi=py/31;const out=step(w[0]*xi+w[1]*yi+b);ctx.fillStyle=out?'#f9731611':'#3b82f611';ctx.fillRect(px*10,py*10,10,10);}
+            if(Math.abs(w[1])>0.01){ctx.beginPath();const x0=0,y0=(-b-w[0]*x0)/w[1];const x1=1,y1=(-b-w[0]*x1)/w[1];ctx.moveTo(x0*320,(1-y0)*320);ctx.lineTo(x1*320,(1-y1)*320);ctx.strokeStyle=AC;ctx.lineWidth=2.5;ctx.stroke();}
+            ds.pts.forEach(p=>{ctx.beginPath();ctx.arc(p.x*280+20,(1-p.y)*280+20,12,0,Math.PI*2);ctx.fillStyle=p.c?'#22c55e':'#ef4444';ctx.fill();ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.stroke();ctx.fillStyle='#fff';ctx.font='bold 10px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(p.c,p.x*280+20,(1-p.y)*280+20);});
+        };
+        const drawLoss=()=>{
+            const canvas=document.getElementById('ai-ann-loss');if(!canvas)return; const ctx=canvas.getContext('2d');
+            ctx.clearRect(0,0,260,120);ctx.strokeStyle='var(--border)';ctx.strokeRect(0,0,260,120);
+            if(lossHist.length<2)return;const max=Math.max(...lossHist);
+            ctx.beginPath();ctx.strokeStyle=AC;ctx.lineWidth=2;
+            lossHist.forEach((v,i)=>{const x=(i/(lossHist.length-1))*250+5,y=110-(v/max)*100;if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);});ctx.stroke();
+        };
+        const updateWeightDisplay=()=>{document.getElementById('ai-ann-weights').innerHTML=`w₁ = <b style="color:${AC}">${w[0].toFixed(4)}</b><br>w₂ = <b style="color:${AC}">${w[1].toFixed(4)}</b><br>b  = <b style="color:${AC}">${b.toFixed(4)}</b>`;};
+        const trainEpoch=()=>{
+            const ds=datasets[document.getElementById('ai-ann-data').value]; const lr=parseFloat(lrInp.value);
+            let errors=0;
+            ds.pts.forEach(p=>{const out=step(w[0]*p.x+w[1]*p.y+b);const err=p.c-out;if(err!==0){errors++;w[0]+=lr*err*p.x;w[1]+=lr*err*p.y;b+=lr*err;}});
+            epoch++; lossHist.push(errors/ds.pts.length); if(lossHist.length>50)lossHist.shift();
+            document.getElementById('ai-ann-epoch').textContent=`Epoch: ${epoch} | Errors: ${errors}`;
+            const isXOR=document.getElementById('ai-ann-data').value==='XOR';
+            document.getElementById('ai-ann-status').innerHTML=errors===0?'<span style="color:#22c55e;">✅ Converged!</span>':isXOR?'<span style="color:#ef4444;">⚠ XOR is not linearly separable — will never converge</span>':'<span style="color:#fbbf24;">⏳ Training...</span>';
+            updateWeightDisplay(); drawBoundary(); drawLoss();
+        };
+        const reset=()=>{w=[Math.random()-0.5,Math.random()-0.5];b=Math.random()-0.5;epoch=0;lossHist=[];updateWeightDisplay();drawBoundary();drawLoss();document.getElementById('ai-ann-epoch').textContent='';document.getElementById('ai-ann-status').textContent='';};
+        document.getElementById('ai-ann-train').addEventListener('click',trainEpoch);
+        document.getElementById('ai-ann-reset').addEventListener('click',reset);
+        document.getElementById('ai-ann-data').addEventListener('change',reset);
+        reset();
+    };
+
+    const initAiBackpropSim = (container) => {
+        const AC='#f97316';
+        container.innerHTML=`
+        <div style="padding:20px;font-family:var(--font-sans);">
+            <h3 style="color:${AC};margin-bottom:16px;">2→3→1 MLP Backpropagation Visualizer</h3>
+            <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:16px;">
+                <label style="font-weight:700;">Input x₁: <input id="ai-bp-x1" type="number" value="0.5" step="0.1" style="width:70px;padding:6px;border-radius:6px;border:1px solid ${AC};background:var(--bg-card);color:var(--text-main);"></label>
+                <label style="font-weight:700;">Input x₂: <input id="ai-bp-x2" type="number" value="0.3" step="0.1" style="width:70px;padding:6px;border-radius:6px;border:1px solid ${AC};background:var(--bg-card);color:var(--text-main);"></label>
+                <label style="font-weight:700;">Target y: <input id="ai-bp-y" type="number" value="1" step="1" min="0" max="1" style="width:60px;padding:6px;border-radius:6px;border:1px solid ${AC};background:var(--bg-card);color:var(--text-main);"></label>
+                <label style="font-weight:700;">LR: <input id="ai-bp-lr" type="number" value="0.1" step="0.05" style="width:60px;padding:6px;border-radius:6px;border:1px solid ${AC};background:var(--bg-card);color:var(--text-main);"></label>
+                <button id="ai-bp-fwd" style="padding:8px 16px;border-radius:8px;background:#6366f1;color:#fff;border:none;font-weight:700;cursor:pointer;">⇒ Forward</button>
+                <button id="ai-bp-back" style="padding:8px 16px;border-radius:8px;background:#ef4444;color:#fff;border:none;font-weight:700;cursor:pointer;">⇐ Backprop</button>
+                <button id="ai-bp-update" style="padding:8px 16px;border-radius:8px;background:#22c55e;color:#fff;border:none;font-weight:700;cursor:pointer;">↑ Update W</button>
+                <button id="ai-bp-auto" style="padding:8px 14px;border-radius:8px;background:${AC};color:#fff;border:none;font-weight:700;cursor:pointer;">▶▶ 100 Epochs</button>
+            </div>
+            <div style="display:flex;gap:16px;">
+                <canvas id="ai-bp-canvas" width="440" height="320" style="border-radius:12px;background:var(--bg-card);border:1px solid var(--border);"></canvas>
+                <div style="flex:1;font-size:12px;">
+                    <div style="font-weight:800;color:${AC};margin-bottom:6px;">Computation Log</div>
+                    <div id="ai-bp-log" style="font-family:var(--font-mono);line-height:1.8;font-size:11px;max-height:200px;overflow-y:auto;"></div>
+                    <canvas id="ai-bp-loss" width="250" height:100" style="border-radius:8px;background:var(--bg-card);border:1px solid var(--border);margin-top:10px;width:250px;height:100px;"></canvas>
+                    <div style="font-size:11px;color:var(--text-muted);">Training Loss</div>
+                </div>
+            </div>
+        </div>`;
+        const sig=(z)=>1/(1+Math.exp(-z));
+        const sigD=(a)=>a*(1-a);
+        let W1=[[Math.random()-0.5,Math.random()-0.5],[Math.random()-0.5,Math.random()-0.5],[Math.random()-0.5,Math.random()-0.5]];
+        let b1=[0,0,0];
+        let W2=[Math.random()-0.5,Math.random()-0.5,Math.random()-0.5];
+        let b2=0;
+        let a1=[],a2=0,lossHist=[],epoch=0;
+        const canvas=document.getElementById('ai-bp-canvas');const ctx=canvas.getContext('2d');
+        const layers=[[{x:60,y:100},{x:60,y:220}],[{x:200,y:60},{x:200,y:160},{x:200,y:260}],[{x:360,y:160}]];
+        const drawNet=(activations=[],grads=[])=>{
+            ctx.clearRect(0,0,440,320);
+            layers.forEach((layer,li)=>layer.forEach((n,ni)=>{
+                if(li<layers.length-1)layers[li+1].forEach((nxt)=>{ctx.beginPath();ctx.moveTo(n.x,n.y);ctx.lineTo(nxt.x,nxt.y);ctx.strokeStyle='var(--border)';ctx.lineWidth=1;ctx.stroke();});
+            }));
+            layers.forEach((layer,li)=>layer.forEach((n,ni)=>{
+                const a=activations[li]?activations[li][ni]:null;
+                const g=grads[li]?grads[li][ni]:null;
+                ctx.beginPath();ctx.arc(n.x,n.y,22,0,Math.PI*2);
+                ctx.fillStyle=a!==null?`rgba(249,115,22,${Math.min(Math.abs(a),1)*0.6+0.1})`:'#1e293b';ctx.fill();
+                ctx.strokeStyle=g!==null&&Math.abs(g)>0.1?'#ef4444':AC;ctx.lineWidth=2;ctx.stroke();
+                if(a!==null){ctx.fillStyle='#fff';ctx.font='bold 10px monospace';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(a.toFixed(2),n.x,n.y);}
+            }));
+        };
+        drawNet();
+        const fwd=()=>{
+            const x1=parseFloat(document.getElementById('ai-bp-x1').value);
+            const x2=parseFloat(document.getElementById('ai-bp-x2').value);
+            const X=[x1,x2];
+            a1=W1.map((w,i)=>sig(w[0]*X[0]+w[1]*X[1]+b1[i]));
+            a2=sig(W2.reduce((s,w,i)=>s+w*a1[i],0)+b2);
+            const loss=0.5*(parseFloat(document.getElementById('ai-bp-y').value)-a2)**2;
+            lossHist.push(loss);epoch++;
+            document.getElementById('ai-bp-log').innerHTML+=`Forward: a1=[${a1.map(v=>v.toFixed(3)).join(', ')}] a2=${a2.toFixed(4)} Loss=${loss.toFixed(5)}<br>`;
+            drawNet([[parseFloat(document.getElementById('ai-bp-x1').value),parseFloat(document.getElementById('ai-bp-x2').value)],a1,[a2]]);
+        };
+        const back=()=>{
+            const y=parseFloat(document.getElementById('ai-bp-y').value);
+            const dL_da2=a2-y; const da2_dz2=sigD(a2); const delta2=dL_da2*da2_dz2;
+            const delta1=a1.map((a,i)=>W2[i]*delta2*sigD(a));
+            document.getElementById('ai-bp-log').innerHTML+=`Backprop: δ₂=${delta2.toFixed(4)} δ₁=[${delta1.map(v=>v.toFixed(3)).join(', ')}]<br>`;
+            drawNet([[],[],[]],[],delta1);
+            window._delta1=delta1; window._delta2=delta2;
+        };
+        const updateW=()=>{
+            const lr=parseFloat(document.getElementById('ai-bp-lr').value);
+            const x1=parseFloat(document.getElementById('ai-bp-x1').value);
+            const x2=parseFloat(document.getElementById('ai-bp-x2').value);
+            if(!window._delta2)return;
+            W2=W2.map((w,i)=>w-lr*window._delta2*a1[i]); b2-=lr*window._delta2;
+            W1=W1.map((w,i)=>w.map((wj,j)=>wj-lr*window._delta1[i]*(j===0?x1:x2))); b1=b1.map((b,i)=>b-lr*window._delta1[i]);
+            drawNet();
+            const lc=document.getElementById('ai-bp-loss'); if(!lc)return; const lx=lc.getContext('2d');
+            lx.clearRect(0,0,250,100); if(lossHist.length<2)return;
+            const mx=Math.max(...lossHist);lx.beginPath();lx.strokeStyle=AC;lx.lineWidth=2;
+            lossHist.forEach((v,i)=>{const px=(i/(lossHist.length-1))*240+5,py=90-(v/mx)*80;if(i===0)lx.moveTo(px,py);else lx.lineTo(px,py);});lx.stroke();
+        };
+        document.getElementById('ai-bp-fwd').addEventListener('click',fwd);
+        document.getElementById('ai-bp-back').addEventListener('click',back);
+        document.getElementById('ai-bp-update').addEventListener('click',updateW);
+        document.getElementById('ai-bp-auto').addEventListener('click',async()=>{for(let i=0;i<100;i++){fwd();back();updateW();await new Promise(r=>setTimeout(r,30));}});
+    };
+
+    const initAiFuzzySim = (container) => {
+        const AC='#f97316';
+        container.innerHTML=`
+        <div style="padding:20px;font-family:var(--font-sans);">
+            <h3 style="color:${AC};margin-bottom:16px;">Mamdani Fuzzy Inference System — Temperature → Fan Speed</h3>
+            <div style="display:flex;gap:20px;flex-wrap:wrap;align-items:flex-start;">
+                <div style="flex:1;min-width:280px;">
+                    <label style="font-weight:700;display:block;margin-bottom:8px;">Temperature (°C): <span id="ai-fz-tempval" style="color:${AC};">25</span>°C</label>
+                    <input id="ai-fz-temp" type="range" min="0" max="50" value="25" style="width:100%;accent-color:${AC};">
+                    <div style="margin-top:20px;">
+                        <div style="font-weight:800;margin-bottom:8px;">Input Membership (Temperature)</div>
+                        <canvas id="ai-fz-input" width="340" height="130" style="border-radius:10px;background:var(--bg-card);border:1px solid var(--border);"></canvas>
+                    </div>
+                    <div style="margin-top:16px;">
+                        <div style="font-weight:800;margin-bottom:8px;">Output Membership (Fan Speed)</div>
+                        <canvas id="ai-fz-output" width="340" height="130" style="border-radius:10px;background:var(--bg-card);border:1px solid var(--border);"></canvas>
+                    </div>
+                </div>
+                <div style="width:220px;">
+                    <div style="font-weight:800;color:${AC};margin-bottom:8px;">Fuzzy Rules</div>
+                    <div style="font-size:12px;line-height:2;border:1px solid var(--border);padding:10px;border-radius:8px;background:var(--bg-card);">
+                        <div>IF temp is <b>Cold</b> → fan <b>Slow</b></div>
+                        <div>IF temp is <b>Warm</b> → fan <b>Medium</b></div>
+                        <div>IF temp is <b>Hot</b> → fan <b>Fast</b></div>
+                    </div>
+                    <div style="margin-top:16px;font-weight:800;color:${AC};">Fuzzification</div>
+                    <div id="ai-fz-memb" style="font-family:var(--font-mono);font-size:12px;line-height:2;margin-top:6px;"></div>
+                    <div style="margin-top:12px;padding:14px;background:${AC}22;border:1px solid ${AC};border-radius:10px;">
+                        <div style="font-weight:800;margin-bottom:4px;">Crisp Output</div>
+                        <div id="ai-fz-crisp" style="font-size:26px;font-weight:800;color:${AC};">— %</div>
+                        <div style="font-size:11px;color:var(--text-muted);">Fan Speed</div>
+                    </div>
+                </div>
+            </div>
+        </div>`;
+        const tri=(x,a,b,c)=>Math.max(0,x<=b?(x-a)/(b-a):(c-x)/(c-b));
+        const update=()=>{
+            const T=parseFloat(document.getElementById('ai-fz-temp').value);
+            document.getElementById('ai-fz-tempval').textContent=T;
+            const mCold=tri(T,0,10,25); const mWarm=tri(T,15,25,35); const mHot=tri(T,28,40,50);
+            document.getElementById('ai-fz-memb').innerHTML=`Cold: <b style="color:#3b82f6">${mCold.toFixed(3)}</b><br>Warm: <b style="color:#fbbf24">${mWarm.toFixed(3)}</b><br>Hot: <b style="color:#ef4444">${mHot.toFixed(3)}</b>`;
+            const drawMF=(canvasId,xmax,mfs,val,colors)=>{
+                const c=document.getElementById(canvasId); const ctx=c.getContext('2d');
+                ctx.clearRect(0,0,340,130);ctx.strokeStyle='var(--border)';ctx.strokeRect(1,1,338,128);
+                mfs.forEach((mf,i)=>{ctx.beginPath();ctx.strokeStyle=colors[i];ctx.lineWidth=2;
+                    for(let x=0;x<=xmax;x++){const px=10+(x/xmax)*320;const py=115-tri(x,...mf)*100;if(x===0)ctx.moveTo(px,py);else ctx.lineTo(px,py);}
+                    ctx.stroke();});
+                const vpx=10+(val/xmax)*320;ctx.strokeStyle=AC;ctx.lineWidth=2;ctx.setLineDash([4,4]);ctx.beginPath();ctx.moveTo(vpx,10);ctx.lineTo(vpx,120);ctx.stroke();ctx.setLineDash([]);
+                ctx.fillStyle=AC;ctx.font='bold 11px monospace';ctx.textAlign='center';ctx.fillText(val.toFixed(0),vpx,10);
+            };
+            drawMF('ai-fz-input',50,[[0,10,25],[15,25,35],[28,40,50]],T,['#3b82f6','#fbbf24','#ef4444']);
+            const fSlow=mCold; const fMed=mWarm; const fFast=mHot;
+            let num=0,den=0;
+            for(let s=0;s<=100;s++){const mS=Math.min(tri(s,0,10,30),fSlow); const mM=Math.min(tri(s,25,50,75),fMed); const mF=Math.min(tri(s,60,90,100),fFast); const agg=Math.max(mS,mM,mF); num+=s*agg; den+=agg;}
+            const crisp=den>0?(num/den).toFixed(1):0;
+            document.getElementById('ai-fz-crisp').textContent=crisp+'%';
+            const cCtx=document.getElementById('ai-fz-output').getContext('2d');
+            cCtx.clearRect(0,0,340,130);cCtx.strokeStyle='var(--border)';cCtx.strokeRect(1,1,338,128);
+            [[0,10,30],[25,50,75],[60,90,100]].forEach((mf,i)=>{cCtx.beginPath();cCtx.strokeStyle=['#3b82f6','#fbbf24','#ef4444'][i];cCtx.lineWidth=1.5;for(let s=0;s<=100;s++){const px=10+(s/100)*320,py=115-tri(s,...mf)*100;if(s===0)cCtx.moveTo(px,py);else cCtx.lineTo(px,py);}cCtx.stroke();});
+            const cpx=10+(parseFloat(crisp)/100)*320;cCtx.strokeStyle=AC;cCtx.lineWidth=2.5;cCtx.setLineDash([4,4]);cCtx.beginPath();cCtx.moveTo(cpx,10);cCtx.lineTo(cpx,120);cCtx.stroke();cCtx.setLineDash([]);
+            cCtx.fillStyle=AC;cCtx.font='bold 11px monospace';cCtx.textAlign='center';cCtx.fillText(crisp+'%',cpx,10);
+        };
+        document.getElementById('ai-fz-temp').addEventListener('input',update); update();
+    };
+
+    const initAiGeneticSim = (container) => {
+        const AC='#f97316';
+        container.innerHTML=`
+        <div style="padding:20px;font-family:var(--font-sans);">
+            <h3 style="color:${AC};margin-bottom:4px;">Genetic Algorithm — Maximize f(x) = x·sin(10πx) + 2</h3>
+            <div style="font-size:12px;color:var(--text-muted);margin-bottom:16px;">x ∈ [0, 1], binary chromosome (16 bits)</div>
+            <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:16px;">
+                <label style="font-weight:700;">Pop: <input id="ai-ga-pop" type="number" value="20" min="10" max="50" step="5" style="width:55px;padding:5px;border-radius:6px;border:1px solid ${AC};background:var(--bg-card);color:var(--text-main);"></label>
+                <label style="font-weight:700;">Pc: <input id="ai-ga-pc" type="number" value="0.8" min="0.1" max="1" step="0.1" style="width:55px;padding:5px;border-radius:6px;border:1px solid ${AC};background:var(--bg-card);color:var(--text-main);"></label>
+                <label style="font-weight:700;">Pm: <input id="ai-ga-pm" type="number" value="0.01" min="0.001" max="0.1" step="0.005" style="width:65px;padding:5px;border-radius:6px;border:1px solid ${AC};background:var(--bg-card);color:var(--text-main);"></label>
+                <button id="ai-ga-init" style="padding:8px 14px;border-radius:8px;background:${AC};color:#fff;border:none;font-weight:700;cursor:pointer;">🌱 Initialize</button>
+                <button id="ai-ga-step" style="padding:8px 14px;border-radius:8px;background:#6366f1;color:#fff;border:none;font-weight:700;cursor:pointer;">⏭ Evolve</button>
+                <button id="ai-ga-run" style="padding:8px 14px;border-radius:8px;background:#22c55e;color:#fff;border:none;font-weight:700;cursor:pointer;">▶▶ 50 Gen</button>
+                <span id="ai-ga-info" style="margin-left:auto;font-weight:700;color:${AC};"></span>
+            </div>
+            <div style="display:flex;gap:16px;">
+                <canvas id="ai-ga-canvas" width="420" height="280" style="border-radius:12px;background:var(--bg-card);border:1px solid var(--border);"></canvas>
+                <div style="width:200px;">
+                    <div style="font-weight:800;color:${AC};margin-bottom:6px;">Best Fitness per Gen</div>
+                    <canvas id="ai-ga-fit" width="200" height="120" style="border-radius:8px;background:var(--bg-card);border:1px solid var(--border);"></canvas>
+                    <div id="ai-ga-pop-display" style="margin-top:10px;font-family:var(--font-mono);font-size:10px;max-height:130px;overflow-y:auto;"></div>
+                </div>
+            </div>
+        </div>`;
+        const FN=(x)=>x*Math.sin(10*Math.PI*x)+2;
+        const BITS=16; const MAX=Math.pow(2,BITS)-1;
+        const decode=(chrom)=>chrom.reduce((v,b,i)=>v+(b<<(BITS-1-i)),0)/MAX;
+        const fitness=(chrom)=>Math.max(0,FN(decode(chrom)));
+        let pop=[],gen=0,bestHist=[];
+        const canvas=document.getElementById('ai-ga-canvas');const ctx=canvas.getContext('2d');
+        const drawFn=()=>{ctx.clearRect(0,0,420,280);ctx.strokeStyle='var(--border)';ctx.strokeRect(30,20,380,240);
+            ctx.beginPath();ctx.strokeStyle='#6366f1';ctx.lineWidth=2;
+            for(let i=0;i<=380;i++){const x=i/380;const y=FN(x);const px=30+i,py=260-(y/3)*220;if(i===0)ctx.moveTo(px,py);else ctx.lineTo(px,py);}ctx.stroke();
+            if(pop.length){pop.forEach(c=>{const x=decode(c);const y=FN(x);const px=30+(x*380),py=260-(y/3)*220;ctx.beginPath();ctx.arc(px,py,4,0,Math.PI*2);ctx.fillStyle=AC+'99';ctx.fill();});
+            const best=pop.reduce((b,c)=>fitness(c)>fitness(b)?c:b);const bx=decode(best);const by=FN(bx);const bpx=30+(bx*380),bpy=260-(by/3)*220;
+            ctx.beginPath();ctx.arc(bpx,bpy,8,0,Math.PI*2);ctx.fillStyle=AC;ctx.fill();ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.stroke();}};
+        const drawFitHist=()=>{const c=document.getElementById('ai-ga-fit');const lx=c.getContext('2d');lx.clearRect(0,0,200,120);if(bestHist.length<2)return;const mx=Math.max(...bestHist);lx.beginPath();lx.strokeStyle=AC;lx.lineWidth=2;bestHist.forEach((v,i)=>{const px=(i/(bestHist.length-1))*190+5,py=110-(v/mx)*100;if(i===0)lx.moveTo(px,py);else lx.lineTo(px,py);});lx.stroke();};
+        const init=()=>{const N=parseInt(document.getElementById('ai-ga-pop').value); pop=Array.from({length:N},()=>Array.from({length:BITS},()=>Math.round(Math.random())));gen=0;bestHist=[];drawFn();drawFitHist();document.getElementById('ai-ga-pop-display').innerHTML='';};
+        const select=(pop)=>{const a=pop[Math.floor(Math.random()*pop.length)],b=pop[Math.floor(Math.random()*pop.length)];return fitness(a)>fitness(b)?a:b;};
+        const evolve=()=>{const Pc=parseFloat(document.getElementById('ai-ga-pc').value),Pm=parseFloat(document.getElementById('ai-ga-pm').value);
+            const newPop=[];while(newPop.length<pop.length){const p1=select(pop),p2=select(pop);let c1,c2;if(Math.random()<Pc){const pt=Math.floor(Math.random()*BITS);c1=[...p1.slice(0,pt),...p2.slice(pt)];c2=[...p2.slice(0,pt),...p1.slice(pt)];}else{c1=[...p1];c2=[...p2];}
+            [c1,c2].forEach(c=>{newPop.push(c.map(b=>Math.random()<Pm?1-b:b));});}
+            pop=newPop.slice(0,pop.length);gen++;
+            const best=pop.reduce((b,c)=>fitness(c)>fitness(b)?c:b);bestHist.push(fitness(best));if(bestHist.length>100)bestHist.shift();
+            document.getElementById('ai-ga-info').textContent=`Gen: ${gen} | Best f(x)=${fitness(best).toFixed(4)} x=${decode(best).toFixed(4)}`;
+            document.getElementById('ai-ga-pop-display').innerHTML=pop.slice(0,8).map((c,i)=>`<div>${i+1}: x=${decode(c).toFixed(3)} f=${fitness(c).toFixed(2)}</div>`).join('');
+            drawFn();drawFitHist();};
+        document.getElementById('ai-ga-init').addEventListener('click',init);
+        document.getElementById('ai-ga-step').addEventListener('click',()=>{if(!pop.length)init();evolve();});
+        document.getElementById('ai-ga-run').addEventListener('click',async()=>{if(!pop.length)init();for(let i=0;i<50;i++){evolve();await new Promise(r=>setTimeout(r,80));}});
+        init();
+    };
+
+    const initAiExpertSim = (container) => {
+        const AC='#f97316';
+        const KB=[
+            {id:'R1',if:['fever','cough','sore_throat'],then:'flu',desc:'IF fever AND cough AND sore_throat → Flu'},
+            {id:'R2',if:['fever','rash'],then:'measles',desc:'IF fever AND rash → Measles'},
+            {id:'R3',if:['cough','chest_pain','shortness_breath'],then:'pneumonia',desc:'IF cough AND chest_pain AND shortness_breath → Pneumonia'},
+            {id:'R4',if:['headache','stiff_neck','fever'],then:'meningitis',desc:'IF headache AND stiff_neck AND fever → Meningitis'},
+            {id:'R5',if:['fatigue','weight_loss','night_sweats'],then:'tuberculosis',desc:'IF fatigue AND weight_loss AND night_sweats → Tuberculosis'},
+            {id:'R6',if:['flu'],then:'influenza_confirmed',desc:'IF flu → Influenza Confirmed'},
+        ];
+        const symptoms=['fever','cough','sore_throat','rash','chest_pain','shortness_breath','headache','stiff_neck','fatigue','weight_loss','night_sweats'];
+        container.innerHTML=`
+        <div style="padding:20px;font-family:var(--font-sans);">
+            <h3 style="color:${AC};margin-bottom:16px;">Medical Expert System — Forward Chaining</h3>
+            <div style="display:flex;gap:20px;flex-wrap:wrap;">
+                <div style="width:240px;">
+                    <div style="font-weight:800;margin-bottom:10px;">Patient Symptoms</div>
+                    <div style="display:flex;flex-direction:column;gap:6px;">
+                        ${symptoms.map(s=>`<label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;"><input type="checkbox" id="ai-es-${s}" style="accent-color:${AC};width:15px;height:15px;"> ${s.replace(/_/g,' ')}</label>`).join('')}
+                    </div>
+                    <button id="ai-es-run" style="width:100%;margin-top:14px;padding:10px;border-radius:8px;background:${AC};color:#fff;border:none;font-weight:700;cursor:pointer;">⚕ Run Inference</button>
+                    <button id="ai-es-reset" style="width:100%;margin-top:8px;padding:8px;border-radius:8px;background:transparent;color:${AC};border:1px solid ${AC};cursor:pointer;font-weight:700;">↺ Reset</button>
+                </div>
+                <div style="flex:1;min-width:280px;">
+                    <div style="font-weight:800;color:${AC};margin-bottom:8px;">Knowledge Base</div>
+                    <div style="font-size:11px;border:1px solid var(--border);border-radius:8px;padding:10px;margin-bottom:12px;line-height:2;">
+                        ${KB.map(r=>`<div id="ai-es-rule-${r.id}" style="padding:2px 6px;border-radius:4px;">${r.id}: ${r.desc}</div>`).join('')}
+                    </div>
+                    <div style="font-weight:800;color:${AC};margin-bottom:8px;">Working Memory & Inference Log</div>
+                    <div id="ai-es-log" style="font-size:12px;font-family:var(--font-mono);border:1px solid var(--border);border-radius:8px;padding:10px;min-height:100px;max-height:200px;overflow-y:auto;line-height:2;"></div>
+                    <div id="ai-es-diagnosis" style="margin-top:12px;"></div>
+                </div>
+            </div>
+        </div>`;
+        document.getElementById('ai-es-run').addEventListener('click',async()=>{
+            let wm=new Set(symptoms.filter(s=>document.getElementById(`ai-es-${s}`)&&document.getElementById(`ai-es-${s}`).checked));
+            const log=[`📋 Initial facts: [${[...wm].join(', ')||'none'}]`];
+            document.getElementById('ai-es-log').innerHTML=log.join('<br>');
+            let fired=true; const diagnoses=[];
+            while(fired){fired=false;
+                for(const rule of KB){
+                    KB.forEach(r=>document.getElementById('ai-es-rule-'+r.id)&&(document.getElementById('ai-es-rule-'+r.id).style.background=''));
+                    if(!wm.has(rule.then)&&rule.if.every(c=>wm.has(c))){
+                        const el=document.getElementById('ai-es-rule-'+rule.id);
+                        if(el)el.style.background=AC+'33';
+                        wm.add(rule.then); fired=true;
+                        log.push(`🔥 Fire ${rule.id}: derived <b style="color:${AC}">${rule.then}</b>`);
+                        diagnoses.push(rule.then);
+                        document.getElementById('ai-es-log').innerHTML=log.join('<br>');
+                        await new Promise(r=>setTimeout(r,600));
+                    }
+                }
+            }
+            const final=diagnoses.filter(d=>!['flu','measles','pneumonia','meningitis','tuberculosis'].includes(d)||d==='influenza_confirmed'?false:true);
+            const diags=diagnoses.filter(d=>!['influenza_confirmed'].includes(d));
+            document.getElementById('ai-es-diagnosis').innerHTML=diags.length?`<div style="padding:14px;background:#22c55e22;border:1px solid #22c55e;border-radius:10px;"><div style="font-weight:800;font-size:14px;color:#22c55e;">✅ Diagnosis: ${diags.join(', ')}</div><div style="font-size:12px;margin-top:4px;color:var(--text-muted);">Based on ${log.length} inference steps</div></div>`:`<div style="padding:14px;background:#ef444422;border:1px solid #ef4444;border-radius:10px;font-weight:700;color:#ef4444;">❌ No diagnosis derived from given symptoms.</div>`;
+        });
+        document.getElementById('ai-es-reset').addEventListener('click',()=>{symptoms.forEach(s=>{const el=document.getElementById('ai-es-'+s);if(el)el.checked=false;});document.getElementById('ai-es-log').innerHTML='';document.getElementById('ai-es-diagnosis').innerHTML='';KB.forEach(r=>{const el=document.getElementById('ai-es-rule-'+r.id);if(el)el.style.background='';});});
+    };
+
+    const buildSimHeader = (title, subtitle, icon, color) => {
+        return `<div style="padding:15px;border-bottom:1px solid var(--border);background:linear-gradient(135deg,${color}15,transparent);display:flex;align-items:center;gap:12px;border-radius:12px 12px 0 0;">
+            <div style="font-size:32px;">${icon}</div>
+            <div>
+                <h3 style="margin:0;font-size:16px;color:${color}">${title}</h3>
+                <p style="margin:2px 0 0;font-size:11px;color:var(--text-muted);">${subtitle}</p>
+            </div>
+        </div>`;
+    };
+
+    // ── CLOUD COMPUTING SIMULATIONS ──────────────────────────────────────
+    const initCloudVirtualizationSim = (container) => {
+        const AC = '#0ea5e9';
+        container.innerHTML = buildSimHeader('VM Lifecycle Manager', 'Provision and manage virtual instances', '🖥️', AC) + `
+        <div style="padding:15px;font-family:var(--font-sans);font-size:13px;display:grid;grid-template-columns:1fr 1fr;gap:15px;">
+            <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;">
+                <h4 style="margin:0 0 10px;color:${AC}">Provision VM</h4>
+                <div style="display:flex;flex-direction:column;gap:8px;">
+                    <label>Name: <input id="cv-vm-name" value="VM-Server" style="width:100%;padding:5px;border:1px solid var(--border);border-radius:4px;background:var(--bg-card);color:var(--text-main);"></label>
+                    <label>Cores: <select id="cv-vm-cpu" style="width:100%;padding:5px;border:1px solid var(--border);border-radius:4px;background:var(--bg-card);color:var(--text-main);"><option value="2">2 vCPU</option><option value="4">4 vCPU</option></select></label>
+                    <label>RAM: <select id="cv-vm-ram" style="width:100%;padding:5px;border:1px solid var(--border);border-radius:4px;background:var(--bg-card);color:var(--text-main);"><option value="4">4 GB</option><option value="8">8 GB</option></select></label>
+                    <button id="cv-vm-create" style="background:${AC};color:#fff;border:none;padding:8px;border-radius:6px;font-weight:700;cursor:pointer;">Provision</button>
+                </div>
+            </div>
+            <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;display:flex;flex-direction:column;">
+                <h4 style="margin:0 0 10px;color:${AC}">Active Instances</h4>
+                <div id="cv-vm-list" style="flex:1;display:flex;flex-direction:column;gap:8px;overflow-y:auto;max-height:220px;"></div>
+            </div>
+        </div>`;
+        let vms = [];
+        const render = () => {
+            const list = document.getElementById('cv-vm-list');
+            if(!list) return;
+            if(!vms.length) { list.innerHTML = '<div style="color:var(--text-muted);text-align:center;padding:20px;">No VMs provisioned</div>'; return; }
+            list.innerHTML = vms.map(vm => `
+                <div style="border:1px solid var(--border);border-radius:6px;padding:8px;display:flex;justify-content:space-between;align-items:center;background:var(--bg-card);">
+                    <div>
+                        <b>${vm.name}</b> (${vm.cpu} vCPU, ${vm.ram}GB RAM)<br>
+                        <span style="font-size:10px;color:${vm.status==='Running'?'#22c55e':vm.status==='Paused'?'#fbbf24':'#ef4444'}">${vm.status}</span>
+                    </div>
+                    <div style="display:flex;gap:4px;">
+                        <button class="cv-act-run" data-id="${vm.id}" style="padding:4px;border:none;border-radius:4px;background:#22c55e22;color:#22c55e;cursor:pointer;">▶</button>
+                        <button class="cv-act-pause" data-id="${vm.id}" style="padding:4px;border:none;border-radius:4px;background:#fbbf2422;color:#fbbf24;cursor:pointer;">⏸</button>
+                        <button class="cv-act-delete" data-id="${vm.id}" style="padding:4px;border:none;border-radius:4px;background:#ef444422;color:#ef4444;cursor:pointer;">🗑</button>
+                    </div>
+                </div>
+            `).join('');
+            list.querySelectorAll('.cv-act-run').forEach(btn => {
+                btn.onclick = () => { const vm = vms.find(v=>v.id===btn.dataset.id); if(vm){vm.status='Running'; render();} };
+            });
+            list.querySelectorAll('.cv-act-pause').forEach(btn => {
+                btn.onclick = () => { const vm = vms.find(v=>v.id===btn.dataset.id); if(vm){vm.status='Paused'; render();} };
+            });
+            list.querySelectorAll('.cv-act-delete').forEach(btn => {
+                btn.onclick = () => { vms = vms.filter(v=>v.id!==btn.dataset.id); render(); };
+            });
+        };
+        document.getElementById('cv-vm-create').onclick = () => {
+            const name = document.getElementById('cv-vm-name').value;
+            const cpu = document.getElementById('cv-vm-cpu').value;
+            const ram = document.getElementById('cv-vm-ram').value;
+            vms.push({ id: Math.random().toString(36).slice(2, 11), name, cpu, ram, status: 'Running' });
+            render();
+        };
+        render();
+    };
+
+    const initCloudDockerSim = (container) => {
+        const AC = '#0ea5e9';
+        container.innerHTML = buildSimHeader('Docker Container Manager', 'Build images and spin up containerized services', '🐳', AC) + `
+        <div style="padding:15px;font-family:var(--font-sans);font-size:13px;display:grid;grid-template-columns:1.2fr 1fr;gap:15px;">
+            <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;">
+                <h4 style="margin:0 0 8px;color:${AC}">Dockerfile</h4>
+                <textarea id="cd-df" style="width:100%;height:100px;background:#1e293b;color:#f8fafc;font-family:monospace;padding:8px;border:1px solid var(--border);border-radius:6px;resize:none;">FROM nginx:latest\nCOPY ./html /usr/share/nginx/html\nEXPOSE 80\nCMD ["nginx", "-g", "daemon off;"]</textarea>
+                <button id="cd-build" style="background:${AC};color:#fff;border:none;padding:8px 12px;border-radius:6px;font-weight:700;margin-top:8px;cursor:pointer;width:100%;">Build & Run</button>
+            </div>
+            <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;display:flex;flex-direction:column;">
+                <h4 style="margin:0 0 8px;color:${AC}">Active Containers</h4>
+                <div id="cd-c-list" style="flex:1;display:flex;flex-direction:column;gap:6px;overflow-y:auto;max-height:160px;">
+                    <div style="color:var(--text-muted);text-align:center;padding:20px;">No containers running</div>
+                </div>
+            </div>
+        </div>`;
+        let containers = [];
+        const render = () => {
+            const list = document.getElementById('cd-c-list');
+            if(!list) return;
+            if(!containers.length) { list.innerHTML = '<div style="color:var(--text-muted);text-align:center;padding:20px;">No containers running</div>'; return; }
+            list.innerHTML = containers.map(c => `
+                <div style="border:1px solid var(--border);border-radius:6px;padding:8px;background:var(--bg-card);font-family:monospace;font-size:11px;">
+                    <b>ID:</b> ${c.id} | <b>Port:</b> ${c.port}<br>
+                    <span style="color:#22c55e">● Up ${c.uptime}s</span>
+                </div>
+            `).join('');
+        };
+        document.getElementById('cd-build').onclick = () => {
+            const id = 'c-' + Math.floor(Math.random()*9000+1000);
+            const port = '8080:' + Math.floor(Math.random()*90+80);
+            containers.push({ id, port, uptime: 0 });
+            render();
+            setInterval(() => {
+                const c = containers.find(x=>x.id===id);
+                if(c) { c.uptime++; render(); }
+            }, 1000);
+        };
+    };
+
+    const initCloudLoadBalancerSim = (container) => {
+        const AC = '#0ea5e9';
+        container.innerHTML = buildSimHeader('Load Balancer Router', 'Distribute client traffic to servers', '⚖️', AC) + `
+        <div style="padding:15px;font-family:var(--font-sans);font-size:13px;display:grid;grid-template-columns:1.2fr 1fr;gap:15px;">
+            <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;">
+                <h4 style="margin:0 0 10px;color:${AC}">Controls</h4>
+                <label>Routing Algorithm: 
+                    <select id="clb-algo" style="width:100%;padding:6px;border:1px solid var(--border);border-radius:4px;background:var(--bg-card);color:var(--text-main);margin-bottom:10px;">
+                        <option value="rr">Round Robin</option>
+                        <option value="random">Random Selection</option>
+                    </select>
+                </label>
+                <button id="clb-send" style="background:${AC};color:#fff;border:none;padding:8px 12px;border-radius:6px;font-weight:700;cursor:pointer;width:100%;">Send Client Request</button>
+            </div>
+            <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;">
+                <h4 style="margin:0 0 10px;color:${AC}">Server Pool</h4>
+                <div style="display:flex;flex-direction:column;gap:8px;">
+                    <div id="clb-s0" style="border:1px solid var(--border);border-radius:6px;padding:8px;text-align:center;"><b>Server A</b> (Reqs: <span class="req">0</span>)</div>
+                    <div id="clb-s1" style="border:1px solid var(--border);border-radius:6px;padding:8px;text-align:center;"><b>Server B</b> (Reqs: <span class="req">0</span>)</div>
+                    <div id="clb-s2" style="border:1px solid var(--border);border-radius:6px;padding:8px;text-align:center;"><b>Server C</b> (Reqs: <span class="req">0</span>)</div>
+                </div>
+            </div>
+        </div>`;
+        let reqs = [0, 0, 0]; let rrIdx = 0;
+        document.getElementById('clb-send').onclick = () => {
+            const algo = document.getElementById('clb-algo').value;
+            let target = 0;
+            if (algo === 'rr') {
+                target = rrIdx;
+                rrIdx = (rrIdx + 1) % 3;
+            } else {
+                target = Math.floor(Math.random()*3);
+            }
+            reqs[target]++;
+            const sEl = document.getElementById(`clb-s${target}`);
+            sEl.querySelector('.req').textContent = reqs[target];
+            sEl.style.background = AC + '22';
+            setTimeout(() => { sEl.style.background = ''; }, 300);
+        };
+    };
+
+    const initCloudAutoScalingSim = (container) => {
+        const AC = '#0ea5e9';
+        container.innerHTML = buildSimHeader('Auto-Scaling Engine', 'Dynamic resource provisioning based on CPU load', '📈', AC) + `
+        <div style="padding:15px;font-family:var(--font-sans);font-size:13px;display:grid;grid-template-columns:1fr 1.2fr;gap:15px;">
+            <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;">
+                <h4 style="margin:0 0 10px;color:${AC}">Scale Controller</h4>
+                <div style="font-weight:700;margin-bottom:6px;">Current Load: <span id="cas-load-txt">30%</span></div>
+                <input id="cas-load" type="range" min="10" max="100" value="30" style="width:100%;accent-color:${AC};">
+                <div style="margin-top:10px;font-size:11px;color:var(--text-muted);">
+                    Thresholds:<br>
+                    ● CPU > 75% -> Scale Out (+1 Node)<br>
+                    ● CPU < 25% -> Scale In (-1 Node, Min: 1)
+                </div>
+            </div>
+            <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;">
+                <h4 style="margin:0 0 10px;color:${AC}">Cluster Nodes</h4>
+                <div id="cas-nodes" style="display:flex;gap:8px;flex-wrap:wrap;"></div>
+            </div>
+        </div>`;
+        let nodes = 1;
+        const render = () => {
+            const containerNodes = document.getElementById('cas-nodes');
+            if(!containerNodes) return;
+            containerNodes.innerHTML = Array(nodes).fill(0).map((_,i) => `
+                <div style="border:1.5px solid ${AC};border-radius:8px;padding:12px;background:var(--bg-card);text-align:center;width:60px;">
+                    <div style="font-size:20px;">🖥️</div>
+                    <span style="font-size:10px;font-weight:700;color:${AC}">Node-${i+1}</span>
+                </div>
+            `).join('');
+        };
+        document.getElementById('cas-load').oninput = (e) => {
+            const val = parseInt(e.target.value);
+            document.getElementById('cas-load-txt').textContent = val + '%';
+            if (val > 75 && nodes < 4) {
+                nodes++;
+                render();
+            } else if (val < 25 && nodes > 1) {
+                nodes--;
+                render();
+            }
+        };
+        render();
+    };
+
+    const initCloudStorageSim = (container) => {
+        const AC = '#0ea5e9';
+        container.innerHTML = buildSimHeader('Distributed Object Storage', 'Upload objects and replicate data across Availability Zones', '📦', AC) + `
+        <div style="padding:15px;font-family:var(--font-sans);font-size:13px;display:grid;grid-template-columns:1fr 1.2fr;gap:15px;">
+            <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;">
+                <h4 style="margin:0 0 10px;color:${AC}">Upload Object</h4>
+                <label>File Name: <input id="cs-file-name" value="report.pdf" style="width:100%;padding:6px;border:1px solid var(--border);border-radius:4px;background:var(--bg-card);color:var(--text-main);margin-bottom:8px;"></label>
+                <button id="cs-upload" style="background:${AC};color:#fff;border:none;padding:8px 12px;border-radius:6px;font-weight:700;cursor:pointer;width:100%;">Upload & Replicate</button>
+            </div>
+            <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;">
+                <h4 style="margin:0 0 10px;color:${AC}">Bucket (Replicated Zones)</h4>
+                <div style="display:flex;flex-direction:column;gap:8px;">
+                    <div style="border:1px solid var(--border);border-radius:6px;padding:8px;"><b>Zone A (US-East-1a):</b> <span id="cs-z0" style="color:var(--text-muted)">Empty</span></div>
+                    <div style="border:1px solid var(--border);border-radius:6px;padding:8px;"><b>Zone B (US-East-1b):</b> <span id="cs-z1" style="color:var(--text-muted)">Empty</span></div>
+                    <div style="border:1px solid var(--border);border-radius:6px;padding:8px;"><b>Zone C (US-East-1c):</b> <span id="cs-z2" style="color:var(--text-muted)">Empty</span></div>
+                </div>
+            </div>
+        </div>`;
+        document.getElementById('cs-upload').onclick = () => {
+            const fname = document.getElementById('cs-file-name').value;
+            for(let i=0;i<3;i++) {
+                const el = document.getElementById(`cs-z${i}`);
+                el.style.color = '#fbbf24';
+                el.textContent = 'Syncing...';
+                setTimeout(() => {
+                    el.style.color = '#22c55e';
+                    el.textContent = `Synced: ${fname}`;
+                }, (i+1)*400);
+            }
+        };
+    };
+
+    const initCloudCdnSim = (container) => {
+        const AC = '#0ea5e9';
+        container.innerHTML = buildSimHeader('CDN Cache Manager', 'Cache static assets on global edge servers', '🌐', AC) + `
+        <div style="padding:15px;font-family:var(--font-sans);font-size:13px;display:grid;grid-template-columns:1fr 1fr;gap:15px;">
+            <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center;">
+                <h4 style="margin:0 0 10px;color:${AC}">Global Clients</h4>
+                <div style="display:flex;flex-direction:column;gap:6px;">
+                    <button class="cdn-fetch" data-city="New York" style="padding:6px;border:1px solid ${AC};background:transparent;color:${AC};border-radius:4px;cursor:pointer;width:100%;">Fetch from NY Edge</button>
+                    <button class="cdn-fetch" data-city="London" style="padding:6px;border:1px solid ${AC};background:transparent;color:${AC};border-radius:4px;cursor:pointer;width:100%;">Fetch from London Edge</button>
+                    <button class="cdn-fetch" data-city="Tokyo" style="padding:6px;border:1px solid ${AC};background:transparent;color:${AC};border-radius:4px;cursor:pointer;width:100%;">Fetch from Tokyo Edge</button>
+                </div>
+            </div>
+            <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;">
+                <h4 style="margin:0 0 10px;color:${AC}">Fetch Log</h4>
+                <div id="cdn-log" style="font-family:monospace;font-size:11px;line-height:1.6;overflow-y:auto;max-height:150px;"></div>
+            </div>
+        </div>`;
+        const cache = {};
+        container.querySelectorAll('.cdn-fetch').forEach(btn => {
+            btn.onclick = () => {
+                const city = btn.getAttribute('data-city');
+                const log = document.getElementById('cdn-log');
+                if (cache[city]) {
+                    log.innerHTML += `<div style="color:#22c55e">● Cache HIT at ${city} Edge (12ms)</div>`;
+                } else {
+                    cache[city] = true;
+                    log.innerHTML += `<div style="color:#ef4444">○ Cache MISS at ${city} Edge -> Origin Fetch (240ms)</div>`;
+                }
+                log.scrollTop = log.scrollHeight;
+            };
+        });
+    };
+
+    const initCloudIamSim = (container) => {
+        const AC = '#0ea5e9';
+        container.innerHTML = buildSimHeader('IAM Identity Broker', 'Define users, policies, and test access control', '🔑', AC) + `
+        <div style="padding:15px;font-family:var(--font-sans);font-size:13px;display:grid;grid-template-columns:1fr 1fr;gap:15px;">
+            <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;">
+                <h4 style="margin:0 0 8px;color:${AC}">IAM Policy</h4>
+                <label>User: 
+                    <select id="iam-user" style="width:100%;padding:4px;border:1px solid var(--border);border-radius:4px;background:var(--bg-card);color:var(--text-main);margin-bottom:8px;">
+                        <option value="admin">AdminUser</option>
+                        <option value="readOnly">ReadOnlyUser</option>
+                    </select>
+                </label>
+                <label>Resource:
+                    <select id="iam-resource" style="width:100%;padding:4px;border:1px solid var(--border);border-radius:4px;background:var(--bg-card);color:var(--text-main);margin-bottom:8px;">
+                        <option value="s3">S3 Bucket</option>
+                        <option value="ec2">EC2 Instance</option>
+                    </select>
+                </label>
+                <label>Action:
+                    <select id="iam-action" style="width:100%;padding:4px;border:1px solid var(--border);border-radius:4px;background:var(--bg-card);color:var(--text-main);margin-bottom:8px;">
+                        <option value="read">GetObject / Read</option>
+                        <option value="write">DeleteObject / Terminate</option>
+                    </select>
+                </label>
+                <button id="iam-test" style="background:${AC};color:#fff;border:none;padding:8px 12px;border-radius:6px;font-weight:700;cursor:pointer;width:100%;">Test Authorization</button>
+            </div>
+            <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;">
+                <div id="iam-result-icon" style="font-size:48px;">🔒</div>
+                <div id="iam-result-text" style="font-weight:700;margin-top:10px;">Configure and test access rules</div>
+            </div>
+        </div>`;
+        document.getElementById('iam-test').onclick = () => {
+            const user = document.getElementById('iam-user').value;
+            const res = document.getElementById('iam-resource').value;
+            const act = document.getElementById('iam-action').value;
+            const rIcon = document.getElementById('iam-result-icon');
+            const rText = document.getElementById('iam-result-text');
+            if (user === 'admin' || (user === 'readOnly' && act === 'read')) {
+                rIcon.textContent = '🔓';
+                rText.innerHTML = '<span style="color:#22c55e">Access ALLOWED</span>';
+            } else {
+                rIcon.textContent = '❌';
+                rText.innerHTML = '<span style="color:#ef4444">Access DENIED</span><br><span style="font-size:11px;color:var(--text-muted);">Missing permission policy</span>';
+            }
+        };
+    };
+
+    const initCloudServerlessSim = (container) => {
+        const AC = '#0ea5e9';
+        container.innerHTML = buildSimHeader('Serverless FaaS Sandbox', 'Deploy event-driven functions and monitor cold starts', '⚡', AC) + `
+        <div style="padding:15px;font-family:var(--font-sans);font-size:13px;display:grid;grid-template-columns:1.2fr 1fr;gap:15px;">
+            <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;">
+                <h4 style="margin:0 0 8px;color:${AC}">Handler Code (Node.js)</h4>
+                <textarea id="cf-code" style="width:100%;height:100px;background:#1e293b;color:#f8fafc;font-family:monospace;padding:8px;border:1px solid var(--border);border-radius:6px;resize:none;">exports.handler = async (event) => {\n    const name = event.name || 'World';\n    return { greeting: \`Hello, \${name}!\` };\n};</textarea>
+                <button id="cf-deploy" style="background:${AC};color:#fff;border:none;padding:8px 12px;border-radius:6px;font-weight:700;margin-top:8px;cursor:pointer;width:100%;">Trigger Execution</button>
+            </div>
+            <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;font-family:monospace;font-size:11px;">
+                <h4 style="margin:0 0 10px;color:${AC};font-family:var(--font-sans);">Invocation Metrics</h4>
+                <div id="cf-metrics" style="line-height:2;">
+                    Status: <span class="val">Idle</span><br>
+                    Latency: <span class="val">N/A</span><br>
+                    Response: <span class="val">N/A</span>
+                </div>
+            </div>
+        </div>`;
+        let cold = true;
+        document.getElementById('cf-deploy').onclick = () => {
+            const mEl = document.getElementById('cf-metrics');
+            const latency = cold ? Math.floor(Math.random()*250+150) + 'ms (Cold Start)' : Math.floor(Math.random()*15+3) + 'ms (Warm)';
+            cold = false;
+            mEl.innerHTML = `
+                Status: <span style="color:#22c55e">● Success (200)</span><br>
+                Latency: <span style="color:${cold?'#fbbf24':'#22c55e'}">${latency}</span><br>
+                Response: <span style="color:#0ea5e9">{ "greeting": "Hello, World!" }</span>
+            `;
+            setTimeout(() => { cold = true; }, 8000);
+        };
+    };
+
+    const initCloudSlaSim = (container) => {
+        const AC = '#0ea5e9';
+        container.innerHTML = buildSimHeader('SLA Monitoring Dashboard', 'Simulate system load and measure reliability thresholds', '📊', AC) + `
+        <div style="padding:15px;font-family:var(--font-sans);font-size:13px;display:grid;grid-template-columns:1fr 1.2fr;gap:15px;">
+            <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;">
+                <h4 style="margin:0 0 10px;color:${AC}">SLA Metric Options</h4>
+                <button id="csla-normal" style="background:#22c55e;color:#fff;border:none;padding:6px;border-radius:4px;cursor:pointer;width:100%;margin-bottom:8px;font-weight:700;">Simulate Normal Traffic</button>
+                <button id="csla-fail" style="background:#ef4444;color:#fff;border:none;padding:6px;border-radius:4px;cursor:pointer;width:100%;font-weight:700;">Trigger Server Failover</button>
+            </div>
+            <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;line-height:2.2;">
+                <h4 style="margin:0 0 10px;color:${AC}">Service Status</h4>
+                Uptime SLA: <b style="color:#22c55e">99.99%</b><br>
+                Current Availability: <b id="csla-avail" style="color:#22c55e">100%</b><br>
+                Active Status: <span id="csla-status" style="color:#22c55e;font-weight:700;">Healthy</span>
+            </div>
+        </div>`;
+        document.getElementById('csla-normal').onclick = () => {
+            document.getElementById('csla-avail').textContent = '100%';
+            document.getElementById('csla-avail').style.color = '#22c55e';
+            document.getElementById('csla-status').textContent = 'Healthy';
+            document.getElementById('csla-status').style.color = '#22c55e';
+        };
+        document.getElementById('csla-fail').onclick = () => {
+            document.getElementById('csla-avail').textContent = '99.85%';
+            document.getElementById('csla-avail').style.color = '#ef4444';
+            document.getElementById('csla-status').textContent = 'Failing over to US-West backup...';
+            document.getElementById('csla-status').style.color = '#fbbf24';
+            setTimeout(() => {
+                document.getElementById('csla-status').textContent = 'Recovered (Multi-AZ redundant)';
+                document.getElementById('csla-status').style.color = '#22c55e';
+            }, 1500);
+        };
+    };
+
+    const initCloudMapReduceSim = (container) => {
+        const AC = '#0ea5e9';
+        container.innerHTML = buildSimHeader('MapReduce Cluster Console', 'Distribute computation tasks to Map/Reduce worker nodes', '🔀', AC) + `
+        <div style="padding:15px;font-family:var(--font-sans);font-size:13px;display:grid;grid-template-columns:1fr 1fr;gap:15px;">
+            <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;">
+                <h4 style="margin:0 0 8px;color:${AC}">Dataset Input</h4>
+                <textarea id="cmr-input" style="width:100%;height:80px;background:var(--bg-card);color:var(--text-main);padding:6px;border:1px solid var(--border);border-radius:4px;resize:none;font-family:monospace;">cloud docker cloud kubernetes docker</textarea>
+                <button id="cmr-run" style="background:${AC};color:#fff;border:none;padding:8px 12px;border-radius:6px;font-weight:700;margin-top:8px;cursor:pointer;width:100%;">Run MapReduce Jobs</button>
+            </div>
+            <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;">
+                <h4 style="margin:0 0 8px;color:${AC}">Map & Reduce Output</h4>
+                <div id="cmr-out" style="font-family:monospace;font-size:11px;overflow-y:auto;max-height:140px;line-height:1.8;"></div>
+            </div>
+        </div>`;
+        document.getElementById('cmr-run').onclick = () => {
+            const val = document.getElementById('cmr-input').value;
+            const words = val.trim().split(/\s+/);
+            const out = document.getElementById('cmr-out');
+            out.innerHTML = '<b>Mapping...</b><br>';
+            const mapping = words.map(w=>`(${w}, 1)`).join(', ');
+            out.innerHTML += `<span style="color:var(--text-muted)">${mapping}</span><br>`;
+            setTimeout(() => {
+                out.innerHTML += '<b style="color:#0ea5e9">Reducing & Aggregating...</b><br>';
+                const counts = {};
+                words.forEach(w => counts[w] = (counts[w] || 0) + 1);
+                out.innerHTML += Object.keys(counts).map(k=>`<b>${k}:</b> ${counts[k]}`).join('<br>');
+            }, 1000);
+        };
+    };
+
+    const initCloudKubernetesSim = (container) => {
+        const AC = '#0ea5e9';
+        container.innerHTML = buildSimHeader('K8s Cluster Scheduler', 'Assign application pods to worker nodes based on CPU limits', '☸️', AC) + `
+        <div style="padding:15px;font-family:var(--font-sans);font-size:13px;display:grid;grid-template-columns:1fr 1.2fr;gap:15px;">
+            <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;">
+                <h4 style="margin:0 0 10px;color:${AC}">Schedule Pod</h4>
+                <label>Pod Name: <input id="ck-name" value="web-app" style="width:100%;padding:4px;border:1px solid var(--border);border-radius:4px;background:var(--bg-card);color:var(--text-main);margin-bottom:8px;"></label>
+                <label>CPU Requested: 
+                    <select id="ck-cpu" style="width:100%;padding:4px;border:1px solid var(--border);border-radius:4px;background:var(--bg-card);color:var(--text-main);margin-bottom:10px;">
+                        <option value="1">1 Core</option>
+                        <option value="2">2 Cores</option>
+                    </select>
+                </label>
+                <button id="ck-sched" style="background:${AC};color:#fff;border:none;padding:8px 12px;border-radius:6px;font-weight:700;cursor:pointer;width:100%;">Schedule Pod</button>
+            </div>
+            <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;">
+                <h4 style="margin:0 0 10px;color:${AC}">Worker Nodes</h4>
+                <div style="display:flex;flex-direction:column;gap:8px;">
+                    <div style="border:1px solid var(--border);border-radius:6px;padding:8px;"><b>Node A (CPU: 2/4 used):</b> <div id="ck-n0" style="display:flex;gap:4px;margin-top:4px;"></div></div>
+                    <div style="border:1px solid var(--border);border-radius:6px;padding:8px;"><b>Node B (CPU: 1/4 used):</b> <div id="ck-n1" style="display:flex;gap:4px;margin-top:4px;"></div></div>
+                </div>
+            </div>
+        </div>`;
+        let n0 = 2; let n1 = 1;
+        document.getElementById('ck-sched').onclick = () => {
+            const cpu = parseInt(document.getElementById('ck-cpu').value);
+            const name = document.getElementById('ck-name').value;
+            let targetNode = null;
+            if (n0 + cpu <= 4) {
+                targetNode = 0;
+                n0 += cpu;
+            } else if (n1 + cpu <= 4) {
+                targetNode = 1;
+                n1 += cpu;
+            }
+            if (targetNode !== null) {
+                const el = document.getElementById(`ck-n${targetNode}`);
+                el.innerHTML += `<span style="background:${AC}40;color:${AC};border:1px solid ${AC};padding:2px 6px;border-radius:4px;font-size:10px;">${name} (\${cpu}C)</span>`;
+            } else {
+                alert('Out of scheduling capacity! Scale cluster node pool.');
+            }
+        };
+    };
+
+    // ── CYBERSECURITY SIMULATIONS ────────────────────────────────────────
+    const initCyberCaesarSim = (container) => {
+        const AC = '#ef4444';
+        container.innerHTML = buildSimHeader('Caesar & ROT13 Encryption', 'Shift characters along the alphabet ring', '🔐', AC) + `
+        <div style="padding:15px;font-family:var(--font-sans);font-size:13px;display:grid;grid-template-columns:1fr 1.2fr;gap:15px;">
+            <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;">
+                <h4 style="margin:0 0 8px;color:${AC}">Config</h4>
+                <label>Key Shift: <input id="cc-shift" type="number" min="1" max="25" value="3" style="width:100%;padding:4px;border:1px solid var(--border);border-radius:4px;background:var(--bg-card);color:var(--text-main);margin-bottom:8px;"></label>
+                <label>Plain Text: <input id="cc-plain" value="HELLO" style="width:100%;padding:6px;border:1px solid var(--border);border-radius:4px;background:var(--bg-card);color:var(--text-main);"></label>
+            </div>
+            <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;line-height:2.2;">
+                <h4 style="margin:0 0 10px;color:${AC}">Cipher Text Output</h4>
+                Ciphered Text: <b id="cc-cipher" style="color:${AC};font-size:16px;">KHOOR</b><br>
+                Formula: C = (P + K) mod 26
+            </div>
+        </div>`;
+        const run = () => {
+            const shift = parseInt(document.getElementById('cc-shift').value) || 0;
+            const plain = document.getElementById('cc-plain').value.toUpperCase();
+            let c = '';
+            for(let i=0;i<plain.length;i++){
+                const code = plain.charCodeAt(i);
+                if(code >= 65 && code <= 90) {
+                    c += String.fromCharCode(((code - 65 + shift) % 26) + 65);
+                } else {
+                    c += plain.charAt(i);
+                }
+            }
+            document.getElementById('cc-cipher').textContent = c;
+        };
+        document.getElementById('cc-shift').oninput = run;
+        document.getElementById('cc-plain').oninput = run;
+    };
+
+    const initCyberVigenereSim = (container) => {
+        const AC = '#ef4444';
+        container.innerHTML = buildSimHeader('Vigenère Polyalphabetic Cipher', 'Encrypt data using a repeating string key matrix', '🔐', AC) + `
+        <div style="padding:15px;font-family:var(--font-sans);font-size:13px;display:grid;grid-template-columns:1fr 1.2fr;gap:15px;">
+            <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;">
+                <h4 style="margin:0 0 8px;color:${AC}">Input Parameters</h4>
+                <label>Secret Key: <input id="cvig-key" value="KEY" style="width:100%;padding:4px;border:1px solid var(--border);border-radius:4px;background:var(--bg-card);color:var(--text-main);margin-bottom:8px;"></label>
+                <label>Plain Text: <input id="cvig-plain" value="ATTACK" style="width:100%;padding:6px;border:1px solid var(--border);border-radius:4px;background:var(--bg-card);color:var(--text-main);"></label>
+            </div>
+            <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;line-height:2;">
+                <h4 style="margin:0 0 10px;color:${AC}">Encryption Output</h4>
+                Repeated Key: <span id="cvig-repkey" style="font-family:monospace;">KEYKEY</span><br>
+                Ciphered Text: <b id="cvig-cipher" style="color:${AC};font-size:15px;">KXRECK</b>
+            </div>
+        </div>`;
+        const run = () => {
+            const key = document.getElementById('cvig-key').value.toUpperCase().replace(/[^A-Z]/g,'');
+            const plain = document.getElementById('cvig-plain').value.toUpperCase().replace(/[^A-Z]/g,'');
+            if(!key.length || !plain.length) return;
+            let repKey = ''; let cipher = '';
+            for(let i=0;i<plain.length;i++){
+                const kChar = key.charCodeAt(i % key.length) - 65;
+                const pChar = plain.charCodeAt(i) - 65;
+                repKey += key.charAt(i % key.length);
+                cipher += String.fromCharCode(((pChar + kChar) % 26) + 65);
+            }
+            document.getElementById('cvig-repkey').textContent = repKey;
+            document.getElementById('cvig-cipher').textContent = cipher;
+        };
+        document.getElementById('cvig-key').oninput = run;
+        document.getElementById('cvig-plain').oninput = run;
+    };
+
+    const initCyberRsaSim = (container) => {
+        const AC = '#ef4444';
+        container.innerHTML = buildSimHeader('RSA Asymmetric Cipher', 'Simulate key pair derivation and encrypt messages', '🔐', AC) + `
+        <div style="padding:15px;font-family:var(--font-sans);font-size:13px;display:grid;grid-template-columns:1fr 1fr;gap:15px;">
+            <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;">
+                <h4 style="margin:0 0 8px;color:${AC}">Key Generation</h4>
+                Prime p: <b>3</b>, q: <b>11</b><br>
+                n = p * q = <b>33</b><br>
+                phi(n) = <b>20</b><br>
+                Public Exponent e: <b>3</b><br>
+                Private Key d: <b>7</b> (as 3*7 = 21 = 1 mod phi)<br>
+                <div style="border-top:1px solid var(--border);margin-top:8px;padding-top:8px;">
+                    Input digit (msg < 33): <input id="crsa-msg" type="number" value="5" min="1" max="32" style="width:60px;padding:4px;background:var(--bg-card);color:var(--text-main);border:1px solid var(--border);border-radius:4px;">
+                </div>
+            </div>
+            <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;line-height:2;">
+                <h4 style="margin:0 0 10px;color:${AC}">RSA Logic Flow</h4>
+                1. Ciphertext C = M^e mod n<br>
+                &nbsp;&nbsp; Ciphertext = <b><span id="crsa-c">126</span></b><br>
+                2. Plaintext M = C^d mod n<br>
+                &nbsp;&nbsp; Decrypted = <b><span id="crsa-d">5</span></b>
+            </div>
+        </div>`;
+        const run = () => {
+            const m = parseInt(document.getElementById('crsa-msg').value) || 0;
+            const e = 3; const n = 33; const d = 7;
+            let c = 1;
+            for(let i=0;i<e;i++) c = (c * m) % n;
+            let plain = 1;
+            for(let i=0;i<d;i++) plain = (plain * c) % n;
+            document.getElementById('crsa-c').textContent = c;
+            document.getElementById('crsa-d').textContent = plain;
+        };
+        document.getElementById('crsa-msg').oninput = run;
+        run();
+    };
+
+    const initCyberAesSim = (container) => {
+        const AC = '#ef4444';
+        container.innerHTML = buildSimHeader('AES Symmetric Round Block', 'Observe diffusion and confusion block operations', '🔐', AC) + `
+        <div style="padding:15px;font-family:var(--font-sans);font-size:13px;display:grid;grid-template-columns:1.2fr 1fr;gap:15px;">
+            <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;">
+                <h4 style="margin:0 0 10px;color:${AC}">Round 1 Substitution State</h4>
+                <div style="display:grid;grid-template-columns:repeat(4, 1fr);gap:4px;font-family:monospace;max-width:180px;margin:10px auto;">
+                    <div style="border:1px solid var(--border);padding:8px;text-align:center;">19</div>
+                    <div style="border:1px solid var(--border);padding:8px;text-align:center;background:#ef444433;">3D</div>
+                    <div style="border:1px solid var(--border);padding:8px;text-align:center;">E2</div>
+                    <div style="border:1px solid var(--border);padding:8px;text-align:center;">9A</div>
+                    <div style="border:1px solid var(--border);padding:8px;text-align:center;">09</div>
+                    <div style="border:1px solid var(--border);padding:8px;text-align:center;">F4</div>
+                    <div style="border:1px solid var(--border);padding:8px;text-align:center;">AB</div>
+                    <div style="border:1px solid var(--border);padding:8px;text-align:center;">7C</div>
+                    <div style="border:1px solid var(--border);padding:8px;text-align:center;">55</div>
+                    <div style="border:1px solid var(--border);padding:8px;text-align:center;">3A</div>
+                    <div style="border:1px solid var(--border);padding:8px;text-align:center;">8B</div>
+                    <div style="border:1px solid var(--border);padding:8px;text-align:center;">D3</div>
+                    <div style="border:1px solid var(--border);padding:8px;text-align:center;">22</div>
+                    <div style="border:1px solid var(--border);padding:8px;text-align:center;">8A</div>
+                    <div style="border:1px solid var(--border);padding:8px;text-align:center;">C1</div>
+                    <div style="border:1px solid var(--border);padding:8px;text-align:center;">0F</div>
+                </div>
+            </div>
+            <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:8px;">
+                <h4 style="margin:0 0 5px;color:${AC}">AES Round Ops</h4>
+                <button id="caes-sub" style="background:${AC};color:#fff;border:none;padding:6px;border-radius:4px;cursor:pointer;font-weight:700;">1. SubBytes</button>
+                <button id="caes-shift" style="background:${AC};color:#fff;border:none;padding:6px;border-radius:4px;cursor:pointer;font-weight:700;">2. ShiftRows</button>
+                <button id="caes-mix" style="background:${AC};color:#fff;border:none;padding:6px;border-radius:4px;cursor:pointer;font-weight:700;">3. MixColumns</button>
+                <div id="caes-log" style="font-size:11px;font-family:monospace;margin-top:6px;color:var(--text-muted);">Click a round step to execute transformation</div>
+            </div>
+        </div>`;
+        document.getElementById('caes-sub').onclick = () => { document.getElementById('caes-log').textContent = 'S-Box transformation applied: replaced bytes with Rijndael lookup mapping.'; };
+        document.getElementById('caes-shift').onclick = () => { document.getElementById('caes-log').textContent = 'Row offsets applied: Row 1 left-shifted 1 byte, Row 2 by 2 bytes, Row 3 by 3 bytes.'; };
+        document.getElementById('caes-mix').onclick = () => { document.getElementById('caes-log').textContent = 'Linear mapping applied: multiplied matrix columns against constant MDS matrix.'; };
+    };
+
+    const initCyberHashingSim = (container) => {
+        const AC = '#ef4444';
+        container.innerHTML = buildSimHeader('Integrity Hashes & Avalanche Effect', 'Produce cryptographic signatures of data', '🔐', AC) + `
+        <div style="padding:15px;font-family:var(--font-sans);font-size:13px;display:grid;grid-template-columns:1.2fr 1fr;gap:15px;">
+            <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;">
+                <h4 style="margin:0 0 10px;color:${AC}">Input Message</h4>
+                <textarea id="chash-msg" style="width:100%;height:80px;background:var(--bg-card);color:var(--text-main);padding:6px;border:1px solid var(--border);border-radius:4px;resize:none;">SecretPass</textarea>
+            </div>
+            <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;line-height:2.2;font-family:monospace;font-size:11px;">
+                <h4 style="margin:0 0 10px;color:${AC};font-family:var(--font-sans);">Hash Signatures</h4>
+                MD5:<br><b id="chash-md5" style="color:${AC}">a782b1c6d3e4...</b><br>
+                SHA-256:<br><b id="chash-sha2" style="color:${AC}">2c74a9f8b1c5e...</b>
+            </div>
+        </div>`;
+        const simpleHash = (str, len) => {
+            let h = 0;
+            for(let i=0;i<str.length;i++) h = (h * 31 + str.charCodeAt(i)) & 0xffffffff;
+            let res = Math.abs(h).toString(16);
+            while(res.length < len) res += 'a';
+            return res.substring(0, len);
+        };
+        const run = () => {
+            const val = document.getElementById('chash-msg').value;
+            document.getElementById('chash-md5').textContent = simpleHash(val, 32);
+            document.getElementById('chash-sha2').textContent = simpleHash(val + 'sha2', 64);
+        };
+        document.getElementById('chash-msg').oninput = run;
+        run();
+    };
+
+    const initCyberFirewallSim = (container) => {
+        const AC = '#ef4444';
+        container.innerHTML = buildSimHeader('Firewall Inspection Engine', 'Apply access control rules to filter packets', '🛡️', AC) + `
+        <div style="padding:15px;font-family:var(--font-sans);font-size:13px;display:grid;grid-template-columns:1fr 1fr;gap:15px;">
+            <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;">
+                <h4 style="margin:0 0 10px;color:${AC}">Active Policy</h4>
+                <div style="line-height:1.8;font-family:monospace;font-size:11px;margin-bottom:10px;">
+                    1. ALLOW TCP PORT 80/443 (HTTP)<br>
+                    2. ALLOW UDP PORT 53 (DNS)<br>
+                    3. DENY ALL OTHER PACKETS
+                </div>
+                <div style="border-top:1px solid var(--border);padding-top:8px;">
+                    Target Port: <input id="cfw-port" type="number" value="80" style="width:60px;padding:4px;background:var(--bg-card);color:var(--text-main);border:1px solid var(--border);border-radius:4px;">
+                </div>
+                <button id="cfw-test" style="background:${AC};color:#fff;border:none;padding:8px;border-radius:6px;font-weight:700;margin-top:8px;cursor:pointer;width:100%;">Inject Packet</button>
+            </div>
+            <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;">
+                <div id="cfw-res-icon" style="font-size:42px;">🟢</div>
+                <div id="cfw-res-txt" style="font-weight:700;margin-top:10px;">Packet status logs</div>
+            </div>
+        </div>`;
+        document.getElementById('cfw-test').onclick = () => {
+            const port = parseInt(document.getElementById('cfw-port').value);
+            const icon = document.getElementById('cfw-res-icon');
+            const txt = document.getElementById('cfw-res-txt');
+            if (port === 80 || port === 443 || port === 53) {
+                icon.textContent = '🟢';
+                txt.innerHTML = `<span style="color:#22c55e;font-weight:700;">PASS</span><br><span style="font-size:11px;color:var(--text-muted)">Matched port rule allowed</span>`;
+            } else {
+                icon.textContent = '🔴';
+                txt.innerHTML = `<span style="color:#ef4444;font-weight:700;">BLOCKED & DROPPED</span><br><span style="font-size:11px;color:var(--text-muted)">Default deny rule hit</span>`;
+            }
+        };
+    };
+
+    const initCyberIdsSim = (container) => {
+        const AC = '#ef4444';
+        container.innerHTML = buildSimHeader('IDS Pattern Alerts', 'Monitor raw socket streams for attack patterns', '🚨', AC) + `
+        <div style="padding:15px;font-family:var(--font-sans);font-size:13px;display:grid;grid-template-columns:1fr 1fr;gap:15px;">
+            <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center;">
+                <h4 style="margin:0 0 10px;color:${AC}">Trigger Signatures</h4>
+                <div style="display:flex;flex-direction:column;gap:6px;">
+                    <button class="ids-trigger" data-type="sqli" style="padding:6px;border:1px solid ${AC};background:transparent;color:${AC};border-radius:4px;cursor:pointer;width:100%;">Inject SQL injection payload</button>
+                    <button class="ids-trigger" data-type="ping" style="padding:6px;border:1px solid ${AC};background:transparent;color:${AC};border-radius:4px;cursor:pointer;width:100%;">Inject ICMP flood scan</button>
+                </div>
+            </div>
+            <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;">
+                <h4 style="margin:0 0 8px;color:${AC}">IDS Console Logging</h4>
+                <div id="ids-log" style="font-family:monospace;font-size:11px;line-height:1.6;overflow-y:auto;max-height:150px;"></div>
+            </div>
+        </div>`;
+        container.querySelectorAll('.ids-trigger').forEach(btn => {
+            btn.onclick = () => {
+                const type = btn.getAttribute('data-type');
+                const log = document.getElementById('ids-log');
+                const time = new Date().toLocaleTimeString();
+                if (type === 'sqli') {
+                    log.innerHTML += `<div style="color:#ef4444">[${time}] ALERT: SQLi attempt - Match (' OR '1'='1)</div>`;
+                } else {
+                    log.innerHTML += `<div style="color:#fbbf24">[${time}] ALERT: PortScan - Match (ICMP ping flood)</div>`;
+                }
+                log.scrollTop = log.scrollHeight;
+            };
+        });
+    };
+
+    const initCyberSqlInjectSim = (container) => {
+        const AC = '#ef4444';
+        container.innerHTML = buildSimHeader('SQL Injection Attack Sandbox', 'Bypass authentication checks using SQL payloads', '🔐', AC) + `
+        <div style="padding:15px;font-family:var(--font-sans);font-size:13px;display:grid;grid-template-columns:1fr 1fr;gap:15px;">
+            <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;">
+                <h4 style="margin:0 0 10px;color:${AC}">Admin Login Portal</h4>
+                <label>User: <input id="sqli-user" value="admin" style="width:100%;padding:4px;border:1px solid var(--border);border-radius:4px;background:var(--bg-card);color:var(--text-main);margin-bottom:6px;"></label>
+                <label>Pass: <input id="sqli-pass" value="password" style="width:100%;padding:4px;border:1px solid var(--border);border-radius:4px;background:var(--bg-card);color:var(--text-main);margin-bottom:8px;"></label>
+                <button id="sqli-login" style="background:${AC};color:#fff;border:none;padding:8px;border-radius:6px;font-weight:700;cursor:pointer;width:100%;">Authenticate</button>
+            </div>
+            <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;font-family:monospace;font-size:11px;line-height:1.6;">
+                <h4 style="margin:0 0 8px;color:${AC};font-family:var(--font-sans);">DB Query Monitor</h4>
+                SQL Query Executed:<br>
+                <span id="sqli-query" style="color:var(--text-muted)">SELECT * FROM users WHERE user='admin' AND pass='password';</span><br><br>
+                Result: <b id="sqli-res" style="color:#ef4444">Access Denied (Fail)</b>
+            </div>
+        </div>`;
+        const run = () => {
+            const user = document.getElementById('sqli-user').value;
+            const pass = document.getElementById('sqli-pass').value;
+            const query = `SELECT * FROM users WHERE user='\${user}' AND pass='\${pass}';`;
+            document.getElementById('sqli-query').textContent = query;
+            const isInject = user.includes("'") || pass.includes("'");
+            if (isInject) {
+                document.getElementById('sqli-res').innerHTML = '<span style="color:#22c55e">SUCCESS: Authenticated as Admin! (Bypassed)</span>';
+            } else {
+                document.getElementById('sqli-res').innerHTML = '<span style="color:#ef4444">Access Denied (Fail)</span>';
+            }
+        };
+        document.getElementById('sqli-login').onclick = run;
+    };
+
+    const initCyberXssSim = (container) => {
+        const AC = '#ef4444';
+        container.innerHTML = buildSimHeader('Cross-Site Scripting (XSS)', 'Observe script injection and output sanitization', '🔐', AC) + `
+        <div style="padding:15px;font-family:var(--font-sans);font-size:13px;display:grid;grid-template-columns:1fr 1fr;gap:15px;">
+            <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;">
+                <h4 style="margin:0 0 10px;color:${AC}">Post Message</h4>
+                <textarea id="xss-msg" style="width:100%;height:60px;background:var(--bg-card);color:var(--text-main);padding:6px;border:1px solid var(--border);border-radius:4px;resize:none;font-family:monospace;"><script>alert('XSS')</script></textarea>
+                <div style="margin-top:6px;display:flex;gap:4px;">
+                    <button id="xss-unsafe" style="background:#ef4444;color:#fff;border:none;padding:6px;border-radius:4px;cursor:pointer;flex:1;font-size:11px;font-weight:700;">Render Unsafe</button>
+                    <button id="xss-safe" style="background:#22c55e;color:#fff;border:none;padding:6px;border-radius:4px;cursor:pointer;flex:1;font-size:11px;font-weight:700;">Render Sanitized</button>
+                </div>
+            </div>
+            <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;">
+                <h4 style="margin:0 0 8px;color:${AC}">DOM Sandbox Render</h4>
+                <div id="xss-render" style="border:1px solid var(--border);border-radius:6px;padding:10px;min-height:80px;background:var(--bg-card);"></div>
+            </div>
+        </div>`;
+        document.getElementById('xss-unsafe').onclick = () => {
+            const val = document.getElementById('xss-msg').value;
+            document.getElementById('xss-render').innerHTML = val;
+            if (val.includes('<script>')) {
+                alert('Unsafe Script Injected and Executed!');
+            }
+        };
+        document.getElementById('xss-safe').onclick = () => {
+            const val = document.getElementById('xss-msg').value;
+            const escaped = val.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            document.getElementById('xss-render').innerHTML = escaped;
+        };
+    };
+
+    const initCyberMitmSim = (container) => {
+        const AC = '#ef4444';
+        container.innerHTML = buildSimHeader('Man-in-the-Middle Network Flow', 'Simulate ARP poisoning redirecting client packets', '🔐', AC) + `
+        <div style="padding:15px;font-family:var(--font-sans);font-size:13px;display:grid;grid-template-columns:1fr 1fr;gap:15px;">
+            <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;">
+                <h4 style="margin:0 0 10px;color:${AC}">Flow Toggle</h4>
+                <button id="mitm-poison" style="background:${AC};color:#fff;border:none;padding:8px;border-radius:6px;font-weight:700;cursor:pointer;width:100%;margin-bottom:10px;">ARP Poison Router</button>
+                <div style="font-size:11px;color:var(--text-muted);line-height:1.6;">
+                    ARP Spoofing maps the router's IP to the attacker's MAC address, routing all web payloads through the sniffing agent.
+                </div>
+            </div>
+            <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;line-height:2.2;">
+                <h4 style="margin:0 0 10px;color:${AC}">Sniffed Network Stream</h4>
+                Mitm Mode: <b id="mitm-state" style="color:#22c55e">Inactive (Direct Link)</b><br>
+                Payload Log: <span id="mitm-payload" style="font-family:monospace;font-size:11px;color:var(--text-muted);">Listening...</span>
+            </div>
+        </div>`;
+        let poisoned = false;
+        document.getElementById('mitm-poison').onclick = () => {
+            poisoned = !poisoned;
+            const state = document.getElementById('mitm-state');
+            const pl = document.getElementById('mitm-payload');
+            const btn = document.getElementById('mitm-poison');
+            if (poisoned) {
+                state.textContent = 'POISONED (Intercepting)';
+                state.style.color = '#ef4444';
+                pl.innerHTML = `<span style="color:#ef4444">GET /login.html HTTP/1.1<br>Authorization: Bearer Session-41b9...</span>`;
+                btn.textContent = 'Recover Router ARP';
+            } else {
+                state.textContent = 'Inactive (Direct Link)';
+                state.style.color = '#22c55e';
+                pl.textContent = 'Listening...';
+                btn.textContent = 'ARP Poison Router';
+            }
+        };
+    };
+
+    const initCyberSteganographySim = (container) => {
+        const AC = '#ef4444';
+        container.innerHTML = buildSimHeader('LSB Steganography Data Hiding', 'Embed text payloads into Least Significant Bits of pixels', '🖼️', AC) + `
+        <div style="padding:15px;font-family:var(--font-sans);font-size:13px;display:grid;grid-template-columns:1fr 1.2fr;gap:15px;">
+            <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;">
+                <h4 style="margin:0 0 8px;color:${AC}">Secret Payload</h4>
+                <label>Text to Hide: <input id="stego-payload" value="FLAG" style="width:100%;padding:4px;border:1px solid var(--border);border-radius:4px;background:var(--bg-card);color:var(--text-main);margin-bottom:8px;"></label>
+                <button id="stego-embed" style="background:${AC};color:#fff;border:none;padding:8px;border-radius:6px;font-weight:700;cursor:pointer;width:100%;">Embed Into Pixel</button>
+            </div>
+            <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;font-family:monospace;font-size:11px;line-height:2;">
+                <h4 style="margin:0 0 10px;color:${AC};font-family:var(--font-sans);">Pixel Data Representation</h4>
+                Original RGB: <span style="color:var(--text-muted)">[11010110, 01001010, 10101100]</span><br>
+                Embedded RGB: <b id="stego-rgb" style="color:${AC}">[11010110, 01001010, 10101100]</b><br>
+                Decoded Secret: <b id="stego-decode" style="color:#22c55e">N/A</b>
+            </div>
+        </div>`;
+        document.getElementById('stego-embed').onclick = () => {
+            const val = document.getElementById('stego-payload').value;
+            document.getElementById('stego-rgb').textContent = `[1101011\${val.includes('F')?'1':'0'}, 0100101\${val.includes('L')?'1':'0'}, 1010110\${val.includes('A')?'1':'0'}]`;
+            document.getElementById('stego-decode').textContent = val;
+        };
+    };
+
+    const initCyberNetworkScanSim = (container) => {
+        const AC = '#ef4444';
+        container.innerHTML = buildSimHeader('Port Scanner Reconnaissance', 'Map open server socket ports and identify vulnerabilities', '🔍', AC) + `
+        <div style="padding:15px;font-family:var(--font-sans);font-size:13px;display:grid;grid-template-columns:1fr 1.2fr;gap:15px;">
+            <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;">
+                <h4 style="margin:0 0 10px;color:${AC}">Scan Options</h4>
+                <label>Target IP: <input id="cns-ip" value="192.168.1.10" style="width:100%;padding:4px;border:1px solid var(--border);border-radius:4px;background:var(--bg-card);color:var(--text-main);margin-bottom:8px;"></label>
+                <button id="cns-scan" style="background:${AC};color:#fff;border:none;padding:8px;border-radius:6px;font-weight:700;cursor:pointer;width:100%;">Start Port Scan</button>
+            </div>
+            <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;font-family:monospace;font-size:11px;">
+                <h4 style="margin:0 0 10px;color:${AC};font-family:var(--font-sans);">Scanner Console Output</h4>
+                <div id="cns-log" style="line-height:1.8;">Ready to scan target host...</div>
+            </div>
+        </div>`;
+        document.getElementById('cns-scan').onclick = () => {
+            const ip = document.getElementById('cns-ip').value;
+            const log = document.getElementById('cns-log');
+            log.innerHTML = `Starting Nmap TCP-SYN scan on \${ip}...<br>`;
+            setTimeout(() => { log.innerHTML += `● Port 22 (SSH) - <span style="color:#22c55e">OPEN</span><br>`; }, 300);
+            setTimeout(() => { log.innerHTML += `● Port 80 (HTTP) - <span style="color:#22c55e">OPEN</span> (Nginx 1.18)<br>`; }, 600);
+            setTimeout(() => { log.innerHTML += `● Port 3306 (MySQL) - <span style="color:#ef4444">FILTERED</span><br>`; }, 900);
+            setTimeout(() => { log.innerHTML += `<b style="color:#ef4444">Scan Complete: 2 open ports found.</b>`; }, 1200);
+        };
+    };
+
     const initSimulation = (id) => {
         const data = window.VLAB_DATA[id];
         const container = document.getElementById('dynamic-sim-ui');
@@ -6990,6 +10392,41 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <p>This is a free-form Practice Lab. Switch to the <b>Experiment</b> tab to build your network.</p>
                 </div>
             `;
+            return;
+        }
+
+        if (data.simType === 'dfa_sim') {
+            initDfaSim(container);
+            return;
+        }
+
+        if (data.simType === 'nfa_to_dfa') {
+            initNfaToDfaSim(container);
+            return;
+        }
+
+        if (data.simType === 'regex_thompson') {
+            initRegexThompsonSim(container);
+            return;
+        }
+
+        if (data.simType === 'cfg_parser') {
+            initCfgParserSim(container);
+            return;
+        }
+
+        if (data.simType === 'pda_stack') {
+            initPdaStackSim(container);
+            return;
+        }
+
+        if (data.simType === 'turing_machine') {
+            initTuringMachineSim(container);
+            return;
+        }
+
+        if (data.simType === 'dfa_minimization') {
+            initDfaMinimizationSim(container);
             return;
         }
 
@@ -7082,6 +10519,50 @@ document.addEventListener('DOMContentLoaded', async () => {
             initCsmaSim(container);
             return;
         }
+
+        if (data.simType === 'ai_search')      { initAiSearchSim(container);     return; }
+        if (data.simType === 'ai_heuristic')   { initAiHeuristicSim(container);  return; }
+        if (data.simType === 'ai_csp')         { initAiCspSim(container);        return; }
+        if (data.simType === 'ai_minimax')     { initAiMinimaxSim(container);    return; }
+        if (data.simType === 'ai_naive_bayes') { initAiNaiveBayesSim(container); return; }
+        if (data.simType === 'ai_knn')         { initAiKnnSim(container);        return; }
+        if (data.simType === 'ai_kmeans')      { initAiKmeansSim(container);     return; }
+        if (data.simType === 'ai_ann')         { initAiAnnSim(container);        return; }
+        if (data.simType === 'ai_backprop')    { initAiBackpropSim(container);   return; }
+        if (data.simType === 'ai_fuzzy')       { initAiFuzzySim(container);      return; }
+        if (data.simType === 'ai_genetic')     { initAiGeneticSim(container);    return; }
+        if (data.simType === 'ai_expert')      { initAiExpertSim(container);     return; }
+
+        // ── Cloud Computing Simulations ──────────────────────────────────────
+        if (data.simType === 'cloud_virtualization') { initCloudVirtualizationSim(container); return; }
+        if (data.simType === 'cloud_docker')         { initCloudDockerSim(container);         return; }
+        if (data.simType === 'cloud_loadbalancer')   { initCloudLoadBalancerSim(container);   return; }
+        if (data.simType === 'cloud_autoscaling')    { initCloudAutoScalingSim(container);    return; }
+        if (data.simType === 'cloud_storage')        { initCloudStorageSim(container);        return; }
+        if (data.simType === 'cloud_cdn')            { initCloudCdnSim(container);            return; }
+        if (data.simType === 'cloud_iam')            { initCloudIamSim(container);            return; }
+        if (data.simType === 'cloud_serverless')     { initCloudServerlessSim(container);     return; }
+        if (data.simType === 'cloud_sla')            { initCloudSlaSim(container);            return; }
+        if (data.simType === 'cloud_mapreduce')      { initCloudMapReduceSim(container);      return; }
+        if (data.simType === 'cloud_kubernetes')     { initCloudKubernetesSim(container);     return; }
+        if (data.simType === 'cloud_security')       { initCloudIamSim(container);            return; }
+        if (data.simType === 'cloud_monitoring')     { initCloudSlaSim(container);            return; }
+        if (data.simType === 'cloud_intro')          { initCloudVirtualizationSim(container); return; }
+        if (data.simType === 'cloud_devops')         { initCloudDockerSim(container);         return; }
+
+        // ── Cybersecurity Simulations ────────────────────────────────────────
+        if (data.simType === 'cyber_caesar')       { initCyberCaesarSim(container);      return; }
+        if (data.simType === 'cyber_vigenere')     { initCyberVigenereSim(container);    return; }
+        if (data.simType === 'cyber_rsa')          { initCyberRsaSim(container);         return; }
+        if (data.simType === 'cyber_aes')          { initCyberAesSim(container);         return; }
+        if (data.simType === 'cyber_hashing')      { initCyberHashingSim(container);     return; }
+        if (data.simType === 'cyber_firewall')     { initCyberFirewallSim(container);    return; }
+        if (data.simType === 'cyber_ids')          { initCyberIdsSim(container);         return; }
+        if (data.simType === 'cyber_sql_inject')   { initCyberSqlInjectSim(container);   return; }
+        if (data.simType === 'cyber_xss')          { initCyberXssSim(container);         return; }
+        if (data.simType === 'cyber_mitm')         { initCyberMitmSim(container);        return; }
+        if (data.simType === 'cyber_steganography') { initCyberSteganographySim(container); return; }
+        if (data.simType === 'cyber_network_scan') { initCyberNetworkScanSim(container); return; }
 
         container.innerHTML = `
             <div class="sim-toolbar">
@@ -7475,6 +10956,92 @@ student@mitadt-os:~$ </div>
             document.documentElement.style.setProperty('--primary-rgb', '245, 158, 11');
             document.documentElement.style.setProperty('--accent', '#fbbf24');
             document.title = "MIT ADT VLAB - Database Systems";
+        } else if (currentSubject === 'toc') {
+            optionsHtml = `
+                <option value="dfa_sim">1. DFA Simulator</option>
+                <option value="nfa_to_dfa">2. NFA to DFA Converter</option>
+                <option value="regex_thompson">3. Regex to NFA (Thompson's)</option>
+                <option value="cfg_parser">4. CFG & Parse Trees</option>
+                <option value="pda_stack">5. PDA Stack Simulator</option>
+                <option value="turing_machine">6. Turing Machine Tape Sim</option>
+                <option value="dfa_minimization">7. DFA Minimization</option>
+            `;
+            const crumbs = document.querySelectorAll('.breadcrumb .crumb');
+            if (crumbs.length >= 2) {
+                crumbs[1].textContent = "Theory of Computation Lab";
+            }
+            document.documentElement.style.setProperty('--primary', '#0d9488');
+            document.documentElement.style.setProperty('--primary-rgb', '13, 148, 136');
+            document.documentElement.style.setProperty('--accent', '#2dd4bf');
+            document.title = "MIT ADT VLAB - Theory of Computation";
+        } else if (currentSubject === 'ai') {
+            optionsHtml = `
+                <option value="ai_search">1. BFS / DFS / A* Search</option>
+                <option value="ai_heuristic">2. Heuristic & Informed Search</option>
+                <option value="ai_csp">3. CSP — N-Queens</option>
+                <option value="ai_minimax">4. Minimax & Alpha-Beta</option>
+                <option value="ai_naive_bayes">5. Naïve Bayes Classifier</option>
+                <option value="ai_knn">6. K-Nearest Neighbors</option>
+                <option value="ai_kmeans">7. K-Means Clustering</option>
+                <option value="ai_ann">8. Perceptron (ANN)</option>
+                <option value="ai_backprop">9. Backpropagation & GD</option>
+                <option value="ai_fuzzy">10. Fuzzy Logic System</option>
+                <option value="ai_genetic">11. Genetic Algorithm</option>
+                <option value="ai_expert">12. Expert System</option>
+            `;
+            const crumbs = document.querySelectorAll('.breadcrumb .crumb');
+            if (crumbs.length >= 2) {
+                crumbs[1].textContent = "Artificial Intelligence Lab";
+            }
+            document.documentElement.style.setProperty('--primary', '#f97316');
+            document.documentElement.style.setProperty('--primary-rgb', '249, 115, 22');
+            document.documentElement.style.setProperty('--accent', '#fb923c');
+            document.title = "MIT ADT VLAB - Artificial Intelligence";
+        } else if (currentSubject === 'cloud') {
+            optionsHtml = `
+                <option value="cloud_virtualization">1. Virtualization & VM Lifecycle</option>
+                <option value="cloud_docker">2. Docker Container Orchestration</option>
+                <option value="cloud_loadbalancer">3. Load Balancing</option>
+                <option value="cloud_autoscaling">4. Auto-Scaling Policies</option>
+                <option value="cloud_storage">5. Distributed Object Storage</option>
+                <option value="cloud_cdn">6. Content Delivery Network</option>
+                <option value="cloud_iam">7. Identity & Access Management</option>
+                <option value="cloud_serverless">8. Serverless Functions</option>
+                <option value="cloud_sla">9. SLA Monitoring & Fault Tolerance</option>
+                <option value="cloud_mapreduce">10. MapReduce Parallel Processing</option>
+                <option value="cloud_kubernetes">11. Kubernetes Pod Scheduling</option>
+            `;
+            const crumbs = document.querySelectorAll('.breadcrumb .crumb');
+            if (crumbs.length >= 2) {
+                crumbs[1].textContent = "Cloud Computing Lab";
+            }
+            document.documentElement.style.setProperty('--primary', '#0ea5e9');
+            document.documentElement.style.setProperty('--primary-rgb', '14, 165, 233');
+            document.documentElement.style.setProperty('--accent', '#38bdf8');
+            document.title = "MIT ADT VLAB - Cloud Computing";
+        } else if (currentSubject === 'cyber') {
+            optionsHtml = `
+                <option value="cyber_caesar">1. Caesar Cipher & ROT13</option>
+                <option value="cyber_vigenere">2. Vigenère Cipher</option>
+                <option value="cyber_rsa">3. RSA Public-Key Encryption</option>
+                <option value="cyber_aes">4. AES Block Cipher</option>
+                <option value="cyber_hashing">5. Hashing Algorithms</option>
+                <option value="cyber_firewall">6. Firewall Rule Engine</option>
+                <option value="cyber_ids">7. Intrusion Detection System</option>
+                <option value="cyber_sql_inject">8. SQL Injection Attack</option>
+                <option value="cyber_xss">9. Cross-Site Scripting (XSS)</option>
+                <option value="cyber_mitm">10. Man-in-the-Middle (MITM)</option>
+                <option value="cyber_steganography">11. Steganography (LSB)</option>
+                <option value="cyber_network_scan">12. Port Scanner & Vulnerability Assessment</option>
+            `;
+            const crumbs = document.querySelectorAll('.breadcrumb .crumb');
+            if (crumbs.length >= 2) {
+                crumbs[1].textContent = "Cybersecurity Lab";
+            }
+            document.documentElement.style.setProperty('--primary', '#ef4444');
+            document.documentElement.style.setProperty('--primary-rgb', '239, 68, 68');
+            document.documentElement.style.setProperty('--accent', '#f87171');
+            document.title = "MIT ADT VLAB - Cybersecurity";
         } else {
             optionsHtml = `
                 <option value="cables_devices">1. Cables, Connectors and Networking Devices</option>
@@ -7507,6 +11074,10 @@ student@mitadt-os:~$ </div>
     const netLabs = ['cables_devices', 'modulation', 'net_commands', 'ip_class', 'csma', 'csma_ca', 'subnet', 'vlan', 'routing_protocols', 'routing_dv', 'routing_ls', 'udp', 'tcp', 'dns', 'practice'];
     const progLabs = ['c_prog', 'cpp_prog', 'java_prog', 'python_prog'];
     const dbmsLabs = ['sql_queries', 'transactions', 'indexing'];
+    const tocLabs = ['dfa_sim', 'nfa_to_dfa', 'regex_thompson', 'cfg_parser', 'pda_stack', 'turing_machine', 'dfa_minimization'];
+    const aiLabs = ['ai_search', 'ai_heuristic', 'ai_csp', 'ai_minimax', 'ai_naive_bayes', 'ai_knn', 'ai_kmeans', 'ai_ann', 'ai_backprop', 'ai_fuzzy', 'ai_genetic', 'ai_expert'];
+    const cloudLabs = ['cloud_virtualization', 'cloud_docker', 'cloud_loadbalancer', 'cloud_autoscaling', 'cloud_storage', 'cloud_cdn', 'cloud_iam', 'cloud_serverless', 'cloud_sla', 'cloud_mapreduce', 'cloud_kubernetes'];
+    const cyberLabs = ['cyber_caesar', 'cyber_vigenere', 'cyber_rsa', 'cyber_aes', 'cyber_hashing', 'cyber_firewall', 'cyber_ids', 'cyber_sql_inject', 'cyber_xss', 'cyber_mitm', 'cyber_steganography', 'cyber_network_scan'];
     
     let initialLab = localStorage.getItem('vlab_current_lab');
     if (currentSubject === 'os') {
@@ -7523,6 +11094,26 @@ student@mitadt-os:~$ </div>
         if (!dbmsLabs.includes(initialLab)) {
             initialLab = 'sql_queries';
             localStorage.setItem('vlab_current_lab', 'sql_queries');
+        }
+    } else if (currentSubject === 'toc') {
+        if (!tocLabs.includes(initialLab)) {
+            initialLab = 'dfa_sim';
+            localStorage.setItem('vlab_current_lab', 'dfa_sim');
+        }
+    } else if (currentSubject === 'ai') {
+        if (!aiLabs.includes(initialLab)) {
+            initialLab = 'ai_search';
+            localStorage.setItem('vlab_current_lab', 'ai_search');
+        }
+    } else if (currentSubject === 'cloud') {
+        if (!cloudLabs.includes(initialLab)) {
+            initialLab = 'cloud_virtualization';
+            localStorage.setItem('vlab_current_lab', 'cloud_virtualization');
+        }
+    } else if (currentSubject === 'cyber') {
+        if (!cyberLabs.includes(initialLab)) {
+            initialLab = 'cyber_caesar';
+            localStorage.setItem('vlab_current_lab', 'cyber_caesar');
         }
     } else {
         if (!netLabs.includes(initialLab)) {
@@ -7655,10 +11246,19 @@ student@mitadt-os:~$ </div>
             const progLabs = ['c_prog', 'cpp_prog', 'java_prog', 'python_prog'];
             const dbmsLabs = ['sql_queries', 'transactions', 'indexing'];
             
+            const tocLabs = ['dfa_sim', 'nfa_to_dfa', 'regex_thompson', 'cfg_parser', 'pda_stack', 'turing_machine', 'dfa_minimization'];
+            const aiLabs = ['ai_search', 'ai_heuristic', 'ai_csp', 'ai_minimax', 'ai_naive_bayes', 'ai_knn', 'ai_kmeans', 'ai_ann', 'ai_backprop', 'ai_fuzzy', 'ai_genetic', 'ai_expert'];
+            const cloudLabs = ['cloud_virtualization', 'cloud_docker', 'cloud_loadbalancer', 'cloud_autoscaling', 'cloud_storage', 'cloud_cdn', 'cloud_iam', 'cloud_serverless', 'cloud_sla', 'cloud_mapreduce', 'cloud_kubernetes'];
+            const cyberLabs = ['cyber_caesar', 'cyber_vigenere', 'cyber_rsa', 'cyber_aes', 'cyber_hashing', 'cyber_firewall', 'cyber_ids', 'cyber_sql_inject', 'cyber_xss', 'cyber_mitm', 'cyber_steganography', 'cyber_network_scan'];
+
             let targetKeys = [];
             if (subject === 'os') targetKeys = osLabs;
             else if (subject === 'dbms') targetKeys = dbmsLabs;
             else if (subject === 'programming') targetKeys = progLabs;
+            else if (subject === 'toc') targetKeys = tocLabs;
+            else if (subject === 'ai') targetKeys = aiLabs;
+            else if (subject === 'cloud') targetKeys = cloudLabs;
+            else if (subject === 'cyber') targetKeys = cyberLabs;
             else targetKeys = netLabs;
             
             targetKeys.forEach(key => {
@@ -7768,6 +11368,36 @@ Academic Rules:
                         } else {
                             subjectHelp = "AI Tutor (Networking Mode): How can I help you with networking topologies? Ask about subnet masking, VLAN tagging, Routing tables (OSPF/RIP), DNS resolution, or CSMA collision controls!";
                         }
+                    } else if (subject === 'ai') {
+                        if (queryLower.includes('search') || queryLower.includes('bfs') || queryLower.includes('dfs') || queryLower.includes('a*')) {
+                            subjectHelp = "AI Tutor: State space search is fundamental in AI. BFS guarantees shortest path by exploring layer-by-layer (FIFO queue). DFS goes deep (LIFO stack) and is not optimal. A* search uses both path cost (g) and heuristic (h) to find the optimal path efficiently (f = g + h).";
+                        } else if (queryLower.includes('minimax') || queryLower.includes('alpha') || queryLower.includes('beta')) {
+                            subjectHelp = "AI Tutor: Minimax is used in game trees for zero-sum games. Max maximizes the score, Min minimizes it. Alpha-beta pruning cuts off branches that cannot influence the final decision, significantly improving performance.";
+                        } else if (queryLower.includes('neuron') || queryLower.includes('backprop') || queryLower.includes('neural')) {
+                            subjectHelp = "AI Tutor: Neural Networks model cognitive logic. A Perceptron is a single-layer classifier. Backpropagation calculates the gradient of the loss function using chain rule calculus, updating weights via Gradient Descent to minimize prediction error.";
+                        } else {
+                            subjectHelp = "AI Tutor (AI Mode): How can I help you with Artificial Intelligence? Ask about Search Algorithms, Game Trees (Minimax), Machine Learning (KNN/Bayes/K-Means), Neural Networks, Fuzzy Logic, or Genetic Algorithms!";
+                        }
+                    } else if (subject === 'cloud') {
+                        if (queryLower.includes('virtualization') || queryLower.includes('vm')) {
+                            subjectHelp = "AI Tutor: Virtualization uses a Hypervisor to run multiple virtual machines on a single physical host, slicing CPU, RAM, and storage into isolated virtual guest OS resources.";
+                        } else if (queryLower.includes('docker') || queryLower.includes('container') || queryLower.includes('kubernetes')) {
+                            subjectHelp = "AI Tutor: Containers isolate applications at the user-space level using OS kernel namespaces. Docker builds container images. Kubernetes orchestrates them across clusters, scaling and healing pods dynamically.";
+                        } else if (queryLower.includes('load') || queryLower.includes('scaling') || queryLower.includes('serverless')) {
+                            subjectHelp = "AI Tutor: Load Balancers distribute traffic across instances. Autoscaling dynamically adjusts cluster sizes based on metrics like CPU usage. Serverless/FaaS executes events on-demand without managing server nodes.";
+                        } else {
+                            subjectHelp = "AI Tutor (Cloud Mode): How can I help you with Cloud Computing? Ask about Virtualization, Containers (Docker/Kubernetes), Load Balancers, Cloud Object Storage, CDNs, IAM Policies, or Serverless functions!";
+                        }
+                    } else if (subject === 'cyber') {
+                        if (queryLower.includes('cipher') || queryLower.includes('caesar') || queryLower.includes('vigenere')) {
+                            subjectHelp = "AI Tutor: Classical cryptography relies on substitution and transposition. Caesar cipher is a simple monoalphabetic shift. Vigenère uses a polyalphabetic key word to vary the shifts dynamically, resisting frequency analysis.";
+                        } else if (queryLower.includes('rsa') || queryLower.includes('aes') || queryLower.includes('encrypt')) {
+                            subjectHelp = "AI Tutor: RSA is public-key (asymmetric) cryptography based on the mathematical difficulty of factoring large prime products. AES is symmetric block cipher using substitution-permutation networks for secure data transmission.";
+                        } else if (queryLower.includes('injection') || queryLower.includes('sql') || queryLower.includes('xss')) {
+                            subjectHelp = "AI Tutor: SQL Injection inserts malicious SQL payloads into input inputs to hijack database queries. Cross-Site Scripting (XSS) injects malicious client scripts to hijack user sessions. Prevent both by sanitizing and validating all inputs!";
+                        } else {
+                            subjectHelp = "AI Tutor (Cyber Mode): How can I help you with Cybersecurity? Ask about Encryptions (RSA/AES), Hashing algorithms, Network Firewalls, Web Attacks (SQLi/XSS), or ARP Poisoning MITM attacks!";
+                        }
                     }
                     if (subjectHelp) {
                         responseText = subjectHelp + "\n\n(Tip: Save a Gemini API Key in the programming settings (⚙️) to unlock premium live conversational queries across all labs!)";
@@ -7814,3 +11444,4 @@ Academic Rules:
         });
     }
 });
+
