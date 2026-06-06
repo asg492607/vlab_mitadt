@@ -83,13 +83,13 @@ const fetchProgress = async () => {
     }
     try {
         const progSnap = await getDocs(collection(db, "users", user.uid, "progress"));
-        progSnap.forEach(doc => {
-            localStorage.setItem(`vlab_state_${doc.id}`, JSON.stringify(doc.data()));
+        progSnap.forEach(docSnap => {
+            localStorage.setItem(`vlab_state_${docSnap.id}`, JSON.stringify(docSnap.data()));
         });
 
         const topoSnap = await getDocs(collection(db, "users", user.uid, "topologies"));
-        topoSnap.forEach(doc => {
-            localStorage.setItem(`vlab_topology_${doc.id}`, JSON.stringify(doc.data()));
+        topoSnap.forEach(docSnap => {
+            localStorage.setItem(`vlab_topology_${docSnap.id}`, JSON.stringify(docSnap.data()));
         });
 
         console.log("Progress and topologies restored from cloud");
@@ -109,6 +109,40 @@ const fetchProgress = async () => {
 
 window.fetchProgress = fetchProgress;
 window.syncProgress = syncProgress;
+
+// Intercept Canvas fillStyle and strokeStyle to support CSS variables natively
+const originalFillStyle = Object.getOwnPropertyDescriptor(CanvasRenderingContext2D.prototype, 'fillStyle');
+Object.defineProperty(CanvasRenderingContext2D.prototype, 'fillStyle', {
+    set: function(val) {
+        if (typeof val === 'string' && val.startsWith('var(')) {
+            const varName = val.substring(4, val.length - 1).trim();
+            const resolved = getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
+            originalFillStyle.set.call(this, resolved || '#64748b');
+        } else {
+            originalFillStyle.set.call(this, val);
+        }
+    },
+    get: function() {
+        return originalFillStyle.get.call(this);
+    }
+});
+
+const originalStrokeStyle = Object.getOwnPropertyDescriptor(CanvasRenderingContext2D.prototype, 'strokeStyle');
+Object.defineProperty(CanvasRenderingContext2D.prototype, 'strokeStyle', {
+    set: function(val) {
+        if (typeof val === 'string' && val.startsWith('var(')) {
+            const varName = val.substring(4, val.length - 1).trim();
+            const resolved = getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
+            originalStrokeStyle.set.call(this, resolved || '#64748b');
+        } else {
+            originalStrokeStyle.set.call(this, val);
+        }
+    },
+    get: function() {
+        return originalStrokeStyle.get.call(this);
+    }
+});
+
 // Polyfill for roundRect if not supported
 if (!CanvasRenderingContext2D.prototype.roundRect) {
     CanvasRenderingContext2D.prototype.roundRect = function (x, y, w, h, r) {
@@ -1301,12 +1335,14 @@ class TopologySimulation {
                 requestAnimationFrame(move);
             } else {
                 p.remove();
-                if (isSuccess && progress >= 1) {
+                if (isSuccess && progress >= 1 && to.el) {
                     to.el.style.transform = 'scale(1.2)';
                     to.el.style.boxShadow = `0 0 20px ${color}`;
                     setTimeout(() => {
-                        to.el.style.transform = 'scale(1)';
-                        to.el.style.boxShadow = 'none';
+                        if (to.el) {
+                            to.el.style.transform = 'scale(1)';
+                            to.el.style.boxShadow = 'none';
+                        }
                     }, 200);
                 }
 
