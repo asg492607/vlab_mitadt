@@ -1,7 +1,6 @@
-// window.VLAB_DATA is loaded globally via vlabData.js script tag
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { getFirestore, doc, setDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { getFirestore, doc, setDoc, collection, getDocs, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 // evaluate.js and labs/index.js loaded on-demand if needed
 
 const firebaseConfig = {
@@ -856,7 +855,15 @@ class TopologySimulation {
                         <div class="tool-category" id="cat-tools">
                             <button id="btnSaveTopo" class="btn-sim" style="width:100%; margin-bottom:8px;">Save</button>
                             <button id="btnLoadTopo" class="btn-sim" style="width:100%; margin-bottom:8px;">Load</button>
+                            <button id="btnToggle3D" class="btn-sim" style="width:100%; margin-bottom:8px; background:#0d9488; color:white; border:none; cursor:pointer;">📐 View: 2D</button>
+                            <button id="btnCollabTopo" class="btn-sim" style="width:100%; margin-bottom:8px; background:#2563eb; color:white; border:none; cursor:pointer;">👥 Collaborate</button>
                             <button id="btnClearTopo" class="btn-sim" style="width:100%; border-color:var(--danger); color:var(--danger);">Clear</button>
+                        </div>
+                        <div id="topo-collab-bar" style="display:none; background:var(--bg-alt); padding:8px; border-radius:8px; border:1px solid var(--border); margin-top:8px; flex-direction:column; gap:6px;">
+                            <input id="topoRoomId" placeholder="Room ID (e.g. TOPO-99)" style="padding:4px 8px; font-size:11px; border-radius:4px; border:1px solid var(--border); background:var(--bg-page); color:var(--text-main); font-family:monospace; width:100%; box-sizing:border-box;">
+                            <button id="btnCreateTopoRoom" class="btn-sim" style="width:100%; font-size:11px; padding:4px;">Create Room</button>
+                            <button id="btnJoinTopoRoom" class="btn-sim" style="width:100%; font-size:11px; padding:4px;">Join Room</button>
+                            <span id="topoCollabStatus" style="font-size:10px; color:#10b981; text-align:center; display:block; margin-top:4px;"></span>
                         </div>
                     </div>
                 </aside>
@@ -893,6 +900,67 @@ class TopologySimulation {
         document.getElementById('btnSaveTopo').onclick = () => this.saveTopology();
         document.getElementById('btnLoadTopo').onclick = () => this.loadTopology();
         document.getElementById('btnClearTopo').onclick = () => this.clearTopology();
+
+        // 3D Isometric View toggle
+        this.is3DActive = false;
+        const toggle3D = document.getElementById('btnToggle3D');
+        if (toggle3D) {
+            toggle3D.onclick = () => {
+                this.is3DActive = !this.is3DActive;
+                const canvasBox = document.getElementById('topology-canvas');
+                if (canvasBox) {
+                    if (this.is3DActive) {
+                        canvasBox.classList.add('isometric-grid');
+                        toggle3D.textContent = '📐 View: 3D';
+                        toggle3D.style.background = '#8b5cf6';
+                        this.updateStatus("Switched to Isometric 3D View");
+                    } else {
+                        canvasBox.classList.remove('isometric-grid');
+                        toggle3D.textContent = '📐 View: 2D';
+                        toggle3D.style.background = '#0d9488';
+                        this.updateStatus("Switched to 2D Plain View");
+                    }
+                }
+            };
+        }
+
+        // Topology Collaboration Setup
+        const btnCollab = document.getElementById('btnCollabTopo');
+        const collabBar = document.getElementById('topo-collab-bar');
+        const roomInput = document.getElementById('topoRoomId');
+        const statusText = document.getElementById('topoCollabStatus');
+
+        if (btnCollab) {
+            btnCollab.onclick = () => {
+                const isOpen = collabBar.style.display === 'flex';
+                collabBar.style.display = isOpen ? 'none' : 'flex';
+            };
+        }
+
+        const createRoom = async () => {
+            const roomId = roomInput.value.trim().toUpperCase();
+            if (!roomId) { alert("Enter a valid Room ID."); return; }
+            statusText.textContent = "Creating room...";
+            window.activeTopoRoomId = roomId;
+            try {
+                this.syncCollabTopology();
+                statusText.textContent = "Room Active: " + roomId;
+                this.listenToTopoRoom(roomId);
+            } catch(e) { statusText.textContent = "Error: " + e.message; }
+        };
+
+        const joinRoom = () => {
+            const roomId = roomInput.value.trim().toUpperCase();
+            if (!roomId) { alert("Enter a Room ID."); return; }
+            window.activeTopoRoomId = roomId;
+            statusText.textContent = "Joined: " + roomId;
+            this.listenToTopoRoom(roomId);
+        };
+
+        if (document.getElementById('btnCreateTopoRoom')) {
+            document.getElementById('btnCreateTopoRoom').onclick = createRoom;
+            document.getElementById('btnJoinTopoRoom').onclick = joinRoom;
+        }
 
         // Auto-load previous session
         setTimeout(() => this.loadTopology(), 500);
@@ -985,6 +1053,61 @@ class TopologySimulation {
         if (this.updateStatus) this.updateStatus();
     }
 
+    syncCollabTopology() {
+        if (!window.activeTopoRoomId) return;
+        const data = {
+            nodes: this.nodes.map(n => ({ ...n, el: null })),
+            links: this.links.map(l => ({
+                fromId: l.from.id,
+                toId: l.to.id,
+                type: l.type,
+                fromPort: l.fromPort,
+                toPort: l.toPort
+            })),
+            updatedBy: localStorage.getItem('vlab_user_name') || 'Student',
+            timestamp: new Date().toISOString()
+        };
+        setDoc(doc(db, "topology_collaboration", window.activeTopoRoomId), data, { merge: true })
+            .catch(err => console.error("Collab topo sync error", err));
+    }
+
+    syncCollabTopologyDebounced() {
+        clearTimeout(this.collabDebounceTimeout);
+        this.collabDebounceTimeout = setTimeout(() => {
+            this.syncCollabTopology();
+        }, 300);
+    }
+
+    listenToTopoRoom(roomId) {
+        if (this.topoCollabUnsubscribe) this.topoCollabUnsubscribe();
+        this.topoCollabUnsubscribe = onSnapshot(doc(db, "topology_collaboration", roomId), (docSnap) => {
+            if (docSnap.exists()) {
+                const dataSnap = docSnap.data();
+                const myName = localStorage.getItem('vlab_user_name') || 'Student';
+                if (dataSnap.updatedBy !== myName) {
+                    this.restoreTopologyData(dataSnap);
+                }
+            }
+        });
+    }
+
+    restoreTopologyData(data) {
+        this.nodes = [];
+        this.links = [];
+        this.workspace.querySelectorAll('.device-node').forEach(n => n.remove());
+
+        data.nodes.forEach(n => this.addNode(n.type, n.x, n.y, n.label, n.config));
+        data.links.forEach(l => {
+            const from = this.nodes.find(n => n.id === l.fromId);
+            const to = this.nodes.find(n => n.id === l.toId);
+            if (from && to) {
+                this.links.push({ from, to, type: l.type, fromPort: l.fromPort, toPort: l.toPort });
+            }
+        });
+        this.validateTopology();
+        this.updateStatus("Collaborative Workspace Synced");
+    }
+
     saveTopology() {
         const labId = document.getElementById('labSelect')?.value || 'practice';
         const data = {
@@ -1029,6 +1152,7 @@ class TopologySimulation {
         this.links = [];
         this.workspace.querySelectorAll('.device-node').forEach(n => n.remove());
         this.updateStatus("Workspace Cleared");
+        this.syncCollabTopology();
     }
 
     addNode(type, x, y, label = null, config = null) {
@@ -1061,6 +1185,7 @@ class TopologySimulation {
         this.addNodeElement(node);
         this.updateStatus(`Added ${type.toUpperCase()}`);
         if (this.render) this.render();
+        this.syncCollabTopology();
     }
 
     updateStatus(msg) {
@@ -1119,6 +1244,7 @@ class TopologySimulation {
                         this.links.push({ from: this.cableStartNode, to: node, type: this.selectedCable, fromPort, toPort });
                         this.showHint(`Connected ${this.cableStartNode.label} to ${node.label}`);
                         this.validateTopology();
+                        this.syncCollabTopology();
                     } else {
                         this.showHint(`Connection failed: No available ports.`);
                     }
@@ -1195,6 +1321,7 @@ class TopologySimulation {
         this.validateTopology();
         this.updateStatus(`Deleted ${node.label}`);
         if (this.render) this.render();
+        this.syncCollabTopology();
     }
 
     deleteLinks() {
@@ -1206,6 +1333,7 @@ class TopologySimulation {
         this.validateTopology();
         this.updateStatus(`Cleared links for ${node.label}`);
         if (this.render) this.render();
+        this.syncCollabTopology();
     }
 
     updateTooltipPos(e) {
@@ -1254,8 +1382,15 @@ class TopologySimulation {
             if (Math.abs(me.clientX - this.dragNode.startX) > 5 || Math.abs(me.clientY - this.dragNode.startY) > 5) {
                 onMove();
             }
-            const dx = me.clientX - this.dragNode.startX;
-            const dy = me.clientY - this.dragNode.startY;
+            let dx = me.clientX - this.dragNode.startX;
+            let dy = me.clientY - this.dragNode.startY;
+            if (this.is3DActive) {
+                const angle = 35 * Math.PI / 180;
+                const rx = dx * Math.cos(angle) + dy * Math.sin(angle);
+                const ry = (-dx * Math.sin(angle) + dy * Math.cos(angle)) / Math.cos(55 * Math.PI / 180);
+                dx = rx;
+                dy = ry;
+            }
             node.x = this.dragNode.initialX + dx;
             node.y = this.dragNode.initialY + dy;
             el.style.left = node.x + 'px';
@@ -3491,6 +3626,113 @@ const loadUserCode = async (labId) => {
     return null;
 };
 
+// --- DYNAMIC MARKDOWN & STATIC CODE AUDITOR UTILS ---
+const parseMarkdown = (md) => {
+    let html = md;
+    html = html.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    html = html.replace(/^### (.*$)/gim, '<h3 style="color:var(--primary); margin-top:10px; margin-bottom:6px; font-weight:700;">$1</h3>');
+    html = html.replace(/^## (.*$)/gim, '<h2 style="color:var(--accent); margin-top:12px; margin-bottom:8px; font-weight:700;">$1</h2>');
+    html = html.replace(/^# (.*$)/gim, '<h1 style="color:var(--primary); margin-top:16px; margin-bottom:12px; font-size:18px; font-weight:800;">$1</h1>');
+    html = html.replace(/```([\s\S]*?)```/gm, '<pre style="background:var(--bg-alt); padding:10px; border-radius:6px; border:1px solid var(--border); font-family:\'JetBrains Mono\', monospace; font-size:12px; overflow-x:auto;">$1</pre>');
+    html = html.replace(/`([^`]+)`/g, '<code style="background:var(--bg-alt); padding:2px 4px; border-radius:4px; font-family:\'JetBrains Mono\', monospace; font-size:12px;">$1</code>');
+    html = html.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+    html = html.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+    html = html.replace(/^\s*-\s+(.*$)/gim, '<li style="margin-left:20px; margin-bottom:4px;">$1</li>');
+    html = html.replace(/\n/g, '<br>');
+    return html;
+};
+
+const runStaticCodeAnalysis = (code, lang) => {
+    let lines = code.split('\n');
+    let totalLines = lines.length;
+    let commentLines = 0;
+    let cyclomaticComplexity = 1;
+    let memoryIssues = [];
+    
+    lines.forEach(line => {
+        let trimmed = line.trim();
+        if (trimmed.startsWith('//') || trimmed.startsWith('#')) {
+            commentLines++;
+        } else if (trimmed.includes('/*') || trimmed.includes('*/')) {
+            commentLines++;
+        }
+        
+        const matchKeywords = trimmed.match(/\b(if|else\s+if|for|while|switch|case|catch)\b/g);
+        if (matchKeywords) {
+            cyclomaticComplexity += matchKeywords.length;
+        }
+        const matchOps = trimmed.match(/(&&|\|\|)/g);
+        if (matchOps) {
+            cyclomaticComplexity += matchOps.length;
+        }
+    });
+
+    let commentRatio = totalLines > 0 ? (commentLines / totalLines) * 100 : 0;
+    
+    let varNames = code.match(/\b(int|double|float|char|void|let|const|var)\s+(\w+)\b/g);
+    let shortNames = 0;
+    if (varNames) {
+        varNames.forEach(match => {
+            const parts = match.split(/\s+/);
+            const name = parts[parts.length - 1];
+            if (name && name.length <= 2 && name !== 'i' && name !== 'j' && name !== 'x' && name !== 'y') {
+                shortNames++;
+            }
+        });
+    }
+
+    if (lang === 'c' || lang === 'cpp') {
+        let mallocCount = (code.match(/\bmalloc\b/g) || []).length;
+        let freeCount = (code.match(/\bfree\b/g) || []).length;
+        let newCount = (code.match(/\bnew\b/g) || []).length;
+        let deleteCount = (code.match(/\bdelete\b/g) || []).length;
+        
+        if (mallocCount > freeCount) {
+            memoryIssues.push(`Memory Leak Warning: Found ${mallocCount} malloc(s) but only ${freeCount} free(s). Make sure to deallocate resources.`);
+        }
+        if (newCount > deleteCount) {
+            memoryIssues.push(`Memory Leak Warning: Found ${newCount} 'new' statement(s) but only ${deleteCount} 'delete' statement(s).`);
+        }
+        if (code.match(/\bstrcpy\b/g)) {
+            memoryIssues.push(`Security Alert: Use of unsafe 'strcpy' detected. Recommend using 'strncpy' to prevent buffer overflows.`);
+        }
+        if (code.match(/\bgets\b/g)) {
+            memoryIssues.push(`Security Alert: Use of deprecated 'gets' detected. Use 'fgets' to specify buffer boundaries.`);
+        }
+    }
+
+    let scoreComments = Math.min(25, Math.round(commentRatio * 1.5));
+    let scoreNames = Math.max(0, 25 - (shortNames * 5));
+    let scoreComplexity = Math.max(0, 25 - Math.max(0, (cyclomaticComplexity - 8) * 3));
+    let scoreMemory = Math.max(0, 25 - (memoryIssues.length * 12.5));
+    let totalScore = scoreComments + scoreNames + scoreComplexity + scoreMemory;
+
+    let grade = 'A+';
+    if (totalScore < 95) grade = 'A';
+    if (totalScore < 90) grade = 'A-';
+    if (totalScore < 85) grade = 'B+';
+    if (totalScore < 80) grade = 'B';
+    if (totalScore < 75) grade = 'B-';
+    if (totalScore < 70) grade = 'C+';
+    if (totalScore < 60) grade = 'C';
+    if (totalScore < 50) grade = 'D';
+
+    return {
+        totalLines,
+        commentRatio: Math.round(commentRatio),
+        cyclomaticComplexity,
+        memoryIssues,
+        totalScore,
+        grade,
+        recommendations: [
+            commentRatio < 15 ? "💡 Low comment density. Document your function arguments, loops, and conditions with inline comments." : null,
+            shortNames > 0 ? `💡 Found ${shortNames} short variables. Rename them to descriptive names (e.g. 'index' instead of 'id').` : null,
+            cyclomaticComplexity > 12 ? "💡 High Cyclomatic Complexity. Split complex nested loops/conditions into modular functions." : null,
+            ...memoryIssues
+        ].filter(r => r !== null)
+    };
+};
+
 // --- INITIALIZE PROGRAMMING WORKSPACE ---
 const initProgrammingLab = async (container, labId) => {
     let data = window.VLAB_DATA[labId];
@@ -3505,6 +3747,8 @@ const initProgrammingLab = async (container, labId) => {
                     <button id="btnRunCode" class="btn-sim primary">▶ Run Code</button>
                     <button id="btnGradeCode" class="btn-sim" style="background:#10b981; color:white;">🎯 Submit Code</button>
                     <button id="btnResetCode" class="btn-sim">Reset Template</button>
+                    <button id="btnToggleNotebook" class="btn-sim" style="background:#0284c7; color:white;">📓 Notebook Mode</button>
+                    <button id="btnCheckQuality" class="btn-sim" style="background:#ea580c; color:white;">🔍 Check Quality</button>
                 </div>
                 <div style="display:flex; gap:8px; align-items:center;">
                     <button id="btnCollSession" class="btn-sim" style="background:#2563eb; color:white;">👥 Live Collaboration</button>
@@ -3521,31 +3765,55 @@ const initProgrammingLab = async (container, labId) => {
                 <span id="roomStatusText" style="font-size:12px; color:#10b981;"></span>
             </div>
 
-            <div style="display:flex; flex:1; gap:12px; height:500px; flex-wrap:wrap;">
-                <div style="flex:1.4; display:flex; flex-direction:column; border:1px solid var(--border); border-radius:12px; overflow:hidden; min-width:320px;">
-                    <div style="background:var(--bg-alt); padding:8px 16px; border-bottom:1px solid var(--border); font-weight:700; display:flex; justify-content:space-between; align-items:center;">
-                        <span>📝 Code Editor (${data.lang.toUpperCase()})</span>
-                        <span id="editorStatus" style="font-size:12px; color:var(--text-muted);">Synced to cloud</span>
-                    </div>
-                    <div id="ace-editor" style="flex:1; width:100%;"></div>
-                </div>
-                
-                <div style="flex:1; display:flex; flex-direction:column; gap:12px; min-width:280px;">
-                    <div style="display:flex; flex-direction:column; border:1px solid var(--border); border-radius:12px; overflow:hidden; flex:0.4;">
-                        <div style="background:var(--bg-alt); padding:8px 16px; border-bottom:1px solid var(--border); font-weight:700;">📥 Standard Input (stdin)</div>
-                        <textarea id="stdin-area" placeholder="Type input values here..." style="flex:1; padding:12px; border:none; resize:none; font-family:monospace; background:var(--bg-page); color:var(--text-main); font-size:13px; outline:none;"></textarea>
+            <div style="display:flex; flex:1; gap:12px; height:500px; flex-wrap:wrap; position:relative;">
+                <div id="normal-editor-view" style="display:flex; flex:1; gap:12px; height:100%; flex-wrap:wrap; width:100%;">
+                    <div style="flex:1.4; display:flex; flex-direction:column; border:1px solid var(--border); border-radius:12px; overflow:hidden; min-width:320px;">
+                        <div style="background:var(--bg-alt); padding:8px 16px; border-bottom:1px solid var(--border); font-weight:700; display:flex; justify-content:space-between; align-items:center;">
+                            <span>📝 Code Editor (${data.lang.toUpperCase()})</span>
+                            <span id="editorStatus" style="font-size:12px; color:var(--text-muted);">Synced to cloud</span>
+                        </div>
+                        <div id="ace-editor" style="flex:1; width:100%;"></div>
                     </div>
                     
-                    <div style="display:flex; flex-direction:column; border:1px solid var(--border); border-radius:12px; overflow:hidden; flex:1;">
-                        <div style="background:var(--bg-alt); padding:8px 16px; border-bottom:1px solid var(--border); font-weight:700; display:flex; justify-content:space-between; align-items:center;">
-                            <span>💻 Console Terminal</span>
-                            <button id="btnClearConsole" style="background:transparent; border:none; color:var(--text-muted); cursor:pointer; font-size:12px;">Clear</button>
+                    <div style="flex:1; display:flex; flex-direction:column; gap:12px; min-width:280px; height:100%;">
+                        <div style="display:flex; flex-direction:column; border:1px solid var(--border); border-radius:12px; overflow:hidden; flex:0.4;">
+                            <div style="background:var(--bg-alt); padding:8px 16px; border-bottom:1px solid var(--border); font-weight:700;">📥 Standard Input (stdin)</div>
+                            <textarea id="stdin-area" placeholder="Type input values here..." style="flex:1; padding:12px; border:none; resize:none; font-family:monospace; background:var(--bg-page); color:var(--text-main); font-size:13px; outline:none;"></textarea>
                         </div>
-                        <div id="terminal-box" style="flex:1; background:#000; color:#10b981; font-family:'JetBrains Mono', monospace; font-size:13px; padding:12px; overflow-y:auto; line-height:1.5; white-space:pre-wrap;">Console Ready. Write code and click 'Run Code' to execute.</div>
+                        
+                        <div style="display:flex; flex-direction:column; border:1px solid var(--border); border-radius:12px; overflow:hidden; flex:1;">
+                            <div style="background:var(--bg-alt); padding:8px 16px; border-bottom:1px solid var(--border); font-weight:700; display:flex; justify-content:space-between; align-items:center;">
+                                <div style="display:flex; gap:12px; font-size:13px;">
+                                    <span id="tabConsole" style="cursor:pointer; font-weight:700; border-bottom:2px solid var(--primary); padding-bottom:2px;">💻 Console Terminal</span>
+                                    <span id="tabAuditor" style="cursor:pointer; font-weight:700; color:var(--text-muted); padding-bottom:2px;">🔍 Static Auditor</span>
+                                </div>
+                                <button id="btnClearConsole" style="background:transparent; border:none; color:var(--text-muted); cursor:pointer; font-size:12px;">Clear</button>
+                            </div>
+                            <div id="terminal-tab-content" style="flex:1; display:flex; flex-direction:column; background:#000; overflow:hidden; position:relative;">
+                                <div id="terminal-box" style="flex:1; color:#10b981; font-family:'JetBrains Mono', monospace; font-size:13px; padding:12px; overflow-y:auto; line-height:1.5; white-space:pre-wrap;">Console Ready. Write code and click 'Run Code' to execute.</div>
+                                <div id="auditor-box" style="display:none; flex:1; background:var(--bg-page); color:var(--text-main); font-family:inherit; padding:12px; overflow-y:auto; font-size:13px; height:100%;">
+                                    <div style="text-align:center; padding:30px; color:var(--text-muted);">
+                                        Click <b>"Check Quality"</b> in the toolbar to run static analysis on your code.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <div id="ai-tutor-drawer" style="width:300px; display:none; flex-direction:column; border:1px solid var(--border); border-radius:12px; overflow:hidden; background:var(--container-bg); min-height:500px;">
+                <div id="notebook-view" style="display:none; flex:1; flex-direction:column; gap:12px; overflow-y:auto; height:100%; width:100%; padding:8px; border:1px solid var(--border); border-radius:12px; background:var(--bg-page);">
+                    <div class="notebook-toolbar" style="display:flex; gap:8px; background:var(--bg-alt); padding:8px 12px; border-radius:8px; border:1px solid var(--border); flex-wrap:wrap; align-items:center; margin-bottom:10px;">
+                        <button id="btnNotebookAddCode" class="btn-sim" style="font-size:12px; padding:4px 8px;">+ Code Cell</button>
+                        <button id="btnNotebookAddMarkdown" class="btn-sim" style="font-size:12px; padding:4px 8px;">+ Markdown Cell</button>
+                        <button id="btnNotebookRunAll" class="btn-sim primary" style="font-size:12px; padding:4px 8px; background:#10b981; border:none; color:white;">▶ Run All</button>
+                        <button id="btnNotebookClearAll" class="btn-sim" style="font-size:12px; padding:4px 8px;">Clear Outputs</button>
+                    </div>
+                    <div id="notebook-cells-list" style="display:flex; flex-direction:column; gap:16px;">
+                        <!-- Dynamically generated notebook cells -->
+                    </div>
+                </div>
+
+                <div id="ai-tutor-drawer" style="width:300px; display:none; flex-direction:column; border:1px solid var(--border); border-radius:12px; overflow:hidden; background:var(--container-bg); min-height:100%; position:absolute; right:0; top:0; z-index:10;">
                     <div style="background:#a855f71a; color:#a855f7; padding:12px 16px; border-bottom:1px solid var(--border); font-weight:800; display:flex; justify-content:space-between; align-items:center;">
                         <span>✨ AI Tutor Assistant</span>
                         <button id="btnCloseAiDrawer" style="background:transparent; border:none; color:#a855f7; font-weight:bold; cursor:pointer;">×</button>
@@ -3623,6 +3891,307 @@ const initProgrammingLab = async (container, labId) => {
     // Stdin / console element configurations
     const stdinArea = document.getElementById('stdin-area');
     const terminalBox = document.getElementById('terminal-box');
+
+    // Tab switcher handlers
+    document.getElementById('tabConsole').addEventListener('click', () => {
+        document.getElementById('tabConsole').style.color = 'var(--text-main)';
+        document.getElementById('tabConsole').style.borderBottom = '2px solid var(--primary)';
+        document.getElementById('tabAuditor').style.color = 'var(--text-muted)';
+        document.getElementById('tabAuditor').style.borderBottom = 'none';
+        document.getElementById('terminal-box').style.display = 'block';
+        document.getElementById('auditor-box').style.display = 'none';
+    });
+
+    document.getElementById('tabAuditor').addEventListener('click', () => {
+        document.getElementById('tabAuditor').style.color = 'var(--text-main)';
+        document.getElementById('tabAuditor').style.borderBottom = '2px solid var(--primary)';
+        document.getElementById('tabConsole').style.color = 'var(--text-muted)';
+        document.getElementById('tabConsole').style.borderBottom = 'none';
+        document.getElementById('terminal-box').style.display = 'none';
+        document.getElementById('auditor-box').style.display = 'block';
+    });
+
+    // Check Quality event listener
+    document.getElementById('btnCheckQuality').addEventListener('click', () => {
+        document.getElementById('tabAuditor').click();
+        const codeText = editor.getValue();
+        const report = runStaticCodeAnalysis(codeText, data.lang);
+        const auditorBox = document.getElementById('auditor-box');
+        if (!auditorBox) return;
+
+        let gradeColor = '#ef4444';
+        if (report.grade.startsWith('A')) gradeColor = '#10b981';
+        else if (report.grade.startsWith('B')) gradeColor = '#3b82f6';
+        else if (report.grade.startsWith('C')) gradeColor = '#f59e0b';
+
+        let recsHtml = report.recommendations.map(r => `
+            <div style="background:rgba(245, 158, 11, 0.05); border-left:4px solid #f59e0b; padding:10px; border-radius:6px; margin-bottom:8px; font-size:12px;">
+                ${r}
+            </div>
+        `).join('');
+        if (!recsHtml) {
+            recsHtml = `<div style="color:#10b981; font-weight:700; font-size:12px;">🎉 No issues found! Your code is high-quality and safe.</div>`;
+        }
+
+        auditorBox.innerHTML = `
+            <div style="border:1px solid var(--border); border-radius:12px; padding:16px; background:var(--bg-alt); margin-bottom:12px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                    <span style="font-weight:700; font-size:15px; color:var(--text-main);">🔍 Code Quality Audit</span>
+                    <span style="background:${gradeColor}; color:white; font-size:18px; font-weight:800; padding:6px 12px; border-radius:8px;">${report.grade}</span>
+                </div>
+                <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:12px; text-align:center; font-size:12px; margin-bottom:15px;">
+                    <div style="background:var(--bg-page); padding:8px; border-radius:6px; border:1px solid var(--border);">
+                        <span style="color:var(--text-muted);">Total Lines</span>
+                        <div style="font-size:16px; font-weight:700; margin-top:4px; color:var(--text-main);">${report.totalLines}</div>
+                    </div>
+                    <div style="background:var(--bg-page); padding:8px; border-radius:6px; border:1px solid var(--border);">
+                        <span style="color:var(--text-muted);">Comment Ratio</span>
+                        <div style="font-size:16px; font-weight:700; margin-top:4px; color:var(--text-main);">${report.commentRatio}%</div>
+                    </div>
+                    <div style="background:var(--bg-page); padding:8px; border-radius:6px; border:1px solid var(--border);">
+                        <span style="color:var(--text-muted);">Complexity</span>
+                        <div style="font-size:16px; font-weight:700; margin-top:4px; color:${report.cyclomaticComplexity > 10 ? '#ef4444' : 'var(--text-main)'};">${report.cyclomaticComplexity}</div>
+                    </div>
+                </div>
+                <h4 style="margin-bottom:8px; font-weight:700; color:var(--text-main);">Overall Score: <span style="color:${gradeColor}">${report.totalScore}/100</span></h4>
+                <div style="height:6px; background:var(--border); border-radius:3px; overflow:hidden; margin-bottom:15px;">
+                    <div style="height:100%; width:${report.totalScore}%; background:${gradeColor}; border-radius:3px;"></div>
+                </div>
+            </div>
+            <h4 style="margin-bottom:10px; font-weight:700; font-size:13px; color:var(--text-main); display:flex; align-items:center; gap:6px;">
+                <span>💡</span> Recommendations
+            </h4>
+            <div style="display:flex; flex-direction:column; gap:8px;">
+                ${recsHtml}
+            </div>
+        `;
+    });
+
+    // Jupyter Notebook Mode logic
+    let isNotebookActive = false;
+    let notebookCells = [];
+    const savedNotebook = localStorage.getItem('vlab_notebook_cells_' + labId);
+    if (savedNotebook) {
+        try { notebookCells = JSON.parse(savedNotebook); } catch(e) {}
+    }
+    if (!notebookCells || notebookCells.length === 0) {
+        notebookCells = [
+            { id: 'cell-1', type: 'markdown', content: `## 📓 Interactive Notebook: ${data.title || 'Laboratory Activity'}\nDouble-click this markdown cell to edit. Execute the code cell below independently. Custom imports and variables carry over within Python modules.` },
+            { id: 'cell-2', type: 'code', content: data.defaultCode || '', execCount: null, output: null }
+        ];
+    }
+
+    const syncNotebookToEditor = () => {
+        const joinedCode = notebookCells.filter(c => c.type === 'code').map(c => c.content).join('\n\n');
+        editor.setValue(joinedCode, -1);
+        localStorage.setItem('vlab_notebook_cells_' + labId, JSON.stringify(notebookCells));
+    };
+
+    const renderNotebook = () => {
+        const listContainer = document.getElementById('notebook-cells-list');
+        if (!listContainer) return;
+        listContainer.innerHTML = notebookCells.map((cell, idx) => {
+            if (cell.type === 'markdown') {
+                return `
+                    <div class="notebook-cell markdown-cell" id="cell-container-${cell.id}" style="border: 1px solid var(--border); border-radius:8px; padding:12px; background:var(--bg-alt); transition:border-color 0.2s; position:relative;">
+                        <div style="font-size:10px; color:var(--text-muted); position:absolute; right:8px; top:6px;">Markdown Cell (Double-Click to Edit)</div>
+                        <div id="cell-preview-${cell.id}" style="line-height:1.6; font-size:14px; margin-top:8px; color:var(--text-main);">${parseMarkdown(cell.content)}</div>
+                        <textarea id="cell-edit-${cell.id}" style="display:none; width:100%; min-height:80px; padding:10px; background:var(--bg-page); color:var(--text-main); font-family:inherit; border:1px solid var(--primary); border-radius:6px; font-size:13px; outline:none; resize:vertical; margin-top:8px; box-sizing:border-box;">${cell.content}</textarea>
+                        <div id="cell-controls-${cell.id}" style="display:none; gap:6px; margin-top:8px; justify-content:flex-end;">
+                            <button id="btnSaveCell-${cell.id}" class="btn-sim primary" style="font-size:11px; padding:4px 8px;">Done</button>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; margin-top:10px; border-top:1px solid var(--border); padding-top:8px;">
+                            <div style="display:flex; gap:6px;">
+                                <button id="btnMoveCellUp-${cell.id}" class="btn-sim" style="font-size:10px; padding:2px 6px;">▲ Up</button>
+                                <button id="btnMoveCellDown-${cell.id}" class="btn-sim" style="font-size:10px; padding:2px 6px;">▼ Down</button>
+                            </div>
+                            <button id="btnDeleteCell-${cell.id}" class="btn-sim" style="font-size:10px; padding:2px 6px; background:#ef4444; color:white; border:none; cursor:pointer;">Delete</button>
+                        </div>
+                    </div>
+                `;
+            } else {
+                return `
+                    <div class="notebook-cell code-cell" id="cell-container-${cell.id}" style="border: 1px solid var(--border); border-radius:8px; padding:12px; background:var(--bg-alt); display:flex; flex-direction:column; gap:10px; position:relative;">
+                        <div style="font-size:10px; color:var(--text-muted); position:absolute; right:8px; top:6px;">Code Cell (In [${cell.execCount || ' ' }])</div>
+                        <div style="display:flex; gap:10px; align-items:flex-start; margin-top:12px;">
+                            <span style="font-family:'JetBrains Mono', monospace; font-size:13px; color:var(--primary); padding-top:8px; min-width:55px;">In [${cell.execCount || ' ' }]:</span>
+                            <textarea id="cell-code-${cell.id}" style="flex:1; min-height:120px; font-family:'JetBrains Mono', monospace; font-size:13px; padding:10px; background:#1e1e1e; color:#d4d4d4; border:1px solid var(--border); border-radius:6px; outline:none; line-height:1.4; resize:vertical; box-sizing:border-box;">${cell.content}</textarea>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <div style="display:flex; gap:6px;">
+                                <button id="btnMoveCellUp-${cell.id}" class="btn-sim" style="font-size:10px; padding:2px 6px;">▲ Up</button>
+                                <button id="btnMoveCellDown-${cell.id}" class="btn-sim" style="font-size:10px; padding:2px 6px;">▼ Down</button>
+                            </div>
+                            <div style="display:flex; gap:6px;">
+                                <button id="btnRunCell-${cell.id}" class="btn-sim primary" style="font-size:11px; padding:4px 10px; background:#10b981; border:none; color:white; cursor:pointer;">Run Cell</button>
+                                <button id="btnDeleteCell-${cell.id}" class="btn-sim" style="font-size:10px; padding:2px 6px; background:#ef4444; color:white; border:none; cursor:pointer;">Delete</button>
+                            </div>
+                        </div>
+                        <div id="cell-output-${cell.id}" style="display:${cell.output ? 'block' : 'none'}; background:#000; color:#10b981; font-family:'JetBrains Mono', monospace; font-size:12px; padding:10px; border-radius:6px; white-space:pre-wrap; max-height:200px; overflow-y:auto; border:1px solid #10b98133;">${cell.output || ''}</div>
+                    </div>
+                `;
+            }
+        }).join('');
+
+        // Bind cells event handlers programmatically to ensure security policy compliance
+        notebookCells.forEach((cell, cellIdx) => {
+            const container = document.getElementById(`cell-container-${cell.id}`);
+            if (cell.type === 'markdown') {
+                if (container) {
+                    container.addEventListener('dblclick', () => {
+                        document.getElementById(`cell-preview-${cell.id}`).style.display = 'none';
+                        document.getElementById(`cell-edit-${cell.id}`).style.display = 'block';
+                        document.getElementById(`cell-controls-${cell.id}`).style.display = 'flex';
+                    });
+                }
+                const saveBtn = document.getElementById(`btnSaveCell-${cell.id}`);
+                if (saveBtn) {
+                    saveBtn.addEventListener('click', () => {
+                        const edit = document.getElementById(`cell-edit-${cell.id}`);
+                        if (edit) cell.content = edit.value;
+                        renderNotebook();
+                        localStorage.setItem('vlab_notebook_cells_' + labId, JSON.stringify(notebookCells));
+                    });
+                }
+            } else {
+                const runBtn = document.getElementById(`btnRunCell-${cell.id}`);
+                if (runBtn) {
+                    runBtn.addEventListener('click', async () => {
+                        const codeVal = document.getElementById(`cell-code-${cell.id}`).value;
+                        cell.content = codeVal;
+                        const out = document.getElementById(`cell-output-${cell.id}`);
+                        out.style.display = 'block';
+                        out.textContent = '[Running cell...]';
+
+                        const stdinText = stdinArea.value;
+                        const sim = await executeSimulatedCode(data.lang, codeVal, stdinText, labId);
+                        cell.execCount = (window.cellExecCountCounter || 0) + 1;
+                        window.cellExecCountCounter = cell.execCount;
+
+                        let outputText = sim.compileLog;
+                        if (sim.stdout) outputText += sim.stdout;
+                        if (sim.stderr) outputText += '\nError:\n' + sim.stderr;
+
+                        cell.output = outputText;
+                        renderNotebook();
+                        syncNotebookToEditor();
+                    });
+                }
+            }
+
+            const moveUpBtn = document.getElementById(`btnMoveCellUp-${cell.id}`);
+            if (moveUpBtn) {
+                moveUpBtn.addEventListener('click', () => {
+                    if (cellIdx === 0) return;
+                    const temp = notebookCells[cellIdx];
+                    notebookCells[cellIdx] = notebookCells[cellIdx - 1];
+                    notebookCells[cellIdx - 1] = temp;
+                    renderNotebook();
+                    localStorage.setItem('vlab_notebook_cells_' + labId, JSON.stringify(notebookCells));
+                });
+            }
+
+            const moveDownBtn = document.getElementById(`btnMoveCellDown-${cell.id}`);
+            if (moveDownBtn) {
+                moveDownBtn.addEventListener('click', () => {
+                    if (cellIdx === notebookCells.length - 1) return;
+                    const temp = notebookCells[cellIdx];
+                    notebookCells[cellIdx] = notebookCells[cellIdx + 1];
+                    notebookCells[cellIdx + 1] = temp;
+                    renderNotebook();
+                    localStorage.setItem('vlab_notebook_cells_' + labId, JSON.stringify(notebookCells));
+                });
+            }
+
+            const deleteBtn = document.getElementById(`btnDeleteCell-${cell.id}`);
+            if (deleteBtn) {
+                deleteBtn.addEventListener('click', () => {
+                    if (confirm("Delete this cell?")) {
+                        notebookCells = notebookCells.filter(c => c.id !== cell.id);
+                        renderNotebook();
+                        localStorage.setItem('vlab_notebook_cells_' + labId, JSON.stringify(notebookCells));
+                        syncNotebookToEditor();
+                    }
+                });
+            }
+        });
+    };
+
+    // Toggle Notebook View Click Handler
+    document.getElementById('btnToggleNotebook').addEventListener('click', () => {
+        isNotebookActive = !isNotebookActive;
+        const toggleBtn = document.getElementById('btnToggleNotebook');
+        const normalView = document.getElementById('normal-editor-view');
+        const notebookView = document.getElementById('notebook-view');
+
+        if (isNotebookActive) {
+            toggleBtn.textContent = '📝 Editor Mode';
+            toggleBtn.style.background = '#ea580c';
+            normalView.style.display = 'none';
+            notebookView.style.display = 'flex';
+            
+            // Sync current editor code to the primary code cell
+            const codeCellIndex = notebookCells.findIndex(c => c.type === 'code');
+            if (codeCellIndex !== -1) {
+                notebookCells[codeCellIndex].content = editor.getValue();
+            }
+            renderNotebook();
+        } else {
+            toggleBtn.textContent = '📓 Notebook Mode';
+            toggleBtn.style.background = '#0284c7';
+            normalView.style.display = 'flex';
+            notebookView.style.display = 'none';
+
+            // Sync cell changes back to main editor
+            syncNotebookToEditor();
+        }
+    });
+
+    // Notebook buttons handlers
+    document.getElementById('btnNotebookAddCode').addEventListener('click', () => {
+        notebookCells.push({ id: 'cell-' + Date.now(), type: 'code', content: '', execCount: null, output: null });
+        renderNotebook();
+    });
+
+    document.getElementById('btnNotebookAddMarkdown').addEventListener('click', () => {
+        notebookCells.push({ id: 'cell-' + Date.now(), type: 'markdown', content: 'Double-click to edit markdown description...' });
+        renderNotebook();
+    });
+
+    document.getElementById('btnNotebookRunAll').addEventListener('click', async () => {
+        const stdinText = stdinArea.value;
+        for (let cell of notebookCells) {
+            if (cell.type === 'code') {
+                const codeArea = document.getElementById(`cell-code-${cell.id}`);
+                if (codeArea) cell.content = codeArea.value;
+                const out = document.getElementById(`cell-output-${cell.id}`);
+                if (out) {
+                    out.style.display = 'block';
+                    out.textContent = '[Running cell...]';
+                }
+                const sim = await executeSimulatedCode(data.lang, cell.content, stdinText, labId);
+                cell.execCount = (window.cellExecCountCounter || 0) + 1;
+                window.cellExecCountCounter = cell.execCount;
+
+                let outputText = sim.compileLog;
+                if (sim.stdout) outputText += sim.stdout;
+                if (sim.stderr) outputText += '\nError:\n' + sim.stderr;
+                cell.output = outputText;
+            }
+        }
+        renderNotebook();
+        syncNotebookToEditor();
+    });
+
+    document.getElementById('btnNotebookClearAll').addEventListener('click', () => {
+        notebookCells.forEach(c => {
+            if (c.type === 'code') {
+                c.output = null;
+                c.execCount = null;
+            }
+        });
+        renderNotebook();
+    });
 
     // Run Code Integration
     document.getElementById('btnRunCode').addEventListener('click', async () => {
