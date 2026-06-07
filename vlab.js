@@ -2377,7 +2377,8 @@ class NetworkingSim {
         if (type === 'success') color = 'var(--success)';
         else if (type === 'error') color = 'var(--danger)';
         else if (type === 'data') color = 'var(--primary)';
-        div.innerHTML = `<span style="color:${color}; font-weight:800;">[${new Date().toLocaleTimeString([], { hour12: false, minute: '2-digit', second: '2-digit' })}]</span> ${msg}`;
+        const timeStr = new Date().toLocaleTimeString([], { hour12: false, minute: '2-digit', second: '2-digit' });
+        div.innerHTML = `<span class="event-time" style="color:${color}; font-weight:800;">[${timeStr}]</span> <span class="event-proto" style="display:none;">${(this.mode || 'net').toUpperCase()}</span> <span class="event-desc">${msg}</span>`;
         this.eventList.prepend(div);
     }
 

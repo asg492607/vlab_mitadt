@@ -205,7 +205,7 @@
                         <h1 class="section-title">Feedback</h1>
                         <div class="section-body">
                             <p style="color:var(--text-muted); margin-bottom:15px;">Share your experience with this lab to help us improve.</p>
-                            <textarea id="feedbackText" class="sim-select" style="width: 100%; height: 120px; margin-top: 10px; resize:vertical;" placeholder="Share your experience — what worked well, what was confusing, or any suggestions..."></textarea>
+                            <textarea id="feedbackText" style="width: 100%; height: 120px; margin-top: 10px; resize:vertical; background:var(--bg-page); border:1px solid var(--border); border-radius:var(--radius-md); padding:12px; color:var(--text-main); font-family:inherit; outline:none;" placeholder="Share your experience — what worked well, what was confusing, or any suggestions..."></textarea>
                             <button id="submitFeedbackBtn" class="btn-sim primary" style="margin-top: 15px;" onclick="(function(){ const t = document.getElementById('feedbackText'); if(!t || !t.value.trim()) { alert('Please write your feedback before submitting.'); return; } const labId = document.getElementById('labSelect').value; const fb = { feedback: t.value.trim(), lab: labId, timestamp: new Date().toISOString() }; try { localStorage.setItem('vlab_feedback_' + labId, JSON.stringify(fb)); } catch(e){} t.value=''; const btn = document.getElementById('submitFeedbackBtn'); btn.textContent = '✓ Thank you!'; btn.disabled = true; setTimeout(() => { btn.textContent = 'Submit Feedback'; btn.disabled = false; }, 3000); })()">Submit Feedback</button>
                         </div>
                     </section>

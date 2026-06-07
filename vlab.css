@@ -497,7 +497,15 @@ body {
     justify-content: center;
     cursor: move;
     z-index: 10;
-    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.2s;
+    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.2s ease, background 0.2s;
+    border-radius: var(--radius-md);
+}
+
+.device-node:hover {
+    transform: scale(1.1);
+    background: rgba(255, 255, 255, 0.4);
+    box-shadow: 0 0 20px var(--primary);
+    z-index: 100;
 }
 
 .device-node.cabling-source {
@@ -508,7 +516,8 @@ body {
 }
 
 .device-node.dragging {
-    transform: scale(1.15);
+    transform: scale(1.05);
+    opacity: 0.8;
     z-index: 100;
 }
 
@@ -834,16 +843,7 @@ body {
     box-shadow: inset 0 0 100px rgba(0,0,0,0.02);
 }
 
-.device-node {
-    transition: transform 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275), background 0.2s;
-    border-radius: var(--radius-md);
-}
 
-.device-node:hover {
-    transform: scale(1.1);
-    background: rgba(255, 255, 255, 0.4);
-    box-shadow: 0 8px 30px rgba(0,0,0,0.05);
-}
 
 .context-menu {
     position: fixed;
@@ -1263,20 +1263,7 @@ body.sandbox-mode .topology-main {
     transition: filter 0.3s ease;
 }
 
-.device-node {
-    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.2s ease;
-}
 
-.device-node:hover {
-    transform: scale(1.1);
-    box-shadow: 0 0 20px var(--primary);
-    z-index: 100;
-}
-
-.device-node.dragging {
-    transform: scale(1.05);
-    opacity: 0.8;
-}
 
 /* Analytical Glass Panel */
 .analytics-overlay {
@@ -1292,16 +1279,7 @@ body.sandbox-mode .topology-main {
     pointer-events: none;
 }
 
-.nav-item {
-    border-radius: 12px;
-    margin: 4px 12px;
-    transition: all 0.2s ease;
-}
 
-.nav-item:hover {
-    background: rgba(37, 99, 235, 0.1);
-    transform: translateX(5px);
-}
 .locked-overlay {
     position: absolute;
     top: 0; left: 0; width: 100%; height: 100%;
