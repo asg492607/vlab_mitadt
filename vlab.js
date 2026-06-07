@@ -1950,6 +1950,7 @@ class NetworkingSim {
         this.labId = labId;
         this.packets = [];
         this.acks = [];
+        this.particles = [];
         this.isRunning = false;
         this.mode = mode || 'stop-wait';
         this.windowSize = 4;
@@ -2274,8 +2275,38 @@ class NetworkingSim {
                     p.y += Math.sin(Date.now() / 50) * 2;
                     if (p.collisionTime === undefined) p.collisionTime = Date.now();
                     if (Date.now() - p.collisionTime > 2000) arr.splice(i, 1);
-                } else if (p.progress >= 1) {
-                    if (idx === 0) this.handlePacketArrival(p); else this.handleAckArrival(p); arr.splice(i, 1);
+                    
+                    // Collision Explosion Sparks
+                    if (Math.random() < 0.6) {
+                        this.particles.push({
+                            x: p.x + (Math.random() - 0.5) * 15,
+                            y: p.y + (Math.random() - 0.5) * 15,
+                            vx: (Math.random() - 0.5) * 5,
+                            vy: (Math.random() - 0.5) * 5,
+                            color: "#ef4444",
+                            alpha: 1.0,
+                            size: Math.random() * 4 + 3,
+                            decay: Math.random() * 0.06 + 0.03
+                        });
+                    }
+                } else {
+                    if (p.progress >= 1) {
+                        if (idx === 0) this.handlePacketArrival(p); else this.handleAckArrival(p); arr.splice(i, 1);
+                    } else {
+                        // Data/Ack Transmission Flow Particles
+                        if (Math.random() < 0.4) {
+                            this.particles.push({
+                                x: p.x,
+                                y: p.y,
+                                vx: (Math.random() - 0.5) * 1.5,
+                                vy: (Math.random() - 0.5) * 1.5,
+                                color: idx === 0 ? "#10b981" : "#fbbf24",
+                                alpha: 1.0,
+                                size: Math.random() * 2.5 + 1.5,
+                                decay: Math.random() * 0.04 + 0.02
+                            });
+                        }
+                    }
                 }
                 if (arr[i]) this.drawPacket(p);
             }
@@ -2298,6 +2329,27 @@ class NetworkingSim {
             const elapsed = (Date.now() - this.startTime) / 1000;
             const bps = elapsed > 0 ? Math.round((this.stats.acked * 1024) / elapsed) : 0;
             throughputEl.textContent = `${bps} Bps`;
+        }
+
+        // Update & Draw Flow/Explosion Particles
+        for (let i = this.particles.length - 1; i >= 0; i--) {
+            const pt = this.particles[i];
+            pt.x += pt.vx;
+            pt.y += pt.vy;
+            pt.alpha -= pt.decay;
+            if (pt.alpha <= 0) {
+                this.particles.splice(i, 1);
+            } else {
+                this.ctx.save();
+                this.ctx.globalAlpha = pt.alpha;
+                this.ctx.fillStyle = pt.color;
+                this.ctx.shadowBlur = 6;
+                this.ctx.shadowColor = pt.color;
+                this.ctx.beginPath();
+                this.ctx.arc(pt.x, pt.y, pt.size, 0, Math.PI * 2);
+                this.ctx.fill();
+                this.ctx.restore();
+            }
         }
 
         this.aniId = requestAnimationFrame(this.animate);
@@ -3065,56 +3117,171 @@ const runPistonCode = async (lang, version, code, stdin) => {
     }
 };
 
-const executeSimulatedCode = (lang, code, stdin, labId) => {
+let pyodideInstance = null;
+const loadPyodideEngine = async () => {
+    if (pyodideInstance) return pyodideInstance;
+    if (window.pyodideLoadingPromise) {
+        return window.pyodideLoadingPromise;
+    }
+    window.pyodideLoadingPromise = new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = "https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js";
+        script.onload = async () => {
+            try {
+                pyodideInstance = await window.loadPyodide({
+                    indexURL: "https://cdn.jsdelivr.net/pyodide/v0.25.0/full/"
+                });
+                resolve(pyodideInstance);
+            } catch (err) {
+                reject(err);
+            }
+        };
+        script.onerror = reject;
+        document.head.appendChild(script);
+    });
+    return window.pyodideLoadingPromise;
+};
+
+const runPythonCodeWithPyodide = async (code, stdin) => {
+    try {
+        const pyodide = await loadPyodideEngine();
+        pyodide.runPython(`
+import sys
+import io
+sys.stdout = io.StringIO()
+sys.stderr = io.StringIO()
+
+_stdin_data = ${JSON.stringify(stdin)}
+_stdin_lines = _stdin_data.split('\\n')
+_stdin_idx = 0
+
+def mock_input(prompt=''):
+    global _stdin_idx
+    if _stdin_idx < len(_stdin_lines):
+        val = _stdin_lines[_stdin_idx]
+        _stdin_idx += 1
+        return val
+    raise EOFError('EOF when reading a line')
+
+import builtins
+builtins.input = mock_input
+`);
+        await pyodide.runPythonAsync(code);
+        const stdout = pyodide.runPython("sys.stdout.getvalue()");
+        const stderr = pyodide.runPython("sys.stderr.getvalue()");
+        return { compileLog: "[Running...] python3 main.py\n", stdout, stderr, code: 0 };
+    } catch (err) {
+        return { compileLog: "[Running...] python3 main.py\n", stdout: "", stderr: err.message, code: 1 };
+    }
+};
+
+const transpileCodeToJS = (lang, code) => {
+    let js = code;
+    js = js.replace(/#include\s+<[^>]+>/g, '');
+    js = js.replace(/using\s+namespace\s+\w+;/g, '');
+    js = js.replace(/import\s+[\w.]+;/g, '');
+    js = js.replace(/package\s+[\w.]+;/g, '');
+    js = js.replace(/struct\s+(\w+)\s*{[^}]+};/g, '');
+    js = js.replace(/struct\s+(\w+)\s+(\w+)\s*;/g, 'let $2 = {};');
+    js = js.replace(/struct\s+(\w+)\s+(\w+)\s*=\s*{[^}]+};/g, 'let $2 = {};');
+    if (js.includes('swap(&')) {
+        js = js.replace(/void\s+swap\(\s*(?:int|double|float)\s*\*\s*(\w+)\s*,\s*(?:int|double|float)\s*\*\s*(\w+)\s*\)/g, 'function swap($1, $2)');
+        js = js.replace(/\*(\w+)/g, '$1.val');
+        js = js.replace(/swap\(&(\w+)\s*,\s*&(\w+)\)/g, 'let _$1 = {val: $1}, _$2 = {val: $2}; swap(_$1, _$2); $1 = _$1.val; $2 = _$2.val;');
+    }
+    js = js.replace(/int\s*\*\s*(\w+)\s*=\s*\(int\s*\*\)malloc\([^)]+\)/g, 'let $1 = [];');
+    js = js.replace(/free\(\w+\)/g, '');
+    js = js.replace(/\b(?:int|double|float|char|void|bool|string|auto|const|let)\s+(\w+)\b/g, 'let $1');
+    js = js.replace(/scanf\(\s*"[^"]+"\s*,\s*&?([\w.\[\]]+)(?:\s*,\s*&?([\w.\[\]]+))?(?:\s*,\s*&?([\w.\[\]]+))?(?:\s*,\s*&?([\w.\[\]]+))?\s*\)/g, (match, p1, p2, p3, p4) => {
+        let repl = "";
+        if (p1) repl += `${p1} = ctx.readToken();\n`;
+        if (p2) repl += `${p2} = ctx.readToken();\n`;
+        if (p3) repl += `${p3} = ctx.readToken();\n`;
+        if (p4) repl += `${p4} = ctx.readToken();\n`;
+        return repl;
+    });
+    js = js.replace(/cin\s*>>\s*([^;]+);/g, (match, varsStr) => {
+        const vars = varsStr.split('>>').map(v => v.trim());
+        return vars.map(v => `${v} = ctx.readToken();`).join('\n');
+    });
+    js = js.replace(/Scanner\s+\w+\s*=\s*new\s*Scanner\([^)]*\);?/g, '');
+    js = js.replace(/sc\.nextInt\(\)/g, 'ctx.readToken()');
+    js = js.replace(/sc\.nextDouble\(\)/g, 'ctx.readToken()');
+    js = js.replace(/sc\.next\(\)/g, 'ctx.readToken()');
+    js = js.replace(/sc\.nextLine\(\)/g, 'ctx.readLine()');
+    js = js.replace(/printf\(\s*"([^"]+)"\s*(?:,\s*(.+))?\)/g, (match, formatStr, argsStr) => {
+        if (!argsStr) return `ctx.stdout += ${JSON.stringify(formatStr)};`;
+        const args = argsStr.split(',').map(a => a.trim());
+        let finalStr = formatStr;
+        args.forEach(arg => {
+            finalStr = finalStr.replace(/%[dsf]/, `\${${arg}}`);
+        });
+        return `ctx.stdout += \`${finalStr}\`;`;
+    });
+    js = js.replace(/cout\s*<<\s*([^;]+);/g, (match, streamStr) => {
+        const parts = streamStr.split('<<').map(p => p.trim());
+        let appendExprs = parts.map(part => {
+            if (part === 'endl' || part === '"\\n"') return '"\\n"';
+            return part;
+        }).join(' + ');
+        return `ctx.stdout += (${appendExprs});`;
+    });
+    js = js.replace(/System\.out\.println\(([^)]*)\)/g, 'ctx.stdout += ($1) + "\\n"');
+    js = js.replace(/System\.out\.print\(([^)]*)\)/g, 'ctx.stdout += ($1)');
+    js = js.replace(/(?:public|private|protected):/g, '');
+    js = js.replace(/public\s+class\s+\w+\s*{/g, '');
+    js = js.replace(/public\s+static\s+void\s+main\s*\([^)]*\)\s*{/g, 'function main() {');
+    return js;
+};
+
+const executeSimulatedCode = async (lang, code, stdin, labId) => {
+    if (lang === "python") {
+        return await runPythonCodeWithPyodide(code, stdin);
+    }
     const inputVal = stdin.trim();
     let stdout = "";
     let stderr = "";
     let compileLog = "";
     if (lang === "c" || lang === "cpp") {
-        compileLog = `[Compiling...] g++ main.cpp -o main.out\n[Compilation successful]\n[Running...] ./main.out\n`;
+        compileLog = `[Compiling client-side ${lang.toUpperCase()}...] g++ main.cpp -o main.out\n[Compilation successful]\n[Running...] ./main.out\n`;
     } else if (lang === "java") {
-        compileLog = `[Compiling...] javac Main.java\n[Compilation successful]\n[Running...] java Main\n`;
-    } else {
-        compileLog = `[Running...] python3 main.py\n`;
+        compileLog = `[Compiling client-side Java...] javac Main.java\n[Compilation successful]\n[Running...] java Main\n`;
     }
-
-    if (labId === 'c_prog') {
-        const val = parseInt(inputVal);
-        if (isNaN(val)) stdout = "Invalid input\n";
-        else {
-            const fact = (n) => n <= 1 ? 1 : n * fact(n - 1);
-            stdout = fact(val).toString() + "\n";
-        }
-    } else if (labId === 'cpp_prog') {
-        const lines = inputVal.split(/\s+/);
-        if (lines.length === 0 || isNaN(parseFloat(lines[0]))) {
-            stdout = "0\n";
-        } else {
-            let balance = parseFloat(lines[0]);
-            let idx = 1;
-            while (idx < lines.length) {
-                const act = lines[idx];
-                const amt = parseFloat(lines[idx+1]);
-                if (act === 'D') balance += amt;
-                else if (act === 'W') { if (balance >= amt) balance -= amt; }
-                idx += 2;
+    try {
+        let jsSource = transpileCodeToJS(lang, code);
+        let stdinTokens = inputVal.split(/\s+/);
+        let tokenIndex = 0;
+        const readToken = () => {
+            if (tokenIndex < stdinTokens.length) {
+                const tok = stdinTokens[tokenIndex++];
+                if (!isNaN(tok) && tok.trim() !== "") return Number(tok);
+                return tok;
             }
-            stdout = balance.toString() + "\n";
+            return "";
+        };
+        const readLine = () => {
+            if (tokenIndex < stdinTokens.length) {
+                const line = stdinTokens.slice(tokenIndex).join(" ");
+                tokenIndex = stdinTokens.length;
+                return line;
+            }
+            return "";
+        };
+        const ctx = { stdout: "", readToken, readLine };
+        let bodyCode = jsSource;
+        if (jsSource.includes('function main(')) {
+            bodyCode += `\nmain();\n`;
+        } else if (jsSource.includes('int main(')) {
+            bodyCode = bodyCode.replace(/int\s+main\s*\([^)]*\)\s*{/g, 'function main() {');
+            bodyCode += `\nmain();\n`;
         }
-    } else if (labId === 'java_prog') {
-        const val = parseInt(inputVal);
-        if (isNaN(val)) stdout = "0\n";
-        else {
-            let sum = 0;
-            for (let i = 1; i <= val; i++) sum += i;
-            stdout = sum.toString() + "\n";
-        }
-    } else if (labId === 'python_prog') {
-        const nums = inputVal.split(/\s+/).map(Number).filter(x => !isNaN(x));
-        const sum = nums.reduce((a, b) => a + b, 0);
-        stdout = sum.toString() + "\n";
+        const runner = new Function("ctx", `try { ${bodyCode} } catch(e) { throw e; }`);
+        runner(ctx);
+        stdout = ctx.stdout;
+    } catch(err) {
+        stderr = err.message;
     }
-    return { compileLog, stdout, stderr, code: 0 };
+    return { compileLog, stdout, stderr, code: stderr ? 1 : 0 };
 };
 
 // --- MOCK DATABASE SCHEMAS ---
@@ -3474,7 +3641,7 @@ const initProgrammingLab = async (container, labId) => {
             terminalBox.textContent = outputText;
         } else {
             // Simulated evaluation fallback
-            const sim = executeSimulatedCode(data.lang, codeText, stdinText, labId);
+            const sim = await executeSimulatedCode(data.lang, codeText, stdinText, labId);
             let outputText = sim.compileLog;
             if (sim.stdout) outputText += sim.stdout;
             if (sim.stderr) outputText += "\nError:\n" + sim.stderr;
@@ -3510,7 +3677,7 @@ const initProgrammingLab = async (container, labId) => {
             if (res && res.run) {
                 runOutput = (res.run.stdout || "").trim();
             } else {
-                const sim = executeSimulatedCode(data.lang, codeText, tc.input, labId);
+                const sim = await executeSimulatedCode(data.lang, codeText, tc.input, labId);
                 runOutput = (sim.stdout || "").trim();
             }
 
@@ -4044,6 +4211,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         if (!data) return;
+
+        if (typeof loadChatHistory === 'function') {
+            loadChatHistory(id);
+        }
 
         let parentTitle = data.title;
         let isMulti = data.isMultiModule;
@@ -11338,9 +11509,112 @@ student@mitadt-os:~$ </div>
             return corpus;
         };
 
+        // Persistent Chat Logic
+        const loadChatHistory = (labId) => {
+            globalChatLogs.innerHTML = `<div class="global-ai-msg ai">Hello! I am your MIT VLab Academic AI Tutor. I can help guide you through configurations, CLI logs, SQL queries, or CPU scheduling concepts. How can I assist you today?</div>`;
+            const savedChat = localStorage.getItem(`vlab_chat_${labId}`);
+            if (savedChat) {
+                try {
+                    const messages = JSON.parse(savedChat);
+                    messages.forEach(m => {
+                        appendGlobalMessage(m.sender, m.text);
+                    });
+                } catch(e) { console.error("Error loading chat", e); }
+            }
+        };
+        window.loadChatHistory = loadChatHistory;
+
+        const saveChatHistory = (labId, sender, text) => {
+            const savedChat = localStorage.getItem(`vlab_chat_${labId}`);
+            let messages = [];
+            if (savedChat) {
+                try { messages = JSON.parse(savedChat); } catch(e) {}
+            }
+            messages.push({ sender, text });
+            if (messages.length > 50) messages.shift();
+            localStorage.setItem(`vlab_chat_${labId}`, JSON.stringify(messages));
+            
+            const user = auth.currentUser;
+            if (user) {
+                setDoc(doc(db, "users", user.uid, "chats", labId), {
+                    messages: messages,
+                    lastUpdated: new Date().toISOString()
+                }, { merge: true }).catch(err => console.error("Cloud chat sync failed", err));
+            }
+        };
+
+        // Voice readback engine
+        let speechEnabled = false;
+        const toggleSpeak = document.getElementById('btnGlobalAiSpeakToggle');
+        if (toggleSpeak) {
+            toggleSpeak.addEventListener('click', () => {
+                speechEnabled = !speechEnabled;
+                toggleSpeak.textContent = speechEnabled ? "🔊 Read: On" : "🔊 Read: Off";
+                toggleSpeak.style.borderColor = speechEnabled ? "var(--primary)" : "var(--border)";
+                if (!speechEnabled && window.speechSynthesis) {
+                    window.speechSynthesis.cancel();
+                }
+            });
+        }
+
+        const speakText = (text) => {
+            if (!speechEnabled || !window.speechSynthesis) return;
+            window.speechSynthesis.cancel();
+            const cleanText = text.replace(/[*#`_\-]/g, '').replace(/AI Tutor:/g, '').substring(0, 300);
+            const utterance = new SpeechSynthesisUtterance(cleanText);
+            window.speechSynthesis.speak(utterance);
+        };
+
+        // Voice recognition engine
+        const btnVoice = document.getElementById('btnGlobalAiVoice');
+        if (btnVoice) {
+            if (window.SpeechRecognition || window.webkitSpeechRecognition) {
+                const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+                const recognition = new SpeechRec();
+                recognition.continuous = false;
+                recognition.interimResults = false;
+                recognition.lang = 'en-US';
+                
+                recognition.onstart = () => {
+                    btnVoice.textContent = "🔴";
+                    btnVoice.style.background = "#ef4444";
+                };
+                
+                recognition.onend = () => {
+                    btnVoice.textContent = "🎙️";
+                    btnVoice.style.background = "#4b5563";
+                };
+                
+                recognition.onerror = () => {
+                    btnVoice.textContent = "🎙️";
+                    btnVoice.style.background = "#4b5563";
+                };
+                
+                recognition.onresult = (event) => {
+                    const resultText = event.results[0][0].transcript;
+                    globalAiInput.value = resultText;
+                    globalAiInput.focus();
+                };
+                
+                btnVoice.addEventListener('click', () => {
+                    try {
+                        recognition.start();
+                    } catch(e) {
+                        recognition.stop();
+                    }
+                });
+            } else {
+                btnVoice.style.display = 'none';
+            }
+        }
+
         const executeGlobalChatQuery = async (queryText) => {
             if (!queryText.trim()) return;
+            const labId = document.getElementById('labSelect').value;
+            
             appendGlobalMessage('student', queryText);
+            saveChatHistory(labId, 'student', queryText);
+            
             appendGlobalMessage('ai', 'AI Tutor is writing a response...');
             
             const context = getActiveContext();
@@ -11443,7 +11717,10 @@ Academic Rules:
             
             // Remove thinking message
             if (globalChatLogs.lastChild) globalChatLogs.removeChild(globalChatLogs.lastChild);
-            appendGlobalMessage('ai', responseText || "Error communicating with AI.");
+            const finalResp = responseText || "Error communicating with AI.";
+            appendGlobalMessage('ai', finalResp);
+            saveChatHistory(labId, 'ai', finalResp);
+            speakText(finalResp);
         };
         
         btnGlobalAiSend.addEventListener('click', () => {

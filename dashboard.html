@@ -382,6 +382,19 @@
                 padding: 16px 24px;
             }
         }
+        .badge-item.active {
+            opacity: 1 !important;
+            border-color: #fbbf24 !important;
+            background: rgba(251, 191, 36, 0.1) !important;
+            box-shadow: 0 0 15px rgba(251, 191, 36, 0.2);
+            animation: bounceIn 0.6s ease;
+        }
+        @keyframes bounceIn {
+            0% { transform: scale(0.3); opacity: 0; }
+            50% { transform: scale(1.05); }
+            70% { transform: scale(0.9); }
+            100% { transform: scale(1); }
+        }
     </style>
 </head>
 <body>
@@ -511,7 +524,45 @@
                         </div>
                     </div>
                 </div>
-</div>
+            </div>
+            
+            <!-- Premium Achievements & Leaderboard Section -->
+            <div class="theory-card" style="margin-top: 40px; background: var(--glass); border: 1px solid var(--card-border); padding: 30px; border-radius: 32px; backdrop-filter: blur(10px);">
+                <h3 style="margin-bottom: 20px; font-size: 22px; font-weight: 800; text-align: center; color: var(--primary-accent, #2563eb);">🏆 Your Achievements & Cohort Rankings</h3>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; flex-wrap: wrap;">
+                    <!-- Badge Grid -->
+                    <div>
+                        <h4 style="margin-bottom: 12px; font-weight: 700; color: var(--dashboard-text);">🎖️ Earned Badges</h4>
+                        <div id="badge-grid" style="display: flex; gap: 12px; flex-wrap: wrap;">
+                            <div class="badge-item" id="badge-net" title="Complete CSMA/CD and Subnetting labs" style="opacity:0.3; background: var(--badge-bg); border: 1px solid var(--card-border); padding: 12px; border-radius: 12px; text-align: center; flex: 1; min-width: 100px; transition: all 0.3s;">
+                                <div style="font-size: 32px; margin-bottom: 6px;">🌐</div>
+                                <div style="font-size: 11px; font-weight: 800;">NET MASTER</div>
+                            </div>
+                            <div class="badge-item" id="badge-os" title="Complete CPU scheduling and deadlocks" style="opacity:0.3; background: var(--badge-bg); border: 1px solid var(--card-border); padding: 12px; border-radius: 12px; text-align: center; flex: 1; min-width: 100px; transition: all 0.3s;">
+                                <div style="font-size: 32px; margin-bottom: 6px;">💻</div>
+                                <div style="font-size: 11px; font-weight: 800;">SYSTEMS GURU</div>
+                            </div>
+                            <div class="badge-item" id="badge-prog" title="Complete C/C++ or Python labs" style="opacity:0.3; background: var(--badge-bg); border: 1px solid var(--card-border); padding: 12px; border-radius: 12px; text-align: center; flex: 1; min-width: 100px; transition: all 0.3s;">
+                                <div style="font-size: 32px; margin-bottom: 6px;">🚀</div>
+                                <div style="font-size: 11px; font-weight: 800;">CODE STAR</div>
+                            </div>
+                            <div class="badge-item" id="badge-cyber" title="Complete RSA and SQL injection labs" style="opacity:0.3; background: var(--badge-bg); border: 1px solid var(--card-border); padding: 12px; border-radius: 12px; text-align: center; flex: 1; min-width: 100px; transition: all 0.3s;">
+                                <div style="font-size: 32px; margin-bottom: 6px;">🔐</div>
+                                <div style="font-size: 11px; font-weight: 800;">CYBER SHIELD</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Ranking Panel -->
+                    <div>
+                        <h4 style="margin-bottom: 12px; font-weight: 700; color: var(--dashboard-text);">📊 Cohort Leaderboard</h4>
+                        <div id="leaderboard-list" style="display: flex; flex-direction: column; gap: 8px;">
+                            <div style="text-align: center; padding: 20px; color: var(--muted-text);">Loading cohort ranking...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Mode Grid, Lab Selection, and Launch Action (hidden initially) -->
@@ -849,6 +900,57 @@
                 });
                 updateProgressUI();
 
+                // Build Leaderboard
+                try {
+                    const allUsersSnap = await getDocs(collection(db, "users"));
+                    const leaderboardData = [];
+                    for (const uDoc of allUsersSnap.docs) {
+                        const uData = uDoc.data();
+                        if (uData.role === 'student') {
+                            const studentProgSnap = await getDocs(collection(db, "users", uDoc.id, "progress"));
+                            let completedCount = 0;
+                            let totalScore = 0;
+                            studentProgSnap.forEach(pDoc => {
+                                const p = pDoc.data();
+                                if (p.completed) {
+                                    completedCount++;
+                                    totalScore += (p.posttestScore || 0);
+                                }
+                            });
+                            const avgScore = completedCount > 0 ? Math.round(totalScore / completedCount) : 0;
+                            leaderboardData.push({
+                                name: uData.name || "Anonymous",
+                                completedCount,
+                                avgScore
+                            });
+                        }
+                    }
+                    leaderboardData.sort((a, b) => {
+                        if (b.completedCount !== a.completedCount) return b.completedCount - a.completedCount;
+                        return b.avgScore - a.avgScore;
+                    });
+                    const leaderboardList = document.getElementById('leaderboard-list');
+                    if (leaderboardList) {
+                        const medals = ["🥇", "🥈", "🥉", "👤", "👤"];
+                        leaderboardList.innerHTML = leaderboardData.slice(0, 5).map((student, rank) => {
+                            return `
+                                <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.03); padding:8px 12px; border-radius:10px; font-size:13px; border:1px solid rgba(255,255,255,0.05);">
+                                    <span style="display:flex; align-items:center; gap:8px;">
+                                        <span>${medals[rank] || "👤"}</span>
+                                        <b>${student.name}</b>
+                                    </span>
+                                    <span style="color:var(--muted-text); font-size:12px;">
+                                        <b style="color:#fbbf24;">${student.completedCount} Labs</b> (Avg: ${student.avgScore}%)
+                                    </span>
+                                </div>
+                            `;
+                        }).join('') || '<div style="text-align:center; padding:10px; color:var(--muted-text);">No other cohort members yet.</div>';
+                    }
+                } catch(err) {
+                    console.warn("Leaderboard build failed", err);
+                    const leaderboardList = document.getElementById('leaderboard-list');
+                    if (leaderboardList) leaderboardList.innerHTML = '<div style="text-align:center; padding:10px; color:var(--muted-text);">Leaderboard offline.</div>';
+                }
             } catch (e) { console.warn("Sync error", e); }
         }
         fetchEvaluation();
@@ -881,6 +983,11 @@
         }
 
         function updateProgressUI() {
+            let csmaDone = false, subnetDone = false;
+            let cpuDone = false, deadlockDone = false;
+            let cDone = false, pythonDone = false;
+            let rsaDone = false, sqliDone = false;
+
             document.querySelectorAll('.lab-card').forEach(card => {
                 const id = card.getAttribute('data-id');
                 const state = JSON.parse(localStorage.getItem('vlab_state_' + id) || '{}');
@@ -898,6 +1005,44 @@
                     badge.className = 'status-badge locked';
                 }
             });
+
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key.startsWith('vlab_state_')) {
+                    const labId = key.substring(11);
+                    try {
+                        const state = JSON.parse(localStorage.getItem(key));
+                        if (state.completed) {
+                            if (labId === 'csma') csmaDone = true;
+                            if (labId === 'subnet') subnetDone = true;
+                            if (labId === 'cpu_scheduling') cpuDone = true;
+                            if (labId === 'deadlock_avoidance') deadlockDone = true;
+                            if (labId === 'c_prog') cDone = true;
+                            if (labId === 'python_prog') pythonDone = true;
+                            if (labId === 'cyber_rsa') rsaDone = true;
+                            if (labId === 'cyber_sql_inject') sqliDone = true;
+                        }
+                    } catch(e){}
+                }
+            }
+
+            const updateBadgeEl = (elId, isUnlocked) => {
+                const el = document.getElementById(elId);
+                if (el) {
+                    if (isUnlocked) {
+                        el.classList.add('active');
+                        el.style.opacity = '1';
+                    } else {
+                        el.classList.remove('active');
+                        el.style.opacity = '0.3';
+                    }
+                }
+            };
+
+            updateBadgeEl('badge-net', csmaDone && subnetDone);
+            updateBadgeEl('badge-os', cpuDone && deadlockDone);
+            updateBadgeEl('badge-prog', cDone || pythonDone);
+            updateBadgeEl('badge-cyber', rsaDone && sqliDone);
         }
     </script>
 </body>
