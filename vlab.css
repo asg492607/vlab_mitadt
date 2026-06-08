@@ -68,7 +68,8 @@ body {
     box-shadow: var(--shadow-sm);
 }
 
-.breadcrumb {
+/*.vlab-header .breadcrumb*/
+.vlab-header .breadcrumb {
     display: flex;
     align-items: center;
     gap: 10px;
@@ -648,7 +649,7 @@ body {
     backdrop-filter: blur(10px);
 }
 
-.breadcrumb {
+.content-header .breadcrumb {
     font-size: 13px;
     color: var(--text-muted);
     margin-bottom: 8px;
@@ -885,7 +886,7 @@ body {
     position: absolute;
     bottom: 0; left: 0; width: 100%;
     height: 34px;
-    background: var(--glass);
+    background: linear-gradient(to right, var(--bg-sidebar), var(--bg-page));
     backdrop-filter: blur(25px);
     border-top: 1px solid var(--border);
     display: flex;
@@ -898,8 +899,6 @@ body {
     z-index: 1000;
     letter-spacing: 0.5px;
 }
-
-
 
 .sim-status-pill .pulse {
     width: 8px;
@@ -929,8 +928,6 @@ body {
     align-items: center;
     gap: 20px;
 }
-
-
 
 .device-node[data-type="note"] {
     background: rgba(253, 224, 71, 0.1);
@@ -1009,17 +1006,19 @@ body.sandbox-mode .topology-main {
 
 .topo-tooltip {
     position: fixed;
-    background: rgba(15, 23, 42, 0.9);
-    backdrop-filter: blur(8px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: var(--glass);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--border);
     color: white;
-    padding: 10px 14px;
-    border-radius: var(--radius-md);
+    padding: 12px 16px;
+    border-radius: 12px;
+    box-shadow: var(--shadow-lg);
     font-size: 12px;
     pointer-events: none;
-    z-index: 3000;
+    z-index: 10000;
     display: none;
-    box-shadow: var(--shadow-lg);
+    font-family: var(--font-sans);
+    animation: fadeIn 0.2s ease-out;
 }
 
 .workspace-log {
@@ -1064,10 +1063,7 @@ body.sandbox-mode .topology-main {
     font-size: 10px;
 }
 
-.workspace-status {
-    background: linear-gradient(to right, var(--bg-sidebar), var(--bg-page));
-    border-top: 1px solid var(--border);
-}
+
 
 .status-dot {
     width: 8px;
@@ -1243,19 +1239,7 @@ body.sandbox-mode .topology-main {
     to { transform: translateX(0); opacity: 1; }
 }
 
-.topo-tooltip {
-    position: fixed;
-    background: var(--glass);
-    backdrop-filter: blur(12px);
-    border: 1px solid var(--border);
-    padding: 12px 16px;
-    border-radius: 12px;
-    box-shadow: var(--shadow-lg);
-    z-index: 10000;
-    pointer-events: none;
-    font-family: var(--font-sans);
-    animation: fadeIn 0.2s ease-out;
-}
+
 
 /* Premium Neon Link Glow */
 #topo-links {

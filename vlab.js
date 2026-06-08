@@ -16,6 +16,39 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
+// Module-level timer tracking for lab cleanup
+const activeLabIntervals = [];
+const activeLabTimeouts = [];
+const activeLabFrames = [];
+
+const setInterval = (fn, delay, ...args) => {
+    const id = window.setInterval(fn, delay, ...args);
+    activeLabIntervals.push(id);
+    return id;
+};
+
+const setTimeout = (fn, delay, ...args) => {
+    const id = window.setTimeout(fn, delay, ...args);
+    activeLabTimeouts.push(id);
+    return id;
+};
+
+const requestAnimationFrame = (fn) => {
+    const id = window.requestAnimationFrame(fn);
+    activeLabFrames.push(id);
+    return id;
+};
+
+const clearAllLabTimers = () => {
+    activeLabIntervals.forEach(window.clearInterval);
+    activeLabIntervals.length = 0;
+    activeLabTimeouts.forEach(window.clearTimeout);
+    activeLabTimeouts.length = 0;
+    activeLabFrames.forEach(window.cancelAnimationFrame);
+    activeLabFrames.length = 0;
+};
+window.clearAllLabTimers = clearAllLabTimers;
+
 const getCurrentUser = () => {
     return new Promise((resolve, reject) => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -4958,37 +4991,7 @@ window.initIndexingLab = initIndexingLab;
 
 // App Controller
 document.addEventListener('DOMContentLoaded', async () => {
-    // Local timer tracking for lab cleanup
-    const activeLabIntervals = [];
-    const activeLabTimeouts = [];
-    const activeLabFrames = [];
 
-    const setInterval = (fn, delay, ...args) => {
-        const id = window.setInterval(fn, delay, ...args);
-        activeLabIntervals.push(id);
-        return id;
-    };
-
-    const setTimeout = (fn, delay, ...args) => {
-        const id = window.setTimeout(fn, delay, ...args);
-        activeLabTimeouts.push(id);
-        return id;
-    };
-
-    const requestAnimationFrame = (fn) => {
-        const id = window.requestAnimationFrame(fn);
-        activeLabFrames.push(id);
-        return id;
-    };
-
-    const clearAllLabTimers = () => {
-        activeLabIntervals.forEach(window.clearInterval);
-        activeLabIntervals.length = 0;
-        activeLabTimeouts.forEach(window.clearTimeout);
-        activeLabTimeouts.length = 0;
-        activeLabFrames.forEach(window.cancelAnimationFrame);
-        activeLabFrames.length = 0;
-    };
 
     // Initial State Restoration from Cloud
     await fetchProgress();
@@ -11975,6 +11978,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (data.simType === 'cyber_mitm')         { initCyberMitmSim(container);        return; }
         if (data.simType === 'cyber_steganography') { initCyberSteganographySim(container); return; }
         if (data.simType === 'cyber_network_scan') { initCyberNetworkScanSim(container); return; }
+
+        if (window.currentSim) {
+            window.currentSim.destroy();
+            window.currentSim = null;
+        }
 
         container.innerHTML = `
             <div class="sim-toolbar">
