@@ -5752,7 +5752,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         }
 
-        setTimeout(() => {
+        window.setTimeout(() => {
             document.querySelectorAll('.section-title').forEach(el => el.textContent = data.title);
 
             const setBody = (id, html) => {
