@@ -134,7 +134,7 @@ const fetchProgress = async () => {
         const splash = document.getElementById('splash-screen');
         if (splash) {
             splash.style.opacity = '0';
-            setTimeout(() => splash.style.display = 'none', 800);
+            window.setTimeout(() => splash.style.display = 'none', 800);
         }
     }
 };
@@ -12799,10 +12799,10 @@ student@mitadt-os:~$ </div>
         const splash = document.getElementById('splash-screen');
         if (splash) {
             splash.style.opacity = '0';
-            setTimeout(() => splash.style.display = 'none', 800);
+            window.setTimeout(() => splash.style.display = 'none', 800);
         }
     };
-    setTimeout(hideSplash, 1500);
+    window.setTimeout(hideSplash, 1500);
 
     document.getElementById('labSelect').addEventListener('change', (e) => {
         const targetLab = e.target.value;
@@ -12840,11 +12840,11 @@ student@mitadt-os:~$ </div>
         if (activeSection === 'simulation') initSimulation(targetLab);
         if (activeSection === 'experiment') initExperiment(targetLab);
 
-        setTimeout(() => {
+        window.setTimeout(() => {
             const splash2 = document.getElementById('splash-screen');
             if (splash2) {
                 splash2.style.opacity = '0';
-                setTimeout(() => splash2.style.display = 'none', 800);
+                window.setTimeout(() => splash2.style.display = 'none', 800);
             }
         }, 1200);
     });
