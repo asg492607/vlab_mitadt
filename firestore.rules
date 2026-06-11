@@ -16,14 +16,13 @@ service cloud.firestore {
 
     // Rules for the 'users' collection
     match /users/{userId} {
-      // Users can read and write their own data
-      // Teachers can read all user profile data
-      allow read: if isAuthenticated() && (request.auth.uid == userId || isTeacher());
+      // Authenticated users can read user profiles (required for leaderboard)
+      allow read: if isAuthenticated();
       allow write: if isAuthenticated() && request.auth.uid == userId;
 
       // Explicit rules for user progress
       match /progress/{labId} {
-        allow read: if isAuthenticated() && (request.auth.uid == userId || isTeacher());
+        allow read: if isAuthenticated();
         allow write: if isAuthenticated() && request.auth.uid == userId;
       }
 
