@@ -3890,6 +3890,565 @@ const runStaticCodeAnalysis = (code, lang) => {
     };
 };
 
+const initAssemblySim = async (container, labId) => {
+    let data = window.VLAB_DATA[labId];
+    if (data && data.isMultiModule) {
+        const modIdx = window.currentModuleIndex !== undefined && window.currentModuleIndex !== null ? window.currentModuleIndex : 0;
+        data = data.modules[modIdx];
+    }
+    
+    // UI Layout
+    container.innerHTML = `
+        <div class="asm-workspace" style="display:flex; height:100%; gap:15px; padding:10px; font-family:var(--font-sans);">
+            <!-- Left Panel: Code & Console -->
+            <div style="flex:1.2; display:flex; flex-direction:column; gap:10px;">
+                <div class="sim-toolbar" style="display:flex; justify-content:space-between; align-items:center;">
+                    <span style="font-weight:800; font-size:16px; color:var(--primary);">NASM Assembly Editor</span>
+                    <div style="display:flex; gap:8px;">
+                        <button id="btnAssemble" class="btn-sim primary">Assemble</button>
+                        <button id="btnStep" class="btn-sim" disabled>Step Forward</button>
+                        <button id="btnRunAsm" class="btn-sim" disabled>Run</button>
+                        <button id="btnResetAsm" class="btn-sim">Reset</button>
+                    </div>
+                </div>
+                
+                <!-- Code text area / editor -->
+                <div style="flex:1.5; position:relative; border:1px solid var(--border); border-radius:8px; overflow:hidden;">
+                    <textarea id="asm-editor" style="width:100%; height:100%; background:var(--bg-dark); color:#38bdf8; font-family:var(--font-mono); font-size:14px; padding:12px; border:none; resize:none; outline:none; line-height:1.5;"></textarea>
+                </div>
+                
+                <!-- Console -->
+                <div style="flex:0.8; display:flex; flex-direction:column; border:1px solid var(--border); border-radius:8px; overflow:hidden; background:rgba(15,23,42,0.95);">
+                    <div style="background:rgba(255,255,255,0.05); padding:6px 12px; border-bottom:1px solid var(--border); font-size:11px; font-weight:800; color:var(--text-muted);">SIMULATED KERNEL CONSOLE</div>
+                    <pre id="asm-console" style="flex:1; padding:10px; font-family:var(--font-mono); font-size:12px; color:#10b981; overflow-y:auto; margin:0; line-height:1.4; white-space:pre-wrap;"></pre>
+                </div>
+            </div>
+            
+            <!-- Right Panel: Registers & Stack visualizer -->
+            <div style="flex:1; display:flex; flex-direction:column; gap:15px; min-width:300px;">
+                <!-- Registers Matrix -->
+                <div style="flex:1.2; border:1px solid var(--border); border-radius:8px; background:var(--glass); padding:12px; display:flex; flex-direction:column;">
+                    <h5 style="margin:0 0 10px 0; font-size:12px; font-weight:800; color:var(--primary); letter-spacing:0.5px; text-transform:uppercase;">CPU Registers</h5>
+                    <div class="register-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:8px; flex:1;">
+                        <div class="register-card" id="reg-EAX"><span>EAX</span><b class="reg-val">0x00000000</b></div>
+                        <div class="register-card" id="reg-EBX"><span>EBX</span><b class="reg-val">0x00000000</b></div>
+                        <div class="register-card" id="reg-ECX"><span>ECX</span><b class="reg-val">0x00000000</b></div>
+                        <div class="register-card" id="reg-EDX"><span>EDX</span><b class="reg-val">0x00000000</b></div>
+                        <div class="register-card" id="reg-ESI"><span>ESI</span><b class="reg-val">0x00000000</b></div>
+                        <div class="register-card" id="reg-EDI"><span>EDI</span><b class="reg-val">0x00000000</b></div>
+                        <div class="register-card" id="reg-ESP"><span>ESP</span><b class="reg-val">0x00001000</b></div>
+                        <div class="register-card" id="reg-EBP"><span>EBP</span><b class="reg-val">0x00001000</b></div>
+                        <div class="register-card" id="reg-EIP" style="grid-column: span 2; background:rgba(37,99,235,0.1); border-color:var(--primary);"><span>EIP (Instruction Pointer)</span><b class="reg-val">0x00000000</b></div>
+                    </div>
+                    <!-- Flags -->
+                    <div style="display:flex; justify-content:space-around; align-items:center; margin-top:10px; padding-top:10px; border-top:1px solid var(--border);">
+                        <div class="flag-item" id="flag-ZF"><span>ZF</span><div class="flag-dot"></div></div>
+                        <div class="flag-item" id="flag-SF"><span>SF</span><div class="flag-dot"></div></div>
+                        <div class="flag-item" id="flag-OF"><span>OF</span><div class="flag-dot"></div></div>
+                        <div class="flag-item" id="flag-CF"><span>CF</span><div class="flag-dot"></div></div>
+                    </div>
+                </div>
+                
+                <!-- Stack visualizer -->
+                <div style="flex:1; border:1px solid var(--border); border-radius:8px; background:var(--glass); padding:12px; display:flex; flex-direction:column; overflow:hidden;">
+                    <h5 style="margin:0 0 10px 0; font-size:12px; font-weight:800; color:var(--primary); letter-spacing:0.5px; text-transform:uppercase;">Memory Stack (LIFO)</h5>
+                    <div style="flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:4px; padding-right:4px;" id="asm-stack-list">
+                        <!-- Filled by stack operations dynamically -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    const editor = document.getElementById('asm-editor');
+    const consoleEl = document.getElementById('asm-console');
+    const btnAssemble = document.getElementById('btnAssemble');
+    const btnStep = document.getElementById('btnStep');
+    const btnRun = document.getElementById('btnRunAsm');
+    const btnReset = document.getElementById('btnResetAsm');
+    const stackListEl = document.getElementById('asm-stack-list');
+
+    // Load template
+    editor.value = data.code_template || "";
+
+    // Internal State
+    let registers = { EAX: 0, EBX: 0, ECX: 0, EDX: 0, ESI: 0, EDI: 0, ESP: 0x1000, EBP: 0x1000, EIP: 0 };
+    let flags = { ZF: 0, SF: 0, OF: 0, CF: 0 };
+    let memory = {}; // For data segment variables
+    let stack = [];  // Array of pushed items: { address, value, register }
+    let instructions = []; // Parsed commands
+    let labels = {}; // Map of string labels to instruction indexes
+    let isCompiled = false;
+    let runInterval = null;
+
+    const formatHex32 = (val) => {
+        let cleanVal = parseInt(val, 10);
+        if (isNaN(cleanVal)) cleanVal = 0;
+        if (cleanVal < 0) {
+            // Compute two's complement for negative values in 32-bit
+            cleanVal = (0xFFFFFFFF + cleanVal + 1) & 0xFFFFFFFF;
+        }
+        return '0x' + cleanVal.toString(16).padStart(8, '0').toUpperCase();
+    };
+
+    const updateRegisterUI = (regName) => {
+        const valEl = document.querySelector(`#reg-${regName} .reg-val`);
+        if (valEl) {
+            const hex = formatHex32(registers[regName]);
+            if (valEl.textContent !== hex) {
+                valEl.textContent = hex;
+                const card = document.getElementById(`reg-${regName}`);
+                if (card) {
+                    card.classList.add('glow-change');
+                    setTimeout(() => card.classList.remove('glow-change'), 500);
+                }
+            }
+        }
+    };
+
+    const updateAllRegistersUI = () => {
+        Object.keys(registers).forEach(updateRegisterUI);
+        // Flags
+        Object.keys(flags).forEach(f => {
+            const dot = document.querySelector(`#flag-${f} .flag-dot`);
+            if (dot) {
+                if (flags[f]) {
+                    dot.classList.add('flag-on');
+                } else {
+                    dot.classList.remove('flag-on');
+                }
+            }
+        });
+    };
+
+    const updateStackUI = () => {
+        stackListEl.innerHTML = '';
+        if (stack.length === 0) {
+            stackListEl.innerHTML = '<div style="text-align:center; padding:20px; font-size:11px; color:var(--text-muted);">Stack is empty (ESP = 0x1000)</div>';
+            return;
+        }
+        // Draw stack frames
+        stack.slice().reverse().forEach(item => {
+            stackListEl.innerHTML += `
+                <div class="stack-cell animate-stack-push" style="display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.03); border:1px solid var(--border); padding:6px 12px; border-radius:6px; font-family:var(--font-mono); font-size:11px;">
+                    <span style="color:var(--text-muted);">${formatHex32(item.address)}</span>
+                    <span style="font-weight:700; color:var(--secondary);">${formatHex32(item.value)}</span>
+                    <span style="font-size:10px; opacity:0.6;">[${item.source}]</span>
+                </div>
+            `;
+        });
+    };
+
+    const printConsole = (msg, isError = false) => {
+        if (isError) {
+            consoleEl.innerHTML += `<span style="color:#ef4444">${msg}</span>`;
+        } else {
+            consoleEl.innerHTML += `<span>${msg}</span>`;
+        }
+        consoleEl.scrollTop = consoleEl.scrollHeight;
+    };
+
+    // Assembler & Code Parser
+    const assembleCode = () => {
+        printConsole("assembling source code... ");
+        const lines = editor.value.split('\n');
+        instructions = [];
+        labels = {};
+        memory = {};
+        registers = { EAX: 0, EBX: 0, ECX: 0, EDX: 0, ESI: 0, EDI: 0, ESP: 0x1000, EBP: 0x1000, EIP: 0 };
+        flags = { ZF: 0, SF: 0, OF: 0, CF: 0 };
+        stack = [];
+        updateStackUI();
+        updateAllRegistersUI();
+
+        let currentSection = '.text';
+        let dataOffset = 0x2000;
+
+        for (let i = 0; i < lines.length; i++) {
+            let line = lines[i].trim();
+            // Remove comments
+            const commentIndex = line.indexOf(';');
+            if (commentIndex !== -1) {
+                line = line.substring(0, commentIndex).trim();
+            }
+            if (!line) continue;
+
+            // Section markers
+            if (line.startsWith('section ')) {
+                currentSection = line.substring(8).trim();
+                continue;
+            }
+
+            if (currentSection === '.data') {
+                const dataParts = line.split(/\s+/);
+                if (dataParts.length >= 3) {
+                    const varName = dataParts[0];
+                    const directive = dataParts[1].toLowerCase();
+                    const valStr = dataParts.slice(2).join(' ');
+
+                    if (directive === 'dd') {
+                        const val = parseInt(valStr, 10);
+                        memory[varName] = { address: dataOffset, value: isNaN(val) ? 0 : val };
+                        dataOffset += 4;
+                    } else if (directive === 'db') {
+                        let cleanStr = valStr.replace(/^['"]|['"]$/g, '');
+                        cleanStr = cleanStr.replace(/0xa/g, '\n').replace(/,\s*/g, '');
+                        memory[varName] = { address: dataOffset, value: cleanStr };
+                        dataOffset += cleanStr.length;
+                    }
+                }
+                continue;
+            }
+
+            // Labels
+            if (line.endsWith(':')) {
+                const labelName = line.substring(0, line.length - 1).trim();
+                labels[labelName] = instructions.length;
+                continue;
+            }
+
+            // Check global / extern tags
+            if (line.startsWith('global ') || line.startsWith('extern ')) {
+                continue;
+            }
+
+            // Parse instructions
+            const firstSpace = line.indexOf(' ');
+            let opcode = line.toLowerCase();
+            let argsStr = '';
+            if (firstSpace !== -1) {
+                opcode = line.substring(0, firstSpace).trim().toLowerCase();
+                argsStr = line.substring(firstSpace + 1).trim();
+            }
+
+            const args = argsStr.split(',').map(s => s.trim());
+            instructions.push({ opcode, args, originalLine: i, lineText: lines[i] });
+        }
+
+        // Confirm _start exists
+        if (labels['_start'] === undefined) {
+            printConsole("error: global label '_start' not found.\n", true);
+            isCompiled = false;
+            return;
+        }
+
+        // Initialize EIP to _start index
+        registers.EIP = labels['_start'];
+        updateRegisterUI('EIP');
+
+        printConsole("assembly successful. Build target x86_elf executable.\n");
+        isCompiled = true;
+        btnStep.disabled = false;
+        btnRun.disabled = false;
+    };
+
+    // Step-by-Step Executer
+    const stepInstruction = () => {
+        if (!isCompiled) return false;
+        if (registers.EIP >= instructions.length) {
+            printConsole("Program reached end of instructions.\n");
+            stopExecution();
+            return false;
+        }
+
+        const inst = instructions[registers.EIP];
+        const { opcode, args } = inst;
+        let nextEip = registers.EIP + 1;
+
+        const resolveVal = (valStr) => {
+            if (!valStr) return 0;
+            const upper = valStr.toUpperCase();
+            if (registers[upper] !== undefined) {
+                return registers[upper];
+            }
+            if (valStr.startsWith('[') && valStr.endsWith(']')) {
+                const memLabel = valStr.substring(1, valStr.length - 1).trim();
+                if (memory[memLabel] !== undefined) {
+                    return memory[memLabel].value;
+                }
+                const regLabel = memLabel.toUpperCase();
+                if (registers[regLabel] !== undefined) {
+                    return registers[regLabel];
+                }
+                return 0;
+            }
+            if (memory[valStr] !== undefined) {
+                return memory[valStr].address;
+            }
+            const parsed = parseInt(valStr, 10);
+            return isNaN(parsed) ? 0 : parsed;
+        };
+
+        const writeOperand = (destStr, val) => {
+            const upper = destStr.toUpperCase();
+            if (registers[upper] !== undefined) {
+                registers[upper] = val;
+                updateRegisterUI(upper);
+                return;
+            }
+            if (destStr.startsWith('[') && destStr.endsWith(']')) {
+                const memLabel = destStr.substring(1, destStr.length - 1).trim();
+                if (memory[memLabel] !== undefined) {
+                    memory[memLabel].value = val;
+                }
+            }
+        };
+
+        switch (opcode) {
+            case 'mov':
+                writeOperand(args[0], resolveVal(args[1]));
+                break;
+
+            case 'add':
+                const addVal = resolveVal(args[0]) + resolveVal(args[1]);
+                writeOperand(args[0], addVal);
+                flags.ZF = addVal === 0 ? 1 : 0;
+                flags.SF = addVal < 0 ? 1 : 0;
+                break;
+
+            case 'sub':
+                const subVal = resolveVal(args[0]) - resolveVal(args[1]);
+                writeOperand(args[0], subVal);
+                flags.ZF = subVal === 0 ? 1 : 0;
+                flags.SF = subVal < 0 ? 1 : 0;
+                break;
+
+            case 'mul':
+                const mulVal = registers.EAX * resolveVal(args[0]);
+                registers.EAX = mulVal & 0xFFFFFFFF;
+                registers.EDX = Math.floor(mulVal / 0x100000000);
+                updateRegisterUI('EAX');
+                updateRegisterUI('EDX');
+                flags.ZF = registers.EAX === 0 ? 1 : 0;
+                break;
+
+            case 'div':
+                const divisor = resolveVal(args[0]);
+                if (divisor === 0) {
+                    printConsole("Division by zero exception!\n", true);
+                    stopExecution();
+                    return false;
+                }
+                const numVal = registers.EAX;
+                registers.EAX = Math.floor(numVal / divisor);
+                registers.EDX = numVal % divisor;
+                updateRegisterUI('EAX');
+                updateRegisterUI('EDX');
+                break;
+
+            case 'cmp':
+                const cmpVal1 = resolveVal(args[0]);
+                const cmpVal2 = resolveVal(args[1]);
+                const cmpDiff = cmpVal1 - cmpVal2;
+                flags.ZF = cmpDiff === 0 ? 1 : 0;
+                flags.SF = cmpDiff < 0 ? 1 : 0;
+                flags.CF = cmpVal1 < cmpVal2 ? 1 : 0;
+                break;
+
+            case 'jmp':
+                const jmpLabel = args[0];
+                if (labels[jmpLabel] !== undefined) {
+                    nextEip = labels[jmpLabel];
+                }
+                break;
+
+            case 'je':
+            case 'jz':
+                if (flags.ZF === 1) {
+                    if (labels[args[0]] !== undefined) nextEip = labels[args[0]];
+                }
+                break;
+
+            case 'jne':
+            case 'jnz':
+                if (flags.ZF === 0) {
+                    if (labels[args[0]] !== undefined) nextEip = labels[args[0]];
+                }
+                break;
+
+            case 'jg':
+                if (flags.ZF === 0 && flags.SF === flags.OF) {
+                    if (labels[args[0]] !== undefined) nextEip = labels[args[0]];
+                }
+                break;
+
+            case 'jl':
+                if (flags.SF !== flags.OF) {
+                    if (labels[args[0]] !== undefined) nextEip = labels[args[0]];
+                }
+                break;
+
+            case 'jge':
+                if (flags.SF === flags.OF) {
+                    if (labels[args[0]] !== undefined) nextEip = labels[args[0]];
+                }
+                break;
+
+            case 'jle':
+                if (flags.ZF === 1 || flags.SF !== flags.OF) {
+                    if (labels[args[0]] !== undefined) nextEip = labels[args[0]];
+                }
+                break;
+
+            case 'push':
+                registers.ESP -= 4;
+                const pushVal = resolveVal(args[0]);
+                stack.push({ address: registers.ESP, value: pushVal, source: args[0] });
+                updateRegisterUI('ESP');
+                updateStackUI();
+                break;
+
+            case 'pop':
+                if (stack.length === 0) {
+                    printConsole("Stack underflow exception!\n", true);
+                    stopExecution();
+                    return false;
+                }
+                const popItem = stack.pop();
+                writeOperand(args[0], popItem.value);
+                registers.ESP += 4;
+                updateRegisterUI('ESP');
+                updateStackUI();
+                break;
+
+            case 'call':
+                registers.ESP -= 4;
+                stack.push({ address: registers.ESP, value: nextEip, source: `line_${nextEip}` });
+                updateRegisterUI('ESP');
+                updateStackUI();
+                const callLabel = args[0];
+                if (labels[callLabel] !== undefined) {
+                    nextEip = labels[callLabel];
+                }
+                break;
+
+            case 'ret':
+                if (stack.length === 0) {
+                    printConsole("Stack underflow on return address!\n", true);
+                    stopExecution();
+                    return false;
+                }
+                const retItem = stack.pop();
+                nextEip = retItem.value;
+                registers.ESP += 4;
+                updateRegisterUI('ESP');
+                updateStackUI();
+                break;
+
+            case 'int':
+                if (args[0] === '0x80') {
+                    const syscallId = registers.EAX;
+                    if (syscallId === 1) {
+                        const status = registers.EBX;
+                        printConsole(`\n[Process terminated with exit status ${status}]\n`);
+                        stopExecution();
+                        // Validate completion
+                        if (modIdx === 0 && status === 20) {
+                            markModuleSuccess();
+                        } else if (modIdx === 1 && status === 20) {
+                            markModuleSuccess();
+                        } else if (modIdx === 2 && status === 10) {
+                            markModuleSuccess();
+                        } else if (modIdx === 3) {
+                            markModuleSuccess();
+                        } else if (modIdx === 4) {
+                            markModuleSuccess();
+                        }
+                        return false;
+                    } else if (syscallId === 4) {
+                        const fd = registers.EBX;
+                        const msgAddress = registers.ECX;
+                        if (fd === 1) {
+                            let outputStr = "Hello Assembly!\n";
+                            Object.keys(memory).forEach(k => {
+                                if (memory[k].address === msgAddress) {
+                                    outputStr = memory[k].value;
+                                }
+                            });
+                            printConsole(outputStr);
+                            if (modIdx === 4) {
+                                markModuleSuccess();
+                            }
+                        }
+                    }
+                }
+                break;
+
+            default:
+                printConsole(`warning: unknown instruction '${opcode}' ignored.\n`, true);
+                break;
+        }
+
+        highlightEditorLine(inst.originalLine);
+        registers.EIP = nextEip;
+        updateRegisterUI('EIP');
+        updateAllRegistersUI();
+        return true;
+    };
+
+    const highlightEditorLine = (lineIdx) => {
+        const instText = instructions[registers.EIP] ? instructions[registers.EIP].lineText : '';
+        if (instText) {
+            printConsole(`eip -> line ${lineIdx + 1}: ${instText.trim()}\n`);
+        }
+    };
+
+    const markModuleSuccess = () => {
+        printConsole(`\n\n[SUCCESS] Module objectives achieved! Output matches target.\n`, false);
+        const activeLab = window.localStorage.getItem('vlab_current_lab') || 'asm_prog';
+        const progressKey = `${activeLab}_mod_${window.currentModuleIndex || 0}`;
+        window.localStorage.setItem(`${progressKey}_completed`, 'true');
+        syncProgress(activeLab, { completed: true, score: 100 });
+        const doneDot = document.getElementById('workspace-sync-indicator');
+        if (doneDot) doneDot.style.background = 'var(--success)';
+    };
+
+    const runExecution = () => {
+        btnStep.disabled = true;
+        btnRun.disabled = true;
+        runInterval = setInterval(() => {
+            const hasMore = stepInstruction();
+            if (!hasMore) {
+                stopExecution();
+            }
+        }, 300);
+    };
+
+    const stopExecution = () => {
+        if (runInterval) {
+            clearInterval(runInterval);
+            runInterval = null;
+        }
+        btnStep.disabled = !isCompiled;
+        btnRun.disabled = !isCompiled;
+    };
+
+    const resetSimulator = () => {
+        stopExecution();
+        registers = { EAX: 0, EBX: 0, ECX: 0, EDX: 0, ESI: 0, EDI: 0, ESP: 0x1000, EBP: 0x1000, EIP: 0 };
+        flags = { ZF: 0, SF: 0, OF: 0, CF: 0 };
+        stack = [];
+        instructions = [];
+        isCompiled = false;
+        consoleEl.innerHTML = '';
+        stackListEl.innerHTML = '<div style="text-align:center; padding:20px; font-size:11px; color:var(--text-muted);">Stack is empty (ESP = 0x1000)</div>';
+        btnStep.disabled = true;
+        btnRun.disabled = true;
+        updateAllRegistersUI();
+        updateStackUI();
+        printConsole("Simulator ready. Input NASM code and click Assemble.\n");
+    };
+
+    btnAssemble.addEventListener('click', assembleCode);
+    btnStep.addEventListener('click', stepInstruction);
+    btnRun.addEventListener('click', runExecution);
+    btnReset.addEventListener('click', resetSimulator);
+
+    resetSimulator();
+};
+
+window.initAssemblySim = initAssemblySim;
+
 // --- INITIALIZE PROGRAMMING WORKSPACE ---
 const initProgrammingLab = async (container, labId) => {
     let data = window.VLAB_DATA[labId];
@@ -11845,6 +12404,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
 
+        if (data.simType === 'assembly_sim') {
+            initAssemblySim(container, id);
+            return;
+        }
+
         if (data.simType === 'programming') {
             initProgrammingLab(container, id);
             return;
@@ -12353,6 +12917,7 @@ student@mitadt-os:~$ </div>
                 <option value="cpp_prog">2. C++ OOP Concepts Lab</option>
                 <option value="java_prog">3. Java Programming Lab</option>
                 <option value="python_prog">4. Python Scripting Lab</option>
+                <option value="asm_prog">5. x86 Assembly Level Language (NASM)</option>
             `;
             const crumbs = document.querySelectorAll('.breadcrumb .crumb');
             if (crumbs.length >= 2) {
@@ -12492,7 +13057,7 @@ student@mitadt-os:~$ </div>
     // Sanitize initial lab variable by active subject track to prevent cross-subject loading bugs
     const osLabs = ['cpu_scheduling', 'process_sync', 'deadlock_avoidance', 'page_replacement', 'disk_scheduling'];
     const netLabs = ['cables_devices', 'modulation', 'net_commands', 'ip_class', 'csma', 'csma_ca', 'subnet', 'vlan', 'routing_protocols', 'routing_dv', 'routing_ls', 'udp', 'tcp', 'dns', 'practice'];
-    const progLabs = ['c_prog', 'cpp_prog', 'java_prog', 'python_prog'];
+    const progLabs = ['c_prog', 'cpp_prog', 'java_prog', 'python_prog', 'asm_prog'];
     const dbmsLabs = ['sql_queries', 'transactions', 'indexing'];
     const tocLabs = ['dfa_sim', 'nfa_to_dfa', 'regex_thompson', 'cfg_parser', 'pda_stack', 'turing_machine', 'dfa_minimization'];
     const aiLabs = ['ai_search', 'ai_heuristic', 'ai_csp', 'ai_minimax', 'ai_naive_bayes', 'ai_knn', 'ai_kmeans', 'ai_ann', 'ai_backprop', 'ai_fuzzy', 'ai_genetic', 'ai_expert'];
