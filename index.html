@@ -78,7 +78,7 @@
         
         <div class="hero-visual reveal">
             <div class="hero-image-wrapper">
-                <img src="hero_vlab_3d_network_1777896875805.png" alt="Networking Simulation" class="hero-main-img" style="border: 1px solid var(--border); box-shadow: 0 30px 60px rgba(0,0,0,0.4);">
+                <img src="hero_vlab_3d_network_v2.png" alt="Networking Simulation" class="hero-main-img" style="border: 1px solid var(--border); box-shadow: 0 30px 60px rgba(0,0,0,0.4);">
                 <div class="glass-card floating-card-1">
                     <div class="card-icon-small">⚡</div>
                     <div class="card-text">
@@ -188,6 +188,57 @@
         </div>
     </section>
 
+    <!-- Premium Upgrades Showcase -->
+    <section id="premium-upgrades" class="section-padding bg-alt">
+        <div class="text-center">
+            <span class="section-tag" style="background: rgba(99, 102, 241, 0.15); color: var(--secondary);">Version 2.0 Platinum</span>
+            <h2 class="section-title reveal">State-of-the-Art <span class="gradient-text">Advanced Upgrades</span></h2>
+            <p class="section-desc reveal" style="max-width: 800px; margin: 0 auto 50px;">MIT ADT VLab v2.0 introduces premium interactive utilities designed to bridge the gap between academic theory and real-world software engineering practice.</p>
+        </div>
+
+        <div class="upgrades-grid reveal">
+            <!-- 3D Topology -->
+            <div class="upgrade-card">
+                <div class="upgrade-icon">📐</div>
+                <h4>Isometric 3D Topology</h4>
+                <p>Tilt your canvas into a 3D isometric plane with standing device billboards, realistic drop shadows, and responsive 3D drag physics.</p>
+                <span class="badge-upgrade">Visual Innovation</span>
+            </div>
+
+            <!-- Jupyter Notebook -->
+            <div class="upgrade-card">
+                <div class="upgrade-icon">📓</div>
+                <h4>Jupyter Notebook Mode</h4>
+                <p>Switch between a standard editor and cell-based notebook interface. Write Markdown documentation and run code cells inline with auto-saved local state sync.</p>
+                <span class="badge-upgrade">Programming Curricula</span>
+            </div>
+
+            <!-- static auditor -->
+            <div class="upgrade-card">
+                <div class="upgrade-icon">🛡️</div>
+                <h4>Static Code Auditor</h4>
+                <p>Instant grading (A+ to F) with quality metric evaluations: Cyclomatic Complexity counts, Comment Density metrics, and memory safety checks.</p>
+                <span class="badge-upgrade">Quality Telemetry</span>
+            </div>
+
+            <!-- collaboration -->
+            <div class="upgrade-card">
+                <div class="upgrade-icon">👥</div>
+                <h4>Live Collaboration Rooms</h4>
+                <p>Team up in shared programming and topology design rooms. Sync edits, code cursors, and network node movements instantly via Firestore.</p>
+                <span class="badge-upgrade">Real-time Sync</span>
+            </div>
+
+            <!-- Cisco CLI -->
+            <div class="upgrade-card">
+                <div class="upgrade-icon">⌨️</div>
+                <h4>Cisco IOS CLI & Help</h4>
+                <p>Experience realistic router terminal behavior. Features full tab autocompletion and contextual command descriptions when typing '?'.</p>
+                <span class="badge-upgrade">Realistic Simulation</span>
+            </div>
+        </div>
+    </section>
+
     <!-- Detailed Showcase Section -->
     <section class="detailed-showcase section-padding">
         <div class="showcase-container reveal">
@@ -207,7 +258,7 @@
                 </div>
             </div>
             <div class="showcase-visual">
-                <img src="vlab_simulation_ui_detail_1777897329600.png" alt="Simulation Engine" class="showcase-img" style="border: 1px solid var(--border); border-radius: var(--radius-md);">
+                <img src="vlab_sim_engine_v2.png" alt="Simulation Engine" class="showcase-img" style="border: 1px solid var(--border); border-radius: var(--radius-md);">
             </div>
         </div>
     </section>
@@ -525,7 +576,7 @@
         // Register PWA Service Worker
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js').then(reg => {
+                navigator.serviceWorker.register('./sw.js').then(reg => {
                     console.log('Service Worker registered successfully:', reg.scope);
                 }).catch(err => {
                     console.error('Service Worker registration failed:', err);
