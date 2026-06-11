@@ -11683,3 +11683,261 @@ window.VLAB_DATA.cyber_network_scan = {
     ]
 };
 
+window.VLAB_DATA.asm_prog = {
+    "title": "Assembly Level Language",
+    "simType": "assembly_sim",
+    "isMultiModule": true,
+    "modules": [
+        {
+            "title": "Module 1: Basic Register Operations & Arithmetic",
+            "aim": "To understand general-purpose registers and execute basic arithmetic operations (mov, add, sub).",
+            "theory": {
+                "intro": "x86 architecture contains several 32-bit registers (EAX, EBX, ECX, EDX) used for high-speed CPU operations. In NASM syntax, the destination operand is placed first: 'mov dest, src'.",
+                "cards": [
+                    { "title": "Registers", "content": "EAX is the accumulator register, EBX is the base register, ECX is the counter register, and EDX is the data register." },
+                    { "title": "Instructions", "content": "MOV copies data, ADD performs addition, and SUB performs subtraction. Example: 'add eax, ebx' updates EAX with EAX + EBX." }
+                ]
+            },
+            "procedure": [
+                "Examine the pre-loaded NASM program in the editor.",
+                "Click 'Assemble' to compile the assembly text.",
+                "Click 'Step Forward' to trace instruction execution register-by-register.",
+                "Verify EAX accumulator changes on EIP increments."
+            ],
+            "pretest": [
+                {
+                    "q": "Which of the following registers is commonly used as the accumulator?",
+                    "options": ["EAX", "EBX", "ECX", "EDX"],
+                    "correct": 0
+                },
+                {
+                    "q": "What is the size of the EAX register in 32-bit x86 architecture?",
+                    "options": ["8 bits", "16 bits", "32 bits", "64 bits"],
+                    "correct": 2
+                }
+            ],
+            "posttest": [
+                {
+                    "q": "What instruction is used to copy data from a source to a destination in NASM?",
+                    "options": ["mov", "add", "sub", "cmp"],
+                    "correct": 0
+                },
+                {
+                    "q": "What is the result of 'add eax, ebx'?",
+                    "options": ["eax = eax + ebx", "ebx = eax + ebx", "eax = ebx", "ebx = eax"],
+                    "correct": 0
+                }
+            ],
+            "code_template": "section .text\n    global _start\n_start:\n    mov eax, 15      ; Load 15 into EAX\n    mov ebx, 10      ; Load 10 into EBX\n    add eax, ebx     ; Add EBX to EAX (EAX = 25)\n    sub eax, 5       ; Subtract 5 from EAX (EAX = 20)\n    \n    ; Exit system call\n    mov eax, 1       ; sys_exit\n    mov ebx, 0       ; return status 0\n    int 0x80",
+            "practice_commands": [
+                "mov eax, val - Load val into EAX",
+                "add eax, ebx - Add EBX to EAX",
+                "sub eax, ecx - Subtract ECX from EAX"
+            ],
+            "practice_questions": [
+                "Explain the difference between a 16-bit register (AX) and its 32-bit counterpart (EAX).",
+                "Trace how registers change when executing a series of nested MOV and ADD calls."
+            ]
+        },
+        {
+            "title": "Module 2: Memory Addressing & Data Segments",
+            "aim": "To learn how to declare and reference variables declared in the .data and .bss segments.",
+            "theory": {
+                "intro": "Data segments (.data) define initialized variables, while .bss defines uninitialized memory reservations. Brackets '[]' dereference memory locations to get values.",
+                "cards": [
+                    { "title": "Data segment", "content": "Initialized constants are defined with directives: 'db' (byte), 'dw' (word), 'dd' (doubleword)." },
+                    { "title": "Memory Access", "content": "'mov eax, val' loads the ADDRESS of val, whereas 'mov eax, [val]' loads the VALUE stored at val." }
+                ]
+            },
+            "procedure": [
+                "Review the variables defined in section .data.",
+                "Assemble the code to build memory tables.",
+                "Step through to watch values load from memory addresses into EAX and EBX."
+            ],
+            "pretest": [
+                {
+                    "q": "Which section of a NASM program is used for declaring initialized variables?",
+                    "options": [".data", ".bss", ".text", ".rodata"],
+                    "correct": 0
+                },
+                {
+                    "q": "Which directive defines a doubleword (4 bytes) constant?",
+                    "options": ["db", "dw", "dd", "dq"],
+                    "correct": 2
+                }
+            ],
+            "posttest": [
+                {
+                    "q": "How do you dereference a memory address to fetch its value in NASM?",
+                    "options": ["Using brackets []", "Using pointer *", "Using reference &", "Using direct label name"],
+                    "correct": 0
+                },
+                {
+                    "q": "Which section is used for declaring uninitialized variables?",
+                    "options": [".data", ".bss", ".text", ".rodata"],
+                    "correct": 1
+                }
+            ],
+            "code_template": "section .data\n    num1 dd 40       ; Define doubleword 40\n    num2 dd 20       ; Define doubleword 20\nsection .text\n    global _start\n_start:\n    mov eax, [num1]  ; Dereference num1 into EAX\n    mov ebx, [num2]  ; Dereference num2 into EBX\n    sub eax, ebx     ; EAX = num1 - num2 (EAX = 20)\n    \n    mov eax, 1       ; Exit\n    mov ebx, 0\n    int 0x80",
+            "practice_commands": [
+                "val dd 100 - Define doubleword variable",
+                "mov eax, [val] - Load value of val into EAX"
+            ],
+            "practice_questions": [
+                "Explain memory alignment and its importance in x86 systems.",
+                "Describe the difference between immediate addressing and direct memory addressing."
+            ]
+        },
+        {
+            "title": "Module 3: Control Flow, Comparisons & Loops",
+            "aim": "To implement conditional branches and loop statements in Assembly using CMP and jump instructions.",
+            "theory": {
+                "intro": "CMP performs subtraction behind the scenes to update flag registers (ZF, SF, CF). Jumps evaluate flags to deviate EIP execution flow.",
+                "cards": [
+                    { "title": "CMP instruction", "content": "Compares dest and src by subtracting src from dest without modifying registers." },
+                    { "title": "Jumps", "content": "Unconditional: 'jmp'. Conditional: 'je' (jump equal), 'jne' (not equal), 'jg' (greater), 'jl' (less)." }
+                ]
+            },
+            "procedure": [
+                "Write a loop to calculate sum of integers from 1 to N.",
+                "Assemble and trace the conditional branches in action.",
+                "Observe ZF and SF flags updating on EIP loop branches."
+            ],
+            "pretest": [
+                {
+                    "q": "Which instruction compares two values and sets the CPU flags?",
+                    "options": ["cmp", "test", "jmp", "je"],
+                    "correct": 0
+                },
+                {
+                    "q": "Which jump instruction jumps if the zero flag (ZF) is set to 1?",
+                    "options": ["je", "jne", "jg", "jl"],
+                    "correct": 0
+                }
+            ],
+            "posttest": [
+                {
+                    "q": "What does 'jmp loop_start' do?",
+                    "options": ["Unconditional jump to loop_start", "Jump to loop_start if equal", "Jump to loop_start if greater", "Call subroutine"],
+                    "correct": 0
+                },
+                {
+                    "q": "Which register is traditionally used as a loop counter in x86 loops?",
+                    "options": ["EAX", "EBX", "ECX", "EDX"],
+                    "correct": 2
+                }
+            ],
+            "code_template": "section .text\n    global _start\n_start:\n    mov ecx, 4       ; Loop counter = 4\n    mov eax, 0       ; Accumulator = 0\nloop_start:\n    cmp ecx, 0       ; Compare ecx with 0\n    je loop_exit     ; If counter is 0, exit loop\n    add eax, ecx     ; Add loop counter to accumulator\n    sub ecx, 1       ; Decrement loop counter\n    jmp loop_start   ; Jump back to loop start\nloop_exit:\n    mov ebx, eax     ; Store result (10) in EBX as status\n    mov eax, 1       ; Exit\n    int 0x80",
+            "practice_commands": [
+                "cmp eax, ebx - Compare EAX and EBX",
+                "je label - Jump to label if equal",
+                "jg label - Jump to label if greater"
+            ],
+            "practice_questions": [
+                "How does the CPU keep track of loops behind the scenes?",
+                "Contrast conditional branch behaviors in C/C++ versus Assembly."
+            ]
+        },
+        {
+            "title": "Module 4: Memory Stack & Subroutines",
+            "aim": "To learn stack operations (push/pop) and subroutine linkage (call/ret) using memory offsets.",
+            "theory": {
+                "intro": "The Stack is a LIFO (Last-In-First-Out) memory segment. ESP tracks the stack top. CALL pushes EIP, and RET pops it back.",
+                "cards": [
+                    { "title": "Stack Ops", "content": "'push' decrements ESP by 4 and writes to stack. 'pop' reads stack and increments ESP." },
+                    { "title": "Procedures", "content": "CALL jumps to a label and stores the return address on the stack. RET retrieves this address and returns." }
+                ]
+            },
+            "procedure": [
+                "Observe stack pointer ESP initialize at 0x1000.",
+                "Push registers onto stack and watch them display inside the stack panel grid.",
+                "Trace how CALL jumps EIP to the procedure and RET returns it."
+            ],
+            "pretest": [
+                {
+                    "q": "Which stack operation pushes a 32-bit register value onto the stack?",
+                    "options": ["push", "pop", "call", "ret"],
+                    "correct": 0
+                },
+                {
+                    "q": "Which register is the Stack Pointer in x86?",
+                    "options": ["ESP", "EBP", "EIP", "ESI"],
+                    "correct": 0
+                }
+            ],
+            "posttest": [
+                {
+                    "q": "What instruction calls a procedure and pushes the return address onto the stack?",
+                    "options": ["call", "ret", "push", "jmp"],
+                    "correct": 0
+                },
+                {
+                    "q": "What instruction pops the return address off the stack and returns control?",
+                    "options": ["ret", "call", "pop", "exit"],
+                    "correct": 0
+                }
+            ],
+            "code_template": "section .text\n    global _start\n_start:\n    mov eax, 100\n    mov ebx, 200\n    push eax         ; Save EAX on stack\n    push ebx         ; Save EBX on stack\n    call procedure   ; Call subroutine\n    pop ebx          ; Restore EBX (should be 200)\n    pop eax          ; Restore EAX (should be 100)\n    \n    mov eax, 1       ; Exit\n    mov ebx, 0\n    int 0x80\nprocedure:\n    add eax, ebx     ; Temp add (EAX = 300)\n    ret              ; Return",
+            "practice_commands": [
+                "push eax - Push EAX to stack",
+                "pop ebx - Pop stack into EBX",
+                "call func - Call function func"
+            ],
+            "practice_questions": [
+                "Explain the role of EBP (Base Pointer) in managing function call stack frames.",
+                "What is stack overflow and how do subroutines prevent it?"
+            ]
+        },
+        {
+            "title": "Module 5: Linux System Calls & String Output",
+            "aim": "To use standard software interrupts (int 0x80) to interact with operating system input/output services.",
+            "theory": {
+                "intro": "Linux uses system calls to execute kernel functions. System call ID is placed in EAX, arguments in EBX, ECX, EDX, and triggered via 'int 0x80'.",
+                "cards": [
+                    { "title": "Interrupt 0x80", "content": "Triggers a software interrupt, transferring control from user space to kernel space." },
+                    { "title": "sys_write parameters", "content": "EAX=4 (write), EBX=1 (stdout), ECX=msg pointer, EDX=length in bytes." }
+                ]
+            },
+            "procedure": [
+                "Load EAX with system call ID 4.",
+                "Specify string memory address inside ECX register.",
+                "Click Run and verify output text appears in the console panel."
+            ],
+            "pretest": [
+                {
+                    "q": "What software interrupt triggers a system call in 32-bit Linux?",
+                    "options": ["int 0x80", "int 0x21", "int 0x10", "int 0x13"],
+                    "correct": 0
+                },
+                {
+                    "q": "What system call number corresponds to sys_write in Linux?",
+                    "options": ["1", "2", "3", "4"],
+                    "correct": 3
+                }
+            ],
+            "posttest": [
+                {
+                    "q": "When making a sys_write system call, which register holds the file descriptor?",
+                    "options": ["EBX", "ECX", "EDX", "EAX"],
+                    "correct": 0
+                },
+                {
+                    "q": "In which register does the sys_write call look for the message string pointer?",
+                    "options": ["ECX", "EDX", "EBX", "ESI"],
+                    "correct": 0
+                }
+            ],
+            "code_template": "section .data\n    msg db 'Hello Assembly!', 0xa\n    len equ $ - msg\nsection .text\n    global _start\n_start:\n    mov eax, 4       ; sys_write\n    mov ebx, 1       ; file descriptor 1 (stdout)\n    mov ecx, msg     ; message pointer\n    mov edx, len     ; message length\n    int 0x80         ; interrupt\n    \n    mov eax, 1       ; sys_exit\n    mov ebx, 0       ; status 0\n    int 0x80",
+            "practice_commands": [
+                "int 0x80 - Trigger software interrupt",
+                "mov eax, 4 - Load write system call",
+                "mov eax, 1 - Load exit system call"
+            ],
+            "practice_questions": [
+                "Explain the transition of control from user space to kernel space during int 0x80.",
+                "Design a simple NASM program to read user input (sys_read) and echo it back."
+            ]
+        }
+    ]
+};
+
