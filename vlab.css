@@ -1705,3 +1705,99 @@ body.sandbox-mode .topology-main {
     transform-style: preserve-3d;
 }
 
+/* Assembly Simulator registers and stack workspace */
+.asm-workspace {
+    background: var(--bg-page);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-xl);
+}
+
+.register-grid {
+    margin-top: 5px;
+}
+
+.register-card {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    transition: all 0.3s;
+}
+
+.register-card:hover {
+    background: rgba(37, 99, 235, 0.05);
+    border-color: var(--primary);
+}
+
+.register-card span {
+    font-size: 9px;
+    text-transform: uppercase;
+    font-weight: 800;
+    color: var(--text-muted);
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+}
+
+.register-card b {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    color: var(--text);
+    font-weight: 700;
+}
+
+.glow-change {
+    animation: registerGlow 0.5s ease-out;
+}
+
+@keyframes registerGlow {
+    0% { background: rgba(37, 99, 235, 0.3); border-color: var(--primary); box-shadow: 0 0 15px rgba(37, 99, 235, 0.4); }
+    100% { background: rgba(255, 255, 255, 0.02); border-color: var(--border); box-shadow: none; }
+}
+
+.flag-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    font-size: 10px;
+    font-weight: 800;
+    color: var(--text-muted);
+}
+
+.flag-dot {
+    width: 10px;
+    height: 10px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    transition: all 0.3s;
+}
+
+.flag-dot.flag-on {
+    background: var(--success);
+    border-color: var(--success);
+    box-shadow: 0 0 8px var(--success);
+}
+
+.stack-cell {
+    border: 1px solid var(--border);
+    background: rgba(255, 255, 255, 0.02);
+    transition: all 0.3s;
+}
+
+.animate-stack-push {
+    animation: stackPush 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes stackPush {
+    0% { transform: translateY(-15px); opacity: 0; background: rgba(99, 102, 241, 0.2); }
+    100% { transform: translateY(0); opacity: 1; background: rgba(255, 255, 255, 0.02); }
+}
+
+[data-theme="dark"] .register-card b {
+    color: #f8fafc;
+}
+
