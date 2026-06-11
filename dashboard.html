@@ -630,7 +630,8 @@
                 { id: 'c_prog', num: 1, name: 'C Programming', category: 'Memory & Syntax' },
                 { id: 'cpp_prog', num: 2, name: 'C++ OOP Concepts', category: 'Classes & Objects' },
                 { id: 'java_prog', num: 3, name: 'Java Basics', category: 'JVM Logic' },
-                { id: 'python_prog', num: 4, name: 'Python Scripting', category: 'Dynamic Logic' }
+                { id: 'python_prog', num: 4, name: 'Python Scripting', category: 'Dynamic Logic' },
+                { id: 'asm_prog', num: 5, name: 'x86 Assembly Level (NASM)', category: 'Low-Level Logic' }
             ],
             dbms: [
                 { id: 'sql_queries', num: 1, name: 'SQL Schema & Queries', category: 'SQL DDL/DML' },
@@ -985,7 +986,7 @@
         function updateProgressUI() {
             let csmaDone = false, subnetDone = false;
             let cpuDone = false, deadlockDone = false;
-            let cDone = false, pythonDone = false;
+            let cDone = false, pythonDone = false, asmDone = false;
             let rsaDone = false, sqliDone = false;
 
             document.querySelectorAll('.lab-card').forEach(card => {
@@ -1019,6 +1020,7 @@
                             if (labId === 'deadlock_avoidance') deadlockDone = true;
                             if (labId === 'c_prog') cDone = true;
                             if (labId === 'python_prog') pythonDone = true;
+                            if (labId === 'asm_prog') asmDone = true;
                             if (labId === 'cyber_rsa') rsaDone = true;
                             if (labId === 'cyber_sql_inject') sqliDone = true;
                         }
@@ -1041,7 +1043,7 @@
 
             updateBadgeEl('badge-net', csmaDone && subnetDone);
             updateBadgeEl('badge-os', cpuDone && deadlockDone);
-            updateBadgeEl('badge-prog', cDone || pythonDone);
+            updateBadgeEl('badge-prog', cDone || pythonDone || asmDone);
             updateBadgeEl('badge-cyber', rsaDone && sqliDone);
         }
 
