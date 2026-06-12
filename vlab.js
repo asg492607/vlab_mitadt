@@ -5552,8 +5552,21 @@ window.initIndexingLab = initIndexingLab;
 document.addEventListener('DOMContentLoaded', async () => {
 
 
-    // Initial State Restoration from Cloud
-    await fetchProgress();
+    // Initial State Restoration from Cloud with Timeout
+    try {
+        await Promise.race([
+            fetchProgress(),
+            new Promise((_, reject) => window.setTimeout(() => reject(new Error("fetchProgress timeout")), 3000))
+        ]);
+    } catch (e) {
+        console.warn("Firebase fetchProgress hung or failed:", e);
+    } finally {
+        const splash = document.getElementById('splash-screen');
+        if (splash) {
+            splash.style.opacity = '0';
+            window.setTimeout(() => splash.style.display = 'none', 800);
+        }
+    }
 
     const initVoiceCommandController = () => {
         const btnVoice = document.getElementById('btnVoiceCommand');
