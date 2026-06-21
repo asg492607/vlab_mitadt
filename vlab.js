@@ -1825,21 +1825,6 @@ nf.bind_listener(on_packet_receive)</textarea>
                     </table>
                 </div>
 
-                <!-- Tab: Services (Server Only) -->
-                \${isServer ? `
-                <div class="d-tab-content" id="tab-services" style="display: none; padding: 20px; overflow-y: auto;">
-                    <div style="display: flex; gap: 20px; height: 100%; width: 100%;">
-                        <div style="width: 150px; border-right: 1px solid #cbd5e1; display: flex; flex-direction: column; gap: 6px; padding-right: 12px;">
-                            <button class="service-menu-btn active" data-service="http" style="background: transparent; color: #fff; border: none; text-align: left; padding: 8px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 500;">HTTP / HTTPS</button>
-                            <button class="service-menu-btn" data-service="dns" style="background: transparent; color: #cbd5e1; border: none; text-align: left; padding: 8px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 500;">DNS</button>
-                        </div>
-                        <div style="flex: 1; display: flex; flex-direction: column;" id="service-panel-content">
-                            <!-- Service panels injected dynamically -->
-                        </div>
-                    </div>
-                </div>
-                ` : ''}
-
                 <!-- Tab: Desktop (Grid of Icons) -->
                 <div class="d-tab-content active" id="tab-desktop" style="flex: 1; padding: 20px; display: grid; grid-template-columns: repeat(auto-fill, minmax(105px, 1fr)); gap: 14px; overflow-y: auto; align-content: start;">
                     <div class="app-icon" data-app="ipconfig" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; cursor: pointer; padding: 10px; border-radius: 6px; background: #62b1e6; border: 2px solid #1c6ba0; box-shadow: inset 0 0 10px rgba(255,255,255,0.4); width: 100px; height: 100px;">
