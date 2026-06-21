@@ -6601,6 +6601,7 @@ window.initIndexingLab = initIndexingLab;
 
 // App Controller
 document.addEventListener('DOMContentLoaded', async () => {
+    window.vlabTypedCommands = [];
 
 
     // Initial State Restoration from Cloud with Timeout
