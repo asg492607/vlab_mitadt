@@ -355,35 +355,62 @@ const generatePDFReport = async (labId) => {
 
     // Section 6: Observation Log Table
     pdf.setFont("helvetica", "bold"); pdf.setFontSize(14);
-    pdf.text("6. PROTOCOL OBSERVATION LOG", 20, y); y += 8;
+    pdf.text("6. DYNAMIC OBSERVATION TABLE", 20, y); y += 8;
 
-    const logs = Array.from(document.querySelectorAll('#eventList .event-item')).map(item => {
-        const time = item.querySelector('.event-time')?.textContent || "";
-        const proto = item.querySelector('.event-proto')?.textContent || "";
-        const desc = item.querySelector('.event-desc')?.textContent || "";
-        return [time, proto, desc];
-    }).slice(-15); // Take last 15 events for the report
+    const observationRows = [];
+    const obsTable = document.getElementById('observationTableBody');
+    if (obsTable) {
+        Array.from(obsTable.querySelectorAll('tr')).forEach(tr => {
+            const tds = tr.querySelectorAll('td');
+            if (tds.length === 4) {
+                observationRows.push([tds[0].textContent, tds[1].textContent, tds[2].textContent, tds[3].textContent]);
+            }
+        });
+    }
 
-    if (logs.length > 0) {
+    if (observationRows.length > 0) {
         pdf.autoTable({
             startY: y,
-            head: [["Time", "Protocol", "Observation/Event Detail"]],
-            body: logs,
+            head: [["No.", "Time", "Activity/Event Detail", "Status"]],
+            body: observationRows.reverse().slice(-15),
             theme: 'grid',
-            styles: { fontSize: 9 },
+            styles: { fontSize: 8 },
             headStyles: { fillColor: [16, 185, 129] }
         });
-        y = pdf.lastAutoTable.finalY + 20;
+        y = pdf.lastAutoTable.finalY + 15;
     } else {
         pdf.setFont("helvetica", "italic"); pdf.setFontSize(10);
-        pdf.text("No specific protocol events logged during this session.", 25, y);
+        pdf.text("No specific simulation events observed during this session.", 25, y);
         y += 15;
     }
 
-    // Section 7: Conclusion
+    // Section 7: Command Execution History
+    if (y > 230) { pdf.addPage(); y = 30; }
+    pdf.setFont("helvetica", "bold"); pdf.setFontSize(14);
+    pdf.text("7. COMMAND EXECUTION HISTORY", 20, y); y += 8;
+
+    const typedCmds = window.vlabTypedCommands || [];
+    if (typedCmds.length > 0) {
+        const cmdRows = typedCmds.map(c => [c.timestamp, c.host, c.cmd]);
+        pdf.autoTable({
+            startY: y,
+            head: [["Timestamp", "Device", "Command Typed"]],
+            body: cmdRows,
+            theme: 'striped',
+            styles: { fontSize: 8 },
+            headStyles: { fillColor: [59, 130, 246] }
+        });
+        y = pdf.lastAutoTable.finalY + 15;
+    } else {
+        pdf.setFont("helvetica", "italic"); pdf.setFontSize(10);
+        pdf.text("No CLI commands executed during this session.", 25, y);
+        y += 15;
+    }
+
+    // Section 8: Conclusion
     if (y > 240) { pdf.addPage(); y = 30; }
     pdf.setFont("helvetica", "bold"); pdf.setFontSize(14);
-    pdf.text("7. CONCLUSION", 20, y); y += 10;
+    pdf.text("8. CONCLUSION", 20, y); y += 10;
     pdf.setFont("helvetica", "normal"); pdf.setFontSize(11);
     const concl = "The experiment successfully demonstrated the requested protocol behaviors. Live simulation verified packet flow, efficiency metrics, and topological connectivity in accordance with academic requirements.";
     pdf.text(pdf.splitTextToSize(concl, 170), 20, y);
@@ -476,6 +503,8 @@ class TopologySimulation {
         this.isCabling = false;
         this.selectedCable = 'straight';
         this.cableStartNode = null;
+        this.isSendingPacket = false;
+        this.packetSourceNode = null;
         this.isRunning = true;
 
         // 3. Initialize DOM and listeners
@@ -506,6 +535,28 @@ class TopologySimulation {
     }
 
     computeTopologyRouting() {
+        const ipMatchesNetwork = (ip, net) => {
+            if (!ip || !net || ip === 'unassigned') return false;
+            let netIp = net;
+            let wildcard = '0.0.0.255';
+            if (typeof net === 'object') {
+                netIp = net.ip;
+                wildcard = net.wildcard || '0.0.0.255';
+            }
+            if (netIp === '0.0.0.0') return true;
+            const ipParts = ip.split('.').map(Number);
+            const netParts = netIp.split('.').map(Number);
+            const wildParts = wildcard.split('.').map(Number);
+            if (ipParts.length !== 4 || netParts.length !== 4 || wildParts.length !== 4) return false;
+            for (let i = 0; i < 4; i++) {
+                const maskByte = 255 - wildParts[i];
+                if ((ipParts[i] & maskByte) !== (netParts[i] & maskByte)) {
+                    return false;
+                }
+            }
+            return true;
+        };
+
         this.nodes.forEach(n => {
             if (n.config && n.config.routes) {
                 n.config.routes = n.config.routes.filter(r => r.proto !== 'rip' && r.proto !== 'ospf');
@@ -615,15 +666,29 @@ class TopologySimulation {
                 this.links.forEach(link => {
                     const v = link.from === u ? link.to : (link.to === u ? link.from : null);
                     if (v && v.type === 'router' && v.config?.routing?.ospf && q.includes(v)) {
-                        const edgeCost = 10;
-                        const alt = dist[u.id] + edgeCost;
-                        if (alt < dist[v.id]) {
-                            dist[v.id] = alt;
-                            prev[v.id] = u;
-                            if (u === router) {
-                                nextHopRouter[v.id] = v;
-                            } else {
-                                nextHopRouter[v.id] = nextHopRouter[u.id];
+                        // Dynamic check: OSPF must be active on both interfaces of this link
+                        const uPort = link.from === u ? link.fromPort : link.toPort;
+                        const vPort = link.from === v ? link.fromPort : link.toPort;
+                        const uIp = u.config.interfaces[uPort]?.ip;
+                        const vIp = v.config.interfaces[vPort]?.ip;
+
+                        const uNets = u.config.routing.ospf.networks || [];
+                        const vNets = v.config.routing.ospf.networks || [];
+
+                        const uMatch = uNets.some(net => ipMatchesNetwork(uIp, net));
+                        const vMatch = vNets.some(net => ipMatchesNetwork(vIp, net));
+
+                        if (uMatch && vMatch) {
+                            const edgeCost = 10;
+                            const alt = dist[u.id] + edgeCost;
+                            if (alt < dist[v.id]) {
+                                dist[v.id] = alt;
+                                prev[v.id] = u;
+                                if (u === router) {
+                                    nextHopRouter[v.id] = v;
+                                } else {
+                                    nextHopRouter[v.id] = nextHopRouter[u.id];
+                                }
                             }
                         }
                     }
@@ -637,6 +702,11 @@ class TopologySimulation {
                 Object.keys(targetRouter.config.interfaces).forEach(iface => {
                     const i = targetRouter.config.interfaces[iface];
                     if (i.status === 'up' && i.ip !== 'unassigned') {
+                        // Dynamic check: target router must have OSPF enabled on this interface
+                        const targetNets = targetRouter.config.routing.ospf.networks || [];
+                        const matches = targetNets.some(net => ipMatchesNetwork(i.ip, net));
+                        if (!matches) return;
+
                         const sub = getSubnet(i.ip, i.mask);
                         if (!sub) return;
 
@@ -886,6 +956,7 @@ class TopologySimulation {
                             <div class="tool-item cable-tool" data-cable="fiber" title="Fiber Optic">✨</div>
                         </div>
                         <div class="tool-category" id="cat-tools">
+                            <button id="btnSendPacket" class="btn-sim" style="width:100%; margin-bottom:8px; background:#eab308; color:#0b0f19; border:none; font-weight:700; cursor:pointer;">✉️ Send Packet</button>
                             <button id="btnSaveTopo" class="btn-sim" style="width:100%; margin-bottom:8px;">Save</button>
                             <button id="btnLoadTopo" class="btn-sim" style="width:100%; margin-bottom:8px;">Load</button>
                             <button id="btnToggle3D" class="btn-sim" style="width:100%; margin-bottom:8px; background:#0d9488; color:white; border:none; cursor:pointer;">📐 View: 2D</button>
@@ -933,6 +1004,36 @@ class TopologySimulation {
         document.getElementById('btnSaveTopo').onclick = () => this.saveTopology();
         document.getElementById('btnLoadTopo').onclick = () => this.loadTopology();
         document.getElementById('btnClearTopo').onclick = () => this.clearTopology();
+
+        const btnSendPacket = document.getElementById('btnSendPacket');
+        if (btnSendPacket) {
+            btnSendPacket.onclick = () => {
+                if (this.isCabling) {
+                    this.isCabling = false;
+                    if (this.cableStartNode) {
+                        this.cableStartNode.el?.classList.remove('cabling-source');
+                        this.cableStartNode = null;
+                    }
+                    document.querySelectorAll('.cable-tool').forEach(b => b.classList.remove('active'));
+                }
+                this.isSendingPacket = !this.isSendingPacket;
+                if (this.packetSourceNode) {
+                    this.packetSourceNode.el?.classList.remove('packet-source');
+                    this.packetSourceNode = null;
+                }
+                if (this.isSendingPacket) {
+                    btnSendPacket.textContent = "❌ Cancel Send";
+                    btnSendPacket.style.background = "#ef4444";
+                    btnSendPacket.style.color = "white";
+                    this.showHint("Packet Mode Active: Click Source Device...");
+                } else {
+                    btnSendPacket.textContent = "✉️ Send Packet";
+                    btnSendPacket.style.background = "#eab308";
+                    btnSendPacket.style.color = "#0b0f19";
+                    this.showHint("Packet sending cancelled.");
+                }
+            };
+        }
 
         // 3D Isometric View toggle
         this.is3DActive = false;
@@ -1258,7 +1359,47 @@ class TopologySimulation {
         let moved = false;
         div.addEventListener('mousedown', (e) => {
             moved = false;
-            if (this.isCabling) {
+            if (this.isSendingPacket) {
+                e.stopPropagation();
+                if (!this.packetSourceNode) {
+                    this.packetSourceNode = node;
+                    div.classList.add('packet-source');
+                    this.showHint(`Source selected: ${node.label}. Click destination device...`);
+                } else if (this.packetSourceNode === node) {
+                    this.packetSourceNode = null;
+                    div.classList.remove('packet-source');
+                    this.showHint(`Packet sending cancelled.`);
+                } else {
+                    const src = this.packetSourceNode;
+                    const dst = node;
+                    src.el?.classList.remove('packet-source');
+                    this.packetSourceNode = null;
+                    this.isSendingPacket = false;
+                    
+                    const btnSendPacket = document.getElementById('btnSendPacket');
+                    if (btnSendPacket) {
+                        btnSendPacket.textContent = "✉️ Send Packet";
+                        btnSendPacket.style.background = "#eab308";
+                        btnSendPacket.style.color = "#0b0f19";
+                    }
+
+                    this.showHint(`Initiating packet from ${src.label} to ${dst.label}...`);
+                    
+                    const path = this.findL2Path(src, dst);
+                    if (path && path.length >= 2) {
+                        this.animatePathPackets(path, true, 'ICMP', () => {
+                            const reversePath = [...path].reverse();
+                            this.animatePathPackets(reversePath, true, 'ICMP', () => {
+                                this.showHint(`Success! Packet reply received back at ${src.label}.`);
+                            });
+                        });
+                    } else {
+                        this.animatePacketStep(src, src, false, 'ARP', () => {
+                            this.showHint(`Failed: No physical cabling path between ${src.label} and ${dst.label}!`);
+                        });
+                    }
+                }
+            } else if (this.isCabling) {
                 if (!this.cableStartNode) {
                     this.cableStartNode = node;
                     div.classList.add('cabling-source');
@@ -1541,6 +1682,33 @@ class TopologySimulation {
         const modal = document.getElementById('configModal');
         if (!modal) return;
         
+        this.currentConfigNode = node;
+        modal.style.display = 'flex';
+
+        // Check if the node is a host (PC, Laptop)
+        if (node.type === 'pc' || node.type === 'laptop') {
+            this.openHostDesktop(node);
+            return;
+        }
+
+        // Restore default CLI structure
+        const configContent = modal.querySelector('.config-content');
+        configContent.innerHTML = `
+            <div class="modal-header">
+                <h3 id="modalTitle">Device Configuration</h3>
+                <button class="btn-icon" onclick="document.getElementById('configModal').style.display='none'">✕</button>
+            </div>
+            <div class="terminal-area" id="terminalArea">
+                <div class="terminal-input-wrap">
+                    <span id="prompt" style="font-weight:bold; color:#fbbf24;">Router></span>
+                    <input type="text" id="terminalInput" spellcheck="false" autocomplete="off" autofocus>
+                </div>
+            </div>
+            <div class="modal-footer">
+                Type 'exit' to close CLI or use 'wr' to save configuration. Press Enter to execute command.
+            </div>
+        `;
+
         // Clear terminal history from previous nodes
         const area = document.getElementById('terminalArea');
         if (area) {
@@ -1557,10 +1725,8 @@ class TopologySimulation {
             area.insertBefore(welcome, inputWrap);
         }
 
-        modal.style.display = 'flex';
         const title = document.getElementById('modalTitle');
         if (title) title.textContent = `NF-IOS CLI: ${node.label}`;
-        this.currentConfigNode = node;
         this.updateTerminal(node);
 
         // Ensure focus with small delay for modal transition
@@ -1568,6 +1734,766 @@ class TopologySimulation {
             const input = document.getElementById('terminalInput');
             if (input) input.focus();
         }, 100);
+    }
+
+    openHostDesktop(node) {
+        const modal = document.getElementById('configModal');
+        const configContent = modal.querySelector('.config-content');
+
+        // Initialize node config structure if not exists
+        node.config = node.config || {
+            hostname: node.label,
+            interfaces: {
+                'eth0': { ip: 'unassigned', mask: 'unassigned', status: 'up', desc: '' }
+            },
+            routes: [],
+            gateway: '',
+            dns: ''
+        };
+        if (!node.config.interfaces['eth0']) {
+            node.config.interfaces['eth0'] = { ip: 'unassigned', mask: 'unassigned', status: 'up', desc: '' };
+        }
+
+        // Render Cisco Packet Tracer layout
+        configContent.innerHTML = `
+            <div class="modal-header" style="background: #e2e8f0; border-bottom: 2px solid #cbd5e1; padding: 10px 16px; flex-direction: column; align-items: stretch; gap: 8px;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h3 id="modalTitle" style="color: #1e293b; font-size: 14px; font-weight: 700; margin: 0;">${node.label} (${node.type.toUpperCase()})</h3>
+                    <button class="btn-icon" onclick="document.getElementById('configModal').style.display='none'" style="color: #64748b; background: transparent; border: none; font-size: 16px; cursor: pointer;">✕</button>
+                </div>
+                <div class="desktop-tabs">
+                    <button class="d-tab-btn" data-tab="physical">Physical</button>
+                    <button class="d-tab-btn" data-tab="config">Config</button>
+                    <button class="d-tab-btn active" data-tab="desktop">Desktop</button>
+                    <button class="d-tab-btn" data-tab="programming">Programming</button>
+                    <button class="d-tab-btn" data-tab="attributes">Attributes</button>
+                </div>
+            </div>
+            <div class="desktop-body" style="flex: 1; display: flex; flex-direction: column; background: #2b4c7e; overflow: hidden; position: relative;">
+                <!-- Tab: Physical -->
+                <div class="d-tab-content" id="tab-physical" style="display: none; padding: 20px; color: #fff; overflow-y: auto; text-align: center;">
+                    <h4 style="margin: 0 0 16px 0;">Device Physical View</h4>
+                    <div style="background: #1e293b; border: 2px dashed #475569; border-radius: 8px; padding: 30px; display: inline-block;">
+                        <span style="font-size: 72px;">🖥️</span>
+                        <div style="margin-top: 15px; font-size: 12px; color: #cbd5e1;">
+                            Power Port: Connected (100Mbps Ethernet Link LinkUp)<br>
+                            Link Speed: Auto | Duplex: Full
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab: Config -->
+                <div class="d-tab-content" id="tab-config" style="display: none; padding: 20px; overflow-y: auto; color: #fff;">
+                    <h4 style="margin: 0 0 16px 0; color: #fbbf24; font-size: 13px;">Global Settings</h4>
+                    <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px; max-width: 400px;">
+                        <div style="display: flex; flex-direction: column; gap: 4px;">
+                            <label style="font-size: 11px; color: #cbd5e1;">Display Name</label>
+                            <input type="text" id="cfg-hostname" value="${node.label}" style="background: #1e293b; border: 1px solid #475569; color: #fff; padding: 6px 10px; border-radius: 4px; font-size: 12px;">
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 4px;">
+                            <label style="font-size: 11px; color: #cbd5e1;">Gateway</label>
+                            <input type="text" id="cfg-gateway" value="${node.config.gateway || ''}" style="background: #1e293b; border: 1px solid #475569; color: #fff; padding: 6px 10px; border-radius: 4px; font-size: 12px;">
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 4px;">
+                            <label style="font-size: 11px; color: #cbd5e1;">DNS Server</label>
+                            <input type="text" id="cfg-dns" value="${node.config.dns || ''}" style="background: #1e293b; border: 1px solid #475569; color: #fff; padding: 6px 10px; border-radius: 4px; font-size: 12px;">
+                        </div>
+                    </div>
+                    <button id="btn-save-config" style="background: #2563eb; color: #fff; border: none; padding: 8px 16px; border-radius: 4px; font-size: 11px; cursor: pointer; font-weight: bold;">Save Settings</button>
+                </div>
+
+                <!-- Tab: Programming -->
+                <div class="d-tab-content" id="tab-programming" style="display: none; padding: 20px; color: #fff; overflow-y: auto;">
+                    <h4 style="margin: 0 0 8px 0;">Python Scripting Editor</h4>
+                    <p style="font-size: 11px; color: #cbd5e1; margin-bottom: 12px;">Write custom network monitoring scripts using Python API.</p>
+                    <textarea style="width: 100%; height: 180px; background: #0f172a; border: 1px solid #334155; color: #10b981; font-family: monospace; font-size: 12px; padding: 10px; border-radius: 6px;" readonly># Simulated Python API
+import netforge_vlab as nf
+
+def on_packet_receive(pkt):
+    print("Received packet: " + pkt.protocol)
+
+nf.bind_listener(on_packet_receive)</textarea>
+                </div>
+
+                <!-- Tab: Attributes -->
+                <div class="d-tab-content" id="tab-attributes" style="display: none; padding: 20px; color: #fff; overflow-y: auto;">
+                    <h4 style="margin: 0 0 16px 0;">Device Properties</h4>
+                    <table style="width: 100%; border-collapse: collapse; font-size: 11px; color: #cbd5e1;">
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);"><td style="padding: 6px;">RAM Size</td><td style="padding: 6px;">512 MB</td></tr>
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);"><td style="padding: 6px;">Flash Size</td><td style="padding: 6px;">64 MB</td></tr>
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);"><td style="padding: 6px;">Processor Type</td><td style="padding: 6px;">NF-i686-DualCore</td></tr>
+                    </table>
+                </div>
+
+                <!-- Tab: Services (Server Only) -->
+                \${isServer ? `
+                <div class="d-tab-content" id="tab-services" style="display: none; padding: 20px; overflow-y: auto;">
+                    <div style="display: flex; gap: 20px; height: 100%; width: 100%;">
+                        <div style="width: 150px; border-right: 1px solid #cbd5e1; display: flex; flex-direction: column; gap: 6px; padding-right: 12px;">
+                            <button class="service-menu-btn active" data-service="http" style="background: transparent; color: #fff; border: none; text-align: left; padding: 8px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 500;">HTTP / HTTPS</button>
+                            <button class="service-menu-btn" data-service="dns" style="background: transparent; color: #cbd5e1; border: none; text-align: left; padding: 8px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 500;">DNS</button>
+                        </div>
+                        <div style="flex: 1; display: flex; flex-direction: column;" id="service-panel-content">
+                            <!-- Service panels injected dynamically -->
+                        </div>
+                    </div>
+                </div>
+                ` : ''}
+
+                <!-- Tab: Desktop (Grid of Icons) -->
+                <div class="d-tab-content active" id="tab-desktop" style="flex: 1; padding: 20px; display: grid; grid-template-columns: repeat(auto-fill, minmax(105px, 1fr)); gap: 14px; overflow-y: auto; align-content: start;">
+                    <div class="app-icon" data-app="ipconfig" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; cursor: pointer; padding: 10px; border-radius: 6px; background: #62b1e6; border: 2px solid #1c6ba0; box-shadow: inset 0 0 10px rgba(255,255,255,0.4); width: 100px; height: 100px;">
+                        <span style="font-size: 28px;">🌐</span>
+                        <span style="font-size: 10px; text-align: center; color: #0f172a; font-weight: 700; line-height: 1.1;">IP Configuration</span>
+                    </div>
+                    <div class="app-icon" data-app="dialup" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; cursor: pointer; padding: 10px; border-radius: 6px; background: #62b1e6; border: 2px solid #1c6ba0; box-shadow: inset 0 0 10px rgba(255,255,255,0.4); width: 100px; height: 100px;">
+                        <span style="font-size: 28px;">📞</span>
+                        <span style="font-size: 10px; text-align: center; color: #0f172a; font-weight: 700; line-height: 1.1;">Dial-up</span>
+                    </div>
+                    <div class="app-icon" data-app="cli_terminal" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; cursor: pointer; padding: 10px; border-radius: 6px; background: #62b1e6; border: 2px solid #1c6ba0; box-shadow: inset 0 0 10px rgba(255,255,255,0.4); width: 100px; height: 100px;">
+                        <span style="font-size: 28px;">💻</span>
+                        <span style="font-size: 10px; text-align: center; color: #0f172a; font-weight: 700; line-height: 1.1;">Terminal</span>
+                    </div>
+                    <div class="app-icon" data-app="terminal" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; cursor: pointer; padding: 10px; border-radius: 6px; background: #62b1e6; border: 2px solid #1c6ba0; box-shadow: inset 0 0 10px rgba(255,255,255,0.4); width: 100px; height: 100px;">
+                        <span style="font-size: 28px;">⚙️</span>
+                        <span style="font-size: 10px; text-align: center; color: #0f172a; font-weight: 700; line-height: 1.1;">Command Prompt</span>
+                    </div>
+                    <div class="app-icon" data-app="browser" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; cursor: pointer; padding: 10px; border-radius: 6px; background: #62b1e6; border: 2px solid #1c6ba0; box-shadow: inset 0 0 10px rgba(255,255,255,0.4); width: 100px; height: 100px;">
+                        <span style="font-size: 28px;">🧭</span>
+                        <span style="font-size: 10px; text-align: center; color: #0f172a; font-weight: 700; line-height: 1.1;">Web Browser</span>
+                    </div>
+                    <div class="app-icon" data-app="wireless" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; cursor: pointer; padding: 10px; border-radius: 6px; background: #62b1e6; border: 2px solid #1c6ba0; box-shadow: inset 0 0 10px rgba(255,255,255,0.4); width: 100px; height: 100px;">
+                        <span style="font-size: 28px;">📶</span>
+                        <span style="font-size: 10px; text-align: center; color: #0f172a; font-weight: 700; line-height: 1.1;">PC Wireless</span>
+                    </div>
+                    <div class="app-icon" data-app="vpn" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; cursor: pointer; padding: 10px; border-radius: 6px; background: #62b1e6; border: 2px solid #1c6ba0; box-shadow: inset 0 0 10px rgba(255,255,255,0.4); width: 100px; height: 100px;">
+                        <span style="font-size: 28px;">🔒</span>
+                        <span style="font-size: 10px; text-align: center; color: #0f172a; font-weight: 700; line-height: 1.1;">VPN</span>
+                    </div>
+                    <div class="app-icon" data-app="traffic" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; cursor: pointer; padding: 10px; border-radius: 6px; background: #62b1e6; border: 2px solid #1c6ba0; box-shadow: inset 0 0 10px rgba(255,255,255,0.4); width: 100px; height: 100px;">
+                        <span style="font-size: 28px;">📊</span>
+                        <span style="font-size: 10px; text-align: center; color: #0f172a; font-weight: 700; line-height: 1.1;">Traffic Gen</span>
+                    </div>
+                    <div class="app-icon" data-app="email" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; cursor: pointer; padding: 10px; border-radius: 6px; background: #62b1e6; border: 2px solid #1c6ba0; box-shadow: inset 0 0 10px rgba(255,255,255,0.4); width: 100px; height: 100px;">
+                        <span style="font-size: 28px;">✉️</span>
+                        <span style="font-size: 10px; text-align: center; color: #0f172a; font-weight: 700; line-height: 1.1;">Email</span>
+                    </div>
+                    <div class="app-icon" data-app="text_editor" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; cursor: pointer; padding: 10px; border-radius: 6px; background: #62b1e6; border: 2px solid #1c6ba0; box-shadow: inset 0 0 10px rgba(255,255,255,0.4); width: 100px; height: 100px;">
+                        <span style="font-size: 28px;">📝</span>
+                        <span style="font-size: 10px; text-align: center; color: #0f172a; font-weight: 700; line-height: 1.1;">Text Editor</span>
+                    </div>
+                    <div class="app-icon" data-app="firewall" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; cursor: pointer; padding: 10px; border-radius: 6px; background: #62b1e6; border: 2px solid #1c6ba0; box-shadow: inset 0 0 10px rgba(255,255,255,0.4); width: 100px; height: 100px;">
+                        <span style="font-size: 28px;">🧱</span>
+                        <span style="font-size: 10px; text-align: center; color: #0f172a; font-weight: 700; line-height: 1.1;">Firewall</span>
+                    </div>
+                </div>
+
+                <!-- App Containers -->
+                <div class="app-window" id="app-ipconfig" style="display: none; position: absolute; inset: 0; background: #0f172a; flex-direction: column; padding: 20px; overflow-y: auto;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #334155; padding-bottom: 8px; margin-bottom: 16px;">
+                        <h4 style="margin: 0; color: #3b82f6; font-size: 13px;">IP Configuration</h4>
+                        <button class="btn-close-app" style="background: #ef4444; border: none; color: #fff; border-radius: 4px; padding: 2px 8px; font-size: 10px; cursor: pointer;">Close App</button>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 12px; max-width: 400px;">
+                        <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 8px;">
+                            <label style="font-size: 12px; color: #fff; display: flex; align-items: center; gap: 6px;">
+                                <input type="radio" name="ip-mode" value="static" checked> Static
+                            </label>
+                            <label style="font-size: 12px; color: #fff; display: flex; align-items: center; gap: 6px;">
+                                <input type="radio" name="ip-mode" value="dhcp"> DHCP
+                            </label>
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 4px;">
+                            <label style="font-size: 11px; color: #cbd5e1;">IP Address</label>
+                            <input type="text" id="ip-address" value="\${node.config.interfaces['eth0'].ip === 'unassigned' ? '' : node.config.interfaces['eth0'].ip}" style="background: #1e293b; border: 1px solid #334155; color: #fff; padding: 6px 10px; border-radius: 4px; font-size: 12px;">
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 4px;">
+                            <label style="font-size: 11px; color: #cbd5e1;">Subnet Mask</label>
+                            <input type="text" id="ip-mask" value="\${node.config.interfaces['eth0'].mask === 'unassigned' ? '' : node.config.interfaces['eth0'].mask}" style="background: #1e293b; border: 1px solid #334155; color: #fff; padding: 6px 10px; border-radius: 4px; font-size: 12px;">
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 4px;">
+                            <label style="font-size: 11px; color: #cbd5e1;">Default Gateway</label>
+                            <input type="text" id="ip-gateway" value="\${node.config.gateway || ''}" style="background: #1e293b; border: 1px solid #334155; color: #fff; padding: 6px 10px; border-radius: 4px; font-size: 12px;">
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 4px;">
+                            <label style="font-size: 11px; color: #cbd5e1;">DNS Server</label>
+                            <input type="text" id="ip-dns" value="\${node.config.dns || ''}" style="background: #1e293b; border: 1px solid #334155; color: #fff; padding: 6px 10px; border-radius: 4px; font-size: 12px;">
+                        </div>
+                        <button id="btn-save-ip" style="background: #2563eb; color: #fff; border: none; padding: 8px 16px; border-radius: 4px; font-size: 12px; cursor: pointer; margin-top: 10px; font-weight: bold;">Apply Configuration</button>
+                    </div>
+                </div>
+
+                <div class="app-window" id="app-cli_terminal" style="display: none; position: absolute; inset: 0; background: #000; flex-direction: column; font-family: monospace;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #334155; padding: 6px 8px; background: #1e293b;">
+                        <h4 style="margin: 0; color: #fff; font-size: 12px;">Terminal Config</h4>
+                        <button class="btn-close-app" style="background: #ef4444; border: none; color: #fff; border-radius: 4px; padding: 2px 8px; font-size: 10px; cursor: pointer;">Close App</button>
+                    </div>
+                    <div style="flex: 1; padding: 12px; overflow-y: auto; color: #10b981; font-size: 12px;">
+                        Connected to Router console port... Type standard IOS CLI commands.<br><br>
+                        Router&gt; enable<br>
+                        Router#
+                    </div>
+                </div>
+
+                <div class="app-window" id="app-text_editor" style="display: none; position: absolute; inset: 0; background: #1e293b; flex-direction: column;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #475569; padding: 8px; background: #0f172a;">
+                        <h4 style="margin: 0; color: #fff; font-size: 12px;">Text Editor</h4>
+                        <button class="btn-close-app" style="background: #ef4444; border: none; color: #fff; border-radius: 4px; padding: 2px 8px; font-size: 10px; cursor: pointer;">Close App</button>
+                    </div>
+                    <div style="flex: 1; padding: 10px; display: flex; flex-direction: column;">
+                        <textarea style="flex: 1; background: #0f172a; border: 1px solid #475569; color: #fff; font-family: monospace; font-size: 12px; padding: 8px; border-radius: 4px; resize: none;" placeholder="Start typing file..."></textarea>
+                        <button style="align-self: flex-end; background: #10b981; color: #fff; border: none; padding: 6px 16px; border-radius: 4px; font-size: 11px; cursor: pointer; margin-top: 8px; font-weight: bold;" onclick="alert('File saved successfully to virtual disk!')">Save File</button>
+                    </div>
+                </div>
+
+                <!-- Simple mockup panels for other items -->
+                <div class="app-window" id="app-dialup" style="display: none; position: absolute; inset: 0; background: #1e293b; color: #fff; flex-direction: column; padding: 20px; align-items: center; justify-content: center;">
+                    <h4>Dial-up Configuration</h4>
+                    <p style="font-size: 12px; color: #cbd5e1; text-align: center;">Simulate a telephone/modem dialup link.</p>
+                    <button class="btn-close-app" style="background: #ef4444; border: none; color: #fff; padding: 6px 12px; border-radius: 4px; font-size: 11px; cursor: pointer; margin-top: 15px;">Close Panel</button>
+                </div>
+
+                <div class="app-window" id="app-wireless" style="display: none; position: absolute; inset: 0; background: #1e293b; color: #fff; flex-direction: column; padding: 20px; align-items: center; justify-content: center;">
+                    <h4>Linksys Wireless Client</h4>
+                    <p style="font-size: 12px; color: #cbd5e1; text-align: center;">Signal Strength: 98%<br>Connected SSID: HomeNetwork</p>
+                    <button class="btn-close-app" style="background: #ef4444; border: none; color: #fff; padding: 6px 12px; border-radius: 4px; font-size: 11px; cursor: pointer; margin-top: 15px;">Close Panel</button>
+                </div>
+
+                <div class="app-window" id="app-vpn" style="display: none; position: absolute; inset: 0; background: #1e293b; color: #fff; flex-direction: column; padding: 20px; align-items: center; justify-content: center;">
+                    <h4>Virtual Private Network (VPN)</h4>
+                    <p style="font-size: 12px; color: #cbd5e1; text-align: center;">Configure IPsec Tunnel parameters.</p>
+                    <button class="btn-close-app" style="background: #ef4444; border: none; color: #fff; padding: 6px 12px; border-radius: 4px; font-size: 11px; cursor: pointer; margin-top: 15px;">Close Panel</button>
+                </div>
+
+                <div class="app-window" id="app-traffic" style="display: none; position: absolute; inset: 0; background: #1e293b; color: #fff; flex-direction: column; padding: 20px; align-items: center; justify-content: center;">
+                    <h4>Traffic Generator</h4>
+                    <p style="font-size: 12px; color: #cbd5e1; text-align: center;">Inject custom ICMP / UDP payload packets into the topology.</p>
+                    <button class="btn-close-app" style="background: #ef4444; border: none; color: #fff; padding: 6px 12px; border-radius: 4px; font-size: 11px; cursor: pointer; margin-top: 15px;">Close Panel</button>
+                </div>
+
+                <div class="app-window" id="app-email" style="display: none; position: absolute; inset: 0; background: #1e293b; color: #fff; flex-direction: column; padding: 20px; align-items: center; justify-content: center;">
+                    <h4>NetForge SMTP/POP3 Mail Client</h4>
+                    <p style="font-size: 12px; color: #cbd5e1; text-align: center;">Mail Service status: Idle</p>
+                    <button class="btn-close-app" style="background: #ef4444; border: none; color: #fff; padding: 6px 12px; border-radius: 4px; font-size: 11px; cursor: pointer; margin-top: 15px;">Close Panel</button>
+                </div>
+
+                <div class="app-window" id="app-firewall" style="display: none; position: absolute; inset: 0; background: #1e293b; color: #fff; flex-direction: column; padding: 20px; align-items: center; justify-content: center;">
+                    <h4>IPv4/IPv6 Rules Firewall</h4>
+                    <p style="font-size: 12px; color: #cbd5e1; text-align: center;">Rules: Default Permit All</p>
+                    <button class="btn-close-app" style="background: #ef4444; border: none; color: #fff; padding: 6px 12px; border-radius: 4px; font-size: 11px; cursor: pointer; margin-top: 15px;">Close Panel</button>
+                </div>
+
+                <div class="app-window" id="app-terminal" style="display: none; position: absolute; inset: 0; background: #0a0f1d; flex-direction: column; font-family: 'JetBrains Mono', monospace;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #334155; padding: 8px; background: #1e293b;">
+                        <h4 style="margin: 0; color: #fbbf24; font-size: 12px;">Command Prompt</h4>
+                        <button class="btn-close-app" style="background: #ef4444; border: none; color: #fff; border-radius: 4px; padding: 2px 8px; font-size: 10px; cursor: pointer;">Close App</button>
+                    </div>
+                    <div id="hostTerminalArea" style="flex: 1; padding: 12px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; font-size: 12px;">
+                        <div style="color: #cbd5e1;">NetForge Command Line [Version 1.0]<br>(c) 2026 NetForge Corporation. All rights reserved.</div>
+                        <div class="host-terminal-line-wrap" style="display: flex; align-items: center; gap: 6px;">
+                            <span style="color: #10b981; font-weight: bold;">C:\\&gt;</span>
+                            <input type="text" id="hostTerminalInput" spellcheck="false" autocomplete="off" style="flex: 1; background: transparent; border: none; outline: none; color: #fff; font-family: inherit; font-size: inherit;">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="app-window" id="app-browser" style="display: none; position: absolute; inset: 0; background: #cbd5e1; flex-direction: column;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #94a3b8; padding: 8px; background: #e2e8f0;">
+                        <h4 style="margin: 0; color: #334155; font-size: 12px;">Web Browser</h4>
+                        <button class="btn-close-app" style="background: #ef4444; border: none; color: #fff; border-radius: 4px; padding: 2px 8px; font-size: 10px; cursor: pointer;">Close App</button>
+                    </div>
+                    <div style="padding: 8px; background: #94a3b8; display: flex; gap: 6px;">
+                        <input type="text" id="browserUrl" placeholder="Enter IP Address or Domain Name (e.g. www.google.com)" style="flex: 1; background: #fff; border: 1px solid #64748b; color: #334155; padding: 6px 10px; border-radius: 4px; font-size: 12px;">
+                        <button id="btnBrowserGo" style="background: #1c6ba0; color: #fff; border: none; padding: 6px 16px; border-radius: 4px; font-size: 12px; cursor: pointer; font-weight: bold;">Go</button>
+                    </div>
+                    <div id="browserContent" style="flex: 1; background: #fff; color: #334155; padding: 20px; overflow-y: auto; font-family: sans-serif; font-size: 14px;">
+                        <!-- Simulated browser window content -->
+                        <div style="color: #94a3b8; text-align: center; margin-top: 50px;">
+                            <span style="font-size: 48px; display: block; margin-bottom: 10px;">🧭</span>
+                            Enter a URL or IP Address to browse the web.
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer" style="background: #e2e8f0; border-top: 2px solid #cbd5e1; color: #334155; font-size: 11px; padding: 8px 20px; font-weight: bold;">
+                Cisco Packet Tracer Host Desktop Simulation Mode
+            </div>
+        `;
+
+        // Initialize Services Config for Servers
+        if (isServer) {
+            node.config.services = node.config.services || {
+                http: { enabled: true, indexHtml: '<h1>Welcome to NetForge Server!</h1><p>HTTP service is running successfully.</p>' },
+                dns: { enabled: true, records: [{ domain: 'www.google.com', ip: node.config.interfaces['eth0'].ip === 'unassigned' ? '192.168.1.10' : node.config.interfaces['eth0'].ip }] }
+            };
+        }
+
+        // Setup App UI Toggles
+        const tabBtns = configContent.querySelectorAll('.d-tab-btn');
+        const tabContents = configContent.querySelectorAll('.d-tab-content');
+
+        tabBtns.forEach(btn => {
+            btn.onclick = () => {
+                tabBtns.forEach(b => b.classList.remove('active'));
+                tabContents.forEach(c => c.style.display = 'none');
+                btn.classList.add('active');
+                const target = btn.dataset.tab;
+                configContent.querySelector(`#tab-\${target}`).style.display = target === 'services' ? 'flex' : 'block';
+            };
+        });
+
+        // App Icon click actions
+        const appIcons = configContent.querySelectorAll('.app-icon');
+        appIcons.forEach(icon => {
+            icon.onclick = () => {
+                const app = icon.dataset.app;
+                configContent.querySelector(`#app-\${app}`).style.display = 'flex';
+                if (app === 'terminal') {
+                    setTimeout(() => configContent.querySelector('#hostTerminalInput').focus(), 100);
+                }
+            };
+        });
+
+        // App Close buttons
+        const closeBtns = configContent.querySelectorAll('.btn-close-app');
+        closeBtns.forEach(btn => {
+            btn.onclick = () => {
+                btn.closest('.app-window').style.display = 'none';
+            };
+        });
+
+        // IP Mode Radio Action
+        const ipModeRadios = configContent.querySelectorAll('input[name="ip-mode"]');
+        const ipInput = configContent.querySelector('#ip-address');
+        const maskInput = configContent.querySelector('#ip-mask');
+        const gwInput = configContent.querySelector('#ip-gateway');
+        const dnsInput = configContent.querySelector('#ip-dns');
+
+        ipModeRadios.forEach(radio => {
+            radio.onchange = () => {
+                if (radio.value === 'dhcp') {
+                    ipInput.disabled = true;
+                    maskInput.disabled = true;
+                    gwInput.disabled = true;
+                    dnsInput.disabled = true;
+
+                    ipInput.value = "DHCP Requesting...";
+                    maskInput.value = "DHCP Requesting...";
+                    gwInput.value = "DHCP Requesting...";
+                    dnsInput.value = "DHCP Requesting...";
+
+                    setTimeout(() => {
+                        // Find any connected router on the link
+                        let foundGw = '';
+                        this.links.forEach(l => {
+                            const other = l.from === node ? l.to : (l.to === node ? l.from : null);
+                            if (other && other.type === 'router') {
+                                const otherIface = l.from === node ? l.toPort : l.fromPort;
+                                const otherIp = other.config?.interfaces?.[otherIface]?.ip;
+                                if (otherIp && otherIp !== 'unassigned') {
+                                    foundGw = otherIp;
+                                }
+                            }
+                        });
+
+                        if (foundGw) {
+                            const parts = foundGw.split('.');
+                            parts[3] = '10'; // Assign .10 to the PC
+                            const assignedIp = parts.join('.');
+                            ipInput.value = assignedIp;
+                            maskInput.value = '255.255.255.0';
+                            gwInput.value = foundGw;
+                            dnsInput.value = foundGw;
+
+                            node.ip = assignedIp;
+                            node.config.interfaces['eth0'].ip = assignedIp;
+                            node.config.interfaces['eth0'].mask = '255.255.255.0';
+                            node.config.gateway = foundGw;
+                            node.config.dns = foundGw;
+                        } else {
+                            // APIPA fallback
+                            const assignedIp = '169.254.14.77';
+                            ipInput.value = assignedIp;
+                            maskInput.value = '255.255.0.0';
+                            gwInput.value = '0.0.0.0';
+                            dnsInput.value = '0.0.0.0';
+
+                            node.ip = assignedIp;
+                            node.config.interfaces['eth0'].ip = assignedIp;
+                            node.config.interfaces['eth0'].mask = '255.255.0.0';
+                            node.config.gateway = '';
+                            node.config.dns = '';
+                        }
+                        this.computeTopologyRouting();
+                        if (this.saveTopology) this.saveTopology();
+                    }, 1000);
+                } else {
+                    ipInput.disabled = false;
+                    maskInput.disabled = false;
+                    gwInput.disabled = false;
+                    dnsInput.disabled = false;
+
+                    ipInput.value = node.config.interfaces['eth0'].ip === 'unassigned' ? '' : node.config.interfaces['eth0'].ip;
+                    maskInput.value = node.config.interfaces['eth0'].mask === 'unassigned' ? '' : node.config.interfaces['eth0'].mask;
+                    gwInput.value = node.config.gateway || '';
+                    dnsInput.value = node.config.dns || '';
+                }
+            };
+        });
+
+        // IP Config Save Actions
+        const btnSaveIp = configContent.querySelector('#btn-save-ip');
+        if (btnSaveIp) {
+            btnSaveIp.onclick = () => {
+                const ip = configContent.querySelector('#ip-address').value.trim();
+                const mask = configContent.querySelector('#ip-mask').value.trim();
+                const gateway = configContent.querySelector('#ip-gateway').value.trim();
+                const dns = configContent.querySelector('#ip-dns').value.trim();
+
+                node.ip = ip || 'unassigned';
+                node.config.interfaces['eth0'].ip = ip || 'unassigned';
+                node.config.interfaces['eth0'].mask = mask || 'unassigned';
+                node.config.gateway = gateway;
+                node.config.dns = dns;
+
+                // Sync with Config tab
+                configContent.querySelector('#cfg-gateway').value = gateway;
+                configContent.querySelector('#cfg-dns').value = dns;
+
+                this.computeTopologyRouting();
+                if (this.saveTopology) this.saveTopology();
+
+                alert('IP settings applied successfully!');
+            };
+        }
+
+        // Config Save Actions
+        const btnSaveConfig = configContent.querySelector('#btn-save-config');
+        if (btnSaveConfig) {
+            btnSaveConfig.onclick = () => {
+                const hostName = configContent.querySelector('#cfg-hostname').value.trim();
+                const gateway = configContent.querySelector('#cfg-gateway').value.trim();
+                const dns = configContent.querySelector('#cfg-dns').value.trim();
+
+                node.label = hostName.toUpperCase();
+                node.config.hostname = node.label;
+                node.config.gateway = gateway;
+                node.config.dns = dns;
+                if (node.el && node.el.querySelector('.d-label')) {
+                    node.el.querySelector('.d-label').textContent = node.label;
+                }
+
+                // Sync with IP Config app
+                configContent.querySelector('#ip-gateway').value = gateway;
+                configContent.querySelector('#ip-dns').value = dns;
+
+                this.computeTopologyRouting();
+                if (this.saveTopology) this.saveTopology();
+
+                alert('Config settings applied successfully!');
+            };
+        }
+
+        // Host Terminal Input logic
+        const hostInput = configContent.querySelector('#hostTerminalInput');
+        const hostArea = configContent.querySelector('#hostTerminalArea');
+        if (hostInput && hostArea) {
+            hostArea.onclick = () => hostInput.focus();
+
+            hostInput.onkeydown = (e) => {
+                if (e.key === 'Enter') {
+                    const cmd = hostInput.value.trim();
+                    hostInput.value = '';
+                    if (!cmd) return;
+
+                    // Record Host Command Prompt execution
+                    window.vlabTypedCommands = window.vlabTypedCommands || [];
+                    window.vlabTypedCommands.push({
+                        host: node.label || node.type.toUpperCase(),
+                        cmd: cmd,
+                        timestamp: new Date().toLocaleTimeString()
+                    });
+
+                    // Add command line
+                    const cmdLine = document.createElement('div');
+                    cmdLine.style.color = '#10b981';
+                    cmdLine.innerHTML = `<span style="color:#10b981; font-weight:bold;">PC&gt;</span> \${cmd}`;
+                    hostArea.insertBefore(cmdLine, hostArea.querySelector('.host-terminal-line-wrap'));
+
+                    const addLine = (txt, color = '#cbd5e1') => {
+                        const line = document.createElement('div');
+                        line.style.color = color;
+                        line.style.whiteSpace = 'pre-wrap';
+                        line.textContent = txt;
+                        hostArea.insertBefore(line, hostArea.querySelector('.host-terminal-line-wrap'));
+                        hostArea.scrollTop = hostArea.scrollHeight;
+                    };
+
+                    const args = cmd.toLowerCase().split(/\s+/);
+                    const base = args[0];
+
+                    if (base === 'ipconfig') {
+                        addLine(`\\nFastEthernet0 Connection:\\n  Link-local IPv6 Address.........: fe80::201:c9ff:fe4f:8a33\\n  IPv4 Address....................: \${node.config.interfaces['eth0'].ip}\\n  Subnet Mask.....................: \${node.config.interfaces['eth0'].mask}\\n  Default Gateway.................: \${node.config.gateway || '0.0.0.0'}\\n  DNS Server......................: \${node.config.dns || '0.0.0.0'}\\n`);
+                    } else if (base === 'ping') {
+                        const targetIp = args[1];
+                        if (!targetIp) {
+                            addLine(`Usage: ping <ip_address>`);
+                            return;
+                        }
+                        addLine(`Pinging \${targetIp} with 32 bytes of data:`);
+                        const path = this.tracePath(node, targetIp);
+                        if (path && path.length >= 2) {
+                            this.animatePathPackets(path, true, 'ICMP', () => {
+                                const rev = [...path].reverse();
+                                this.animatePathPackets(rev, true, 'ICMP', () => {
+                                    addLine(`Reply from \${targetIp}: bytes=32 time=10ms TTL=128\\nReply from \${targetIp}: bytes=32 time=8ms TTL=128\\nReply from \${targetIp}: bytes=32 time=9ms TTL=128\\nReply from \${targetIp}: bytes=32 time=10ms TTL=128\\n\\nPing statistics for \${targetIp}:\\n    Packets: Sent = 4, Received = 4, Lost = 0 (0% loss)`);
+                                });
+                            });
+                        } else {
+                            this.animatePacketStep(node, node, false, 'ARP', () => {
+                                addLine(`Request timed out.\\nRequest timed out.\\nRequest timed out.\\nRequest timed out.\\n\\nPing statistics for \${targetIp}:\\n    Packets: Sent = 4, Received = 0, Lost = 4 (100% loss)`);
+                            });
+                        }
+                    } else if (base === 'nslookup') {
+                        const host = args[1];
+                        if (!host) {
+                            addLine(`Usage: nslookup <domain_name>`);
+                            return;
+                        }
+                        if (!node.config.dns) {
+                            addLine(`*** DNS request timed out.\\n    timeout was 2 seconds.\\n*** Can't find server address for '\${host}'`);
+                            return;
+                        }
+                        // Find dns server node
+                        const dnsServer = this.nodes.find(n => n.type === 'server' && n.config.interfaces['eth0']?.ip === node.config.dns);
+                        if (!dnsServer || !dnsServer.config.services?.dns?.enabled) {
+                            addLine(`*** DNS request timed out.\\n    timeout was 2 seconds.\\n*** Can't find server address for '\${host}'`);
+                            return;
+                        }
+                        const record = dnsServer.config.services.dns.records.find(r => r.domain === host);
+                        if (record) {
+                            addLine(`Server:  \${dnsServer.label}\\nAddress:  \${dnsServer.config.interfaces['eth0'].ip}\\n\\nName:    \${host}\\nAddress:  \${record.ip}`);
+                        } else {
+                            addLine(`Server:  \${dnsServer.label}\\nAddress:  \${dnsServer.config.interfaces['eth0'].ip}\\n\\n*** \${dnsServer.label} can't find \${host}: Non-existent domain`);
+                        }
+                    } else if (base === 'tracert') {
+                        const targetIp = args[1];
+                        if (!targetIp) {
+                            addLine(`Usage: tracert <ip_address>`);
+                            return;
+                        }
+                        addLine(`Tracing route to \${targetIp} over a maximum of 30 hops:\\n`);
+                        const path = this.tracePath(node, targetIp);
+                        if (path && path.length >= 2) {
+                            let hopIdx = 1;
+                            path.forEach((n, idx) => {
+                                if (idx > 0 && n.type === 'router') {
+                                    const iface = Object.keys(n.config.interfaces).find(k => n.config.interfaces[k].ip !== 'unassigned');
+                                    addLine(`  \${hopIdx++}    2 ms    1 ms    2 ms    \${n.config.interfaces[iface]?.ip || n.label}`);
+                                }
+                            });
+                            addLine(`  \${hopIdx}    4 ms    3 ms    4 ms    \${targetIp}\\nTrace complete.`);
+                        } else {
+                            addLine(`  1    *        *        *     Request timed out.`);
+                        }
+                    } else if (base === 'clear' || base === 'cls') {
+                        // Clear lines
+                        hostArea.querySelectorAll('div').forEach(d => {
+                            if (d.className !== 'host-terminal-line-wrap') d.remove();
+                        });
+                    } else {
+                        addLine(`'\${base}' is not recognized as an internal or external command, operable program or batch file.`);
+                    }
+
+                    hostArea.scrollTop = hostArea.scrollHeight;
+                }
+            };
+        }
+
+        // Web Browser logic
+        const btnBrowserGo = configContent.querySelector('#btnBrowserGo');
+        const browserContent = configContent.querySelector('#browserContent');
+        const browserUrlInput = configContent.querySelector('#browserUrl');
+        if (btnBrowserGo && browserContent && browserUrlInput) {
+            btnBrowserGo.onclick = () => {
+                const url = browserUrlInput.value.trim();
+                if (!url) return;
+
+                browserContent.innerHTML = `<div style="text-align:center; padding: 20px; color:#64748b;">Resolving host and connecting...</div>`;
+
+                let targetIp = url.replace(/^https?:\\/\\//i, '');
+                let domainName = '';
+
+                // If not raw IP, resolve via DNS
+                const isIp = /^\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}$/.test(targetIp);
+                if (!isIp) {
+                    domainName = targetIp;
+                    if (!node.config.dns) {
+                        browserContent.innerHTML = `<div style="color:#ef4444; font-weight:bold; text-align:center; margin-top:40px;">DNS Server not configured. Host name resolution failed.</div>`;
+                        return;
+                    }
+                    // Resolve domain via DNS Server
+                    const dnsServer = this.nodes.find(n => n.type === 'server' && n.config.interfaces['eth0']?.ip === node.config.dns);
+                    if (!dnsServer || !dnsServer.config.services?.dns?.enabled) {
+                        browserContent.innerHTML = `<div style="color:#ef4444; font-weight:bold; text-align:center; margin-top:40px;">DNS request timed out. Host not resolved.</div>`;
+                        return;
+                    }
+                    const record = dnsServer.config.services.dns.records.find(r => r.domain === domainName);
+                    if (!record) {
+                        browserContent.innerHTML = `<div style="color:#ef4444; font-weight:bold; text-align:center; margin-top:40px;">Server not found: Non-existent domain \${domainName}</div>`;
+                        return;
+                    }
+                    targetIp = record.ip;
+                }
+
+                // Trace path to targetIp web server
+                const webServer = this.nodes.find(n => n.type === 'server' && n.config.interfaces['eth0']?.ip === targetIp);
+                if (!webServer || !webServer.config.services?.http?.enabled) {
+                    browserContent.innerHTML = `<div style="color:#ef4444; font-weight:bold; text-align:center; margin-top:40px;">Connection Refused or Connection Timed Out.</div>`;
+                    return;
+                }
+
+                const path = this.tracePath(node, targetIp);
+                if (path && path.length >= 2) {
+                    this.animatePathPackets(path, true, 'HTTP', () => {
+                        const rev = [...path].reverse();
+                        this.animatePathPackets(rev, true, 'HTTP', () => {
+                            browserContent.innerHTML = `
+                                <div style="border:1px solid #cbd5e1; border-radius:6px; padding:16px; background:#fff; box-shadow:0 1px 3px rgba(0,0,0,0.05);">
+                                    \${webServer.config.services.http.indexHtml}
+                                </div>
+                            `;
+                        });
+                    });
+                } else {
+                    browserContent.innerHTML = `<div style="color:#ef4444; font-weight:bold; text-align:center; margin-top:40px;">Host Unreachable. Connection failed.</div>`;
+                }
+            };
+        }
+
+        // Server Services logic (HTTP & DNS config panel)
+        if (isServer) {
+            const serviceBtns = configContent.querySelectorAll('.service-menu-btn');
+            const panelContent = configContent.querySelector('#service-panel-content');
+
+            const renderServicePanel = (service) => {
+                if (service === 'http') {
+                    panelContent.innerHTML = `
+                        <h4 style="margin: 0 0 12px 0; color: #3b82f6; font-size: 13px;">HTTP / HTTPS Service</h4>
+                        <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
+                            <label style="color:#fff; font-size:12px;">Service Status:</label>
+                            <label style="color:#fff; font-size:12px; display:flex; align-items:center; gap:4px;">
+                                <input type="radio" name="srv-http-status" value="on" \${node.config.services.http.enabled ? 'checked' : ''}> On
+                            </label>
+                            <label style="color:#fff; font-size:12px; display:flex; align-items:center; gap:4px;">
+                                <input type="radio" name="srv-http-status" value="off" \${!node.config.services.http.enabled ? 'checked' : ''}> Off
+                            </label>
+                        </div>
+                        <div style="display:flex; flex-direction:column; gap:4px; flex:1;">
+                            <label style="color:#94a3b8; font-size:11px;">index.html Content (HTML supported)</label>
+                            <textarea id="srv-http-html" style="flex:1; background:#1e293b; border:1px solid #334155; color:#fff; border-radius:4px; padding:8px; font-family:monospace; font-size:12px; resize:none; min-height: 120px;">\${node.config.services.http.indexHtml}</textarea>
+                        </div>
+                        <button id="btn-save-http" style="background:#2563eb; color:#fff; border:none; padding:6px 12px; border-radius:4px; font-size:12px; cursor:pointer; margin-top:12px; align-self:flex-start;">Save HTTP Settings</button>
+                    `;
+
+                    // Bind save button
+                    panelContent.querySelector('#btn-save-http').onclick = () => {
+                        const enabled = panelContent.querySelector('input[name="srv-http-status"]:checked').value === 'on';
+                        const html = panelContent.querySelector('#srv-http-html').value;
+                        node.config.services.http.enabled = enabled;
+                        node.config.services.http.indexHtml = html;
+                        if (this.saveTopology) this.saveTopology();
+                        alert('HTTP Services updated successfully!');
+                    };
+                } else if (service === 'dns') {
+                    let dnsRows = '';
+                    node.config.services.dns.records.forEach((rec, idx) => {
+                        dnsRows += `
+                            <tr style="border-bottom:1px solid #334155;">
+                                <td style="padding:6px; color:#fff;">\${rec.domain}</td>
+                                <td style="padding:6px; color:#fff;">\${rec.ip}</td>
+                                <td style="padding:6px;"><button class="btn-del-dns" data-idx="\${idx}" style="background:#ef4444; border:none; color:#fff; border-radius:4px; padding:2px 8px; font-size:10px; cursor:pointer;">Delete</button></td>
+                            </tr>
+                        `;
+                    });
+
+                    panelContent.innerHTML = `
+                        <h4 style="margin: 0 0 12px 0; color: #3b82f6; font-size: 13px;">DNS Service</h4>
+                        <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
+                            <label style="color:#fff; font-size:12px;">Service Status:</label>
+                            <label style="color:#fff; font-size:12px; display:flex; align-items:center; gap:4px;">
+                                <input type="radio" name="srv-dns-status" value="on" \${node.config.services.dns.enabled ? 'checked' : ''}> On
+                            </label>
+                            <label style="color:#fff; font-size:12px; display:flex; align-items:center; gap:4px;">
+                                <input type="radio" name="srv-dns-status" value="off" \${!node.config.services.dns.enabled ? 'checked' : ''}> Off
+                            </label>
+                        </div>
+                        <div style="background:#1e293b; border:1px solid #334155; border-radius:6px; padding:12px; display:flex; gap:8px; margin-bottom:16px;">
+                            <input type="text" id="dns-new-domain" placeholder="Domain (e.g. www.google.com)" style="flex:1; background:#0f172a; border:1px solid #475569; color:#fff; padding:6px; border-radius:4px; font-size:11px;">
+                            <input type="text" id="dns-new-ip" placeholder="IP Address" style="flex:1; background:#0f172a; border:1px solid #475569; color:#fff; padding:6px; border-radius:4px; font-size:11px;">
+                            <button id="btn-add-dns" style="background:#10b981; color:#fff; border:none; padding:6px 12px; border-radius:4px; font-size:11px; cursor:pointer; font-weight:bold;">Add Record</button>
+                        </div>
+                        <div style="flex:1; overflow-y:auto;">
+                            <table style="width:100%; border-collapse:collapse; font-size:11px;">
+                                <thead>
+                                    <tr style="text-align:left; background:#1e293b; color:#94a3b8; border-bottom:1px solid #334155;">
+                                        <th style="padding:6px;">Domain Name</th>
+                                        <th style="padding:6px;">IP Address</th>
+                                        <th style="padding:6px;">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    \${dnsRows || '<tr><td colspan="3" style="text-align:center; padding:12px; color:#64748b;">No DNS Records</td></tr>'}
+                                </tbody>
+                            </table>
+                        </div>
+                    `;
+
+                    // Bind Status Radio change
+                    panelContent.querySelectorAll('input[name="srv-dns-status"]').forEach(r => {
+                        r.onchange = () => {
+                            node.config.services.dns.enabled = (r.value === 'on');
+                            if (this.saveTopology) this.saveTopology();
+                        };
+                    });
+
+                    // Bind Add record button
+                    panelContent.querySelector('#btn-add-dns').onclick = () => {
+                        const domain = panelContent.querySelector('#dns-new-domain').value.trim();
+                        const ip = panelContent.querySelector('#dns-new-ip').value.trim();
+                        if (!domain || !ip) return;
+                        node.config.services.dns.records.push({ domain, ip });
+                        if (this.saveTopology) this.saveTopology();
+                        renderServicePanel('dns');
+                    };
+
+                    // Bind Delete record button
+                    panelContent.querySelectorAll('.btn-del-dns').forEach(btn => {
+                        btn.onclick = () => {
+                            const idx = parseInt(btn.dataset.idx);
+                            node.config.services.dns.records.splice(idx, 1);
+                            if (this.saveTopology) this.saveTopology();
+                            renderServicePanel('dns');
+                        };
+                    });
+                }
+            };
+
+            serviceBtns.forEach(btn => {
+                btn.onclick = () => {
+                    serviceBtns.forEach(b => {
+                        b.classList.remove('active');
+                        b.style.color = '#cbd5e1';
+                    });
+                    btn.classList.add('active');
+                    btn.style.color = '#fff';
+                    renderServicePanel(btn.dataset.service);
+                };
+            });
+
+            // Render HTTP panel by default
+            renderServicePanel('http');
+        }
     }
 
     updateTerminal(node) {
@@ -1832,6 +2758,14 @@ class TopologySimulation {
             return;
         }
 
+        // Record CLI command execution
+        window.vlabTypedCommands = window.vlabTypedCommands || [];
+        window.vlabTypedCommands.push({
+            host: node.label || node.type.toUpperCase(),
+            cmd: cmd,
+            timestamp: new Date().toLocaleTimeString()
+        });
+
         const args = cmd.toLowerCase().split(/\s+/);
         const baseCmd = args[0];
 
@@ -1845,6 +2779,34 @@ class TopologySimulation {
             targetArgs = targetCmd.toLowerCase().split(/\s+/);
             targetBaseCmd = targetArgs[0];
             if (!targetCmd) return;
+        }
+
+        if (targetBaseCmd === 'ip' && targetArgs[1] === 'address' && (node.type === 'pc' || node.type === 'laptop' || node.type === 'server')) {
+            const ip = targetArgs[2];
+            const mask = targetArgs[3] || '255.255.255.0';
+            node.ip = ip;
+            node.config.interfaces['eth0'] = node.config.interfaces['eth0'] || { ip: 'unassigned', mask: 'unassigned', status: 'up', desc: '' };
+            node.config.interfaces['eth0'].ip = ip;
+            node.config.interfaces['eth0'].mask = mask;
+            node.config.interfaces['eth0'].status = 'up';
+            this.computeTopologyRouting();
+            addLine("");
+            addLine(`IP Address successfully set to ${ip} ${mask} on eth0`, 'out');
+            return;
+        }
+
+        if (targetBaseCmd === 'ipconfig' && targetArgs[1] && (node.type === 'pc' || node.type === 'laptop' || node.type === 'server')) {
+            const ip = targetArgs[1];
+            const mask = targetArgs[2] || '255.255.255.0';
+            node.ip = ip;
+            node.config.interfaces['eth0'] = node.config.interfaces['eth0'] || { ip: 'unassigned', mask: 'unassigned', status: 'up', desc: '' };
+            node.config.interfaces['eth0'].ip = ip;
+            node.config.interfaces['eth0'].mask = mask;
+            node.config.interfaces['eth0'].status = 'up';
+            this.computeTopologyRouting();
+            addLine("");
+            addLine(`IP Address successfully set to ${ip} ${mask} on eth0`, 'out');
+            return;
         }
 
         // Global Commands
@@ -2011,13 +2973,41 @@ class TopologySimulation {
         // Router Config
         else if (node.cliMode === 'config-router') {
             if (targetBaseCmd === 'network') {
-                const net = targetArgs[1];
-                node.config.routing[node.currentRouterProto].networks.push(net);
+                if (node.currentRouterProto === 'ospf') {
+                    const ip = targetArgs[1];
+                    const wildcard = targetArgs[2] || '0.0.0.255';
+                    const area = targetArgs[4] || '0';
+                    const netObj = { ip, wildcard, area };
+                    const existingIdx = node.config.routing.ospf.networks.findIndex(n => typeof n === 'object' ? n.ip === ip : n === ip);
+                    if (existingIdx !== -1) {
+                        node.config.routing.ospf.networks[existingIdx] = netObj;
+                    } else {
+                        node.config.routing.ospf.networks.push(netObj);
+                    }
+                } else {
+                    const net = targetArgs[1];
+                    if (!node.config.routing.rip.networks.includes(net)) {
+                        node.config.routing.rip.networks.push(net);
+                    }
+                }
                 this.computeTopologyRouting();
+                addLine("");
+            } else if (targetBaseCmd === 'version') {
+                const ver = targetArgs[1];
+                if (node.currentRouterProto === 'rip') {
+                    node.config.routing.rip.version = parseInt(ver) || 2;
+                }
+                addLine("");
+            } else if (targetBaseCmd === 'no' && targetArgs[1] === 'auto-summary') {
+                if (node.currentRouterProto === 'rip') {
+                    node.config.routing.rip.autoSummary = false;
+                }
                 addLine("");
             } else if (targetBaseCmd === 'exit') {
                 node.cliMode = 'config';
                 addLine("");
+            } else {
+                addLine("% Unrecognized command. Type '?' for help.", "out");
             }
         }
  
@@ -2407,12 +3397,32 @@ class NetworkingSim {
         div.className = 'event-item';
         div.style.padding = '8px 12px'; div.style.borderBottom = '1px solid var(--border)';
         let color = "var(--text-muted)";
-        if (type === 'success') color = 'var(--success)';
-        else if (type === 'error') color = 'var(--danger)';
-        else if (type === 'data') color = 'var(--primary)';
+        let statusText = "INFO";
+        if (type === 'success') { color = 'var(--success)'; statusText = "SUCCESS"; }
+        else if (type === 'error') { color = 'var(--danger)'; statusText = "ERROR"; }
+        else if (type === 'data') { color = 'var(--primary)'; statusText = "DATA"; }
         const timeStr = new Date().toLocaleTimeString([], { hour12: false, minute: '2-digit', second: '2-digit' });
         div.innerHTML = `<span class="event-time" style="color:${color}; font-weight:800;">[${timeStr}]</span> <span class="event-proto" style="display:none;">${(this.mode || 'net').toUpperCase()}</span> <span class="event-desc">${msg}</span>`;
         this.eventList.prepend(div);
+
+        // Add to Dynamic Observation Table
+        const obsBody = document.getElementById('observationTableBody');
+        if (obsBody) {
+            // Remove empty placeholder row if exists
+            if (obsBody.querySelector('td[colspan="4"]')) {
+                obsBody.innerHTML = '';
+            }
+            const rowCount = obsBody.children.length + 1;
+            const tr = document.createElement('tr');
+            tr.style.borderBottom = '1px solid #334155';
+            tr.innerHTML = `
+                <td style="padding:4px; font-weight:bold; color:#fbbf24;">#${rowCount}</td>
+                <td style="padding:4px; color:#cbd5e1;">${timeStr}</td>
+                <td style="padding:4px; color:#f1f5f9;">${msg}</td>
+                <td style="padding:4px; color:${color}; font-weight:bold;">${statusText}</td>
+            `;
+            obsBody.prepend(tr);
+        }
     }
 
     reset() {
@@ -2426,11 +3436,30 @@ class NetworkingSim {
         this.isRunning = true;
         this.startTime = Date.now();
         this.logEvent("Simulation Engine Started", "success");
+
+        if (this.mode === 'ospf' || this.mode === 'ls_sim') {
+            this.logEvent("OSPF Hello packets broadcasted on all interfaces", "success");
+            this.logEvent("Adjacency established with neighbors B and C", "success");
+            this.logEvent("LSDB Exchange complete: Dijkstra SPF Converged!", "info");
+        } else if (this.mode === 'bgp' || this.mode === 'path_sim') {
+            this.logEvent("BGP Peer session opened on TCP Port 179", "success");
+            this.logEvent("NLRI Update: Prefix 8.8.8.0/24 advertised by AS 65003", "info");
+            this.logEvent("AS-PATH selection complete: Best path chosen via AS 65002", "success");
+        } else if (this.mode === 'dv_sim') {
+            this.logEvent("RIPv2 Engine Initialized: Broadcasting periodic updates", "success");
+            this.logEvent("Distance Vectors exchanged: Bellman-Ford convergence complete", "info");
+        }
+
         this.runStep();
     }
 
     runStep() {
         if (!this.isRunning) return;
+        
+        // Ignore routing simulation modes so they do not spawn sliding window packets
+        const routingModes = ['dv_sim', 'ls_sim', 'ospf', 'bgp', 'path_sim'];
+        if (routingModes.includes(this.mode)) return;
+
         if (this.mode === 'stop-wait' || this.mode === 'collision' || this.mode === 'csma_ca') {
             if (this.base === this.nextSeqNum && this.packets.length === 0 && this.acks.length === 0) {
                 this.sendPacket(this.nextSeqNum);
@@ -2507,7 +3536,7 @@ class NetworkingSim {
             this.drawVlanSim();
         } else if (mode === 'dns') {
             this.drawDnsSim();
-        } else if (mode === 'dv_sim' || mode === 'ls_sim' || mode === 'path_sim') {
+        } else if (mode === 'dv_sim' || mode === 'ls_sim' || mode === 'path_sim' || mode === 'ospf' || mode === 'bgp') {
             this.drawRoutingSim();
         } else if (mode === 'gbn' && labId === 'tcp') {
             this.drawTcpTransferSim();
@@ -3070,73 +4099,95 @@ class NetworkingSim {
 
     drawRoutingSim() {
         const time = Date.now() / 1000;
+        const w = this.canvas.width;
+        const h = this.canvas.height;
+
         const nodes = [
-            { x: 150, y: 300, name: "Router A" },
-            { x: 400, y: 150, name: "Router B" },
-            { x: 400, y: 450, name: "Router C" },
-            { x: 650, y: 300, name: "Router D" }
+            { x: w * 0.2, y: h * 0.55, name: "Router A" },
+            { x: w * 0.5, y: h * 0.25, name: "Router B" },
+            { x: w * 0.5, y: h * 0.80, name: "Router C" },
+            { x: w * 0.8, y: h * 0.55, name: "Router D" }
         ];
 
         nodes.forEach(n => this.drawNode(n.x, n.y, n.name, "#64748b"));
-        this.drawCostLink(150, 300, 400, 150, "Cost: 10");
-        this.drawCostLink(150, 300, 400, 450, "Cost: 2");
-        this.drawCostLink(400, 150, 650, 300, "Cost: 5");
-        this.drawCostLink(400, 450, 650, 300, "Cost: 20");
+        this.drawCostLink(w * 0.2, h * 0.55, w * 0.5, h * 0.25, "Cost: 10");
+        this.drawCostLink(w * 0.2, h * 0.55, w * 0.5, h * 0.80, "Cost: 2");
+        this.drawCostLink(w * 0.5, h * 0.25, w * 0.8, h * 0.55, "Cost: 5");
+        this.drawCostLink(w * 0.5, h * 0.80, w * 0.8, h * 0.55, "Cost: 20");
 
-        this.ctx.fillStyle = "var(--text-main)";
+        this.ctx.fillStyle = "#0f172a";
         this.ctx.font = "bold 16px Outfit, sans-serif";
+        this.ctx.textAlign = "left";
 
         if (this.mode === 'dv_sim') {
-            this.ctx.fillText("Distance Vector (RIPv2): Iterative Bellman-Ford Table Exchange", 100, 50);
+            this.ctx.fillText("Distance Vector (RIPv2): Iterative Bellman-Ford Table Exchange", 30, 40);
             this.ctx.fillStyle = "rgba(0,0,0,0.85)";
-            this.ctx.beginPath(); this.ctx.roundRect(30, 350, 170, 110, 8); this.ctx.fill();
+            this.ctx.beginPath(); this.ctx.roundRect(30, h - 170, 170, 110, 8); this.ctx.fill();
             this.ctx.fillStyle = "white";
             this.ctx.font = "bold 10px monospace";
-            this.ctx.fillText("LOCAL RIB: ROUTER A", 45, 368);
-            this.ctx.fillText("Dest | Cost | Next", 45, 385);
-            this.ctx.fillText("───────────────────", 45, 393);
-            this.ctx.fillText("  B  |  10  |   B", 45, 408);
-            this.ctx.fillText("  C  |   2  |   C", 45, 423);
-            this.ctx.fillText("  D  |   7  |   C (Best)", 45, 438);
+            this.ctx.fillText("LOCAL RIB: ROUTER A", 45, h - 152);
+            this.ctx.fillText("Dest | Cost | Next", 45, h - 135);
+            this.ctx.fillText("───────────────────", 45, h - 127);
+            this.ctx.fillText("  B  |  10  |   B", 45, h - 112);
+            this.ctx.fillText("  C  |   2  |   C", 45, h - 97);
+            this.ctx.fillText("  D  |   7  |   C (Best)", 45, h - 82);
 
             const cycle = time % 4;
             if (cycle < 2) {
                 const p = cycle / 2;
-                const px = 150 + (400 - 150) * p, py = 300 + (450 - 300) * p;
+                const px = (w * 0.2) + ((w * 0.5) - (w * 0.2)) * p;
+                const py = (h * 0.55) + ((h * 0.80) - (h * 0.55)) * p;
                 this.ctx.fillStyle = "#3b82f6";
                 this.ctx.beginPath(); this.ctx.arc(px, py, 5, 0, Math.PI * 2); this.ctx.fill();
-                this.ctx.fillStyle = "var(--text-muted)";
+                this.ctx.fillStyle = "#475569";
                 this.ctx.font = "bold 9px monospace";
                 this.ctx.fillText("DV Update Packet", px + 10, py - 5);
             }
-        } else if (this.mode === 'ls_sim') {
-            this.ctx.fillText("Link State (OSPFv2): Dijkstra SPF (Shortest Path First) Calculation", 100, 50);
+        } else if (this.mode === 'ls_sim' || this.mode === 'ospf') {
+            this.ctx.fillText("Link State (OSPFv2): Dijkstra SPF (Shortest Path First) Calculation", 30, 40);
             this.ctx.fillStyle = "rgba(0,0,0,0.85)";
-            this.ctx.beginPath(); this.ctx.roundRect(30, 350, 180, 80, 8); this.ctx.fill();
+            this.ctx.beginPath(); this.ctx.roundRect(30, h - 140, 180, 80, 8); this.ctx.fill();
             this.ctx.fillStyle = "white";
             this.ctx.font = "bold 10px monospace";
-            this.ctx.fillText("OSPF LSDB (Global View)", 45, 370);
-            this.ctx.fillText("• A-B (10) | A-C (2)", 45, 390);
-            this.ctx.fillText("• B-D (5)  | C-D (20)", 45, 405);
+            this.ctx.fillText("OSPF LSDB (Global View)", 45, h - 120);
+            this.ctx.fillText("• A-B (10) | A-C (2)", 45, h - 100);
+            this.ctx.fillText("• B-D (5)  | C-D (20)", 45, h - 85);
             
-            // Highlight shortest path A -> C -> D
+            // Highlight shortest path A -> B -> D (Cost = 15)
             this.ctx.strokeStyle = "#10b981";
             this.ctx.lineWidth = 4;
-            this.ctx.setLineDash([5, 5]);
             this.ctx.beginPath();
-            this.ctx.moveTo(150, 300); this.ctx.lineTo(400, 450);
+            this.ctx.moveTo(w * 0.2, h * 0.55); this.ctx.lineTo(w * 0.5, h * 0.25);
+            this.ctx.lineTo(w * 0.8, h * 0.55);
             this.ctx.stroke();
-            this.ctx.setLineDash([]);
+
+            // Animate green OSPF packet
+            let progress = (time % 4) / 4;
+            let px, py;
+            if (progress < 0.5) {
+                const subP = progress * 2;
+                px = (w * 0.2) + ((w * 0.5) - (w * 0.2)) * subP;
+                py = (h * 0.55) + ((h * 0.25) - (h * 0.55)) * subP;
+            } else {
+                const subP = (progress - 0.5) * 2;
+                px = (w * 0.5) + ((w * 0.8) - (w * 0.5)) * subP;
+                py = (h * 0.25) + ((h * 0.55) - (h * 0.25)) * subP;
+            }
+            this.ctx.fillStyle = "#10b981";
+            this.ctx.beginPath(); this.ctx.arc(px, py, 8, 0, Math.PI * 2); this.ctx.fill();
+            this.ctx.fillStyle = "#0f172a";
+            this.ctx.font = "bold 10px Outfit, sans-serif";
+            this.ctx.fillText("OSPF Packet (Cost: 15)", px, py + 20);
         } else {
-            this.ctx.fillText("BGP (Path Vector): AS-Path Attribute and Policy Routing", 100, 50);
+            this.ctx.fillText("BGP (Path Vector): AS-Path Attribute and Policy Routing", 30, 40);
             this.ctx.fillStyle = "rgba(0,0,0,0.85)";
-            this.ctx.beginPath(); this.ctx.roundRect(30, 350, 200, 80, 8); this.ctx.fill();
+            this.ctx.beginPath(); this.ctx.roundRect(30, h - 140, 200, 80, 8); this.ctx.fill();
             this.ctx.fillStyle = "white";
             this.ctx.font = "bold 10px monospace";
-            this.ctx.fillText("BGP TABLE (AS 65001)", 45, 370);
-            this.ctx.fillText("Prefix: 8.8.8.0/24", 45, 390);
-            this.ctx.fillText("AS-PATH: [65002, 65003] i", 45, 405);
-            this.ctx.fillText("NEXT-HOP: 10.0.0.1", 45, 420);
+            this.ctx.fillText("BGP TABLE (AS 65001)", 45, h - 120);
+            this.ctx.fillText("Prefix: 8.8.8.0/24", 45, h - 100);
+            this.ctx.fillText("AS-PATH: [65002, 65003] i", 45, h - 85);
+            this.ctx.fillText("NEXT-HOP: 10.0.0.1", 45, h - 70);
 
             let progress = (time % 6) / 6;
             const p = progress;
@@ -3144,16 +4195,16 @@ class NetworkingSim {
             let px, py;
             if (p < 0.5) {
                 const subP = p * 2;
-                px = 150 + (400 - 150) * subP;
-                py = 300 + (150 - 300) * subP;
+                px = (w * 0.2) + ((w * 0.5) - (w * 0.2)) * subP;
+                py = (h * 0.55) + ((h * 0.25) - (h * 0.55)) * subP;
             } else {
                 const subP = (p - 0.5) * 2;
-                px = 400 + (650 - 400) * subP;
-                py = 150 + (300 - 150) * subP;
+                px = (w * 0.5) + ((w * 0.8) - (w * 0.5)) * subP;
+                py = (h * 0.25) + ((h * 0.55) - (h * 0.25)) * subP;
             }
             this.ctx.fillStyle = "#f59e0b";
             this.ctx.beginPath(); this.ctx.arc(px, py, 8, 0, Math.PI * 2); this.ctx.fill();
-            this.ctx.fillStyle = "var(--text-main)";
+            this.ctx.fillStyle = "#0f172a";
             this.ctx.font = "bold 10px Outfit, sans-serif";
             this.ctx.fillText("Best Path (Metric: 15)", px, py + 20);
         }
@@ -7985,7 +9036,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         });
 
-        // Pre-select based on active module index
         if (window.currentModuleIndex === 0) {
             diskAlgoSelect.value = 'fcfs';
         } else if (window.currentModuleIndex === 1) {
@@ -8012,33 +9062,37 @@ document.addEventListener('DOMContentLoaded', async () => {
                         
                         <div style="position:absolute; top:15%; left:10%; transform:translate(-50%,-50%); background:var(--bg-card); border:2px solid #3b82f6; padding:10px; border-radius:8px; text-align:center; z-index:2;" id="pc1">
                             <div style="font-weight:800; font-size:12px;">PC-1</div>
-                            <div style="font-size:10px; background:#3b82f6; color:#fff; padding:2px 6px; border-radius:4px; margin-top:5px;">VLAN 10</div>
+                            <div id="pc1VlanTag" style="font-size:10px; background:#3b82f6; color:#fff; padding:2px 6px; border-radius:4px; margin-top:5px;">VLAN 10</div>
                         </div>
                         <div style="position:absolute; top:65%; left:10%; transform:translate(-50%,-50%); background:var(--bg-card); border:2px solid #ef4444; padding:10px; border-radius:8px; text-align:center; z-index:2;" id="pc3">
                             <div style="font-weight:800; font-size:12px;">PC-3</div>
-                            <div style="font-size:10px; background:#ef4444; color:#fff; padding:2px 6px; border-radius:4px; margin-top:5px;">VLAN 20</div>
+                            <div id="pc3VlanTag" style="font-size:10px; background:#ef4444; color:#fff; padding:2px 6px; border-radius:4px; margin-top:5px;">VLAN 20</div>
                         </div>
                         
                         <div style="position:absolute; top:15%; left:90%; transform:translate(-50%,-50%); background:var(--bg-card); border:2px solid #3b82f6; padding:10px; border-radius:8px; text-align:center; z-index:2;" id="pc2">
                             <div style="font-weight:800; font-size:12px;">PC-2</div>
-                            <div style="font-size:10px; background:#3b82f6; color:#fff; padding:2px 6px; border-radius:4px; margin-top:5px;">VLAN 10</div>
+                            <div id="pc2VlanTag" style="font-size:10px; background:#3b82f6; color:#fff; padding:2px 6px; border-radius:4px; margin-top:5px;">VLAN 10</div>
                         </div>
                         <div style="position:absolute; top:65%; left:90%; transform:translate(-50%,-50%); background:var(--bg-card); border:2px solid #ef4444; padding:10px; border-radius:8px; text-align:center; z-index:2;" id="pc4">
                             <div style="font-weight:800; font-size:12px;">PC-4</div>
-                            <div style="font-size:10px; background:#ef4444; color:#fff; padding:2px 6px; border-radius:4px; margin-top:5px;">VLAN 20</div>
+                            <div id="pc4VlanTag" style="font-size:10px; background:#ef4444; color:#fff; padding:2px 6px; border-radius:4px; margin-top:5px;">VLAN 20</div>
                         </div>
                         
                         <div style="position:absolute; top:33%; left:50%; transform:translate(-50%,-50%); font-size:11px; font-weight:800; background:rgba(0,0,0,0.5); color:#fff; padding:4px 10px; border-radius:12px; border:1px solid #64748b;">802.1Q TRUNK</div>
                     </div>
                     
-                    <div class="theory-card" style="width:300px; margin:0; display:flex; flex-direction:column;">
-                        <h3 style="color:var(--primary); margin-bottom:15px;">Broadcast Controls</h3>
-                        <div style="display:flex; flex-direction:column; gap:10px; flex:1;">
-                            <button id="btnVlan10" class="btn-sim" style="border-color:#3b82f6; color:#3b82f6;">Broadcast from PC-1 (VLAN 10)</button>
-                            <button id="btnVlan20" class="btn-sim" style="border-color:#ef4444; color:#ef4444;">Broadcast from PC-3 (VLAN 20)</button>
-                            <button id="btnVlanCross" class="btn-sim" style="border-color:var(--warning); color:var(--warning);">Ping PC-3 from PC-1 (Cross-VLAN)</button>
+                    <div class="theory-card" style="width:320px; margin:0; display:flex; flex-direction:column;">
+                        <h3 style="color:var(--primary); margin-bottom:12px;">Port Configuration</h3>
+                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:15px;" id="vlanConfigSection">
                         </div>
-                        <div id="vlanConsole" style="background:#0b0f19; border-radius:8px; padding:10px; font-family:'JetBrains Mono', monospace; font-size:11px; color:#10b981; height:140px; overflow-y:auto; margin-top:15px; border:1px solid var(--border);">
+                        <h3 style="color:var(--primary); margin-bottom:12px;">Diagnostics</h3>
+                        <div style="display:flex; flex-direction:column; gap:8px;">
+                            <button id="btnVlanBc1" class="btn-sim primary">Broadcast from PC-1</button>
+                            <button id="btnVlanBc3" class="btn-sim primary">Broadcast from PC-3</button>
+                            <button id="btnVlanPing12" class="btn-sim">Ping PC-1 ➔ PC-2</button>
+                            <button id="btnVlanPing13" class="btn-sim">Ping PC-1 ➔ PC-3</button>
+                        </div>
+                        <div id="vlanConsole" style="background:#0b0f19; border-radius:8px; padding:10px; font-family:'JetBrains Mono', monospace; font-size:11px; color:#10b981; height:120px; overflow-y:auto; margin-top:15px; border:1px solid var(--border);">
                             > VLAN Simulator Initialized
                         </div>
                     </div>
@@ -8050,6 +9104,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         const ctx = canvas.getContext('2d');
         let aniFrame = null;
         let isSimRunning = false;
+
+        const pcVlans = { pc1: 10, pc2: 10, pc3: 20, pc4: 20 };
 
         const getPos = (id) => {
             const el = document.getElementById(id);
@@ -8072,6 +9128,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             ctx.setLineDash([]);
         };
 
+        const getVlanColor = (vlanVal) => {
+            return vlanVal === 10 ? '#3b82f6' : '#ef4444';
+        };
+
         const drawTopology = () => {
             canvas.width = canvas.parentElement.clientWidth;
             canvas.height = canvas.parentElement.clientHeight;
@@ -8081,25 +9141,64 @@ document.addEventListener('DOMContentLoaded', async () => {
             const pc1 = getPos('pc1'), pc2 = getPos('pc2');
             const pc3 = getPos('pc3'), pc4 = getPos('pc4');
 
-            drawLine(pc1, sw1, 'rgba(59,130,246,0.3)');
-            drawLine(pc3, sw1, 'rgba(239,68,68,0.3)');
-            drawLine(pc2, sw2, 'rgba(59,130,246,0.3)');
-            drawLine(pc4, sw2, 'rgba(239,68,68,0.3)');
+            drawLine(pc1, sw1, getVlanColor(pcVlans.pc1) + '4D');
+            drawLine(pc3, sw1, getVlanColor(pcVlans.pc3) + '4D');
+            drawLine(pc2, sw2, getVlanColor(pcVlans.pc2) + '4D');
+            drawLine(pc4, sw2, getVlanColor(pcVlans.pc4) + '4D');
             drawLine(sw1, sw2, 'rgba(100,116,139,0.8)', true);
         };
         
-        setTimeout(drawTopology, 50);
-        window.addEventListener('resize', () => { if(document.getElementById('vlanCanvas')) drawTopology(); });
-        
         const log = (msg, color='#10b981') => {
             const c = document.getElementById('vlanConsole');
-            c.innerHTML += `<div style="color:${color}; margin-bottom:4px;">> ${msg}</div>`;
-            c.scrollTop = c.scrollHeight;
+            if (c) {
+                c.innerHTML += `<div style="color:${color}; margin-bottom:4px;">> ${msg}</div>`;
+                c.scrollTop = c.scrollHeight;
+            }
+        };
+
+        const updateVlanUI = () => {
+            ['pc1', 'pc2', 'pc3', 'pc4'].forEach(id => {
+                const tagEl = document.getElementById(id + 'VlanTag');
+                const pcEl = document.getElementById(id);
+                if (tagEl && pcEl) {
+                    const val = pcVlans[id];
+                    tagEl.textContent = 'VLAN ' + val;
+                    tagEl.style.background = getVlanColor(val);
+                    pcEl.style.borderColor = getVlanColor(val);
+                }
+            });
+            drawTopology();
+        };
+
+        const buildInputs = () => {
+            const container = document.getElementById('vlanConfigSection');
+            if (!container) return;
+            container.innerHTML = '';
+            ['pc1', 'pc2', 'pc3', 'pc4'].forEach(id => {
+                container.innerHTML += `
+                    <div style="display:flex; flex-direction:column; gap:3px;">
+                        <label style="font-size:11px; font-weight:800; color:var(--text-muted); text-transform:uppercase;">${id.toUpperCase()} VLAN:</label>
+                        <select data-pc="${id}" class="sim-select" style="padding:4px; font-size:12px;">
+                            <option value="10" ${pcVlans[id] === 10 ? 'selected' : ''}>VLAN 10</option>
+                            <option value="20" ${pcVlans[id] === 20 ? 'selected' : ''}>VLAN 20</option>
+                        </select>
+                    </div>
+                `;
+            });
+
+            container.querySelectorAll('select').forEach(sel => {
+                sel.addEventListener('change', (e) => {
+                    const pc = e.target.dataset.pc;
+                    pcVlans[pc] = parseInt(e.target.value);
+                    updateVlanUI();
+                    log(`${pc.toUpperCase()} reassigned to VLAN ${pcVlans[pc]}`, '#fff');
+                });
+            });
         };
 
         const animatePacket = (path, color, tag, onComplete) => {
             let start = performance.now();
-            const duration = 1200; 
+            const duration = 1000; 
             
             const animate = (time) => {
                 if(!document.getElementById('vlanCanvas')) return;
@@ -8107,7 +9206,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if(progress > 1) progress = 1;
                 
                 drawTopology();
-                
                 const x = path[0].x + (path[1].x - path[0].x) * progress;
                 const y = path[0].y + (path[1].y - path[0].y) * progress;
                 
@@ -8137,85 +9235,125 @@ document.addEventListener('DOMContentLoaded', async () => {
             aniFrame = requestAnimationFrame(animate);
         };
 
-        const runVlanBroadcast = (vlanId) => {
+        const runVlanBroadcast = (srcPcId) => {
             if(isSimRunning) return;
             isSimRunning = true;
             
             const sw1 = getPos('sw1'), sw2 = getPos('sw2');
-            const pc1 = getPos('pc1'), pc2 = getPos('pc2');
-            const pc3 = getPos('pc3'), pc4 = getPos('pc4');
-
-            const isVlan10 = vlanId === 10;
-            const src = isVlan10 ? pc1 : pc3;
-            const dst = isVlan10 ? pc2 : pc4;
-            const dropped = isVlan10 ? pc3 : pc1;
-            const color = isVlan10 ? '#3b82f6' : '#ef4444';
+            const srcPos = getPos(srcPcId);
+            const vlanId = pcVlans[srcPcId];
+            const color = getVlanColor(vlanId);
             
-            document.querySelectorAll('#btnVlan10, #btnVlan20, #btnVlanCross').forEach(b => b.disabled = true);
-            log(`PC-${isVlan10?1:3} sending broadcast frame...`, '#fff');
+            document.querySelectorAll('button, select').forEach(b => b.disabled = true);
+            log(`${srcPcId.toUpperCase()} (VLAN ${vlanId}) broadcasting frame...`, '#fff');
             
-            animatePacket([src, sw1], color, null, () => {
+            animatePacket([srcPos, sw1], color, null, () => {
                 log(`SW-1 received frame. Attaching 802.1Q Tag: [VLAN ${vlanId}]`, '#f59e0b');
                 
-                ctx.fillStyle = 'rgba(239,68,68,0.8)';
-                ctx.font = 'bold 20px Outfit, sans-serif';
-                ctx.fillText('X', dropped.x + 30, dropped.y);
-                log(`SW-1 drops frame for PC-${isVlan10?3:1} (Different VLAN)`, '#ef4444');
+                const otherLocalPc = srcPcId === 'pc1' ? 'pc3' : 'pc1';
+                const otherLocalPos = getPos(otherLocalPc);
+                
+                if (pcVlans[otherLocalPc] === vlanId) {
+                    log(`SW-1 forwards copy to ${otherLocalPc.toUpperCase()} (Match)`, '#10b981');
+                    animatePacket([sw1, otherLocalPos], color, null);
+                } else {
+                    ctx.fillStyle = 'rgba(239,68,68,0.8)';
+                    ctx.font = 'bold 20px Outfit, sans-serif';
+                    ctx.fillText('X', otherLocalPos.x + 30, otherLocalPos.y);
+                    log(`SW-1 drops frame for ${otherLocalPc.toUpperCase()} (VLAN Mismatch)`, '#ef4444');
+                }
                 
                 setTimeout(() => {
                     log(`SW-1 forwarding tagged frame across TRUNK...`);
                     animatePacket([sw1, sw2], color, `VLAN ${vlanId}`, () => {
                         log(`SW-2 received frame. Stripping 802.1Q Tag.`, '#f59e0b');
                         
-                        const dropped2 = isVlan10 ? pc4 : pc2;
-                        ctx.fillStyle = 'rgba(239,68,68,0.8)';
-                        ctx.fillText('X', dropped2.x - 30, dropped2.y);
-                        log(`SW-2 drops frame for PC-${isVlan10?4:2} (Different VLAN)`, '#ef4444');
-                        
-                        setTimeout(() => {
-                            log(`SW-2 forwarding untagged frame to PC-${isVlan10?2:4}...`);
-                            animatePacket([sw2, dst], color, null, () => {
-                                log(`Broadcast successfully reached PC-${isVlan10?2:4} (VLAN ${vlanId})!`, '#3b82f6');
-                                setTimeout(()=> {
-                                    drawTopology();
-                                    isSimRunning = false;
-                                    document.querySelectorAll('#btnVlan10, #btnVlan20, #btnVlanCross').forEach(b => b.disabled = false);
-                                }, 1500);
-                            });
-                        }, 1000);
+                        const dests = ['pc2', 'pc4'];
+                        dests.forEach(destId => {
+                            const destPos = getPos(destId);
+                            if (pcVlans[destId] === vlanId) {
+                                log(`SW-2 forwards untagged copy to ${destId.toUpperCase()} (Match)`, '#10b981');
+                                animatePacket([sw2, destPos], color, null, () => {
+                                    log(`${destId.toUpperCase()} received Broadcast.`, '#3b82f6');
+                                });
+                            } else {
+                                ctx.fillStyle = 'rgba(239,68,68,0.8)';
+                                ctx.font = 'bold 20px Outfit, sans-serif';
+                                ctx.fillText('X', destPos.x - 30, destPos.y);
+                                log(`SW-2 drops frame for ${destId.toUpperCase()} (VLAN Mismatch)`, '#ef4444');
+                            }
+                        });
+
+                        setTimeout(()=> {
+                            drawTopology();
+                            isSimRunning = false;
+                            document.querySelectorAll('button, select').forEach(b => b.disabled = false);
+                        }, 2000);
                     });
                 }, 1000);
             });
         };
 
-        const runCrossVlanPing = () => {
+        const runPing = (src, dest) => {
             if(isSimRunning) return;
             isSimRunning = true;
-            const sw1 = getPos('sw1'), pc1 = getPos('pc1');
             
-            document.querySelectorAll('#btnVlan10, #btnVlan20, #btnVlanCross').forEach(b => b.disabled = true);
-            log(`PC-1 (VLAN 10) pinging PC-3 (VLAN 20)...`, '#fff');
+            const srcPos = getPos(src);
+            const destPos = getPos(dest);
+            const sw1 = getPos('sw1'), sw2 = getPos('sw2');
             
-            animatePacket([pc1, sw1], '#3b82f6', null, () => {
-                log(`SW-1 checking MAC table and VLAN assignments...`, '#f59e0b');
-                setTimeout(() => {
-                    ctx.fillStyle = 'rgba(239,68,68,0.8)';
-                    ctx.font = 'bold 24px Outfit, sans-serif';
-                    ctx.fillText('DROP', sw1.x, sw1.y + 40);
-                    log(`SW-1 DROP: Cannot route between VLANs without a Router!`, '#ef4444');
-                    
-                    setTimeout(()=> {
-                        drawTopology();
-                        isSimRunning = false;
-                        document.querySelectorAll('#btnVlan10, #btnVlan20, #btnVlanCross').forEach(b => b.disabled = false);
-                    }, 2000);
-                }, 1000);
+            document.querySelectorAll('button, select').forEach(b => b.disabled = true);
+            log(`Ping: ${src.toUpperCase()} (VLAN ${pcVlans[src]}) ➔ ${dest.toUpperCase()} (VLAN ${pcVlans[dest]})...`, '#fff');
+            
+            animatePacket([srcPos, sw1], getVlanColor(pcVlans[src]), null, () => {
+                if (pcVlans[src] !== pcVlans[dest]) {
+                    log(`SW-1 checking VLAN mappings: Mismatch!`, '#f59e0b');
+                    setTimeout(() => {
+                        ctx.fillStyle = 'rgba(239,68,68,0.8)';
+                        ctx.font = 'bold 24px Outfit, sans-serif';
+                        ctx.fillText('DROP', sw1.x, sw1.y + 40);
+                        log(`SW-1 DROP: Cannot route between VLANs without a Layer 3 Device!`, '#ef4444');
+                        setTimeout(() => {
+                            drawTopology();
+                            isSimRunning = false;
+                            document.querySelectorAll('button, select').forEach(b => b.disabled = false);
+                        }, 2000);
+                    }, 1000);
+                } else {
+                    log(`SW-1 tag-encapsulates frame and forwards across TRUNK...`, '#10b981');
+                    animatePacket([sw1, sw2], getVlanColor(pcVlans[src]), `VLAN ${pcVlans[src]}`, () => {
+                        log(`SW-2 received frame. Stripping Tag. Forwards to ${dest.toUpperCase()}`, '#10b981');
+                        animatePacket([sw2, destPos], getVlanColor(pcVlans[src]), null, () => {
+                            log(`Ping Request reached ${dest.toUpperCase()}! Sending Reply...`, '#3b82f6');
+                            animatePacket([destPos, sw2], getVlanColor(pcVlans[src]), null, () => {
+                                animatePacket([sw2, sw1], getVlanColor(pcVlans[src]), `VLAN ${pcVlans[src]}`, () => {
+                                    animatePacket([sw1, srcPos], getVlanColor(pcVlans[src]), null, () => {
+                                        log(`Ping Reply received! RTT < 1ms. Success!`, '#10b981');
+                                        setTimeout(() => {
+                                            drawTopology();
+                                            isSimRunning = false;
+                                            document.querySelectorAll('button, select').forEach(b => b.disabled = false);
+                                        }, 1500);
+                                    });
+                                });
+                            });
+                        });
+                    });
+                }
             });
         };
 
-        document.getElementById('btnVlan10').addEventListener('click', () => runVlanBroadcast(10));
-        document.getElementById('btnVlan20').addEventListener('click', () => runVlanBroadcast(20));
-        document.getElementById('btnVlanCross').addEventListener('click', runCrossVlanPing);
+        setTimeout(() => {
+            buildInputs();
+            updateVlanUI();
+        }, 50);
+
+        window.addEventListener('resize', () => { if(document.getElementById('vlanCanvas')) drawTopology(); });
+
+        document.getElementById('btnVlanBc1').addEventListener('click', () => runVlanBroadcast('pc1'));
+        document.getElementById('btnVlanBc3').addEventListener('click', () => runVlanBroadcast('pc3'));
+        document.getElementById('btnVlanPing12').addEventListener('click', () => runPing('pc1', 'pc2'));
+        document.getElementById('btnVlanPing13').addEventListener('click', () => runPing('pc1', 'pc3'));
     };
 
     const initDnsSim = (container) => {
@@ -8248,20 +9386,26 @@ document.addEventListener('DOMContentLoaded', async () => {
                         <div style="position:absolute; top:50%; left:85%; transform:translate(-50%,-50%); background:var(--bg-card); border:2px solid #10b981; padding:10px; border-radius:8px; text-align:center; z-index:2;" id="dnsTld">
                             <div style="font-size:24px;">🗄️</div>
                             <div style="font-weight:800; font-size:11px;">TLD Server</div>
-                            <div style="font-size:9px; color:var(--text-muted);">.com</div>
+                            <div id="dnsTldLabel" style="font-size:9px; color:var(--text-muted);">.com</div>
                         </div>
                         
                         <div style="position:absolute; top:85%; left:85%; transform:translate(-50%,-50%); background:var(--bg-card); border:2px solid #8b5cf6; padding:10px; border-radius:8px; text-align:center; z-index:2;" id="dnsAuth">
                             <div style="font-size:24px;">🗄️</div>
                             <div style="font-weight:800; font-size:11px;">Auth Server</div>
-                            <div style="font-size:9px; color:var(--text-muted);">example.com</div>
+                            <div id="dnsAuthLabel" style="font-size:9px; color:var(--text-muted);">example.com</div>
                         </div>
                     </div>
                     
                     <div class="theory-card" style="width:300px; margin:0; display:flex; flex-direction:column;">
                         <h3 style="color:var(--primary); margin-bottom:15px;">DNS Query</h3>
                         <div style="display:flex; flex-direction:column; gap:10px;">
-                            <input type="text" id="dnsQueryHost" class="sim-select" value="www.example.com" style="width:100%; font-family:'JetBrains Mono', monospace;" readonly>
+                            <select id="dnsQueryHost" class="sim-select" style="width:100%; font-family:'JetBrains Mono', monospace; padding:8px;">
+                                <option value="www.example.com" data-tld=".com" data-auth="example.com" data-ip="93.184.216.34">www.example.com (93.184.216.34)</option>
+                                <option value="en.wikipedia.org" data-tld=".org" data-auth="wikipedia.org" data-ip="198.35.26.96">en.wikipedia.org (198.35.26.96)</option>
+                                <option value="api.github.com" data-tld=".com" data-auth="github.com" data-ip="140.82.112.5">api.github.com (140.82.112.5)</option>
+                                <option value="root.ietf.org" data-tld=".org" data-auth="ietf.org" data-ip="4.31.198.44">root.ietf.org (4.31.198.44)</option>
+                                <option value="www.google.net" data-tld=".net" data-auth="google.net" data-ip="172.217.16.132">www.google.net (172.217.16.132)</option>
+                            </select>
                             <button id="btnDnsIterative" class="btn-sim" style="border-color:#f59e0b; color:#f59e0b;">Run Iterative Query</button>
                             <button id="btnDnsRecursive" class="btn-sim" style="border-color:#3b82f6; color:#3b82f6;">Run Recursive Query</button>
                         </div>
@@ -8315,6 +9459,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         setTimeout(drawTopology, 50);
         window.addEventListener('resize', () => { if(document.getElementById('dnsCanvas')) drawTopology(); });
+
+        const selectEl = document.getElementById('dnsQueryHost');
+        selectEl.addEventListener('change', () => {
+            const opt = selectEl.options[selectEl.selectedIndex];
+            document.getElementById('dnsTldLabel').textContent = opt.dataset.tld;
+            document.getElementById('dnsAuthLabel').textContent = opt.dataset.auth;
+        });
         
         const log = (msg, color='#10b981') => {
             const c = document.getElementById('dnsConsole');
@@ -8362,11 +9513,18 @@ document.addEventListener('DOMContentLoaded', async () => {
             if(isSimRunning) return;
             isSimRunning = true;
             document.getElementById('dnsConsole').innerHTML = '';
-            log(`Starting ${type.toUpperCase()} resolution for www.example.com...`, '#fff');
+
+            const opt = selectEl.options[selectEl.selectedIndex];
+            const host = opt.value;
+            const tld = opt.dataset.tld;
+            const auth = opt.dataset.auth;
+            const ip = opt.dataset.ip;
+
+            log(`Starting ${type.toUpperCase()} resolution for ${host}...`, '#fff');
             
             const c = getPos('dnsClient'), r = getPos('dnsResolver');
             const rt = getPos('dnsRoot'), tl = getPos('dnsTld'), au = getPos('dnsAuth');
-            document.querySelectorAll('#btnDnsIterative, #btnDnsRecursive').forEach(b => b.disabled = true);
+            document.querySelectorAll('#btnDnsIterative, #btnDnsRecursive, #dnsQueryHost').forEach(b => b.disabled = true);
             
             animatePacket([c, r], '#3b82f6', 'Query', false, () => {
                 log('Resolver checks cache: MISS.', '#f59e0b');
@@ -8374,26 +9532,26 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if(type === 'iterative') {
                     // Iterative
                     setTimeout(() => {
-                        log('Resolver -> Root: Where is .com?', '#3b82f6');
+                        log(`Resolver -> Root: Where is ${tld}?`, '#3b82f6');
                         animatePacket([r, rt], '#ef4444', '?', false, () => {
-                            log('Root -> Resolver: Try TLD server.', '#10b981');
+                            log(`Root -> Resolver: Try TLD server for ${tld}.`, '#10b981');
                             animatePacket([rt, r], '#ef4444', 'TLD IP', true, () => {
                                 setTimeout(() => {
-                                    log('Resolver -> TLD: Where is example.com?', '#3b82f6');
+                                    log(`Resolver -> TLD: Where is ${auth}?`, '#3b82f6');
                                     animatePacket([r, tl], '#10b981', '?', false, () => {
-                                        log('TLD -> Resolver: Try Auth server.', '#10b981');
+                                        log(`TLD -> Resolver: Try Auth server for ${auth}.`, '#10b981');
                                         animatePacket([tl, r], '#10b981', 'Auth IP', true, () => {
                                             setTimeout(() => {
-                                                log('Resolver -> Auth: What is IP of www.example.com?', '#3b82f6');
+                                                log(`Resolver -> Auth: What is IP of ${host}?`, '#3b82f6');
                                                 animatePacket([r, au], '#8b5cf6', '?', false, () => {
-                                                    log('Auth -> Resolver: IP is 93.184.216.34', '#10b981');
+                                                    log(`Auth -> Resolver: IP is ${ip}`, '#10b981');
                                                     animatePacket([au, r], '#8b5cf6', 'A Rec', true, () => {
                                                         setTimeout(() => {
                                                             log('Resolver caches result and replies to Client.', '#f59e0b');
                                                             animatePacket([r, c], '#3b82f6', 'IP Ans', true, () => {
-                                                                log('Client successfully resolved www.example.com!', '#fff');
+                                                                log(`Client successfully resolved ${host} to ${ip}!`, '#fff');
                                                                 isSimRunning = false;
-                                                                document.querySelectorAll('#btnDnsIterative, #btnDnsRecursive').forEach(b => b.disabled = false);
+                                                                document.querySelectorAll('#btnDnsIterative, #btnDnsRecursive, #dnsQueryHost').forEach(b => b.disabled = false);
                                                             });
                                                         }, 500);
                                                     });
@@ -8408,13 +9566,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                 } else {
                     // Recursive
                     setTimeout(() => {
-                        log('Resolver -> Root: Resolve www.example.com', '#3b82f6');
+                        log(`Resolver -> Root: Resolve ${host}`, '#3b82f6');
                         animatePacket([r, rt], '#ef4444', 'Query', false, () => {
-                            log('Root -> TLD: Resolve www.example.com', '#3b82f6');
+                            log(`Root -> TLD: Resolve ${host}`, '#3b82f6');
                             animatePacket([rt, tl], '#10b981', 'Query', false, () => {
-                                log('TLD -> Auth: Resolve www.example.com', '#3b82f6');
+                                log(`TLD -> Auth: Resolve ${host}`, '#3b82f6');
                                 animatePacket([tl, au], '#8b5cf6', 'Query', false, () => {
-                                    log('Auth -> TLD: IP is 93.184.216.34', '#10b981');
+                                    log(`Auth -> TLD: IP is ${ip}`, '#10b981');
                                     animatePacket([au, tl], '#8b5cf6', 'A Rec', true, () => {
                                         log('TLD -> Root: Forwarding Answer', '#10b981');
                                         animatePacket([tl, rt], '#10b981', 'A Rec', true, () => {
@@ -8423,9 +9581,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                                                 setTimeout(() => {
                                                     log('Resolver caches result and replies to Client.', '#f59e0b');
                                                     animatePacket([r, c], '#3b82f6', 'IP Ans', true, () => {
-                                                        log('Client successfully resolved www.example.com!', '#fff');
+                                                        log(`Client successfully resolved ${host} to ${ip}!`, '#fff');
                                                         isSimRunning = false;
-                                                        document.querySelectorAll('#btnDnsIterative, #btnDnsRecursive').forEach(b => b.disabled = false);
+                                                        document.querySelectorAll('#btnDnsIterative, #btnDnsRecursive, #dnsQueryHost').forEach(b => b.disabled = false);
                                                     });
                                                 }, 500);
                                             });
@@ -8475,6 +9633,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                             <button id="btnRouteStep" class="btn-sim primary">Execute Next Step</button>
                             <button id="btnRouteReset" class="btn-sim">Reset Topology</button>
                         </div>
+
+                        <h3 style="color:var(--primary); margin-top:20px; margin-bottom:10px; font-size:14px;">Configure Link Costs</h3>
+                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;" id="linkCostInputs">
+                            <!-- Populated Dynamically -->
+                        </div>
                         
                         <h3 style="color:var(--primary); margin-top:20px; margin-bottom:10px; font-size:14px;">Router A Routing Table</h3>
                         <table class="sim-table" style="width:100%; border-collapse:collapse; font-family:'JetBrains Mono', monospace; font-size:12px; text-align:left;">
@@ -8497,6 +9660,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const canvas = document.getElementById('routingCanvas');
         const ctx = canvas.getContext('2d');
         let step = 0;
+        let simSteps = [];
 
         // Topology definition
         const nodes = ['A', 'B', 'C', 'D', 'E'];
@@ -8573,6 +9737,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const renderTableA = (data) => {
             const tbody = document.getElementById('routingTableA');
+            if (!tbody) return;
             tbody.innerHTML = '';
             nodes.forEach(n => {
                 if(n==='A') return;
@@ -8587,97 +9752,202 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
         };
 
-        const resetSim = () => {
-            step = 0;
-            drawTopology();
-            renderTableA({});
-            document.getElementById('btnRouteStep').disabled = false;
-            document.getElementById('btnRouteStep').textContent = 'Execute Next Step';
+        const calculateSteps = (algo) => {
+            simSteps = [];
+            
+            if (algo === 'ls') {
+                // Dijkstra
+                let queue = ['A', 'B', 'C', 'D', 'E'];
+                let dist = {A: 0, B: Infinity, C: Infinity, D: Infinity, E: Infinity};
+                let prev = {A: null, B: null, C: null, D: null, E: null};
+                let visited = new Set();
+
+                for (let stepIdx = 0; stepIdx < 5; stepIdx++) {
+                    let u = null;
+                    let minDist = Infinity;
+                    queue.forEach(n => {
+                        if (dist[n] < minDist) {
+                            minDist = dist[n];
+                            u = n;
+                        }
+                    });
+                    
+                    if (!u) break;
+                    
+                    queue = queue.filter(n => n !== u);
+                    visited.add(u);
+                    
+                    edges.forEach(e => {
+                        if (e.n1 === u || e.n2 === u) {
+                            const v = e.n1 === u ? e.n2 : e.n1;
+                            if (!visited.has(v)) {
+                                const alt = dist[u] + e.cost;
+                                if (alt < dist[v]) {
+                                    dist[v] = alt;
+                                    prev[v] = u;
+                                }
+                            }
+                        }
+                    });
+                    
+                    let activeEdges = [];
+                    let activeNodes = Array.from(visited);
+                    Object.keys(prev).forEach(nodeId => {
+                        if (prev[nodeId] && visited.has(nodeId)) {
+                            activeEdges.push({n1: prev[nodeId], n2: nodeId});
+                        }
+                    });
+                    
+                    edges.forEach(e => {
+                        if ((e.n1 === u && !visited.has(e.n2)) || (e.n2 === u && !visited.has(e.n1))) {
+                            if (!activeEdges.some(ae => (ae.n1 === e.n1 && ae.n2 === e.n2) || (ae.n1 === e.n2 && ae.n2 === e.n1))) {
+                                activeEdges.push(e);
+                            }
+                        }
+                    });
+
+                    let table = {};
+                    ['B', 'C', 'D', 'E'].forEach(n => {
+                        if (dist[n] === Infinity) {
+                            table[n] = {cost: '∞', hop: '-'};
+                        } else {
+                            let curr = n;
+                            let hop = '-';
+                            while (curr && curr !== 'A') {
+                                hop = curr;
+                                curr = prev[curr];
+                            }
+                            table[n] = {cost: dist[n], hop: hop};
+                        }
+                    });
+                    
+                    simSteps.push({ activeNodes, activeEdges, table });
+                }
+            } else {
+                // Bellman-Ford
+                let dist = {A: 0, B: Infinity, C: Infinity, D: Infinity, E: Infinity};
+                let prev = {A: null, B: null, C: null, D: null, E: null};
+
+                for (let round = 1; round <= 4; round++) {
+                    let updated = false;
+                    let activeEdges = [];
+                    let activeNodes = ['A'];
+                    
+                    edges.forEach(e => {
+                        const u = e.n1;
+                        const v = e.n2;
+                        
+                        if (dist[u] !== Infinity && dist[u] + e.cost < dist[v]) {
+                            dist[v] = dist[u] + e.cost;
+                            prev[v] = u;
+                            updated = true;
+                            activeEdges.push(e);
+                            if (!activeNodes.includes(v)) activeNodes.push(v);
+                        }
+                        if (dist[v] !== Infinity && dist[v] + e.cost < dist[u]) {
+                            dist[u] = dist[v] + e.cost;
+                            prev[u] = v;
+                            updated = true;
+                            activeEdges.push(e);
+                            if (!activeNodes.includes(u)) activeNodes.push(u);
+                        }
+                    });
+                    
+                    let table = {};
+                    ['B', 'C', 'D', 'E'].forEach(n => {
+                        if (dist[n] === Infinity) {
+                            table[n] = {cost: '∞', hop: '-'};
+                        } else {
+                            let curr = n;
+                            let hop = '-';
+                            while (curr && curr !== 'A') {
+                                hop = curr;
+                                curr = prev[curr];
+                            }
+                            table[n] = {cost: dist[n], hop: hop};
+                        }
+                    });
+                    
+                    simSteps.push({ activeNodes, activeEdges, table });
+                    if (!updated) break;
+                }
+            }
         };
 
-        setTimeout(resetSim, 50);
+        const resetSim = () => {
+            step = 0;
+            calculateSteps(document.getElementById('routeAlgoSelect').value);
+            drawTopology();
+            renderTableA({
+                B: {cost: '∞', hop: '-'},
+                C: {cost: '∞', hop: '-'},
+                D: {cost: '∞', hop: '-'},
+                E: {cost: '∞', hop: '-'}
+            });
+            const btn = document.getElementById('btnRouteStep');
+            if (btn) {
+                btn.disabled = false;
+                btn.textContent = 'Execute Next Step';
+            }
+        };
+
+        const buildLinkInputs = () => {
+            const container = document.getElementById('linkCostInputs');
+            if (!container) return;
+            container.innerHTML = '';
+            edges.forEach((e, idx) => {
+                container.innerHTML += `
+                    <div style="display:flex; align-items:center; gap:5px; font-size:12px;">
+                        <span style="color:var(--text-muted); font-weight:800;">${e.n1}-${e.n2}:</span>
+                        <input type="number" min="1" max="99" value="${e.cost}" data-index="${idx}" style="width:40px; padding:3px; background:var(--bg-page); border:1px solid var(--border); color:#fff; border-radius:4px; text-align:center;">
+                    </div>
+                `;
+            });
+            
+            container.querySelectorAll('input').forEach(input => {
+                input.addEventListener('change', (ev) => {
+                    const val = Math.max(1, parseInt(ev.target.value) || 1);
+                    ev.target.value = val;
+                    const idx = parseInt(ev.target.dataset.index);
+                    edges[idx].cost = val;
+                    resetSim();
+                });
+            });
+        };
+
+        setTimeout(() => {
+            buildLinkInputs();
+            resetSim();
+        }, 50);
+
         window.addEventListener('resize', () => { if(document.getElementById('routingCanvas')) drawTopology(); });
 
-        document.getElementById('btnRouteReset').addEventListener('click', resetSim);
-        document.getElementById('routeAlgoSelect').addEventListener('change', resetSim);
+        document.getElementById('btnRouteReset').addEventListener('click', () => {
+            resetSim();
+        });
+        document.getElementById('routeAlgoSelect').addEventListener('change', () => {
+            resetSim();
+        });
 
         document.getElementById('btnRouteStep').addEventListener('click', () => {
             const algo = document.getElementById('routeAlgoSelect').value;
-            step++;
+            if (simSteps.length === 0) {
+                calculateSteps(algo);
+            }
             
-            if(algo === 'dv') {
-                if(step === 1) {
-                    drawTopology(['A'], [{n1:'A',n2:'B'}, {n1:'A',n2:'C'}]);
-                    renderTableA({
-                        B: {cost: 2, hop: 'B'},
-                        C: {cost: 5, hop: 'C'}
-                    });
-                } else if(step === 2) {
-                    drawTopology(['A', 'B'], [{n1:'B',n2:'C'}, {n1:'B',n2:'D'}]);
-                    renderTableA({
-                        B: {cost: 2, hop: 'B'},
-                        C: {cost: 5, hop: 'C'}, // A->B->C is 2+3=5, same cost
-                        D: {cost: 3, hop: 'B'}  // A->B->D is 2+1=3
-                    });
-                } else if(step === 3) {
-                    drawTopology(['A', 'D'], [{n1:'D',n2:'E'}, {n1:'D',n2:'C'}]);
-                    renderTableA({
-                        B: {cost: 2, hop: 'B'},
-                        C: {cost: 5, hop: 'C'}, // A->B->D->C is 2+1+2=5, same cost
-                        D: {cost: 3, hop: 'B'},
-                        E: {cost: 7, hop: 'B'}  // A->B->D->E is 2+1+4=7
-                    });
-                } else if(step === 4) {
-                    drawTopology(['A', 'C'], [{n1:'C',n2:'E'}]);
-                    renderTableA({
-                        B: {cost: 2, hop: 'B'},
-                        C: {cost: 5, hop: 'C'},
-                        D: {cost: 3, hop: 'B'},
-                        E: {cost: 7, hop: 'B'} // A->C->E is 5+2=7, same cost
-                    });
-                    document.getElementById('btnRouteStep').disabled = true;
-                    document.getElementById('btnRouteStep').textContent = 'Converged';
+            if (step < simSteps.length) {
+                const current = simSteps[step];
+                drawTopology(current.activeNodes, current.activeEdges);
+                renderTableA(current.table);
+                
+                const btn = document.getElementById('btnRouteStep');
+                if (btn) {
+                    btn.textContent = step === simSteps.length - 1 ? 'Converged' : 'Execute Next Step';
+                    if (step === simSteps.length - 1) {
+                        btn.disabled = true;
+                    }
                 }
-            } else {
-                // Link State (Dijkstra)
-                if(step === 1) {
-                    drawTopology(['A'], [{n1:'A',n2:'B'}, {n1:'A',n2:'C'}]);
-                    renderTableA({
-                        B: {cost: 2, hop: 'B'},
-                        C: {cost: 5, hop: 'C'}
-                    });
-                } else if(step === 2) {
-                    // Pick B (min cost 2)
-                    drawTopology(['A', 'B'], [{n1:'A',n2:'B'}, {n1:'B',n2:'D'}, {n1:'B',n2:'C'}]);
-                    renderTableA({
-                        B: {cost: 2, hop: 'B'},
-                        C: {cost: 5, hop: 'C'},
-                        D: {cost: 3, hop: 'B'}
-                    });
-                } else if(step === 3) {
-                    // Pick D (min cost 3)
-                    drawTopology(['A', 'B', 'D'], [{n1:'A',n2:'B'}, {n1:'B',n2:'D'}, {n1:'D',n2:'E'}, {n1:'D',n2:'C'}]);
-                    renderTableA({
-                        B: {cost: 2, hop: 'B'},
-                        C: {cost: 5, hop: 'C'}, 
-                        D: {cost: 3, hop: 'B'},
-                        E: {cost: 7, hop: 'B'}
-                    });
-                } else if(step === 4) {
-                    // Pick C (min cost 5)
-                    drawTopology(['A', 'B', 'D', 'C'], [{n1:'A',n2:'B'}, {n1:'B',n2:'D'}, {n1:'A',n2:'C'}, {n1:'C',n2:'E'}]);
-                    renderTableA({
-                        B: {cost: 2, hop: 'B'},
-                        C: {cost: 5, hop: 'C'},
-                        D: {cost: 3, hop: 'B'},
-                        E: {cost: 7, hop: 'B'}
-                    });
-                } else if(step === 5) {
-                    // Shortest Path Tree
-                    drawTopology(['A', 'B', 'C', 'D', 'E'], [{n1:'A',n2:'B'}, {n1:'B',n2:'D'}, {n1:'A',n2:'C'}, {n1:'C',n2:'E'}]);
-                    document.getElementById('btnRouteStep').disabled = true;
-                    document.getElementById('btnRouteStep').textContent = 'Shortest Path Tree Built';
-                }
+                step++;
             }
         });
     };
@@ -8689,7 +9959,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             </div>
             <div class="sim-workspace" style="padding:20px; gap:20px; flex-direction:column; overflow-y:auto; overflow-x:hidden;">
                 <div style="display:flex; gap:20px; flex-wrap:wrap;">
-                    <div class="theory-card" style="flex:1.5; min-width:400px; margin:0; position:relative; min-height:350px; overflow:hidden;">
+                    <div class="theory-card" style="flex:1.5; min-width:400px; margin:0; position:relative; min-height:400px; overflow:hidden;">
                         <canvas id="transCanvas" style="position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none;"></canvas>
                         
                         <div style="position:absolute; top:50%; left:20%; transform:translate(-50%,-50%); background:var(--bg-card); border:2px solid #3b82f6; padding:15px; border-radius:12px; text-align:center; z-index:2; min-width:100px;" id="transClient">
@@ -8713,10 +9983,25 @@ document.addEventListener('DOMContentLoaded', async () => {
                                 <option value="tcp">TCP (Reliable, Connection-Oriented)</option>
                                 <option value="udp">UDP (Unreliable, Connectionless)</option>
                             </select>
+                            
+                            <label style="font-size:12px; font-weight:800; color:var(--text-muted);">Window Size (TCP Only):</label>
+                            <select id="transWindow" class="sim-select" style="width:100%;">
+                                <option value="1">1 (Stop & Wait)</option>
+                                <option value="3" selected>3 Packets</option>
+                                <option value="5">5 Packets</option>
+                            </select>
+
+                            <label style="font-size:12px; font-weight:800; color:var(--text-muted);">Packet Loss Rate:</label>
+                            <select id="transLoss" class="sim-select" style="width:100%;">
+                                <option value="0">0% (Perfect Link)</option>
+                                <option value="20" selected>20% Loss Rate</option>
+                                <option value="40">40% Loss Rate</option>
+                            </select>
+
                             <button id="btnTransStart" class="btn-sim primary">Start Transmission</button>
                         </div>
                         
-                        <div id="transConsole" style="background:#0b0f19; border-radius:8px; padding:10px; font-family:'JetBrains Mono', monospace; font-size:11px; color:#10b981; height:180px; overflow-y:auto; margin-top:20px; border:1px solid var(--border);">
+                        <div id="transConsole" style="background:#0b0f19; border-radius:8px; padding:10px; font-family:'JetBrains Mono', monospace; font-size:11px; color:#10b981; height:150px; overflow-y:auto; margin-top:20px; border:1px solid var(--border);">
                             > Transport Simulator Ready
                         </div>
                     </div>
@@ -8760,128 +10045,118 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         const log = (msg, color='#10b981') => {
             const c = document.getElementById('transConsole');
-            c.innerHTML += `<div style="color:${color}; margin-bottom:4px;">> ${msg}</div>`;
-            c.scrollTop = c.scrollHeight;
+            if (c) {
+                c.innerHTML += `<div style="color:${color}; margin-bottom:4px;">> ${msg}</div>`;
+                c.scrollTop = c.scrollHeight;
+            }
         };
 
         const setTcpState = (host, state, color) => {
             const el = document.getElementById(host === 'A' ? 'tcpStateA' : 'tcpStateB');
-            el.textContent = state;
-            el.style.color = color;
+            if (el) {
+                el.textContent = state;
+                el.style.color = color;
+            }
         };
 
-        const animatePacket = (from, to, color, tag, duration, yOffset=0, onComplete) => {
-            let start = performance.now();
+        let activePackets = [];
+
+        const animateLoop = () => {
+            if(!document.getElementById('transCanvas')) return;
+            drawTopology();
             
-            const animate = (time) => {
-                if(!document.getElementById('transCanvas')) return;
-                let progress = (time - start) / duration;
+            const now = performance.now();
+            const client = getPos('transClient');
+            const server = getPos('transServer');
+
+            activePackets = activePackets.filter(p => {
+                const elapsed = now - p.startTime;
+                let progress = elapsed / p.duration;
                 if(progress > 1) progress = 1;
-                
-                // Don't clear canvas to allow multiple packets (UDP stream)
-                // Just clear this packet's previous position if we wanted to, but we'll re-draw full topology for simplicity in TCP. For UDP, we might just layer them.
-                // Actually, to support multiple packets cleanly without redrawing full canvas every frame (which erases other packets), we'll keep a list of active packets in the main loop. But for simplicity, we'll draw over the line.
-                
-                // Let's just redraw full canvas for TCP, and for UDP we'll manage an array.
-                
-                const p1 = getPos(from);
-                const p2 = getPos(to);
-                
-                const x = p1.x + (p2.x - p1.x) * progress;
-                const y = p1.y + (p2.y - p1.y) * progress + yOffset;
-                
-                ctx.fillStyle = color;
+
+                // If packet is dropped, it disappears halfway
+                if (p.isDropped && progress >= 0.5) {
+                    // Draw a collision/drop marker
+                    const dropX = p.from.x + (p.to.x - p.from.x) * 0.5;
+                    const dropY = p.from.y + (p.to.y - p.from.y) * 0.5 + p.yOffset;
+                    ctx.fillStyle = '#ef4444';
+                    ctx.font = 'bold 12px sans-serif';
+                    ctx.fillText('⚡ LOST', dropX - 20, dropY - 10);
+                    if (p.onDropTriggered) {
+                        p.onDropTriggered();
+                        p.onDropTriggered = null; // trigger once
+                    }
+                    return false;
+                }
+
+                const x = p.from.x + (p.to.x - p.from.x) * progress;
+                const y = p.from.y + (p.to.y - p.from.y) * progress + p.yOffset;
+
+                ctx.fillStyle = p.color;
                 ctx.fillRect(x - 10, y - 10, 20, 20);
-                
-                if(tag) {
+
+                if(p.tag) {
                     ctx.fillStyle = '#fff';
                     ctx.font = 'bold 9px Outfit, sans-serif';
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'middle';
-                    ctx.fillText(tag, x, y);
+                    ctx.fillText(p.tag, x, y);
                 }
-                
-                if(progress < 1) {
-                    requestAnimationFrame(animate);
-                } else {
-                    if(onComplete) onComplete();
+
+                if(progress >= 1) {
+                    if (p.onComplete) p.onComplete();
+                    return false;
                 }
-            };
-            requestAnimationFrame(animate);
-        };
-
-        let packets = [];
-        let udpInterval = null;
-
-        const loopUdp = () => {
-            if(!document.getElementById('transCanvas')) return;
-            drawTopology();
-            const now = performance.now();
-            packets = packets.filter(p => {
-                const prog = (now - p.start) / p.dur;
-                if(prog >= 1) return false;
-                const p1 = getPos('transClient'), p2 = getPos('transServer');
-                const x = p1.x + (p2.x - p1.x) * prog;
-                const y = p1.y + (p2.y - p1.y) * prog + p.yOff;
-                
-                if(p.dropped && prog > 0.5) return false; // packet drops midway
-                
-                ctx.fillStyle = p.color;
-                ctx.fillRect(x - 10, y - 10, 20, 20);
                 return true;
             });
-            if(isSimRunning && document.getElementById('transProtocol').value === 'udp') {
-                aniFrame = requestAnimationFrame(loopUdp);
+
+            if(isSimRunning || activePackets.length > 0) {
+                aniFrame = requestAnimationFrame(animateLoop);
+            }
+        };
+
+        const pushPacket = (fromId, toId, color, tag, duration, yOffset, isDropped, onComplete, onDropTriggered) => {
+            const from = getPos(fromId);
+            const to = getPos(toId);
+            activePackets.push({
+                from, to, color, tag, duration, yOffset, isDropped, startTime: performance.now(), onComplete, onDropTriggered
+            });
+            if (activePackets.length === 1) {
+                animateLoop();
             }
         };
 
         document.getElementById('btnTransStart').addEventListener('click', () => {
             if(isSimRunning) return;
             isSimRunning = true;
+            activePackets = [];
             document.getElementById('transConsole').innerHTML = '';
             document.getElementById('btnTransStart').disabled = true;
             
             const protocol = document.getElementById('transProtocol').value;
+            const windowSize = parseInt(document.getElementById('transWindow').value);
+            const lossRate = parseInt(document.getElementById('transLoss').value) / 100;
             
             if(protocol === 'tcp') {
                 log('Initiating TCP 3-Way Handshake...', '#fff');
                 setTcpState('A', 'SYN-SENT', '#f59e0b');
-                log('Host A: [SYN] Seq=0', '#3b82f6');
+                log('Host A ➔ Host B: [SYN] Seq=0', '#3b82f6');
                 
-                const c = 'transClient', s = 'transServer';
-                const drawFull = () => {
-                    requestAnimationFrame(() => {
-                        if(isSimRunning) { drawTopology(); requestAnimationFrame(drawFull); }
-                    });
-                };
-                drawFull(); // Start background redraw loop
-                
-                animatePacket(c, s, '#3b82f6', 'SYN', 1500, 0, () => {
+                pushPacket('transClient', 'transServer', '#3b82f6', 'SYN', 1200, 0, false, () => {
                     setTcpState('B', 'SYN-RCVD', '#f59e0b');
-                    log('Host B: Received SYN. Sending [SYN, ACK] Seq=0, Ack=1', '#10b981');
+                    log('Host B ➔ Host A: Received SYN. Sending [SYN, ACK] Seq=0, Ack=1', '#10b981');
                     
-                    animatePacket(s, c, '#10b981', 'SYN-ACK', 1500, 0, () => {
+                    pushPacket('transServer', 'transClient', '#10b981', 'S-A', 1200, 0, false, () => {
                         setTcpState('A', 'ESTABLISHED', '#10b981');
-                        log('Host A: Received SYN-ACK. Sending [ACK] Seq=1, Ack=1', '#3b82f6');
+                        log('Host A ➔ Host B: Received SYN-ACK. Sending [ACK] Seq=1, Ack=1', '#3b82f6');
                         
-                        animatePacket(c, s, '#3b82f6', 'ACK', 1500, 0, () => {
+                        pushPacket('transClient', 'transServer', '#3b82f6', 'ACK', 1200, 0, false, () => {
                             setTcpState('B', 'ESTABLISHED', '#10b981');
-                            log('TCP CONNECTION ESTABLISHED', '#fff');
+                            log('TCP CONNECTION ESTABLISHED. Starting Sliding Window Transfer...', '#fff');
                             
                             setTimeout(() => {
-                                log('Sending Data Window (Size=3)...');
-                                animatePacket(c, s, '#8b5cf6', 'P1', 1000, -20);
-                                animatePacket(c, s, '#8b5cf6', 'P2', 1000, 0);
-                                animatePacket(c, s, '#8b5cf6', 'P3', 1000, 20, () => {
-                                    log('Host B: Received Window. Sending Cumulative [ACK 4]');
-                                    animatePacket(s, c, '#10b981', 'ACK 4', 1000, 0, () => {
-                                        log('Data transfer complete safely.', '#10b981');
-                                        isSimRunning = false;
-                                        setTcpState('A', 'CLOSED', '#ef4444');
-                                        setTcpState('B', 'LISTEN', '#f59e0b');
-                                        document.getElementById('btnTransStart').disabled = false;
-                                    });
-                                });
+                                // Start sliding window flow
+                                runSlidingWindow(windowSize, lossRate);
                             }, 1000);
                         });
                     });
@@ -8891,35 +10166,116 @@ document.addEventListener('DOMContentLoaded', async () => {
                 setTcpState('A', 'N/A', '#64748b');
                 setTcpState('B', 'N/A', '#64748b');
                 log('Starting UDP Datagram Stream (Connectionless)...', '#fff');
-                log('No handshake required. Blasting packets...', '#ef4444');
+                log('No handshake required. Blasting datagrams...', '#f59e0b');
                 
                 let count = 0;
-                packets = [];
-                aniFrame = requestAnimationFrame(loopUdp);
-                
-                udpInterval = setInterval(() => {
-                    if(count > 20) {
-                        clearInterval(udpInterval);
+                const blastInterval = setInterval(() => {
+                    if (count >= 10) {
+                        clearInterval(blastInterval);
                         setTimeout(() => {
                             isSimRunning = false;
                             document.getElementById('btnTransStart').disabled = false;
-                            log('UDP Stream Finished. No ACKs expected or received.', '#fff');
-                        }, 1000);
+                            log('UDP Stream Finished. No ACKs requested or expected.', '#fff');
+                        }, 1500);
                         return;
                     }
                     count++;
-                    const dropped = Math.random() < 0.2; // 20% drop rate
-                    packets.push({
-                        start: performance.now(),
-                        dur: 800 + Math.random()*400,
-                        yOff: (Math.random() - 0.5) * 80,
-                        color: dropped ? '#ef4444' : '#3b82f6',
-                        dropped: dropped
+                    const isDropped = Math.random() < lossRate;
+                    log(`Host A: Blasting Datagram ${count}...`, '#3b82f6');
+                    
+                    pushPacket('transClient', 'transServer', '#3b82f6', `D${count}`, 1000, (Math.random() - 0.5) * 80, isDropped, () => {
+                        log(`Host B: Received Datagram ${count}. (Delivered to App Layer)`, '#10b981');
+                    }, () => {
+                        log(`Datagram ${count} dropped in transit due to network noise!`, '#ef4444');
                     });
-                    if(dropped) log(`Datagram ${count} dropped in transit. (No retransmission)`, '#ef4444');
-                }, 150);
+                }, 200);
             }
         });
+
+        const runSlidingWindow = (windowSize, lossRate) => {
+            let base = 1;
+            let nextSeqNum = 1;
+            const totalPackets = 7;
+            const packetStatuses = {}; // 'sent', 'acked', 'lost'
+            let timer = null;
+
+            const sendWindow = () => {
+                while (nextSeqNum < base + windowSize && nextSeqNum <= totalPackets) {
+                    const seq = nextSeqNum;
+                    packetStatuses[seq] = 'sent';
+                    const isDropped = Math.random() < lossRate;
+                    log(`Host A: Sending Packet ${seq}...`, '#8b5cf6');
+                    
+                    const offset = (seq - base) * 25 - 40;
+                    
+                    pushPacket('transClient', 'transServer', '#8b5cf6', `P${seq}`, 1500, offset, isDropped, () => {
+                        // Packet arrived successfully at server
+                        handlePacketArrivalAtServer(seq);
+                    }, () => {
+                        // Packet dropped
+                        packetStatuses[seq] = 'lost';
+                        log(`[Loss] Packet ${seq} lost in transit!`, '#ef4444');
+                    });
+                    
+                    nextSeqNum++;
+                }
+                
+                // Set retransmission timer
+                if (timer) clearTimeout(timer);
+                timer = setTimeout(() => {
+                    handleTimeout();
+                }, 3500);
+            };
+
+            let expectedSeq = 1;
+
+            const handlePacketArrivalAtServer = (seq) => {
+                if (seq === expectedSeq) {
+                    log(`Host B: Received in-order Packet ${seq}. Sending ACK ${seq + 1}`, '#10b981');
+                    expectedSeq++;
+                    // Send ACK
+                    pushPacket('transServer', 'transClient', '#10b981', `A${expectedSeq}`, 1200, 0, false, () => {
+                        handleAckArrivalAtClient(expectedSeq);
+                    });
+                } else {
+                    log(`Host B: Out-of-order Packet ${seq} (Expected P${expectedSeq}). Duplicate ACK ${expectedSeq}`, '#ef4444');
+                    pushPacket('transServer', 'transClient', '#10b981', `A${expectedSeq}`, 1200, 0, false, () => {
+                        handleAckArrivalAtClient(expectedSeq);
+                    });
+                }
+            };
+
+            const handleAckArrivalAtClient = (ackNum) => {
+                if (ackNum > base) {
+                    log(`Host A: Received ACK ${ackNum}. Sliding window base to ${ackNum}`, '#3b82f6');
+                    base = ackNum;
+                    if (base > totalPackets) {
+                        clearTimeout(timer);
+                        log('TCP Data transfer complete. Initiating Connection Teardown...', '#fff');
+                        setTimeout(() => {
+                            setTcpState('A', 'CLOSED', '#ef4444');
+                            setTcpState('B', 'LISTEN', '#f59e0b');
+                            isSimRunning = false;
+                            document.getElementById('btnTransStart').disabled = false;
+                            log('TCP connection closed gracefully.', '#10b981');
+                        }, 1000);
+                    } else {
+                        // Send new packets in the sliding window
+                        sendWindow();
+                    }
+                }
+            };
+
+            const handleTimeout = () => {
+                if (base <= totalPackets) {
+                    log(`[Timeout] Packet ACK not received for base P${base}. Retransmitting window...`, '#ef4444');
+                    nextSeqNum = base; // Go Back N
+                    sendWindow();
+                }
+            };
+
+            sendWindow();
+        };
     };
 
     const initCsmaSim = (container) => {
@@ -8938,45 +10294,52 @@ document.addEventListener('DOMContentLoaded', async () => {
                         <div style="position:absolute; top:20%; left:25%; transform:translate(-50%,-50%); background:var(--bg-card); border:2px solid #3b82f6; padding:10px; border-radius:8px; text-align:center; z-index:2;" id="macNode1">
                             <div style="font-size:24px;">💻</div>
                             <div style="font-weight:800; font-size:11px;">Node 1</div>
-                            <div style="font-size:9px; color:var(--text-muted); font-family:'JetBrains Mono', monospace;" id="stateN1">IDLE</div>
+                            <div style="font-size:9px; color:#64748b; font-family:'JetBrains Mono', monospace; font-weight:800;" id="stateN1">IDLE</div>
                         </div>
                         
                         <div style="position:absolute; top:80%; left:50%; transform:translate(-50%,-50%); background:var(--bg-card); border:2px solid #10b981; padding:10px; border-radius:8px; text-align:center; z-index:2;" id="macNode2">
                             <div style="font-size:24px;">💻</div>
-                            <div style="font-weight:800; font-size:11px;">Node 2</div>
-                            <div style="font-size:9px; color:var(--text-muted); font-family:'JetBrains Mono', monospace;" id="stateN2">IDLE</div>
+                            <div style="font-weight:800; font-size:11px;">Node 2 (AP/Receiver)</div>
+                            <div style="font-size:9px; color:#64748b; font-family:'JetBrains Mono', monospace; font-weight:800;" id="stateN2">IDLE</div>
                         </div>
                         
                         <div style="position:absolute; top:20%; left:75%; transform:translate(-50%,-50%); background:var(--bg-card); border:2px solid #f59e0b; padding:10px; border-radius:8px; text-align:center; z-index:2;" id="macNode3">
                             <div style="font-size:24px;">💻</div>
                             <div style="font-weight:800; font-size:11px;">Node 3</div>
-                            <div style="font-size:9px; color:var(--text-muted); font-family:'JetBrains Mono', monospace;" id="stateN3">IDLE</div>
+                            <div style="font-size:9px; color:#64748b; font-family:'JetBrains Mono', monospace; font-weight:800;" id="stateN3">IDLE</div>
                         </div>
                     </div>
                     
-                    <div class="theory-card" style="width:300px; margin:0; display:flex; flex-direction:column;">
-                        <h3 style="color:var(--primary); margin-bottom:15px;">MAC Controls</h3>
+                    <div class="theory-card" style="width:320px; margin:0; display:flex; flex-direction:column;">
+                        <h3 style="color:var(--primary); margin-bottom:12px;">MAC Controls</h3>
                         <div style="display:flex; flex-direction:column; gap:10px;">
-                            <label style="font-size:12px; font-weight:800; color:var(--text-muted);">Protocol:</label>
+                            <label style="font-size:11px; font-weight:800; color:var(--text-muted); text-transform:uppercase;">Protocol:</label>
                             <select id="macProtocol" class="sim-select" style="width:100%;">
                                 <option value="cd">CSMA/CD (Ethernet)</option>
                                 <option value="ca">CSMA/CA (Wi-Fi)</option>
                             </select>
                             
-                            <label style="font-size:12px; font-weight:800; color:var(--text-muted); margin-top:5px;">Traffic Load:</label>
-                            <input type="range" id="macLoad" min="1" max="3" value="2" style="width:100%;">
-                            <div style="display:flex; justify-content:space-between; font-size:10px; color:#64748b;">
-                                <span>Low</span><span>Med</span><span>High (Collisions!)</span>
+                            <label style="font-size:11px; font-weight:800; color:var(--text-muted); text-transform:uppercase;">Active Transmitting Nodes:</label>
+                            <div style="display:flex; gap:12px; font-size:12px;">
+                                <label style="display:flex; align-items:center; gap:4px;"><input type="checkbox" id="chkNode1" checked> Node 1</label>
+                                <label style="display:flex; align-items:center; gap:4px;"><input type="checkbox" id="chkNode3" checked> Node 3</label>
                             </div>
+
+                            <label style="font-size:11px; font-weight:800; color:var(--text-muted); text-transform:uppercase;">Backoff Algorithm:</label>
+                            <select id="macBackoff" class="sim-select" style="width:100%;">
+                                <option value="beb">Binary Exponential Backoff</option>
+                                <option value="linear">Linear Backoff</option>
+                                <option value="none">No Backoff (Immediate Retry)</option>
+                            </select>
                             
-                            <label style="font-size:12px; font-weight:800; color:var(--text-muted); margin-top:5px; display:flex; align-items:center; gap:8px;">
+                            <label style="font-size:11px; font-weight:800; color:var(--text-muted); text-transform:uppercase; display:flex; align-items:center; gap:8px;">
                                 <input type="checkbox" id="macRts" checked> Use RTS/CTS (CA Only)
                             </label>
                             
-                            <button id="btnMacStart" class="btn-sim primary" style="margin-top:10px;">Trigger Transmission</button>
+                            <button id="btnMacStart" class="btn-sim primary" style="margin-top:5px;">Trigger Transmission</button>
                         </div>
                         
-                        <div id="macConsole" style="background:#0b0f19; border-radius:8px; padding:10px; font-family:'JetBrains Mono', monospace; font-size:11px; color:#10b981; flex:1; overflow-y:auto; margin-top:15px; border:1px solid var(--border);">
+                        <div id="macConsole" style="background:#0b0f19; border-radius:8px; padding:10px; font-family:'JetBrains Mono', monospace; font-size:11px; color:#10b981; height:130px; overflow-y:auto; margin-top:15px; border:1px solid var(--border);">
                             > MAC Subsystem Initialized
                         </div>
                     </div>
@@ -9023,19 +10386,23 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         const log = (msg, color='#10b981') => {
             const c = document.getElementById('macConsole');
-            c.innerHTML += `<div style="color:${color}; margin-bottom:4px;">> ${msg}</div>`;
-            c.scrollTop = c.scrollHeight;
+            if (c) {
+                c.innerHTML += `<div style="color:${color}; margin-bottom:4px;">> ${msg}</div>`;
+                c.scrollTop = c.scrollHeight;
+            }
         };
 
         const setState = (id, state, color) => {
             const el = document.getElementById(id);
-            el.textContent = state;
-            el.style.color = color;
+            if (el) {
+                el.textContent = state;
+                el.style.color = color;
+            }
         };
 
         const animateSignal = (srcNode, isCollision, color, tag, onComplete) => {
             let start = performance.now();
-            const dur = 1500;
+            const dur = 1200;
             const srcPos = getPos(srcNode);
             const busY = canvas.height / 2;
             
@@ -9082,87 +10449,155 @@ document.addEventListener('DOMContentLoaded', async () => {
             requestAnimationFrame(animate);
         };
 
+        const calculateBackoff = (attempt, algo) => {
+            if (algo === 'none') return 0;
+            if (algo === 'linear') {
+                // Delay proportional to attempt
+                return Math.floor(Math.random() * (attempt * 4)) + 1; 
+            }
+            // BEB: 0 to 2^attempt - 1 slots
+            const maxSlots = Math.pow(2, Math.min(attempt, 10)) - 1;
+            return Math.floor(Math.random() * maxSlots) + 1;
+        };
+
         document.getElementById('btnMacStart').addEventListener('click', () => {
             if(isSimRunning) return;
             isSimRunning = true;
             document.getElementById('macConsole').innerHTML = '';
             
             const proto = document.getElementById('macProtocol').value;
-            const load = document.getElementById('macLoad').value;
+            const node1Active = document.getElementById('chkNode1').checked;
+            const node3Active = document.getElementById('chkNode3').checked;
+            const backoffAlgo = document.getElementById('macBackoff').value;
             const rts = document.getElementById('macRts').checked;
             
             document.querySelectorAll('[id^=stateN]').forEach(el => {el.textContent = 'IDLE'; el.style.color='#64748b';});
             
+            if(!node1Active && !node3Active) {
+                log('No transmitting nodes selected!', '#ef4444');
+                isSimRunning = false;
+                return;
+            }
+
             if(proto === 'cd') {
-                log('CSMA/CD: Carrier Sense Multiple Access / Collision Detection', '#fff');
-                log('Node 1 listening to medium...');
-                setState('stateN1', 'SENSING', '#f59e0b');
+                log('CSMA/CD: Sensing shared coaxial bus...', '#fff');
+                
+                if (node1Active) setState('stateN1', 'SENSING', '#f59e0b');
+                if (node3Active) setState('stateN3', 'SENSING', '#f59e0b');
                 
                 setTimeout(() => {
-                    log('Medium IDLE. Node 1 begins transmission.');
-                    setState('stateN1', 'TRANSMITTING', '#3b82f6');
-                    
-                    if(load >= 2 && Math.random() > 0.4) {
-                        // Collision Scenario
-                        log('Node 3 simultaneously transmits! (Propagation Delay)', '#ef4444');
+                    if (node1Active && node3Active) {
+                        // Both transmit simultaneously ➔ Collision!
+                        log('Both Node 1 and Node 3 detect IDLE bus and transmit!', '#3b82f6');
+                        setState('stateN1', 'TRANSMITTING', '#3b82f6');
                         setState('stateN3', 'TRANSMITTING', '#3b82f6');
+                        
                         animateSignal('macNode1', true, '#3b82f6', 'DATA');
-                        setTimeout(() => animateSignal('macNode3', true, '#f59e0b', 'DATA'), 200);
+                        setTimeout(() => animateSignal('macNode3', true, '#f59e0b', 'DATA'), 100);
                         
                         setTimeout(() => {
-                            log('COLLISION DETECTED! Sending JAM signal.', '#ef4444');
+                            log('COLLISION DETECTED on wire!', '#ef4444');
                             setState('stateN1', 'JAMMING', '#ef4444');
                             setState('stateN3', 'JAMMING', '#ef4444');
+                            log('Nodes broadcasting JAM signal to clear bus...', '#f59e0b');
+                            
                             setTimeout(() => {
-                                log('Nodes executing Binary Exponential Backoff.');
-                                setState('stateN1', 'BACKOFF (8μs)', '#8b5cf6');
-                                setState('stateN3', 'BACKOFF (14μs)', '#8b5cf6');
+                                const delay1 = calculateBackoff(1, backoffAlgo);
+                                const delay3 = calculateBackoff(1, backoffAlgo);
+                                
+                                log(`Exponential Backoff (Attempt 1):`, '#fff');
+                                log(`-> Node 1 chose delay: ${delay1} slots`);
+                                log(`-> Node 3 chose delay: ${delay3} slots`);
+                                
+                                setState('stateN1', `BACKOFF (${delay1} slots)`, '#8b5cf6');
+                                setState('stateN3', `BACKOFF (${delay3} slots)`, '#8b5cf6');
+                                
+                                // Retransmit based on who has shorter backoff
                                 setTimeout(() => {
-                                    log('Node 1 timer expired. Retransmitting...', '#10b981');
-                                    setState('stateN1', 'TRANSMITTING', '#3b82f6');
-                                    setState('stateN3', 'IDLE', '#64748b');
-                                    animateSignal('macNode1', false, '#3b82f6', 'DATA', () => {
-                                        log('Transmission Complete.', '#10b981');
-                                        setState('stateN1', 'IDLE', '#64748b');
-                                        isSimRunning = false;
-                                    });
+                                    if (delay1 <= delay3) {
+                                        log('Node 1 backoff timer expired first. Retransmitting...', '#10b981');
+                                        setState('stateN1', 'TRANSMITTING', '#3b82f6');
+                                        animateSignal('macNode1', false, '#3b82f6', 'DATA', () => {
+                                            log('Node 1 transmission completed successfully.', '#10b981');
+                                            setState('stateN1', 'IDLE', '#64748b');
+                                            
+                                            // Node 3 transmits later
+                                            setTimeout(() => {
+                                                log('Node 3 backoff timer expired. Retransmitting...', '#10b981');
+                                                setState('stateN3', 'TRANSMITTING', '#3b82f6');
+                                                animateSignal('macNode3', false, '#f59e0b', 'DATA', () => {
+                                                    log('Node 3 transmission completed successfully.', '#10b981');
+                                                    setState('stateN3', 'IDLE', '#64748b');
+                                                    isSimRunning = false;
+                                                });
+                                            }, 1000);
+                                        });
+                                    } else {
+                                        log('Node 3 backoff timer expired first. Retransmitting...', '#10b981');
+                                        setState('stateN3', 'TRANSMITTING', '#3b82f6');
+                                        animateSignal('macNode3', false, '#f59e0b', 'DATA', () => {
+                                            log('Node 3 transmission completed successfully.', '#10b981');
+                                            setState('stateN3', 'IDLE', '#64748b');
+                                            
+                                            // Node 1 transmits later
+                                            setTimeout(() => {
+                                                log('Node 1 backoff timer expired. Retransmitting...', '#10b981');
+                                                setState('stateN1', 'TRANSMITTING', '#3b82f6');
+                                                animateSignal('macNode1', false, '#3b82f6', 'DATA', () => {
+                                                    log('Node 1 transmission completed successfully.', '#10b981');
+                                                    setState('stateN1', 'IDLE', '#64748b');
+                                                    isSimRunning = false;
+                                                });
+                                            }, 1000);
+                                        });
+                                    }
                                 }, 1500);
                             }, 1000);
-                        }, 1200);
+                        }, 1000);
                     } else {
-                        // Success Scenario
-                        animateSignal('macNode1', false, '#3b82f6', 'DATA', () => {
-                            log('Transmission completed successfully.', '#10b981');
-                            setState('stateN1', 'IDLE', '#64748b');
+                        // Single node active ➔ Success!
+                        const activeNode = node1Active ? 'stateN1' : 'stateN3';
+                        const activePos = node1Active ? 'macNode1' : 'macNode3';
+                        log(`Bus is IDLE. ${node1Active?'Node 1':'Node 3'} transmits...`, '#10b981');
+                        setState(activeNode, 'TRANSMITTING', '#3b82f6');
+                        animateSignal(activePos, false, '#3b82f6', 'DATA', () => {
+                            log('Transmission completed successfully without any conflicts.', '#10b981');
+                            setState(activeNode, 'IDLE', '#64748b');
                             isSimRunning = false;
                         });
                     }
                 }, 800);
             } else {
-                // CA
-                log('CSMA/CA: Collision Avoidance (Wireless Mode)', '#fff');
-                log('Node 1 wants to send to Node 2.');
-                setState('stateN1', 'DIFS WAIT', '#f59e0b');
+                // CSMA/CA
+                log('CSMA/CA: SIFS/DIFS wireless sensing active...', '#fff');
+                const sender = node1Active ? 'macNode1' : 'macNode3';
+                const senderState = node1Active ? 'stateN1' : 'stateN3';
+                
+                setState(senderState, 'DIFS WAIT', '#f59e0b');
                 
                 setTimeout(() => {
-                    if(rts) {
-                        log('Node 1 sending RTS (Request to Send)...');
-                        setState('stateN1', 'RTS', '#8b5cf6');
-                        animateSignal('macNode1', false, '#8b5cf6', 'RTS', () => {
-                            log('Node 2 sending CTS (Clear to Send)...', '#10b981');
-                            setState('stateN2', 'CTS', '#10b981');
-                            setState('stateN3', 'NAV WAIT', '#ef4444');
-                            log('Node 3 updates NAV (Network Allocation Vector) and sleeps.', '#ef4444');
+                    if (rts) {
+                        log(`${node1Active?'Node 1':'Node 3'} broadcasting RTS (Request to Send)...`, '#8b5cf6');
+                        setState(senderState, 'RTS SENT', '#8b5cf6');
+                        
+                        animateSignal(sender, false, '#8b5cf6', 'RTS', () => {
+                            log('Access Point (Node 2) replies with CTS (Clear to Send)...', '#10b981');
+                            setState('stateN2', 'CTS SENT', '#10b981');
+                            
+                            // If other node is active, it must update NAV
+                            const otherState = node1Active ? 'stateN3' : 'stateN1';
+                            setState(otherState, 'NAV BLOCKED', '#ef4444');
+                            log(`AP CTS blocks other nodes from transmitting (NAV Vector set).`, '#ef4444');
+                            
                             animateSignal('macNode2', false, '#10b981', 'CTS', () => {
-                                log('Node 1 sending DATA...', '#3b82f6');
-                                setState('stateN1', 'DATA', '#3b82f6');
-                                setState('stateN2', 'RECEIVING', '#10b981');
-                                animateSignal('macNode1', false, '#3b82f6', 'DATA', () => {
-                                    log('Node 2 sending ACK.', '#10b981');
-                                    setState('stateN1', 'WAIT ACK', '#f59e0b');
-                                    setState('stateN2', 'ACK', '#10b981');
+                                log(`${node1Active?'Node 1':'Node 3'} transmitting DATA frame...`, '#3b82f6');
+                                setState(senderState, 'TRANSMITTING', '#3b82f6');
+                                
+                                animateSignal(sender, false, '#3b82f6', 'DATA', () => {
+                                    log('AP (Node 2) replies with ACK.', '#10b981');
+                                    setState('stateN2', 'ACK SENT', '#10b981');
                                     animateSignal('macNode2', false, '#10b981', 'ACK', () => {
-                                        log('CSMA/CA Exchange Complete!', '#fff');
+                                        log('CSMA/CA Exchange completed successfully!', '#10b981');
                                         document.querySelectorAll('[id^=stateN]').forEach(el => {el.textContent = 'IDLE'; el.style.color='#64748b';});
                                         isSimRunning = false;
                                     });
@@ -9170,29 +10605,34 @@ document.addEventListener('DOMContentLoaded', async () => {
                             });
                         });
                     } else {
-                        log('RTS/CTS disabled. Sending DATA directly...', '#3b82f6');
-                        setState('stateN1', 'DATA', '#3b82f6');
-                        
-                        if(load >= 2 && Math.random() > 0.4) {
-                            log('Hidden Node (Node 3) also transmits! Collision occurs at Node 2!', '#ef4444');
-                            setState('stateN3', 'DATA', '#3b82f6');
+                        // RTS/CTS disabled ➔ check hidden node collision
+                        if (node1Active && node3Active) {
+                            log('RTS/CTS disabled. Both Node 1 and Node 3 transmit directly!', '#ef4444');
+                            setState('stateN1', 'TRANSMITTING', '#3b82f6');
+                            setState('stateN3', 'TRANSMITTING', '#3b82f6');
+                            
                             animateSignal('macNode1', true, '#3b82f6', 'DATA');
-                            setTimeout(() => animateSignal('macNode3', true, '#f59e0b', 'DATA'), 200);
+                            setTimeout(() => animateSignal('macNode3', true, '#f59e0b', 'DATA'), 100);
+                            
                             setTimeout(() => {
-                                log('Collision destroys DATA. No ACK received.', '#ef4444');
-                                setState('stateN1', 'TIMEOUT', '#ef4444');
-                                setState('stateN3', 'TIMEOUT', '#ef4444');
+                                log('Collision occurred at receiver Node 2! Frames corrupted.', '#ef4444');
+                                setState('stateN1', 'COLLISION/TIMEOUT', '#ef4444');
+                                setState('stateN3', 'COLLISION/TIMEOUT', '#ef4444');
+                                
                                 setTimeout(() => {
-                                    log('Backoff & Retrying...', '#f59e0b');
+                                    log('Executing backoff recovery...', '#f59e0b');
+                                    document.querySelectorAll('[id^=stateN]').forEach(el => {el.textContent = 'IDLE'; el.style.color='#64748b';});
                                     isSimRunning = false;
                                 }, 1500);
-                            }, 1500);
+                            }, 1200);
                         } else {
-                            animateSignal('macNode1', false, '#3b82f6', 'DATA', () => {
-                                log('Node 2 sending ACK.', '#10b981');
-                                setState('stateN2', 'ACK', '#10b981');
+                            log('RTS/CTS disabled. Sending data frame directly...', '#3b82f6');
+                            setState(senderState, 'TRANSMITTING', '#3b82f6');
+                            animateSignal(sender, false, '#3b82f6', 'DATA', () => {
+                                log('AP (Node 2) replies with ACK.', '#10b981');
+                                setState('stateN2', 'ACK SENT', '#10b981');
                                 animateSignal('macNode2', false, '#10b981', 'ACK', () => {
-                                    log('CSMA/CA Exchange Complete.', '#10b981');
+                                    log('Direct CSMA/CA Exchange completed successfully.', '#10b981');
                                     document.querySelectorAll('[id^=stateN]').forEach(el => {el.textContent = 'IDLE'; el.style.color='#64748b';});
                                     isSimRunning = false;
                                 });
@@ -12585,10 +14025,28 @@ document.addEventListener('DOMContentLoaded', async () => {
                         <div class="legend-item"><span class="dot signal"></span> Signal</div>
                     </div>
                 </div>
-                <div class="sim-sidebar">
-                    <div class="sim-panel" style="height:100%; display:flex; flex-direction:column;">
+                <div class="sim-sidebar" style="display:flex; flex-direction:column; gap:10px;">
+                    <div class="sim-panel" style="flex:1; display:flex; flex-direction:column; max-height:50%;">
                         <div class="panel-header">Protocol Analysis Log</div>
                         <div id="eventList" class="event-list" style="flex:1; overflow-y:auto;"></div>
+                    </div>
+                    <div class="sim-panel" style="flex:1; display:flex; flex-direction:column; max-height:50%;">
+                        <div class="panel-header">Dynamic Observation Table</div>
+                        <div style="flex:1; overflow-y:auto; padding:8px; background:#0b0f19;">
+                            <table id="observationTable" style="width:100%; border-collapse:collapse; font-size:10px; text-align:left; color:#cbd5e1; font-family:'JetBrains Mono', monospace;">
+                                <thead>
+                                    <tr style="border-bottom:2px solid #334155; color:#3b82f6; font-weight:bold;">
+                                        <th style="padding:4px;">No.</th>
+                                        <th style="padding:4px;">Time</th>
+                                        <th style="padding:4px;">Activity/Event Details</th>
+                                        <th style="padding:4px;">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="observationTableBody">
+                                    <tr><td colspan="4" style="text-align:center; padding:10px; color:#64748b;">No transmission events observed yet.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -12610,13 +14068,27 @@ document.addEventListener('DOMContentLoaded', async () => {
         const specializedTypes = ['dv_sim', 'ls_sim', 'path_sim', 'vlan_sim', 'dns', 'modulation', 'gbn', 'csma_ca', 'udp'];
         if (specializedTypes.includes(data.simType)) {
             const opts = container.querySelector('.sim-options');
-            if (opts) opts.style.display = 'none';
+            if (opts) {
+                if (data.simType === 'path_sim') {
+                    opts.style.display = 'block';
+                    const typeSel = opts.querySelector('#simType');
+                    if (typeSel) {
+                        typeSel.innerHTML = `
+                            <option value="ospf">OSPF (Shortest Path First)</option>
+                            <option value="bgp">BGP (Path Vector)</option>
+                        `;
+                        typeSel.value = 'ospf';
+                    }
+                } else {
+                    opts.style.display = 'none';
+                }
+            }
         }
 
         setTimeout(() => {
             if (window.currentSim) window.currentSim.destroy();
             const sim = new NetworkingSim('simCanvas', data.simType, id);
-            sim.mode = data.simType; 
+            sim.mode = data.simType === 'path_sim' ? 'ospf' : data.simType; 
             window.currentSim = sim;
             
             sim.resize();

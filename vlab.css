@@ -295,8 +295,8 @@ body {
 
 #network-canvas-container canvas,
 .topology-workspace canvas {
-    max-width: 100%;
-    height: auto;
+    width: 100%;
+    height: 100%;
     display: block;
 }
 
@@ -512,6 +512,13 @@ body {
 .device-node.cabling-source {
     box-shadow: 0 0 0 4px var(--primary);
     background: var(--primary-light);
+    border-radius: var(--radius-md);
+    z-index: 20;
+}
+
+.device-node.packet-source {
+    box-shadow: 0 0 0 4px #eab308;
+    background: rgba(234, 179, 8, 0.25);
     border-radius: var(--radius-md);
     z-index: 20;
 }
@@ -1799,5 +1806,91 @@ body.sandbox-mode .topology-main {
 
 [data-theme="dark"] .register-card b {
     color: #f8fafc;
+}
+
+/* Cisco Packet Tracer Host Desktop Modal Tabs */
+.desktop-tabs {
+    display: flex;
+    gap: 4px;
+    margin-top: 10px;
+    border-bottom: 1px solid #cbd5e1;
+}
+
+.desktop-tabs .d-tab-btn {
+    background: #cbd5e1;
+    color: #334155;
+    border: 1px solid #94a3b8;
+    border-bottom: none;
+    padding: 6px 14px;
+    font-size: 11px;
+    font-weight: 600;
+    border-radius: 4px 4px 0 0;
+    cursor: pointer;
+    transition: all 0.1s;
+    outline: none;
+}
+
+.desktop-tabs .d-tab-btn:hover {
+    background: #e2e8f0;
+    color: #0f172a;
+}
+
+.desktop-tabs .d-tab-btn.active {
+    background: #ffffff;
+    color: #1e3a8a;
+    border-color: #94a3b8;
+    border-bottom: 1px solid #ffffff;
+    font-weight: 700;
+    margin-bottom: -1px;
+    z-index: 10;
+}
+
+.desktop-body {
+    background: #0f223d !important;
+}
+
+.d-tab-content#tab-desktop {
+    background: #0f223d;
+}
+
+.app-icon {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    cursor: pointer;
+    padding: 10px;
+    border-radius: 6px;
+    background: #62b1e6 !important;
+    border: 2px solid #1c6ba0 !important;
+    box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.4);
+    width: 100px;
+    height: 100px;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.app-icon:hover {
+    background: #73b8e6 !important;
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3), inset 0 0 10px rgba(255,255,255,0.6);
+}
+
+.app-icon span:last-child {
+    font-size: 10px !important;
+    text-align: center;
+    color: #0b1e36 !important;
+    font-weight: bold;
+    line-height: 1.1;
+}
+
+.service-menu-btn:hover {
+    background: #1e293b !important;
+    color: #fff !important;
+}
+
+.service-menu-btn.active {
+    background: #2563eb !important;
+    color: #fff !important;
 }
 
