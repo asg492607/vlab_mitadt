@@ -2306,11 +2306,11 @@ nf.bind_listener(on_packet_receive)</textarea>
 
                 browserContent.innerHTML = `<div style="text-align:center; padding: 20px; color:#64748b;">Resolving host and connecting...</div>`;
 
-                let targetIp = url.replace(/^https?:\\/\\//i, '');
+                let targetIp = url.replace(/^https?:\/\//i, '');
                 let domainName = '';
 
                 // If not raw IP, resolve via DNS
-                const isIp = /^\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}$/.test(targetIp);
+                const isIp = /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(targetIp);
                 if (!isIp) {
                     domainName = targetIp;
                     if (!node.config.dns) {
