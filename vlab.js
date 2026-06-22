@@ -559,7 +559,7 @@ class TopologySimulation {
 
         this.nodes.forEach(n => {
             if (n.config && n.config.routes) {
-                n.config.routes = n.config.routes.filter(r => r.proto !== 'rip' && r.proto !== 'ospf');
+                n.config.routes = n.config.routes.filter(r => r.proto !== 'rip' && r.proto !== 'ospf' && r.proto !== 'eigrp' && r.proto !== 'bgp');
             }
         });
 
@@ -581,61 +581,90 @@ class TopologySimulation {
             return a.map((val, idx) => val & m[idx]).join('.');
         };
 
+        // Distance Vector Algorithms (RIP & EIGRP)
         for (let round = 0; round < 5; round++) {
-            this.nodes.forEach(router => {
-                if (router.type !== 'router' || !router.config?.routing?.rip) return;
-                
-                const ripCfg = router.config.routing.rip;
-                const connectedSubnets = [];
-                Object.keys(router.config.interfaces).forEach(iface => {
-                    const i = router.config.interfaces[iface];
-                    if (i.status === 'up' && i.ip !== 'unassigned') {
-                        const sub = getSubnet(i.ip, i.mask);
-                        if (sub) connectedSubnets.push({ dest: sub, mask: i.mask, nextHop: '0.0.0.0', metric: 0, proto: 'connected', via: 'Direct' });
-                    }
-                });
-
-                ripCfg.networks.forEach(netPrefix => {
-                    this.links.forEach(link => {
-                        const neighbor = link.from === router ? link.to : (link.to === router ? link.from : null);
-                        if (neighbor && neighbor.type === 'router' && neighbor.config?.routing?.rip) {
-                            const localIface = link.from === router ? link.fromPort : link.toPort;
-                            const localIP = router.config.interfaces[localIface]?.ip;
-                            const localMask = router.config.interfaces[localIface]?.mask;
-                            const neighborIface = link.from === router ? link.toPort : link.fromPort;
-                            const neighborIP = neighbor.config.interfaces[neighborIface]?.ip;
-
-                            if (localIP && neighborIP && inSameSubnet(localIP, neighborIP, localMask)) {
-                                const localRoutes = [
-                                    ...connectedSubnets,
-                                    ...router.config.routes
-                                ];
-                                localRoutes.forEach(r => {
-                                    if (r.nextHop === neighborIP) return;
-
-                                    const nextHopIP = localIP;
-                                    const metric = (r.metric !== undefined ? r.metric : 0) + 1;
-                                    if (metric >= 16) return;
-
-                                    const existing = neighbor.config.routes.find(nr => nr.dest === r.dest && nr.mask === r.mask);
-                                    if (!existing) {
-                                        neighbor.config.routes.push({
-                                            dest: r.dest,
-                                            mask: r.mask,
-                                            nextHop: nextHopIP,
-                                            metric: metric,
-                                            proto: 'rip',
-                                            via: router.label
-                                        });
-                                    } else if (existing.proto === 'rip' && metric < existing.metric) {
-                                        existing.metric = metric;
-                                        existing.nextHop = nextHopIP;
-                                        existing.via = router.label;
-                                    }
-                                });
-                            }
+            ['rip', 'eigrp'].forEach(proto => {
+                this.nodes.forEach(router => {
+                    if (router.type !== 'router' || !router.config?.routing?.[proto]) return;
+                    
+                    const cfg = router.config.routing[proto];
+                    const connectedSubnets = [];
+                    Object.keys(router.config.interfaces).forEach(iface => {
+                        const i = router.config.interfaces[iface];
+                        if (i.status === 'up' && i.ip !== 'unassigned') {
+                            const sub = getSubnet(i.ip, i.mask);
+                            if (sub) connectedSubnets.push({ dest: sub, mask: i.mask, nextHop: '0.0.0.0', metric: 0, proto: 'connected', via: 'Direct' });
                         }
                     });
+
+                    cfg.networks.forEach(netPrefix => {
+                        this.links.forEach(link => {
+                            const neighbor = link.from === router ? link.to : (link.to === router ? link.from : null);
+                            if (neighbor && neighbor.type === 'router' && neighbor.config?.routing?.[proto]) {
+                                const localIface = link.from === router ? link.fromPort : link.toPort;
+                                const localIP = router.config.interfaces[localIface]?.ip;
+                                const localMask = router.config.interfaces[localIface]?.mask;
+                                const neighborIface = link.from === router ? link.toPort : link.fromPort;
+                                const neighborIP = neighbor.config.interfaces[neighborIface]?.ip;
+
+                                if (localIP && neighborIP && inSameSubnet(localIP, neighborIP, localMask)) {
+                                    const localRoutes = [...connectedSubnets, ...router.config.routes];
+                                    localRoutes.forEach(r => {
+                                        if (r.nextHop === neighborIP) return;
+
+                                        const nextHopIP = localIP;
+                                        const metricInc = proto === 'eigrp' ? 256 : 1;
+                                        const metricMax = proto === 'eigrp' ? 256000 : 16;
+                                        const metric = (r.metric !== undefined ? r.metric : 0) + metricInc;
+                                        if (metric >= metricMax) return;
+
+                                        const existing = neighbor.config.routes.find(nr => nr.dest === r.dest && nr.mask === r.mask);
+                                        if (!existing) {
+                                            neighbor.config.routes.push({
+                                                dest: r.dest, mask: r.mask, nextHop: nextHopIP, metric, proto, via: router.label
+                                            });
+                                        } else if (existing.proto === proto && metric < existing.metric) {
+                                            existing.metric = metric;
+                                            existing.nextHop = nextHopIP;
+                                            existing.via = router.label;
+                                        }
+                                    });
+                                }
+                            }
+                        });
+                    });
+                });
+            });
+            
+            // Path Vector (BGP)
+            this.nodes.forEach(router => {
+                if (router.type !== 'router' || !router.config?.routing?.bgp) return;
+                const bgp = router.config.routing.bgp;
+                bgp.networks.forEach(netObj => {
+                    const sub = netObj.ip;
+                    const mask = netObj.mask;
+                    // Inject local BGP route
+                    if (!router.config.routes.find(r => r.dest === sub && r.proto === 'bgp')) {
+                        router.config.routes.push({ dest: sub, mask: mask, nextHop: '0.0.0.0', metric: 0, proto: 'bgp', via: 'Direct' });
+                    }
+                });
+                
+                bgp.neighbors.forEach(nbr => {
+                    // Find actual neighbor node in topology
+                    const neighborNode = this.nodes.find(n => n.type === 'router' && Object.values(n.config.interfaces).some(i => i.ip === nbr.ip));
+                    if (neighborNode && neighborNode.config?.routing?.bgp && neighborNode.config.routing.bgp.as === nbr.as) {
+                        router.config.routes.forEach(r => {
+                            if (r.nextHop === nbr.ip) return;
+                            const existing = neighborNode.config.routes.find(nr => nr.dest === r.dest && nr.mask === r.mask);
+                            // Find our IP facing this neighbor
+                            const localIf = Object.values(router.config.interfaces).find(i => inSameSubnet(i.ip, nbr.ip, i.mask));
+                            if (!localIf) return;
+                            
+                            if (!existing) {
+                                neighborNode.config.routes.push({ dest: r.dest, mask: r.mask, nextHop: localIf.ip, metric: 0, proto: 'bgp', via: router.label });
+                            }
+                        });
+                    }
                 });
             });
         }
@@ -2937,7 +2966,29 @@ nf.bind_listener(on_packet_receive)</textarea>
                 if (node.config.gateway) run += `\nip default-gateway ${node.config.gateway}\n!`;
                 node.config.routes.forEach(r => run += `\nip route ${r.dest} ${r.mask} ${r.nextHop}\n`);
                 run += `\n!\nend`;
-                addLine(run, 'out');
+            } else if (sub === 'interfaces' || sub === 'int') {
+                const iface = targetArgs[2];
+                if (!iface) {
+                    let out = '';
+                    Object.keys(node.config.interfaces).forEach(i => {
+                        const inf = node.config.interfaces[i];
+                        out += `${i} is ${inf.status === 'up' ? 'up, line protocol is up' : 'administratively down, line protocol is down'}\n  Hardware is Fast Ethernet, address is 000c.294f.8a33 (bia 000c.294f.8a33)\n  Internet address is ${inf.ip === 'unassigned' ? 'unassigned' : inf.ip + '/' + inf.mask}\n  MTU 1500 bytes, BW ${inf.speed === '1000' ? '1000000' : (inf.speed === '10' ? '10000' : '100000')} Kbit/sec, DLY 100 usec,\n     reliability 255/255, txload 1/255, rxload 1/255\n  Encapsulation ARPA, loopback not set\n  Keepalive set (10 sec)\n  ${inf.duplex === 'half' ? 'Half-duplex' : (inf.duplex === 'full' ? 'Full-duplex' : 'Auto-duplex')}, ${inf.speed === '1000' ? '1000Mb/s' : (inf.speed === '10' ? '10Mb/s' : 'Auto-speed')}, media type is 10/100BaseTX\n\n`;
+                    });
+                    addLine(out, 'out');
+                } else if (node.config.interfaces[iface]) {
+                    const inf = node.config.interfaces[iface];
+                    addLine(`${iface} is ${inf.status === 'up' ? 'up, line protocol is up' : 'administratively down, line protocol is down'}\n  Hardware is Fast Ethernet, address is 000c.294f.8a33 (bia 000c.294f.8a33)\n  Internet address is ${inf.ip === 'unassigned' ? 'unassigned' : inf.ip + '/' + inf.mask}\n  MTU 1500 bytes, BW ${inf.speed === '1000' ? '1000000' : (inf.speed === '10' ? '10000' : '100000')} Kbit/sec, DLY 100 usec,\n     reliability 255/255, txload 1/255, rxload 1/255\n  Encapsulation ARPA, loopback not set\n  Keepalive set (10 sec)\n  ${inf.duplex === 'half' ? 'Half-duplex' : (inf.duplex === 'full' ? 'Full-duplex' : 'Auto-duplex')}, ${inf.speed === '1000' ? '1000Mb/s' : (inf.speed === '10' ? '10Mb/s' : 'Auto-speed')}, media type is 10/100BaseTX`, 'out');
+                } else {
+                    addLine(`% Invalid interface`, 'out');
+                }
+            } else if (sub === 'controllers') {
+                const iface = targetArgs[2];
+                if (iface && node.config.interfaces[iface]) {
+                    const inf = node.config.interfaces[iface];
+                    addLine(`Interface ${iface}\nHardware is DEC21140 Fast Ethernet\nport state is ${inf.status === 'up' ? 'up' : 'down'}\n${inf.clockRate ? 'DCE V.35, clock rate ' + inf.clockRate : 'DTE V.35 transmit clock'}\nline is ${inf.duplex || 'auto'} duplex\nmedia type is ${inf.speed || 'auto'} Mbps`, 'out');
+                } else {
+                    addLine(`% Incomplete command.`, 'out');
+                }
             } else if (sub === 'ip') {
                 const sub2 = targetArgs[2];
                 if (sub2 === 'interface' && targetArgs[3] && targetArgs[3].startsWith('br')) {
@@ -2989,6 +3040,33 @@ nf.bind_listener(on_packet_receive)</textarea>
                     });
                     if (out.split('\n').length === 2) out += `(No OSPF neighbors found)\n`;
                     addLine(out, 'out');
+                } else if (sub2 === 'eigrp' && targetArgs[3] === 'neighbors') {
+                    let out = `EIGRP-IPv4 Neighbors for AS(${node.config.routing?.eigrp?.as || 1})\nH   Address                 Interface       Hold Uptime   SRTT   RTO  Q  Seq\n`;
+                    let idx = 0;
+                    this.links.filter(l => l.from === node || l.to === node).forEach(l => {
+                        const other = l.from === node ? l.to : l.from;
+                        const myPort = l.from === node ? l.fromPort : l.toPort;
+                        const otherPort = l.from === node ? l.toPort : l.fromPort;
+                        if (other.type === 'router' && other.config?.routing?.eigrp && node.config?.routing?.eigrp) {
+                            out += `${idx}   ${(other.config.interfaces[otherPort]?.ip || 'unassigned').padEnd(23)} ${myPort.padEnd(15)} 12   00:15:34  12    200  0  3\n`;
+                            idx++;
+                        }
+                    });
+                    addLine(out, 'out');
+                } else if (sub2 === 'bgp') {
+                    if (targetArgs[3] === 'summary' || targetArgs[3] === 'sum') {
+                        let out = `BGP router identifier ${node.config.interfaces['fa0/0']?.ip || '1.1.1.1'}, local AS number ${node.config.routing?.bgp?.as || 1}\nBGP table version is 4, main routing table version 4\n\nNeighbor        V    AS MsgRcvd MsgSent   TblVer  InQ OutQ Up/Down  State/PfxRcd\n`;
+                        (node.config.routing?.bgp?.neighbors || []).forEach(nbr => {
+                            out += `${nbr.ip.padEnd(15)} 4 ${nbr.as.toString().padStart(5)}      14      15        4    0    0 00:05:12        1\n`;
+                        });
+                        addLine(out, 'out');
+                    } else {
+                        let out = `BGP table version is 4, local router ID is ${node.config.interfaces['fa0/0']?.ip || '1.1.1.1'}\nStatus codes: s suppressed, d damped, h history, * valid, > best, i - internal,\n              r RIB-failure, S Stale\nOrigin codes: i - IGP, e - EGP, ? - incomplete\n\n   Network          Next Hop            Metric LocPrf Weight Path\n`;
+                        node.config.routes.filter(r => r.proto === 'bgp').forEach(r => {
+                            out += `*> ${r.dest.padEnd(16)} ${r.nextHop.padEnd(19)}      0             0 i\n`;
+                        });
+                        addLine(out, 'out');
+                    }
                 }
             } else if (sub === 'mac' && targetArgs[2] === 'address-table') {
                 let out = `          Mac Address Table\n-------------------------------------------\nVlan    Mac Address       Type        Ports\n----    -----------       ----        -----\n`;
@@ -3050,13 +3128,35 @@ nf.bind_listener(on_packet_receive)</textarea>
                 addLine("");
             } else if (effectiveBase === 'router') {
                 const protocol = effectiveArgs[1];
-                if (['rip', 'ospf', 'bgp'].includes(protocol)) {
+                if (['rip', 'ospf', 'bgp', 'eigrp'].includes(protocol)) {
                     node.cliMode = `config-router`;
                     node.currentRouterProto = protocol;
+                    const asOrPid = effectiveArgs[2] || '1';
                     node.config.routing = node.config.routing || {};
-                    node.config.routing[protocol] = node.config.routing[protocol] || { networks: [], neighbors: [] };
+                    node.config.routing[protocol] = node.config.routing[protocol] || { networks: [], neighbors: [], as: asOrPid };
                     addLine("");
                 } else addLine("% Invalid routing protocol.", "out");
+            } else if (effectiveBase === 'line' && targetArgs[1] === 'vty') {
+                node.cliMode = 'config-line';
+                node.config.lines = node.config.lines || { vty: { transport: 'all' } };
+                addLine("");
+            } else if (effectiveBase === 'ip' && targetArgs[1] === 'domain-lookup') {
+                node.config.dns = node.config.dns || {};
+                node.config.dns.enabled = true;
+                addLine("");
+            } else if (effectiveBase === 'no' && targetArgs[1] === 'ip' && targetArgs[2] === 'domain-lookup') {
+                node.config.dns = node.config.dns || {};
+                node.config.dns.enabled = false;
+                addLine("");
+            } else if (effectiveBase === 'ip' && targetArgs[1] === 'name-server') {
+                node.config.dns = node.config.dns || {};
+                node.config.dns.server = targetArgs[2];
+                addLine("");
+            } else if (effectiveBase === 'ip' && targetArgs[1] === 'host') {
+                node.config.dns = node.config.dns || {};
+                node.config.dns.hosts = node.config.dns.hosts || {};
+                node.config.dns.hosts[targetArgs[2]] = targetArgs[3];
+                addLine("");
             } else {
                 addLine("% Unrecognized command.", "out");
             }
@@ -3076,10 +3176,17 @@ nf.bind_listener(on_packet_receive)</textarea>
                     } else {
                         node.config.routing.ospf.networks.push(netObj);
                     }
+                } else if (node.currentRouterProto === 'bgp') {
+                    const ip = targetArgs[1];
+                    let mask = '255.255.255.0';
+                    if (targetArgs[2] === 'mask') mask = targetArgs[3];
+                    const netObj = { ip, mask };
+                    node.config.routing.bgp.networks.push(netObj);
                 } else {
                     const net = targetArgs[1];
-                    if (!node.config.routing.rip.networks.includes(net)) {
-                        node.config.routing.rip.networks.push(net);
+                    const proto = node.currentRouterProto; // rip or eigrp
+                    if (!node.config.routing[proto].networks.includes(net)) {
+                        node.config.routing[proto].networks.push(net);
                     }
                 }
                 this.computeTopologyRouting();
@@ -3090,9 +3197,16 @@ nf.bind_listener(on_packet_receive)</textarea>
                     node.config.routing.rip.version = parseInt(ver) || 2;
                 }
                 addLine("");
+            } else if (targetBaseCmd === 'neighbor') {
+                if (node.currentRouterProto === 'bgp' && targetArgs[2] === 'remote-as') {
+                    node.config.routing.bgp.neighbors.push({ ip: targetArgs[1], as: targetArgs[3] });
+                }
+                addLine("");
             } else if (targetBaseCmd === 'no' && targetArgs[1] === 'auto-summary') {
                 if (node.currentRouterProto === 'rip') {
                     node.config.routing.rip.autoSummary = false;
+                } else if (node.currentRouterProto === 'eigrp') {
+                    node.config.routing.eigrp.autoSummary = false;
                 }
                 addLine("");
             } else if (targetBaseCmd === 'exit') {
@@ -3123,10 +3237,35 @@ nf.bind_listener(on_packet_receive)</textarea>
                 this.computeTopologyRouting();
                 addLine("");
             } else if (targetBaseCmd === 'switchport' || targetBaseCmd === 'sw') {
-                const vid = targetArgs[3];
-                node.config.interfaces[node.currentIf].vlan = vid;
-                node.config.vlans[vid] = node.config.vlans[vid] || { name: `VLAN${vid}`, ports: [] };
-                if (!node.config.vlans[vid].ports.includes(node.currentIf)) node.config.vlans[vid].ports.push(node.currentIf);
+                if (targetArgs[1] === 'mode' && (targetArgs[2] === 'access' || targetArgs[2] === 'trunk')) {
+                    node.config.interfaces[node.currentIf].switchportMode = targetArgs[2];
+                    addLine("");
+                } else if (targetArgs[1] === 'access' && targetArgs[2] === 'vlan') {
+                    const vid = targetArgs[3];
+                    node.config.interfaces[node.currentIf].vlan = vid;
+                    node.config.interfaces[node.currentIf].switchportMode = 'access';
+                    node.config.vlans[vid] = node.config.vlans[vid] || { name: `VLAN${vid}`, ports: [] };
+                    if (!node.config.vlans[vid].ports.includes(node.currentIf)) node.config.vlans[vid].ports.push(node.currentIf);
+                    addLine("");
+                } else {
+                    addLine("% Invalid switchport command.", "out");
+                }
+            } else if (targetBaseCmd === 'speed') {
+                if (['10', '100', '1000', 'auto'].includes(targetArgs[1])) {
+                    node.config.interfaces[node.currentIf].speed = targetArgs[1];
+                    addLine("");
+                } else {
+                    addLine("% Invalid speed. Use 10, 100, 1000, or auto.", "out");
+                }
+            } else if (targetBaseCmd === 'duplex') {
+                if (['half', 'full', 'auto'].includes(targetArgs[1])) {
+                    node.config.interfaces[node.currentIf].duplex = targetArgs[1];
+                    addLine("");
+                } else {
+                    addLine("% Invalid duplex. Use half, full, or auto.", "out");
+                }
+            } else if (targetBaseCmd === 'clock' && targetArgs[1] === 'rate') {
+                node.config.interfaces[node.currentIf].clockRate = targetArgs[2];
                 addLine("");
             } else if (targetBaseCmd === 'description' || targetBaseCmd === 'desc') {
                 node.config.interfaces[node.currentIf].desc = targetCmd.substring(targetBaseCmd.length + 1);
@@ -3147,10 +3286,27 @@ nf.bind_listener(on_packet_receive)</textarea>
                 addLine("");
             }
         }
+
+        // Line Config
+        else if (node.cliMode === 'config-line') {
+            if (targetBaseCmd === 'transport' && targetArgs[1] === 'input') {
+                node.config.lines.vty.transport = targetArgs.slice(2).join(' ');
+                addLine("");
+            } else if (targetBaseCmd === 'exit') {
+                node.cliMode = 'config';
+                addLine("");
+            } else {
+                addLine("% Unrecognized command.", "out");
+            }
+        }
  
         // Execution Commands (Ping)
         else if (targetBaseCmd === 'ping') {
-            const targetIp = targetArgs[1];
+            let targetIp = targetArgs[1];
+            if (node.config.dns && node.config.dns.hosts && node.config.dns.hosts[targetIp]) {
+                targetIp = node.config.dns.hosts[targetIp];
+            }
+
             if (!targetIp) { addLine("% Incomplete command.", "out"); return; }
             addLine(`Sending 5, 100-byte ICMP Echos to ${targetIp}, timeout is 2 seconds:`, 'out');
  
@@ -3169,9 +3325,13 @@ nf.bind_listener(on_packet_receive)</textarea>
                 });
             }
         }
-
-        else if (targetBaseCmd === 'traceroute') {
-            addLine(`Tracing the route to ${targetArgs[1]}\n  1  192.168.1.1  1 msec  1 msec  1 msec\n  2  10.0.0.1  2 msec  *  2 msec`, "out");
+ 
+        else if (targetBaseCmd === 'traceroute' || targetBaseCmd === 'tracert') {
+            let targetIp = targetArgs[1];
+            if (node.config.dns && node.config.dns.hosts && node.config.dns.hosts[targetIp]) {
+                targetIp = node.config.dns.hosts[targetIp];
+            }
+            addLine(`Tracing the route to ${targetIp}\n  1  192.168.1.1  1 msec  1 msec  1 msec\n  2  10.0.0.1  2 msec  *  2 msec`, "out");
         }
 
         else if (targetBaseCmd === '?' || targetBaseCmd === 'help') {
