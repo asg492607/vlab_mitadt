@@ -2821,10 +2821,20 @@ nf.bind_listener(on_packet_receive)</textarea>
         }
 
         // Record CLI command execution
+        // Record CLI command execution
+        let recSuffix = '>';
+        if (node.cliMode === 'privileged') recSuffix = '#';
+        if (node.cliMode === 'config') recSuffix = '(config)#';
+        if (node.cliMode === 'config-if') recSuffix = `(config-if)#`;
+        if (node.cliMode === 'config-vlan') recSuffix = `(config-vlan)#`;
+        if (node.cliMode === 'config-router') recSuffix = `(config-router)#`;
+        if (node.cliMode === 'config-line') recSuffix = `(config-line)#`;
+        const recPrompt = (node.label || node.type.toUpperCase()) + recSuffix;
+
         window.vlabTypedCommands = window.vlabTypedCommands || [];
         window.vlabTypedCommands.push({
             host: node.label || node.type.toUpperCase(),
-            cmd: cmd,
+            cmd: `${recPrompt} ${cmd}`,
             timestamp: new Date().toLocaleTimeString()
         });
 
