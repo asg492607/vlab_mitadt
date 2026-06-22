@@ -983,6 +983,23 @@ class TopologySimulation {
                         <div class="props-header">Device Properties <button onclick="this.parentElement.parentElement.style.display='none'">×</button></div>
                         <div id="props-body" class="props-body"></div>
                     </div>
+                    <div id="pdu-list-panel" class="pdu-list-panel" style="display:flex; flex-direction:column; position:absolute; bottom:40px; right:20px; width:350px; max-height:200px; background:#1e293b; border:1px solid #475569; border-radius:8px; overflow-y:auto; box-shadow: 0 4px 15px rgba(0,0,0,0.5); z-index:1001; font-family:'JetBrains Mono', monospace; font-size:11px; color:#cbd5e1;">
+                        <div style="position:sticky; top:0; background:#0f172a; padding:6px 12px; border-bottom:1px solid #475569; font-weight:bold; color:#fbbf24; display:flex; justify-content:space-between; align-items:center;">
+                            Simulation PDU List
+                            <button onclick="document.getElementById('pdu-list-panel').style.display='none'" style="background:transparent; border:none; color:#ef4444; cursor:pointer;">✖</button>
+                        </div>
+                        <table id="pduTable" style="width:100%; border-collapse:collapse; text-align:left;">
+                            <thead>
+                                <tr style="border-bottom:1px solid #475569;">
+                                    <th style="padding:4px 8px;">Source</th>
+                                    <th style="padding:4px 8px;">Destination</th>
+                                    <th style="padding:4px 8px;">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="pduTableBody">
+                            </tbody>
+                        </table>
+                    </div>
                     <div class="scanlines"></div>
                 </main>
             </div>
@@ -1385,15 +1402,36 @@ class TopologySimulation {
 
                     this.showHint(`Initiating packet from ${src.label} to ${dst.label}...`);
                     
+                    const logPDU = (s, d, status, color) => {
+                        const panel = document.getElementById('pdu-list-panel');
+                        const tbody = document.getElementById('pduTableBody');
+                        if (panel && tbody) {
+                            panel.style.display = 'flex';
+                            panel.style.flexDirection = 'column';
+                            const tr = document.createElement('tr');
+                            tr.style.borderBottom = '1px solid #334155';
+                            tr.innerHTML = `
+                                <td style="padding:4px 8px;">${s.label}</td>
+                                <td style="padding:4px 8px;">${d.label}</td>
+                                <td style="padding:4px 8px; color:${color}; font-weight:bold;">${status}</td>
+                            `;
+                            tbody.prepend(tr);
+                        }
+                    };
+
                     const path = this.findL2Path(src, dst);
                     if (path && path.length >= 2) {
+                        logPDU(src, dst, "In Progress", "#eab308");
+                        const pduRow = document.getElementById('pduTableBody').firstElementChild;
                         this.animatePathPackets(path, true, 'ICMP', () => {
                             const reversePath = [...path].reverse();
                             this.animatePathPackets(reversePath, true, 'ICMP', () => {
                                 this.showHint(`Success! Packet reply received back at ${src.label}.`);
+                                if (pduRow) pduRow.children[2].innerHTML = `<span style="color:#10b981;">Successful</span>`;
                             });
                         });
                     } else {
+                        logPDU(src, dst, "Failed", "#ef4444");
                         this.animatePacketStep(src, src, false, 'ARP', () => {
                             this.showHint(`Failed: No physical cabling path between ${src.label} and ${dst.label}!`);
                         });
@@ -1890,19 +1928,19 @@ nf.bind_listener(on_packet_receive)</textarea>
                         </div>
                         <div style="display: flex; flex-direction: column; gap: 4px;">
                             <label style="font-size: 11px; color: #cbd5e1;">IP Address</label>
-                            <input type="text" id="ip-address" value="\${node.config.interfaces['eth0'].ip === 'unassigned' ? '' : node.config.interfaces['eth0'].ip}" style="background: #1e293b; border: 1px solid #334155; color: #fff; padding: 6px 10px; border-radius: 4px; font-size: 12px;">
+                            <input type="text" id="ip-address" value="${node.config.interfaces['eth0'].ip === 'unassigned' ? '' : node.config.interfaces['eth0'].ip}" style="background: #1e293b; border: 1px solid #334155; color: #fff; padding: 6px 10px; border-radius: 4px; font-size: 12px;">
                         </div>
                         <div style="display: flex; flex-direction: column; gap: 4px;">
                             <label style="font-size: 11px; color: #cbd5e1;">Subnet Mask</label>
-                            <input type="text" id="ip-mask" value="\${node.config.interfaces['eth0'].mask === 'unassigned' ? '' : node.config.interfaces['eth0'].mask}" style="background: #1e293b; border: 1px solid #334155; color: #fff; padding: 6px 10px; border-radius: 4px; font-size: 12px;">
+                            <input type="text" id="ip-mask" value="${node.config.interfaces['eth0'].mask === 'unassigned' ? '' : node.config.interfaces['eth0'].mask}" style="background: #1e293b; border: 1px solid #334155; color: #fff; padding: 6px 10px; border-radius: 4px; font-size: 12px;">
                         </div>
                         <div style="display: flex; flex-direction: column; gap: 4px;">
                             <label style="font-size: 11px; color: #cbd5e1;">Default Gateway</label>
-                            <input type="text" id="ip-gateway" value="\${node.config.gateway || ''}" style="background: #1e293b; border: 1px solid #334155; color: #fff; padding: 6px 10px; border-radius: 4px; font-size: 12px;">
+                            <input type="text" id="ip-gateway" value="${node.config.gateway || ''}" style="background: #1e293b; border: 1px solid #334155; color: #fff; padding: 6px 10px; border-radius: 4px; font-size: 12px;">
                         </div>
                         <div style="display: flex; flex-direction: column; gap: 4px;">
                             <label style="font-size: 11px; color: #cbd5e1;">DNS Server</label>
-                            <input type="text" id="ip-dns" value="\${node.config.dns || ''}" style="background: #1e293b; border: 1px solid #334155; color: #fff; padding: 6px 10px; border-radius: 4px; font-size: 12px;">
+                            <input type="text" id="ip-dns" value="${node.config.dns || ''}" style="background: #1e293b; border: 1px solid #334155; color: #fff; padding: 6px 10px; border-radius: 4px; font-size: 12px;">
                         </div>
                         <button id="btn-save-ip" style="background: #2563eb; color: #fff; border: none; padding: 8px 16px; border-radius: 4px; font-size: 12px; cursor: pointer; margin-top: 10px; font-weight: bold;">Apply Configuration</button>
                     </div>
@@ -2006,7 +2044,7 @@ nf.bind_listener(on_packet_receive)</textarea>
         `;
 
         // Initialize Services Config for Servers
-        if (isServer) {
+        if (node.type === 'server') {
             node.config.services = node.config.services || {
                 http: { enabled: true, indexHtml: '<h1>Welcome to NetForge Server!</h1><p>HTTP service is running successfully.</p>' },
                 dns: { enabled: true, records: [{ domain: 'www.google.com', ip: node.config.interfaces['eth0'].ip === 'unassigned' ? '192.168.1.10' : node.config.interfaces['eth0'].ip }] }
@@ -2023,7 +2061,7 @@ nf.bind_listener(on_packet_receive)</textarea>
                 tabContents.forEach(c => c.style.display = 'none');
                 btn.classList.add('active');
                 const target = btn.dataset.tab;
-                configContent.querySelector(`#tab-\${target}`).style.display = target === 'services' ? 'flex' : 'block';
+                configContent.querySelector(`#tab-${target}`).style.display = target === 'services' ? 'flex' : 'block';
             };
         });
 
@@ -2032,7 +2070,7 @@ nf.bind_listener(on_packet_receive)</textarea>
         appIcons.forEach(icon => {
             icon.onclick = () => {
                 const app = icon.dataset.app;
-                configContent.querySelector(`#app-\${app}`).style.display = 'flex';
+                configContent.querySelector(`#app-${app}`).style.display = 'flex';
                 if (app === 'terminal') {
                     setTimeout(() => configContent.querySelector('#hostTerminalInput').focus(), 100);
                 }
@@ -2202,7 +2240,7 @@ nf.bind_listener(on_packet_receive)</textarea>
                     // Add command line
                     const cmdLine = document.createElement('div');
                     cmdLine.style.color = '#10b981';
-                    cmdLine.innerHTML = `<span style="color:#10b981; font-weight:bold;">PC&gt;</span> \${cmd}`;
+                    cmdLine.innerHTML = `<span style="color:#10b981; font-weight:bold;">PC&gt;</span> ${cmd}`;
                     hostArea.insertBefore(cmdLine, hostArea.querySelector('.host-terminal-line-wrap'));
 
                     const addLine = (txt, color = '#cbd5e1') => {
@@ -2218,25 +2256,26 @@ nf.bind_listener(on_packet_receive)</textarea>
                     const base = args[0];
 
                     if (base === 'ipconfig') {
-                        addLine(`\\nFastEthernet0 Connection:\\n  Link-local IPv6 Address.........: fe80::201:c9ff:fe4f:8a33\\n  IPv4 Address....................: \${node.config.interfaces['eth0'].ip}\\n  Subnet Mask.....................: \${node.config.interfaces['eth0'].mask}\\n  Default Gateway.................: \${node.config.gateway || '0.0.0.0'}\\n  DNS Server......................: \${node.config.dns || '0.0.0.0'}\\n`);
+                        addLine(`\\nFastEthernet0 Connection:\\n  Link-local IPv6 Address.........: fe80::201:c9ff:fe4f:8a33\\n  IPv4 Address....................: ${node.config.interfaces['eth0'].ip}\\n  Subnet Mask.....................: ${node.config.interfaces['eth0'].mask}\\n  Default Gateway.................: ${node.config.gateway || '0.0.0.0'}\\n  DNS Server......................: ${node.config.dns || '0.0.0.0'}\\n`);
                     } else if (base === 'ping') {
                         const targetIp = args[1];
                         if (!targetIp) {
                             addLine(`Usage: ping <ip_address>`);
                             return;
                         }
-                        addLine(`Pinging \${targetIp} with 32 bytes of data:`);
+                        addLine(`Pinging ${targetIp} with 32 bytes of data:`);
                         const path = this.tracePath(node, targetIp);
                         if (path && path.length >= 2) {
                             this.animatePathPackets(path, true, 'ICMP', () => {
                                 const rev = [...path].reverse();
                                 this.animatePathPackets(rev, true, 'ICMP', () => {
-                                    addLine(`Reply from \${targetIp}: bytes=32 time=10ms TTL=128\\nReply from \${targetIp}: bytes=32 time=8ms TTL=128\\nReply from \${targetIp}: bytes=32 time=9ms TTL=128\\nReply from \${targetIp}: bytes=32 time=10ms TTL=128\\n\\nPing statistics for \${targetIp}:\\n    Packets: Sent = 4, Received = 4, Lost = 0 (0% loss)`);
+                                    addLine(`Reply from ${targetIp}: bytes=32 time=10ms TTL=128\\nReply from ${targetIp}: bytes=32 time=8ms TTL=128\\nReply from ${targetIp}: bytes=32 time=9ms TTL=128\\nReply from ${targetIp}: bytes=32 time=10ms TTL=128\\n\\nPing statistics for ${targetIp}:\\n    Packets: Sent = 4, Received = 4, Lost = 0 (0% loss)`);
                                 });
                             });
                         } else {
                             this.animatePacketStep(node, node, false, 'ARP', () => {
-                                addLine(`Request timed out.\\nRequest timed out.\\nRequest timed out.\\nRequest timed out.\\n\\nPing statistics for \${targetIp}:\\n    Packets: Sent = 4, Received = 0, Lost = 4 (100% loss)`);
+                                addLine(`Request timed out.\\nRequest timed out.\\nRequest timed out.\\nRequest timed out.\\n\\nPing statistics for ${targetIp}:\\n    Packets: Sent = 4, Received = 0, Lost = 4 (100% loss)`);
+                                addLine(`Request timed out.\nRequest timed out.\nRequest timed out.\nRequest timed out.\n\nPing statistics for ${targetIp}:\n    Packets: Sent = 4, Received = 0, Lost = 4 (100% loss)`);
                             });
                         }
                     } else if (base === 'nslookup') {
@@ -2246,7 +2285,7 @@ nf.bind_listener(on_packet_receive)</textarea>
                             return;
                         }
                         if (!node.config.dns) {
-                            addLine(`*** DNS request timed out.\\n    timeout was 2 seconds.\\n*** Can't find server address for '\${host}'`);
+                            addLine(`*** DNS request timed out.\n    timeout was 2 seconds.\n*** Can't find server address for '${host}'`);
                             return;
                         }
                         // Find dns server node
@@ -2257,9 +2296,9 @@ nf.bind_listener(on_packet_receive)</textarea>
                         }
                         const record = dnsServer.config.services.dns.records.find(r => r.domain === host);
                         if (record) {
-                            addLine(`Server:  \${dnsServer.label}\\nAddress:  \${dnsServer.config.interfaces['eth0'].ip}\\n\\nName:    \${host}\\nAddress:  \${record.ip}`);
+                            addLine(`Server:  ${dnsServer.label}\\nAddress:  ${dnsServer.config.interfaces['eth0'].ip}\\n\\nName:    ${host}\\nAddress:  ${record.ip}`);
                         } else {
-                            addLine(`Server:  \${dnsServer.label}\\nAddress:  \${dnsServer.config.interfaces['eth0'].ip}\\n\\n*** \${dnsServer.label} can't find \${host}: Non-existent domain`);
+                            addLine(`Server:  ${dnsServer.label}\\nAddress:  ${dnsServer.config.interfaces['eth0'].ip}\\n\\n*** ${dnsServer.label} can't find ${host}: Non-existent domain`);
                         }
                     } else if (base === 'tracert') {
                         const targetIp = args[1];
@@ -2267,17 +2306,17 @@ nf.bind_listener(on_packet_receive)</textarea>
                             addLine(`Usage: tracert <ip_address>`);
                             return;
                         }
-                        addLine(`Tracing route to \${targetIp} over a maximum of 30 hops:\\n`);
+                        addLine(`Tracing route to ${targetIp} over a maximum of 30 hops:\\n`);
                         const path = this.tracePath(node, targetIp);
                         if (path && path.length >= 2) {
                             let hopIdx = 1;
                             path.forEach((n, idx) => {
                                 if (idx > 0 && n.type === 'router') {
                                     const iface = Object.keys(n.config.interfaces).find(k => n.config.interfaces[k].ip !== 'unassigned');
-                                    addLine(`  \${hopIdx++}    2 ms    1 ms    2 ms    \${n.config.interfaces[iface]?.ip || n.label}`);
+                                    addLine(`  ${hopIdx++}    2 ms    1 ms    2 ms    ${n.config.interfaces[iface]?.ip || n.label}`);
                                 }
                             });
-                            addLine(`  \${hopIdx}    4 ms    3 ms    4 ms    \${targetIp}\\nTrace complete.`);
+                            addLine(`  ${hopIdx}    4 ms    3 ms    4 ms    ${targetIp}\\nTrace complete.`);
                         } else {
                             addLine(`  1    *        *        *     Request timed out.`);
                         }
@@ -2287,7 +2326,7 @@ nf.bind_listener(on_packet_receive)</textarea>
                             if (d.className !== 'host-terminal-line-wrap') d.remove();
                         });
                     } else {
-                        addLine(`'\${base}' is not recognized as an internal or external command, operable program or batch file.`);
+                        addLine(`'${base}' is not recognized as an internal or external command, operable program or batch file.`);
                     }
 
                     hostArea.scrollTop = hostArea.scrollHeight;
@@ -2357,7 +2396,7 @@ nf.bind_listener(on_packet_receive)</textarea>
         }
 
         // Server Services logic (HTTP & DNS config panel)
-        if (isServer) {
+        if (node.type === 'server') {
             const serviceBtns = configContent.querySelectorAll('.service-menu-btn');
             const panelContent = configContent.querySelector('#service-panel-content');
 
