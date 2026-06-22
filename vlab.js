@@ -226,15 +226,13 @@ const generatePDFReport = async (labId) => {
         const wasActive = section?.classList.contains('active');
         
         try {
-            // 1. Prioritize Direct Canvas Export for Sim/Topo (100% Reliable)
-            if (elementId === 'simCanvas' || elementId === 'topology-builder-ui') {
+            // 1. Prioritize Direct Canvas Export for SimCanvas
+            if (elementId === 'simCanvas') {
                 const canvas = element.querySelector('canvas') || (element.tagName === 'CANVAS' ? element : null);
                 if (canvas) {
                     // Force a re-render to ensure current state is captured
                     if (window.currentSim) window.currentSim.drawPerformanceGraphs();
-                    if (window.currentTopo) window.currentTopo.render();
 
-                    // Create a temporary canvas to draw a white background (JPEG doesn't support transparency)
                     const tempCanvas = document.createElement('canvas');
                     tempCanvas.width = canvas.width;
                     tempCanvas.height = canvas.height;
@@ -242,6 +240,24 @@ const generatePDFReport = async (labId) => {
                     ctx.fillStyle = '#ffffff';
                     ctx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
                     ctx.drawImage(canvas, 0, 0);
+
+                    // Dark mode to Light mode filter for PDF
+                    const imgDataRaw = ctx.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
+                    const data = imgDataRaw.data;
+                    for (let i = 0; i < data.length; i += 4) {
+                        const r = data[i], g = data[i+1], b = data[i+2];
+                        if (r < 60 && g < 60 && b < 65) { 
+                            // Convert dark backgrounds to white
+                            data[i] = 255; data[i+1] = 255; data[i+2] = 255;
+                        } else if (r > 200 && g > 200 && b > 200) { 
+                            // Convert white text to black
+                            data[i] = 0; data[i+1] = 0; data[i+2] = 0;
+                        } else if (r > 150 && g > 150 && b > 150 && Math.abs(r-g)<15 && Math.abs(g-b)<15) {
+                            // Convert light grey text to dark grey
+                            data[i] = 50; data[i+1] = 50; data[i+2] = 50;
+                        }
+                    }
+                    ctx.putImageData(imgDataRaw, 0, 0);
 
                     const imgData = tempCanvas.toDataURL('image/jpeg', 0.9);
                     pdf.setFont("helvetica", "bold"); pdf.setFontSize(12);
