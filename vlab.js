@@ -2834,8 +2834,48 @@ nf.bind_listener(on_packet_receive)</textarea>
         }
 
         // Global Commands
+        if (targetBaseCmd === 'clear' && targetArgs[1] === 'ip' && targetArgs[2] === 'route' && targetArgs[3] === '*') {
+            node.config.routes = [];
+            this.computeTopologyRouting();
+            addLine("");
+            return;
+        }
+
         if (targetBaseCmd === 'clear' || targetBaseCmd === 'cls') {
             area.querySelectorAll('.terminal-line').forEach(l => l.remove());
+            return;
+        }
+
+        if (targetBaseCmd === 'debug' && targetArgs[1] === 'ip' && targetArgs[2] === 'rip') {
+            node.debugRip = true;
+            addLine("RIP protocol debugging is on", "out");
+            const simDebug = () => {
+                if (!node.debugRip || !this.isRunning) return;
+                const activeIf = Object.keys(node.config.interfaces).find(k => node.config.interfaces[k].status === 'up' && node.config.interfaces[k].ip !== 'unassigned');
+                if (activeIf && node.el && node.el.querySelector('.terminal-area')) {
+                    const debugArea = node.el.querySelector('.terminal-area');
+                    const dLine = document.createElement('div');
+                    dLine.className = 'terminal-line';
+                    dLine.style.color = '#cbd5e1';
+                    dLine.innerHTML = `RIP: sending v2 update to 224.0.0.9 via ${activeIf}`;
+                    debugArea.insertBefore(dLine, debugArea.querySelector('.terminal-line-wrap'));
+                    
+                    const dLine2 = document.createElement('div');
+                    dLine2.className = 'terminal-line';
+                    dLine2.style.color = '#cbd5e1';
+                    dLine2.innerHTML = `RIP: build update entries`;
+                    debugArea.insertBefore(dLine2, debugArea.querySelector('.terminal-line-wrap'));
+                    debugArea.scrollTop = debugArea.scrollHeight;
+                }
+                if (node.debugRip) setTimeout(simDebug, 10000 + Math.random() * 5000);
+            };
+            setTimeout(simDebug, 2000);
+            return;
+        }
+
+        if (targetBaseCmd === 'undebug' && targetArgs[1] === 'all') {
+            node.debugRip = false;
+            addLine("All possible debugging has been turned off", "out");
             return;
         }
 
@@ -2921,6 +2961,34 @@ nf.bind_listener(on_packet_receive)</textarea>
                     addLine(out, 'out');
                 } else if (sub2 === 'arp') {
                     addLine("Protocol  Address          Age (min)  Hardware Addr   Type   Interface\nInternet  192.168.1.1             -   000c.294f.8a33  ARPA   FastEthernet0/0", "out");
+                } else if (sub2 === 'protocols') {
+                    let out = '';
+                    if (node.config?.routing?.rip) {
+                        out += `Routing Protocol is "rip"\n  Outgoing update filter list for all interfaces is not set\n  Incoming update filter list for all interfaces is not set\n  Sending updates every 30 seconds, next due in 15 seconds\n  Invalid after 180 seconds, hold down 180, flushed after 240\n  Redistributing: rip\n  Default version control: send version 2, receive version 2\n    Interface             Send  Recv  Triggered RIP  Key-chain\n    FastEthernet0/0       2     2\n  Automatic network summarization is ${node.config.routing.rip.autoSummary === false ? 'not in effect' : 'in effect'}\n  Maximum path: 4\n  Routing for Networks:\n`;
+                        (node.config.routing.rip.networks || []).forEach(n => out += `    ${n}\n`);
+                        out += `  Routing Information Sources:\n    Gateway         Distance      Last Update\n`;
+                        out += `  Distance: (default is 120)\n\n`;
+                    }
+                    if (node.config?.routing?.ospf) {
+                        out += `Routing Protocol is "ospf 1"\n  Outgoing update filter list for all interfaces is not set\n  Incoming update filter list for all interfaces is not set\n  Router ID ${node.config.interfaces['fa0/0']?.ip || '1.1.1.1'}\n  Number of areas in this router is 1. 1 normal 0 stub 0 nssa\n  Maximum path: 4\n  Routing for Networks:\n`;
+                        (node.config.routing.ospf.networks || []).forEach(n => out += `    ${n.ip} ${n.wildcard} area ${n.area}\n`);
+                        out += `  Routing Information Sources:\n    Gateway         Distance      Last Update\n`;
+                        out += `  Distance: (default is 110)\n`;
+                    }
+                    if (!out) out = 'No routing protocols configured.';
+                    addLine(out, 'out');
+                } else if (sub2 === 'ospf' && targetArgs[3] === 'neighbor') {
+                    let out = `Neighbor ID     Pri   State           Dead Time   Address         Interface\n`;
+                    this.links.filter(l => l.from === node || l.to === node).forEach(l => {
+                        const other = l.from === node ? l.to : l.from;
+                        const myPort = l.from === node ? l.fromPort : l.toPort;
+                        const otherPort = l.from === node ? l.toPort : l.fromPort;
+                        if (other.type === 'router' && other.config?.routing?.ospf && node.config?.routing?.ospf) {
+                            out += `${(other.config.interfaces['fa0/0']?.ip || '1.1.1.1').padEnd(15)} 1     FULL/BDR        00:00:34    ${(other.config.interfaces[otherPort]?.ip || 'unassigned').padEnd(15)} ${myPort}\n`;
+                        }
+                    });
+                    if (out.split('\n').length === 2) out += `(No OSPF neighbors found)\n`;
+                    addLine(out, 'out');
                 }
             } else if (sub === 'mac' && targetArgs[2] === 'address-table') {
                 let out = `          Mac Address Table\n-------------------------------------------\nVlan    Mac Address       Type        Ports\n----    -----------       ----        -----\n`;
