@@ -2829,6 +2829,7 @@ nf.bind_listener(on_packet_receive)</textarea>
         if (node.cliMode === 'config-vlan') recSuffix = `(config-vlan)#`;
         if (node.cliMode === 'config-router') recSuffix = `(config-router)#`;
         if (node.cliMode === 'config-line') recSuffix = `(config-line)#`;
+        if (node.cliMode === 'dhcp-config') recSuffix = `(dhcp-config)#`;
         const recPrompt = (node.label || node.type.toUpperCase()) + recSuffix;
 
         window.vlabTypedCommands = window.vlabTypedCommands || [];
@@ -3163,6 +3164,12 @@ nf.bind_listener(on_packet_receive)</textarea>
                 node.config.dns = node.config.dns || {};
                 node.config.dns.enabled = true;
                 addLine("");
+            } else if (effectiveBase === 'ip' && targetArgs[1] === 'dhcp' && targetArgs[2] === 'pool') {
+                node.cliMode = 'dhcp-config';
+                node.currentDhcpPool = targetArgs[3];
+                node.config.dhcp = node.config.dhcp || {};
+                node.config.dhcp[targetArgs[3]] = node.config.dhcp[targetArgs[3]] || {};
+                addLine("");
             } else if (effectiveBase === 'no' && targetArgs[1] === 'ip' && targetArgs[2] === 'domain-lookup') {
                 node.config.dns = node.config.dns || {};
                 node.config.dns.enabled = false;
@@ -3248,13 +3255,44 @@ nf.bind_listener(on_packet_receive)</textarea>
                 this.computeTopologyRouting();
                 addLine(`%LINK-5-CHANGED: Interface ${node.currentIf}, changed state to administratively down`, 'out');
             } else if (targetBaseCmd === 'ip' && targetArgs[1] === 'address') {
-                const ip = targetArgs[2];
-                const mask = targetArgs[3] || '255.255.255.0';
-                node.ip = ip;
-                node.config.interfaces[node.currentIf].ip = ip;
-                node.config.interfaces[node.currentIf].mask = mask;
-                this.computeTopologyRouting();
-                addLine("");
+                if (targetArgs[2] === 'dhcp') {
+                    node.config.interfaces[node.currentIf].ip = 'dhcp';
+                    node.config.interfaces[node.currentIf].mask = 'dhcp';
+                    addLine("");
+                    setTimeout(() => {
+                        if (!this.isRunning) return;
+                        const server = this.nodes.find(n => n.type === 'router' && n.config.dhcp && Object.keys(n.config.dhcp).length > 0);
+                        if (server) {
+                            const pool = Object.values(server.config.dhcp)[0];
+                            const baseIp = pool.network ? pool.network.split('.').slice(0, 3).join('.') : '192.168.1';
+                            const assigned = `${baseIp}.${Math.floor(Math.random() * 200) + 10}`;
+                            node.ip = assigned;
+                            node.config.interfaces[node.currentIf].ip = assigned;
+                            node.config.interfaces[node.currentIf].mask = pool.mask || '255.255.255.0';
+                            node.config.interfaces[node.currentIf].gateway = pool.defaultRouter || '';
+                            node.config.dns = node.config.dns || {};
+                            node.config.dns.server = pool.dnsServer || '';
+                            if (node.el && node.el.querySelector('.terminal-area')) {
+                                const debugArea = node.el.querySelector('.terminal-area');
+                                const dLine = document.createElement('div');
+                                dLine.className = 'terminal-line';
+                                dLine.style.color = '#cbd5e1';
+                                dLine.innerHTML = `\\n%DHCP-6-ADDRESS_ASSIGN: Interface ${node.currentIf} assigned DHCP address ${assigned}, mask ${node.config.interfaces[node.currentIf].mask}`;
+                                debugArea.insertBefore(dLine, debugArea.querySelector('.terminal-line-wrap'));
+                                debugArea.scrollTop = debugArea.scrollHeight;
+                            }
+                            this.computeTopologyRouting();
+                        }
+                    }, 3000);
+                } else {
+                    const ip = targetArgs[2];
+                    const mask = targetArgs[3] || '255.255.255.0';
+                    node.ip = ip;
+                    node.config.interfaces[node.currentIf].ip = ip;
+                    node.config.interfaces[node.currentIf].mask = mask;
+                    this.computeTopologyRouting();
+                    addLine("");
+                }
             } else if (targetBaseCmd === 'switchport' || targetBaseCmd === 'sw') {
                 if (targetArgs[1] === 'mode' && (targetArgs[2] === 'access' || targetArgs[2] === 'trunk')) {
                     node.config.interfaces[node.currentIf].switchportMode = targetArgs[2];
@@ -3310,6 +3348,26 @@ nf.bind_listener(on_packet_receive)</textarea>
         else if (node.cliMode === 'config-line') {
             if (targetBaseCmd === 'transport' && targetArgs[1] === 'input') {
                 node.config.lines.vty.transport = targetArgs.slice(2).join(' ');
+                addLine("");
+            } else if (targetBaseCmd === 'exit') {
+                node.cliMode = 'config';
+                addLine("");
+            } else {
+                addLine("% Unrecognized command.", "out");
+            }
+        }
+        
+        // DHCP Config
+        else if (node.cliMode === 'dhcp-config') {
+            if (targetBaseCmd === 'network') {
+                node.config.dhcp[node.currentDhcpPool].network = targetArgs[1];
+                node.config.dhcp[node.currentDhcpPool].mask = targetArgs[2] || '255.255.255.0';
+                addLine("");
+            } else if (targetBaseCmd === 'default-router') {
+                node.config.dhcp[node.currentDhcpPool].defaultRouter = targetArgs[1];
+                addLine("");
+            } else if (targetBaseCmd === 'dns-server') {
+                node.config.dhcp[node.currentDhcpPool].dnsServer = targetArgs[1];
                 addLine("");
             } else if (targetBaseCmd === 'exit') {
                 node.cliMode = 'config';
