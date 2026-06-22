@@ -234,7 +234,16 @@ const generatePDFReport = async (labId) => {
                     if (window.currentSim) window.currentSim.drawPerformanceGraphs();
                     if (window.currentTopo) window.currentTopo.render();
 
-                    const imgData = canvas.toDataURL('image/jpeg', 0.9);
+                    // Create a temporary canvas to draw a white background (JPEG doesn't support transparency)
+                    const tempCanvas = document.createElement('canvas');
+                    tempCanvas.width = canvas.width;
+                    tempCanvas.height = canvas.height;
+                    const ctx = tempCanvas.getContext('2d');
+                    ctx.fillStyle = '#ffffff';
+                    ctx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+                    ctx.drawImage(canvas, 0, 0);
+
+                    const imgData = tempCanvas.toDataURL('image/jpeg', 0.9);
                     pdf.setFont("helvetica", "bold"); pdf.setFontSize(12);
                     pdf.text(title, 20, yPos);
                     pdf.addImage(imgData, 'JPEG', 20, yPos + 5, 170, 85);
