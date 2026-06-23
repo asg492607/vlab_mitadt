@@ -226,10 +226,16 @@ const generatePDFReport = async (labId) => {
         const wasActive = section?.classList.contains('active');
         
         try {
+            if (section && !wasActive) {
+                section.style.display = 'flex';
+                section.style.opacity = '0';
+                await new Promise(r => setTimeout(r, 300));
+            }
+
             // 1. Prioritize Direct Canvas Export for SimCanvas
             if (elementId === 'simCanvas') {
                 const canvas = element.querySelector('canvas') || (element.tagName === 'CANVAS' ? element : null);
-                if (canvas) {
+                if (canvas && canvas.width > 0 && canvas.height > 0) {
                     // Force a re-render to ensure current state is captured
                     if (window.currentSim) window.currentSim.drawPerformanceGraphs();
 
@@ -263,17 +269,12 @@ const generatePDFReport = async (labId) => {
                     pdf.setFont("helvetica", "bold"); pdf.setFontSize(12);
                     pdf.text(title, 20, yPos);
                     pdf.addImage(imgData, 'JPEG', 20, yPos + 5, 170, 85);
+                    if (section && !wasActive) section.style.display = 'none';
                     return yPos + 100;
                 }
             }
 
             // 2. Fallback to html2canvas for complex DOM elements
-            if (section && !wasActive) {
-                section.style.display = 'flex';
-                section.style.opacity = '0';
-                await new Promise(r => setTimeout(r, 300));
-            }
-
             const canvas = await html2canvas(element, { 
                 scale: 1.5,
                 useCORS: true,
