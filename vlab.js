@@ -585,7 +585,18 @@ class TopologySimulation {
 
         this.nodes.forEach(n => {
             if (n.config && n.config.routes) {
-                n.config.routes = n.config.routes.filter(r => r.proto !== 'rip' && r.proto !== 'ospf' && r.proto !== 'eigrp' && r.proto !== 'bgp');
+                n.config.routes = n.config.routes.filter(r => r.proto !== 'rip' && r.proto !== 'ospf' && r.proto !== 'eigrp' && r.proto !== 'bgp' && r.proto !== 'static');
+                if (n.config.routing && n.config.routing.static) {
+                    n.config.routing.static.forEach(sr => {
+                        n.config.routes.push({
+                            dest: sr.net,
+                            mask: sr.mask,
+                            nextHop: sr.nextHop,
+                            proto: 'static',
+                            metric: 1
+                        });
+                    });
+                }
             }
         });
 
@@ -818,9 +829,19 @@ class TopologySimulation {
         let hopsCount = 0;
 
         while (hopsCount++ < maxHops) {
+            let actualTargetIp = targetIp;
+            
+            // Check NAT translation
+            for (const n of this.nodes) {
+                if (n.type === 'router' && n.config.nat && n.config.nat.static) {
+                    const mapping = n.config.nat.static.find(m => m.global === actualTargetIp);
+                    if (mapping) actualTargetIp = mapping.local;
+                }
+            }
+
             const targetNode = this.nodes.find(n => 
-                n.ip === targetIp || 
-                (n.config && Object.values(n.config.interfaces).some(i => i.ip === targetIp))
+                n.ip === actualTargetIp || 
+                (n.config && Object.values(n.config.interfaces).some(i => i.ip === actualTargetIp))
             );
 
             if (!targetNode) return null;
@@ -831,6 +852,17 @@ class TopologySimulation {
                 const activeIf = Object.keys(currentL3.config.interfaces).find(k => currentL3.config.interfaces[k].ip !== 'unassigned');
                 srcIp = currentL3.config.interfaces[activeIf]?.ip;
                 srcMask = currentL3.config.interfaces[activeIf]?.mask;
+
+                // Basic ACL Check
+                if (currentL3.config.acls) {
+                    for (const iface of Object.values(currentL3.config.interfaces)) {
+                        if (iface.acl && currentL3.config.acls[iface.acl.num]) {
+                            const rules = currentL3.config.acls[iface.acl.num];
+                            const blocked = rules.some(r => r.action === 'deny' && (r.ip === srcNode.ip || r.ip === targetIp || r.ip === 'any'));
+                            if (blocked) return null; // Packet dropped by ACL
+                        }
+                    }
+                }
             }
 
             if (inSameSubnet(srcIp, targetIp, srcMask)) {
@@ -3184,8 +3216,55 @@ nf.bind_listener(on_packet_receive)</textarea>
             } else if (effectiveBase === 'ip' && targetArgs[1] === 'dhcp' && targetArgs[2] === 'pool') {
                 node.cliMode = 'dhcp-config';
                 node.currentDhcpPool = targetArgs[3];
+                if (!node.currentDhcpPool) { addLine("% Incomplete command.", "out"); return; }
                 node.config.dhcp = node.config.dhcp || {};
                 node.config.dhcp[targetArgs[3]] = node.config.dhcp[targetArgs[3]] || {};
+                addLine("");
+            } else if (effectiveBase === 'ip' && targetArgs[1] === 'route') {
+                const net = targetArgs[2];
+                const mask = targetArgs[3];
+                const nextHop = targetArgs[4];
+                if (net && mask && nextHop) {
+                    node.config.routing = node.config.routing || {};
+                    node.config.routing.static = node.config.routing.static || [];
+                    node.config.routing.static.push({ net, mask, nextHop });
+                    this.computeTopologyRouting();
+                    addLine("");
+                } else addLine("% Incomplete command.", "out");
+            } else if (effectiveBase === 'access-list') {
+                const num = targetArgs[1];
+                const action = targetArgs[2];
+                const ip = targetArgs[3];
+                const wildcard = targetArgs[4] || '0.0.0.0';
+                if (num && action && ip) {
+                    node.config.acls = node.config.acls || {};
+                    node.config.acls[num] = node.config.acls[num] || [];
+                    node.config.acls[num].push({ action, ip, wildcard });
+                    addLine("");
+                } else addLine("% Incomplete command.", "out");
+            } else if (effectiveBase === 'ip' && targetArgs[1] === 'nat' && targetArgs[2] === 'inside' && targetArgs[3] === 'source' && targetArgs[4] === 'static') {
+                const local = targetArgs[5];
+                const global = targetArgs[6];
+                if (local && global) {
+                    node.config.nat = node.config.nat || { static: [] };
+                    node.config.nat.static.push({ local, global });
+                    addLine("");
+                } else addLine("% Incomplete command.", "out");
+            } else if (effectiveBase === 'spanning-tree' && targetArgs[1] === 'vlan') {
+                const vlan = targetArgs[2];
+                if (targetArgs[3] === 'root') {
+                    node.config.stp = node.config.stp || {};
+                    node.config.stp[vlan] = { root: targetArgs[4] };
+                }
+                addLine("");
+            } else if (effectiveBase === 'vtp') {
+                if (targetArgs[1] === 'mode') {
+                    node.config.vtp = node.config.vtp || {};
+                    node.config.vtp.mode = targetArgs[2];
+                } else if (targetArgs[1] === 'domain') {
+                    node.config.vtp = node.config.vtp || {};
+                    node.config.vtp.domain = targetArgs[2];
+                }
                 addLine("");
             } else if (effectiveBase === 'no' && targetArgs[1] === 'ip' && targetArgs[2] === 'domain-lookup') {
                 node.config.dns = node.config.dns || {};
@@ -3324,6 +3403,19 @@ nf.bind_listener(on_packet_receive)</textarea>
                 } else {
                     addLine("% Invalid switchport command.", "out");
                 }
+            } else if (targetBaseCmd === 'ip' && targetArgs[1] === 'access-group') {
+                const num = targetArgs[2];
+                const direction = targetArgs[3];
+                if (num && direction) {
+                    node.config.interfaces[node.currentIf].acl = { num, direction };
+                    addLine("");
+                } else addLine("% Incomplete command.", "out");
+            } else if (targetBaseCmd === 'ip' && targetArgs[1] === 'nat') {
+                const direction = targetArgs[2];
+                if (direction === 'inside' || direction === 'outside') {
+                    node.config.interfaces[node.currentIf].nat = direction;
+                    addLine("");
+                } else addLine("% Incomplete command.", "out");
             } else if (targetBaseCmd === 'speed') {
                 if (['10', '100', '1000', 'auto'].includes(targetArgs[1])) {
                     node.config.interfaces[node.currentIf].speed = targetArgs[1];
