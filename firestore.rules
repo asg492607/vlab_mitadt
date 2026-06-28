@@ -16,8 +16,8 @@ service cloud.firestore {
 
     // Rules for the 'users' collection
     match /users/{userId} {
-      // Authenticated users can read user profiles (required for leaderboard)
-      allow read: if isAuthenticated();
+      // Only the user themselves or a teacher can read their profile to prevent mass scraping
+      allow read: if isAuthenticated() && (request.auth.uid == userId || isTeacher());
       allow write: if isAuthenticated() && request.auth.uid == userId;
 
       // Explicit rules for user progress

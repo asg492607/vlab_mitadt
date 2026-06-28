@@ -1,6 +1,6 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { getFirestore, doc, setDoc, collection, getDocs, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+import { getFirestore, doc, setDoc, collection, getDocs, onSnapshot } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 // evaluate.js and labs/index.js loaded on-demand if needed
 
 const firebaseConfig = {
@@ -6676,7 +6676,7 @@ const initProgrammingLab = async (container, labId) => {
         if (collabUnsubscribe) collabUnsubscribe();
         const { onSnapshot } = window.firebaseFirestore || { onSnapshot: (ref, cb) => {
             // Fallback dynamic import if not loaded globally
-            import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js").then(mod => {
+            import("https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js").then(mod => {
                 window.firebaseFirestore = mod;
                 listenToRoom(roomId);
             });

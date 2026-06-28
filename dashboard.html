@@ -854,9 +854,9 @@
         async function fetchEvaluation() {
             if (!userUid) return;
             try {
-                const { initializeApp } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js");
-                const { getFirestore, doc, getDoc, collection, getDocs } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
-                const { getAuth, onAuthStateChanged } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js");
+                const { initializeApp } = await import("https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js");
+                const { getFirestore, doc, getDoc, collection, getDocs } = await import("https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js");
+                const { getAuth, onAuthStateChanged } = await import("https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js");
                 
                 const firebaseConfig = {
                     apiKey: "AIzaSyBaYFXyCpq60TC-op86g5cO5laHA5_bC10",
@@ -938,7 +938,7 @@
                                 <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.03); padding:8px 12px; border-radius:10px; font-size:13px; border:1px solid rgba(255,255,255,0.05);">
                                     <span style="display:flex; align-items:center; gap:8px;">
                                         <span>${medals[rank] || "👤"}</span>
-                                        <b>${student.name}</b>
+                                        <b>${student.name.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</b>
                                     </span>
                                     <span style="color:var(--muted-text); font-size:12px;">
                                         <b style="color:#fbbf24;">${student.completedCount} Labs</b> (Avg: ${student.avgScore}%)
@@ -974,7 +974,7 @@
                 </div>
             `;
             document.getElementById('vlabSelection').style.display = 'block';
-            document.querySelector('.welcome-header p').innerHTML = `Welcome, <span id="userNameDisplay" style="color:var(--dashboard-text); font-weight:700;">${userName}</span>. You are in Instructor Mode.`;
+            document.querySelector('.welcome-header p').innerHTML = `Welcome, <span id="userNameDisplay" style="color:var(--dashboard-text); font-weight:700;">${userName.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</span>. You are in Instructor Mode.`;
         } else {
             // Restore active subject session if available
             const activeSub = localStorage.getItem('vlab_current_subject');
