@@ -49,6 +49,41 @@ const clearAllLabTimers = () => {
 };
 window.clearAllLabTimers = clearAllLabTimers;
 
+window.showToast = (message, type = 'success') => {
+    let container = document.getElementById('toast-container');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'toast-container';
+        document.body.appendChild(container);
+    }
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    const icon = type === 'success' ? '✅' : type === 'error' ? '❌' : '⚠️';
+    toast.innerHTML = `
+        <div class="toast-icon">${icon}</div>
+        <div class="toast-message">${message}</div>
+        <div class="toast-progress"></div>
+    `;
+    container.appendChild(toast);
+    setTimeout(() => {
+        toast.style.animation = 'slideOutToast 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards';
+        setTimeout(() => toast.remove(), 400);
+    }, 3000);
+};
+
+window.animateValue = (obj, start, end, duration, suffix = '') => {
+    let startTimestamp = null;
+    const step = (timestamp) => {
+        if (!startTimestamp) startTimestamp = timestamp;
+        const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+        obj.innerHTML = Math.floor(progress * (end - start) + start) + suffix;
+        if (progress < 1) {
+            window.requestAnimationFrame(step);
+        }
+    };
+    window.requestAnimationFrame(step);
+};
+
 const getCurrentUser = () => {
     return new Promise((resolve, reject) => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -1013,6 +1048,24 @@ class TopologySimulation {
                 requestAnimationFrame(move);
             } else {
                 p.remove();
+                if (!isSuccess) {
+                    const shatter = document.createElement('div');
+                    shatter.style.cssText = `
+                        position: absolute;
+                        left: ${end.x}px;
+                        top: ${end.y}px;
+                        width: 10px;
+                        height: 10px;
+                        border: 2px solid ${color};
+                        border-radius: 50%;
+                        transform: translate(-50%, -50%);
+                        animation: shatterPulse 0.5s ease-out forwards;
+                        pointer-events: none;
+                        z-index: 1000;
+                    `;
+                    if (layer) layer.appendChild(shatter);
+                    setTimeout(() => shatter.remove(), 500);
+                }
                 if (onComplete) onComplete();
             }
         };
@@ -2052,7 +2105,7 @@ nf.bind_listener(on_packet_receive)</textarea>
                     </div>
                     <div style="flex: 1; padding: 10px; display: flex; flex-direction: column;">
                         <textarea style="flex: 1; background: #0f172a; border: 1px solid #475569; color: #fff; font-family: monospace; font-size: 12px; padding: 8px; border-radius: 4px; resize: none;" placeholder="Start typing file..."></textarea>
-                        <button style="align-self: flex-end; background: #10b981; color: #fff; border: none; padding: 6px 16px; border-radius: 4px; font-size: 11px; cursor: pointer; margin-top: 8px; font-weight: bold;" onclick="alert('File saved successfully to virtual disk!')">Save File</button>
+                        <button style="align-self: flex-end; background: #10b981; color: #fff; border: none; padding: 6px 16px; border-radius: 4px; font-size: 11px; cursor: pointer; margin-top: 8px; font-weight: bold;" onclick="window.showToast('File saved successfully to virtual disk!', 'success')">Save File</button>
                     </div>
                 </div>
 
@@ -2273,7 +2326,7 @@ nf.bind_listener(on_packet_receive)</textarea>
                 this.computeTopologyRouting();
                 if (this.saveTopology) this.saveTopology();
 
-                alert('IP settings applied successfully!');
+                window.showToast('IP settings applied successfully!', 'success');
             };
         }
 
@@ -2300,7 +2353,7 @@ nf.bind_listener(on_packet_receive)</textarea>
                 this.computeTopologyRouting();
                 if (this.saveTopology) this.saveTopology();
 
-                alert('Config settings applied successfully!');
+                window.showToast('Config settings applied successfully!', 'success');
             };
         }
 
@@ -2514,7 +2567,7 @@ nf.bind_listener(on_packet_receive)</textarea>
                         node.config.services.http.enabled = enabled;
                         node.config.services.http.indexHtml = html;
                         if (this.saveTopology) this.saveTopology();
-                        alert('HTTP Services updated successfully!');
+                        window.showToast('HTTP Services updated successfully!', 'success');
                     };
                 } else if (service === 'dns') {
                     let dnsRows = '';
@@ -3586,7 +3639,11 @@ nf.bind_listener(on_packet_receive)</textarea>
             if (link.type !== 'serial') {
                 this.ctx.lineWidth = 2.5;
                 this.ctx.moveTo(fx, fy);
-                this.ctx.lineTo(tx, ty);
+                const distance = Math.hypot(tx - fx, ty - fy);
+                const sag = distance * 0.15; // 15% physics sag based on distance
+                const midX = (fx + tx) / 2;
+                const midY = (fy + ty) / 2 + sag;
+                this.ctx.quadraticCurveTo(midX, midY, tx, ty);
                 this.ctx.stroke();
             }
 
@@ -3736,7 +3793,11 @@ class NetworkingSim {
         if (this.startTime) {
             const elapsed = (Date.now() - this.startTime) / 1000;
             throughput = (this.stats.acked * 1024) / (elapsed || 1);
-            if (throughputEl) throughputEl.textContent = Math.round(throughput) + " Bps";
+            if (throughputEl) {
+                const currentVal = parseInt(throughputEl.textContent) || 0;
+                const targetVal = Math.round(throughput);
+                if (currentVal !== targetVal) window.animateValue(throughputEl, currentVal, targetVal, 300, ' Bps');
+            }
         }
 
         window.VLAB_CURRENT_STATS = { sent: this.stats.sent, acked: this.stats.acked, efficiency: efficiency + '%', throughput: Math.round(throughput) + " Bps" };
@@ -4087,7 +4148,10 @@ class NetworkingSim {
         if (throughputEl && this.startTime) {
             const elapsed = (Date.now() - this.startTime) / 1000;
             const bps = elapsed > 0 ? Math.round((this.stats.acked * 1024) / elapsed) : 0;
-            throughputEl.textContent = `${bps} Bps`;
+            if (throughputEl) {
+                const currentVal = parseInt(throughputEl.textContent) || 0;
+                if (currentVal !== bps) window.animateValue(throughputEl, currentVal, bps, 300, ' Bps');
+            }
         }
 
         // Update & Draw Flow/Explosion Particles
