@@ -18,7 +18,16 @@ service cloud.firestore {
     match /users/{userId} {
       // Only the user themselves or a teacher can read their profile to prevent mass scraping
       allow read: if isAuthenticated() && (request.auth.uid == userId || isTeacher());
-      allow write: if isAuthenticated() && request.auth.uid == userId;
+      // Block Mass Assignment and BOLA:
+      // 1. Creating a teacher requires the secret code
+      allow create: if isAuthenticated() && request.auth.uid == userId && (
+        request.resource.data.role == 'student' || 
+        (request.resource.data.role == 'teacher' && request.resource.data.teacherCode == 'VLAB_TEACHER_2026')
+      );
+      // 2. Prevent updating the role after creation
+      allow update: if isAuthenticated() && request.auth.uid == userId && 
+        !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'teacherCode']);
+      allow delete: if isAuthenticated() && request.auth.uid == userId;
 
       // Explicit rules for user progress
       match /progress/{labId} {

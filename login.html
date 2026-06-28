@@ -183,10 +183,17 @@
         function toggleAuthMode() {
             isSignUp = !isSignUp;
             document.getElementById('nameGroup').style.display = isSignUp ? 'block' : 'none';
+            document.getElementById('teacherCodeGroup').style.display = (isSignUp && currentRole === 'teacher') ? 'block' : 'none';
             document.getElementById('toggleMode').textContent = isSignUp ? 'Login' : 'Sign Up';
             document.getElementById('auth-btn-text').textContent = isSignUp ? 'Create Account' : 'Login to Dashboard';
             document.querySelector('.auth-footer span').textContent = isSignUp ? 'Already have an account? ' : "Don't have an account? ";
             updateSubtitle();
+        }
+
+        const originalSetRole = setRole;
+        setRole = function(role) {
+            originalSetRole(role);
+            document.getElementById('teacherCodeGroup').style.display = (isSignUp && role === 'teacher') ? 'block' : 'none';
         }
     </script>
 </head>
@@ -207,6 +214,10 @@
             <div class="input-group" id="nameGroup" style="display: none;">
                 <label>Full Name</label>
                 <input type="text" id="fullName" placeholder="e.g. Atharva Gandhi">
+            </div>
+            <div class="input-group" id="teacherCodeGroup" style="display: none;">
+                <label>Instructor Access Code <span style="color:#fbbf24; font-size:12px;">(Required)</span></label>
+                <input type="password" id="teacherCode" placeholder="Enter provided passcode">
             </div>
             <div class="input-group">
                 <label>Email Address</label>
@@ -269,14 +280,30 @@
             try {
                 if (isSignUp) {
                     const name = document.getElementById('fullName').value;
+                    const teacherCode = document.getElementById('teacherCode').value;
+                    
+                    if (currentRole === 'teacher' && !teacherCode) {
+                        alert("Instructor Access Code is required to sign up as a Teacher.");
+                        btn.disabled = false;
+                        btn.textContent = 'Create Account';
+                        return;
+                    }
+
                     const res = await createUserWithEmailAndPassword(auth, email, password);
                     await updateProfile(res.user, { displayName: name });
-                    await setDoc(doc(db, "users", res.user.uid), {
+                    
+                    const userData = {
                         name: name,
                         email: email,
                         role: currentRole,
                         createdAt: new Date().toISOString()
-                    });
+                    };
+                    
+                    if (currentRole === 'teacher') {
+                        userData.teacherCode = teacherCode; // validated via firestore rules
+                    }
+
+                    await setDoc(doc(db, "users", res.user.uid), userData);
                     localStorage.setItem('vlab_user_name', name);
                     localStorage.setItem('vlab_user_role', currentRole);
                     localStorage.setItem('vlab_user_uid', res.user.uid);
