@@ -1,6 +1,9 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 import { getFirestore, doc, setDoc, collection, getDocs, onSnapshot } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+
+window.escapeHtml = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
 // evaluate.js and labs/index.js loaded on-demand if needed
 
 const firebaseConfig = {
@@ -1509,7 +1512,7 @@ class TopologySimulation {
         div.style.left = node.x + 'px';
         div.style.top = node.y + 'px';
         div.style.userSelect = 'none';
-        div.innerHTML = `<div class="d-icon">${node.icon}</div><div class="d-label">${node.label}</div>`;
+        div.innerHTML = `<div class="d-icon">${node.icon}</div><div class="d-label">${window.escapeHtml(node.label)}</div>`;
 
         // Tooltip handlers (single set — see below for implementation)
 
@@ -1642,7 +1645,7 @@ class TopologySimulation {
             if (tooltip) {
                 tooltip.style.display = 'block';
                 tooltip.innerHTML = `
-                    <div style="font-weight:800; color:var(--primary); margin-bottom:4px;">${node.label}</div>
+                    <div style="font-weight:800; color:var(--primary); margin-bottom:4px;">${window.escapeHtml(node.label)}</div>
                     <div style="font-size:11px; opacity:0.8;">Type: ${node.type.toUpperCase()}</div>
                     <div style="font-size:11px; opacity:0.8;">IP: ${node.config?.ip || 'Unconfigured'}</div>
                     <div style="font-size:11px; opacity:0.8;">Status: <span style="color:var(--success)">Operational</span></div>
@@ -2380,7 +2383,7 @@ nf.bind_listener(on_packet_receive)</textarea>
                     // Add command line
                     const cmdLine = document.createElement('div');
                     cmdLine.style.color = '#10b981';
-                    cmdLine.innerHTML = `<span style="color:#10b981; font-weight:bold;">PC&gt;</span> ${cmd}`;
+                    cmdLine.innerHTML = `<span style="color:#10b981; font-weight:bold;">PC&gt;</span> ${window.escapeHtml(cmd)}`;
                     hostArea.insertBefore(cmdLine, hostArea.querySelector('.host-terminal-line-wrap'));
 
                     const addLine = (txt, color = '#cbd5e1') => {
@@ -2504,7 +2507,7 @@ nf.bind_listener(on_packet_receive)</textarea>
                     }
                     const record = dnsServer.config.services.dns.records.find(r => r.domain === domainName);
                     if (!record) {
-                        browserContent.innerHTML = `<div style="color:#ef4444; font-weight:bold; text-align:center; margin-top:40px;">Server not found: Non-existent domain \${domainName}</div>`;
+                        browserContent.innerHTML = `<div style="color:#ef4444; font-weight:bold; text-align:center; margin-top:40px;">Server not found: Non-existent domain ${window.escapeHtml(domainName)}</div>`;
                         return;
                     }
                     targetIp = record.ip;
@@ -2912,7 +2915,7 @@ nf.bind_listener(on_packet_receive)</textarea>
             if (!log) return;
             const entry = document.createElement('div');
             entry.className = `log-entry ${type}`;
-            entry.innerHTML = `<span class="log-time">${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</span> ${msg}`;
+            entry.innerHTML = `<span class="log-time">${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</span> ${window.escapeHtml(msg)}`;
             log.prepend(entry);
             if (log.children.length > 5) log.lastElementChild.remove();
         };
@@ -3901,7 +3904,7 @@ class NetworkingSim {
         else if (type === 'error') { color = 'var(--danger)'; statusText = "ERROR"; }
         else if (type === 'data') { color = 'var(--primary)'; statusText = "DATA"; }
         const timeStr = new Date().toLocaleTimeString([], { hour12: false, minute: '2-digit', second: '2-digit' });
-        div.innerHTML = `<span class="event-time" style="color:${color}; font-weight:800;">[${timeStr}]</span> <span class="event-proto" style="display:none;">${(this.mode || 'net').toUpperCase()}</span> <span class="event-desc">${msg}</span>`;
+        div.innerHTML = `<span class="event-time" style="color:${color}; font-weight:800;">[${timeStr}]</span> <span class="event-proto" style="display:none;">${(this.mode || 'net').toUpperCase()}</span> <span class="event-desc">${window.escapeHtml(msg)}</span>`;
         this.eventList.prepend(div);
 
         // Add to Dynamic Observation Table
@@ -3917,7 +3920,7 @@ class NetworkingSim {
             tr.innerHTML = `
                 <td style="padding:4px; font-weight:bold; color:#fbbf24;">#${rowCount}</td>
                 <td style="padding:4px; color:#cbd5e1;">${timeStr}</td>
-                <td style="padding:4px; color:#f1f5f9;">${msg}</td>
+                <td style="padding:4px; color:#f1f5f9;">${window.escapeHtml(msg)}</td>
                 <td style="padding:4px; color:${color}; font-weight:bold;">${statusText}</td>
             `;
             obsBody.prepend(tr);
@@ -4560,7 +4563,7 @@ class NetworkingSim {
                 label = "SYN-ACK (Ack=101)";
             } else {
                 px = this.senderPos.x + (this.receiverPos.x - this.senderPos.x) * p; py = this.senderPos.y;
-                label = "ACK (Seq=101, Ack=201)"; color = "#10b981";
+                label = "ACK (Seq=101, Ack=201)"; data = "Established"; color = "#10b981";
             }
         } else if (cycle < 16) {
             // Data Transfer Phase (GBN/Congestion Control)
@@ -5593,10 +5596,11 @@ const initAssemblySim = async (container, labId) => {
     };
 
     const printConsole = (msg, isError = false) => {
-        if (isError) {
-            consoleEl.innerHTML += `<span style="color:#ef4444">${msg}</span>`;
+        const isFault = msg.includes("Error") || msg.includes("Fault") || msg.includes("Invalid");
+        if (isFault || isError) {
+            consoleEl.innerHTML += `<span style="color:#ef4444">${window.escapeHtml(msg)}</span>`;
         } else {
-            consoleEl.innerHTML += `<span>${msg}</span>`;
+            consoleEl.innerHTML += `<span>${window.escapeHtml(msg)}</span>`;
         }
         consoleEl.scrollTop = consoleEl.scrollHeight;
     };
@@ -6857,13 +6861,14 @@ const initSqlLab = async (container, labId) => {
             if (res.rows && res.rows.length !== undefined) {
                 let tableHtml = `<table style="width:100%; border-collapse:collapse; margin-top:8px; font-size:13px; text-align:left;"><thead><tr style="border-bottom:2px solid var(--border); background:var(--bg-alt);">`;
                 res.columns.forEach(col => {
-                    tableHtml += `<th style="padding:8px;">${col.toUpperCase()}</th>`;
+                    tableHtml += `<th style="padding:8px;">${window.escapeHtml(col.toUpperCase())}</th>`;
                 });
                 tableHtml += `</tr></thead><tbody>`;
                 res.rows.forEach(row => {
                     tableHtml += `<tr style="border-bottom:1px solid var(--border);">`;
                     res.columns.forEach(col => {
-                        tableHtml += `<td style="padding:8px;">${row[col] !== undefined ? row[col] : 'NULL'}</td>`;
+                        const val = row[col] !== undefined ? row[col] : 'NULL';
+                        tableHtml += `<td style="padding:8px;">${window.escapeHtml(String(val))}</td>`;
                     });
                     tableHtml += `</tr>`;
                 });
@@ -6879,7 +6884,7 @@ const initSqlLab = async (container, labId) => {
                     </div>
                 `;
             } else {
-                out.innerHTML = `<span style="color:#10b981;">Query executed successfully. ${res.message || ''}</span>`;
+                out.innerHTML = `<span style="color:#10b981;">Query executed successfully. ${window.escapeHtml(res.message || '')}</span>`;
                 planBox.innerHTML = `<div style="text-align:center; padding:30px; color:var(--text-muted);">Query does not return tabular rows (no scan plan needed).</div>`;
             }
             

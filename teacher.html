@@ -347,11 +347,13 @@
 
                     if (completedCount > 0) certCount++;
 
+                    const escapeHtml = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+                    
                     card.innerHTML = `
                         <div style="display:flex; justify-content:space-between; align-items:flex-start;">
                             <div>
-                                <div class="student-name">${student.name}</div>
-                                <div class="student-email">${student.email}</div>
+                                <div class="student-name">${escapeHtml(student.name)}</div>
+                                <div class="student-email">${escapeHtml(student.email)}</div>
                             </div>
                             <div style="background:var(--primary); color:white; font-size:10px; padding:4px 10px; border-radius:100px; font-weight:800;">
                                 ${completedCount} LABS DONE
@@ -360,7 +362,7 @@
                         <div class="progress-section" style="margin-top:10px; flex:1;">
                             ${progressHtml || '<p style="color:var(--text-muted); font-size:12px; padding:20px 0;">No data recorded.</p>'}
                         </div>
-                        <button class="btn-action" onclick="window.viewDetails('${student.id}', '${student.name}')">🔬 REVIEW ACADEMIC REPORT</button>
+                        <button class="btn-action" onclick="window.viewDetails('${escapeHtml(student.id)}', '${escapeHtml(student.name)}')">🔬 REVIEW ACADEMIC REPORT</button>
                     `;
                     list.appendChild(card);
                 }
