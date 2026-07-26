@@ -14840,9 +14840,13 @@ const initOsiTcpipSim = (container) => {
                         🔄 Reset
                     </button>
                     <select id="osi-speed-select" style="background:#1e293b; color:#fff; border:1px solid var(--border); padding:7px 10px; border-radius:8px; font-size:12px; font-weight:bold;">
-                        <option value="1">1x Speed</option>
-                        <option value="2">2x Speed</option>
-                        <option value="4">4x Speed</option>
+                        <option value="0.2">0.2x Ultra Slow</option>
+                        <option value="0.3">0.3x Very Slow</option>
+                        <option value="0.4">0.4x Slow</option>
+                        <option value="0.5">0.5x Half Speed</option>
+                        <option value="1" selected>1x Normal Speed</option>
+                        <option value="2">2x Fast Speed</option>
+                        <option value="4">4x Ultra Fast</option>
                     </select>
                 </div>
             </div>
