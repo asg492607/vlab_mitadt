@@ -7998,14 +7998,141 @@ document.addEventListener('DOMContentLoaded', async () => {
             }, 1000);
         };
 
-        loadLevel(0);
+        const evaluateCliCommand = (rawCmd) => {
+            const cmd = rawCmd.trim();
+            const lower = cmd.toLowerCase();
+            const parts = lower.split(/\s+/);
+            const base = parts[0];
+            const target = parts[1] || '8.8.8.8';
 
-        const otherCmds = {
-            'ipconfig': 'Windows IP Configuration\n   IPv4 Address: 192.168.1.100\n   Subnet Mask:  255.255.255.0\n   Gateway:      192.168.1.1',
-            'ifconfig': 'eth0: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>\n     inet 192.168.1.100 netmask 255.255.255.0',
-            'arp -a': 'Interface: 192.168.1.100\n  192.168.1.1     00-11-22-33-44-55  dynamic\n  192.168.1.255   ff-ff-ff-ff-ff-ff  static',
-            'netstat -an': 'Active Connections\n  TCP  0.0.0.0:80    LISTENING\n  TCP  0.0.0.0:443   LISTENING',
+            if (base === 'clear' || base === 'cls') {
+                document.getElementById('cmdOutput').textContent = `MIT ADT VLab Terminal v2.0\n${'─'.repeat(38)}\nC:\\Users\\Student> `;
+                return null;
+            }
+            if (base === 'help') {
+                return `Available Academic Network Commands:\n` +
+                       `  ipconfig [/all | /flushdns] - Display network interface details & DNS\n` +
+                       `  ifconfig / ip addr        - Display Linux network interfaces\n` +
+                       `  ping <target>             - Test Layer-3 reachability & ICMP latency\n` +
+                       `  tracert / traceroute      - Trace hop-by-hop packet path (TTL)\n` +
+                       `  arp -a                    - Display local ARP MAC cache table\n` +
+                       `  netstat -an               - Monitor active TCP/UDP sockets & ports\n` +
+                       `  nslookup <domain>         - Query DNS domain name resolution\n` +
+                       `  route print / ip route    - Display OS IPv4/IPv6 routing table\n` +
+                       `  pathping <target>         - 100-ping per-hop latency/loss audit\n` +
+                       `  show ip interface brief   - Cisco IOS interface status summary\n` +
+                       `  show mac address-table    - Cisco switch Layer-2 MAC address table\n` +
+                       `  show ip route             - Cisco router Layer-3 IP routing table\n` +
+                       `  clear / cls               - Clear terminal screen`;
+            }
+            if (lower === 'ipconfig /all') {
+                return `Windows IP Configuration\n\n` +
+                       `   Host Name . . . . . . . . . . . . : LAB-PC-01\n` +
+                       `   Primary Dns Suffix  . . . . . . . : mitadt.edu.in\n` +
+                       `   Node Type . . . . . . . . . . . . : Hybrid\n` +
+                       `   Ethernet adapter Ethernet0:\n` +
+                       `      Physical Address. . . . . . . : 00-1A-2B-3C-4D-01\n` +
+                       `      DHCP Enabled. . . . . . . . . : Yes\n` +
+                       `      IPv4 Address. . . . . . . . . : 192.168.1.10(Preferred)\n` +
+                       `      Subnet Mask . . . . . . . . . : 255.255.255.0\n` +
+                       `      Default Gateway . . . . . . . : 192.168.1.1\n` +
+                       `      DNS Servers . . . . . . . . . : 8.8.8.8, 1.1.1.1`;
+            }
+            if (lower === 'ipconfig') {
+                return `Windows IP Configuration\n\n` +
+                       `Ethernet adapter Ethernet0:\n` +
+                       `   IPv4 Address. . . . . . . . . : 192.168.1.10\n` +
+                       `   Subnet Mask . . . . . . . . . : 255.255.255.0\n` +
+                       `   Default Gateway . . . . . . . : 192.168.1.1`;
+            }
+            if (lower === 'ipconfig /flushdns') {
+                return `Windows IP Configuration\n\nSuccessfully flushed the DNS Resolver Cache.`;
+            }
+            if (lower === 'ifconfig' || lower === 'ip addr') {
+                return `eth0: flags=4163<UP,BROADCAST,RUNNING,MULTICAST> mtu 1500\n` +
+                       `        inet 192.168.1.10  netmask 255.255.255.0  broadcast 192.168.1.255\n` +
+                       `        ether 00:1a:2b:3c:4d:01  txqueuelen 1000  (Ethernet)`;
+            }
+            if (base === 'ping') {
+                return `Pinging ${target} with 32 bytes of data:\n` +
+                       `Reply from ${target}: bytes=32 time=2ms TTL=128\n` +
+                       `Reply from ${target}: bytes=32 time=1ms TTL=128\n` +
+                       `Reply from ${target}: bytes=32 time=2ms TTL=128\n` +
+                       `Reply from ${target}: bytes=32 time=1ms TTL=128\n\n` +
+                       `Ping statistics for ${target}:\n` +
+                       `    Packets: Sent = 4, Received = 4, Lost = 0 (0% loss),\n` +
+                       `Approximate round trip times in milli-seconds:\n` +
+                       `    Minimum = 1ms, Maximum = 2ms, Average = 1ms`;
+            }
+            if (base === 'tracert' || base === 'traceroute') {
+                return `Tracing route to ${target}:\n` +
+                       `  1    1ms   <1ms     1ms  192.168.1.1 [Default Gateway]\n` +
+                       `  2    7ms    8ms     6ms  10.100.0.1 [ISP Edge Router]\n` +
+                       `  3   14ms   15ms    14ms  203.88.32.1 [ISP Core Backbone]\n` +
+                       `  4   21ms   20ms    22ms  ${target} [Destination Host]\n\nTrace complete.`;
+            }
+            if (lower === 'arp -a' || lower === 'arp') {
+                return `Interface: 192.168.1.10 --- 0x2\n` +
+                       `  Internet Address      Physical Address      Type\n` +
+                       `  192.168.1.1           00-1a-2b-3c-4d-01     dynamic\n` +
+                       `  192.168.1.11          00-1a-2b-3c-4d-02     dynamic\n` +
+                       `  192.168.1.255         ff-ff-ff-ff-ff-ff     static`;
+            }
+            if (base === 'netstat') {
+                return `Active Connections\n\n` +
+                       `  Proto  Local Address          Foreign Address        State\n` +
+                       `  TCP    0.0.0.0:80             0.0.0.0:0              LISTENING\n` +
+                       `  TCP    0.0.0.0:443            0.0.0.0:0              LISTENING\n` +
+                       `  TCP    192.168.1.10:51234     142.250.77.110:443     ESTABLISHED\n` +
+                       `  UDP    0.0.0.0:53             *:*`;
+            }
+            if (base === 'nslookup') {
+                return `Server:  google-public-dns-a.google.com\n` +
+                       `Address: 8.8.8.8\n\n` +
+                       `Non-authoritative answer:\n` +
+                       `Name:    ${target}\n` +
+                       `Address: 142.250.77.110`;
+            }
+            if (lower === 'route print' || lower === 'ip route') {
+                return `IPv4 Route Table\n===========================================================================\n` +
+                       `Active Routes:\n` +
+                       `Network Destination        Netmask          Gateway       Interface  Metric\n` +
+                       `          0.0.0.0          0.0.0.0      192.168.1.1    192.168.1.10      25\n` +
+                       `        127.0.0.0        255.0.0.0         On-link        127.0.0.1     306\n` +
+                       `      192.168.1.0    255.255.255.0         On-link    192.168.1.10     281`;
+            }
+            if (base === 'pathping') {
+                return `Tracing route to ${target} over a maximum of 30 hops:\n` +
+                       `  0  LAB-PC-01 [192.168.1.10]\n` +
+                       `  1  192.168.1.1\n` +
+                       `  2  10.100.0.1\n` +
+                       `Computing statistics for 50 seconds...\n` +
+                       `            Source to Here   This Node/Link\n` +
+                       `Hop  RTT    Lost/Sent = Pct  Lost/Sent = Pct  Address\n` +
+                       `  0                                           LAB-PC-01 [192.168.1.10]\n` +
+                       `  1    1ms     0/ 100 =  0%     0/ 100 =  0%  192.168.1.1\n` +
+                       `  2    7ms     0/ 100 =  0%     0/ 100 =  0%  10.100.0.1\n\nTrace complete.`;
+            }
+            if (lower === 'show ip interface brief') {
+                return `Interface              IP-Address      OK? Method Status                  Protocol\n` +
+                       `GigabitEthernet0/0     192.168.1.1     YES NVRAM  up                      up      \n` +
+                       `GigabitEthernet0/1     10.0.0.1        YES NVRAM  up                      up      \n` +
+                       `GigabitEthernet0/2     unassigned      YES unset  administratively down   down    `;
+            }
+            if (lower === 'show mac address-table') {
+                return `          Mac Address Table\n-------------------------------------------\nVlan    Mac Address       Type        Ports\n----    -----------       --------    -----\n   1    001a.2b3c.4d01    DYNAMIC     Fa0/1\n   1    001a.2b3c.4d02    DYNAMIC     Fa0/2`;
+            }
+            if (lower === 'show ip route') {
+                return `Codes: C - connected, S - static, R - RIP, B - BGP, O - OSPF\n\nGateway of last resort is 10.0.0.1 to network 0.0.0.0\n\nS*    0.0.0.0/0 [1/0] via 10.0.0.1\nC     192.168.1.0/24 is directly connected, GigabitEthernet0/0\nC     10.0.0.0/8 is directly connected, GigabitEthernet0/1`;
+            }
+            if (lower === 'show version' || lower === 'show running-config') {
+                return `Cisco IOS Software, C2911 Software (C2911-UNIVERSALK9-M), Version 15.1(4)M4\nTechnical Support: http://www.cisco.com/techsupport\nSystem image file is "flash0:c2911-universalk9-mz.SPA.151-4.M4.bin"`;
+            }
+
+            return `'${cmd}' is not recognized as an internal or external command.\nType 'help' to view all available networking commands.`;
         };
+
+        loadLevel(0);
 
         document.getElementById('cmdChallengeInput').onkeydown = (e) => {
             if (e.key !== 'Enter') return;
@@ -8016,26 +8143,30 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (!cmd) return;
             const lv = levels[lvl];
             output.textContent += `${cmd}\n`;
+
+            const resultOutput = evaluateCliCommand(cmd);
+            if (resultOutput === null) return; // cleared screen
+
             if (cmd.toLowerCase() === lv.cmd.toLowerCase()) {
                 clearInterval(timerInterval);
                 const pts = Math.max(10, timeLeft);
                 score += pts;
                 document.getElementById('cmdScore').textContent = score;
-                output.textContent += `\n${lv.out}\n\n✅ CORRECT! +${pts} points (${timeLeft}s remaining)\n\nC:\\Users\\Student> `;
+                output.textContent += `\n${resultOutput}\n\n✅ CORRECT TASK COMMAND! +${pts} points (${timeLeft}s remaining)\n\nC:\\Users\\Student> `;
                 output.scrollTop = output.scrollHeight;
                 setTimeout(() => {
                     if (lvl < levels.length - 1) { lvl++; loadLevel(lvl); }
                     else {
                         clearInterval(timerInterval);
                         const banner = document.getElementById('cmdWinBanner');
-                        banner.style.display = 'block';
-                        banner.textContent = `🏆 Challenge Complete! Final Score: ${score}/${levels.length * 60}`;
+                        if (banner) {
+                            banner.style.display = 'block';
+                            banner.textContent = `🏆 Challenge Complete! Final Score: ${score}/${levels.length * 60}`;
+                        }
                     }
-                }, 2200);
+                }, 2000);
             } else {
-                const known = otherCmds[cmd.toLowerCase()];
-                if (known) output.textContent += `\n${known}\n\nC:\\Users\\Student> `;
-                else output.textContent += `\n'${cmd}' — not the right command for this task. Try again!\n\nC:\\Users\\Student> `;
+                output.textContent += `\n${resultOutput}\n\nC:\\Users\\Student> `;
             }
             output.scrollTop = output.scrollHeight;
         };
@@ -14615,6 +14746,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (data.simType === 'cloud_intro')          { initCloudVirtualizationSim(container); return; }
         if (data.simType === 'cloud_devops')         { initCloudDockerSim(container);         return; }
         if (data.simType === 'pkt_tracer')           { initPktTracerSim(container);           return; }
+        if (data.simType === 'cli')                  { initCmdChallenge(container);           return; }
 
         // ── Cybersecurity Simulations ────────────────────────────────────────
         if (data.simType === 'cyber_caesar')       { initCyberCaesarSim(container);      return; }
