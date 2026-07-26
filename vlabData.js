@@ -1203,51 +1203,339 @@ window.VLAB_DATA = {
     "simType": "ip_class"
 },
     'lan_cables': {
-        title: "LAN Setup & Cabling",
-        aim: "To construct EIA/TIA 568A and 568B RJ-45 twisted pair cabling standards (Straight-Through vs Crossover) for LAN connections.",
-        intro: {
-            summary: "Physical layer transmission depends on structured copper cabling. Pinout alignment dictates successful full-duplex Ethernet link establishment.",
-            importance: "Incorrect cable wiring causes physical link drops, late collisions, and excessive packet error rates.",
-            applications: ["Structured Building Cabling", "Patch Panel Wiring", "Data Center Interconnects"],
-            outcome: "Students will learn T568A/T568B color pinouts and crimp Straight-Through vs Crossover cables."
-        },
-        prerequisites: ["Practical 1: Introduction to Networking Tools"],
-        outcomes: [
-            "Arrange T568B color-coded wires in order.",
-            "Differentiate Straight-Through from Crossover pinouts.",
-            "Perform cable continuity testing across 8 RJ-45 pins."
+    "title": "Practical 5: LAN Setup & Cabling (Straight-Through & Crossover)",
+    "aim": "To build a Local Area Network (LAN), understand Ethernet physical media standards, crimp RJ-45 connectors using T568A and T568B standards, select correct Straight-Through vs Crossover cables for device combinations, analyze Auto-MDI/MDIX operation, configure IPv4 addresses, test communication using the ping command, and troubleshoot physical layer cabling faults.",
+    "intro": {
+        "summary": "A Local Area Network (LAN) connects computers and devices within a limited geographical area such as a classroom, laboratory, office building, or home. One of the most important steps in building a LAN is selecting and terminating the correct network cable. Modern Ethernet uses 4 twisted pairs (8 wires) terminated with RJ-45 connectors. Understanding T568A/T568B pinouts, Straight-Through vs Crossover cabling, and Layer 2 Ethernet frame forwarding is foundational for network installation and troubleshooting.",
+        "importance": "Incorrect cable wiring causes physical link drops, excessive collision rates, late collisions, and total loss of communication. Although modern switches feature Auto-MDI/MDIX auto-sensing, understanding physical pinouts (Pins 1, 2, 3, 6) is mandatory for network engineers, structured cabling technicians, and Cisco certification exams.",
+        "applications": [
+            "Structured Building Cabling & Office LAN Deployment",
+            "Patch Panel to Layer 2/3 Switch Interconnections",
+            "Data Center Server Rack Cabling & High-Density Switches",
+            "Direct PC-to-PC Data Migration & Cross-Connect Links",
+            "Industrial Ethernet & Power-over-Ethernet (PoE) Wiring"
         ],
-        theory: {
-            intro: "Straight-Through cables connect different device types (PC to Switch), while Crossover cables connect similar device types (Switch to Switch, PC to PC).",
-            cards: [
-                { title: "T568B Standard", content: "Pinout order: Orange-White, Orange, Green-White, Blue, Blue-White, Green, Brown-White, Brown." },
-                { title: "Crossover Cable", content: "Swaps Pins 1 & 3 (TX+ to RX+) and Pins 2 & 6 (TX- to RX-)." }
-            ],
-            formulas: ["Max CAT6 Distance = 100 Meters (328 Feet)", "Ethernet Pins Used = Pins 1, 2, 3, 6 for 10/100 Mbps"],
-            standards: ["ANSI/TIA-568.2-D Balanced Twisted-Pair Cabling Standard"]
-        },
-        tools: [
-            { name: "RJ-45 Crimping Tool & Cable Tester", layer: "Physical Layer 1", ports: "8P8C Modular Jack", usage: "Terminates CAT6 cable ends and verifies 8-pin electrical continuity", statusLED: "LEDs 1-8 Sequence Light" }
-        ],
-        procedure: [
-            "Select T568B pinout arrangement on the interactive wiring crimping tool.",
-            "Arrange 8 color-coded copper wires in correct order.",
-            "Crimp RJ-45 connector onto CAT6 Ethernet cable.",
-            "Test continuity across all 8 pins with the Virtual Cable Tester."
-        ],
-        troubleshooting: {
-            problem: "Cable tester shows Pin 3 LED is dark.",
-            hints: ["Pin 3 wire (Green-White) is broken or not fully crimped."],
-            fix: "Strip cable, re-align wires to T568B, and recrimp RJ-45 connector."
-        },
-        viva: [
-            { q: "What is the color sequence for T568B standard?", a: "White-Orange, Orange, White-Green, Blue, White-Blue, Green, White-Brown, Brown." },
-            { q: "When do you use a Crossover cable?", a: "When connecting similar OSI layer devices directly (e.g. PC to PC, Switch to Switch)." }
-        ],
-        assignment: "Crimp both ends of a cable using T568B standard and document pin continuity test results.",
-        references: [{ title: "TIA-568 Cabling Standard Documentation", link: "https://tiaonline.org" }],
-        simType: "cable_crimp"
+        "outcome": "Students will be able to identify LAN components, construct T568A and T568B RJ-45 cable terminations, choose between Straight-Through and Crossover cables, evaluate Link/Activity LED states, execute Ping connectivity tests, and systematically troubleshoot physical layer network faults."
     },
+    "prerequisites": [
+        "Basic understanding of OSI Model Layer 1 (Physical) and Layer 2 (Data Link)",
+        "Concept of MAC addressing and Ethernet network interface cards (NICs)",
+        "IPv4 addressing basics (IP address and Subnet Mask)"
+    ],
+    "outcomes": [
+        "Explain the architecture, characteristics, and hardware components of a Local Area Network (LAN).",
+        "Differentiate between Cat5e, Cat6, Cat6A Ethernet media standards.",
+        "Arrange the 8 color-coded conductors according to T568A and T568B standards.",
+        "Differentiate Straight-Through cables (T568B-T568B) from Crossover cables (T568A-T568B).",
+        "Identify correct cable selection rules for similar vs dissimilar network devices.",
+        "Understand Auto-MDI/MDIX automatic transmit/receive pair sensing.",
+        "Trace Layer 2 Ethernet frame flow through a switch using MAC address tables.",
+        "Assign IPv4 parameters and verify Layer 3 connectivity using the Ping utility.",
+        "Diagnose cabling failures, broken conductors, duplicate IPs, and disabled interface ports."
+    ],
+    "theory": {
+        "intro": "Ethernet (IEEE 802.3) is the dominant local area network technology. It relies on unshielded twisted pair (UTP) copper cabling and RJ-45 modular connectors to transmit electrical signals at rates from 10 Mbps up to 10 Gbps.",
+        "cards": [
+            {
+                "title": "1. What is a Local Area Network (LAN)?",
+                "content": "A Local Area Network (LAN) is a high-speed, low-latency computer network spanning a restricted geographical area (labs, offices, homes).\n\nKey Characteristics:\n• Limited Geographical Boundary (up to 100 meters per copper cable segment)\n• High Bandwidth (100 Mbps, 1 Gbps, 10 Gbps)\n• Low Latency (<1 ms) & Low Error Rates\n• Shared Resources (Files, Printers, Internet Gateways, Servers)"
+            },
+            {
+                "title": "2. Essential Components of a LAN",
+                "content": "• End Devices: Workstations, Laptops, Servers, Printers (contain Network Interface Cards - NICs).\n• Intermediary Devices: Layer 2 Ethernet Switches (micro-segmentation) and Layer 3 Routers (inter-subnet forwarding).\n• Media: Unshielded Twisted Pair (UTP) Cat5e/Cat6/Cat6A cables.\n• Connectors: 8-pin RJ-45 modular plugs."
+            },
+            {
+                "title": "3. Ethernet Cable Categories & Twisted Pair Physics",
+                "content": "Ethernet copper cables contain 4 twisted wire pairs (8 color-coded conductors).\nTwisting wires reduces Electromagnetic Interference (EMI) and Crosstalk (NEXT).\n\nCategories:\n• Cat5e: Up to 1 Gbps (100 MHz bandwidth, 100m max distance)\n• Cat6: Up to 10 Gbps (250 MHz bandwidth, 55m max for 10G, 100m for 1G)\n• Cat6A: Up to 10 Gbps (500 MHz bandwidth, 100m max distance)"
+            },
+            {
+                "title": "4. RJ-45 Connector & Wiring Standards (T568A vs T568B)",
+                "content": "An RJ-45 connector has 8 gold-plated pins numbered 1 to 8 from left to right (clip facing down).\n\nT568A Wire Order:\n1: White-Green | 2: Green | 3: White-Orange | 4: Blue | 5: White-Blue | 6: Orange | 7: White-Brown | 8: Brown\n\nT568B Wire Order (Most Popular):\n1: White-Orange | 2: Orange | 3: White-Green | 4: Blue | 5: White-Blue | 6: Green | 7: White-Brown | 8: Brown"
+            },
+            {
+                "title": "5. Straight-Through Cable Specification",
+                "content": "A Straight-Through Cable uses the SAME wiring standard on both ends (T568B–T568B or T568A–T568A).\n\nWorking Principle: Pin 1 connects to Pin 1, Pin 2 to Pin 2, etc. Transmit (Tx) pins on an MDI host (PC) connect to Receive (Rx) pins on an MDI-X switch port.\n\nUsed Between Dissimilar Devices:\n• PC / Workstation ↔ Ethernet Switch / Hub\n• Router (MDI) ↔ Ethernet Switch (MDI-X)\n• Switch ↔ Server / Wireless Access Point"
+            },
+            {
+                "title": "6. Crossover Cable Specification",
+                "content": "A Crossover Cable uses DIFFERENT wiring standards on each end (T568A on End 1 and T568B on End 2).\n\nWorking Principle: Pins 1 & 2 (Tx pair of T568A) connect to Pins 3 & 6 (Rx pair of T568B), swapping transmit and receive pairs so two MDI devices can communicate directly.\n\nUsed Between Similar Devices:\n• PC ↔ PC (Direct Host Link without switch)\n• Switch ↔ Switch (Uplink without dedicated MDI-X port)\n• Router ↔ Router\n• Hub ↔ Hub"
+            },
+            {
+                "title": "7. Auto-MDI/MDIX Feature",
+                "content": "Auto-MDI/MDIX (Automatic Medium Dependent Interface Crossover) is a hardware feature on modern switch and NIC PHY chips.\n\nFunction: The PHY chip automatically detects required transmit and receive pin pairs and electronically swaps them internally if needed.\nResult: Allows modern devices to communicate successfully regardless of whether a Straight-Through or Crossover cable is plugged in!"
+            },
+            {
+                "title": "8. Layer 2 Ethernet Communication & Ping Diagnostics",
+                "content": "When PC1 sends data to PC2 on the same LAN:\n1. PC1 encapsulates IP packet inside Ethernet Frame with Source MAC and Destination MAC.\n2. Frame travels across physical UTP cable to Switch port.\n3. Switch learns PC1 MAC address on ingress port and checks internal MAC Table.\n4. Switch forwards frame out exclusively to PC2 egress port.\n5. PC2 receives frame and sends ICMP Echo Reply back.\n\nPing Diagnostics:\n• Reply from 192.168.1.20: Successful L1/L2/L3 connection!\n• Request Timed Out: Physical cable break, firewall blocking, or host powered off.\n• Destination Host Unreachable: Subnet mismatch or missing default gateway route."
+            }
+        ],
+        "formulas": [
+            "Ethernet 10/100 Mbps Pins Used = Pins 1, 2 (Tx) & Pins 3, 6 (Rx)",
+            "Gigabit 1000BASE-T Pins Used = All 8 Pins (4 Pairs Bidirectional)",
+            "Max Copper Segment Length = 100 Meters (90m Solid Horizontal + 10m Stranded Patch)",
+            "Crossover Swapped Pins = Pin 1 ↔ Pin 3 and Pin 2 ↔ Pin 6"
+        ],
+        "standards": [
+            "ANSI/TIA-568.2-D - Balanced Twisted-Pair Telecommunications Cabling Standard",
+            "IEEE 802.3 - Ethernet Physical Layer Specification",
+            "ISO/IEC 11801 - Generic Cabling for Customer Premises"
+        ]
+    },
+    "tools": [
+        {
+            "name": "Device Pair Cable Selector & Auto-MDIX Tester",
+            "layer": "Physical Layer 1",
+            "ports": "RJ-45 MDI/MDI-X",
+            "usage": "Tests cable type compatibility between PCs, Switches & Routers",
+            "statusLED": "Link LED Green/Red"
+        },
+        {
+            "name": "T568A / T568B Color Wiring Crimp Engine",
+            "layer": "Physical Layer 1",
+            "ports": "8P8C Conductors",
+            "usage": "Arranges 8 twisted pair wires into T568A/B crimp sequences",
+            "statusLED": "Continuity 1-8 Sequence"
+        },
+        {
+            "name": "Layer 2 Ethernet Frame & Switch MAC Visualizer",
+            "layer": "Data Link Layer 2",
+            "ports": "ASIC Switch Ports",
+            "usage": "Animates frame forwarding and MAC table learning",
+            "statusLED": "Activity LED Blinking"
+        },
+        {
+            "name": "Interactive Terminal Ping Diagnostic Console",
+            "layer": "Network Layer 3",
+            "ports": "ICMP Echo",
+            "usage": "Executes ping requests and reports ICMP latency and loss",
+            "statusLED": "ICMP Reply Active"
+        }
+    ],
+    "procedure": [
+        "Launch the LAN Setup & Cabling Simulator in the Interactive Simulation tab.",
+        "Use Module 1 (Cable Selection) to select Device A and Device B, toggle Auto-MDIX ON/OFF, and test Straight-Through vs Crossover links.",
+        "Use Module 2 (T568A/B Pinout Builder) to drag/click 8 color-coded conductors in order and verify crimping sequence.",
+        "Use Module 3 (LAN Canvas Topology Builder) to connect PC1, PC2, and Switch, assigning IP addresses and subnet masks.",
+        "Observe Link (Green) and Activity (Blinking Yellow) LEDs on the simulated NICs and Switch ports.",
+        "Open Module 6 (Terminal Ping Console) and issue 'ping 192.168.1.20' to verify Layer 3 connectivity.",
+        "Execute Module 7 (Fault Injection Lab) to diagnose cable breaks, duplicate IPs, and disabled ports."
+    ],
+    "troubleshooting": {
+        "problem": "PC1 Link LED remains OFF when connected to PC2 using a standard Straight-Through cable (Auto-MDIX disabled).",
+        "hints": [
+            "Direct PC-to-PC connections require transmit pins of PC1 to connect to receive pins of PC2.",
+            "Without Auto-MDIX, a Straight-Through cable connects Tx to Tx and Rx to Rx, causing physical link failure."
+        ],
+        "fix": "Replace the Straight-Through cable with a Crossover cable (T568A on one end, T568B on the other) OR enable Auto-MDIX on the NICs."
+    },
+    "pretest": [
+        {
+            "q": "Which cable type is traditionally used to connect a PC directly to a Layer 2 Switch?",
+            "options": [
+                "Crossover Cable",
+                "Straight-Through Cable",
+                "Rollover Cable",
+                "Coaxial Cable"
+            ],
+            "correct": 1,
+            "explanation": "PC (MDI device) to Switch (MDI-X device) connects different OSI device types and requires a Straight-Through cable."
+        },
+        {
+            "q": "Which pins are used for Transmit (Tx) and Receive (Rx) in 10/100 Mbps Fast Ethernet?",
+            "options": [
+                "Pins 1, 2, 4, 5",
+                "Pins 1, 2, 3, 6",
+                "Pins 3, 4, 5, 6",
+                "Pins 5, 6, 7, 8"
+            ],
+            "correct": 1,
+            "explanation": "Fast Ethernet (10/100 Mbps) utilizes Pins 1 and 2 for Transmit (Tx) and Pins 3 and 6 for Receive (Rx)."
+        },
+        {
+            "q": "What is the wire color for Pin 1 in the T568B cabling standard?",
+            "options": [
+                "White-Green",
+                "White-Orange",
+                "Green",
+                "Orange"
+            ],
+            "correct": 1,
+            "explanation": "The T568B standard begins with White-Orange on Pin 1 and Orange on Pin 2."
+        },
+        {
+            "q": "What does Auto-MDI/MDIX do on modern network switches?",
+            "options": [
+                "Assigns IP addresses automatically via DHCP",
+                "Automatically detects and corrects transmit/receive cable pin swapping",
+                "Encrypts Layer 2 Ethernet frames",
+                "Boosts Wi-Fi signal strength"
+            ],
+            "correct": 1,
+            "explanation": "Auto-MDI/MDIX senses transmit/receive pin configurations and electronically swaps them internally if needed."
+        },
+        {
+            "q": "What is the maximum recommended segment length for CAT6 copper UTP cabling?",
+            "options": [
+                "50 meters",
+                "100 meters",
+                "250 meters",
+                "500 meters"
+            ],
+            "correct": 1,
+            "explanation": "The TIA/EIA standard specifies a maximum segment length of 100 meters (328 feet) for twisted pair copper."
+        }
+    ],
+    "posttest": [
+        {
+            "q": "Which cabling standard uses White-Green on Pin 1 and Green on Pin 2?",
+            "options": [
+                "T568A",
+                "T568B",
+                "USOC",
+                "IEEE 802.11"
+            ],
+            "correct": 0,
+            "explanation": "T568A starts with White-Green (Pin 1) and Green (Pin 2)."
+        },
+        {
+            "q": "Which pair of devices requires a Crossover cable when Auto-MDIX is disabled?",
+            "options": [
+                "PC to Switch",
+                "Switch to Router",
+                "PC to PC",
+                "Switch to Server"
+            ],
+            "correct": 2,
+            "explanation": "PC to PC connects similar MDI devices directly, requiring a Crossover cable to swap Tx and Rx pairs."
+        },
+        {
+            "q": "If you crimp T568A on End 1 and T568B on End 2 of a CAT6 cable, what type of cable have you created?",
+            "options": [
+                "Straight-Through Cable",
+                "Crossover Cable",
+                "Rollover Console Cable",
+                "Coaxial Ribbon Cable"
+            ],
+            "correct": 1,
+            "explanation": "Mixing T568A on one end and T568B on the other creates a Crossover cable."
+        },
+        {
+            "q": "What ICMP output indicates that physical cable connection is working but the target IP is on a different unreachable network?",
+            "options": [
+                "Reply from 192.168.1.20",
+                "Destination Host Unreachable",
+                "Request Timed Out",
+                "Hardware Error"
+            ],
+            "correct": 1,
+            "explanation": "'Destination Host Unreachable' means Layer 2 link is up, but no Layer 3 routing path exists to the destination subnet."
+        },
+        {
+            "q": "What physical indicator shows that an Ethernet link has been successfully established at Layer 1?",
+            "options": [
+                "Power LED turns red",
+                "Link LED turns solid Green",
+                "Activity LED blinks blue",
+                "DHCP LED turns yellow"
+            ],
+            "correct": 1,
+            "explanation": "A solid Green Link LED indicates physical signal detection and successful electrical link establishment."
+        },
+        {
+            "q": "Which pins are swapped between T568A and T568B to create a Crossover cable?",
+            "options": [
+                "Pins 1,2 swapped with Pins 3,6",
+                "Pins 4,5 swapped with Pins 7,8",
+                "Pins 1,8 swapped with Pins 2,7",
+                "Pins 3,4 swapped with Pins 5,6"
+            ],
+            "correct": 0,
+            "explanation": "A Crossover cable swaps pair 2 (Pins 1,2) with pair 3 (Pins 3,6)."
+        },
+        {
+            "q": "What layer of the OSI model does an Ethernet Switch operate on to forward frames using MAC addresses?",
+            "options": [
+                "Layer 1 (Physical)",
+                "Layer 2 (Data Link)",
+                "Layer 3 (Network)",
+                "Layer 4 (Transport)"
+            ],
+            "correct": 1,
+            "explanation": "Layer 2 Ethernet Switches inspect MAC addresses in frame headers to forward data to destination ports."
+        },
+        {
+            "q": "Why are conductors in an Ethernet cable twisted in pairs?",
+            "options": [
+                "To increase physical flexibility",
+                "To reduce electromagnetic interference (EMI) and crosstalk",
+                "To increase electrical resistance",
+                "To prevent water damage"
+            ],
+            "correct": 1,
+            "explanation": "Twisting pairs causes opposing electromagnetic fields to cancel out noise, reducing crosstalk."
+        },
+        {
+            "q": "What command in Windows or Linux command prompt is used to test round-trip latency to a remote IP?",
+            "options": [
+                "ipconfig",
+                "ping",
+                "tracert",
+                "netstat"
+            ],
+            "correct": 1,
+            "explanation": "The 'ping' command sends ICMP Echo Request packets to verify network connectivity and measure latency."
+        },
+        {
+            "q": "If PC1 (192.168.1.10/24) cannot ping PC2 (192.168.1.20/24) and Link LED is dark, what is the FIRST troubleshooting step?",
+            "options": [
+                "Reinstall the Windows operating system",
+                "Check physical cable connection and verify cable type",
+                "Change DNS server IP",
+                "Replace the router"
+            ],
+            "correct": 1,
+            "explanation": "Always start physical layer troubleshooting by checking physical cable connections, RJ-45 seating, and Link LED status."
+        }
+    ],
+    "viva": [
+        {
+            "q": "Explain the difference between T568A and T568B wiring standards.",
+            "a": "T568A and T568B are telecommunications wiring standards for RJ-45 connectors. T568A begins with White-Green/Green on Pins 1 & 2 and White-Orange/Orange on Pins 3 & 6. T568B swaps these two pairs, starting with White-Orange/Orange on Pins 1 & 2 and White-Green/Green on Pins 3 & 6."
+        },
+        {
+            "q": "How does Auto-MDI/MDIX eliminate the need for crossover cables?",
+            "a": "Auto-MDIX allows modern network interface cards and switch ports to automatically detect required transmit and receive signals. The hardware internally switches Tx and Rx channels if a Straight-Through cable is connected between similar devices."
+        },
+        {
+            "q": "Why does 1000BASE-T (Gigabit Ethernet) require all 8 conductors in a CAT6 cable?",
+            "a": "Unlike 10/100 Mbps Fast Ethernet which only uses 4 wires (2 pairs), Gigabit Ethernet (1000BASE-T) transmits and receives data simultaneously on all 4 twisted pairs (8 wires) using hybrid bidirectional signaling at 250 Mbps per pair."
+        },
+        {
+            "q": "Describe the steps a Layer 2 Switch performs when an Ethernet frame arrives on Port 1.",
+            "a": "1. Switch reads Source MAC address and records it in its MAC Address Table linked to Port 1.\n2. Switch reads Destination MAC address.\n3. If Destination MAC is in the table, switch forwards frame out ONLY to the matching egress port.\n4. If Destination MAC is unknown or broadcast, switch floods frame out to all ports except Port 1."
+        },
+        {
+            "q": "What does 'Request Timed Out' mean during a Ping test?",
+            "a": "'Request Timed Out' indicates that the source host sent an ICMP Echo Request, but did not receive an ICMP Echo Reply within the timeout window (usually 4 seconds). This is caused by broken physical cables, target host shutdown, or firewall dropping ICMP packets."
+        }
+    ],
+    "assignment": "1. Construct a reference diagram showing T568A and T568B RJ-45 pinout colors.\n2. Draw a topology connecting PC1, PC2, and Switch 1. Specify the correct cable type for each link when Auto-MDIX is disabled.\n3. Perform a virtual cabling lab ping diagnostic: set PC1 to 192.168.1.10/24 and PC2 to 192.168.1.20/24, execute ping, and record output.",
+    "references": [
+        {
+            "title": "ANSI/TIA-568.2-D Cabling Standard",
+            "link": "https://tiaonline.org"
+        },
+        {
+            "title": "IEEE 802.3 Ethernet Working Group Specifications",
+            "link": "https://ieee802.org/3"
+        },
+        {
+            "title": "Cisco Networking Academy - LAN Cabling & Ethernet Fundamentals",
+            "link": "https://www.cisco.com"
+        }
+    ],
+    "simType": "lan_cables"
+},
     'subnetting': {
         title: "Subnetting, VLSM & CIDR",
         aim: "To divide network blocks using Variable Length Subnet Masking (VLSM) and Classless Inter-Domain Routing (CIDR) notation.",

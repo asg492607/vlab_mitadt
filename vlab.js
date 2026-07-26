@@ -9529,6 +9529,440 @@ const initIpClassSim = (container) => {
 };
 
 
+        // --- PRACTICAL 5: LAN SETUP & CABLING SIMULATOR ---
+// Interactive Practical 5 LAN Setup & Cabling Simulator
+const initLanCablesSim = (container) => {
+    let currentTab = 'selector'; // 'selector', 'crimp', 'canvas', 'ping', 'faults'
+
+    // Module 1 State: Cable Selection Challenge
+    let devA = 'pc';
+    let devB = 'switch';
+    let autoMdix = false;
+    let selectedCable = 'straight';
+
+    // Module 2 State: T568A/B Pinout Builder
+    let targetStandard = 'T568B';
+    let userWires = ['', '', '', '', '', '', '', ''];
+    let crimpResult = null;
+
+    // Module 3 & 6 State: LAN Topology & Terminal Ping
+    let pc1_ip = '192.168.1.10';
+    let pc2_ip = '192.168.1.20';
+    let topoCableType = 'straight';
+    let isPortDisabled = false;
+    let pingLog = [];
+
+    // Module 7 State: Fault Injection Lab
+    let activeFault = 'none';
+
+    const t568bColors = ['White-Orange', 'Orange', 'White-Green', 'Blue', 'White-Blue', 'Green', 'White-Brown', 'Brown'];
+    const t568aColors = ['White-Green', 'Green', 'White-Orange', 'Blue', 'White-Blue', 'Orange', 'White-Brown', 'Brown'];
+
+    const render = () => {
+        // Module 1 Cable Logic
+        const isSameType = (devA === 'pc' && devB === 'pc') || (devA === 'switch' && devB === 'switch') || (devA === 'router' && devB === 'router') || (devA === 'hub' && devB === 'hub') || (devA === 'pc' && devB === 'router') || (devA === 'router' && devB === 'pc');
+        const correctCableNeeded = isSameType ? 'crossover' : 'straight';
+        const isLinkUp = autoMdix || (selectedCable === correctCableNeeded);
+
+        container.innerHTML = `
+        <div class="sim-toolbar" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; padding:12px 16px; background:var(--bg-card); border-bottom:1px solid var(--border);">
+            <div style="font-size:20px; font-weight:800; color:var(--primary); display:flex; align-items:center; gap:8px;">
+                <span>LAN Setup & Cabling Engine 🔌</span>
+            </div>
+            <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                <button class="btn-sim ${currentTab === 'selector' ? 'primary' : ''}" id="tabSelector" style="font-size:12px; padding:6px 12px;">Cable Selection Challenge 🔌</button>
+                <button class="btn-sim ${currentTab === 'crimp' ? 'primary' : ''}" id="tabCrimp" style="font-size:12px; padding:6px 12px;">RJ-45 Pinout Crimper 🛠️</button>
+                <button class="btn-sim ${currentTab === 'canvas' ? 'primary' : ''}" id="tabCanvas" style="font-size:12px; padding:6px 12px;">LAN Topology Canvas 💻</button>
+                <button class="btn-sim ${currentTab === 'ping' ? 'primary' : ''}" id="tabPing" style="font-size:12px; padding:6px 12px;">Terminal Ping Diagnostics 📟</button>
+                <button class="btn-sim ${currentTab === 'faults' ? 'primary' : ''}" id="tabFaults" style="font-size:12px; padding:6px 12px;">Fault Injection Lab ⚠️</button>
+            </div>
+        </div>
+
+        <div class="sim-workspace" style="padding:16px; display:flex; flex-direction:column; gap:16px; background:var(--bg-page);">
+            ${currentTab === 'selector' ? `
+                <div style="display:flex; gap:16px; flex-wrap:wrap; width:100%;">
+                    
+                    <!-- Main Selection Card -->
+                    <div class="theory-card" style="flex:2; min-width:340px; margin:0; display:flex; flex-direction:column; gap:16px;">
+                        <h3 style="color:var(--primary); margin:0; font-size:17px;">Device Compatibility & Cable Selection Tester</h3>
+                        <p style="font-size:13px; color:var(--text-main); margin:0; line-height:1.6;">
+                            Connect two devices and select the cable type. Test how traditional MDI/MDI-X pin alignment works and observe modern <b>Auto-MDIX</b> auto-sensing.
+                        </p>
+
+                        <!-- Device Selection Controls -->
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; background:var(--bg-page); padding:14px; border:1px solid var(--border); border-radius:10px;">
+                            <div>
+                                <label style="font-size:11px; font-weight:800; color:var(--text-muted);">DEVICE A (PORT MDI/MDI-X):</label>
+                                <select id="selDevA" class="sim-select" style="width:100%; margin-top:4px; font-weight:700;">
+                                    <option value="pc" ${devA === 'pc' ? 'selected' : ''}>Workstation PC (MDI)</option>
+                                    <option value="switch" ${devA === 'switch' ? 'selected' : ''}>Layer 2 Switch (MDI-X)</option>
+                                    <option value="router" ${devA === 'router' ? 'selected' : ''}>Router Interface (MDI)</option>
+                                    <option value="hub" ${devA === 'hub' ? 'selected' : ''}>Ethernet Hub (MDI-X)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label style="font-size:11px; font-weight:800; color:var(--text-muted);">DEVICE B (PORT MDI/MDI-X):</label>
+                                <select id="selDevB" class="sim-select" style="width:100%; margin-top:4px; font-weight:700;">
+                                    <option value="pc" ${devB === 'pc' ? 'selected' : ''}>Workstation PC (MDI)</option>
+                                    <option value="switch" ${devB === 'switch' ? 'selected' : ''}>Layer 2 Switch (MDI-X)</option>
+                                    <option value="router" ${devB === 'router' ? 'selected' : ''}>Router Interface (MDI)</option>
+                                    <option value="hub" ${devB === 'hub' ? 'selected' : ''}>Ethernet Hub (MDI-X)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Auto-MDIX Toggle & Cable Selector -->
+                        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; padding:12px; background:var(--bg-page); border:1px solid var(--border); border-radius:10px;">
+                            <div style="display:flex; align-items:center; gap:8px;">
+                                <input type="checkbox" id="chkAutoMdix" ${autoMdix ? 'checked' : ''} style="width:18px; height:18px; cursor:pointer;">
+                                <label for="chkAutoMdix" style="font-size:13px; font-weight:800; color:var(--text-main); cursor:pointer;">Enable Auto-MDI/MDIX Feature ⚡</label>
+                            </div>
+                            <div style="display:flex; gap:8px;">
+                                <button class="btn-sim ${selectedCable === 'straight' ? 'primary' : ''}" id="btnSelStraight" style="font-size:12px; font-weight:700;">Straight-Through Cable ───</button>
+                                <button class="btn-sim ${selectedCable === 'crossover' ? 'primary' : ''}" id="btnSelCrossover" style="font-size:12px; font-weight:700;">Crossover Cable ──❌──</button>
+                            </div>
+                        </div>
+
+                        <!-- Visual Physical Simulation Box -->
+                        <div style="padding:24px; background:#0b0f19; border:1px solid var(--border); border-radius:12px; display:flex; justify-content:space-between; align-items:center; position:relative;">
+                            <!-- Device A Visual -->
+                            <div style="display:flex; flex-direction:column; align-items:center; gap:6px;">
+                                <div style="font-size:32px;">${devA === 'pc' ? '💻' : (devA === 'switch' ? '🔀' : (devA === 'router' ? '🌐' : '📦'))}</div>
+                                <div style="font-size:12px; font-weight:800; color:#ffffff;">Device A (${devA.toUpperCase()})</div>
+                                <div style="font-size:10px; font-family:monospace; color:#94a3b8;">Tx: Pins 1,2 | Rx: Pins 3,6</div>
+                            </div>
+
+                            <!-- Animated Cable Line -->
+                            <div style="flex:1; margin:0 20px; display:flex; flex-direction:column; align-items:center; gap:6px;">
+                                <div style="width:100%; height:6px; background:${isLinkUp ? '#10b981' : '#ef4444'}; border-radius:3px; position:relative; box-shadow: 0 0 10px ${isLinkUp ? '#10b981' : '#ef4444'}; transition:all 0.3s;"></div>
+                                <span style="font-size:11px; font-family:'JetBrains Mono', monospace; font-weight:800; color:${isLinkUp ? '#10b981' : '#ef4444'};">
+                                    ${selectedCable === 'straight' ? 'STRAIGHT-THROUGH (T568B-T568B)' : 'CROSSOVER (T568A-T568B)'}
+                                </span>
+                            </div>
+
+                            <!-- Device B Visual -->
+                            <div style="display:flex; flex-direction:column; align-items:center; gap:6px;">
+                                <div style="font-size:32px;">${devB === 'pc' ? '💻' : (devB === 'switch' ? '🔀' : (devB === 'router' ? '🌐' : '📦'))}</div>
+                                <div style="font-size:12px; font-weight:800; color:#ffffff;">Device B (${devB.toUpperCase()})</div>
+                                <div style="font-size:10px; font-family:monospace; color:#94a3b8;">Tx: Pins 1,2 | Rx: Pins 3,6</div>
+                            </div>
+
+                            <!-- Link Status Badge -->
+                            <div style="position:absolute; top:10px; right:10px;">
+                                <span style="padding:4px 10px; border-radius:6px; font-size:11px; font-weight:800; background:${isLinkUp ? 'rgba(16,185,129,0.2)' : 'rgba(239,68,68,0.2)'}; color:${isLinkUp ? '#10b981' : '#ef4444'}; border:1px solid ${isLinkUp ? '#10b981' : '#ef4444'};">
+                                    ${isLinkUp ? '🟢 LINK UP (1000 Mbps Full-Duplex)' : '🔴 LINK DOWN (Physical Pin Mismatch)'}
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Feedback Explanation Log -->
+                        <div id="cableFeedbackLog" style="padding:12px; background:rgba(37,99,235,0.06); border:1px solid var(--border); border-radius:8px; font-size:12px; line-height:1.6; color:var(--text-main);">
+                            ${isLinkUp ? 
+                                `<span style="color:#10b981; font-weight:bold;">✅ PHYSICAL LINK ESTABLISHED!</span><br>${autoMdix ? 'Auto-MDIX is ACTIVE: Physical PHY chip automatically detected and adjusted transmit/receive channels.' : `Correct cable choice! Connecting ${devA.toUpperCase()} to ${devB.toUpperCase()} requires a ${selectedCable.toUpperCase()} cable.`}` :
+                                `<span style="color:#ef4444; font-weight:bold;">❌ LINK FAILURE (No Carrier Signal):</span><br>Connecting <b>${devA.toUpperCase()}</b> to <b>${devB.toUpperCase()}</b> without Auto-MDIX using a ${selectedCable.toUpperCase()} cable connects Transmit-to-Transmit (Tx↔Tx) and Receive-to-Receive (Rx↔Rx). Change cable type to <b>${correctCableNeeded.toUpperCase()}</b> or turn ON Auto-MDIX!`
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Rules Sidebar -->
+                    <div class="theory-card" style="flex:1; min-width:260px; margin:0; display:flex; flex-direction:column; gap:12px;">
+                        <h3 style="color:var(--primary); margin:0; font-size:16px;">Traditional Cabling Matrix 📊</h3>
+                        
+                        <div style="line-height:1.7; font-size:12px; display:flex; flex-direction:column; gap:8px;">
+                            <div style="padding:8px 12px; background:var(--bg-page); border:1px solid var(--border); border-radius:6px;">
+                                <b>Dissimilar Devices → Straight Cable</b><br>
+                                • PC ↔ Switch / Hub<br>
+                                • Router ↔ Switch / Hub<br>
+                                • Switch ↔ Server / AP
+                            </div>
+                            <div style="padding:8px 12px; background:var(--bg-page); border:1px solid var(--border); border-radius:6px;">
+                                <b>Similar Devices → Crossover Cable</b><br>
+                                • PC ↔ PC (Direct)<br>
+                                • Switch ↔ Switch<br>
+                                • Router ↔ Router<br>
+                                • PC ↔ Router
+                            </div>
+                        </div>
+
+                        <div style="padding:10px; background:rgba(16,185,129,0.06); border:1px solid rgba(16,185,129,0.2); border-radius:8px; font-size:11px; line-height:1.5;">
+                            <b>⚡ Auto-MDIX Note:</b><br>
+                            Modern Gigabit switches (IEEE 802.3ab) eliminate cabling mistakes by auto-detecting wire pairs electronically.
+                        </div>
+                    </div>
+                </div>
+            ` : ''}
+
+            ${currentTab === 'crimp' ? `
+                <!-- Module 2: RJ-45 Wiring Crimp Builder -->
+                <div class="theory-card" style="margin:0; display:flex; flex-direction:column; gap:16px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap;">
+                        <h3 style="color:var(--primary); margin:0;">T568A / T568B RJ-45 Pinout Crimping Builder 🛠️</h3>
+                        <div style="display:flex; gap:8px;">
+                            <button class="btn-sim ${targetStandard === 'T568B' ? 'primary' : ''}" id="btnSetT568B">Target: T568B Standard</button>
+                            <button class="btn-sim ${targetStandard === 'T568A' ? 'primary' : ''}" id="btnSetT568A">Target: T568A Standard</button>
+                        </div>
+                    </div>
+
+                    <p style="font-size:13px; color:var(--text-main); margin:0; line-height:1.6;">
+                        Select color wires into the 8 pin slots below to crimp the RJ-45 connector according to the <b>${targetStandard}</b> wiring standard.
+                    </p>
+
+                    <!-- 8 Pin Slots Box -->
+                    <div style="display:grid; grid-template-columns:repeat(8, 1fr); gap:8px; background:#0b0f19; padding:16px; border-radius:12px; border:1px solid var(--border);">
+                        ${[0, 1, 2, 3, 4, 5, 6, 7].map(idx => `
+                            <div style="display:flex; flex-direction:column; gap:6px; align-items:center;">
+                                <span style="font-size:11px; font-weight:800; color:#94a3b8;">PIN ${idx + 1}</span>
+                                <div class="wire-slot" data-slot="${idx}" style="width:100%; height:70px; border:2px dashed #475569; border-radius:6px; display:flex; align-items:center; justify-content:center; text-align:center; padding:4px; font-size:10px; font-weight:800; cursor:pointer; background:${userWires[idx] ? '#1e293b' : 'transparent'}; color:#ffffff;">
+                                    ${userWires[idx] || 'Click to select'}
+                                </div>
+                                <span style="font-size:9px; color:#64748b; font-family:monospace;">${(idx === 0 || idx === 1) ? 'Tx' : ((idx === 2 || idx === 5) ? 'Rx' : 'Unused')}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+
+                    <!-- Action Controls -->
+                    <div style="display:flex; gap:10px; justify-content:center;">
+                        <button id="btnAutoFillStandard" class="btn-sim primary" style="font-weight:700;">Auto-Fill ${targetStandard} ⚡</button>
+                        <button id="btnVerifyCrimp" class="btn-sim success" style="font-weight:700;">Crimp & Test Continuity 🔍</button>
+                        <button id="btnResetWires" class="btn-sim" style="font-weight:700;">Clear Wires ↺</button>
+                    </div>
+
+                    <div id="crimpTestOutput" style="padding:14px; background:var(--bg-page); border:1px solid var(--border); border-radius:10px; font-size:13px; min-height:50px; line-height:1.6;">
+                        ${crimpResult || '💡 Arrange wires into pins 1–8 and click <b>Crimp & Test Continuity 🔍</b>.'}
+                    </div>
+                </div>
+            ` : ''}
+
+            ${currentTab === 'canvas' ? `
+                <!-- Module 3 & 4: Visual LAN Topology Canvas & LED Visualizer -->
+                <div class="theory-card" style="margin:0; display:flex; flex-direction:column; gap:16px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap;">
+                        <h3 style="color:var(--primary); margin:0;">Visual LAN Drag & Drop Topology Canvas 💻</h3>
+                        <div style="display:flex; gap:8px;">
+                            <button id="btnTogglePort" class="btn-sim ${isPortDisabled ? 'danger' : 'success'}">
+                                ${isPortDisabled ? 'Enable Switch Port 🔴' : 'Disable Switch Port 🟢'}
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Topology Visual Board -->
+                    <div style="background:#0b0f19; border:1px solid var(--border); border-radius:12px; padding:20px; display:flex; flex-direction:column; gap:20px; align-items:center;">
+                        <!-- Top Row: Switch -->
+                        <div style="padding:14px 28px; background:#1e293b; border:2px solid #3b82f6; border-radius:10px; display:flex; align-items:center; gap:14px; box-shadow:0 0 15px rgba(59,130,246,0.3);">
+                            <span style="font-size:32px;">🔀</span>
+                            <div>
+                                <div style="font-size:14px; font-weight:800; color:#ffffff;">Core Layer-2 Switch</div>
+                                <div style="font-size:10px; color:#94a3b8; font-family:monospace;">Ports 1 & 2 Active | MAC Table: 2 Entries</div>
+                            </div>
+                            <div style="display:flex; gap:6px; margin-left:14px;">
+                                <span style="width:10px; height:10px; border-radius:50%; background:${isPortDisabled ? '#ef4444' : '#10b981'}; display:inline-block;" title="Port 1 Link LED"></span>
+                                <span style="width:10px; height:10px; border-radius:50%; background:#10b981; display:inline-block;" title="Port 2 Link LED"></span>
+                            </div>
+                        </div>
+
+                        <!-- Cables -->
+                        <div style="display:flex; justify-content:space-around; width:80%; height:40px;">
+                            <div style="width:4px; height:100%; background:${isPortDisabled ? '#ef4444' : '#10b981'}; box-shadow:0 0 8px ${isPortDisabled ? '#ef4444' : '#10b981'};"></div>
+                            <div style="width:4px; height:100%; background:#10b981; box-shadow:0 0 8px #10b981;"></div>
+                        </div>
+
+                        <!-- Bottom Row: Workstation PCs -->
+                        <div style="display:flex; justify-content:space-around; width:100%;">
+                            <!-- PC 1 -->
+                            <div style="padding:14px; background:#1e293b; border:2px solid ${isPortDisabled ? '#ef4444' : '#10b981'}; border-radius:10px; display:flex; align-items:center; gap:12px;">
+                                <span style="font-size:28px;">💻</span>
+                                <div>
+                                    <div style="font-size:13px; font-weight:800; color:#ffffff;">PC1 (Workstation)</div>
+                                    <div style="font-size:10px; color:#94a3b8; font-family:monospace;">IP: ${pc1_ip}</div>
+                                    <div style="font-size:9px; color:#64748b; font-family:monospace;">MAC: 00:1A:2B:3C:4D:01</div>
+                                </div>
+                            </div>
+
+                            <!-- PC 2 -->
+                            <div style="padding:14px; background:#1e293b; border:2px solid #10b981; border-radius:10px; display:flex; align-items:center; gap:12px;">
+                                <span style="font-size:28px;">💻</span>
+                                <div>
+                                    <div style="font-size:13px; font-weight:800; color:#ffffff;">PC2 (Workstation)</div>
+                                    <div style="font-size:10px; color:#94a3b8; font-family:monospace;">IP: ${pc2_ip}</div>
+                                    <div style="font-size:9px; color:#64748b; font-family:monospace;">MAC: 00:1A:2B:3C:4D:02</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            ` : ''}
+
+            ${currentTab === 'ping' ? `
+                <!-- Module 6: Interactive Terminal Ping Diagnostic Console -->
+                <div class="theory-card" style="margin:0; display:flex; flex-direction:column; gap:16px;">
+                    <h3 style="color:var(--primary); margin:0;">Interactive Terminal Ping Diagnostic Console 📟</h3>
+                    <p style="font-size:13px; color:var(--text-main); margin:0; line-height:1.6;">
+                        Execute network diagnostic commands from PC1 terminal prompt to test Layer 1 physical link and Layer 3 IP connectivity.
+                    </p>
+
+                    <!-- Command Line Input -->
+                    <div style="display:flex; gap:10px; align-items:center;">
+                        <span style="font-family:'JetBrains Mono', monospace; font-size:13px; font-weight:800; color:var(--primary);">C:\\Users\\Student&gt;</span>
+                        <input type="text" id="termCmdInput" value="ping 192.168.1.20" class="sim-select" style="flex:1; font-family:'JetBrains Mono', monospace; font-size:13px; padding:8px;">
+                        <button id="btnRunPingCmd" class="btn-sim primary" style="font-weight:700;">Execute Command ↵</button>
+                    </div>
+
+                    <!-- Terminal Output Box -->
+                    <div id="termLogBox" style="padding:16px; background:#0b0f19; border:1px solid var(--border); border-radius:10px; font-family:'JetBrains Mono', monospace; font-size:12px; color:#10b981; min-height:160px; max-height:260px; overflow-y:auto; line-height:1.8;">
+                        Microsoft Windows [Version 10.0.19045.3803]<br>
+                        (c) Microsoft Corporation. All rights reserved.<br><br>
+                        Type 'ping 192.168.1.20' or 'ipconfig' to test LAN connection...
+                    </div>
+                </div>
+            ` : ''}
+
+            ${currentTab === 'faults' ? `
+                <!-- Module 7: Fault Injection Lab -->
+                <div class="theory-card" style="margin:0; display:flex; flex-direction:column; gap:16px;">
+                    <h3 style="color:var(--primary); margin:0;">Cabling Fault Injection & Troubleshooting Lab ⚠️</h3>
+                    <p style="font-size:13px; color:var(--text-main); margin:0; line-height:1.6;">
+                        Inject real-world network faults into the virtual LAN and perform systematic step-by-step physical layer and logical layer troubleshooting.
+                    </p>
+
+                    <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                        <button class="btn-sim ${activeFault === 'wrong_cable' ? 'danger' : ''}" id="btnFaultCable">Inject Fault: Wrong Cable Type ✂️</button>
+                        <button class="btn-sim ${activeFault === 'dup_ip' ? 'danger' : ''}" id="btnFaultDupIp">Inject Fault: Duplicate IP Address 🚨</button>
+                        <button class="btn-sim ${activeFault === 'bad_pin' ? 'danger' : ''}" id="btnFaultPin">Inject Fault: Severed Wire (Pin 3) ⚡</button>
+                        <button class="btn-sim" id="btnClearFault">Clear All Faults 💚</button>
+                    </div>
+
+                    <div id="faultDiagnosticOut" style="padding:16px; background:var(--bg-page); border:1px solid var(--border); border-radius:10px; font-size:13px; min-height:80px; line-height:1.7;">
+                        💡 Select a fault scenario above to simulate network troubleshooting.
+                    </div>
+                </div>
+            ` : ''}
+        </div>
+        `;
+
+        // Tab Switching Handlers
+        document.getElementById('tabSelector').onclick = () => { currentTab = 'selector'; render(); };
+        document.getElementById('tabCrimp').onclick = () => { currentTab = 'crimp'; render(); };
+        document.getElementById('tabCanvas').onclick = () => { currentTab = 'canvas'; render(); };
+        document.getElementById('tabPing').onclick = () => { currentTab = 'ping'; render(); };
+        document.getElementById('tabFaults').onclick = () => { currentTab = 'faults'; render(); };
+
+        // Module 1 Handlers
+        if (currentTab === 'selector') {
+            document.getElementById('selDevA').onchange = (e) => { devA = e.target.value; render(); };
+            document.getElementById('selDevB').onchange = (e) => { devB = e.target.value; render(); };
+            document.getElementById('chkAutoMdix').onchange = (e) => { autoMdix = e.target.checked; render(); };
+            document.getElementById('btnSelStraight').onclick = () => { selectedCable = 'straight'; render(); };
+            document.getElementById('btnSelCrossover').onclick = () => { selectedCable = 'crossover'; render(); };
+        }
+
+        // Module 2 Handlers (Crimper)
+        if (currentTab === 'crimp') {
+            document.getElementById('btnSetT568B').onclick = () => { targetStandard = 'T568B'; render(); };
+            document.getElementById('btnSetT568A').onclick = () => { targetStandard = 'T568A'; render(); };
+
+            document.getElementById('btnAutoFillStandard').onclick = () => {
+                userWires = targetStandard === 'T568B' ? [...t568bColors] : [...t568aColors];
+                render();
+            };
+
+            document.getElementById('btnResetWires').onclick = () => {
+                userWires = ['', '', '', '', '', '', '', ''];
+                crimpResult = null;
+                render();
+            };
+
+            document.getElementById('btnVerifyCrimp').onclick = () => {
+                const targetColors = targetStandard === 'T568B' ? t568bColors : t568aColors;
+                const isCorrect = userWires.every((w, i) => w === targetColors[i]);
+
+                if (isCorrect) {
+                    crimpResult = `<span style="color:#10b981; font-weight:800;">✅ CONTINUITY TEST PASSED!</span><br>All 8 pins crimped perfectly according to ${targetStandard} standard. Transmit (Pins 1,2) and Receive (Pins 3,6) pairs align 100%!`;
+                } else {
+                    crimpResult = `<span style="color:#ef4444; font-weight:800;">❌ CONTINUITY TEST FAILED!</span><br>Wire sequence mismatch detected. Please check pin alignment against the ${targetStandard} standard.`;
+                }
+                render();
+            };
+        }
+
+        // Module 3 Handlers
+        if (currentTab === 'canvas') {
+            document.getElementById('btnTogglePort').onclick = () => {
+                isPortDisabled = !isPortDisabled;
+                render();
+            };
+        }
+
+        // Module 6 Handlers (Ping Terminal)
+        if (currentTab === 'ping') {
+            const btnPing = document.getElementById('btnRunPingCmd');
+            if (btnPing) btnPing.onclick = () => {
+                const cmd = document.getElementById('termCmdInput').value.trim();
+                const term = document.getElementById('termLogBox');
+
+                if (cmd.startsWith('ping')) {
+                    const targetIp = cmd.split(' ')[1] || '';
+                    if (targetIp === '192.168.1.20' && !isPortDisabled) {
+                        term.innerHTML += `
+                            <br><br>&gt; ${cmd}<br>
+                            Pinging ${targetIp} with 32 bytes of data:<br>
+                            Reply from ${targetIp}: bytes=32 time=1ms TTL=64<br>
+                            Reply from ${targetIp}: bytes=32 time=1ms TTL=64<br>
+                            Reply from ${targetIp}: bytes=32 time=1ms TTL=64<br>
+                            Reply from ${targetIp}: bytes=32 time=1ms TTL=64<br><br>
+                            Ping statistics for ${targetIp}:<br>
+                            Packets: Sent = 4, Received = 4, Lost = 0 (0% loss)
+                        `;
+                    } else {
+                        term.innerHTML += `
+                            <br><br>&gt; ${cmd}<br>
+                            Pinging ${targetIp} with 32 bytes of data:<br>
+                            Request timed out.<br>
+                            Request timed out.<br>
+                            Request timed out.<br>
+                            Request timed out.<br><br>
+                            Ping statistics for ${targetIp}:<br>
+                            Packets: Sent = 4, Received = 0, Lost = 4 (100% loss)
+                        `;
+                    }
+                } else if (cmd === 'ipconfig') {
+                    term.innerHTML += `
+                        <br><br>&gt; ipconfig<br>
+                        Ethernet adapter Local Area Connection:<br>
+                        IPv4 Address. . . . . . . . . . . : 192.168.1.10<br>
+                        Subnet Mask . . . . . . . . . . . : 255.255.255.0<br>
+                        Default Gateway . . . . . . . . . : 192.168.1.1
+                    `;
+                }
+                term.scrollTop = term.scrollHeight;
+            };
+        }
+
+        // Module 7 Handlers (Fault Injection)
+        if (currentTab === 'faults') {
+            const out = document.getElementById('faultDiagnosticOut');
+            document.getElementById('btnFaultCable').onclick = () => {
+                activeFault = 'wrong_cable';
+                out.innerHTML = `<span style="color:#ef4444; font-weight:800;">⚠️ FAULT INJECTED: WRONG CABLE TYPE</span><br>PC1 connected to PC2 using Straight-Through cable with Auto-MDIX OFF.<br><b>Symptom:</b> Link LED OFF, Ping returns 'Request timed out'.<br><b>Fix:</b> Change cable to Crossover or enable Auto-MDIX!`;
+            };
+            document.getElementById('btnFaultDupIp').onclick = () => {
+                activeFault = 'dup_ip';
+                out.innerHTML = `<span style="color:#ef4444; font-weight:800;">⚠️ FAULT INJECTED: DUPLICATE IP ADDRESS</span><br>Both PC1 and PC2 configured with IP 192.168.1.10.<br><b>Symptom:</b> OS IP Address Conflict warning, intermittent packet drops.<br><b>Fix:</b> Change PC2 IP to 192.168.1.20!`;
+            };
+            document.getElementById('btnFaultPin').onclick = () => {
+                activeFault = 'bad_pin';
+                out.innerHTML = `<span style="color:#ef4444; font-weight:800;">⚠️ FAULT INJECTED: SEVERED WIRE (PIN 3 RX+)</span><br>RJ-45 pin 3 conductor broken inside patch cable.<br><b>Symptom:</b> Link LED OFF or flapping, continuity test fails on Pin 3.<br><b>Fix:</b> Cut broken end and recrimp RJ-45 connector using T568B!`;
+            };
+            document.getElementById('btnClearFault').onclick = () => {
+                activeFault = 'none';
+                out.innerHTML = `<span style="color:#10b981; font-weight:800;">💚 ALL FAULTS CLEARED:</span> Physical layer link and IP configuration restored to normal operating state.`;
+            };
+        }
+    };
+
+    render();
+};
+
+
         // --- OPERATING SYSTEMS SIMULATORS ---
         const initCpuSchedulingSim = (container) => {
             const COLORS = ['#2563eb', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4', '#ec4899', '#84cc16'];
@@ -15874,6 +16308,7 @@ const initIpClassSim = (container) => {
             if (data.simType === 'ip_sorter') { initIpSorter(container); return; }
             if (data.simType === 'cmd_challenge' || data.simType === 'cli') { initCmdChallenge(container); return; }
             if (data.simType === 'media_study') { initMediaStudy(container); return; }
+            if (data.simType === 'lan_cables' || id === 'lan_cables' || data.simType === 'cable_crimp') { initLanCablesSim(container); return; }
             if (data.simType === 'ip_class' || id === 'ip_class') { initIpClassSim(container); return; }
             if (data.simType === 'topologies') { initTopologySim(container); return; }
             if (data.simType === 'vlan_sim') { initVlanSim(container); return; }
