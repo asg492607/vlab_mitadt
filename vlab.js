@@ -8281,6 +8281,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             mediaItems.forEach((el, i) => el.style.borderColor = i === idx ? media[i].color : 'var(--border)');
         });
         obs.observe(mediaDetail, { attributes: true, attributeFilter: ['data-render-media'] });
+    };
     // --- TOPOLOGY SIMULATOR (PRACTICAL 3) ---
     const initTopologySim = (container) => {
         let activeTopo = 'bus';
@@ -15880,7 +15881,6 @@ Academic Rules:
             }
         });
     }
-});
 
 
 
@@ -16411,4 +16411,4 @@ Academic Rules:
             window.addEventListener('resize', resize);
         })();
     }
-
+});
