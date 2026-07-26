@@ -161,39 +161,21 @@
         }
         initTheme();
         
-        let currentRole = 'student';
         let isSignUp = false;
-
-        function setRole(role) {
-            currentRole = role;
-            document.querySelectorAll('.role-btn').forEach(btn => btn.classList.remove('active'));
-            document.getElementById(`role-${role}`).classList.add('active');
-            updateSubtitle();
-        }
 
         function updateSubtitle() {
             const subtitle = document.getElementById('auth-subtitle');
-            if (isSignUp) {
-                subtitle.textContent = `Create your ${currentRole} account to get started.`;
-            } else {
-                subtitle.textContent = `Access your ${currentRole === 'student' ? 'networking laboratories' : 'instructor dashboard'}.`;
-            }
+            if (!subtitle) return;
+            subtitle.textContent = isSignUp ? "Create your student account to get started." : "Login to your VLab account.";
         }
 
         function toggleAuthMode() {
             isSignUp = !isSignUp;
             document.getElementById('nameGroup').style.display = isSignUp ? 'block' : 'none';
-            document.getElementById('teacherCodeGroup').style.display = (isSignUp && currentRole === 'teacher') ? 'block' : 'none';
             document.getElementById('toggleMode').textContent = isSignUp ? 'Login' : 'Sign Up';
             document.getElementById('auth-btn-text').textContent = isSignUp ? 'Create Account' : 'Login to Dashboard';
             document.querySelector('.auth-footer span').textContent = isSignUp ? 'Already have an account? ' : "Don't have an account? ";
             updateSubtitle();
-        }
-
-        const originalSetRole = setRole;
-        setRole = function(role) {
-            originalSetRole(role);
-            document.getElementById('teacherCodeGroup').style.display = (isSignUp && role === 'teacher') ? 'block' : 'none';
         }
     </script>
 </head>
@@ -203,21 +185,12 @@
 
     <div class="auth-card">
         <div class="auth-brand" onclick="location.href='index.html'">MIT ADT <span>VLAB</span></div>
-        <p class="auth-subtitle" id="auth-subtitle">Access your networking laboratories.</p>
-
-        <div class="role-selector">
-            <button class="role-btn active" id="role-student" onclick="setRole('student')">🎓 Student</button>
-            <button class="role-btn" id="role-teacher" onclick="setRole('teacher')">👨‍🏫 Teacher</button>
-        </div>
+        <p class="auth-subtitle" id="auth-subtitle">Login to your VLab account.</p>
 
         <form id="authForm">
             <div class="input-group" id="nameGroup" style="display: none;">
                 <label>Full Name</label>
                 <input type="text" id="fullName" placeholder="e.g. Atharva Gandhi">
-            </div>
-            <div class="input-group" id="teacherCodeGroup" style="display: none;">
-                <label>Instructor Access Code <span style="color:#fbbf24; font-size:12px;">(Required)</span></label>
-                <input type="password" id="teacherCode" placeholder="Enter provided passcode">
             </div>
             <div class="input-group">
                 <label>Email Address</label>
@@ -271,54 +244,94 @@
         // Auth Logic
         document.getElementById('authForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const email = document.getElementById('email').value;
+            const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value;
             const btn = e.target.querySelector('button');
             btn.disabled = true;
             btn.textContent = isSignUp ? 'Creating Account...' : 'Authenticating...';
 
             try {
-                if (isSignUp) {
-                    const name = document.getElementById('fullName').value;
-                    const teacherCode = document.getElementById('teacherCode').value;
-                    
-                    if (currentRole === 'teacher' && !teacherCode) {
-                        alert("Instructor Access Code is required to sign up as a Teacher.");
-                        btn.disabled = false;
-                        btn.textContent = 'Create Account';
-                        return;
-                    }
+                let assignedRole = 'student';
+                let user;
 
+                // Special handling for master admin email gandhiatharv565@gmail.com
+                if (email.toLowerCase() === 'gandhiatharv565@gmail.com') {
+                    assignedRole = 'admin';
+                    try {
+                        const res = await signInWithEmailAndPassword(auth, email, password);
+                        user = res.user;
+                    } catch (signInErr) {
+                        if (signInErr.code === 'auth/user-not-found' || signInErr.code === 'auth/invalid-credential') {
+                            try {
+                                const res = await createUserWithEmailAndPassword(auth, email, password);
+                                user = res.user;
+                                await updateProfile(user, { displayName: "Atharva Gandhi (Master Admin)" });
+                            } catch (createErr) {
+                                throw signInErr;
+                            }
+                        } else {
+                            throw signInErr;
+                        }
+                    }
+                    const adminDoc = {
+                        name: "Atharva Gandhi",
+                        email: email,
+                        role: "admin",
+                        isMasterAdmin: true,
+                        createdAt: new Date().toISOString()
+                    };
+                    await setDoc(doc(db, "users", user.uid), adminDoc, { merge: true });
+                    localStorage.setItem('vlab_user_name', "Atharva Gandhi");
+                    localStorage.setItem('vlab_user_email', email);
+                    localStorage.setItem('vlab_user_role', "admin");
+                    localStorage.setItem('vlab_user_uid', user.uid);
+                    localStorage.setItem('vlab_user', 'authenticated');
+                    location.href = 'admin.html';
+                    return;
+                }
+
+                if (isSignUp) {
+                    // Self-registration is strictly restricted to Students
+                    const name = document.getElementById('fullName').value.trim();
+                    assignedRole = 'student';
+                    
                     const res = await createUserWithEmailAndPassword(auth, email, password);
                     await updateProfile(res.user, { displayName: name });
                     
                     const userData = {
                         name: name,
                         email: email,
-                        role: currentRole,
+                        role: 'student',
                         createdAt: new Date().toISOString()
                     };
-                    
-                    if (currentRole === 'teacher') {
-                        userData.teacherCode = teacherCode; // validated via firestore rules
-                    }
 
                     await setDoc(doc(db, "users", res.user.uid), userData);
                     localStorage.setItem('vlab_user_name', name);
-                    localStorage.setItem('vlab_user_role', currentRole);
+                    localStorage.setItem('vlab_user_email', email);
+                    localStorage.setItem('vlab_user_role', 'student');
                     localStorage.setItem('vlab_user_uid', res.user.uid);
                 } else {
                     const res = await signInWithEmailAndPassword(auth, email, password);
+                    localStorage.setItem('vlab_user_email', email);
                     const userDoc = await getDoc(doc(db, "users", res.user.uid));
                     if (userDoc.exists()) {
                         const userData = userDoc.data();
-                        localStorage.setItem('vlab_user_name', userData.name);
-                        localStorage.setItem('vlab_user_role', userData.role);
+                        assignedRole = userData.role || 'student';
+                        localStorage.setItem('vlab_user_name', userData.name || 'User');
+                        localStorage.setItem('vlab_user_role', assignedRole);
+                        localStorage.setItem('vlab_user_uid', res.user.uid);
+                    } else {
+                        assignedRole = 'student';
+                        localStorage.setItem('vlab_user_name', res.user.displayName || 'Student');
+                        localStorage.setItem('vlab_user_role', 'student');
                         localStorage.setItem('vlab_user_uid', res.user.uid);
                     }
                 }
                 localStorage.setItem('vlab_user', 'authenticated');
-                if (currentRole === 'teacher') {
+
+                if (assignedRole === 'admin') {
+                    location.href = 'admin.html';
+                } else if (assignedRole === 'teacher') {
                     location.href = 'teacher.html';
                 } else {
                     location.href = 'dashboard.html';

@@ -27,21 +27,22 @@
             </div>
             <div class="header-actions">
                 <select id="labSelect" class="sim-select" style="margin-right: 16px; font-weight: 800;">
-                    <option value="cables_devices">1. Cables, Connectors and Networking Devices</option>
-                    <option value="modulation">2. Modulation Techniques (AM, FM, PCM)</option>
-                    <option value="net_commands">3. Networking Commands & Utilities</option>
-                    <option value="ip_class">4. IPv4 Address Classification</option>
-                    <option value="csma">5. CSMA/CD Simulation</option>
-                    <option value="csma_ca">6. CSMA/CA Simulation</option>
-                    <option value="subnet">7. Subnetting & Network Design</option>
-                    <option value="vlan">8. VLAN (Virtual LAN) Configuration</option>
-                    <option value="routing_protocols">9. Dynamic Routing (OSPF & BGP)</option>
-                    <option value="routing_dv">10. Distance Vector Routing Algorithm</option>
-                    <option value="routing_ls">11. Link State Routing Algorithm</option>
-                    <option value="udp">12. Chat Application using UDP</option>
-                    <option value="tcp">13. File Transfer using TCP</option>
-                    <option value="dns">14. Domain Name System (DNS)</option>
-                    <option value="practice" style="display:none;">Practice Lab</option>
+                    <option value="intro_tools">1. Introduction to Networking Tools</option>
+                    <option value="net_commands">2. Network Commands & Utilities</option>
+                    <option value="topologies">3. Network Topologies (Bus, Star, Ring, Mesh, Tree)</option>
+                    <option value="ip_class">4. IPv4 & IPv6 Address Classification</option>
+                    <option value="lan_cables">5. LAN Setup & Cabling (Straight/Crossover)</option>
+                    <option value="subnetting">6. Subnetting, VLSM & CIDR</option>
+                    <option value="vlan">7. Virtual LANs (VLAN) & Trunking</option>
+                    <option value="routing_rip">8. Distance Vector Routing Protocol (RIP)</option>
+                    <option value="routing_ospf">9. Link State Routing Protocol (OSPF)</option>
+                    <option value="routing_eigrp">10. Dynamic Routing Protocol (EIGRP)</option>
+                    <option value="static_routing">11. Static Routing Configuration</option>
+                    <option value="udp_tcp">12. UDP & TCP Transport Protocols</option>
+                    <option value="dhcp_config">13. DHCP Configuration & IP Pools</option>
+                    <option value="static_nat">14. Static Network Address Translation (NAT)</option>
+                    <option value="dynamic_nat">15. Dynamic NAT & PAT Overload</option>
+                    <option value="practice" style="display:none;">Practice Sandbox Lab</option>
                 </select>
                 <select id="moduleSelect" class="sim-select" style="margin-right: 16px; font-weight: 800; display: none;">
                 </select>
@@ -56,17 +57,21 @@
             <aside class="vlab-sidebar">
                 <nav>
                     <ul>
-                        <li class="nav-item active" data-section="aim"><span class="nav-icon">🎯</span> Aim</li>
-                        <li class="nav-item" data-section="theory"><span class="nav-icon">📚</span> Theory</li>
-                        <li class="nav-item" data-section="procedure"><span class="nav-icon">📋</span> Procedure</li>
-                        <li class="nav-item" data-section="pretest"><span class="nav-icon">📝</span> Pretest</li>
-                        <li class="nav-item" data-section="simulation"><span class="nav-icon">⚙️</span> Simulation</li>
-                        <li class="nav-item" data-section="experiment"><span class="nav-icon">🔬</span> Experiment</li>
-                        <li class="nav-item" data-section="posttest"><span class="nav-icon">📊</span> Posttest</li>
-                        <li class="nav-item" data-section="practice_tasks"><span class="nav-icon">💡</span> Practice Tasks</li>
-                        <li class="nav-item" data-section="references"><span class="nav-icon">🔗</span> References</li>
-                        <li class="nav-item" data-section="contributors"><span class="nav-icon">👥</span> Contribution</li>
-                        <li class="nav-item" data-section="feedback"><span class="nav-icon">💬</span> Feedback</li>
+                        <li class="nav-item active" data-section="aim"><span class="nav-icon">📌</span> Introduction & Aim</li>
+                        <li class="nav-item" data-section="prerequisites"><span class="nav-icon">🧠</span> Prerequisites</li>
+                        <li class="nav-item" data-section="outcomes"><span class="nav-icon">🎯</span> Learning Outcomes</li>
+                        <li class="nav-item" data-section="theory"><span class="nav-icon">📚</span> Technical Theory</li>
+                        <li class="nav-item" data-section="tools"><span class="nav-icon">🛠️</span> Hardware Tools Inspector</li>
+                        <li class="nav-item" data-section="simulation"><span class="nav-icon">⚙️</span> Interactive Simulation</li>
+                        <li class="nav-item" data-section="experiment"><span class="nav-icon">🧪</span> Cisco Packet Tracer Lab</li>
+                        <li class="nav-item" data-section="troubleshooting"><span class="nav-icon">🔧</span> Troubleshooting Challenge</li>
+                        <li class="nav-item" data-section="posttest"><span class="nav-icon">📊</span> Post-Test Evaluation</li>
+                        <li class="nav-item" data-section="viva"><span class="nav-icon">🎙️</span> Viva Voce Questions</li>
+                        <li class="nav-item" data-section="assignment"><span class="nav-icon">📜</span> Mini-Assignment Tasks</li>
+                        <li class="nav-item" data-section="manual"><span class="nav-icon">📄</span> Lab Manual PDF 🔒</li>
+                        <li class="nav-item" data-section="certificate"><span class="nav-icon">🏆</span> Completion Certificate 🔒</li>
+                        <li class="nav-item" data-section="feedback"><span class="nav-icon">💬</span> Feedback & Ratings</li>
+                        <li class="nav-item" data-section="references"><span class="nav-icon">🔗</span> References & Standards</li>
                     </ul>
                 </nav>
             </aside>
@@ -98,33 +103,40 @@
                     <section id="section-aim" class="content-section active">
                         <h1 class="section-title" id="aim-title">Loading...</h1>
                         <div class="section-body" id="aim-body">
-                            <p style="color:var(--text-muted);">Loading lab content...</p>
+                            <p style="color:var(--text-muted);">Loading lab introduction and aim...</p>
+                        </div>
+                    </section>
+
+                    <section id="section-prerequisites" class="content-section">
+                        <h1 class="section-title">🧠 Prerequisites</h1>
+                        <div class="section-body" id="prerequisites-body">
+                            <p style="color:var(--text-muted);">Loading prerequisites...</p>
+                        </div>
+                    </section>
+
+                    <section id="section-outcomes" class="content-section">
+                        <h1 class="section-title">🎯 Learning Outcomes</h1>
+                        <div class="section-body" id="outcomes-body">
+                            <p style="color:var(--text-muted);">Loading learning outcomes...</p>
                         </div>
                     </section>
 
                     <section id="section-theory" class="content-section">
-                        <h1 class="section-title">Theory</h1>
+                        <h1 class="section-title">📚 Theory & Technical Standards</h1>
                         <div class="section-body" id="theory-body">
                             <p style="color:var(--text-muted);">Loading theory...</p>
                         </div>
                     </section>
 
-                    <section id="section-pretest" class="content-section">
-                        <h1 class="section-title">Pretest</h1>
-                        <div class="section-body" id="pretest-body">
-                            <p style="color:var(--text-muted);">Loading pretest questions...</p>
-                        </div>
-                    </section>
-
-                    <section id="section-procedure" class="content-section">
-                        <h1 class="section-title">Procedure</h1>
-                        <div class="section-body" id="procedure-body">
-                            <p style="color:var(--text-muted);">Loading procedure...</p>
+                    <section id="section-tools" class="content-section">
+                        <h1 class="section-title">🛠️ Hardware & Tools Inspector</h1>
+                        <div class="section-body" id="tools-body">
+                            <p style="color:var(--text-muted);">Loading hardware tools inspector...</p>
                         </div>
                     </section>
 
                     <section id="section-simulation" class="content-section">
-                        <h1 class="section-title">Simulation</h1>
+                        <h1 class="section-title">⚙️ Interactive Simulation</h1>
                         <div class="simulation-container">
                             <div id="dynamic-sim-ui">
                                 <!-- Dynamic Protocol Animation UI -->
@@ -133,71 +145,96 @@
                     </section>
 
                     <section id="section-experiment" class="content-section">
-                        <h1 class="section-title">Experiment</h1>
+                        <h1 class="section-title">🏗️ Practice Lab Sandbox</h1>
                         <div class="simulation-container">
                             <div id="topology-builder-ui" style="height: 100%; width: 100%;">
-                                <!-- Topology Builder will be injected here -->
+                                <!-- Topology Builder injected via JS -->
                             </div>
                         </div>
                     </section>
 
-                    <section id="section-posttest" class="content-section">
-                        <h1 class="section-title">Posttest</h1>
-                        <div class="section-body">
-                            <p>Verify your technical understanding with the following assessment.</p>
-                            <div id="post-mcq-container">
-                                <!-- MCQ Injected via JS -->
-                            </div>
-                            <div class="theory-card" style="margin-top: 20px;">
-                                <strong>Laboratory Feedback</strong>
-                                <p style="font-size:12px; color:var(--text-muted);">Share your technical experience or any difficulties encountered during this lab.</p>
-                                <textarea id="student-feedback" style="width: 100%; height: 100px; padding: 12px; background: var(--bg-page); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text-main); font-family: inherit; font-size: 13px; resize: vertical; box-sizing: border-box; margin-top: 10px; outline: none; transition: border-color 0.2s;" placeholder="Type your feedback here..."></textarea>
-                            </div>
-                            <button id="submit-post" class="btn-sim primary" style="margin-top: 20px;">Finish & Submit Experiment</button>
+                    <section id="section-procedure" class="content-section">
+                        <h1 class="section-title">📋 Guided Experiment Workflow</h1>
+                        <div class="section-body" id="procedure-body">
+                            <p style="color:var(--text-muted);">Loading experiment procedure...</p>
                         </div>
                     </section>
- 
-                    <section id="section-practice_tasks" class="content-section">
-                        <h1 class="section-title">Practice Tasks</h1>
-                        <div class="section-body">
-                            <div id="practice-commands-container" class="theory-card" style="background:var(--bg-page); border:1px solid var(--border);">
-                                <h3 style="color:var(--primary); margin-bottom:15px; display:flex; align-items:center; gap:8px;">
-                                    <span>⌨️</span> Recommended Commands
-                                </h3>
-                                <div id="practice-commands-list" style="font-family:var(--font-mono); font-size:13px; line-height:1.8; color:var(--text-main);">
-                                    <!-- Injected via JS -->
-                                </div>
-                            </div>
-                            <div id="practice-questions-container" class="theory-card" style="margin-top:20px;">
-                                <h3 style="color:var(--accent); margin-bottom:15px; display:flex; align-items:center; gap:8px;">
-                                    <span>❓</span> Practice Questions
-                                </h3>
-                                <div id="practice-questions-list">
-                                    <!-- Injected via JS -->
-                                </div>
-                            </div>
+
+                    <section id="section-cli" class="content-section">
+                        <h1 class="section-title">💻 CLI Terminal Console</h1>
+                        <div class="section-body" id="cli-body">
+                            <!-- CLI Terminal injected via JS -->
+                        </div>
+                    </section>
+
+                    <section id="section-packet_analyzer" class="content-section">
+                        <h1 class="section-title">🦈 Wireshark Packet Analyzer</h1>
+                        <div class="section-body" id="packet_analyzer-body">
+                            <!-- Packet Analyzer injected via JS -->
+                        </div>
+                    </section>
+
+                    <section id="section-troubleshooting" class="content-section">
+                        <h1 class="section-title">🔧 Troubleshooting Challenge</h1>
+                        <div class="section-body" id="troubleshooting-body">
+                            <!-- Troubleshooting injected via JS -->
+                        </div>
+                    </section>
+
+
+                    <section id="section-posttest" class="content-section">
+                        <h1 class="section-title">📊 Post-Test Evaluation</h1>
+                        <div class="section-body" id="posttest-body">
+                            <!-- Posttest injected via JS -->
+                        </div>
+                    </section>
+
+                    <section id="section-viva" class="content-section">
+                        <h1 class="section-title">🎙️ Viva Voce Examination Panel</h1>
+                        <div class="section-body" id="viva-body">
+                            <!-- Viva questions injected via JS -->
+                        </div>
+                    </section>
+
+                    <section id="section-assignment" class="content-section">
+                        <h1 class="section-title">📜 Mini-Assignment & Scenario Tasks</h1>
+                        <div class="section-body" id="assignment-body">
+                            <!-- Assignment injected via JS -->
+                        </div>
+                    </section>
+
+                    <section id="section-telemetry" class="content-section">
+                        <h1 class="section-title">📈 Experiment Telemetry & Observation Table</h1>
+                        <div class="section-body" id="telemetry-body">
+                            <!-- Telemetry injected via JS -->
+                        </div>
+                    </section>
+
+                    <section id="section-manual" class="content-section">
+                        <h1 class="section-title">📄 Automated Lab Manual Generator</h1>
+                        <div class="section-body" id="manual-body">
+                            <!-- Lab manual injected via JS -->
+                        </div>
+                    </section>
+
+                    <section id="section-certificate" class="content-section">
+                        <h1 class="section-title">🏆 Completion Certificate</h1>
+                        <div class="section-body" id="certificate-body">
+                            <!-- Certificate injected via JS -->
+                        </div>
+                    </section>
+
+                    <section id="section-feedback" class="content-section">
+                        <h1 class="section-title">💬 Laboratory Feedback & Quality Audit</h1>
+                        <div class="section-body" id="feedback-body">
+                            <!-- Feedback injected via JS -->
                         </div>
                     </section>
 
                     <section id="section-references" class="content-section">
-                        <h1 class="section-title">References</h1>
-                        <div class="section-body">
-                            <ul>
-                                <li>Computer Networking: A Top-Down Approach by Kurose and Ross</li>
-                                <li>Data Communications and Networking by Behrouz A. Forouzan</li>
-                                <li>RFC 793 - Transmission Control Protocol</li>
-                            </ul>
-                        </div>
-                    </section>
-
-                    <section id="section-contributors" class="content-section">
-                        <h1 class="section-title">Contributors</h1>
-                        <div class="section-body">
-                            <div class="theory-card">
-                                <strong>Developed by</strong>
-                                <p>MIT ADT UNIVERSITY - Department of Computer Science & Engineering</p>
-                                <p>Virtual Labs Research Initiative</p>
-                            </div>
+                        <h1 class="section-title">🔗 References & Technical Standards</h1>
+                        <div class="section-body" id="references-body">
+                            <!-- References injected via JS -->
                         </div>
                     </section>
 
@@ -318,8 +355,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" integrity="sha384-JcnsjUPPylna1s1fvi1u12X5qjY5OL56iySh75FdtrwhO/SWXgMjoVqcKyIIWOLk" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha384-ZZ1pncU3bQe8y31yfZdMFdSpttDoPmOZg2wguVK9almUodir1PghgT0eY7Mrty8H" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js" integrity="sha384-QQBwnzmpf8eCm7WvgJ/dpvJ51cajsTkfDMgOq5QVBZav9687X5xjlZo8zroLyU3+" crossorigin="anonymous"></script>
-    <script src="vlabData.js?v=5"></script>
-    <script type="module" src="vlab.js?v=6"></script>
+    <script src="vlabData.js?v=25"></script>
+    <script type="module" src="vlab.js?v=25"></script>
     
     <!-- Global AI Tutor Assistant HTML Components -->
     <div id="global-ai-bubble" class="global-ai-bubble" title="Ask MIT VLab AI Tutor">✨</div>

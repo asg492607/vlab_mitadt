@@ -427,7 +427,8 @@
                 <p style="color: var(--muted-text); margin-top: 8px; font-size: 16px;">Welcome back, <span id="userNameDisplay" style="color:var(--dashboard-text); font-weight:700;">Student</span>. Choose your environment.</p>
             </div>
             <div style="display: flex; gap: 12px; margin-top: 24px; justify-content: center;">
-                <button id="btnTeacherPanel" class="btn-outline" style="display: none; padding: 10px 20px; font-size: 14px;" onclick="location.href='teacher.html'">Teacher Portal</button>
+                <button id="btnTeacherPortal" class="btn-outline" style="display: none; padding: 10px 20px; font-size: 14px; border-color:#a855f7; color:#a855f7;" onclick="location.href='teacher.html'">👨‍🏫 Teacher Workspace</button>
+                <button id="btnAdminPortal" class="btn-outline" style="display: none; padding: 10px 20px; font-size: 14px; border-color:#ef4444; color:#ef4444;" onclick="location.href='admin.html'">🛡️ Admin Portal</button>
                 <button class="btn-outline" style="padding: 10px 20px; font-size: 14px;" onclick="logout()">Sign Out</button>
             </div>
         </header>
@@ -436,93 +437,10 @@
         <div id="subject-view">
             <h2 style="margin-bottom: 24px; text-align: center; font-weight: 800; font-size: 26px;">Select Academic Track</h2>
             <div class="subject-grid">
-                <div class="subject-card" data-subject="networking" onclick="selectSubject('networking')">
-                    <div class="subject-icon" style="background: rgba(37, 99, 235, 0.1); color: #2563eb;">🌐</div>
-                    <div class="subject-info">
-                        <h3>Computer Networks</h3>
-                        <p>Simulate Carrier Sensing (CSMA/CD, CSMA/CA), dynamic routing (OSPF, BGP), UDP and TCP protocols.</p>
-                        <div class="subject-meta">
-                            <span class="badge-lab-count">14 Labs</span>
-                            <span class="subject-status">Ready</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="subject-card" data-subject="os" onclick="selectSubject('os')">
-                    <div class="subject-icon" style="background: rgba(168, 85, 247, 0.1); color: #a855f7;">💻</div>
-                    <div class="subject-info">
-                        <h3>Operating Systems</h3>
-                        <p>Analyze CPU scheduling, process synchronization with semaphores, deadlock avoidance, page replacement, and disk scheduling.</p>
-                        <div class="subject-meta">
-                            <span class="badge-lab-count">5 Labs</span>
-                            <span class="subject-status">Ready</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="subject-card" data-subject="dbms" onclick="selectSubject('dbms')">
-                    <div class="subject-icon" style="background: rgba(245, 158, 11, 0.1); color: #f59e0b;">🗄️</div>
-                    <div class="subject-info">
-                        <h3>Database Systems</h3>
-                        <p>Learn relational schemas, transactions, SQL engine optimizations, indexing tree structures, and normalization.</p>
-                        <div class="subject-meta">
-                            <span class="badge-lab-count">3 Labs</span>
-                            <span class="subject-status">Ready</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="subject-card" data-subject="programming" onclick="selectSubject('programming')">
-                    <div class="subject-icon" style="background: rgba(16, 185, 129, 0.1); color: #10b981;">💻</div>
-                    <div class="subject-info">
-                        <h3>Computer Programming</h3>
-                        <p>Compile and run C, C++, Java, and Python with live compiler terminal execution and real-time AI Tutor support.</p>
-                        <div class="subject-meta">
-                            <span class="badge-lab-count">4 Labs</span>
-                            <span class="subject-status">Ready</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="subject-card" data-subject="toc" onclick="selectSubject('toc')">
-                    <div class="subject-icon" style="background: rgba(13, 148, 136, 0.1); color: #0d9488;">🧠</div>
-                    <div class="subject-info">
-                        <h3>Theory of Computation</h3>
-                        <p>Simulate Finite Automata (DFA, NFA), regular expressions, context-free grammars, pushdown automata stacks, and Turing machines.</p>
-                        <div class="subject-meta">
-                            <span class="badge-lab-count">7 Labs</span>
-                            <span class="subject-status">Ready</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="subject-card" data-subject="ai" onclick="selectSubject('ai')">
-                    <div class="subject-icon" style="background: rgba(249, 115, 22, 0.1); color: #f97316;">🤖</div>
-                    <div class="subject-info">
-                        <h3>Artificial Intelligence</h3>
-                        <p>Explore BFS/DFS/A* search, CSP (N-Queens), Minimax, Naïve Bayes, KNN, K-Means, Neural Networks, Backpropagation, Fuzzy Logic, Genetic Algorithms, and Expert Systems.</p>
-                        <div class="subject-meta">
-                            <span class="badge-lab-count">12 Labs</span>
-                            <span class="subject-status">Ready</span>
-                        </div>
-                    </div>
-                </div>
-                            <div class="subject-card" data-subject="cloud" onclick="selectSubject('cloud')">
-                    <div class="subject-icon" style="background: rgba(14, 165, 233, 0.1); color: #0ea5e9;">☁️</div>
-                    <div class="subject-info">
-                        <h3>Cloud Computing</h3>
-                        <p>Explore virtualization, containers, load balancing, autoscaling, storage, CDN, IAM, serverless, SLA monitoring, MapReduce, and Kubernetes.</p>
-                        <div class="subject-meta">
-                            <span class="badge-lab-count">11 Labs</span>
-                            <span class="subject-status">Ready</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="subject-card" data-subject="cyber" onclick="selectSubject('cyber')">
-                    <div class="subject-icon" style="background: rgba(239, 68, 68, 0.1); color: #ef4444;">🔐</div>
-                    <div class="subject-info">
-                        <h3>Cybersecurity</h3>
-                        <p>Learn about classic ciphers, RSA, AES, hashing, firewalls, IDS, SQL injection, XSS, MITM, steganography, and network scanning.</p>
-                        <div class="subject-meta">
-                            <span class="badge-lab-count">12 Labs</span>
-                            <span class="subject-status">Ready</span>
-                        </div>
-                    </div>
+                <div class="subject-card" onclick="selectSubject('networking')" style="background: var(--glass); border: 1px solid var(--border); padding: 24px; border-radius: 20px; cursor: pointer; transition: all 0.25s ease;">
+                    <div class="subject-icon" style="font-size: 40px; margin-bottom: 12px;">🌐</div>
+                    <h3 style="font-weight: 800; margin-bottom: 8px; color: var(--primary);">Computer Networks (CN)</h3>
+                    <p style="font-size: 13px; color: var(--text-muted); line-height: 1.6;">15 Practical Labs: Packet Tracer, Topologies, Subnetting, VLANs, RIP, OSPF, EIGRP, NAT & DHCP.</p>
                 </div>
             </div>
             
@@ -604,90 +522,22 @@
 
         const SUBJECT_LABS = {
             networking: [
-                { id: 'cables_devices', num: 1, name: 'Cables & Devices', category: 'Physical Layer' },
-                { id: 'modulation', num: 2, name: 'Modulation', category: 'Signal Techniques' },
-                { id: 'net_commands', num: 3, name: 'Net Commands', category: 'Utilities & Tools' },
-                { id: 'ip_class', num: 4, name: 'IP Classification', category: 'Network ID & Host ID' },
-                { id: 'csma', num: 5, name: 'CSMA/CD', category: 'Collision Detection' },
-                { id: 'csma_ca', num: 6, name: 'CSMA/CA', category: 'Collision Avoidance' },
-                { id: 'subnet', num: 7, name: 'Subnetting', category: 'IP Architecture' },
-                { id: 'vlan', num: 8, name: 'VLAN', category: 'Logical Segmentation' },
-                { id: 'routing_protocols', num: 9, name: 'OSPF & BGP', category: 'Advanced Routing' },
-                { id: 'routing_dv', num: 10, name: 'Routing (DV)', category: 'Distance Vector' },
-                { id: 'routing_ls', num: 11, name: 'Routing (LS)', category: 'Link State' },
-                { id: 'udp', num: 12, name: 'UDP Chat', category: 'Connectionless' },
-                { id: 'tcp', num: 13, name: 'TCP Transfer', category: 'Reliable GBN' },
-                { id: 'dns', num: 14, name: 'DNS', category: 'Domain Resolution' }
-            ],
-            os: [
-                { id: 'cpu_scheduling', num: 1, name: 'CPU Scheduling', category: 'Process Mgmt' },
-                { id: 'process_sync', num: 2, name: 'Process Sync', category: 'Concurrency' },
-                { id: 'deadlock_avoidance', num: 3, name: 'Deadlock Avoidance', category: 'Resource Allocation' },
-                { id: 'page_replacement', num: 4, name: 'Page Replacement', category: 'Memory Mgmt' },
-                { id: 'disk_scheduling', num: 5, name: 'Disk Scheduling', category: 'Storage Mgmt' }
-            ],
-            programming: [
-                { id: 'c_prog', num: 1, name: 'C Programming', category: 'Memory & Syntax' },
-                { id: 'cpp_prog', num: 2, name: 'C++ OOP Concepts', category: 'Classes & Objects' },
-                { id: 'java_prog', num: 3, name: 'Java Basics', category: 'JVM Logic' },
-                { id: 'python_prog', num: 4, name: 'Python Scripting', category: 'Dynamic Logic' },
-                { id: 'asm_prog', num: 5, name: 'x86 Assembly Level (NASM)', category: 'Low-Level Logic' }
-            ],
-            dbms: [
-                { id: 'sql_queries', num: 1, name: 'SQL Schema & Queries', category: 'SQL DDL/DML' },
-                { id: 'transactions', num: 2, name: 'ACID Transactions', category: 'Concurrency' },
-                { id: 'indexing', num: 3, name: 'B-Tree Indexing', category: 'Access Structures' }
-            ],
-            toc: [
-                { id: 'dfa_sim', num: 1, name: 'DFA Simulator', category: 'Finite Automata' },
-                { id: 'nfa_to_dfa', num: 2, name: 'NFA to DFA Converter', category: 'Automata Equivalence' },
-                { id: 'regex_thompson', num: 3, name: 'Regex to NFA', category: 'Formal Languages' },
-                { id: 'cfg_parser', num: 4, name: 'CFG & Parse Trees', category: 'Context-Free Grammars' },
-                { id: 'pda_stack', num: 5, name: 'PDA Stack Simulator', category: 'Pushdown Automata' },
-                { id: 'turing_machine', num: 6, name: 'Turing Machine', category: 'Computability Theory' },
-                { id: 'dfa_minimization', num: 7, name: 'DFA Minimization', category: 'Automata Optimization' }
-            ],
-            ai: [
-                { id: 'ai_search',      num: 1,  name: 'BFS / DFS / A* Search',       category: 'Search Algorithms' },
-                { id: 'ai_heuristic',   num: 2,  name: 'Heuristic & Informed Search',  category: 'Greedy / A*' },
-                { id: 'ai_csp',         num: 3,  name: 'CSP — N-Queens',               category: 'Constraint Satisfaction' },
-                { id: 'ai_minimax',     num: 4,  name: 'Minimax & Alpha-Beta',         category: 'Game Trees' },
-                { id: 'ai_naive_bayes', num: 5,  name: 'Naïve Bayes Classifier',       category: 'Probabilistic ML' },
-                { id: 'ai_knn',         num: 6,  name: 'K-Nearest Neighbors',          category: 'Instance-Based' },
-                { id: 'ai_kmeans',      num: 7,  name: 'K-Means Clustering',           category: 'Unsupervised ML' },
-                { id: 'ai_ann',         num: 8,  name: 'Perceptron (ANN)',             category: 'Neural Networks' },
-                { id: 'ai_backprop',    num: 9,  name: 'Backpropagation & GD',         category: 'Deep Learning' },
-                { id: 'ai_fuzzy',       num: 10, name: 'Fuzzy Logic System',           category: 'Fuzzy Inference' },
-                { id: 'ai_genetic',     num: 11, name: 'Genetic Algorithm',            category: 'Evolutionary AI' },
-                { id: 'ai_expert',      num: 12, name: 'Expert System',                category: 'Rule-Based AI' }
-                        ],
-            cloud: [
-                { id: 'cloud_virtualization', num: 1, name: 'Virtualization & VM Lifecycle', category: 'Cloud Infra' },
-                { id: 'cloud_docker', num: 2, name: 'Docker Container Orchestration', category: 'Containers' },
-                { id: 'cloud_loadbalancer', num: 3, name: 'Load Balancing', category: 'Network Services' },
-                { id: 'cloud_autoscaling', num: 4, name: 'Auto-Scaling Policies', category: 'Resource Management' },
-                { id: 'cloud_storage', num: 5, name: 'Distributed Object Storage', category: 'Storage' },
-                { id: 'cloud_cdn', num: 6, name: 'Content Delivery Network', category: 'CDN' },
-                { id: 'cloud_iam', num: 7, name: 'Identity & Access Management', category: 'Security' },
-                { id: 'cloud_serverless', num: 8, name: 'Serverless Functions', category: 'Compute' },
-                { id: 'cloud_sla', num: 9, name: 'SLA Monitoring & Fault Tolerance', category: 'Reliability' },
-                { id: 'cloud_mapreduce', num: 10, name: 'MapReduce Parallel Processing', category: 'Big Data' },
-                { id: 'cloud_kubernetes', num: 11, name: 'Kubernetes Pod Scheduling', category: 'Orchestration' }
-            ],
-            cyber: [
-                { id: 'cyber_caesar', num: 1, name: 'Caesar Cipher & ROT13', category: 'Classic Ciphers' },
-                { id: 'cyber_vigenere', num: 2, name: 'Vigenère Cipher', category: 'Polyalphabetic Cipher' },
-                { id: 'cyber_rsa', num: 3, name: 'RSA Public-Key Encryption', category: 'Public-Key Crypto' },
-                { id: 'cyber_aes', num: 4, name: 'AES Block Cipher', category: 'Symmetric Crypto' },
-                { id: 'cyber_hashing', num: 5, name: 'Hashing Algorithms', category: 'Integrity' },
-                { id: 'cyber_firewall', num: 6, name: 'Firewall Rule Engine', category: 'Network Security' },
-                { id: 'cyber_ids', num: 7, name: 'Intrusion Detection System', category: 'Threat Detection' },
-                { id: 'cyber_sql_inject', num: 8, name: 'SQL Injection Attack', category: 'Web Security' },
-                { id: 'cyber_xss', num: 9, name: 'Cross-Site Scripting (XSS)', category: 'Web Security' },
-                { id: 'cyber_mitm', num: 10, name: 'Man-in-the-Middle (MITM)', category: 'Network Attack' },
-                { id: 'cyber_steganography', num: 11, name: 'Steganography (LSB)', category: 'Data Hiding' },
-                { id: 'cyber_network_scan', num: 12, name: 'Port Scanner & Vulnerability Assessment', category: 'Reconnaissance' }
-            ],
+                { id: 'intro_tools', num: 'P1', name: 'Introduction to Networking Tools', category: 'Simulators & Hardware' },
+                { id: 'net_commands', num: 'P2', name: 'Network Commands & Utilities', category: 'CLI Diagnostics' },
+                { id: 'topologies', num: 'P3', name: 'Network Topologies: Bus, Star, Ring, Mesh, Tree', category: 'Topology Design' },
+                { id: 'ip_class', num: 'P4', name: 'IPv4 & IPv6 Address Classification', category: 'IP Addressing' },
+                { id: 'lan_cables', num: 'P5', name: 'LAN Setup & Cabling', category: 'Physical Layer & Crimping' },
+                { id: 'subnetting', num: 'P6', name: 'Subnetting, VLSM & CIDR', category: 'Subnet Math & VLSM' },
+                { id: 'vlan', num: 'P7', name: 'Virtual LANs & IEEE 802.1Q Trunking', category: 'Switching & VLANs' },
+                { id: 'routing_rip', num: 'P8', name: 'Distance Vector Routing - RIP', category: 'Dynamic Routing' },
+                { id: 'routing_ospf', num: 'P9', name: 'Link State Routing - OSPF', category: 'Dynamic Routing' },
+                { id: 'routing_eigrp', num: 'P10', name: 'Dynamic Routing - EIGRP', category: 'Dynamic Routing' },
+                { id: 'static_routing', num: 'P11', name: 'Static Routing Configuration', category: 'Router Configuration' },
+                { id: 'udp_tcp', num: 'P12', name: 'UDP & TCP Transport Protocols', category: 'Transport Layer' },
+                { id: 'dhcp_config', num: 'P13', name: 'DHCP Configuration & IP Pools', category: 'Network Services' },
+                { id: 'static_nat', num: 'P14', name: 'Static NAT 1:1 Mapping', category: 'Network Address Translation' },
+                { id: 'dynamic_nat', num: 'P15', name: 'Dynamic NAT & PAT Overload', category: 'Network Address Translation' }
+            ]
         };
 
         // Theme Handling
@@ -780,6 +630,13 @@
             const labs = SUBJECT_LABS[subject] || [];
             const container = document.querySelector('.lab-selection');
             if (!container) return;
+
+            if (labs.length === 0) {
+                container.innerHTML = `<div style="text-align: center; padding: 40px; color: var(--muted-text); grid-column: 1/-1;">No practical labs available for this subject track.</div>`;
+                const launchBtn = document.querySelector('.btn-start');
+                if (launchBtn) launchBtn.disabled = true;
+                return;
+            }
 
             container.innerHTML = labs.map(lab => {
                 return `
@@ -958,29 +815,88 @@
 
         // Role-based UI updates
         const userRole = localStorage.getItem('vlab_user_role');
-        if (userRole === 'teacher') {
-            document.getElementById('btnTeacherPanel').style.display = 'block';
-            document.getElementById('subject-view').style.display = 'none';
-            document.getElementById('subject-dashboard-view').style.display = 'block';
-            document.querySelector('.mode-grid').style.display = 'none';
-            document.getElementById('vlabSelection').innerHTML = `
-                <div class="theory-card" style="text-align:center; padding:60px; background:var(--glass); border:1px solid var(--primary);">
-                    <div style="font-size:48px; margin-bottom:20px;">👨‍🏫</div>
-                    <h2 style="margin-bottom:12px;">Instructor Action Center</h2>
-                    <p style="color:var(--muted-text); margin-bottom:30px; max-width:400px; margin-left:auto; margin-right:auto;">
-                        Welcome to the administrative hub. From here, you can monitor student progress, review lab reports, and submit academic evaluations.
-                    </p>
-                    <button class="btn-auth" style="max-width:280px; margin:0 auto;" onclick="location.href='teacher.html'">Open Teacher Portal</button>
+        if (userRole === 'admin') {
+            const adminBtn = document.getElementById('btnAdminPortal');
+            if (adminBtn) adminBtn.style.display = 'inline-block';
+            const teachBtn = document.getElementById('btnTeacherPortal');
+            if (teachBtn) teachBtn.style.display = 'inline-block';
+        } else if (userRole === 'teacher') {
+            const teachBtn = document.getElementById('btnTeacherPortal');
+            if (teachBtn) teachBtn.style.display = 'inline-block';
+        }
+
+        function renderSubjectCards(customSubs = []) {
+            const grid = document.querySelector('.subject-grid');
+            if (!grid) return;
+
+            const defaultSubjects = [
+                { code: 'networking', icon: '🌐', name: 'Computer Networks (CN)', desc: '15 Practical Labs: Packet Tracer, Topologies, Subnetting, VLANs, RIP, OSPF, EIGRP, NAT & DHCP.' },
+                { code: 'os', icon: '💻', name: 'Operating Systems (OS)', desc: '5 Practical Labs: CPU Scheduling, Semaphores, Banker\'s Algorithm, Page Replacement, Disk Scheduling.' },
+                { code: 'programming', icon: '🚀', name: 'Computer Programming', desc: '5 Practical Labs: C, C++, Java, Python, and x86 NASM Assembly.' },
+                { code: 'dbms', icon: '🗄️', name: 'Database Management Systems (DBMS)', desc: '3 Practical Labs: Relational Schemas, Transactions, and B-Tree Indexing.' },
+                { code: 'toc', icon: '🧮', name: 'Theory of Computation (TOC)', desc: '7 Practical Labs: DFA, NFA, Regex, Parsing, PDA, Turing Machine.' },
+                { code: 'ai', icon: '🤖', name: 'Artificial Intelligence (AI)', desc: '12 Practical Labs: Search, CSP, Minimax, Naive Bayes, KNN, K-Means, Neural Nets.' },
+                { code: 'cloud', icon: '☁️', name: 'Cloud Computing', desc: '11 Practical Labs: Virtualization, Docker, Load Balancing, Auto-Scaling, Kubernetes.' },
+                { code: 'cyber', icon: '🔐', name: 'Cybersecurity & Cryptography', desc: '12 Practical Labs: RSA, AES, Firewalls, SQL Injection, XSS, MITM.' }
+            ];
+
+            const mergedMap = new Map();
+            defaultSubjects.forEach(s => mergedMap.set(s.code, s));
+            customSubs.forEach(c => {
+                const code = (c.code || c.id || '').toLowerCase();
+                if (code) {
+                    mergedMap.set(code, {
+                        code: code,
+                        icon: c.icon || '📚',
+                        name: c.name || code.toUpperCase(),
+                        desc: c.category ? `Category: ${c.category}` : 'Institutional Curriculum Subject Track.'
+                    });
+                }
+            });
+
+            const allSubs = Array.from(mergedMap.values());
+
+            grid.innerHTML = allSubs.map(s => `
+                <div class="subject-card" onclick="selectSubject('${s.code}')" style="background: var(--glass); border: 1px solid var(--border); padding: 24px; border-radius: 20px; cursor: pointer; transition: all 0.25s ease;">
+                    <div class="subject-icon" style="font-size: 40px; margin-bottom: 12px;">${s.icon}</div>
+                    <h3 style="font-weight: 800; margin-bottom: 8px; color: var(--primary);">${s.name}</h3>
+                    <p style="font-size: 13px; color: var(--text-muted); line-height: 1.6;">${s.desc}</p>
                 </div>
-            `;
-            document.getElementById('vlabSelection').style.display = 'block';
-            document.querySelector('.welcome-header p').innerHTML = `Welcome, <span id="userNameDisplay" style="color:var(--dashboard-text); font-weight:700;">${userName.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</span>. You are in Instructor Mode.`;
-        } else {
-            // Restore active subject session if available
-            const activeSub = localStorage.getItem('vlab_current_subject');
-            if (activeSub) {
-                selectSubject(activeSub);
+            `).join('');
+        }
+
+        async function loadSubjectsFromFirestore() {
+            try {
+                const { initializeApp } = await import("https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js");
+                const { getFirestore, collection, getDocs } = await import("https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js");
+                
+                const firebaseConfig = {
+                    apiKey: "AIzaSyBaYFXyCpq60TC-op86g5cO5laHA5_bC10",
+                    authDomain: "vlab-b1761.firebaseapp.com",
+                    projectId: "vlab-b1761",
+                    storageBucket: "vlab-b1761.firebasestorage.app",
+                    messagingSenderId: "83114402229",
+                    appId: "1:83114402229:web:be4e43415868e57ecaf9fc"
+                };
+                const app = initializeApp(firebaseConfig, "dashSubApp_" + Date.now());
+                const db = getFirestore(app);
+
+                const snap = await getDocs(collection(db, "subjects"));
+                const customSubs = [];
+                snap.forEach(d => customSubs.push({ id: d.id, ...d.data() }));
+
+                renderSubjectCards(customSubs);
+            } catch(e) {
+                console.warn("Subject loading note:", e);
+                renderSubjectCards([]);
             }
+        }
+        loadSubjectsFromFirestore();
+
+        // Restore active subject session if available
+        const activeSub = localStorage.getItem('vlab_current_subject');
+        if (activeSub) {
+            selectSubject(activeSub);
         }
 
         function updateProgressUI() {

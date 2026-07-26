@@ -1,0 +1,1070 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Portal - MIT ADT VLAB Governance Suite</title>
+    <link rel="stylesheet" href="vlab.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            min-height: 100vh;
+            overflow-x: hidden;
+            overflow-y: auto !important;
+            background: var(--bg-page);
+            color: var(--text-main);
+            font-family: var(--font-sans);
+        }
+        .admin-container {
+            max-width: 1350px;
+            margin: 0 auto;
+            padding: 30px;
+            box-sizing: border-box;
+        }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+        .action-bar { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 24px; background: var(--glass); border: 1px solid var(--border); padding: 18px; border-radius: 20px; backdrop-filter: blur(10px); }
+        .btn-action-lg { padding: 12px 22px; border-radius: 12px; border: none; font-weight: 800; cursor: pointer; font-size: 13px; transition: all 0.25s ease; display: flex; align-items: center; gap: 8px; color: white; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        .btn-action-lg:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.25); }
+        .btn-purple { background: #a855f7; } .btn-purple:hover { background: #9333ea; }
+        .btn-blue { background: #2563eb; } .btn-blue:hover { background: #1d4ed8; }
+        .btn-emerald { background: #10b981; } .btn-emerald:hover { background: #059669; }
+        .btn-amber { background: #f59e0b; } .btn-amber:hover { background: #d97706; }
+        .nav-tabs { display: flex; gap: 10px; margin-bottom: 24px; border-bottom: 1px solid var(--border); padding-bottom: 12px; overflow-x: auto; }
+        .tab-btn { padding: 12px 24px; border-radius: 12px; background: transparent; border: 1px solid transparent; color: var(--text-muted); font-weight: 800; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
+        .tab-btn.active { background: var(--bg-card); border-color: var(--border); color: var(--primary); box-shadow: var(--shadow-sm); }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 24px; }
+        .admin-card { background: var(--glass); border: 1px solid var(--border); padding: 24px; border-radius: 20px; backdrop-filter: blur(10px); margin-bottom: 24px; }
+        .admin-card h4 { font-size: 12px; color: var(--text-muted); text-transform: uppercase; font-weight: 800; margin-bottom: 8px; }
+        .admin-card .val { font-size: 32px; font-weight: 800; color: var(--primary); }
+        .data-table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 14px; }
+        .data-table th, .data-table td { padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--border); }
+        .data-table th { background: var(--bg-alt); color: var(--text-muted); font-weight: 800; text-transform: uppercase; font-size: 11px; }
+        .role-badge { padding: 4px 10px; border-radius: 100px; font-size: 10px; font-weight: 800; text-transform: uppercase; }
+        .role-admin { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
+        .role-teacher { background: rgba(168, 85, 247, 0.15); color: #a855f7; }
+        .role-student { background: rgba(37, 99, 235, 0.15); color: #2563eb; }
+        .btn-action { background: var(--bg-alt); color: var(--text-main); border: 1px solid var(--border); padding: 6px 14px; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 12px; transition: all 0.2s; }
+        .btn-action:hover { background: var(--primary); color: white; border-color: var(--primary); }
+        .btn-back {
+            padding: 10px 20px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: var(--bg-alt);
+            color: var(--text-main);
+            font-weight: 800;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .btn-back:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(37, 99, 235, 0.3);
+        }
+        .btn-back.btn-danger {
+            background: rgba(239, 68, 68, 0.15);
+            color: #ef4444;
+            border-color: rgba(239, 68, 68, 0.3);
+        }
+        .btn-back.btn-danger:hover {
+            background: #ef4444;
+            color: white;
+            border-color: #ef4444;
+            box-shadow: 0 6px 16px rgba(239, 68, 68, 0.3);
+        }
+        .modal {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            background: rgba(15, 23, 42, 0.85) !important;
+            backdrop-filter: blur(12px) !important;
+            -webkit-backdrop-filter: blur(12px) !important;
+            display: none !important;
+            align-items: center;
+            justify-content: center;
+            z-index: 99999 !important;
+            opacity: 0;
+            transition: opacity 0.25s ease;
+        }
+        .modal.open {
+            display: flex !important;
+            opacity: 1;
+        }
+        .modal-content {
+            background: var(--bg-card) !important;
+            border: 1px solid var(--border) !important;
+            width: 90% !important;
+            max-width: 580px !important;
+            max-height: 85vh !important;
+            overflow-y: auto !important;
+            border-radius: 24px !important;
+            padding: 32px !important;
+            position: relative !important;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6) !important;
+            color: var(--text-main) !important;
+            transform: scale(0.95);
+            transition: transform 0.25s ease;
+        }
+        .modal.open .modal-content {
+            transform: scale(1);
+        }
+        .close-modal {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            cursor: pointer;
+            font-size: 24px;
+            color: var(--text-muted);
+            line-height: 1;
+        }
+        .form-group {
+            display: block;
+            margin-bottom: 20px;
+        }
+        .form-label {
+            display: block;
+            font-size: 12px;
+            font-weight: 800;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+        .form-input {
+            display: block;
+            width: 100%;
+            padding: 12px 16px;
+            border-radius: 12px;
+            background: var(--bg-alt);
+            color: var(--text-main);
+            border: 1px solid var(--border);
+            font-weight: 700;
+            font-family: inherit;
+            font-size: 14px;
+            box-sizing: border-box;
+            transition: all 0.2s ease;
+        }
+        select.form-input {
+            appearance: none;
+            -webkit-appearance: none;
+            padding-right: 40px;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23a855f7' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 16px center;
+            background-size: 16px;
+        }
+        .form-input:focus, select.form-input:focus {
+            outline: none;
+            border-color: #a855f7;
+            box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.2);
+        }
+        .allocation-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+        @media (max-width: 900px) { .allocation-grid { grid-template-columns: 1fr; } }
+        .teacher-alloc-card { background: var(--bg-card); border: 1px solid var(--border); padding: 18px 20px; border-radius: 16px; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .btn-save-alloc {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            border: none;
+            font-size: 15px;
+            font-weight: 800;
+            border-radius: 14px;
+            cursor: pointer;
+            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
+            transition: all 0.25s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .btn-save-alloc:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 25px rgba(16, 185, 129, 0.45);
+        }
+    </style>
+    <script>
+        function initTheme() {
+            const savedTheme = localStorage.getItem('vlab_theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+        }
+        initTheme();
+
+        function openModal(id) {
+            const m = document.getElementById(id);
+            if (m) m.classList.add('open');
+        }
+        function closeModal(id) {
+            const m = document.getElementById(id);
+            if (m) m.classList.remove('open');
+        }
+        function openCreateAccModal() { openModal('createAccModal'); }
+        function openAddSubjectModal() { openModal('addSubjectModal'); }
+        function openAddPracticalModal() { openModal('addPracticalModal'); }
+        function openAddClassModal() { openModal('addClassModal'); }
+
+        window.addEventListener('click', function(e) {
+            if (e.target.classList.contains('modal')) {
+                e.target.classList.remove('open');
+            }
+        });
+    </script>
+</head>
+<body>
+    <div class="admin-container">
+        <!-- Main Governance Header -->
+        <div class="header">
+            <div>
+                <h1 onclick="location.href='index.html'" style="cursor:pointer; margin:0 0 6px 0;">MIT ADT <span style="color:#ef4444">Institutional Admin Suite</span></h1>
+                <p style="color: var(--text-muted); margin:0;">Master Governance: Provision Instructors, Add Subjects, Build Practicals, Create Classes, & Allocate Workloads.</p>
+            </div>
+            <div style="display:flex; gap:12px;">
+                <button class="btn-back" onclick="location.href='dashboard.html'">🎓 Student Hub</button>
+                <button class="btn-back btn-danger" onclick="logout()">🚪 Sign Out</button>
+            </div>
+        </div>
+
+        <!-- Telemetry Stats Grid -->
+        <div class="card-grid">
+            <div class="admin-card">
+                <h4>Total Registered Users</h4>
+                <div class="val" id="statUsers">0</div>
+            </div>
+            <div class="admin-card">
+                <h4>Active Instructors</h4>
+                <div class="val" id="statTeachers" style="color:#a855f7">0</div>
+            </div>
+            <div class="admin-card">
+                <h4>Registered Subjects</h4>
+                <div class="val" id="statSubjects" style="color:#2563eb">0</div>
+            </div>
+            <div class="admin-card">
+                <h4>Active Classes</h4>
+                <div class="val" id="statClasses" style="color:#10b981">0</div>
+            </div>
+        </div>
+
+        <!-- Master Quick Creation Action Bar -->
+        <div class="action-bar">
+            <button class="btn-action-lg btn-purple" onclick="openCreateAccModal()">👨‍🏫 Register New Instructor</button>
+            <button class="btn-action-lg btn-blue" onclick="openAddSubjectModal()">📚 Create New Subject</button>
+            <button class="btn-action-lg btn-emerald" onclick="openAddPracticalModal()">🧪 Add Practical Experiment</button>
+            <button class="btn-action-lg btn-amber" onclick="openAddClassModal()">🏫 Create Class / Division</button>
+        </div>
+
+        <!-- Governance Tabs -->
+        <div class="nav-tabs">
+            <button class="tab-btn active" onclick="switchTab('tab-users')">👥 User Directory & Roles</button>
+            <button class="tab-btn" onclick="switchTab('tab-subjects')">📚 Subjects & Practicals</button>
+            <button class="tab-btn" onclick="switchTab('tab-classes')">🏫 Classes & Divisions</button>
+            <button class="tab-btn" onclick="switchTab('tab-allocation')">🎯 Workload Allocation Matrix</button>
+        </div>
+
+        <!-- TAB 1: USER DIRECTORY & PROMOTION -->
+        <div id="tab-users" class="tab-content active">
+            <div class="admin-card">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                    <h3 style="margin:0;">👥 System User Directory</h3>
+                    <input type="text" id="searchUser" placeholder="Search user name or email..." style="padding:10px 16px; background:var(--bg-alt); border:1px solid var(--border); border-radius:10px; color:var(--text-main); font-family:inherit;" onkeyup="filterUsers()">
+                </div>
+                <div style="overflow-x:auto;">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th>Assigned Workload</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="userTableBody">
+                            <tr><td colspan="5" style="text-align:center; padding:40px; color:var(--text-muted);">Loading system directory...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 2: SUBJECTS & PRACTICALS -->
+        <div id="tab-subjects" class="tab-content">
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:24px;">
+                <!-- Subjects List -->
+                <div class="admin-card">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                        <h3 style="margin:0;">📚 Academic Subjects</h3>
+                        <button class="btn-action" style="background:#2563eb; color:white; border:none;" onclick="openAddSubjectModal()">+ Add Subject</button>
+                    </div>
+                    <div style="overflow-x:auto;">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Code</th>
+                                    <th>Subject Name</th>
+                                    <th>Category</th>
+                                </tr>
+                            </thead>
+                            <tbody id="subjectTableBody">
+                                <tr><td colspan="3" style="text-align:center; padding:30px; color:var(--text-muted);">No custom subjects added yet. Click "+ Add Subject" to create one.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Practicals List -->
+                <div class="admin-card">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                        <h3 style="margin:0;">🧪 Practical Experiments</h3>
+                        <button class="btn-action" style="background:#10b981; color:white; border:none;" onclick="openAddPracticalModal()">+ Add Practical</button>
+                    </div>
+                    <div style="overflow-x:auto;">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Subject</th>
+                                    <th>Practical Title</th>
+                                    <th>Category</th>
+                                </tr>
+                            </thead>
+                            <tbody id="practicalTableBody">
+                                <tr><td colspan="3" style="text-align:center; padding:30px; color:var(--text-muted);">No custom practicals created yet. Click "+ Add Practical" to build one.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 3: CLASSES & DIVISIONS -->
+        <div id="tab-classes" class="tab-content">
+            <div class="admin-card">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                    <h3 style="margin:0;">🏫 Classes, Divisions & Batches</h3>
+                    <button class="btn-action" style="background:#f59e0b; color:white; border:none;" onclick="openAddClassModal()">+ Create Class / Division</button>
+                </div>
+                <div style="overflow-x:auto;">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Class / Year</th>
+                                <th>Division</th>
+                                <th>Batch</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="classTableBody">
+                            <tr><td colspan="4" style="text-align:center; padding:40px; color:var(--text-muted);">No custom classes/divisions created yet. Click "+ Create Class / Division" to add one.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 4: WORKLOAD ALLOCATION MATRIX (REFINED UI/UX) -->
+        <div id="tab-allocation" class="tab-content">
+            <div class="allocation-grid">
+                <!-- Left Panel: Instructor Workload Directory -->
+                <div class="admin-card">
+                    <h3 style="margin-top:0;">👨‍🏫 Instructors Workload Status</h3>
+                    <p style="font-size:13px; color:var(--text-muted); margin-bottom:20px;">Current subject and division assignments for faculty members.</p>
+                    <div id="teacherAllocationList">
+                        <div style="text-align:center; padding:30px; color:var(--text-muted);">Loading instructor workload directory...</div>
+                    </div>
+                </div>
+
+                <!-- Right Panel: Allocation Form Card -->
+                <div class="admin-card">
+                    <h3 style="margin-top:0;">🎯 Assign Subject & Class to Instructor</h3>
+                    <p style="font-size:13px; color:var(--text-muted); margin-bottom:24px;">Select an instructor and assign their official subject track and student division batch.</p>
+                    
+                    <div class="form-group">
+                        <label class="form-label">1. Select Instructor Account</label>
+                        <select id="assignTeacherSelect" class="form-input">
+                            <option value="">Choose Instructor Account...</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">2. Assign Subject Track</label>
+                        <select id="assignSubjectSelect" class="form-input">
+                            <option value="networking">🌐 Computer Networks (CN)</option>
+                            <option value="os">💻 Operating Systems (OS)</option>
+                            <option value="dbms">🗄️ DBMS & SQL Sandbox</option>
+                            <option value="programming">⚙️ Programming (C/C++/Java/Python)</option>
+                            <option value="toc">🧮 Theory of Computation (TOC)</option>
+                            <option value="ai">🤖 Artificial Intelligence (AI)</option>
+                            <option value="cloud">☁️ Cloud Computing</option>
+                            <option value="cyber">🔐 Cybersecurity</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" style="margin-bottom:28px;">
+                        <label class="form-label">3. Assign Division / Batch</label>
+                        <select id="assignDivisionSelect" class="form-input">
+                            <option value="Division A - Batch B1">Division A - Batch B1</option>
+                            <option value="Division A - Batch B2">Division A - Batch B2</option>
+                            <option value="Division B - Batch B1">Division B - Batch B1</option>
+                            <option value="Division B - Batch B2">Division B - Batch B2</option>
+                            <option value="All Divisions (Global)">All Divisions (Global)</option>
+                        </select>
+                    </div>
+
+                    <button class="btn-save-alloc" onclick="saveAssignment()">🎯 Save Workload Allocation</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 1: REGISTER INSTRUCTOR -->
+    <div id="createAccModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal('createAccModal')">&times;</span>
+            <h3>👨‍🏫 Register New Instructor Account</h3>
+            <p style="color:var(--text-muted); font-size:14px; margin-bottom:20px;">Provision official faculty credentials into Firebase Auth and Firestore.</p>
+            
+            <div style="margin-bottom:12px;">
+                <label style="font-weight:700; font-size:12px; display:block;">Full Name</label>
+                <input type="text" id="newAccName" placeholder="e.g. Prof. Rajesh Kumar" class="form-input">
+            </div>
+
+            <div style="margin-bottom:12px;">
+                <label style="font-weight:700; font-size:12px; display:block;">Email Address</label>
+                <input type="email" id="newAccEmail" placeholder="teacher@university.edu" class="form-input">
+            </div>
+
+            <div style="margin-bottom:12px;">
+                <label style="font-weight:700; font-size:12px; display:block;">Initial Password</label>
+                <input type="password" id="newAccPassword" placeholder="••••••••" class="form-input">
+            </div>
+
+            <div style="margin-bottom:12px;">
+                <label style="font-weight:700; font-size:12px; display:block;">Account Role</label>
+                <select id="newAccRole" class="form-input">
+                    <option value="teacher">👨‍🏫 Teacher / Instructor</option>
+                    <option value="admin">🛡️ Administrator</option>
+                </select>
+            </div>
+
+            <div style="margin-bottom:12px;">
+                <label style="font-weight:700; font-size:12px; display:block;">Subject Track Allocation</label>
+                <select id="newAccSubject" class="form-input">
+                    <option value="networking">Computer Networks (CN)</option>
+                    <option value="os">Operating Systems (OS)</option>
+                    <option value="dbms">DBMS & SQL</option>
+                    <option value="programming">Programming (C/C++/Java/Python)</option>
+                    <option value="toc">Theory of Computation (TOC)</option>
+                    <option value="ai">Artificial Intelligence (AI)</option>
+                    <option value="cloud">Cloud Computing</option>
+                    <option value="cyber">Cybersecurity</option>
+                </select>
+            </div>
+
+            <div style="margin-bottom:20px;">
+                <label style="font-weight:700; font-size:12px; display:block;">Division / Batch</label>
+                <select id="newAccDivision" class="form-input">
+                    <option value="Division A - Batch B1">Division A - Batch B1</option>
+                    <option value="Division A - Batch B2">Division A - Batch B2</option>
+                    <option value="Division B - Batch B1">Division B - Batch B1</option>
+                    <option value="Division B - Batch B2">Division B - Batch B2</option>
+                    <option value="All Divisions">All Divisions (Global)</option>
+                </select>
+            </div>
+
+            <div style="display:flex; gap:10px;">
+                <button class="btn-action" style="flex:1; padding:12px; background:#a855f7; color:white; border:none;" onclick="createAccountByAdmin()">Provision Account</button>
+                <button class="btn-action" style="flex:0.5; padding:12px;" onclick="closeModal('createAccModal')">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 2: ADD SUBJECT -->
+    <div id="addSubjectModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal('addSubjectModal')">&times;</span>
+            <h3>📚 Create New Academic Subject Track</h3>
+            <p style="color:var(--text-muted); font-size:14px; margin-bottom:20px;">Add a new subject track to the institutional curriculum catalog.</p>
+            
+            <div style="margin-bottom:12px;">
+                <label style="font-weight:700; font-size:12px;">Subject Code (e.g. ml, devops)</label>
+                <input type="text" id="subCode" placeholder="e.g. ml" class="form-input">
+            </div>
+            <div style="margin-bottom:12px;">
+                <label style="font-weight:700; font-size:12px;">Subject Name</label>
+                <input type="text" id="subName" placeholder="e.g. Machine Learning & Data Science" class="form-input">
+            </div>
+            <div style="margin-bottom:20px;">
+                <label style="font-weight:700; font-size:12px;">Category</label>
+                <input type="text" id="subCategory" placeholder="e.g. Advanced CS Elective" class="form-input">
+            </div>
+
+            <div style="display:flex; gap:10px;">
+                <button class="btn-action" style="flex:1; padding:12px; background:#2563eb; color:white; border:none;" onclick="submitNewSubject()">Save Subject to Catalog</button>
+                <button class="btn-action" style="flex:0.5; padding:12px;" onclick="closeModal('addSubjectModal')">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 3: ADD PRACTICAL EXPERIMENT -->
+    <div id="addPracticalModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal('addPracticalModal')">&times;</span>
+            <h3>🧪 Build Practical Experiment</h3>
+            <p style="color:var(--text-muted); font-size:14px; margin-bottom:20px;">Define a new practical lab experiment under a subject track.</p>
+            
+            <div style="margin-bottom:12px;">
+                <label style="font-weight:700; font-size:12px;">Select Subject Track</label>
+                <select id="pracSubjectSelect" class="form-input">
+                    <option value="networking">Computer Networks (CN)</option>
+                    <option value="os">Operating Systems (OS)</option>
+                    <option value="dbms">DBMS & SQL</option>
+                    <option value="programming">Programming</option>
+                </select>
+            </div>
+            <div style="margin-bottom:12px;">
+                <label style="font-weight:700; font-size:12px;">Practical Title</label>
+                <input type="text" id="pracTitle" placeholder="e.g. Practical 16: BGP Routing Simulation" class="form-input">
+            </div>
+            <div style="margin-bottom:20px;">
+                <label style="font-weight:700; font-size:12px;">Category / Tag</label>
+                <input type="text" id="pracCategory" placeholder="e.g. Advanced Routing" class="form-input">
+            </div>
+
+            <div style="display:flex; gap:10px;">
+                <button class="btn-action" style="flex:1; padding:12px; background:#10b981; color:white; border:none;" onclick="submitNewPractical()">Create Practical Experiment</button>
+                <button class="btn-action" style="flex:0.5; padding:12px;" onclick="closeModal('addPracticalModal')">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 4: CREATE CLASS / DIVISION -->
+    <div id="addClassModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal('addClassModal')">&times;</span>
+            <h3>🏫 Create Institutional Class / Division</h3>
+            <p style="color:var(--text-muted); font-size:14px; margin-bottom:20px;">Define student cohort divisions and lab batches.</p>
+            
+            <div style="margin-bottom:12px;">
+                <label style="font-weight:700; font-size:12px;">Academic Year / Class</label>
+                <input type="text" id="className" placeholder="e.g. Third Year CS (TY CS)" class="form-input">
+            </div>
+            <div style="margin-bottom:12px;">
+                <label style="font-weight:700; font-size:12px;">Division Name</label>
+                <input type="text" id="classDivision" placeholder="e.g. Division A" class="form-input">
+            </div>
+            <div style="margin-bottom:20px;">
+                <label style="font-weight:700; font-size:12px;">Lab Batch</label>
+                <input type="text" id="classBatch" placeholder="e.g. Batch B1" class="form-input">
+            </div>
+
+            <div style="display:flex; gap:10px;">
+                <button class="btn-action" style="flex:1; padding:12px; background:#f59e0b; color:white; border:none;" onclick="submitNewClass()">Save Class Division</button>
+                <button class="btn-action" style="flex:0.5; padding:12px;" onclick="closeModal('addClassModal')">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 5: ROLE EDIT -->
+    <div id="roleModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal('roleModal')">&times;</span>
+            <h3>⚙️ Modify User Role</h3>
+            <p style="color:var(--text-muted); font-size:14px; margin-bottom:20px;">Promote or demote user access level across the institution.</p>
+            
+            <input type="hidden" id="editUserId">
+            <div style="margin-bottom:15px;">
+                <label style="font-weight:700; font-size:13px;">User Name:</label>
+                <div id="editUserName" style="font-size:16px; font-weight:800; color:var(--primary); margin-top:4px;">--</div>
+            </div>
+
+            <div style="margin-bottom:20px;">
+                <label style="font-weight:700; font-size:13px; display:block; margin-bottom:8px;">Select System Role:</label>
+                <select id="editRoleSelect" class="form-input">
+                    <option value="student">🎓 Student</option>
+                    <option value="teacher">👨‍🏫 Teacher</option>
+                    <option value="admin">🛡️ Administrator</option>
+                </select>
+            </div>
+
+            <div style="display:flex; gap:10px;">
+                <button class="btn-action" style="flex:1; padding:12px; background:#2563eb; color:white; border:none;" onclick="submitRoleChange()">Save Role Changes</button>
+                <button class="btn-action" style="flex:0.5; padding:12px;" onclick="closeModal('roleModal')">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+        import { getFirestore, collection, getDocs, doc, getDoc, updateDoc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged, signOut, createUserWithEmailAndPassword, updateProfile } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBaYFXyCpq60TC-op86g5cO5laHA5_bC10",
+            authDomain: "vlab-b1761.firebaseapp.com",
+            projectId: "vlab-b1761",
+            storageBucket: "vlab-b1761.firebasestorage.app",
+            messagingSenderId: "83114402229",
+            appId: "1:83114402229:web:be4e43415868e57ecaf9fc"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        let allUsers = [];
+        let allSubjects = [];
+        let allPracticals = [];
+        let allClasses = [];
+
+        window.logout = () => {
+            signOut(auth).then(() => {
+                localStorage.clear();
+                location.href = 'login.html';
+            });
+        };
+
+        window.switchTab = (tabId) => {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            
+            const targetBtn = Array.from(document.querySelectorAll('.tab-btn')).find(b => b.getAttribute('onclick').includes(tabId));
+            if (targetBtn) targetBtn.classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+        };
+
+        window.openCreateAccModal = () => document.getElementById('createAccModal').style.display = 'flex';
+        window.openAddSubjectModal = () => document.getElementById('addSubjectModal').style.display = 'flex';
+        window.openAddPracticalModal = () => document.getElementById('addPracticalModal').style.display = 'flex';
+        window.openAddClassModal = () => document.getElementById('addClassModal').style.display = 'flex';
+
+        window.createAccountByAdmin = async () => {
+            const name = document.getElementById('newAccName').value.trim();
+            const email = document.getElementById('newAccEmail').value.trim();
+            const password = document.getElementById('newAccPassword').value;
+            const role = document.getElementById('newAccRole').value;
+            const subject = document.getElementById('newAccSubject').value;
+            const division = document.getElementById('newAccDivision').value;
+
+            if (!name || !email || !password) {
+                alert("Please fill all required fields.");
+                return;
+            }
+
+            try {
+                const secondaryAppName = "adminProvisioner_" + Date.now();
+                const secondaryApp = initializeApp(firebaseConfig, secondaryAppName);
+                const secondaryAuth = getAuth(secondaryApp);
+                
+                const res = await createUserWithEmailAndPassword(secondaryAuth, email, password);
+                await updateProfile(res.user, { displayName: name });
+                
+                const assignText = subject ? `${subject.toUpperCase()} (${division})` : 'Unassigned';
+                const userData = {
+                    name: name,
+                    email: email,
+                    role: role,
+                    assignedSubject: subject,
+                    assignedDivision: division,
+                    assignedTrack: assignText,
+                    createdAt: new Date().toISOString()
+                };
+
+                await setDoc(doc(db, "users", res.user.uid), userData);
+                alert(`Account created successfully for ${name} (${role.toUpperCase()})!`);
+                closeModal('createAccModal');
+                loadUsers();
+            } catch(e) {
+                alert("Account creation failed: " + e.message);
+            }
+        };
+
+        window.submitNewSubject = async () => {
+            const code = document.getElementById('subCode').value.trim().toLowerCase();
+            const name = document.getElementById('subName').value.trim();
+            const cat = document.getElementById('subCategory').value.trim();
+
+            if (!code || !name) { alert("Please enter both Subject Code and Subject Name."); return; }
+
+            const newSubject = { code: code, name: name, category: cat || 'General CS', createdAt: new Date().toISOString() };
+
+            try {
+                await setDoc(doc(db, "subjects", code), newSubject);
+            } catch(e) {
+                console.warn("Firestore save note:", e);
+            }
+
+            allSubjects.unshift(newSubject);
+            document.getElementById('statSubjects').textContent = allSubjects.length;
+            renderSubjectTable(allSubjects);
+            populateSubjectDropdowns(allSubjects);
+            
+            document.getElementById('subCode').value = '';
+            document.getElementById('subName').value = '';
+            document.getElementById('subCategory').value = '';
+            closeModal('addSubjectModal');
+            alert(`Subject "${name}" (${code.toUpperCase()}) created successfully!`);
+        };
+
+        window.submitNewPractical = async () => {
+            let subject = document.getElementById('pracSubjectSelect').value;
+            const title = document.getElementById('pracTitle').value.trim();
+            const category = document.getElementById('pracCategory').value.trim();
+
+            if (!title) { alert("Please enter the Practical Title."); return; }
+            if (!subject) subject = "general";
+
+            const pracId = `${subject}_${Date.now()}`;
+            const newPrac = { id: pracId, subjectId: subject, title: title, category: category || 'Practical Simulation', createdAt: new Date().toISOString() };
+
+            try {
+                await setDoc(doc(db, "practicals", pracId), newPrac);
+            } catch(e) {
+                console.warn("Firestore save note:", e);
+            }
+
+            allPracticals.unshift(newPrac);
+            renderPracticalTable(allPracticals);
+
+            document.getElementById('pracTitle').value = '';
+            document.getElementById('pracCategory').value = '';
+            closeModal('addPracticalModal');
+            alert(`Practical experiment "${title}" created successfully!`);
+        };
+
+        window.submitNewClass = async () => {
+            const name = document.getElementById('className').value.trim();
+            const div = document.getElementById('classDivision').value.trim();
+            const batch = document.getElementById('classBatch').value.trim();
+
+            if (!name || !div) { alert("Please enter Academic Year/Class Name and Division."); return; }
+
+            const classId = `class_${Date.now()}`;
+            const newClass = { id: classId, className: name, division: div, batch: batch || 'All Batches', createdAt: new Date().toISOString() };
+
+            try {
+                await setDoc(doc(db, "classes", classId), newClass);
+            } catch(e) {
+                console.warn("Firestore save note:", e);
+            }
+
+            allClasses.unshift(newClass);
+            document.getElementById('statClasses').textContent = allClasses.length;
+            renderClassTable(allClasses);
+            populateClassDropdowns(allClasses);
+
+            document.getElementById('className').value = '';
+            document.getElementById('classDivision').value = '';
+            document.getElementById('classBatch').value = '';
+            closeModal('addClassModal');
+            alert(`Class Division "${name} - ${div}" created successfully!`);
+        };
+
+        async function initAdmin() {
+            onAuthStateChanged(auth, async (user) => {
+                const localRole = localStorage.getItem('vlab_user_role');
+                const userEmail = (user && user.email ? user.email : (localStorage.getItem('vlab_user_email') || '')).toLowerCase();
+                const isMasterAdmin = (userEmail === 'gandhiatharv565@gmail.com');
+
+                if (!user && !isMasterAdmin && localRole !== 'admin') {
+                    location.href = 'login.html';
+                    return;
+                }
+
+                try {
+                    if (user) {
+                        const userDocRef = doc(db, "users", user.uid);
+                        const userDoc = await getDoc(userDocRef);
+                        const role = userDoc.exists() ? userDoc.data().role : null;
+                        
+                        if (isMasterAdmin || role === 'admin' || localRole === 'admin') {
+                            await setDoc(userDocRef, {
+                                name: user.displayName || "Atharva Gandhi",
+                                email: user.email,
+                                role: "admin",
+                                isMasterAdmin: true,
+                                createdAt: new Date().toISOString()
+                            }, { merge: true }).catch(err => console.warn("Doc merge note:", err));
+
+                            localStorage.setItem('vlab_user_role', 'admin');
+                            loadUsers();
+                            loadSubjects();
+                            loadPracticals();
+                            loadClasses();
+                            return;
+                        }
+                    } else if (isMasterAdmin || localRole === 'admin') {
+                        loadUsers();
+                        loadSubjects();
+                        loadPracticals();
+                        loadClasses();
+                        return;
+                    }
+
+                    alert("Unauthorized. Administrator credentials required.");
+                    location.href = 'dashboard.html';
+                } catch(e) {
+                    console.error("Admin verification error:", e);
+                    if (isMasterAdmin || localRole === 'admin') {
+                        loadUsers();
+                        loadSubjects();
+                        loadPracticals();
+                        loadClasses();
+                    } else {
+                        location.href = 'login.html';
+                    }
+                }
+            });
+        }
+
+        async function loadUsers() {
+            try {
+                const snap = await getDocs(collection(db, "users"));
+                allUsers = [];
+                let teachers = 0, students = 0;
+                snap.forEach(d => {
+                    const data = { id: d.id, ...d.data() };
+                    allUsers.push(data);
+                    if (data.role === 'teacher') teachers++;
+                    if (data.role === 'student') students++;
+                });
+
+                document.getElementById('statUsers').textContent = allUsers.length;
+                document.getElementById('statTeachers').textContent = teachers;
+
+                renderUserTable(allUsers);
+                renderTeacherAllocationList(allUsers.filter(u => u.role === 'teacher'));
+                populateTeacherDropdown(allUsers.filter(u => u.role === 'teacher'));
+            } catch(e) {
+                console.error("Failed to load user directory:", e);
+            }
+        }
+
+        async function loadSubjects() {
+            try {
+                const snap = await getDocs(collection(db, "subjects"));
+                allSubjects = [];
+                snap.forEach(d => allSubjects.push({ id: d.id, ...d.data() }));
+                document.getElementById('statSubjects').textContent = allSubjects.length;
+                renderSubjectTable(allSubjects);
+                populateSubjectDropdowns(allSubjects);
+            } catch(e) {
+                document.getElementById('statSubjects').textContent = 0;
+                renderSubjectTable([]);
+                populateSubjectDropdowns([]);
+            }
+        }
+
+        async function loadPracticals() {
+            try {
+                const snap = await getDocs(collection(db, "practicals"));
+                allPracticals = [];
+                snap.forEach(d => allPracticals.push({ id: d.id, ...d.data() }));
+                renderPracticalTable(allPracticals);
+            } catch(e) {
+                renderPracticalTable([]);
+            }
+        }
+
+        async function loadClasses() {
+            try {
+                const snap = await getDocs(collection(db, "classes"));
+                allClasses = [];
+                snap.forEach(d => allClasses.push({ id: d.id, ...d.data() }));
+                document.getElementById('statClasses').textContent = allClasses.length;
+                renderClassTable(allClasses);
+                populateClassDropdowns(allClasses);
+            } catch(e) {
+                document.getElementById('statClasses').textContent = 0;
+                renderClassTable([]);
+                populateClassDropdowns([]);
+            }
+        }
+
+        function populateSubjectDropdowns(subjects) {
+            const targets = ['assignSubjectSelect', 'newAccSubject', 'pracSubjectSelect'];
+            targets.forEach(id => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                if (!subjects.length) {
+                    el.innerHTML = `<option value="">No subjects registered yet. Create one in Subjects tab.</option>`;
+                } else {
+                    el.innerHTML = `<option value="">Select Subject Track...</option>` + subjects.map(s => `<option value="${s.code}">${s.name} (${s.code.toUpperCase()})</option>`).join('');
+                }
+            });
+        }
+
+        function populateClassDropdowns(classes) {
+            const targets = ['assignDivisionSelect', 'newAccDivision'];
+            targets.forEach(id => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                if (!classes.length) {
+                    el.innerHTML = `<option value="">No classes created yet. Create one in Classes tab.</option>`;
+                } else {
+                    el.innerHTML = `<option value="">Select Division / Batch...</option>` + classes.map(c => `<option value="${c.className} - ${c.division} (${c.batch})">${c.className} - ${c.division} (${c.batch})</option>`).join('');
+                }
+            });
+        }
+
+        function renderUserTable(users) {
+            const tbody = document.getElementById('userTableBody');
+            if (!users.length) {
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:30px; color:var(--text-muted);">No users found. Click "Register New Instructor" to provision faculty.</td></tr>`;
+                return;
+            }
+            tbody.innerHTML = users.map(u => `
+                <tr>
+                    <td><b>${u.name || 'User'}</b></td>
+                    <td>${u.email || ''}</td>
+                    <td><span class="role-badge role-${u.role || 'student'}">${u.role || 'student'}</span></td>
+                    <td>${u.assignedTrack || 'Unassigned'}</td>
+                    <td>
+                        <button class="btn-action" onclick="openRoleModal('${u.id}', '${u.name || 'User'}', '${u.role || 'student'}')">Edit Role</button>
+                        <button class="btn-action" style="color:#ef4444;" onclick="deleteUserRecord('${u.id}', '${u.name || 'User'}')">Delete</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function renderSubjectTable(subjects) {
+            const tbody = document.getElementById('subjectTableBody');
+            if (!subjects.length) {
+                tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; padding:30px; color:var(--text-muted);">No custom subjects added yet. Click "+ Add Subject" to create one.</td></tr>`;
+                return;
+            }
+            tbody.innerHTML = subjects.map(s => `
+                <tr>
+                    <td><code>${s.code}</code></td>
+                    <td><b>${s.name}</b></td>
+                    <td>${s.category}</td>
+                </tr>
+            `).join('');
+        }
+
+        function renderPracticalTable(pracs) {
+            const tbody = document.getElementById('practicalTableBody');
+            if (!pracs.length) {
+                tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; padding:30px; color:var(--text-muted);">No custom practicals created yet. Click "+ Add Practical" to build one.</td></tr>`;
+                return;
+            }
+            tbody.innerHTML = pracs.map(p => `
+                <tr>
+                    <td><code>${p.subjectId}</code></td>
+                    <td><b>${p.title}</b></td>
+                    <td>${p.category}</td>
+                </tr>
+            `).join('');
+        }
+
+        function renderClassTable(classes) {
+            const tbody = document.getElementById('classTableBody');
+            if (!classes.length) {
+                tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:30px; color:var(--text-muted);">No custom classes/divisions created yet. Click "+ Create Class / Division" to add one.</td></tr>`;
+                return;
+            }
+            tbody.innerHTML = classes.map(c => `
+                <tr>
+                    <td><b>${c.className}</b></td>
+                    <td>${c.division}</td>
+                    <td>${c.batch}</td>
+                    <td>Active Cohort</td>
+                </tr>
+            `).join('');
+        }
+
+        function renderTeacherAllocationList(teachers) {
+            const container = document.getElementById('teacherAllocationList');
+            if (!teachers.length) {
+                container.innerHTML = `<div style="text-align:center; padding:30px; color:var(--text-muted);">No instructor accounts registered yet. Provision an instructor account to begin work allocation.</div>`;
+                return;
+            }
+            container.innerHTML = teachers.map(t => `
+                <div class="teacher-alloc-card">
+                    <div>
+                        <div style="font-weight:800; font-size:15px;">${t.name}</div>
+                        <div style="font-size:12px; color:var(--text-muted);">${t.email}</div>
+                        <div style="margin-top:6px;"><span class="role-badge role-teacher">${t.assignedTrack || 'Unassigned Workload'}</span></div>
+                    </div>
+                    <button class="btn-action" style="background:#a855f7; color:white; border:none;" onclick="selectTeacherForAlloc('${t.id}')">Select for Alloc</button>
+                </div>
+            `).join('');
+        }
+
+        window.selectTeacherForAlloc = (uid) => {
+            const sel = document.getElementById('assignTeacherSelect');
+            if (sel) sel.value = uid;
+        };
+
+        function populateTeacherDropdown(teachers) {
+            const sel = document.getElementById('assignTeacherSelect');
+            if (!sel) return;
+            sel.innerHTML = `<option value="">Choose Instructor Account...</option>` + teachers.map(t => `<option value="${t.id}">${t.name} (${t.email})</option>`).join('');
+        }
+
+        window.filterUsers = () => {
+            const q = document.getElementById('searchUser').value.toLowerCase();
+            const filtered = allUsers.filter(u => (u.name || '').toLowerCase().includes(q) || (u.email || '').toLowerCase().includes(q));
+            renderUserTable(filtered);
+        };
+
+        window.openRoleModal = (uid, name, role) => {
+            document.getElementById('editUserId').value = uid;
+            document.getElementById('editUserName').textContent = name;
+            document.getElementById('editRoleSelect').value = role;
+            document.getElementById('roleModal').style.display = 'flex';
+        };
+
+        window.submitRoleChange = async () => {
+            const uid = document.getElementById('editUserId').value;
+            const newRole = document.getElementById('editRoleSelect').value;
+            try {
+                await updateDoc(doc(db, "users", uid), { role: newRole });
+                alert(`Updated role to ${newRole.toUpperCase()}`);
+                document.getElementById('roleModal').style.display = 'none';
+                loadUsers();
+            } catch(e) { alert("Failed to update role: " + e.message); }
+        };
+
+        window.deleteUserRecord = async (uid, name) => {
+            if (!confirm(`Are you sure you want to delete user record for ${name}?`)) return;
+            try {
+                await deleteDoc(doc(db, "users", uid));
+                alert(`Deleted user record for ${name}`);
+                loadUsers();
+            } catch(e) { alert("Failed to delete user: " + e.message); }
+        };
+
+        window.saveAssignment = async () => {
+            const teacherId = document.getElementById('assignTeacherSelect').value;
+            const subject = document.getElementById('assignSubjectSelect').value;
+            const division = document.getElementById('assignDivisionSelect').value;
+            if (!teacherId) { alert("Please select an instructor."); return; }
+
+            try {
+                const assignText = `${subject.toUpperCase()} (${division})`;
+                await updateDoc(doc(db, "users", teacherId), {
+                    assignedSubject: subject,
+                    assignedDivision: division,
+                    assignedTrack: assignText
+                });
+                alert(`Successfully assigned ${assignText} to teacher.`);
+                loadUsers();
+            } catch(e) { alert("Failed to save assignment: " + e.message); }
+        };
+
+        initAdmin();
+    </script>
+</body>
+</html>

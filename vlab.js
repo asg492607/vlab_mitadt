@@ -7314,16 +7314,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (!content) return;
         content.style.opacity = '0';
         
-        // Sync the main header title
-        const mainTitle = document.getElementById('lab-title-display');
-        if (mainTitle) {
-            if (isMulti) {
-                mainTitle.textContent = `${parentTitle} - ${data.title}`;
-            } else {
-                mainTitle.textContent = data.title;
-            }
-        }
-
         window.setTimeout(() => {
             document.querySelectorAll('.section-title').forEach(el => el.textContent = data.title);
 
@@ -7335,16 +7325,142 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
             };
 
-            setBody('section-aim', `<p>${data.aim}</p>`);
+            // 1. Aim & Introduction
+            if (data.aim) {
+                let aimHtml = `<p style="font-size:15px; line-height:1.8; color:var(--text-main); margin-bottom:16px;">${data.aim}</p>`;
+                if (data.intro) {
+                    if (data.intro.summary) {
+                        aimHtml += `<div class="theory-card" style="margin-top:16px;"><strong>Executive Summary</strong><p style="margin-top:8px; line-height:1.7;">${data.intro.summary}</p></div>`;
+                    }
+                    if (data.intro.importance) {
+                        aimHtml += `<div class="theory-card" style="margin-top:16px; border-left:4px solid var(--primary);"><strong>Academic & Industry Importance</strong><p style="margin-top:8px; line-height:1.7;">${data.intro.importance}</p></div>`;
+                    }
+                    if (data.intro.applications && Array.isArray(data.intro.applications)) {
+                        aimHtml += `<div class="theory-card" style="margin-top:16px;"><strong>Real-World Applications</strong><ul style="margin-top:8px; padding-left:20px; line-height:1.8;">${data.intro.applications.map(a => `<li>${a}</li>`).join('')}</ul></div>`;
+                    }
+                    if (data.intro.outcome) {
+                        aimHtml += `<div class="theory-card" style="margin-top:16px; border-left:4px solid var(--success);"><strong>Primary Practical Goal</strong><p style="margin-top:8px; line-height:1.7;">${data.intro.outcome}</p></div>`;
+                    }
+                }
+                setBody('section-aim', aimHtml);
+            }
 
-            let theory = `<p>${data.theory.intro}</p>`;
-            data.theory.cards.forEach(c => theory += `<div class="theory-card"><strong>${c.title}</strong><p>${c.content}</p></div>`);
-            setBody('section-theory', theory);
+            // 2. Prerequisites
+            if (data.prerequisites && Array.isArray(data.prerequisites)) {
+                setBody('section-prerequisites', `<div class="theory-card"><ul style="padding-left:20px; line-height:2;">${data.prerequisites.map(p => `<li>${p}</li>`).join('')}</ul></div>`);
+            }
 
+            // 3. Outcomes
+            if (data.outcomes && Array.isArray(data.outcomes)) {
+                setBody('section-outcomes', `<div class="theory-card"><ul style="padding-left:20px; line-height:2;">${data.outcomes.map(o => `<li>${o}</li>`).join('')}</ul></div>`);
+            }
+
+            // 4. Theory
+            if (data.theory) {
+                let theory = `<p style="font-size:15px; line-height:1.8;">${data.theory.intro || ''}</p>`;
+                if (data.theory.cards && Array.isArray(data.theory.cards)) {
+                    data.theory.cards.forEach(c => {
+                        theory += `<div class="theory-card" style="margin-top:16px;"><strong>${c.title}</strong><p style="margin-top:8px; line-height:1.7; white-space:pre-line;">${c.content}</p></div>`;
+                    });
+                }
+                if (data.theory.formulas && Array.isArray(data.theory.formulas)) {
+                    theory += `<div class="theory-card" style="margin-top:16px; border-left:4px solid var(--accent);"><strong>Key Formulas & Calculations</strong><ul style="margin-top:8px; padding-left:20px; line-height:1.8;">${data.theory.formulas.map(f => `<li><code>${f}</code></li>`).join('')}</ul></div>`;
+                }
+                if (data.theory.standards && Array.isArray(data.theory.standards)) {
+                    theory += `<div class="theory-card" style="margin-top:16px; border-left:4px solid var(--primary);"><strong>IEEE & Industry Standards</strong><ul style="margin-top:8px; padding-left:20px; line-height:1.8;">${data.theory.standards.map(s => `<li>${s}</li>`).join('')}</ul></div>`;
+                }
+                setBody('section-theory', theory);
+            }
+
+            // 5. Tools Inspector
+            if (data.tools && Array.isArray(data.tools)) {
+                let toolsHtml = `<div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:16px;">`;
+                data.tools.forEach(t => {
+                    toolsHtml += `
+                        <div class="theory-card" style="margin:0;">
+                            <div style="font-weight:800; font-size:15px; color:var(--primary);">${t.name}</div>
+                            <div style="font-size:12px; color:var(--text-muted); margin-top:4px;"><b>Layer:</b> ${t.layer}</div>
+                            <div style="font-size:12px; color:var(--text-muted); margin-top:2px;"><b>Ports:</b> ${t.ports}</div>
+                            <div style="font-size:12px; color:var(--text-muted); margin-top:2px;"><b>Usage:</b> ${t.usage}</div>
+                            <div style="font-size:12px; margin-top:6px;"><span style="color:var(--success); font-weight:700;">🟢 LED Status: ${t.statusLED}</span></div>
+                        </div>
+                    `;
+                });
+                toolsHtml += `</div>`;
+                setBody('section-tools', toolsHtml);
+            }
+
+            // 6. Pretest & Posttest
             renderMCQ('section-pretest', data.pretest, 'pre');
             renderMCQ('section-posttest', data.posttest, 'post');
 
-            setBody('section-procedure', `<ol style="padding-left:20px; line-height:2;">${data.procedure.map(s => `<li>${s}</li>`).join('')}</ol>`);
+            // 7. Procedure
+            if (data.procedure && Array.isArray(data.procedure)) {
+                setBody('section-procedure', `<ol style="padding-left:20px; line-height:2;">${data.procedure.map(s => `<li>${s}</li>`).join('')}</ol>`);
+            }
+
+            // 8. Troubleshooting
+            if (data.troubleshooting) {
+                let tbHtml = `
+                    <div class="theory-card" style="border-left:4px solid var(--danger); margin-bottom:16px;">
+                        <h3 style="color:var(--danger); margin-bottom:8px;">⚠️ Fault Scenario</h3>
+                        <p style="font-size:14px; font-weight:700;">${data.troubleshooting.problem}</p>
+                    </div>
+                    <div class="theory-card" style="margin-bottom:16px;">
+                        <h4 style="color:var(--warning); margin-bottom:10px;">🔍 Diagnostic Clues & Hints</h4>
+                        <ul style="padding-left:20px; line-height:1.8;">${(data.troubleshooting.hints || []).map(h => `<li style="margin-bottom:6px;">${h}</li>`).join('')}</ul>
+                    </div>
+                    <div class="theory-card" style="border-left:4px solid var(--success);">
+                        <h4 style="color:var(--success); margin-bottom:8px;">✅ Corrective Solution</h4>
+                        <p style="font-size:13px; line-height:1.6;">${data.troubleshooting.fix}</p>
+                    </div>
+                `;
+                setBody('section-troubleshooting', tbHtml);
+            }
+
+            // 9. Viva Voce
+            if (data.viva && Array.isArray(data.viva)) {
+                let vivaHtml = `<div style="display:flex; flex-direction:column; gap:16px;">`;
+                data.viva.forEach((v, idx) => {
+                    vivaHtml += `
+                        <div class="theory-card" style="margin:0;">
+                            <div style="font-weight:800; font-size:14px; color:var(--primary); margin-bottom:8px;">Q${idx+1}: ${v.q}</div>
+                            <button class="btn-action" style="padding:6px 12px; font-size:12px;" onclick="const a=this.nextElementSibling; a.style.display=a.style.display==='none'?'block':'none';">Reveal Answer 👁️</button>
+                            <div style="display:none; margin-top:10px; padding:10px; background:rgba(16,185,129,0.08); border-left:3px solid var(--success); border-radius:6px; font-size:13px;">
+                                <b>Answer:</b> ${v.a}
+                            </div>
+                        </div>
+                    `;
+                });
+                vivaHtml += `</div>`;
+                setBody('section-viva', vivaHtml);
+            }
+
+            // 10. Mini Assignment Task
+            if (data.assignment) {
+                let assignHtml = `
+                    <div class="theory-card" style="margin-bottom:16px;">
+                        <h3 style="color:var(--primary); margin-bottom:8px;">📜 Practical Assignment Task</h3>
+                        <p style="font-size:14px; line-height:1.6;">${data.assignment}</p>
+                    </div>
+                    <div class="theory-card">
+                        <h4 style="margin-bottom:8px;">Document Observations & Results:</h4>
+                        <textarea style="width:100%; height:120px; padding:10px; background:var(--bg-page); border:1px solid var(--border); border-radius:8px; color:var(--text-main); font-family:monospace;" placeholder="Type your CLI observation log and results here..."></textarea>
+                        <button class="btn-action" style="margin-top:10px; background:var(--primary); color:white; border:none; padding:8px 16px; cursor:pointer;" onclick="alert('Assignment submitted successfully!')">Submit Assignment 📤</button>
+                    </div>
+                `;
+                setBody('section-assignment', assignHtml);
+            }
+
+            // 11. References
+            if (data.references && Array.isArray(data.references)) {
+                let refHtml = `<div class="theory-card"><ul style="padding-left:20px; line-height:1.8;">`;
+                data.references.forEach(r => {
+                    refHtml += `<li style="margin-bottom:8px;"><a href="${r.link}" target="_blank" style="color:var(--primary); text-decoration:underline;">${r.title}</a></li>`;
+                });
+                refHtml += `</ul></div>`;
+                setBody('section-references', refHtml);
+            }
 
             // Inject Practice Tasks
             const cmdList = document.getElementById('practice-commands-list');
@@ -7375,6 +7491,15 @@ document.addEventListener('DOMContentLoaded', async () => {
             container = section.querySelector('.section-body');
         }
         if (!container) return;
+
+        if (!questions || !Array.isArray(questions) || questions.length === 0) {
+            container.innerHTML = `<div class="theory-card" style="text-align:center; padding:30px; color:var(--text-muted);">
+                <div style="font-size:36px; margin-bottom:10px;">📝</div>
+                <h3>Evaluation / Assessment</h3>
+                <p style="font-size:13px; margin-top:6px;">No multiple-choice questions configured for this module. You can attempt the <b>Troubleshooting Challenge</b>, <b>Viva Voce Questions</b>, or perform hands-on configuration in the <b>Cisco Packet Tracer Lab</b>.</p>
+            </div>`;
+            return;
+        }
 
         let html = questions.map((q, i) => `
             <div class="theory-card" id="${prefix}-q${i}">
@@ -7494,22 +7619,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             // 2. Stop any running simulation engines to free up resources
             if (window.currentSim) { window.currentSim.isRunning = false; }
 
-            // 3. Pedagogical Lock Check
-            if ((sid === 'simulation' || sid === 'experiment') && !state.pretest && labId !== 'practice' && initialMode !== 'sandbox') {
-                item.classList.add('active');
-                const container = document.getElementById(`section-${sid}`);
-                container.classList.add('active');
-                container.style.display = 'flex';
-                container.innerHTML = `
-                    <div class="locked-overlay">
-                        <div style="font-size:64px; margin-bottom:24px;">🔒</div>
-                        <h2 style="font-size:28px; margin-bottom:16px;">Section Locked</h2>
-                        <p style="color:var(--text-muted); max-width:400px; margin:0 auto 32px;">To maintain academic integrity, you must complete the <b>Pretest</b> before accessing this module.</p>
-                        <button class="btn-sim primary" onclick="document.querySelector('[data-section=\\'pretest\\']').click()">Go to Pretest</button>
-                    </div>
-                `;
-                return;
-            }
 
             // 4. Activate target section
             item.classList.add('active');
@@ -14317,7 +14426,19 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const initSimulation = (id) => {
         const data = window.VLAB_DATA[id];
-        const container = document.getElementById('dynamic-sim-ui');
+        let container = document.getElementById('dynamic-sim-ui');
+        if (!container) {
+            const sec = document.getElementById('section-simulation');
+            if (sec) {
+                const body = sec.querySelector('.section-body');
+                if (body) {
+                    body.innerHTML = '<div id="dynamic-sim-ui" style="width:100%; height:100%;"></div>';
+                } else {
+                    sec.innerHTML = '<div class="section-body" style="width:100%; height:100%;"><div id="dynamic-sim-ui" style="width:100%; height:100%;"></div></div>';
+                }
+                container = document.getElementById('dynamic-sim-ui');
+            }
+        }
 
         if (!data) {
             container.innerHTML = `
@@ -14489,6 +14610,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (data.simType === 'cloud_monitoring')     { initCloudSlaSim(container);            return; }
         if (data.simType === 'cloud_intro')          { initCloudVirtualizationSim(container); return; }
         if (data.simType === 'cloud_devops')         { initCloudDockerSim(container);         return; }
+        if (data.simType === 'pkt_tracer')           { initPktTracerSim(container);           return; }
 
         // ── Cybersecurity Simulations ────────────────────────────────────────
         if (data.simType === 'cyber_caesar')       { initCyberCaesarSim(container);      return; }
@@ -15528,4 +15650,376 @@ Academic Rules:
         });
     }
 });
+
+
+
+    function initPktTracerSim(container) {
+        if (!container) return;
+
+        const NODES_POOL = [
+            { label:'PC1',    sub:'192.168.1.10',  mac:'00:1A:2B:3C:4D:01', em:'\uD83D\uDCBB' },
+            { label:'PC2',    sub:'192.168.1.11',  mac:'00:1A:2B:3C:4D:02', em:'\uD83D\uDDA5\uFE0F' },
+            { label:'PC3',    sub:'192.168.1.12',  mac:'00:1A:2B:3C:4D:03', em:'\uD83D\uDDA5\uFE0F' },
+            { label:'PC4',    sub:'192.168.1.13',  mac:'00:1A:2B:3C:4D:04', em:'\uD83D\uDCBB' },
+        ];
+
+        const DEVICES = [
+            { id:'hub',      label:'Ethernet Hub',         sub:'Layer 1 - Broadcasts to ALL ports',               em:'\uD83D\uDCFB', col:'#f59e0b', desc:'A Hub repeats every signal to ALL connected ports. There is NO filtering - every device receives every packet, creating collisions and shared bandwidth.' },
+            { id:'switch',   label:'Cisco 2960 Switch',    sub:'Layer 2 - Unicast forwarding via MAC Table',       em:'\uD83D\uDD00', col:'#38bdf8', desc:'A Switch learns MAC addresses and forwards frames ONLY to the correct destination port. Eliminates collisions, full-duplex, dedicated bandwidth per port.' },
+            { id:'router',   label:'Cisco 2911 Router',    sub:'Layer 3 - Routes packets between subnets',         em:'\uD83C\uDF10', col:'#a78bfa', desc:'A Router connects different IP networks. It inspects IP headers, decrements TTL, runs routing protocols (RIP/OSPF/EIGRP), and forwards to the correct next-hop.' },
+            { id:'firewall', label:'Cisco ASA Firewall',   sub:'Layer 3-7 - Stateful packet inspection and ACLs',  em:'\uD83E\uDDF1', col:'#ef4444', desc:'A Firewall inspects each packet against security rules. Permitted traffic creates a stateful session. Blocked traffic gets TCP-Reset or ICMP-Unreachable.' },
+            { id:'wap',      label:'Wireless Access Point', sub:'IEEE 802.11ax - Wireless bridge to wired LAN',    em:'\uD83D\uDCE1', col:'#22c55e', desc:'A WAP bridges wireless clients to the wired Ethernet LAN. Data travels over RF channels (2.4/5GHz), de-encapsulated from 802.11 to 802.3, forwarded to switch.' },
+        ];
+
+        container.innerHTML = `
+        <style>
+            .nsw{font-family:'Outfit',sans-serif;display:flex;flex-direction:column;gap:0;}
+            .nst{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
+            .nstb{display:flex;flex-direction:column;align-items:center;gap:3px;padding:12px 16px;border-radius:12px;border:2px solid #1e3a5f;background:#070d1c;cursor:pointer;transition:all .2s;flex:1;min-width:100px;}
+            .nstb:hover{border-color:#38bdf8;background:#0c1830;}
+            .nstb.act{border-color:var(--tc);background:var(--tb);box-shadow:0 0 20px var(--tc)44;}
+            .nstb .te{font-size:26px;line-height:1.1;}
+            .nstb .tl{font-size:11px;font-weight:700;color:#e2e8f0;text-align:center;}
+            .nstb .ts{font-size:9px;color:#64748b;}
+            .nsib{background:#0b1420;border:1px solid #1e3a5f;border-radius:12px;padding:13px 16px;margin-bottom:12px;display:flex;gap:12px;align-items:flex-start;}
+            .nsib .ie{font-size:34px;flex-shrink:0;}
+            .nsib h3{margin:0 0 4px;font-size:14px;color:#e2e8f0;}
+            .nsib p{margin:0;font-size:12px;color:#94a3b8;line-height:1.6;}
+            .nscr{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;align-items:flex-end;}
+            .nscr .nc{flex:1;min-width:100px;}
+            .nscr label{font-size:10px;color:#64748b;display:block;margin-bottom:4px;font-family:monospace;text-transform:uppercase;}
+            .nscr select{background:#06091a;color:#e2e8f0;border:1px solid #1e3a5f;border-radius:8px;padding:8px 10px;font-size:12px;width:100%;outline:none;cursor:pointer;}
+            .nscr select:focus{border-color:#38bdf8;}
+            .nsbtn{padding:9px 24px;border:none;border-radius:10px;font-size:14px;font-weight:700;color:#fff;cursor:pointer;background:linear-gradient(135deg,#0ea5e9,#6366f1);height:40px;white-space:nowrap;}
+            .nscvb{background:#06091a;border-radius:14px;border:1.5px solid #1e3a5f;position:relative;overflow:hidden;margin-bottom:12px;}
+            .nscvt{display:flex;justify-content:space-between;align-items:center;padding:7px 12px;font-size:10px;font-family:monospace;color:#1e3a5f;border-bottom:1px solid #0a1523;}
+            canvas.nscv{display:block;width:100%;}
+            .nslb{background:#06091a;border:1px solid #1e3a5f;border-radius:12px;padding:10px 14px;}
+            .nslh{display:flex;justify-content:space-between;margin-bottom:5px;}
+            .nslh span{font-size:10px;font-family:monospace;color:#334155;text-transform:uppercase;}
+            .nsl{font-size:12px;line-height:2;max-height:120px;overflow-y:auto;font-family:monospace;}
+            .nsl div{border-bottom:1px solid #080f1e;}
+        </style>
+        <div class="nsw">
+            <div class="nst" id="ns-tabs"></div>
+            <div class="nsib" id="ns-ib">
+                <div class="ie" id="ns-ie">?</div>
+                <div><h3 id="ns-ih">Select a device above to begin</h3><p id="ns-ip">Click a device tab to see how data flows through it.</p></div>
+            </div>
+            <div class="nscr">
+                <div class="nc"><label>Number of PCs</label>
+                    <select id="ns-cnt"><option value="2">2 PCs</option><option value="3" selected>3 PCs</option><option value="4">4 PCs</option></select></div>
+                <div class="nc"><label>Sender PC</label>
+                    <select id="ns-snd"><option value="0">PC1 (192.168.1.10)</option><option value="1">PC2 (192.168.1.11)</option><option value="2">PC3 (192.168.1.12)</option><option value="3">PC4 (192.168.1.13)</option></select></div>
+                <div class="nc" id="ns-tw"><label>Receiver</label>
+                    <select id="ns-rcv"><option value="1">PC2</option><option value="0">PC1</option><option value="2">PC3</option><option value="3">PC4</option><option value="all">ALL (Broadcast)</option></select></div>
+                <button class="nsbtn" onclick="window._nsSend()">&#9654;&nbsp;Simulate</button>
+            </div>
+            <div class="nscvb">
+                <div class="nscvt">
+                    <span id="ns-cl">NETWORK TOPOLOGY - PACKET FLOW VISUALIZATION</span>
+                    <span id="ns-st" style="font-size:11px;font-family:monospace;color:#334155;">&#9679; IDLE</span>
+                </div>
+                <canvas class="nscv" id="ns-cv" height="430"></canvas>
+            </div>
+            <div class="nslb">
+                <div class="nslh">
+                    <span>&#9654; Protocol Console Log</span>
+                    <span id="ns-lb" style="color:#22c55e;">&#9679; READY</span>
+                </div>
+                <div class="nsl" id="ns-log"><div style="color:#334155;">Select a device tab then click Simulate.</div></div>
+            </div>
+        </div>`;
+
+        (() => {
+            const cv = document.getElementById('ns-cv');
+            if (!cv) return;
+            const ctx = cv.getContext('2d');
+            let curDev = 'hub';
+            let parts = [], raf = null, nodes = [], cx = 0, cy = 0;
+
+            // Build tabs
+            const tabsEl = document.getElementById('ns-tabs');
+            DEVICES.forEach(d => {
+                const t = document.createElement('div');
+                t.className = 'nstb';
+                t.style.setProperty('--tc', d.col);
+                t.style.setProperty('--tb', d.col + '18');
+                t.innerHTML = '<span class="te">' + d.em + '</span><span class="tl">' + d.label + '</span><span class="ts">' + d.id.toUpperCase() + '</span>';
+                t.id = 'nst-' + d.id;
+                t.onclick = () => pick(d.id);
+                tabsEl.appendChild(t);
+            });
+
+            function pick(id) {
+                curDev = id;
+                document.querySelectorAll('.nstb').forEach(t => t.classList.remove('act'));
+                const tab = document.getElementById('nst-' + id);
+                if (tab) tab.classList.add('act');
+                const d = DEVICES.find(x => x.id === id);
+                document.getElementById('ns-ie').textContent = d.em;
+                document.getElementById('ns-ih').textContent = d.label + ' \u2014 ' + d.sub;
+                document.getElementById('ns-ip').textContent = d.desc;
+                document.getElementById('ns-cl').textContent = d.label.toUpperCase() + ' \u2014 PACKET FLOW VISUALIZATION';
+                document.getElementById('ns-tw').style.opacity = id === 'hub' ? '0.4' : '1';
+                parts = []; draw();
+            }
+
+            const gv = id => (document.getElementById(id) || {}).value || '';
+            const gi = (id, def) => parseInt((document.getElementById(id) || {}).value || def);
+
+            function resize() { cv.width = cv.offsetWidth || 860; draw(); }
+
+            function layout() {
+                const n = Math.min(4, Math.max(2, gi('ns-cnt', 3)));
+                cx = cv.width / 2; cy = cv.height / 2;
+                const R = Math.min(cv.width, cv.height) * 0.35;
+                nodes = NODES_POOL.slice(0, n).map((m, i) => {
+                    const a = (2 * Math.PI / n) * i - Math.PI / 2;
+                    return Object.assign({}, m, { x: cx + R * Math.cos(a), y: cy + R * Math.sin(a), idx: i });
+                });
+            }
+
+            function draw() {
+                layout();
+                const d = DEVICES.find(x => x.id === curDev) || DEVICES[0];
+                const si = gi('ns-snd', 0);
+                const tv = gv('ns-rcv');
+                const isBc = tv === 'all' || curDev === 'hub';
+                const W = cv.width, H = cv.height;
+                ctx.clearRect(0, 0, W, H);
+                // grid
+                ctx.strokeStyle = 'rgba(8,20,50,0.8)'; ctx.lineWidth = 1;
+                for (let x = 0; x < W; x += 50) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke(); }
+                for (let y = 0; y < H; y += 50) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
+
+                // cables
+                const dash = { hub:[], switch:[], router:[], firewall:[8,4], wap:[3,10] }[curDev] || [];
+                nodes.forEach(n => {
+                    const active = n.idx === si || isBc || String(n.idx) === String(tv);
+                    ctx.save(); ctx.beginPath(); ctx.moveTo(n.x, n.y); ctx.lineTo(cx, cy);
+                    ctx.strokeStyle = active ? d.col : '#0a1530';
+                    ctx.lineWidth = active ? 2.5 : 1;
+                    ctx.globalAlpha = active ? 0.85 : 0.25;
+                    ctx.setLineDash(dash); ctx.stroke(); ctx.restore(); ctx.setLineDash([]);
+                    // port label
+                    if (active) {
+                        const pl = { switch:'Fa0/'+n.idx, router:'Gi0/'+n.idx, hub:'Port'+(n.idx+1), firewall:'Eth'+n.idx, wap:'Assoc'+n.idx }[curDev] || '';
+                        if (pl) {
+                            const mx = cx + (n.x - cx) * 0.68, my = cy + (n.y - cy) * 0.68;
+                            ctx.font = '8px monospace'; ctx.fillStyle = d.col + 'bb';
+                            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                            ctx.fillText(pl, mx, my - 9);
+                        }
+                    }
+                });
+
+                // central device
+                ctx.save(); ctx.shadowColor = d.col; ctx.shadowBlur = 50;
+                ctx.beginPath(); ctx.arc(cx, cy, 48, 0, Math.PI*2);
+                ctx.fillStyle = d.col + '1a'; ctx.fill();
+                ctx.strokeStyle = d.col; ctx.lineWidth = 2.5; ctx.stroke();
+                ctx.restore();
+                ctx.font = '28px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                ctx.fillText(d.em, cx, cy - 2);
+                ctx.font = 'bold 10px monospace'; ctx.fillStyle = d.col;
+                ctx.fillText(d.label, cx, cy + 62);
+                ctx.font = '9px monospace'; ctx.fillStyle = d.col + '99';
+                ctx.fillText(d.sub.split('-')[0].trim(), cx, cy + 74);
+
+                // nodes
+                nodes.forEach(n => {
+                    const role = n.idx === si ? 'sender' : (isBc ? 'bcast' : (String(n.idx) === String(tv) ? 'target' : 'peer'));
+                    const nc = { sender:'#38bdf8', target:'#22c55e', bcast:'#f59e0b', peer:'#1e3a5f' }[role];
+                    const bg = { sender:'#041826', target:'#04180e', bcast:'#18100a', peer:'#060e1a' }[role];
+                    if (role !== 'peer') {
+                        ctx.save(); ctx.shadowColor = nc; ctx.shadowBlur = 28;
+                        ctx.beginPath(); ctx.arc(n.x, n.y, 39, 0, Math.PI*2);
+                        ctx.strokeStyle = nc + '44'; ctx.lineWidth = 3; ctx.stroke(); ctx.restore();
+                    }
+                    ctx.beginPath(); ctx.arc(n.x, n.y, 33, 0, Math.PI*2);
+                    ctx.fillStyle = bg; ctx.fill();
+                    ctx.strokeStyle = nc; ctx.lineWidth = role !== 'peer' ? 2.5 : 1.2; ctx.stroke();
+                    ctx.font = '20px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                    ctx.fillText(n.em, n.x, n.y - 2);
+                    ctx.font = 'bold 10px Outfit,sans-serif'; ctx.fillStyle = '#e2e8f0';
+                    ctx.fillText(n.label, n.x, n.y + 46);
+                    ctx.font = '9px monospace'; ctx.fillStyle = '#475569';
+                    ctx.fillText(n.sub, n.x, n.y + 57);
+                    ctx.fillText(n.mac, n.x, n.y + 68);
+                    if (role !== 'peer') {
+                        const tag = { sender:'\u25b6 TX', target:'\u25b6 RX', bcast:'\u25b6 BC' }[role];
+                        ctx.font = 'bold 9px monospace'; ctx.fillStyle = nc;
+                        ctx.fillText(tag, n.x, n.y + 80);
+                    }
+                });
+
+                // particles
+                parts.forEach(p => {
+                    const t = p.t;
+                    const px = p.x0 + (p.x1 - p.x0) * t;
+                    const py = p.y0 + (p.y1 - p.y0) * t;
+                    for (let i = 1; i <= 7; i++) {
+                        const tt = Math.max(0, t - i * 0.022);
+                        ctx.save(); ctx.globalAlpha = 0.08 * (8 - i);
+                        ctx.beginPath(); ctx.arc(p.x0+(p.x1-p.x0)*tt, p.y0+(p.y1-p.y0)*tt, 10-i, 0, Math.PI*2);
+                        ctx.fillStyle = p.col; ctx.fill(); ctx.restore();
+                    }
+                    ctx.save(); ctx.shadowColor = p.col; ctx.shadowBlur = 28;
+                    ctx.beginPath(); ctx.arc(px, py, 12, 0, Math.PI*2);
+                    ctx.fillStyle = p.col; ctx.fill(); ctx.restore();
+                    ctx.font = 'bold 8px monospace'; ctx.fillStyle = '#fff';
+                    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                    ctx.fillText(p.lbl, px, py);
+                });
+            }
+
+            function tick() {
+                parts.forEach(p => { p.t = Math.min(p.t + 0.013, 1.06); });
+                parts = parts.filter(p => p.t < 1.06);
+                draw();
+                raf = parts.length > 0 ? window.requestAnimationFrame(tick) : null;
+            }
+
+            function spawn(x0, y0, x1, y1, col, lbl, delay) {
+                window.setTimeout(function() {
+                    parts.push({ x0:x0, y0:y0, x1:x1, y1:y1, t:0, col:col, lbl:lbl });
+                    if (!raf) raf = window.requestAnimationFrame(tick);
+                }, delay);
+            }
+
+            function stat(t, c) { var e = document.getElementById('ns-st'); if (e) { e.textContent = t; e.style.color = c; } }
+            function badge(t, c) { var e = document.getElementById('ns-lb'); if (e) { e.textContent = t; e.style.color = c; } }
+            function log(msg, col) {
+                col = col || '#38bdf8';
+                var el = document.getElementById('ns-log');
+                if (!el) return;
+                var ts = new Date().toTimeString().slice(0, 8);
+                el.innerHTML += '<div><span style="color:#1e3a5f">[' + ts + ']</span> <span style="color:' + col + '">' + msg + '</span></div>';
+                el.scrollTop = el.scrollHeight;
+            }
+
+            window._nsSend = function() {
+                layout();
+                var d  = DEVICES.find(function(x){ return x.id === curDev; }) || DEVICES[0];
+                var si = gi('ns-snd', 0);
+                var tv = gv('ns-rcv');
+                var isBc = tv === 'all' || curDev === 'hub';
+                var sN = nodes[si] || nodes[0];
+                var tN = isBc ? null : nodes[parseInt(tv)];
+                document.getElementById('ns-log').innerHTML = '';
+                stat('\u25cf TX ACTIVE', d.col); badge('\u25cf TRANSMITTING', d.col);
+
+                if (curDev === 'hub') {
+                    log('[TX]  ' + sN.label + ' sends frame to Hub Port' + (sN.idx+1) + '  SrcMAC: ' + sN.mac, '#f59e0b');
+                    spawn(sN.x, sN.y, cx, cy, '#f59e0b', 'TX', 0);
+                    nodes.filter(function(n){ return n.idx !== si; }).forEach(function(n, i) {
+                        spawn(cx, cy, n.x, n.y, '#f59e0b', 'BC', 900 + i * 120);
+                    });
+                    window.setTimeout(function() {
+                        log('[HUB] Broadcasts to ALL ' + (nodes.length-1) + ' ports — no MAC filtering (collision domain)', '#f59e0b');
+                        log('[ALL] Every PC receives the frame. Each checks DstMAC to accept or discard.', '#94a3b8');
+                        stat('\u25cf DONE', '#22c55e'); badge('\u25cf DONE', '#22c55e');
+                        window.setTimeout(function(){ stat('\u25cf IDLE','#334155'); badge('\u25cf IDLE','#334155'); }, 2000);
+                    }, 1900);
+
+                } else if (curDev === 'switch') {
+                    log('[ARP]  ' + sN.label + ': Who has ' + (tN ? tN.sub : '?') + '? Tell ' + sN.sub, '#38bdf8');
+                    spawn(sN.x, sN.y, cx, cy, '#38bdf8', 'ARP', 0);
+                    nodes.filter(function(n){ return n.idx !== si; }).forEach(function(n, i) {
+                        spawn(cx, cy, n.x, n.y, '#64748b', 'BC', 900 + i * 90);
+                    });
+                    window.setTimeout(function() {
+                        log('[SW]   Learned: ' + sN.mac + ' -> Fa0/' + si, '#64748b');
+                        if (tN) {
+                            log('[ARP-R] ' + tN.label + ' replies: ' + tN.mac + ' is at ' + tN.sub, '#22c55e');
+                            spawn(tN.x, tN.y, cx, cy, '#22c55e', 'REP', 0);
+                            spawn(cx, cy, sN.x, sN.y, '#22c55e', 'REP', 800);
+                        }
+                    }, 1500);
+                    window.setTimeout(function() {
+                        if (tN) {
+                            log('[SW]   Learned: ' + tN.mac + ' -> Fa0/' + tN.idx + '  Table complete', '#38bdf8');
+                            log('[TX]   UNICAST ' + sN.label + ' -> Switch -> ' + tN.label + '  (no broadcast!)', '#38bdf8');
+                            spawn(sN.x, sN.y, cx, cy, '#38bdf8', 'TX', 0);
+                            spawn(cx, cy, tN.x, tN.y, '#22c55e', 'RX', 900);
+                        }
+                    }, 3000);
+                    window.setTimeout(function() {
+                        if (tN) {
+                            spawn(tN.x, tN.y, cx, cy, '#f59e0b', 'ACK', 0);
+                            spawn(cx, cy, sN.x, sN.y, '#f59e0b', 'ACK', 900);
+                            log('[ACK]  ' + tN.label + ' -> ' + sN.label + '  RTT ~1ms  OK', '#f59e0b');
+                        }
+                        stat('\u25cf DONE', '#22c55e'); badge('\u25cf DONE', '#22c55e');
+                        window.setTimeout(function(){ stat('\u25cf IDLE','#334155'); badge('\u25cf IDLE','#334155'); }, 2500);
+                    }, 4800);
+
+                } else if (curDev === 'router') {
+                    var dstIP = tN ? tN.sub.replace('192.168.1.', '10.0.0.') : '10.0.0.X';
+                    log('[IP]   SrcIP: ' + sN.sub + '  DstIP: ' + dstIP + '  TTL: 64  Proto: ICMP', '#a78bfa');
+                    log('[RT]   ' + sN.label + ' sends to default-gw (Router Gi0/' + si + ')', '#a78bfa');
+                    spawn(sN.x, sN.y, cx, cy, '#a78bfa', 'PKT', 0);
+                    window.setTimeout(function() {
+                        log('[RT]   Routing table: 10.0.0.0/24 via Gi0/' + (tN ? tN.idx : 1) + '  TTL 64->63', '#6366f1');
+                        if (tN) { spawn(cx, cy, tN.x, tN.y, '#6366f1', 'RX', 0); }
+                    }, 1100);
+                    window.setTimeout(function() {
+                        if (tN) {
+                            log('[OK]   Packet delivered to ' + tN.label + ' (10.0.0.' + (tN.idx+1) + ')  checksum OK', '#22c55e');
+                            spawn(tN.x, tN.y, cx, cy, '#f59e0b', 'ACK', 0);
+                            spawn(cx, cy, sN.x, sN.y, '#f59e0b', 'ACK', 900);
+                        }
+                        stat('\u25cf DONE', '#22c55e'); badge('\u25cf DONE', '#22c55e');
+                        window.setTimeout(function(){ stat('\u25cf IDLE','#334155'); badge('\u25cf IDLE','#334155'); }, 2000);
+                    }, 2800);
+
+                } else if (curDev === 'firewall') {
+                    log('[FW]   Packet: ' + sN.sub + ' -> ' + (tN ? tN.sub : 'ALL') + '  Proto: ICMP', '#ef4444');
+                    spawn(sN.x, sN.y, cx, cy, '#ef4444', 'PKT', 0);
+                    window.setTimeout(function() {
+                        log('[ACL]  Rule: permit ip ' + sN.sub + ' ' + (tN ? tN.sub : 'any') + '  Action: PERMIT', '#22c55e');
+                        log('[SPI]  Stateful session created  TCP flags: SYN', '#ef4444');
+                        if (tN) { spawn(cx, cy, tN.x, tN.y, '#22c55e', 'OK', 0); }
+                        else { nodes.filter(function(n){ return n.idx !== si; }).forEach(function(n, i){ spawn(cx, cy, n.x, n.y, '#ef4444', 'OK', i*100); }); }
+                    }, 1100);
+                    window.setTimeout(function() {
+                        log('[SPI]  Return traffic PERMITTED (stateful match)  ACK forwarded', '#f59e0b');
+                        if (tN) { spawn(tN.x, tN.y, cx, cy, '#f59e0b', 'ACK', 0); spawn(cx, cy, sN.x, sN.y, '#f59e0b', 'ACK', 900); }
+                        stat('\u25cf DONE', '#22c55e'); badge('\u25cf DONE', '#22c55e');
+                        window.setTimeout(function(){ stat('\u25cf IDLE','#334155'); badge('\u25cf IDLE','#334155'); }, 2000);
+                    }, 2600);
+
+                } else if (curDev === 'wap') {
+                    log('[WAP]  ' + sN.label + ' -> Association Request  SSID: VLabNet  Band: 5GHz', '#22c55e');
+                    log('[WAP]  Beacon received  Channel: 36  RSSI: -45dBm  MCS: 11', '#64748b');
+                    spawn(sN.x, sN.y, cx, cy, '#22c55e', 'RF', 0);
+                    window.setTimeout(function() {
+                        log('[WAP]  De-encapsulate: 802.11 frame -> 802.3 Ethernet frame', '#22c55e');
+                        if (tN) {
+                            log('[WAP]  Forwarding unicast to ' + tN.label + ' via wired uplink', '#38bdf8');
+                            spawn(cx, cy, tN.x, tN.y, '#38bdf8', 'TX', 0);
+                        } else {
+                            nodes.filter(function(n){ return n.idx !== si; }).forEach(function(n, i){ spawn(cx, cy, n.x, n.y, '#22c55e', 'TX', i*110); });
+                        }
+                    }, 1100);
+                    window.setTimeout(function() {
+                        if (tN) { spawn(tN.x, tN.y, cx, cy, '#f59e0b', 'ACK', 0); spawn(cx, cy, sN.x, sN.y, '#22c55e', 'RF', 900); }
+                        log('[OK]   Round-trip complete  RTT ~3ms  Throughput ~1.2Gbps', '#22c55e');
+                        stat('\u25cf DONE', '#22c55e'); badge('\u25cf DONE', '#22c55e');
+                        window.setTimeout(function(){ stat('\u25cf IDLE','#334155'); badge('\u25cf IDLE','#334155'); }, 2000);
+                    }, 2500);
+                }
+            };
+
+            ['ns-cnt','ns-snd','ns-rcv'].forEach(function(id) {
+                var el = document.getElementById(id);
+                if (el) el.addEventListener('change', function(){ parts = []; draw(); });
+            });
+
+            pick('hub');
+            window.setTimeout(resize, 80);
+            window.addEventListener('resize', resize);
+        })();
+    }
 

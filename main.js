@@ -54,15 +54,24 @@ function mkId(prefix) {
 }
 
 const DEVICE_TEMPLATES = [
-  { kind: "router", title: "Router", sub: "ISR / Generic", ports: ["g0/0", "g0/1", "s0/0/0"], icon: "R" },
-  { kind: "switch", title: "Switch", sub: "Catalyst / VLAN", ports: ["f0/1", "f0/2", "f0/3", "f0/4", "g0/1", "g0/2"], icon: "S" },
-  { kind: "hub", title: "Hub", sub: "Shared medium", ports: ["p1", "p2", "p3", "p4"], icon: "H" },
-  { kind: "firewall", title: "Firewall", sub: "ASA-like", ports: ["g0/0", "g0/1"], icon: "F" },
-  { kind: "pc", title: "PC", sub: "End device", ports: ["eth0"], icon: "PC" },
-  { kind: "server", title: "Server", sub: "DNS/DHCP/Web/Mail", ports: ["eth0"], icon: "SV" },
-  { kind: "iot", title: "IoT Node", sub: "Sensor/Controller", ports: ["eth0"], icon: "IoT" },
-  { kind: "ap", title: "Wireless AP", sub: "802.11", ports: ["eth0", "wlan0"], icon: "AP" },
-  { kind: "wpc", title: "Wireless PC", sub: "Wi-Fi client", ports: ["wlan0"], icon: "W" },
+  { kind: "router", title: "Cisco 2911 ISR Router", sub: "Modular Router", ports: ["g0/0", "g0/1", "g0/2", "s0/0/0", "s0/0/1"], icon: "R2911" },
+  { kind: "router", title: "Cisco 1941 Router", sub: "ISR Router", ports: ["g0/0", "g0/1"], icon: "R1941" },
+  { kind: "switch", title: "Catalyst 2960 Switch", sub: "Layer 2 Switch", ports: ["f0/1", "f0/2", "f0/3", "f0/4", "f0/5", "f0/6", "g0/1", "g0/2"], icon: "S2960" },
+  { kind: "switch", title: "Catalyst 3560 Switch", sub: "Layer 3 Multilayer Switch", ports: ["f0/1", "f0/2", "f0/3", "f0/4", "g0/1", "g0/2"], icon: "S3560" },
+  { kind: "hub", title: "4-Port Hub", sub: "Layer 1 Repeater", ports: ["p1", "p2", "p3", "p4"], icon: "H" },
+  { kind: "hub", title: "2-Port Bridge", sub: "Layer 2 Segmenter", ports: ["p1", "p2"], icon: "BR" },
+  { kind: "firewall", title: "ASA 5505 Firewall", sub: "Security Appliance", ports: ["e0/0", "e0/1", "e0/2"], icon: "ASA" },
+  { kind: "pc", title: "PC Workstation", sub: "Desktop End Device", ports: ["eth0"], icon: "PC" },
+  { kind: "pc", title: "Laptop", sub: "Mobile Computer", ports: ["eth0", "wlan0"], icon: "LAP" },
+  { kind: "server", title: "Dedicated Server", sub: "DNS/DHCP/Web/Mail", ports: ["eth0"], icon: "SV" },
+  { kind: "pc", title: "Printer", sub: "Network Printer", ports: ["eth0"], icon: "PRN" },
+  { kind: "pc", title: "IP Phone", sub: "VoIP Terminal", ports: ["eth0", "pc-port"], icon: "VOIP" },
+  { kind: "wpc", title: "Smartphone", sub: "Wi-Fi Mobile", ports: ["wlan0"], icon: "SMART" },
+  { kind: "wpc", title: "Tablet", sub: "Wireless Device", ports: ["wlan0"], icon: "TAB" },
+  { kind: "ap", title: "Wireless Access Point", sub: "802.11 N/AC AP", ports: ["eth0", "wlan0"], icon: "AP" },
+  { kind: "ap", title: "Wireless Router", sub: "Home Gateway", ports: ["wan0", "lan1", "lan2", "wlan0"], icon: "W-RT" },
+  { kind: "iot", title: "IoT Gateway Node", sub: "Sensor / Controller", ports: ["eth0", "wlan0"], icon: "IoT" },
+  { kind: "cloud", title: "Cloud / Internet Node", sub: "WAN Backbone", ports: ["g0/0", "g0/1"], icon: "WAN" },
 ];
 
 const CABLE_TEMPLATES = [

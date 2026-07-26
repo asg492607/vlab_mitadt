@@ -3,49 +3,80 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     
-    // Helper function to check if the user is authenticated
     function isAuthenticated() {
       return request.auth != null;
     }
 
-    // Helper function to check if the user is a teacher
-    // We check the 'users' collection for the current user's role
-    function isTeacher() {
-      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'teacher';
+    function isMasterAdmin() {
+      return isAuthenticated() && request.auth.token.email.lower() == 'gandhiatharv565@gmail.com';
     }
 
-    // Rules for the 'users' collection
-    match /users/{userId} {
-      // Only the user themselves or a teacher can read their profile to prevent mass scraping
-      allow read: if isAuthenticated() && (request.auth.uid == userId || isTeacher());
-      // Block Mass Assignment and BOLA:
-      // 1. Creating a teacher requires the secret code
-      allow create: if isAuthenticated() && request.auth.uid == userId && (
-        request.resource.data.role == 'student' || 
-        (request.resource.data.role == 'teacher' && request.resource.data.teacherCode == 'VLAB_TEACHER_2026')
-      );
-      // 2. Prevent updating the role after creation
-      allow update: if isAuthenticated() && request.auth.uid == userId && 
-        !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'teacherCode']);
-      allow delete: if isAuthenticated() && request.auth.uid == userId;
+    function isAdmin() {
+      return isMasterAdmin() || (isAuthenticated() && 
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin');
+    }
 
-      // Explicit rules for user progress
+    function isTeacher() {
+      return isAdmin() || (isAuthenticated() && 
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'teacher' ||
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin'));
+    }
+
+    // Rules for 'users' collection
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      allow create, update, delete: if isAuthenticated() && (request.auth.uid == userId || isAdmin());
+
       match /progress/{labId} {
         allow read: if isAuthenticated();
-        allow write: if isAuthenticated() && request.auth.uid == userId;
+        allow write: if isAuthenticated() && (request.auth.uid == userId || isAdmin());
       }
 
-      // Explicit rules for user custom network topologies
       match /topologies/{topoId} {
         allow read: if isAuthenticated() && (request.auth.uid == userId || isTeacher());
-        allow write: if isAuthenticated() && request.auth.uid == userId;
+        allow write: if isAuthenticated() && (request.auth.uid == userId || isAdmin());
       }
 
-      // Explicit rules for teacher evaluations (teachers can write, students can read)
       match /evaluation/{evalDocId} {
         allow read: if isAuthenticated() && (request.auth.uid == userId || isTeacher());
         allow write: if isAuthenticated() && isTeacher();
       }
+    }
+
+    // Dynamic Subjects, Practicals, and Classes managed by Admin
+    match /subjects/{subId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /practicals/{pracId} {
+      allow read: if true;
+      allow write: if isAdmin() || isTeacher();
+    }
+
+    match /classes/{classId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Rules for questions collection (Question Bank)
+    match /questions/{qId} {
+      allow read: if true;
+      allow write: if isAuthenticated() && isTeacher();
+    }
+
+    // Rules for cohort lab submissions
+    match /lab_submissions/{submissionId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated();
+    }
+
+    // Rules for dynamic course content
+    match /lab_content/{labId} {
+      allow read: if true;
+      allow write: if isAuthenticated() && isTeacher();
     }
   }
 }
