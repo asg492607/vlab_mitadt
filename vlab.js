@@ -7706,7 +7706,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                                     <div style="padding:10px; background:rgba(37,99,235,0.08); border-radius:8px; grid-column:1/-1; text-align:center;"><div style="font-size:10px; color:var(--text-muted); font-weight:800;">USABLE HOST COUNT</div><div id="resHosts" style="font-weight:800; font-size:24px; color:var(--primary); margin-top:4px;"></div></div>
                                 </div>
                             </div>
-                            <div style="margin-top:12px; background:#0b0f19; border-radius:12px; padding:15px; font-family:'JetBrains Mono', monospace; font-size:11px; line-height:2;">
+                            <div style="margin-top:12px; background:#f8fafc; border-radius:12px; padding:15px; font-family:'JetBrains Mono', monospace; font-size:11px; line-height:2;">
                                 <div style="color:#64748b; font-size:10px; font-weight:800; margin-bottom:6px;">▸ BINARY REPRESENTATION (Network=<span style='color:#10b981'>■</span> Host=<span style='color:#ef4444'>■</span>)</div>
                                 <div id="binaryBreakdown" style="word-break:break-all; line-height:1.8;"></div>
                             </div>
@@ -7944,7 +7944,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                             <div style="font-size:10px; color:var(--warning); font-weight:800; margin-bottom:6px;">📋 CURRENT TASK</div>
                             <div id="cmdTask" style="font-size:14px; font-weight:600; line-height:1.5;"></div>
                         </div>
-                        <div style="background:#0b0f19; border-radius:12px; border:1px solid var(--border); overflow:hidden;">
+                        <div style="background:#f8fafc; border-radius:12px; border:1px solid var(--border); overflow:hidden;">
                             <div style="background:#131824; padding:8px 14px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border);">
                                 <span style="font-size:11px; color:var(--text-muted);">MIT ADT VLab Terminal</span>
                                 <div style="display:flex; gap:5px;"><span style="width:8px;height:8px;background:#ef4444;border-radius:50%;display:inline-block;"></span><span style="width:8px;height:8px;background:#fbbf24;border-radius:50%;display:inline-block;"></span><span style="width:8px;height:8px;background:#10b981;border-radius:50%;display:inline-block;"></span></div>
@@ -9709,7 +9709,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                             <button id="btnVlanPing12" class="btn-sim">Ping PC-1 ➔ PC-2</button>
                             <button id="btnVlanPing13" class="btn-sim">Ping PC-1 ➔ PC-3</button>
                         </div>
-                        <div id="vlanConsole" style="background:#0b0f19; border-radius:8px; padding:10px; font-family:'JetBrains Mono', monospace; font-size:11px; color:#10b981; height:120px; overflow-y:auto; margin-top:15px; border:1px solid var(--border);">
+                        <div id="vlanConsole" style="background:#f8fafc; border-radius:8px; padding:10px; font-family:'JetBrains Mono', monospace; font-size:11px; color:#10b981; height:120px; overflow-y:auto; margin-top:15px; border:1px solid var(--border);">
                             > VLAN Simulator Initialized
                         </div>
                     </div>
@@ -10026,7 +10026,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                             <button id="btnDnsIterative" class="btn-sim" style="border-color:#f59e0b; color:#f59e0b;">Run Iterative Query</button>
                             <button id="btnDnsRecursive" class="btn-sim" style="border-color:#3b82f6; color:#3b82f6;">Run Recursive Query</button>
                         </div>
-                        <div id="dnsConsole" style="background:#0b0f19; border-radius:8px; padding:10px; font-family:'JetBrains Mono', monospace; font-size:11px; color:#10b981; flex:1; overflow-y:auto; margin-top:15px; border:1px solid var(--border);">
+                        <div id="dnsConsole" style="background:#f8fafc; border-radius:8px; padding:10px; font-family:'JetBrains Mono', monospace; font-size:11px; color:#10b981; flex:1; overflow-y:auto; margin-top:15px; border:1px solid var(--border);">
                             > DNS Subsystem Initialized
                         </div>
                     </div>
@@ -10618,7 +10618,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                             <button id="btnTransStart" class="btn-sim primary">Start Transmission</button>
                         </div>
                         
-                        <div id="transConsole" style="background:#0b0f19; border-radius:8px; padding:10px; font-family:'JetBrains Mono', monospace; font-size:11px; color:#10b981; height:150px; overflow-y:auto; margin-top:20px; border:1px solid var(--border);">
+                        <div id="transConsole" style="background:#f8fafc; border-radius:8px; padding:10px; font-family:'JetBrains Mono', monospace; font-size:11px; color:#10b981; height:150px; overflow-y:auto; margin-top:20px; border:1px solid var(--border);">
                             > Transport Simulator Ready
                         </div>
                     </div>
@@ -10956,7 +10956,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                             <button id="btnMacStart" class="btn-sim primary" style="margin-top:5px;">Trigger Transmission</button>
                         </div>
                         
-                        <div id="macConsole" style="background:#0b0f19; border-radius:8px; padding:10px; font-family:'JetBrains Mono', monospace; font-size:11px; color:#10b981; height:130px; overflow-y:auto; margin-top:15px; border:1px solid var(--border);">
+                        <div id="macConsole" style="background:#f8fafc; border-radius:8px; padding:10px; font-family:'JetBrains Mono', monospace; font-size:11px; color:#10b981; height:130px; overflow-y:auto; margin-top:15px; border:1px solid var(--border);">
                             > MAC Subsystem Initialized
                         </div>
                     </div>
@@ -11282,7 +11282,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         <div id="dfaStatus" style="font-family:monospace; padding:10px; border-radius:8px; text-align:center; font-weight:800; background:rgba(255,255,255,0.05);">
                             State: <span id="dfaCurrentState" style="color:var(--primary);">q0</span>
                         </div>
-                        <div style="font-family:monospace; font-size:12px; display:flex; flex-direction:column; gap:5px; height:120px; overflow-y:auto; background:#0b0f19; padding:10px; border-radius:8px;" id="dfaTraceLog">
+                        <div style="font-family:monospace; font-size:12px; display:flex; flex-direction:column; gap:5px; height:120px; overflow-y:auto; background:#f8fafc; padding:10px; border-radius:8px;" id="dfaTraceLog">
                             <div style="color:#64748b;">[System] Enter a binary string and click Next Step.</div>
                         </div>
                     </div>
@@ -11545,7 +11545,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                             <button id="btnNfaReset" class="btn-sim" style="flex:1;">Reset</button>
                             <button id="btnNfaStep" class="btn-sim primary" style="flex:1;">Step Construction</button>
                         </div>
-                        <div style="font-family:monospace; font-size:12px; height:120px; overflow-y:auto; background:#0b0f19; padding:10px; border-radius:8px;" id="nfaTraceLog">
+                        <div style="font-family:monospace; font-size:12px; height:120px; overflow-y:auto; background:#f8fafc; padding:10px; border-radius:8px;" id="nfaTraceLog">
                             <div style="color:#64748b;">[System] Click Step Construction to begin subset conversion.</div>
                         </div>
                     </div>
@@ -11684,7 +11684,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                             <button id="btnRegexReset" class="btn-sim" style="flex:1;">Reset</button>
                             <button id="btnRegexStep" class="btn-sim primary" style="flex:1;">Step / Build NFA</button>
                         </div>
-                        <div style="font-family:monospace; font-size:12px; height:120px; overflow-y:auto; background:#0b0f19; padding:10px; border-radius:8px;" id="regexTraceLog">
+                        <div style="font-family:monospace; font-size:12px; height:120px; overflow-y:auto; background:#f8fafc; padding:10px; border-radius:8px;" id="regexTraceLog">
                             <div style="color:#64748b;">[System] Select expression and click Build NFA.</div>
                         </div>
                     </div>
@@ -12154,7 +12154,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                             <button id="btnCfgReset" class="btn-sim" style="flex:1;">Reset</button>
                             <button id="btnCfgStep" class="btn-sim primary" style="flex:1;">Next Derivation</button>
                         </div>
-                        <div style="font-family:monospace; font-size:12px; height:120px; overflow-y:auto; background:#0b0f19; padding:10px; border-radius:8px;" id="cfgTraceLog">
+                        <div style="font-family:monospace; font-size:12px; height:120px; overflow-y:auto; background:#f8fafc; padding:10px; border-radius:8px;" id="cfgTraceLog">
                             <div style="color:#64748b;">[System] Enter string matching selected grammar rules.</div>
                         </div>
                     </div>
@@ -12203,7 +12203,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         const ax = 250 - lvl * 40;
                         svg.innerHTML += `
                             <line x1="${px}" y1="${py + 14}" x2="${ax}" y2="${cy - 14}" stroke="#64748b" stroke-width="1.5"/>
-                            <circle cx="${ax}" cy="${cy}" r="12" fill="#0b0f19" stroke="var(--success)" stroke-width="1.5"/>
+                            <circle cx="${ax}" cy="${cy}" r="12" fill="#f8fafc" stroke="var(--success)" stroke-width="1.5"/>
                             <text x="${ax}" y="${cy + 4}" fill="#10b981" font-size="10" font-weight="bold" text-anchor="middle">a</text>
                         `;
                         
@@ -12216,7 +12216,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         const bx = 250 + lvl * 40;
                         svg.innerHTML += `
                             <line x1="${px}" y1="${py + 14}" x2="${bx}" y2="${cy - 14}" stroke="#64748b" stroke-width="1.5"/>
-                            <circle cx="${bx}" cy="${cy}" r="12" fill="#0b0f19" stroke="var(--success)" stroke-width="1.5"/>
+                            <circle cx="${bx}" cy="${cy}" r="12" fill="#f8fafc" stroke="var(--success)" stroke-width="1.5"/>
                             <text x="${bx}" y="${cy + 4}" fill="#10b981" font-size="10" font-weight="bold" text-anchor="middle">b</text>
                         `;
                     }
@@ -12224,7 +12224,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     if (lvl > maxLevel) {
                         svg.innerHTML += `
                             <line x1="250" y1="${py + 14}" x2="250" y2="${cy - 12}" stroke="#64748b" stroke-width="1.5"/>
-                            <circle cx="250" cy="${cy}" r="12" fill="#0b0f19" stroke="#94a3b8" stroke-width="1.5"/>
+                            <circle cx="250" cy="${cy}" r="12" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.5"/>
                             <text x="250" y="${cy + 4}" fill="#94a3b8" font-size="12" font-weight="bold" text-anchor="middle">ε</text>
                         `;
                     }
@@ -12240,7 +12240,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         const ax = 250 - lvl * 40;
                         svg.innerHTML += `
                             <line x1="${px}" y1="${py + 14}" x2="${ax}" y2="${cy - 14}" stroke="#64748b" stroke-width="1.5"/>
-                            <circle cx="${ax}" cy="${cy}" r="12" fill="#0b0f19" stroke="var(--success)" stroke-width="1.5"/>
+                            <circle cx="${ax}" cy="${cy}" r="12" fill="#f8fafc" stroke="var(--success)" stroke-width="1.5"/>
                             <text x="${ax}" y="${cy + 4}" fill="#10b981" font-size="10" font-weight="bold" text-anchor="middle">(</text>
                         `;
                         
@@ -12253,7 +12253,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         const bx = 250 + lvl * 40;
                         svg.innerHTML += `
                             <line x1="${px}" y1="${py + 14}" x2="${bx}" y2="${cy - 14}" stroke="#64748b" stroke-width="1.5"/>
-                            <circle cx="${bx}" cy="${cy}" r="12" fill="#0b0f19" stroke="var(--success)" stroke-width="1.5"/>
+                            <circle cx="${bx}" cy="${cy}" r="12" fill="#f8fafc" stroke="var(--success)" stroke-width="1.5"/>
                             <text x="${bx}" y="${cy + 4}" fill="#10b981" font-size="10" font-weight="bold" text-anchor="middle">)</text>
                         `;
                     }
@@ -12261,7 +12261,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     if (lvl > maxLevel) {
                         svg.innerHTML += `
                             <line x1="250" y1="${py + 14}" x2="250" y2="${cy - 12}" stroke="#64748b" stroke-width="1.5"/>
-                            <circle cx="250" cy="${cy}" r="12" fill="#0b0f19" stroke="#94a3b8" stroke-width="1.5"/>
+                            <circle cx="250" cy="${cy}" r="12" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.5"/>
                             <text x="250" y="${cy + 4}" fill="#94a3b8" font-size="12" font-weight="bold" text-anchor="middle">ε</text>
                         `;
                     }
@@ -12341,14 +12341,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                             <span>State: <b id="pdaState" style="color:var(--primary);">q0</b></span>
                             <span>Input Head: <b id="pdaHead" style="color:var(--accent);">-</b></span>
                         </div>
-                        <div style="font-family:monospace; font-size:12px; height:120px; overflow-y:auto; background:#0b0f19; padding:10px; border-radius:8px;" id="pdaTraceLog">
+                        <div style="font-family:monospace; font-size:12px; height:120px; overflow-y:auto; background:#f8fafc; padding:10px; border-radius:8px;" id="pdaTraceLog">
                             <div style="color:#64748b;">[System] Ready to run PDA simulation.</div>
                         </div>
                     </div>
                     
                     <div class="theory-card" style="margin:0; padding:20px; display:flex; flex-direction:column; align-items:center;">
                         <h3 style="color:var(--primary); margin-bottom:20px; align-self:flex-start;">PDA Memory Stack</h3>
-                        <div id="pdaStackContainer" style="width:140px; height:200px; border:4px solid #475569; border-top:none; border-radius:0 0 16px 16px; background:#0b0f19; display:flex; flex-direction:column-reverse; padding:10px; gap:6px; overflow-y:auto; justify-content:flex-start; align-items:center;">
+                        <div id="pdaStackContainer" style="width:140px; height:200px; border:4px solid #475569; border-top:none; border-radius:0 0 16px 16px; background:#f8fafc; display:flex; flex-direction:column-reverse; padding:10px; gap:6px; overflow-y:auto; justify-content:flex-start; align-items:center;">
                         </div>
                     </div>
                 </div>
@@ -12485,7 +12485,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                             <span>State: <b id="tmState" style="color:var(--primary);">q0_find_end</b></span>
                             <span>Head Pos: <b id="tmHeadIdx" style="color:var(--accent);">0</b></span>
                         </div>
-                        <div style="font-family:monospace; font-size:12px; height:120px; overflow-y:auto; background:#0b0f19; padding:10px; border-radius:8px;" id="tmTraceLog">
+                        <div style="font-family:monospace; font-size:12px; height:120px; overflow-y:auto; background:#f8fafc; padding:10px; border-radius:8px;" id="tmTraceLog">
                             <div style="color:#64748b;">[System] Initialize binary value and step the Turing Machine tape.</div>
                         </div>
                     </div>
@@ -12640,7 +12640,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                             <button id="btnMinReset" class="btn-sim" style="flex:1;">Reset</button>
                             <button id="btnMinStep" class="btn-sim primary" style="flex:2;">Next Step</button>
                         </div>
-                        <div style="font-family:monospace; font-size:12px; height:120px; overflow-y:auto; background:#0b0f19; padding:10px; border-radius:8px;" id="minTraceLog">
+                        <div style="font-family:monospace; font-size:12px; height:120px; overflow-y:auto; background:#f8fafc; padding:10px; border-radius:8px;" id="minTraceLog">
                             <div style="color:#64748b;">[System] Click Next Step to start state pair distinguishability checking.</div>
                         </div>
                         <div id="minResultPill" style="display:none; text-align:center; padding:10px; background:rgba(16,185,129,0.15); border:1px solid var(--success); border-radius:8px; color:var(--success); font-weight:800; font-size:13px;">
@@ -12658,25 +12658,25 @@ document.addEventListener('DOMContentLoaded', async () => {
                             <div style="font-weight:bold; color:var(--primary);">D</div>
                             
                             <div style="font-weight:bold; color:var(--primary);">B</div>
-                            <div id="cell-BA" style="border:1px solid rgba(255,255,255,0.1); padding:8px 0; background:#0b0f19; font-weight:800;">-</div>
+                            <div id="cell-BA" style="border:1px solid rgba(255,255,255,0.1); padding:8px 0; background:#f8fafc; font-weight:800;">-</div>
                             <div style="background:rgba(255,255,255,0.02);"></div><div style="background:rgba(255,255,255,0.02);"></div><div style="background:rgba(255,255,255,0.02);"></div>
                             
                             <div style="font-weight:bold; color:var(--primary);">C</div>
-                            <div id="cell-CA" style="border:1px solid rgba(255,255,255,0.1); padding:8px 0; background:#0b0f19; font-weight:800;">-</div>
-                            <div id="cell-CB" style="border:1px solid rgba(255,255,255,0.1); padding:8px 0; background:#0b0f19; font-weight:800;">-</div>
+                            <div id="cell-CA" style="border:1px solid rgba(255,255,255,0.1); padding:8px 0; background:#f8fafc; font-weight:800;">-</div>
+                            <div id="cell-CB" style="border:1px solid rgba(255,255,255,0.1); padding:8px 0; background:#f8fafc; font-weight:800;">-</div>
                             <div style="background:rgba(255,255,255,0.02);"></div><div style="background:rgba(255,255,255,0.02);"></div>
                             
                             <div style="font-weight:bold; color:var(--primary);">D</div>
-                            <div id="cell-DA" style="border:1px solid rgba(255,255,255,0.1); padding:8px 0; background:#0b0f19; font-weight:800;">-</div>
-                            <div id="cell-DB" style="border:1px solid rgba(255,255,255,0.1); padding:8px 0; background:#0b0f19; font-weight:800;">-</div>
-                            <div id="cell-DC" style="border:1px solid rgba(255,255,255,0.1); padding:8px 0; background:#0b0f19; font-weight:800;">-</div>
+                            <div id="cell-DA" style="border:1px solid rgba(255,255,255,0.1); padding:8px 0; background:#f8fafc; font-weight:800;">-</div>
+                            <div id="cell-DB" style="border:1px solid rgba(255,255,255,0.1); padding:8px 0; background:#f8fafc; font-weight:800;">-</div>
+                            <div id="cell-DC" style="border:1px solid rgba(255,255,255,0.1); padding:8px 0; background:#f8fafc; font-weight:800;">-</div>
                             <div style="background:rgba(255,255,255,0.02);"></div>
                             
                             <div style="font-weight:bold; color:var(--primary);">E</div>
-                            <div id="cell-EA" style="border:1px solid rgba(255,255,255,0.1); padding:8px 0; background:#0b0f19; font-weight:800;">-</div>
-                            <div id="cell-EB" style="border:1px solid rgba(255,255,255,0.1); padding:8px 0; background:#0b0f19; font-weight:800;">-</div>
-                            <div id="cell-EC" style="border:1px solid rgba(255,255,255,0.1); padding:8px 0; background:#0b0f19; font-weight:800;">-</div>
-                            <div id="cell-ED" style="border:1px solid rgba(255,255,255,0.1); padding:8px 0; background:#0b0f19; font-weight:800;">-</div>
+                            <div id="cell-EA" style="border:1px solid rgba(255,255,255,0.1); padding:8px 0; background:#f8fafc; font-weight:800;">-</div>
+                            <div id="cell-EB" style="border:1px solid rgba(255,255,255,0.1); padding:8px 0; background:#f8fafc; font-weight:800;">-</div>
+                            <div id="cell-EC" style="border:1px solid rgba(255,255,255,0.1); padding:8px 0; background:#f8fafc; font-weight:800;">-</div>
+                            <div id="cell-ED" style="border:1px solid rgba(255,255,255,0.1); padding:8px 0; background:#f8fafc; font-weight:800;">-</div>
                         </div>
                     </div>
                 </div>
@@ -14662,7 +14662,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     </div>
                     <div class="sim-panel" style="flex:1; display:flex; flex-direction:column; max-height:50%;">
                         <div class="panel-header">Dynamic Observation Table</div>
-                        <div style="flex:1; overflow-y:auto; padding:8px; background:#0b0f19;">
+                        <div style="flex:1; overflow-y:auto; padding:8px; background:#f8fafc;">
                             <table id="observationTable" style="width:100%; border-collapse:collapse; font-size:10px; text-align:left; color:#cbd5e1; font-family:'JetBrains Mono', monospace;">
                                 <thead>
                                     <tr style="border-bottom:2px solid #334155; color:#3b82f6; font-weight:bold;">
@@ -14821,7 +14821,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const currentSubject = localStorage.getItem('vlab_current_subject') || 'networking';
         if (currentSubject === 'os') {
             container.innerHTML = `
-                <div class="terminal-workspace" style="height:100%; display:flex; flex-direction:column; background:#0b0f19; border-radius:12px; border:1px solid var(--border); overflow:hidden; font-family:'JetBrains Mono', monospace; color:#10b981; min-height:400px;">
+                <div class="terminal-workspace" style="height:100%; display:flex; flex-direction:column; background:#f8fafc; border-radius:12px; border:1px solid var(--border); overflow:hidden; font-family:'JetBrains Mono', monospace; color:#10b981; min-height:400px;">
                     <div style="background:#131824; padding:10px 15px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
                         <span style="color:var(--text-muted); font-size:12px; font-weight:800;">OS INTERACTIVE CLI TERMINAL</span>
                         <div style="display:flex; gap:6px;">
@@ -15676,30 +15676,30 @@ Academic Rules:
         <style>
             .nsw{font-family:'Outfit',sans-serif;display:flex;flex-direction:column;gap:0;}
             .nst{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
-            .nstb{display:flex;flex-direction:column;align-items:center;gap:3px;padding:12px 16px;border-radius:12px;border:2px solid #1e3a5f;background:#070d1c;cursor:pointer;transition:all .2s;flex:1;min-width:100px;}
-            .nstb:hover{border-color:#38bdf8;background:#0c1830;}
-            .nstb.act{border-color:var(--tc);background:var(--tb);box-shadow:0 0 20px var(--tc)44;}
+            .nstb{display:flex;flex-direction:column;align-items:center;gap:3px;padding:12px 16px;border-radius:12px;border:2px solid #e2e8f0;background:#ffffff;cursor:pointer;transition:all .2s;flex:1;min-width:100px;box-shadow:0 1px 3px rgba(0,0,0,0.05);}
+            .nstb:hover{border-color:#2563eb;background:#f8fafc;}
+            .nstb.act{border-color:var(--tc);background:#ffffff;box-shadow:0 4px 12px var(--tc)33;transform:translateY(-2px);}
             .nstb .te{font-size:26px;line-height:1.1;}
-            .nstb .tl{font-size:11px;font-weight:700;color:#e2e8f0;text-align:center;}
-            .nstb .ts{font-size:9px;color:#64748b;}
-            .nsib{background:#0b1420;border:1px solid #1e3a5f;border-radius:12px;padding:13px 16px;margin-bottom:12px;display:flex;gap:12px;align-items:flex-start;}
-            .nsib .ie{font-size:34px;flex-shrink:0;}
-            .nsib h3{margin:0 0 4px;font-size:14px;color:#e2e8f0;}
-            .nsib p{margin:0;font-size:12px;color:#94a3b8;line-height:1.6;}
+            .nstb .tl{font-size:11px;font-weight:700;color:#0f172a;text-align:center;}
+            .nstb .ts{font-size:9px;color:#64748b;font-weight:600;}
+            .nsib{background:#ffffff;border:1px solid #e2e8f0;border-radius:12px;padding:14px 18px;margin-bottom:12px;display:flex;gap:14px;align-items:flex-start;box-shadow:0 1px 3px rgba(0,0,0,0.05);}
+            .nsib .ie{font-size:36px;flex-shrink:0;}
+            .nsib h3{margin:0 0 4px;font-size:14px;color:#0f172a;font-weight:800;}
+            .nsib p{margin:0;font-size:12px;color:#475569;line-height:1.6;}
             .nscr{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;align-items:flex-end;}
             .nscr .nc{flex:1;min-width:100px;}
-            .nscr label{font-size:10px;color:#64748b;display:block;margin-bottom:4px;font-family:monospace;text-transform:uppercase;}
-            .nscr select{background:#06091a;color:#e2e8f0;border:1px solid #1e3a5f;border-radius:8px;padding:8px 10px;font-size:12px;width:100%;outline:none;cursor:pointer;}
-            .nscr select:focus{border-color:#38bdf8;}
-            .nsbtn{padding:9px 24px;border:none;border-radius:10px;font-size:14px;font-weight:700;color:#fff;cursor:pointer;background:linear-gradient(135deg,#0ea5e9,#6366f1);height:40px;white-space:nowrap;}
-            .nscvb{background:#06091a;border-radius:14px;border:1.5px solid #1e3a5f;position:relative;overflow:hidden;margin-bottom:12px;}
-            .nscvt{display:flex;justify-content:space-between;align-items:center;padding:7px 12px;font-size:10px;font-family:monospace;color:#1e3a5f;border-bottom:1px solid #0a1523;}
-            canvas.nscv{display:block;width:100%;}
-            .nslb{background:#06091a;border:1px solid #1e3a5f;border-radius:12px;padding:10px 14px;}
-            .nslh{display:flex;justify-content:space-between;margin-bottom:5px;}
-            .nslh span{font-size:10px;font-family:monospace;color:#334155;text-transform:uppercase;}
-            .nsl{font-size:12px;line-height:2;max-height:120px;overflow-y:auto;font-family:monospace;}
-            .nsl div{border-bottom:1px solid #080f1e;}
+            .nscr label{font-size:10px;color:#475569;display:block;margin-bottom:4px;font-family:monospace;text-transform:uppercase;font-weight:700;}
+            .nscr select{background:#ffffff;color:#0f172a;border:1.5px solid #cbd5e1;border-radius:8px;padding:8px 10px;font-size:12px;width:100%;outline:none;cursor:pointer;font-weight:600;}
+            .nscr select:focus{border-color:#2563eb;}
+            .nsbtn{padding:9px 24px;border:none;border-radius:10px;font-size:14px;font-weight:700;color:#fff;cursor:pointer;background:linear-gradient(135deg,#2563eb,#4f46e5);height:40px;white-space:nowrap;box-shadow:0 4px 10px rgba(37,99,235,0.25);}
+            .nscvb{background:#ffffff;border-radius:14px;border:1.5px solid #e2e8f0;position:relative;overflow:hidden;margin-bottom:12px;box-shadow:0 4px 6px -1px rgba(0,0,0,0.05);}
+            .nscvt{display:flex;justify-content:space-between;align-items:center;padding:8px 14px;font-size:11px;font-family:monospace;color:#475569;border-bottom:1px solid #e2e8f0;background:#f8fafc;font-weight:700;}
+            canvas.nscv{display:block;width:100%;background:#ffffff;}
+            .nslb{background:#ffffff;border:1px solid #e2e8f0;border-radius:12px;padding:12px 16px;box-shadow:0 1px 3px rgba(0,0,0,0.05);}
+            .nslh{display:flex;justify-content:space-between;margin-bottom:6px;}
+            .nslh span{font-size:11px;font-family:monospace;color:#334155;text-transform:uppercase;font-weight:800;}
+            .nsl{font-size:12px;line-height:2;max-height:120px;overflow-y:auto;font-family:monospace;background:#f8fafc;padding:10px;border-radius:8px;border:1px solid #e2e8f0;}
+            .nsl div{border-bottom:1px solid #e2e8f0;color:#0f172a;}
         </style>
         <div class="nsw">
             <div class="nst" id="ns-tabs"></div>
@@ -15719,16 +15719,16 @@ Academic Rules:
             <div class="nscvb">
                 <div class="nscvt">
                     <span id="ns-cl">NETWORK TOPOLOGY - PACKET FLOW VISUALIZATION</span>
-                    <span id="ns-st" style="font-size:11px;font-family:monospace;color:#334155;">&#9679; IDLE</span>
+                    <span id="ns-st" style="font-size:11px;font-family:monospace;color:#64748b;">&#9679; IDLE</span>
                 </div>
                 <canvas class="nscv" id="ns-cv" height="430"></canvas>
             </div>
             <div class="nslb">
                 <div class="nslh">
                     <span>&#9654; Protocol Console Log</span>
-                    <span id="ns-lb" style="color:#22c55e;">&#9679; READY</span>
+                    <span id="ns-lb" style="color:#16a34a;">&#9679; READY</span>
                 </div>
-                <div class="nsl" id="ns-log"><div style="color:#334155;">Select a device tab then click Simulate.</div></div>
+                <div class="nsl" id="ns-log"><div style="color:#64748b;">Select a device tab then click Simulate.</div></div>
             </div>
         </div>`;
 
@@ -15790,7 +15790,7 @@ Academic Rules:
                 const W = cv.width, H = cv.height;
                 ctx.clearRect(0, 0, W, H);
                 // grid
-                ctx.strokeStyle = 'rgba(8,20,50,0.8)'; ctx.lineWidth = 1;
+                ctx.strokeStyle = '#e2e8f0'; ctx.lineWidth = 1;
                 for (let x = 0; x < W; x += 50) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke(); }
                 for (let y = 0; y < H; y += 50) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
 
@@ -15799,16 +15799,16 @@ Academic Rules:
                 nodes.forEach(n => {
                     const active = n.idx === si || isBc || String(n.idx) === String(tv);
                     ctx.save(); ctx.beginPath(); ctx.moveTo(n.x, n.y); ctx.lineTo(cx, cy);
-                    ctx.strokeStyle = active ? d.col : '#0a1530';
-                    ctx.lineWidth = active ? 2.5 : 1;
-                    ctx.globalAlpha = active ? 0.85 : 0.25;
+                    ctx.strokeStyle = active ? d.col : '#cbd5e1';
+                    ctx.lineWidth = active ? 3 : 1.5;
+                    ctx.globalAlpha = active ? 1.0 : 0.4;
                     ctx.setLineDash(dash); ctx.stroke(); ctx.restore(); ctx.setLineDash([]);
                     // port label
                     if (active) {
                         const pl = { switch:'Fa0/'+n.idx, router:'Gi0/'+n.idx, hub:'Port'+(n.idx+1), firewall:'Eth'+n.idx, wap:'Assoc'+n.idx }[curDev] || '';
                         if (pl) {
                             const mx = cx + (n.x - cx) * 0.68, my = cy + (n.y - cy) * 0.68;
-                            ctx.font = '8px monospace'; ctx.fillStyle = d.col + 'bb';
+                            ctx.font = 'bold 9px monospace'; ctx.fillStyle = '#334155';
                             ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
                             ctx.fillText(pl, mx, my - 9);
                         }
@@ -15816,41 +15816,41 @@ Academic Rules:
                 });
 
                 // central device
-                ctx.save(); ctx.shadowColor = d.col; ctx.shadowBlur = 50;
+                ctx.save(); ctx.shadowColor = d.col; ctx.shadowBlur = 20;
                 ctx.beginPath(); ctx.arc(cx, cy, 48, 0, Math.PI*2);
-                ctx.fillStyle = d.col + '1a'; ctx.fill();
-                ctx.strokeStyle = d.col; ctx.lineWidth = 2.5; ctx.stroke();
+                ctx.fillStyle = d.col + '15'; ctx.fill();
+                ctx.strokeStyle = d.col; ctx.lineWidth = 3; ctx.stroke();
                 ctx.restore();
                 ctx.font = '28px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
                 ctx.fillText(d.em, cx, cy - 2);
-                ctx.font = 'bold 10px monospace'; ctx.fillStyle = d.col;
+                ctx.font = 'bold 11px Outfit, sans-serif'; ctx.fillStyle = '#0f172a';
                 ctx.fillText(d.label, cx, cy + 62);
-                ctx.font = '9px monospace'; ctx.fillStyle = d.col + '99';
-                ctx.fillText(d.sub.split('-')[0].trim(), cx, cy + 74);
+                ctx.font = '10px monospace'; ctx.fillStyle = '#64748b';
+                ctx.fillText(d.sub.split('-')[0].trim(), cx, cy + 75);
 
                 // nodes
                 nodes.forEach(n => {
                     const role = n.idx === si ? 'sender' : (isBc ? 'bcast' : (String(n.idx) === String(tv) ? 'target' : 'peer'));
-                    const nc = { sender:'#38bdf8', target:'#22c55e', bcast:'#f59e0b', peer:'#1e3a5f' }[role];
-                    const bg = { sender:'#041826', target:'#04180e', bcast:'#18100a', peer:'#060e1a' }[role];
+                    const nc = { sender:'#2563eb', target:'#16a34a', bcast:'#d97706', peer:'#94a3b8' }[role];
+                    const bg = { sender:'#eff6ff', target:'#f0fdf4', bcast:'#fffbeb', peer:'#f8fafc' }[role];
                     if (role !== 'peer') {
-                        ctx.save(); ctx.shadowColor = nc; ctx.shadowBlur = 28;
+                        ctx.save(); ctx.shadowColor = nc; ctx.shadowBlur = 15;
                         ctx.beginPath(); ctx.arc(n.x, n.y, 39, 0, Math.PI*2);
-                        ctx.strokeStyle = nc + '44'; ctx.lineWidth = 3; ctx.stroke(); ctx.restore();
+                        ctx.strokeStyle = nc + '55'; ctx.lineWidth = 3; ctx.stroke(); ctx.restore();
                     }
                     ctx.beginPath(); ctx.arc(n.x, n.y, 33, 0, Math.PI*2);
                     ctx.fillStyle = bg; ctx.fill();
-                    ctx.strokeStyle = nc; ctx.lineWidth = role !== 'peer' ? 2.5 : 1.2; ctx.stroke();
+                    ctx.strokeStyle = nc; ctx.lineWidth = role !== 'peer' ? 2.5 : 1.5; ctx.stroke();
                     ctx.font = '20px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
                     ctx.fillText(n.em, n.x, n.y - 2);
-                    ctx.font = 'bold 10px Outfit,sans-serif'; ctx.fillStyle = '#e2e8f0';
+                    ctx.font = 'bold 11px Outfit,sans-serif'; ctx.fillStyle = '#0f172a';
                     ctx.fillText(n.label, n.x, n.y + 46);
-                    ctx.font = '9px monospace'; ctx.fillStyle = '#475569';
+                    ctx.font = '10px monospace'; ctx.fillStyle = '#334155';
                     ctx.fillText(n.sub, n.x, n.y + 57);
                     ctx.fillText(n.mac, n.x, n.y + 68);
                     if (role !== 'peer') {
                         const tag = { sender:'\u25b6 TX', target:'\u25b6 RX', bcast:'\u25b6 BC' }[role];
-                        ctx.font = 'bold 9px monospace'; ctx.fillStyle = nc;
+                        ctx.font = 'bold 10px monospace'; ctx.fillStyle = nc;
                         ctx.fillText(tag, n.x, n.y + 80);
                     }
                 });
@@ -15862,14 +15862,14 @@ Academic Rules:
                     const py = p.y0 + (p.y1 - p.y0) * t;
                     for (let i = 1; i <= 7; i++) {
                         const tt = Math.max(0, t - i * 0.022);
-                        ctx.save(); ctx.globalAlpha = 0.08 * (8 - i);
+                        ctx.save(); ctx.globalAlpha = 0.12 * (8 - i);
                         ctx.beginPath(); ctx.arc(p.x0+(p.x1-p.x0)*tt, p.y0+(p.y1-p.y0)*tt, 10-i, 0, Math.PI*2);
                         ctx.fillStyle = p.col; ctx.fill(); ctx.restore();
                     }
-                    ctx.save(); ctx.shadowColor = p.col; ctx.shadowBlur = 28;
+                    ctx.save(); ctx.shadowColor = p.col; ctx.shadowBlur = 15;
                     ctx.beginPath(); ctx.arc(px, py, 12, 0, Math.PI*2);
                     ctx.fillStyle = p.col; ctx.fill(); ctx.restore();
-                    ctx.font = 'bold 8px monospace'; ctx.fillStyle = '#fff';
+                    ctx.font = 'bold 8px monospace'; ctx.fillStyle = '#ffffff';
                     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
                     ctx.fillText(p.lbl, px, py);
                 });
