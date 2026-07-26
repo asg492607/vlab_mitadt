@@ -1981,51 +1981,414 @@ window.VLAB_DATA = {
     "simType": "vlan_sim"
 },
     'routing_rip': {
-        title: "Distance Vector Routing - RIP",
-        aim: "To configure Routing Information Protocol (RIP v2) on multi-router topologies and inspect hop-count routing tables.",
-        intro: {
-            summary: "RIP is a classic Distance-Vector routing protocol using Hop Count as its distance metric to route IP packets across subnets.",
-            importance: "Understanding RIP introduces fundamental dynamic routing concepts including periodic updates, split horizon, and route poisoning.",
-            applications: ["Small Enterprise Networks", "Legacy Branch Office Interconnects"],
-            outcome: "Students will enable RIPv2, advertise network blocks, and analyze routing tables."
-        },
-        prerequisites: ["Practical 11: Static Routing Configuration"],
-        outcomes: [
-            "Enable RIPv2 process on Cisco Routers.",
-            "Advertise directly connected network subnets.",
-            "Verify convergence and inspect RIP route metric (hop count)."
+    "title": "Practical 8: Distance Vector Routing Protocol (RIP)",
+    "aim": "To understand dynamic routing principles, configure RIP Version 2 across a multi-router network, observe periodic routing updates, inspect hop count metric calculation, verify routing table convergence, and evaluate loop prevention mechanisms (Split Horizon, Poison Reverse, and Triggered Updates).",
+    "intro": {
+        "summary": "As computer networks grow larger, connecting multiple subnets across different geographical sites requires multiple routers exchanging routing tables dynamically. Routing Information Protocol (RIP) is one of the foundational Distance Vector Dynamic Routing Protocols in computer networking.",
+        "importance": "RIP introduces core dynamic routing concepts including hop count distance metrics, periodic 30-second routing updates, convergence timers, and loop prevention mechanisms (Split Horizon, Poison Reverse, and Triggered Updates).",
+        "applications": [
+            "Small Enterprise Networks & Branch Office Interconnects",
+            "Educational Computer Networking Labs",
+            "Certification Practice for Cisco CCNA and Network+ Labs",
+            "Legacy Network Routing Infrastructure"
         ],
-        theory: {
-            intro: "RIP is a Distance Vector routing protocol using Hop Count as its metric (maximum 15 hops). RIPv2 uses multicast 224.0.0.9 and supports CIDR/VLSM.",
-            cards: [
-                { title: "Split Horizon", content: "Prevents routing loops by not advertising a route back out the interface it was learned from." },
-                { title: "RIP Updates", content: "Broadcasting complete routing tables every 30 seconds to neighboring routers." }
-            ],
-            formulas: ["Max RIP Hop Count = 15 (16 = Unreachable)", "Periodic Update Timer = 30 Seconds"],
-            standards: ["RFC 2453 - RIP Version 2"]
-        },
-        tools: [
-            { name: "Cisco 2911 Router CLI", layer: "Layer 3 Router", ports: "Serial & Gigabit Ports", usage: "Runs RIP v2 routing process", statusLED: "Routing Convergence Green" }
-        ],
-        procedure: [
-            "Access Router R1 and R2 CLI terminals.",
-            "Execute `router rip` and set version 2 using `version 2`.",
-            "Advertise directly connected networks: `network 192.168.1.0`, `network 10.0.0.0`.",
-            "Verify convergence by executing `show ip route`."
-        ],
-        troubleshooting: {
-            problem: "R1 does not learn RIP routes from R2.",
-            hints: ["Ensure `version 2` is set on both routers.", "Verify interface subnets match."],
-            fix: "Execute `version 2` and `no auto-summary` on R1 and R2."
-        },
-        viva: [
-            { q: "What is the maximum hop count allowed in RIP?", a: "15 hops (a hop count of 16 signifies infinity/unreachable)." },
-            { q: "What multicast address does RIPv2 use?", a: "224.0.0.9." }
-        ],
-        assignment: "Build a 3-router topology running RIPv2. Document the routing table output of the center router.",
-        references: [{ title: "RFC 2453 - RIP v2 Specification", link: "https://datatracker.ietf.org/doc/html/rfc2453" }],
-        simType: "cli"
+        "outcome": "After completing this practical, students will be able to configure RIP Version 2 on Cisco routers, inspect multi-hop routing tables, analyze periodic update vectors, observe routing convergence during link failures, and troubleshoot routing loops."
     },
+    "prerequisites": [
+        "Practical 4: IPv4 & IPv6 Address Classification",
+        "Practical 6: Subnetting, VLSM & CIDR",
+        "Practical 7: Virtual LANs (VLAN) & Trunking"
+    ],
+    "outcomes": [
+        "Explain the operation of Distance Vector Routing and the Routing Information Protocol (RIP).",
+        "Configure RIP Version 2 on multi-router topologies using Cisco IOS CLI commands.",
+        "Calculate Hop Count metric for paths across multi-router networks.",
+        "Differentiate between RIP Version 1 (classful) and RIP Version 2 (classless with VLSM/CIDR).",
+        "Analyze RIP timers: Update (30s), Invalid (180s), Hold-down (180s), and Flush (240s).",
+        "Identify routing loop scenarios including the Count-to-Infinity problem.",
+        "Demonstrate loop prevention techniques: Split Horizon, Poison Reverse, and Triggered Updates.",
+        "Verify network convergence and troubleshoot RIP routing tables using Cisco show and debug commands."
+    ],
+    "theory": {
+        "intro": "Every computer network requires a unique address and routing path for data delivery across multiple interconnected networks. When networks grow beyond a single local switch, multiple routers must make intelligent path determination decisions to forward IP packets from source to destination.",
+        "sections": [
+            {
+                "heading": "1. Introduction to Dynamic Routing & RIP",
+                "content": "As computer networks scale across departments, buildings, and ISPs, static routing becomes unmanageable. When a network path breaks or a new subnet is added, static routes require manual reconfiguration on every router. Dynamic routing protocols enable routers to communicate with adjacent neighbors, automatically discover networks, build routing tables, and adapt to network topology changes in real time. The Routing Information Protocol (RIP) is the primary Distance Vector routing protocol taught in computer networking to illustrate dynamic route discovery and metric calculation."
+            },
+            {
+                "heading": "2. Learning Objectives",
+                "content": "By completing this experiment, students will master:\n• The core principles of Distance Vector routing algorithms.\n• How routers build, maintain, and exchange routing tables periodic updates.\n• Hop Count metric calculation and path selection rules.\n• Configuring RIPv2 with router rip, version 2, network, and no auto-summary.\n• RIP convergence timers (Update: 30s, Invalid: 180s, Hold-down: 180s, Flush: 240s).\n• Detecting and preventing routing loops using Split Horizon and Poison Reverse."
+            },
+            {
+                "heading": "3. What is Routing?",
+                "content": "Routing is the Layer 3 process of examining the destination IP address of an incoming packet, consulting a local routing table, and forwarding the packet out the appropriate egress interface toward the next-hop router or destination network. Without routing, packets could never cross the boundary between distinct IP subnets."
+            },
+            {
+                "heading": "4. Why Dynamic Routing Protocols are Required",
+                "content": "In an enterprise network with 10 routers and 50 subnets, configuring static routes manually creates huge operational overhead and vulnerabilities. If a fiber link fails, a static router continues sending traffic into a dead end (black hole). Dynamic routing protocols solve this by:\n1. Automatically discovering reachable remote subnets.\n2. Dynamically selecting the shortest optimal path.\n3. Automatically re-routing traffic around link or router failures without human intervention."
+            },
+            {
+                "heading": "5. Static Routing vs Dynamic Routing Comparison",
+                "content": "• Configuration: Static routing is manually entered by admins; Dynamic routing is automatically learned via peer protocols.\n• Scalability: Static routing is limited to tiny networks (1-2 routers); Dynamic routing scales to medium and enterprise networks.\n• Topology Changes: Static routing requires manual updates on link failure; Dynamic routing automatically converges and re-routes traffic.\n• Overhead: Static routing consumes zero CPU/RAM/bandwidth; Dynamic routing uses background CPU, memory, and periodic update bandwidth."
+            },
+            {
+                "heading": "6. What is Routing Information Protocol (RIP)?",
+                "content": "RIP is a Distance Vector dynamic routing protocol defined in RFC 1058 (RIPv1) and RFC 2453 (RIPv2). It employs Hop Count as its distance metric to determine the best path to any remote destination IP network. RIP is widely studied because its simple Bellman-Ford algorithm clearly demonstrates how neighboring routers exchange distance vectors."
+            },
+            {
+                "heading": "7. Distance Vector Routing Principles",
+                "content": "Distance Vector routing is based on two concepts:\n• Distance: How far away a destination network is, measured in metric units (Hop Count for RIP).\n• Vector: Which direction (next-hop router IP address and outgoing interface) packets must be sent.\nEach router periodically sends its entire routing table vector to directly connected immediate neighbors."
+            },
+            {
+                "heading": "8. What is Hop Count Metric?",
+                "content": "Hop Count represents the total number of intermediate routers an IP packet must traverse to reach a target network. A directly connected subnet has a Hop Count of 0. Passing through one router increases the Hop Count to 1, two routers to 2, and so forth. RIP always prefers the path with the lowest Hop Count, even if a path with more hops has higher bandwidth."
+            },
+            {
+                "heading": "9. Structure of a RIP Routing Table",
+                "content": "A RIP routing table contains essential entries for every learned remote network:\n1. Destination Network IP & Subnet Mask (e.g., 192.168.4.0/24).\n2. Next-Hop IP Address (e.g., 10.0.1.2).\n3. Metric / Hop Count (e.g., 2 hops).\n4. Outgoing Interface (e.g., GigabitEthernet0/1).\n5. Route Administrative Distance (120 for RIP).\n6. Timer / Age (Time elapsed since last periodic update received)."
+            },
+            {
+                "heading": "10. RIP Working Principle & Step-by-Step Operation",
+                "content": "Step 1: Router boots and populates its routing table with directly connected networks (Hop Count = 0).\nStep 2: RIP timer triggers periodic update (every 30 seconds).\nStep 3: Router broadcasts/multicasts its complete routing table to all active neighbors.\nStep 4: Neighboring routers receive the update, increment the hop count of learned routes by 1, and add or update cheaper routes in their local tables.\nStep 5: Process repeats until all routers reach convergence (identical global network reachability view)."
+            },
+            {
+                "heading": "11. RIP Version 1 vs RIP Version 2 Comparison",
+                "content": "• Subnet Mask Support: RIPv1 is Classful (does not send subnet masks); RIPv2 is Classless (sends subnet masks with routes, fully supporting VLSM & CIDR).\n• Transmission Method: RIPv1 broadcasts to 255.255.255.255; RIPv2 multicasts to 224.0.0.9 (reducing CPU load on non-RIP hosts).\n• Security: RIPv1 lacks authentication; RIPv2 supports MD5 and plaintext authentication.\n• Summarization: RIPv1 forces auto-summarization at classful boundaries; RIPv2 permits disabling auto-summary (no auto-summary)."
+            },
+            {
+                "heading": "12. RIP Timers",
+                "content": "RIP relies on 4 critical timers to maintain table freshness:\n1. Update Timer (30 seconds): Frequency at which complete routing table updates are transmitted.\n2. Invalid Timer (180 seconds): Time a router waits before marking an unrefreshed route as Invalid (Hop Count set to 16).\n3. Hold-down Timer (180 seconds): Period during which lower-metric updates for a suspect route are ignored to prevent loops.\n4. Flush Timer (240 seconds): Total time before an invalid route is permanently purged from the routing table."
+            },
+            {
+                "heading": "13. RIP Metric Limit (Max 15 Hops)",
+                "content": "RIP imposes a strict maximum metric limit of 15 hops. Any destination network requiring 16 hops is defined as Unreachable (Infinity). This design choice caps the Count-to-Infinity problem but restricts RIP deployment to small networks with a maximum diameter of 15 router hops."
+            },
+            {
+                "heading": "14. Network Routing Convergence",
+                "content": "Convergence is the state where all routers in an internetwork have consistent, accurate routing table knowledge of the topology. Fast convergence is desirable so packets are not dropped or misrouted when links fail."
+            },
+            {
+                "heading": "15. Routing Loops & The Count-to-Infinity Problem",
+                "content": "A routing loop occurs when routers repeatedly pass a packet back and forth to each other due to outdated routing tables. When a network fails, two neighboring routers might continuously increment the hop count for that dead network (2 → 3 → 4 ... → 16) believing the other router still has a path. This is called the Count-to-Infinity problem."
+            },
+            {
+                "heading": "16. Loop Prevention Mechanisms",
+                "content": "RIP implements four key mechanisms to prevent routing loops:\n• Split Horizon: A router never advertises a route back out the same interface from which it learned it.\n• Poison Reverse: When a link breaks, the router advertises that route back to its neighbors with a metric of 16 (Poisoned/Unreachable) to immediately clear stale entries.\n• Triggered Updates: Routers immediately send an update when a topology change occurs rather than waiting 30 seconds for the periodic timer.\n• Hold-down Timers: Prevents routers from accepting bad updates while a network is stabilizing."
+            },
+            {
+                "heading": "17. Cisco IOS Configuration Guide",
+                "content": "Configuring RIPv2 on a Cisco router:\nRouter# configure terminal\nRouter(config)# router rip\nRouter(config-router)# version 2\nRouter(config-router)# no auto-summary\nRouter(config-router)# network 192.168.1.0\nRouter(config-router)# network 10.0.0.0\nRouter(config-router)# end"
+            },
+            {
+                "heading": "18. Verification Commands",
+                "content": "• show ip route - Displays the active IP routing table (RIP routes marked with 'R').\n• show ip protocols - Displays active routing protocol parameters, timers, and advertised networks.\n• show running-config - Displays router configuration file.\n• debug ip rip - Displays real-time RIP update packets being sent and received."
+            },
+            {
+                "heading": "19. Real-World Applications, Best Practices & Summary",
+                "content": "Best Practices:\n1. Always configure version 2 and no auto-summary on Cisco routers.\n2. Use passive-interface on LAN facing ports to prevent sending unnecessary RIP updates to user PCs.\n3. Keep network hop diameter below 15 hops.\nSummary: RIP is an essential Distance Vector protocol that teaches hop count path selection, periodic update mechanics, convergence, and loop prevention."
+            }
+        ]
+    },
+    "hardware_inspector": [
+        {
+            "id": "cisco_2911_rip_router",
+            "name": "Cisco 2911 Integrated Services Router",
+            "category": "Layer 3 Dynamic Router",
+            "description": "Enterprise Layer 3 router capable of running RIPv2, OSPF, and EIGRP routing processes with dual GigabitEthernet and Serial WAN interfaces.",
+            "svg": `<svg viewBox="0 0 400 240" xmlns="http://www.w3.org/2000/svg">
+                <rect x="20" y="40" width="360" height="160" rx="10" fill="#0f172a" stroke="#3b82f6" stroke-width="3"/>
+                <rect x="35" y="55" width="330" height="40" rx="5" fill="#1e293b"/>
+                <text x="50" y="80" fill="#38bdf8" font-size="16" font-weight="bold" font-family="monospace">CISCO 2911 ISR ROUTER [RIPv2 ACTIVE]</text>
+                <circle cx="340" cy="75" r="7" fill="#10b981"/>
+                <g transform="translate(40, 110)">
+                    <rect x="0" y="0" width="65" height="40" rx="4" fill="#334155" stroke="#94a3b8" stroke-width="2"/>
+                    <text x="32" y="25" fill="#ffffff" font-size="10" font-weight="bold" text-anchor="middle">Gi0/0</text>
+                </g>
+                <g transform="translate(120, 110)">
+                    <rect x="0" y="0" width="65" height="40" rx="4" fill="#334155" stroke="#94a3b8" stroke-width="2"/>
+                    <text x="32" y="25" fill="#ffffff" font-size="10" font-weight="bold" text-anchor="middle">Gi0/1</text>
+                </g>
+                <g transform="translate(200, 110)">
+                    <rect x="0" y="0" width="65" height="40" rx="4" fill="#334155" stroke="#f59e0b" stroke-width="2"/>
+                    <text x="32" y="25" fill="#f59e0b" font-size="10" font-weight="bold" text-anchor="middle">Serial0/0</text>
+                </g>
+                <g transform="translate(280, 110)">
+                    <rect x="0" y="0" width="65" height="40" rx="4" fill="#334155" stroke="#f59e0b" stroke-width="2"/>
+                    <text x="32" y="25" fill="#f59e0b" font-size="10" font-weight="bold" text-anchor="middle">Serial0/1</text>
+                </g>
+                <text x="200" y="185" fill="#cbd5e1" font-size="11" text-anchor="middle">Distance Vector RIPv2 - Periodic 30s Updates (Multicast 224.0.0.9)</text>
+            </svg>`
+        },
+        {
+            "id": "rip_routing_table_diagram",
+            "name": "RIP Dynamic Routing Table Engine",
+            "category": "Layer 3 Routing Table Structure",
+            "description": "Internal structure of a RIP dynamic routing table displaying Network Subnets, Next-Hop IP addresses, and Hop Count Distance metrics.",
+            "svg": `<svg viewBox="0 0 400 240" xmlns="http://www.w3.org/2000/svg">
+                <rect x="20" y="20" width="360" height="200" rx="8" fill="#0b0f19" stroke="#10b981" stroke-width="2"/>
+                <text x="200" y="45" fill="#10b981" font-size="14" font-weight="bold" text-anchor="middle">RIP DYNAMIC ROUTING TABLE [AD = 120]</text>
+                <line x1="30" y1="55" x2="370" y2="55" stroke="#334155" stroke-width="2"/>
+                <text x="40" y="75" fill="#38bdf8" font-size="11" font-weight="bold">Type</text>
+                <text x="90" y="75" fill="#38bdf8" font-size="11" font-weight="bold">Destination Subnet</text>
+                <text x="230" y="75" fill="#38bdf8" font-size="11" font-weight="bold">Next-Hop</text>
+                <text x="320" y="75" fill="#38bdf8" font-size="11" font-weight="bold">Hop Metric</text>
+
+                <text x="40" y="105" fill="#f59e0b" font-size="11" font-weight="bold">R</text>
+                <text x="90" y="105" fill="#ffffff" font-size="11" font-family="monospace">192.168.4.0/24</text>
+                <text x="230" y="105" fill="#ffffff" font-size="11" font-family="monospace">10.0.1.2</text>
+                <text x="320" y="105" fill="#10b981" font-size="11" font-weight="bold">[120/2]</text>
+
+                <text x="40" y="135" fill="#f59e0b" font-size="11" font-weight="bold">R</text>
+                <text x="90" y="135" fill="#ffffff" font-size="11" font-family="monospace">192.168.3.0/24</text>
+                <text x="230" y="135" fill="#ffffff" font-size="11" font-family="monospace">10.0.1.2</text>
+                <text x="320" y="135" fill="#10b981" font-size="11" font-weight="bold">[120/1]</text>
+
+                <text x="40" y="165" fill="#3b82f6" font-size="11" font-weight="bold">C</text>
+                <text x="90" y="165" fill="#ffffff" font-size="11" font-family="monospace">192.168.1.0/24</text>
+                <text x="230" y="165" fill="#ffffff" font-size="11" font-family="monospace">Directly Conn</text>
+                <text x="320" y="165" fill="#10b981" font-size="11" font-weight="bold">[0/0]</text>
+                <rect x="30" y="185" width="340" height="25" rx="4" fill="#1e293b"/>
+                <text x="200" y="202" fill="#94a3b8" font-size="10" text-anchor="middle">R = Learned via RIP (AD 120) | C = Directly Connected Subnet</text>
+            </svg>`
+        }
+    ],
+    "evaluations": [
+        {
+            "id": "rip_pre_1",
+            "type": "pre",
+            "question": "What distance metric does the Routing Information Protocol (RIP) use to determine the best path?",
+            "options": [
+                "Interface Bandwidth",
+                "Hop Count",
+                "Link Delay",
+                "Administrative Cost"
+            ],
+            "answer": "Hop Count",
+            "explanation": "RIP uses Hop Count exclusively as its routing metric. The path with the fewest router hops to the destination subnet is selected as optimal."
+        },
+        {
+            "id": "rip_pre_2",
+            "type": "pre",
+            "question": "What is the maximum valid Hop Count allowed in a RIP network?",
+            "options": [
+                "10 Hops",
+                "15 Hops",
+                "16 Hops",
+                "255 Hops"
+            ],
+            "answer": "15 Hops",
+            "explanation": "RIP caps maximum reachable distance at 15 hops. A metric of 16 hops defines a network as Unreachable (Infinity)."
+        },
+        {
+            "id": "rip_pre_3",
+            "type": "pre",
+            "question": "What is the default periodic update timer interval for RIP?",
+            "options": [
+                "10 Seconds",
+                "30 Seconds",
+                "60 Seconds",
+                "180 Seconds"
+            ],
+            "answer": "30 Seconds",
+            "explanation": "RIP routers broadcast/multicast their entire routing table to directly connected neighbors every 30 seconds."
+        },
+        {
+            "id": "rip_pre_4",
+            "type": "pre",
+            "question": "What key enhancement makes RIP Version 2 superior to RIP Version 1?",
+            "options": [
+                "Uses link-state Dijkstra algorithm",
+                "Supports classless routing, VLSM, and subnet masks in updates",
+                "Allows up to 100 hops",
+                "Replaces hop count with bandwidth"
+            ],
+            "answer": "Supports classless routing, VLSM, and subnet masks in updates",
+            "explanation": "RIPv2 is a classless routing protocol that carries subnet masks in update messages, supporting Variable Length Subnet Masking (VLSM) and CIDR."
+        },
+        {
+            "id": "rip_pre_5",
+            "type": "pre",
+            "question": "Which loop prevention mechanism prevents a router from advertising a route back out the same interface it was learned from?",
+            "options": [
+                "Hold-down Timer",
+                "Split Horizon",
+                "Route Poisoning",
+                "Poison Reverse"
+            ],
+            "answer": "Split Horizon",
+            "explanation": "Split Horizon dictates that a router never advertises routing information back out the interface through which that information was originally received."
+        },
+        {
+            "id": "rip_post_1",
+            "type": "post",
+            "question": "What IPv4 multicast address does RIP Version 2 use to transmit periodic routing updates?",
+            "options": [
+                "224.0.0.5",
+                "224.0.0.9",
+                "224.0.0.10",
+                "255.255.255.255"
+            ],
+            "answer": "224.0.0.9",
+            "explanation": "RIPv2 uses the reserved IPv4 multicast address 224.0.0.9 to send update messages to neighboring RIP routers without broadcasting to all hosts."
+        },
+        {
+            "id": "rip_post_2",
+            "type": "post",
+            "question": "What is the Administrative Distance (AD) assigned to RIP routes by default in Cisco IOS?",
+            "options": [
+                "90",
+                "110",
+                "120",
+                "170"
+            ],
+            "answer": "120",
+            "explanation": "In Cisco IOS, RIP has an Administrative Distance of 120 (OSPF is 110, EIGRP is 90, Static is 1, Connected is 0)."
+        },
+        {
+            "id": "rip_post_3",
+            "type": "post",
+            "question": "How long does a RIP router wait before marking an unrefreshed route as Invalid (Hop Count 16)?",
+            "options": [
+                "30 Seconds",
+                "90 Seconds",
+                "180 Seconds",
+                "240 Seconds"
+            ],
+            "answer": "180 Seconds",
+            "explanation": "The RIP Invalid Timer defaults to 180 seconds (6 missed 30-second update cycles). After 180s, the route metric is set to 16 (unreachable)."
+        },
+        {
+            "id": "rip_post_4",
+            "type": "post",
+            "question": "What does 'Poison Reverse' do when a network link fails?",
+            "options": [
+                "Deletes the router configuration",
+                "Immediately advertises the failed route with a metric of 16 (Infinity) back to neighbors",
+                "Waits 240 seconds before notifying other routers",
+                "Switches automatically to OSPF"
+            ],
+            "answer": "Immediately advertises the failed route with a metric of 16 (Infinity) back to neighbors",
+            "explanation": "Poison Reverse explicitly advertises an unreachable route with a metric of 16 back out the interface, ensuring neighboring routers invalidate their entries immediately."
+        },
+        {
+            "id": "rip_post_5",
+            "type": "post",
+            "question": "Which Cisco IOS command disables automatic summarization at classful network boundaries in RIPv2?",
+            "options": [
+                "no auto-summary",
+                "disable summary",
+                "version 2 classless",
+                "no ip route summary"
+            ],
+            "answer": "no auto-summary",
+            "explanation": "The no auto-summary router configuration command prevents RIPv2 from summarizing subnets to their classful boundaries (Class A, B, C) at router interfaces."
+        },
+        {
+            "id": "rip_post_6",
+            "type": "post",
+            "question": "Why does the 'Count-to-Infinity' problem occur in Distance Vector protocols?",
+            "options": [
+                "Routers send update packets too fast",
+                "Outdated routing table information is repeatedly passed back and forth between neighboring routers during link failure",
+                "The router runs out of RAM memory",
+                "IP packets lack TTL headers"
+            ],
+            "answer": "Outdated routing table information is repeatedly passed back and forth between neighboring routers during link failure",
+            "explanation": "Count-to-Infinity occurs when slow convergence causes two routers to continuously increment the hop count metric for a failed network until it hits 16."
+        },
+        {
+            "id": "rip_post_7",
+            "type": "post",
+            "question": "What Cisco command displays real-time RIP routing update transactions being sent and received?",
+            "options": [
+                "show ip rip",
+                "debug ip rip",
+                "trace ip route",
+                "monitor rip log"
+            ],
+            "answer": "debug ip rip",
+            "explanation": "The debug ip rip privileged EXEC command displays live diagnostic messages showing RIP update contents, metrics, and peer IP addresses."
+        },
+        {
+            "id": "rip_post_8",
+            "type": "post",
+            "question": "What happens when two equal-cost RIP routes with the same hop count to a destination exist?",
+            "options": [
+                "The router drops all traffic",
+                "The router performs equal-cost load balancing across both paths",
+                "The router randomly deletes one route",
+                "The router converts to static routing"
+            ],
+            "answer": "The router performs equal-cost load balancing across both paths",
+            "explanation": "Cisco routers automatically perform equal-cost load balancing across up to 4 parallel paths with identical RIP hop count metrics."
+        },
+        {
+            "id": "rip_post_9",
+            "type": "post",
+            "question": "What is the purpose of the passive-interface command in RIP configuration?",
+            "options": [
+                "Shuts down the router interface",
+                "Stops sending RIP updates out the specified interface while still listening for incoming packets",
+                "Disables IPv4 routing",
+                "Enables OSPF on that interface"
+            ],
+            "answer": "Stops sending RIP updates out the specified interface while still listening for incoming packets",
+            "explanation": "passive-interface suppresses outgoing periodic RIP updates on LAN-facing user ports, saving bandwidth and improving security."
+        },
+        {
+            "id": "rip_post_10",
+            "type": "post",
+            "question": "In the command R1(config)# router rip, what is the next step to enable Version 2?",
+            "options": [
+                "type version 2",
+                "type enable rip v2",
+                "type ip rip version 2",
+                "type mode classless"
+            ],
+            "answer": "type version 2",
+            "explanation": "Under the router rip configuration sub-prompt, entering version 2 switches the router from legacy RIPv1 to RIPv2."
+        }
+    ],
+    "viva": [
+        {
+            "q": "What is Distance Vector routing and how does RIP implement it?",
+            "a": "Distance Vector routing determines path selection based on direction (vector - next-hop router) and distance (metric - hop count). RIP implements it by broadcasting/multicasting its entire routing table to directly connected neighbors every 30 seconds."
+        },
+        {
+            "q": "Why is the maximum hop count in RIP restricted to 15?",
+            "a": "The maximum metric of 15 hops places a limit on the Count-to-Infinity problem during network failure. A hop count of 16 signifies that the network is unreachable (Infinity)."
+        },
+        {
+            "q": "Explain the difference between Split Horizon and Poison Reverse.",
+            "a": "Split Horizon prevents a router from advertising a route back out the interface it was learned from. Poison Reverse explicitly advertises an unreachable route back out that interface with a metric of 16 (Infinity) to accelerate network convergence."
+        },
+        {
+            "q": "What are the four primary RIP timers and their default values?",
+            "a": "1. Update Timer: 30 seconds (periodic updates).\n2. Invalid Timer: 180 seconds (marks route as invalid/metric 16).\n3. Hold-down Timer: 180 seconds (stabilization period).\n4. Flush Timer: 240 seconds (removes route from routing table)."
+        },
+        {
+            "q": "Why should no auto-summary always be configured under router rip in modern networks?",
+            "a": "By default, RIPv2 automatically summarizes subnets to their classful boundaries (Class A, B, C) when advertising across network boundaries. no auto-summary preserves exact subnet masks, enabling proper routing for VLSM and CIDR subnets."
+        }
+    ],
+    "assignment": "1. Build a 4-router line topology (R1 ⇹ R2 ⇹ R3 ⇹ R4) interconnecting subnets 192.168.1.0/24, 192.168.2.0/24, 192.168.3.0/24, and 192.168.4.0/24.\n2. Configure RIPv2 with router rip, version 2, no auto-summary, and advertise all connected networks on each router.\n3. Issue show ip route on R1 and verify that 192.168.4.0/24 is learned via R2 with a Hop Count metric of 3 [120/3].\n4. Simulate a link failure between R2 and R3. Record the time required for RIP to converge and update the routing tables.",
+    "references": [
+        {
+            "title": "RFC 2453 - RIP Version 2 Specification",
+            "link": "https://datatracker.ietf.org/doc/html/rfc2453"
+        },
+        {
+            "title": "RFC 1058 - Routing Information Protocol (RIPv1)",
+            "link": "https://datatracker.ietf.org/doc/html/rfc1058"
+        },
+        {
+            "title": "Cisco IOS IP Routing: RIP Configuration Guide",
+            "link": "https://www.cisco.com"
+        }
+    ],
+    "simType": "rip_sim"
+},
     'routing_ospf': {
         title: "Link State Routing - OSPF",
         aim: "To implement Open Shortest Path First (OSPF Area 0) dynamic routing using Dijkstra's SPF algorithm.",
@@ -2363,4 +2726,6 @@ window.VLAB_DATA['udp'] = window.VLAB_DATA['udp_tcp'];
 window.VLAB_DATA['tcp'] = window.VLAB_DATA['udp_tcp'];
 window.VLAB_DATA['dns'] = window.VLAB_DATA['dhcp_config'];
 window.VLAB_DATA['vlan'] = window.VLAB_DATA['vlan_sim'];
+window.VLAB_DATA['rip_sim'] = window.VLAB_DATA['routing_rip'];
+window.VLAB_DATA['rip'] = window.VLAB_DATA['routing_rip'];
 

@@ -12599,6 +12599,484 @@ const initVlanSim = (container) => {
     render();
 };
 
+        // --- PRACTICAL 8: DISTANCE VECTOR ROUTING PROTOCOL (RIP) SIMULATOR ---
+// Interactive Practical 8 Distance Vector Routing Protocol (RIP) Simulator
+const initRipSim = (container) => {
+    let currentTab = 'hop_sim'; // 'hop_sim', 'tables', 'infinity', 'cli', 'timers'
+
+    // Tab 1 State: Multi-Router Hop Count & Packet Tracer
+    let isR2R3LinkUp = true;
+    let isRipConverged = true;
+    let isPacketAnimating = false;
+    let packetLog = null;
+    let aniReqId = null;
+
+    // Tab 3 State: Count to Infinity
+    let isSplitHorizonOn = true;
+    let infinityHop = 2;
+    let isInfinityRunning = false;
+
+    // Helper for relative canvas positioning
+    const getRelativePos = (containerId, elemId) => {
+        const c = document.getElementById(containerId);
+        const e = document.getElementById(elemId);
+        if (!c || !e) return { x: 0, y: 0 };
+        const cR = c.getBoundingClientRect();
+        const eR = e.getBoundingClientRect();
+        return {
+            x: (eR.left + eR.width / 2) - cR.left,
+            y: (eR.top + eR.height / 2) - cR.top
+        };
+    };
+
+    const render = () => {
+        if (aniReqId) {
+            cancelAnimationFrame(aniReqId);
+            aniReqId = null;
+        }
+
+        container.innerHTML = `
+        <div class="sim-toolbar" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; padding:12px 16px; background:var(--bg-card); border-bottom:1px solid var(--border);">
+            <div style="font-size:20px; font-weight:800; color:var(--primary); display:flex; align-items:center; gap:8px;">
+                <span>RIP Distance Vector Engine 📡</span>
+            </div>
+            <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                <button class="btn-sim ${currentTab === 'hop_sim' ? 'primary' : ''}" id="tabHopSim" style="font-size:12px; padding:6px 12px;">Multi-Router Hop Tracer 🚀</button>
+                <button class="btn-sim ${currentTab === 'tables' ? 'primary' : ''}" id="tabTables" style="font-size:12px; padding:6px 12px;">Periodic Update Exchange 🔄</button>
+                <button class="btn-sim ${currentTab === 'infinity' ? 'primary' : ''}" id="tabInfinity" style="font-size:12px; padding:6px 12px;">Count-to-Infinity & Split Horizon ♾️</button>
+                <button class="btn-sim ${currentTab === 'cli' ? 'primary' : ''}" id="tabCli" style="font-size:12px; padding:6px 12px;">Cisco Router CLI 💻</button>
+                <button class="btn-sim ${currentTab === 'timers' ? 'primary' : ''}" id="tabTimers" style="font-size:12px; padding:6px 12px;">RIP Timers Inspector ⏱️</button>
+            </div>
+        </div>
+
+        <div class="sim-workspace" style="padding:16px; display:flex; flex-direction:column; gap:16px; background:var(--bg-page);">
+            ${currentTab === 'hop_sim' ? `
+                <!-- Tab 1: Multi-Router Hop Count Tracer & Convergence Simulator -->
+                <div class="theory-card" style="margin:0; display:flex; flex-direction:column; gap:16px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+                        <div>
+                            <h3 style="color:var(--primary); margin:0;">Multi-Router Distance Vector Hop Count & Convergence Tracer</h3>
+                            <p style="font-size:12px; color:var(--text-muted); margin:4px 0 0;">
+                                Transmit packets across 4 routers (R1 ⇹ R2 ⇹ R3 ⇹ R4) and observe dynamic hop count metric calculations!
+                            </p>
+                        </div>
+                        <div style="display:flex; gap:8px;">
+                            <button id="btnToggleLink" class="btn-sim ${isR2R3LinkUp ? 'danger' : 'primary'}" style="font-weight:700;">
+                                ${isR2R3LinkUp ? 'Simulate Link Failure (Break R2 ⇹ R3) 💥' : 'Restore Link (R2 ⇹ R3) 💚'}
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 4-Router Line Topology Board -->
+                    <div id="ripCanvasContainer" style="background:#0b0f19; border-radius:12px; border:1px solid var(--border); position:relative; min-height:260px; padding:20px; overflow:hidden;">
+                        <canvas id="ripPacketCanvas" style="position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:10;"></canvas>
+
+                        <!-- Topology Devices Row -->
+                        <div style="display:grid; grid-template-columns:auto 1fr 1fr 1fr 1fr auto; gap:10px; width:100%; align-items:center; position:relative; z-index:2;">
+                            <!-- PC1 -->
+                            <div id="card-pc1" style="padding:10px; background:#1e293b; border:2px solid #3b82f6; border-radius:10px; text-align:center;">
+                                <div style="font-size:24px;">💻</div>
+                                <div style="font-size:11px; font-weight:800; color:#fff;">PC1</div>
+                                <div style="font-size:8px; color:#94a3b8; font-family:monospace;">192.168.1.10</div>
+                            </div>
+
+                            <!-- R1 -->
+                            <div id="card-r1" style="padding:12px; background:#1e293b; border:2px solid #38bdf8; border-radius:10px; text-align:center;">
+                                <div style="font-size:26px;">🌐</div>
+                                <div style="font-size:12px; font-weight:800; color:#38bdf8;">Router R1</div>
+                                <div style="font-size:8px; color:#94a3b8; font-family:monospace;">LAN: 192.168.1.1</div>
+                                <div style="font-size:8px; color:#f59e0b; font-family:monospace;">WAN: 10.0.1.1</div>
+                            </div>
+
+                            <!-- R2 -->
+                            <div id="card-r2" style="padding:12px; background:#1e293b; border:2px solid #38bdf8; border-radius:10px; text-align:center;">
+                                <div style="font-size:26px;">🌐</div>
+                                <div style="font-size:12px; font-weight:800; color:#38bdf8;">Router R2</div>
+                                <div style="font-size:8px; color:#f59e0b; font-family:monospace;">10.0.1.2 | 10.0.2.1</div>
+                            </div>
+
+                            <!-- R3 -->
+                            <div id="card-r3" style="padding:12px; background:#1e293b; border:2px solid ${isR2R3LinkUp ? '#38bdf8' : '#ef4444'}; border-radius:10px; text-align:center;">
+                                <div style="font-size:26px;">🌐</div>
+                                <div style="font-size:12px; font-weight:800; color:${isR2R3LinkUp ? '#38bdf8' : '#ef4444'};">Router R3</div>
+                                <div style="font-size:8px; color:#f59e0b; font-family:monospace;">10.0.2.2 | 10.0.3.1</div>
+                                ${!isR2R3LinkUp ? '<div style="font-size:8px; color:#ef4444; font-weight:bold;">LINK DOWN</div>' : ''}
+                            </div>
+
+                            <!-- R4 -->
+                            <div id="card-r4" style="padding:12px; background:#1e293b; border:2px solid #38bdf8; border-radius:10px; text-align:center;">
+                                <div style="font-size:26px;">🌐</div>
+                                <div style="font-size:12px; font-weight:800; color:#38bdf8;">Router R4</div>
+                                <div style="font-size:8px; color:#f59e0b; font-family:monospace;">WAN: 10.0.3.2</div>
+                                <div style="font-size:8px; color:#94a3b8; font-family:monospace;">LAN: 192.168.4.1</div>
+                            </div>
+
+                            <!-- PC2 -->
+                            <div id="card-pc2" style="padding:10px; background:#1e293b; border:2px solid #10b981; border-radius:10px; text-align:center;">
+                                <div style="font-size:24px;">💻</div>
+                                <div style="font-size:11px; font-weight:800; color:#fff;">PC2</div>
+                                <div style="font-size:8px; color:#94a3b8; font-family:monospace;">192.168.4.10</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Controls -->
+                    <div style="display:flex; justify-content:center; gap:12px;">
+                        <button id="btnSendRipPacket" class="btn-sim primary" style="font-weight:700; padding:10px 24px;">
+                            Transmit Packet: PC1 (192.168.1.10) ➔ PC2 (192.168.4.10) 🚀
+                        </button>
+                    </div>
+
+                    <!-- Output Log Box -->
+                    <div id="ripPacketLogBox" style="padding:16px; background:var(--bg-page); border:1px solid var(--border); border-radius:10px; font-size:13px; min-height:70px; line-height:1.7;">
+                        ${packetLog || '💡 Click <b>Transmit Packet</b> to trace multi-hop IP packet routing and hop count metrics!'}
+                    </div>
+                </div>
+            ` : ''}
+
+            ${currentTab === 'tables' ? `
+                <!-- Tab 2: Periodic 30s Routing Table Exchange Visualizer -->
+                <div class="theory-card" style="margin:0; display:flex; flex-direction:column; gap:16px;">
+                    <h3 style="color:var(--primary); margin:0;">Periodic 30-Second RIP Routing Table Exchange 🔄</h3>
+                    <p style="font-size:13px; color:var(--text-main); margin:0;">
+                        Distance Vector routers multicast their entire routing table to connected neighbors every 30 seconds (Multicast 224.0.0.9).
+                    </p>
+
+                    <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:12px;">
+                        <!-- R1 Table -->
+                        <div style="background:#0b0f19; padding:12px; border-radius:10px; border:1px solid var(--border);">
+                            <div style="font-size:12px; font-weight:800; color:#38bdf8; margin-bottom:8px; text-align:center;">ROUTER R1 TABLE</div>
+                            <table style="width:100%; font-size:9px; font-family:monospace; color:#cbd5e1;">
+                                <tr style="color:#f59e0b;"><th>Network</th><th>NextHop</th><th>Hop</th></tr>
+                                <tr><td>192.168.1.0/24</td><td>Direct</td><td>0</td></tr>
+                                <tr><td>10.0.1.0/30</td><td>Direct</td><td>0</td></tr>
+                                <tr><td>192.168.4.0/24</td><td>10.0.1.2</td><td><b style="color:#10b981;">3</b></td></tr>
+                            </table>
+                        </div>
+
+                        <!-- R2 Table -->
+                        <div style="background:#0b0f19; padding:12px; border-radius:10px; border:1px solid var(--border);">
+                            <div style="font-size:12px; font-weight:800; color:#38bdf8; margin-bottom:8px; text-align:center;">ROUTER R2 TABLE</div>
+                            <table style="width:100%; font-size:9px; font-family:monospace; color:#cbd5e1;">
+                                <tr style="color:#f59e0b;"><th>Network</th><th>NextHop</th><th>Hop</th></tr>
+                                <tr><td>10.0.1.0/30</td><td>Direct</td><td>0</td></tr>
+                                <tr><td>10.0.2.0/30</td><td>Direct</td><td>0</td></tr>
+                                <tr><td>192.168.4.0/24</td><td>10.0.2.2</td><td><b style="color:#10b981;">2</b></td></tr>
+                            </table>
+                        </div>
+
+                        <!-- R3 Table -->
+                        <div style="background:#0b0f19; padding:12px; border-radius:10px; border:1px solid var(--border);">
+                            <div style="font-size:12px; font-weight:800; color:#38bdf8; margin-bottom:8px; text-align:center;">ROUTER R3 TABLE</div>
+                            <table style="width:100%; font-size:9px; font-family:monospace; color:#cbd5e1;">
+                                <tr style="color:#f59e0b;"><th>Network</th><th>NextHop</th><th>Hop</th></tr>
+                                <tr><td>10.0.2.0/30</td><td>Direct</td><td>0</td></tr>
+                                <tr><td>10.0.3.0/30</td><td>Direct</td><td>0</td></tr>
+                                <tr><td>192.168.4.0/24</td><td>10.0.3.2</td><td><b style="color:#10b981;">1</b></td></tr>
+                            </table>
+                        </div>
+
+                        <!-- R4 Table -->
+                        <div style="background:#0b0f19; padding:12px; border-radius:10px; border:1px solid var(--border);">
+                            <div style="font-size:12px; font-weight:800; color:#38bdf8; margin-bottom:8px; text-align:center;">ROUTER R4 TABLE</div>
+                            <table style="width:100%; font-size:9px; font-family:monospace; color:#cbd5e1;">
+                                <tr style="color:#f59e0b;"><th>Network</th><th>NextHop</th><th>Hop</th></tr>
+                                <tr><td>192.168.4.0/24</td><td>Direct</td><td>0</td></tr>
+                                <tr><td>10.0.3.0/30</td><td>Direct</td><td>0</td></tr>
+                                <tr><td>192.168.1.0/24</td><td>10.0.3.1</td><td><b style="color:#10b981;">3</b></td></tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            ` : ''}
+
+            ${currentTab === 'infinity' ? `
+                <!-- Tab 3: Count-to-Infinity & Split Horizon Simulator -->
+                <div class="theory-card" style="margin:0; display:flex; flex-direction:column; gap:16px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap;">
+                        <h3 style="color:var(--primary); margin:0;">Count-to-Infinity Problem & Split Horizon Visualizer ♾️</h3>
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <input type="checkbox" id="chkSplitHorizon" ${isSplitHorizonOn ? 'checked' : ''} style="width:18px; height:18px; cursor:pointer;">
+                            <label for="chkSplitHorizon" style="font-size:13px; font-weight:800; color:var(--text-main); cursor:pointer;">
+                                Split Horizon & Poison Reverse Enabled ✅
+                            </label>
+                        </div>
+                    </div>
+
+                    <p style="font-size:13px; color:var(--text-main); margin:0; line-height:1.6;">
+                        ${isSplitHorizonOn ? 
+                            '<b>Split Horizon Active:</b> When a link fails, routers DO NOT send outdated route advertisements back out the same interface. Routing loops are completely prevented!' : 
+                            '<b>Split Horizon Disabled:</b> Routers accept stale metric updates from neighbors, continuously incrementing hop count (2 ➔ 3 ➔ 4 ... ➔ 16) until reaching Infinity!'
+                        }
+                    </p>
+
+                    <div style="display:flex; justify-content:center; gap:12px;">
+                        <button id="btnRunInfinity" class="btn-sim danger" style="font-weight:700;">Simulate Link Breakage & Observe Metric Updates ⚡</button>
+                    </div>
+
+                    <div id="infinityLogBox" style="padding:16px; background:#0b0f19; border:1px solid var(--border); border-radius:10px; font-family:'JetBrains Mono', monospace; font-size:12px; color:#10b981; min-height:80px; line-height:1.8;">
+                        💡 Click <b>Simulate Link Breakage</b> to see how Split Horizon stops Count-to-Infinity loops.
+                    </div>
+                </div>
+            ` : ''}
+
+            ${currentTab === 'cli' ? `
+                <!-- Tab 4: Cisco Router CLI Terminal -->
+                <div class="theory-card" style="margin:0; display:flex; flex-direction:column; gap:16px;">
+                    <h3 style="color:var(--primary); margin:0;">Cisco ISR 2911 Router IOS CLI Terminal 💻</h3>
+
+                    <div style="display:flex; gap:10px; align-items:center;">
+                        <span style="font-family:'JetBrains Mono', monospace; font-size:13px; font-weight:800; color:var(--primary);">Router(config-router)#</span>
+                        <input type="text" id="txtRipCliCmd" value="show ip route" class="sim-select" style="flex:1; font-family:'JetBrains Mono', monospace; font-size:13px; padding:8px;">
+                        <button id="btnExecRipCli" class="btn-sim primary" style="font-weight:700;">Execute Command ↵</button>
+                    </div>
+
+                    <div id="ripCliConsole" style="padding:16px; background:#0b0f19; border:1px solid var(--border); border-radius:10px; font-family:'JetBrains Mono', monospace; font-size:12px; color:#10b981; min-height:160px; max-height:260px; overflow-y:auto; line-height:1.8;">
+                        Cisco IOS Software, C2900 Software (C2900-UNIVERSALK9-M), Version 15.1(4)M4<br>
+                        Type 'show ip route', 'router rip', 'version 2', or 'show ip protocols'...
+                    </div>
+                </div>
+            ` : ''}
+
+            ${currentTab === 'timers' ? `
+                <!-- Tab 5: RIP Timers Inspector -->
+                <div class="theory-card" style="margin:0; display:flex; flex-direction:column; gap:16px;">
+                    <h3 style="color:var(--primary); margin:0;">RIP Convergence Timers Inspector ⏱️</h3>
+
+                    <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:12px;">
+                        <div style="padding:16px; background:var(--bg-page); border:2px solid #3b82f6; border-radius:10px; text-align:center;">
+                            <div style="font-size:24px;">⏱️</div>
+                            <div style="font-size:14px; font-weight:800; color:#3b82f6;">Update Timer</div>
+                            <div style="font-size:20px; font-weight:800; color:var(--text-main); margin:6px 0;">30 Sec</div>
+                            <div style="font-size:10px; color:var(--text-muted);">Periodic routing table update interval</div>
+                        </div>
+
+                        <div style="padding:16px; background:var(--bg-page); border:2px solid #f59e0b; border-radius:10px; text-align:center;">
+                            <div style="font-size:24px;">⚠️</div>
+                            <div style="font-size:14px; font-weight:800; color:#f59e0b;">Invalid Timer</div>
+                            <div style="font-size:20px; font-weight:800; color:var(--text-main); margin:6px 0;">180 Sec</div>
+                            <div style="font-size:10px; color:var(--text-muted);">Time before marking unrefreshed route as Hop 16</div>
+                        </div>
+
+                        <div style="padding:16px; background:var(--bg-page); border:2px solid #ef4444; border-radius:10px; text-align:center;">
+                            <div style="font-size:24px;">🛑</div>
+                            <div style="font-size:14px; font-weight:800; color:#ef4444;">Hold-down Timer</div>
+                            <div style="font-size:20px; font-weight:800; color:var(--text-main); margin:6px 0;">180 Sec</div>
+                            <div style="font-size:10px; color:var(--text-muted);">Ignores bad metric updates while stabilizing</div>
+                        </div>
+
+                        <div style="padding:16px; background:var(--bg-page); border:2px solid #a855f7; border-radius:10px; text-align:center;">
+                            <div style="font-size:24px;">🗑️</div>
+                            <div style="font-size:14px; font-weight:800; color:#a855f7;">Flush Timer</div>
+                            <div style="font-size:20px; font-weight:800; color:var(--text-main); margin:6px 0;">240 Sec</div>
+                            <div style="font-size:10px; color:var(--text-muted);">Removes invalid route permanently from routing table</div>
+                        </div>
+                    </div>
+                </div>
+            ` : ''}
+        </div>
+        `;
+
+        // Tab Switch Handlers
+        document.getElementById('tabHopSim').onclick = () => { currentTab = 'hop_sim'; render(); };
+        document.getElementById('tabTables').onclick = () => { currentTab = 'tables'; render(); };
+        document.getElementById('tabInfinity').onclick = () => { currentTab = 'infinity'; render(); };
+        document.getElementById('tabCli').onclick = () => { currentTab = 'cli'; render(); };
+        document.getElementById('tabTimers').onclick = () => { currentTab = 'timers'; render(); };
+
+        // Helper for Canvas Topology Drawing
+        const drawRipTopology = (ctx, canvas) => {
+            const container = document.getElementById('ripCanvasContainer');
+            if (!container || !canvas) return;
+
+            const cR = container.getBoundingClientRect();
+            canvas.width = cR.width;
+            canvas.height = cR.height;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const p1 = getRelativePos('ripCanvasContainer', 'card-pc1');
+            const r1 = getRelativePos('ripCanvasContainer', 'card-r1');
+            const r2 = getRelativePos('ripCanvasContainer', 'card-r2');
+            const r3 = getRelativePos('ripCanvasContainer', 'card-r3');
+            const r4 = getRelativePos('ripCanvasContainer', 'card-r4');
+            const p2 = getRelativePos('ripCanvasContainer', 'card-pc2');
+
+            // Draw link lines
+            const drawLink = (a, b, color, dashed = false) => {
+                ctx.beginPath();
+                ctx.moveTo(a.x, a.y);
+                ctx.lineTo(b.x, b.y);
+                ctx.lineWidth = 3;
+                ctx.strokeStyle = color;
+                if (dashed) ctx.setLineDash([6, 4]);
+                ctx.stroke();
+                ctx.setLineDash([]);
+            };
+
+            drawLink(p1, r1, '#3b82f6', true);
+            drawLink(r1, r2, '#38bdf8');
+            drawLink(r2, r3, isR2R3LinkUp ? '#38bdf8' : '#ef4444', !isR2R3LinkUp);
+            drawLink(r3, r4, '#38bdf8');
+            drawLink(r4, p2, '#10b981', true);
+        };
+
+        // Tab 1 Handlers
+        if (currentTab === 'hop_sim') {
+            setTimeout(() => {
+                const canvas = document.getElementById('ripPacketCanvas');
+                if (canvas) drawRipTopology(canvas.getContext('2d'), canvas);
+            }, 60);
+
+            document.getElementById('btnToggleLink').onclick = () => {
+                isR2R3LinkUp = !isR2R3LinkUp;
+                render();
+            };
+
+            document.getElementById('btnSendRipPacket').onclick = () => {
+                const canvas = document.getElementById('ripPacketCanvas');
+                const container = document.getElementById('ripCanvasContainer');
+                if (!canvas || !container || isPacketAnimating) return;
+                const ctx = canvas.getContext('2d');
+                const out = document.getElementById('ripPacketLogBox');
+
+                if (!isR2R3LinkUp) {
+                    out.innerHTML = `<span style="color:#ef4444; font-weight:800;">🔴 ROUTING ERROR: DESTINATION HOST UNREACHABLE!</span><br>Link between Router R2 and R3 is BROKEN. RIP route metric set to 16 (Infinity). Packet dropped at Router R2!`;
+                    return;
+                }
+
+                isPacketAnimating = true;
+                out.innerHTML = `[1] PC1 (192.168.1.10) sends IP packet to Gateway Router R1 (192.168.1.1)...<br>`;
+
+                const p1 = getRelativePos('ripCanvasContainer', 'card-pc1');
+                const r1 = getRelativePos('ripCanvasContainer', 'card-r1');
+                const r2 = getRelativePos('ripCanvasContainer', 'card-r2');
+                const r3 = getRelativePos('ripCanvasContainer', 'card-r3');
+                const r4 = getRelativePos('ripCanvasContainer', 'card-r4');
+                const p2 = getRelativePos('ripCanvasContainer', 'card-pc2');
+
+                const waypoints = [p1, r1, r2, r3, r4, p2];
+                let currentWay = 0;
+                let startTime = performance.now();
+                const legDur = 400;
+
+                const animate = (time) => {
+                    const elapsed = time - startTime;
+                    drawRipTopology(ctx, canvas);
+
+                    if (currentWay < waypoints.length - 1) {
+                        const prog = Math.min(elapsed / legDur, 1);
+                        const startNode = waypoints[currentWay];
+                        const endNode = waypoints[currentWay + 1];
+
+                        const curX = startNode.x + (endNode.x - startNode.x) * prog;
+                        const curY = startNode.y + (endNode.y - startNode.y) * prog;
+
+                        ctx.fillStyle = '#10b981';
+                        ctx.shadowColor = '#10b981';
+                        ctx.shadowBlur = 15;
+                        ctx.beginPath();
+                        ctx.arc(curX, curY, 10, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.shadowBlur = 0;
+
+                        ctx.fillStyle = '#ffffff';
+                        ctx.font = 'bold 9px monospace';
+                        ctx.textAlign = 'center';
+                        ctx.fillText(`HOP ${currentWay}`, curX, curY - 14);
+
+                        if (prog >= 1) {
+                            currentWay++;
+                            startTime = performance.now();
+                        }
+                        aniReqId = requestAnimationFrame(animate);
+                    } else {
+                        isPacketAnimating = false;
+                        drawRipTopology(ctx, canvas);
+                        out.innerHTML = `
+                            [1] PC1 ➔ Router R1 (Direct - Hop 0)<br>
+                            [2] Router R1 ➔ Router R2 (WAN 10.0.1.0/30 - Hop 1)<br>
+                            [3] Router R2 ➔ Router R3 (WAN 10.0.2.0/30 - Hop 2)<br>
+                            [4] Router R3 ➔ Router R4 (WAN 10.0.3.0/30 - Hop 3)<br>
+                            <span style="color:#10b981; font-weight:bold;">[5] 🟢 SUCCESS: Packet delivered to PC2 (192.168.4.10) with Total Metric = 3 Hops! (AD 120)</span>
+                        `;
+                    }
+                };
+
+                aniReqId = requestAnimationFrame(animate);
+            };
+        }
+
+        // Tab 3 Handlers
+        if (currentTab === 'infinity') {
+            document.getElementById('chkSplitHorizon').onchange = (e) => {
+                isSplitHorizonOn = e.target.checked;
+                render();
+            };
+
+            document.getElementById('btnRunInfinity').onclick = () => {
+                const out = document.getElementById('infinityLogBox');
+                if (isSplitHorizonOn) {
+                    out.innerHTML = `
+                        [1] Link R2 ⇹ R3 FAILS! R2 detects link down.<br>
+                        [2] <b>Poison Reverse Triggered:</b> R2 advertises 192.168.4.0/24 with Hop Metric = 16 (Unreachable) to R1.<br>
+                        [3] <b>Split Horizon Active:</b> R1 DOES NOT send stale route back to R2.<br>
+                        <span style="color:#10b981; font-weight:bold;">[4] SUCCESS: Routing loop prevented instantly! Route purged after 240s flush timer.</span>
+                    `;
+                } else {
+                    out.innerHTML = `[1] Link R2 ⇹ R3 FAILS! Split Horizon is OFF...<br>`;
+                    let hop = 2;
+                    const interval = setInterval(() => {
+                        hop++;
+                        if (hop <= 16) {
+                            out.innerHTML += `<span style="color:#ef4444;">[COUNT TO INFINITY] R1 & R2 exchanging stale metric: Hop Count = ${hop}</span><br>`;
+                        } else {
+                            clearInterval(interval);
+                            out.innerHTML += `<span style="color:#f59e0b; font-weight:bold;">[MAX METRIC REACHED] Hop Count reached 16 (Infinity). Route finally marked Unreachable!</span>`;
+                        }
+                    }, 300);
+                }
+            };
+        }
+
+        // Tab 4 Handlers (CLI)
+        if (currentTab === 'cli') {
+            document.getElementById('btnExecRipCli').onclick = () => {
+                const cmd = document.getElementById('txtRipCliCmd').value.trim();
+                const log = document.getElementById('ripCliConsole');
+
+                if (cmd === 'show ip route') {
+                    log.innerHTML += `
+                        <br><br>&gt; ${cmd}<br>
+                        Codes: L - local, C - connected, R - RIP, O - OSPF, D - EIGRP<br><br>
+                        C    192.168.1.0/24 is directly connected, GigabitEthernet0/0<br>
+                        C    10.0.1.0/30 is directly connected, Serial0/0/0<br>
+                        R    10.0.2.0/30 [120/1] via 10.0.1.2, 00:00:12, Serial0/0/0<br>
+                        R    10.0.3.0/30 [120/2] via 10.0.1.2, 00:00:12, Serial0/0/0<br>
+                        R    192.168.4.0/24 [120/3] via 10.0.1.2, 00:00:12, Serial0/0/0
+                    `;
+                } else if (cmd === 'show ip protocols') {
+                    log.innerHTML += `
+                        <br><br>&gt; ${cmd}<br>
+                        Routing Protocol is "rip"<br>
+                        Sending updates every 30 seconds, next due in 14 seconds<br>
+                        Invalid after 180 seconds, hold down 180, flushed after 240<br>
+                        Automatic network summarization is not in effect<br>
+                        Routing for Networks:<br>
+                        10.0.0.0<br>
+                        192.168.1.0
+                    `;
+                } else {
+                    log.innerHTML += `<br><br>&gt; ${cmd}<br>% Command executed successfully.`;
+                }
+                log.scrollTop = log.scrollHeight;
+            };
+        }
+    };
+
+    render();
+};
+
+
         const initDnsSim = (container) => {
             container.innerHTML = `
             <div class="sim-toolbar">
@@ -17097,6 +17575,7 @@ const initVlanSim = (container) => {
             `;
                 return;
             }
+            if (id === 'routing_rip' || id === 'rip_sim' || (data && (data.simType === 'rip_sim' || data.simType === 'routing_rip'))) { initRipSim(container); return; }
             if (id === 'vlan_sim' || id === 'vlan' || (data && (data.simType === 'vlan_sim' || data.simType === 'vlan_trunking'))) { initVlanSim(container); return; }
             if (id === 'subnetting' || (data && (data.simType === 'subnetting' || data.simType === 'subnet_calc'))) { initSubnettingSim(container); return; }
             if (id === 'lan_cables' || (data && (data.simType === 'lan_cables' || data.simType === 'cable_crimp'))) { initLanCablesSim(container); return; }
