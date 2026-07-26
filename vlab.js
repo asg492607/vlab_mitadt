@@ -14586,136 +14586,35 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
 
-        if (data.simType === 'dfa_sim') {
-            initDfaSim(container);
-            return;
-        }
+        // Specialized Interactive Simulation Dispatchers
+        if (data.simType === 'dfa_sim')            { initDfaSim(container);            return; }
+        if (data.simType === 'nfa_to_dfa')         { initNfaToDfaSim(container);       return; }
+        if (data.simType === 'regex_thompson')     { initRegexThompsonSim(container);   return; }
+        if (data.simType === 'cfg_parser')         { initCfgParserSim(container);       return; }
+        if (data.simType === 'pda_stack')          { initPdaStackSim(container);        return; }
+        if (data.simType === 'turing_machine')     { initTuringMachineSim(container);   return; }
+        if (data.simType === 'dfa_minimization')   { initDfaMinimizationSim(container); return; }
+        if (data.simType === 'assembly_sim')       { initAssemblySim(container, id);   return; }
+        if (data.simType === 'programming')        { initProgrammingLab(container, id);return; }
+        if (data.simType === 'dbms_sql')           { initSqlLab(container, id);        return; }
+        if (data.simType === 'dbms_transactions')  { initTransactionsLab(container, id); return; }
+        if (data.simType === 'dbms_indexing')      { initIndexingLab(container, id);    return; }
+        if (data.simType === 'cpu_scheduling')     { initCpuSchedulingSim(container);   return; }
+        if (data.simType === 'process_sync')       { initProcessSyncSim(container);     return; }
+        if (data.simType === 'bankers')            { initBankersSim(container);          return; }
+        if (data.simType === 'page_replacement')   { initPageReplacementSim(container); return; }
+        if (data.simType === 'disk_scheduling')    { initDiskSchedulingSim(container);  return; }
+        if (data.simType === 'subnet_calc')        { initSubnetCalc(container);        return; }
+        if (data.simType === 'ip_sorter')          { initIpSorter(container);          return; }
+        if (data.simType === 'cmd_challenge' || data.simType === 'cli') { initCmdChallenge(container); return; }
+        if (data.simType === 'media_study')        { initMediaStudy(container);        return; }
+        if (data.simType === 'vlan_sim')           { initVlanSim(container);           return; }
+        if (data.simType === 'dns')                { initDnsSim(container);            return; }
+        if (data.simType === 'dv_sim' || data.simType === 'ls_sim') { initRoutingSim(container); return; }
+        if (data.simType === 'gbn' || data.simType === 'udp')       { initTransportSim(container); return; }
+        if (data.simType === 'pkt_tracer')         { initPktTracerSim(container);       return; }
 
-        if (data.simType === 'nfa_to_dfa') {
-            initNfaToDfaSim(container);
-            return;
-        }
-
-        if (data.simType === 'regex_thompson') {
-            initRegexThompsonSim(container);
-            return;
-        }
-
-        if (data.simType === 'cfg_parser') {
-            initCfgParserSim(container);
-            return;
-        }
-
-        if (data.simType === 'pda_stack') {
-            initPdaStackSim(container);
-            return;
-        }
-
-        if (data.simType === 'turing_machine') {
-            initTuringMachineSim(container);
-            return;
-        }
-
-        if (data.simType === 'dfa_minimization') {
-            initDfaMinimizationSim(container);
-            return;
-        }
-
-        if (data.simType === 'assembly_sim') {
-            initAssemblySim(container, id);
-            return;
-        }
-
-        if (data.simType === 'programming') {
-            initProgrammingLab(container, id);
-            return;
-        }
-
-        if (data.simType === 'dbms_sql') {
-            initSqlLab(container, id);
-            return;
-        }
-
-        if (data.simType === 'dbms_transactions') {
-            initTransactionsLab(container, id);
-            return;
-        }
-
-        if (data.simType === 'dbms_indexing') {
-            initIndexingLab(container, id);
-            return;
-        }
-
-        if (data.simType === 'cpu_scheduling') {
-            initCpuSchedulingSim(container);
-            return;
-        }
-
-        if (data.simType === 'process_sync') {
-            initProcessSyncSim(container);
-            return;
-        }
-
-        if (data.simType === 'bankers') {
-            initBankersSim(container);
-            return;
-        }
-
-        if (data.simType === 'page_replacement') {
-            initPageReplacementSim(container);
-            return;
-        }
-
-        if (data.simType === 'disk_scheduling') {
-            initDiskSchedulingSim(container);
-            return;
-        }
-
-        if (data.simType === 'subnet_calc') {
-            initSubnetCalc(container);
-            return;
-        }
-
-        if (data.simType === 'ip_sorter') {
-            initIpSorter(container);
-            return;
-        }
-
-        if (data.simType === 'cmd_challenge') {
-            initCmdChallenge(container);
-            return;
-        }
-
-        if (data.simType === 'media_study') {
-            initMediaStudy(container);
-            return;
-        }
-
-        if (data.simType === 'vlan_sim') {
-            initVlanSim(container);
-            return;
-        }
-
-        if (data.simType === 'dns') {
-            initDnsSim(container);
-            return;
-        }
-
-        if (data.simType === 'dv_sim' || data.simType === 'ls_sim') {
-            initRoutingSim(container);
-            return;
-        }
-
-        if (data.simType === 'gbn' || data.simType === 'udp') {
-            initTransportSim(container);
-            return;
-        }
-
-        if (data.simType === 'collision' || data.simType === 'csma_ca') {
-            initCsmaSim(container);
-            return;
-        }
-
+        // AI Simulations
         if (data.simType === 'ai_search')      { initAiSearchSim(container);     return; }
         if (data.simType === 'ai_heuristic')   { initAiHeuristicSim(container);  return; }
         if (data.simType === 'ai_csp')         { initAiCspSim(container);        return; }
@@ -14729,7 +14628,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (data.simType === 'ai_genetic')     { initAiGeneticSim(container);    return; }
         if (data.simType === 'ai_expert')      { initAiExpertSim(container);     return; }
 
-        // ── Cloud Computing Simulations ──────────────────────────────────────
+        // Cloud Computing Simulations
         if (data.simType === 'cloud_virtualization') { initCloudVirtualizationSim(container); return; }
         if (data.simType === 'cloud_docker')         { initCloudDockerSim(container);         return; }
         if (data.simType === 'cloud_loadbalancer')   { initCloudLoadBalancerSim(container);   return; }
@@ -14745,10 +14644,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (data.simType === 'cloud_monitoring')     { initCloudSlaSim(container);            return; }
         if (data.simType === 'cloud_intro')          { initCloudVirtualizationSim(container); return; }
         if (data.simType === 'cloud_devops')         { initCloudDockerSim(container);         return; }
-        if (data.simType === 'pkt_tracer')           { initPktTracerSim(container);           return; }
-        if (data.simType === 'cli')                  { initCmdChallenge(container);           return; }
 
-        // ── Cybersecurity Simulations ────────────────────────────────────────
+        // Cybersecurity Simulations
         if (data.simType === 'cyber_caesar')       { initCyberCaesarSim(container);      return; }
         if (data.simType === 'cyber_vigenere')     { initCyberVigenereSim(container);    return; }
         if (data.simType === 'cyber_rsa')          { initCyberRsaSim(container);         return; }
@@ -14762,6 +14659,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (data.simType === 'cyber_steganography') { initCyberSteganographySim(container); return; }
         if (data.simType === 'cyber_network_scan') { initCyberNetworkScanSim(container); return; }
 
+        // Fallback: Protocol Canvas Simulator (CSMA/CD / CSMA/CA)
         if (window.currentSim) {
             window.currentSim.destroy();
             window.currentSim = null;
