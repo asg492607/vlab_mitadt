@@ -8198,600 +8198,820 @@ window.VLAB_DATA = {
         "simType": "eigrp_sim"
     },
     "udp": {
-        "title": "UDP & TCP Transport Protocols",
-        "aim": "To analyze 3-way handshake (SYN, SYN-ACK, ACK), TCP windowing, sequence numbers, and UDP connectionless header frames.",
+        "title": "Practical 12: UDP & TCP Transport Protocols",
+        "aim": "To examine end-to-end transport layer communication, analyze process-to-process port addressing, compare connection-oriented TCP (3-way handshake, flow control, sliding window, retransmission) vs connectionless UDP (best-effort, low overhead), and select appropriate transport protocols for network applications.",
         "intro": {
-            "summary": "The Transport Layer (OSI Layer 4) manages end-to-end communication sessions using TCP (reliable) and UDP (connectionless).",
-            "importance": "Understanding TCP handshakes, windowing, and UDP port multiplexing is key to optimizing web and real-time streaming traffic.",
+            "summary": "The Transport Layer (Layer 4) manages process-to-process communication between host applications. TCP provides connection-oriented, reliable, ordered delivery with error recovery and sliding-window flow control. UDP provides connectionless, lightweight, low-latency transmission for real-time applications like DNS, video streaming, and VoIP.",
+            "importance": "Understanding Layer 4 protocol selection is fundamental to network engineering. Students learn why web browsing (HTTP/HTTPS), email (SMTP), and file transfer (FTP) rely on TCP reliability, whereas VoIP, live streaming, and gaming prioritize UDP speed.",
             "applications": [
-                "HTTP/HTTPS Web Traffic (TCP)",
-                "VoIP & Video Streaming (UDP)",
-                "DNS Lookups (UDP/53)"
+                "Web Browsing & E-Commerce (TCP 80/443)",
+                "Real-Time Video Conferencing & Streaming (UDP)",
+                "Domain Name Resolution (DNS UDP 53)",
+                "Secure Administrative Shell Access (SSH TCP 22)"
             ],
-            "outcome": "Students will analyze TCP 3-Way Handshake packets and compare TCP vs UDP frame headers in a Wireshark-style analyzer."
+            "outcome": "Students will be able to visualize the TCP 3-Way Handshake, explain sliding window flow control, analyze port numbers and socket pairs, and diagnose packet loss retransmissions."
         },
         "prerequisites": [
-            "Practical 2: Network Commands & Utilities"
-        ],
-        "outcomes": [
-            "Capture and decode TCP SYN, SYN-ACK, and ACK packets.",
-            "Compare 20-byte TCP header vs 8-byte UDP header.",
-            "Understand Sequence/Acknowledgement numbers and Flow Control."
-        ],
-        "theory": {
-            "intro": "TCP is a reliable, connection-oriented Transport Layer protocol providing flow control and error recovery. UDP is a fast, connectionless protocol with 8-byte minimal header size.",
-            "cards": [
-                {
-                    "title": "3-Way Handshake",
-                    "content": "Establishes reliable virtual circuit: 1. SYN -> 2. SYN-ACK -> 3. ACK."
-                },
-                {
-                    "title": "TCP Windowing",
-                    "content": "Controls how many bytes can be transmitted before receiving an acknowledgement."
-                }
-            ],
-            "formulas": [
-                "TCP Header Size = 20 Bytes Minimum",
-                "UDP Header Size = 8 Bytes Fixed"
-            ],
-            "standards": [
-                "RFC 793 - Transmission Control Protocol (TCP)",
-                "RFC 768 - User Datagram Protocol (UDP)"
-            ]
-        },
-        "tools": [
-            {
-                "name": "Wireshark Packet Inspector",
-                "layer": "Layer 4 Protocol Analyzer",
-                "ports": "Virtual Sniffer",
-                "usage": "Frame header decoding & TCP stream analysis",
-                "statusLED": "Packet Capture Active"
-            }
-        ],
-        "procedure": [
-            "Launch Wireshark / Transport Packet Analyzer in simulator.",
-            "Initiate HTTP TCP session from PC1 to Server1.",
-            "Inspect SYN, SYN-ACK, and ACK frame headers.",
-            "Compare TCP 20-byte header with UDP 8-byte header structure."
-        ],
-        "troubleshooting": {
-            "problem": "TCP connection establishment hangs on SYN-SENT state.",
-            "hints": [
-                "Check if firewall is blocking TCP Port 80/443 on target server."
-            ],
-            "fix": "Allow incoming TCP port 80 traffic on server firewall."
-        },
-        "viva": [
-            {
-                "q": "What are the flags set in the second step of a TCP 3-way handshake?",
-                "a": "SYN flag = 1 and ACK flag = 1 (SYN-ACK)."
-            },
-            {
-                "q": "Why is UDP preferred over TCP for Voice over IP (VoIP)?",
-                "a": "UDP has low overhead (8-byte header) and no retransmission delays, prioritizing real-time latency over packet loss recovery."
-            }
-        ],
-        "assignment": "Capture a TCP handshake and calculate Sequence Number progression across 3 packet exchanges.",
-        "references": [
-            {
-                "title": "RFC 793 - TCP Specification",
-                "link": "https://datatracker.ietf.org/doc/html/rfc793"
-            }
-        ],
-        "simType": "packet_analyzer",
-        "evaluations": [
-            {
-                "type": "pre",
-                "question": "Which Transport Layer protocol provides reliable, connection-oriented data delivery with error checking and flow control?",
-                "options": [
-                    "UDP",
-                    "TCP",
-                    "IP",
-                    "ICMP"
-                ],
-                "answer": "TCP",
-                "explanation": "TCP (Transmission Control Protocol) is connection-oriented and reliable."
-            },
-            {
-                "type": "pre",
-                "question": "Which Transport Layer protocol is connectionless, lightweight, and used for real-time video streaming and DNS?",
-                "options": [
-                    "TCP",
-                    "UDP",
-                    "FTP",
-                    "HTTP"
-                ],
-                "answer": "UDP",
-                "explanation": "UDP (User Datagram Protocol) is connectionless with low overhead."
-            },
-            {
-                "type": "pre",
-                "question": "What mechanism does TCP use to establish a connection between client and server?",
-                "options": [
-                    "3-Way Handshake (SYN, SYN-ACK, ACK)",
-                    "2-Way Ping",
-                    "4-Way Teardown",
-                    "DHCP Lease"
-                ],
-                "answer": "3-Way Handshake (SYN, SYN-ACK, ACK)",
-                "explanation": "TCP 3-way handshake exchanges SYN, SYN-ACK, and ACK flags."
-            },
-            {
-                "type": "pre",
-                "question": "What is the header size of a UDP packet compared to TCP?",
-                "options": [
-                    "UDP header is 8 bytes; TCP header is 20 bytes minimum",
-                    "UDP header is 20 bytes; TCP header is 8 bytes",
-                    "Both are 64 bytes",
-                    "UDP has no header"
-                ],
-                "answer": "UDP header is 8 bytes; TCP header is 20 bytes minimum",
-                "explanation": "UDP header is only 8 bytes (Source Port, Dest Port, Length, Checksum)."
-            },
-            {
-                "type": "pre",
-                "question": "What is the port number for HTTP web traffic?",
-                "options": [
-                    "21",
-                    "22",
-                    "80",
-                    "443"
-                ],
-                "answer": "80",
-                "explanation": "HTTP uses TCP port 80 (HTTPS uses TCP port 443)."
-            },
-            {
-                "type": "post",
-                "question": "What TCP flag is sent to initiate connection termination?",
-                "options": [
-                    "SYN",
-                    "FIN",
-                    "RST",
-                    "PSH"
-                ],
-                "answer": "FIN",
-                "explanation": "FIN (Finish) flag initiates graceful connection termination."
-            },
-            {
-                "type": "post",
-                "question": "What TCP flow control mechanism regulates how much unacknowledged data a sender can transmit?",
-                "options": [
-                    "Sliding Window Mechanism",
-                    "Slow Start",
-                    "Congestion Avoidance",
-                    "Checksumming"
-                ],
-                "answer": "Sliding Window Mechanism",
-                "explanation": "Sliding Window adjusts data volume sent before requiring ACKs."
-            },
-            {
-                "type": "post",
-                "question": "Which application layer protocol uses UDP port 53 for fast query resolution?",
-                "options": [
-                    "HTTP",
-                    "DNS",
-                    "SSH",
-                    "FTP"
-                ],
-                "answer": "DNS",
-                "explanation": "DNS uses UDP port 53 for fast domain name queries."
-            },
-            {
-                "type": "post",
-                "question": "What field in the TCP header provides ordered delivery and reassembly of segments?",
-                "options": [
-                    "Sequence Number",
-                    "Port Number",
-                    "Window Size",
-                    "Checksum"
-                ],
-                "answer": "Sequence Number",
-                "explanation": "Sequence numbers allow receiver to reorder out-of-order segments."
-            },
-            {
-                "type": "post",
-                "question": "What happens if a UDP packet is corrupted during transmission?",
-                "options": [
-                    "Sender retransmits automatically",
-                    "UDP drops the packet without retransmission",
-                    "Network halts",
-                    "Packet converted to TCP"
-                ],
-                "answer": "UDP drops the packet without retransmission",
-                "explanation": "UDP checksum detects errors, but dropped packets are not retransmitted by UDP."
-            },
-            {
-                "type": "post",
-                "question": "Which application protocol uses TCP port 22 for secure remote administration?",
-                "options": [
-                    "Telnet (Port 23)",
-                    "SSH (Port 22)",
-                    "FTP (Port 21)",
-                    "SMTP (Port 25)"
-                ],
-                "answer": "SSH (Port 22)",
-                "explanation": "SSH uses TCP port 22 for encrypted shell access."
-            },
-            {
-                "type": "post",
-                "question": "What TCP flag forces immediate delivery of buffered data without waiting for buffer to fill?",
-                "options": [
-                    "URG",
-                    "PSH",
-                    "SYN",
-                    "ACK"
-                ],
-                "answer": "PSH",
-                "explanation": "PSH (Push) flag forces immediate push of data to application layer."
-            },
-            {
-                "type": "post",
-                "question": "What is the TCP 4-Way Teardown sequence for closing a connection?",
-                "options": [
-                    "FIN ➔ ACK ➔ FIN ➔ ACK",
-                    "SYN ➔ SYN-ACK ➔ ACK",
-                    "RST ➔ RST-ACK",
-                    "DISCONNECT"
-                ],
-                "answer": "FIN ➔ ACK ➔ FIN ➔ ACK",
-                "explanation": "TCP connection close exchanges FIN, ACK, FIN, ACK."
-            },
-            {
-                "type": "post",
-                "question": "What well-known port range is assigned by IANA for standard services (e.g. HTTP, SSH, DNS)?",
-                "options": [
-                    "0 to 1023",
-                    "1024 to 49151",
-                    "49152 to 65535",
-                    "1 to 100"
-                ],
-                "answer": "0 to 1023",
-                "explanation": "Ports 0-1023 are Well-Known System Ports."
-            },
-            {
-                "type": "post",
-                "question": "Why is UDP preferred over TCP for Voice over IP (VoIP) and online gaming?",
-                "options": [
-                    "VoIP requires 100% data accuracy",
-                    "Low latency is critical and missing audio packets are preferable to delayed retransmissions",
-                    "UDP encrypts audio",
-                    "UDP requires less power"
-                ],
-                "answer": "Low latency is critical and missing audio packets are preferable to delayed retransmissions",
-                "explanation": "Real-time audio demands low latency; retransmitting old audio packets causes speech distortion."
-            }
-        ]
-    },
-    "tcp": {
-        "title": "UDP & TCP Transport Protocols",
-        "aim": "To analyze 3-way handshake (SYN, SYN-ACK, ACK), TCP windowing, sequence numbers, and UDP connectionless header frames.",
-        "intro": {
-            "summary": "The Transport Layer (OSI Layer 4) manages end-to-end communication sessions using TCP (reliable) and UDP (connectionless).",
-            "importance": "Understanding TCP handshakes, windowing, and UDP port multiplexing is key to optimizing web and real-time streaming traffic.",
-            "applications": [
-                "HTTP/HTTPS Web Traffic (TCP)",
-                "VoIP & Video Streaming (UDP)",
-                "DNS Lookups (UDP/53)"
-            ],
-            "outcome": "Students will analyze TCP 3-Way Handshake packets and compare TCP vs UDP frame headers in a Wireshark-style analyzer."
-        },
-        "prerequisites": [
-            "Practical 2: Network Commands & Utilities"
-        ],
-        "outcomes": [
-            "Capture and decode TCP SYN, SYN-ACK, and ACK packets.",
-            "Compare 20-byte TCP header vs 8-byte UDP header.",
-            "Understand Sequence/Acknowledgement numbers and Flow Control."
-        ],
-        "theory": {
-            "intro": "TCP is a reliable, connection-oriented Transport Layer protocol providing flow control and error recovery. UDP is a fast, connectionless protocol with 8-byte minimal header size.",
-            "cards": [
-                {
-                    "title": "3-Way Handshake",
-                    "content": "Establishes reliable virtual circuit: 1. SYN -> 2. SYN-ACK -> 3. ACK."
-                },
-                {
-                    "title": "TCP Windowing",
-                    "content": "Controls how many bytes can be transmitted before receiving an acknowledgement."
-                }
-            ],
-            "formulas": [
-                "TCP Header Size = 20 Bytes Minimum",
-                "UDP Header Size = 8 Bytes Fixed"
-            ],
-            "standards": [
-                "RFC 793 - Transmission Control Protocol (TCP)",
-                "RFC 768 - User Datagram Protocol (UDP)"
-            ]
-        },
-        "tools": [
-            {
-                "name": "Wireshark Packet Inspector",
-                "layer": "Layer 4 Protocol Analyzer",
-                "ports": "Virtual Sniffer",
-                "usage": "Frame header decoding & TCP stream analysis",
-                "statusLED": "Packet Capture Active"
-            }
-        ],
-        "procedure": [
-            "Launch Wireshark / Transport Packet Analyzer in simulator.",
-            "Initiate HTTP TCP session from PC1 to Server1.",
-            "Inspect SYN, SYN-ACK, and ACK frame headers.",
-            "Compare TCP 20-byte header with UDP 8-byte header structure."
-        ],
-        "troubleshooting": {
-            "problem": "TCP connection establishment hangs on SYN-SENT state.",
-            "hints": [
-                "Check if firewall is blocking TCP Port 80/443 on target server."
-            ],
-            "fix": "Allow incoming TCP port 80 traffic on server firewall."
-        },
-        "viva": [
-            {
-                "q": "What are the flags set in the second step of a TCP 3-way handshake?",
-                "a": "SYN flag = 1 and ACK flag = 1 (SYN-ACK)."
-            },
-            {
-                "q": "Why is UDP preferred over TCP for Voice over IP (VoIP)?",
-                "a": "UDP has low overhead (8-byte header) and no retransmission delays, prioritizing real-time latency over packet loss recovery."
-            }
-        ],
-        "assignment": "Capture a TCP handshake and calculate Sequence Number progression across 3 packet exchanges.",
-        "references": [
-            {
-                "title": "RFC 793 - TCP Specification",
-                "link": "https://datatracker.ietf.org/doc/html/rfc793"
-            }
-        ],
-        "simType": "packet_analyzer",
-        "evaluations": [
-            {
-                "type": "pre",
-                "question": "Which Transport Layer protocol provides reliable, connection-oriented data delivery with error checking and flow control?",
-                "options": [
-                    "UDP",
-                    "TCP",
-                    "IP",
-                    "ICMP"
-                ],
-                "answer": "TCP",
-                "explanation": "TCP (Transmission Control Protocol) is connection-oriented and reliable."
-            },
-            {
-                "type": "pre",
-                "question": "Which Transport Layer protocol is connectionless, lightweight, and used for real-time video streaming and DNS?",
-                "options": [
-                    "TCP",
-                    "UDP",
-                    "FTP",
-                    "HTTP"
-                ],
-                "answer": "UDP",
-                "explanation": "UDP (User Datagram Protocol) is connectionless with low overhead."
-            },
-            {
-                "type": "pre",
-                "question": "What mechanism does TCP use to establish a connection between client and server?",
-                "options": [
-                    "3-Way Handshake (SYN, SYN-ACK, ACK)",
-                    "2-Way Ping",
-                    "4-Way Teardown",
-                    "DHCP Lease"
-                ],
-                "answer": "3-Way Handshake (SYN, SYN-ACK, ACK)",
-                "explanation": "TCP 3-way handshake exchanges SYN, SYN-ACK, and ACK flags."
-            },
-            {
-                "type": "pre",
-                "question": "What is the header size of a UDP packet compared to TCP?",
-                "options": [
-                    "UDP header is 8 bytes; TCP header is 20 bytes minimum",
-                    "UDP header is 20 bytes; TCP header is 8 bytes",
-                    "Both are 64 bytes",
-                    "UDP has no header"
-                ],
-                "answer": "UDP header is 8 bytes; TCP header is 20 bytes minimum",
-                "explanation": "UDP header is only 8 bytes (Source Port, Dest Port, Length, Checksum)."
-            },
-            {
-                "type": "pre",
-                "question": "What is the port number for HTTP web traffic?",
-                "options": [
-                    "21",
-                    "22",
-                    "80",
-                    "443"
-                ],
-                "answer": "80",
-                "explanation": "HTTP uses TCP port 80 (HTTPS uses TCP port 443)."
-            },
-            {
-                "type": "post",
-                "question": "What TCP flag is sent to initiate connection termination?",
-                "options": [
-                    "SYN",
-                    "FIN",
-                    "RST",
-                    "PSH"
-                ],
-                "answer": "FIN",
-                "explanation": "FIN (Finish) flag initiates graceful connection termination."
-            },
-            {
-                "type": "post",
-                "question": "What TCP flow control mechanism regulates how much unacknowledged data a sender can transmit?",
-                "options": [
-                    "Sliding Window Mechanism",
-                    "Slow Start",
-                    "Congestion Avoidance",
-                    "Checksumming"
-                ],
-                "answer": "Sliding Window Mechanism",
-                "explanation": "Sliding Window adjusts data volume sent before requiring ACKs."
-            },
-            {
-                "type": "post",
-                "question": "Which application layer protocol uses UDP port 53 for fast query resolution?",
-                "options": [
-                    "HTTP",
-                    "DNS",
-                    "SSH",
-                    "FTP"
-                ],
-                "answer": "DNS",
-                "explanation": "DNS uses UDP port 53 for fast domain name queries."
-            },
-            {
-                "type": "post",
-                "question": "What field in the TCP header provides ordered delivery and reassembly of segments?",
-                "options": [
-                    "Sequence Number",
-                    "Port Number",
-                    "Window Size",
-                    "Checksum"
-                ],
-                "answer": "Sequence Number",
-                "explanation": "Sequence numbers allow receiver to reorder out-of-order segments."
-            },
-            {
-                "type": "post",
-                "question": "What happens if a UDP packet is corrupted during transmission?",
-                "options": [
-                    "Sender retransmits automatically",
-                    "UDP drops the packet without retransmission",
-                    "Network halts",
-                    "Packet converted to TCP"
-                ],
-                "answer": "UDP drops the packet without retransmission",
-                "explanation": "UDP checksum detects errors, but dropped packets are not retransmitted by UDP."
-            },
-            {
-                "type": "post",
-                "question": "Which application protocol uses TCP port 22 for secure remote administration?",
-                "options": [
-                    "Telnet (Port 23)",
-                    "SSH (Port 22)",
-                    "FTP (Port 21)",
-                    "SMTP (Port 25)"
-                ],
-                "answer": "SSH (Port 22)",
-                "explanation": "SSH uses TCP port 22 for encrypted shell access."
-            },
-            {
-                "type": "post",
-                "question": "What TCP flag forces immediate delivery of buffered data without waiting for buffer to fill?",
-                "options": [
-                    "URG",
-                    "PSH",
-                    "SYN",
-                    "ACK"
-                ],
-                "answer": "PSH",
-                "explanation": "PSH (Push) flag forces immediate push of data to application layer."
-            },
-            {
-                "type": "post",
-                "question": "What is the TCP 4-Way Teardown sequence for closing a connection?",
-                "options": [
-                    "FIN ➔ ACK ➔ FIN ➔ ACK",
-                    "SYN ➔ SYN-ACK ➔ ACK",
-                    "RST ➔ RST-ACK",
-                    "DISCONNECT"
-                ],
-                "answer": "FIN ➔ ACK ➔ FIN ➔ ACK",
-                "explanation": "TCP connection close exchanges FIN, ACK, FIN, ACK."
-            },
-            {
-                "type": "post",
-                "question": "What well-known port range is assigned by IANA for standard services (e.g. HTTP, SSH, DNS)?",
-                "options": [
-                    "0 to 1023",
-                    "1024 to 49151",
-                    "49152 to 65535",
-                    "1 to 100"
-                ],
-                "answer": "0 to 1023",
-                "explanation": "Ports 0-1023 are Well-Known System Ports."
-            },
-            {
-                "type": "post",
-                "question": "Why is UDP preferred over TCP for Voice over IP (VoIP) and online gaming?",
-                "options": [
-                    "VoIP requires 100% data accuracy",
-                    "Low latency is critical and missing audio packets are preferable to delayed retransmissions",
-                    "UDP encrypts audio",
-                    "UDP requires less power"
-                ],
-                "answer": "Low latency is critical and missing audio packets are preferable to delayed retransmissions",
-                "explanation": "Real-time audio demands low latency; retransmitting old audio packets causes speech distortion."
-            }
-        ]
-    },
-    "dns": {
-        "title": "DHCP Configuration & IP Pools",
-        "aim": "To configure a Cisco Router as a DHCP Server issuing IP addresses, default gateways, and DNS server IPs to LAN clients.",
-        "intro": {
-            "summary": "DHCP (Dynamic Host Configuration Protocol) automates network IP address assignment, reducing manual configuration errors.",
-            "importance": "DHCP enables scalable device onboarding across enterprise LANs, Wi-Fi networks, and VPN tunnels.",
-            "applications": [
-                "Corporate Wi-Fi Hotspots",
-                "Enterprise Workstation Provisioning",
-                "ISP Broadband Modems"
-            ],
-            "outcome": "Students will configure DHCP pools, exclude static IP ranges, and verify DORA lease processes."
-        },
-        "prerequisites": [
-            "Practical 4: IPv4 Address Classification",
+            "Practical 4: IPv4 & IPv6 Address Classification",
             "Practical 11: Static Routing Configuration"
         ],
         "outcomes": [
-            "Configure DHCP Server pools on Cisco routers.",
-            "Reserve static IP ranges using `ip dhcp excluded-address`.",
-            "Analyze DORA process: Discover, Offer, Request, Acknowledge."
+            "Differentiate between TCP (connection-oriented) and UDP (connectionless).",
+            "Explain the TCP 3-Way Handshake (SYN, SYN-ACK, ACK) and 4-Way Connection Termination (FIN, ACK).",
+            "Describe sequence numbers, acknowledgements, and sliding window flow control.",
+            "Identify well-known port numbers (HTTP 80, HTTPS 443, SSH 22, DNS 53, DHCP 67/68).",
+            "Analyze socket pairs (Source IP:Port ⇹ Destination IP:Port).",
+            "Select appropriate transport protocols based on application performance requirements."
         ],
         "theory": {
-            "intro": "Dynamic Host Configuration Protocol (DHCP) automates IP address assignment using DORA process: Discover (Broadcast), Offer (Unicast), Request (Broadcast), Acknowledge (Unicast).",
-            "cards": [
+            "intro": "Layer 4 ensures process-to-process data delivery between endpoints. TCP provides reliability through connection management and error recovery, while UDP provides fast, unacknowledged datagram transport.",
+            "sections": [
                 {
-                    "title": "DORA Process",
-                    "content": "1. Discover (UDP 67) -> 2. Offer (UDP 68) -> 3. Request -> 4. Acknowledge."
+                    "heading": "1. Introduction to Transport Protocols",
+                    "content": "The Transport Layer bridges application processes with the underlying IP network. It performs segmentation, flow control, and port multiplexing to run multiple network applications simultaneously on a single device."
                 },
                 {
-                    "title": "DHCP Pool Options",
-                    "content": "Defines Default Gateway (Option 3), DNS Servers (Option 6), and Domain Name (Option 15)."
+                    "heading": "2. Learning Objectives",
+                    "content": "Master Layer 4 concepts:\\n• TCP 3-Way Handshake.\\n• Sliding window flow control.\\n• Error detection & ARQ retransmissions.\\n• UDP connectionless datagram delivery.\\n• Port number classification and socket pairing."
+                },
+                {
+                    "heading": "3. What is the Transport Layer?",
+                    "content": "Layer 4 of the OSI model. Responsible for end-to-end communication, segmenting data, managing ports, enforcing reliability, and controlling transmission rates."
+                },
+                {
+                    "heading": "4. Why Transport Protocols are Required",
+                    "content": "An IP address delivers packets to a computer, but multiple applications (browser, email, video) run concurrently. Transport layer port numbers ensure incoming packets reach the correct receiving application process."
+                },
+                {
+                    "heading": "5. What is TCP?",
+                    "content": "Transmission Control Protocol (TCP) is a reliable, connection-oriented protocol (RFC 793). It guarantees ordered packet delivery, error recovery, flow control, and congestion control."
+                },
+                {
+                    "heading": "6. What is UDP?",
+                    "content": "User Datagram Protocol (UDP) is a connectionless, best-effort protocol (RFC 768). It transmits datagrams without handshake overhead, acknowledgements, or retransmissions, minimizing latency."
+                },
+                {
+                    "heading": "7. Detailed TCP vs UDP Comparison",
+                    "content": "• Connection: TCP is Connection-Oriented; UDP is Connectionless.\\n• Reliability: TCP guarantees delivery via ACKs; UDP provides Best-Effort.\\n• Ordering: TCP maintains sequence numbers; UDP segments may arrive out of order.\\n• Header Size: TCP is 20 Bytes minimum; UDP is 8 Bytes.\\n• Speed: UDP is faster with lower overhead."
+                },
+                {
+                    "heading": "8. Connection-Oriented Communication",
+                    "content": "TCP establishes a logical stateful connection across 3 phases: Connection Setup (Handshake), Data Transfer, and Connection Teardown."
+                },
+                {
+                    "heading": "9. Connectionless Communication",
+                    "content": "UDP transmits datagrams immediately without setup packets. Ideal for real-time applications where dropping a frame is preferable to delaying speech or video."
+                },
+                {
+                    "heading": "10. TCP Three-Way Handshake",
+                    "content": "1. Client sends SYN (Seq=X).\\n2. Server responds with SYN-ACK (Seq=Y, Ack=X+1).\\n3. Client responds with ACK (Ack=Y+1). Connection transitions to ESTABLISHED."
+                },
+                {
+                    "heading": "11. TCP Data Transfer & ARQ",
+                    "content": "Data is split into segments with sequence numbers. Positive Acknowledgement with Retransmission (PAR) resends lost segments if timer expires."
+                },
+                {
+                    "heading": "12. Sequence Numbers & Ordering",
+                    "content": "Sequence numbers allow the receiver to reassemble out-of-order segments into the exact original byte stream."
+                },
+                {
+                    "heading": "13. Acknowledgements (ACK)",
+                    "content": "Receivers send ACK numbers indicating the NEXT expected byte sequence number."
+                },
+                {
+                    "heading": "14. Sliding Window Protocol",
+                    "content": "Sliding window allows sending multiple unacknowledged segments up to the advertised Window Size, maximizing bandwidth utilization."
+                },
+                {
+                    "heading": "15. Flow Control & Window Sizing",
+                    "content": "Receivers advertise Window Size based on buffer capacity. If buffer fills, Window Size drops to zero, pausing the sender."
+                },
+                {
+                    "heading": "16. Error Detection & Retransmission",
+                    "content": "Checksums detect bit corruption. Retransmission timers (RTO) trigger resending missing segments."
+                },
+                {
+                    "heading": "17. Connection Termination (4-Way Handshake)",
+                    "content": "Closing connection uses FIN ➔ ACK ➔ FIN ➔ ACK sequence."
+                },
+                {
+                    "heading": "18. Port Numbers & Classification",
+                    "content": "• Well-Known Ports: 0-1023 (HTTP 80, HTTPS 443, SSH 22, DNS 53).\\n• Registered Ports: 1024-49151.\\n• Dynamic/Private Ports: 49152-65535."
+                },
+                {
+                    "heading": "19. Socket Communication",
+                    "content": "A socket pair uniquely identifies a connection: (Source IP : Source Port ⇹ Dest IP : Dest Port, Protocol)."
+                },
+                {
+                    "heading": "20. Applications of TCP",
+                    "content": "Web (HTTP/HTTPS), File Transfer (FTP), Email (SMTP/IMAP), Remote Access (SSH)."
+                },
+                {
+                    "heading": "21. Applications of UDP",
+                    "content": "DNS, VoIP (SIP/RTP), Video Streaming, Online Gaming, DHCP, SNMP."
+                },
+                {
+                    "heading": "22. Advantages & Limitations",
+                    "content": "TCP ensures zero data loss but adds overhead. UDP provides ultra-low latency but offers no loss recovery."
+                },
+                {
+                    "heading": "23. Best Practices",
+                    "content": "Use TCP for financial, web, and file data. Use UDP for time-sensitive voice, video, and DNS lookups."
+                },
+                {
+                    "heading": "24. Summary",
+                    "content": "TCP and UDP provide essential end-to-end transport services, balancing reliability vs speed across modern IP networks."
                 }
-            ],
-            "formulas": [
-                "DHCP Server Port = UDP 67",
-                "DHCP Client Port = UDP 68"
-            ],
-            "standards": [
-                "RFC 2131 - Dynamic Host Configuration Protocol",
-                "RFC 2132 - DHCP Options"
             ]
         },
-        "tools": [
+        "hardware_inspector": [
             {
-                "name": "Cisco Router CLI (DHCP Server)",
-                "layer": "Application/Layer 3",
-                "ports": "LAN FastEthernet Port",
-                "usage": "Leases IP pools to clients",
-                "statusLED": "Active DHCP Leases Granted"
+                "id": "tcp_handshake_engine",
+                "name": "TCP 3-Way Handshake & State Engine",
+                "category": "Layer 4 Stateful Connection Engine",
+                "description": "Visualizes TCP state transitions (CLOSED ➔ SYN_SENT ➔ SYN_RCVD ➔ ESTABLISHED) during 3-way handshake.",
+                "svg": "<svg viewBox=\"0 0 400 220\" xmlns=\"http://www.w3.org/2000/svg\">\n                <rect x=\"20\" y=\"20\" width=\"360\" height=\"180\" rx=\"8\" fill=\"#0f172a\" stroke=\"#ec4899\" stroke-width=\"2\"/>\n                <text x=\"200\" y=\"45\" fill=\"#ec4899\" font-size=\"14\" font-weight=\"bold\" text-anchor=\"middle\">TCP 3-WAY HANDSHAKE STATE ENGINE</text>\n                <text x=\"60\" y=\"80\" fill=\"#38bdf8\" font-size=\"12\" font-weight=\"bold\">Client (SYN_SENT)</text>\n                <text x=\"340\" y=\"80\" fill=\"#10b981\" font-size=\"12\" font-weight=\"bold\" text-anchor=\"end\">Server (LISTEN)</text>\n                <line x1=\"70\" y1=\"95\" x2=\"330\" y2=\"115\" stroke=\"#ec4899\" stroke-width=\"2.5\" stroke-dasharray=\"4,4\"/>\n                <text x=\"200\" y=\"100\" fill=\"#ec4899\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">1. SYN (Seq=100)</text>\n                <line x1=\"330\" y1=\"125\" x2=\"70\" y2=\"145\" stroke=\"#38bdf8\" stroke-width=\"2.5\" stroke-dasharray=\"4,4\"/>\n                <text x=\"200\" y=\"130\" fill=\"#38bdf8\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">2. SYN-ACK (Seq=300, Ack=101)</text>\n                <line x1=\"70\" y1=\"155\" x2=\"330\" y2=\"175\" stroke=\"#10b981\" stroke-width=\"2.5\" stroke-dasharray=\"4,4\"/>\n                <text x=\"200\" y=\"160\" fill=\"#10b981\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">3. ACK (Ack=301) [ESTABLISHED]</text>\n            </svg>"
             }
         ],
-        "procedure": [
-            "Exclude gateway address: `ip dhcp excluded-address 192.168.1.1 192.168.1.10`.",
-            "Create pool: `ip dhcp pool LAN_POOL`.",
-            "Specify network: `network 192.168.1.0 255.255.255.0`.",
-            "Set default gateway: `default-router 192.168.1.1`."
+        "troubleshooting": {
+            "problem": "TCP Connection Timeout / Dropped Handshake (SYN Sent but No SYN-ACK Received)",
+            "hints": [
+                "Verify if the destination IP address is reachable via ICMP ping.",
+                "Check if a firewall or Access Control List (ACL) is blocking the target TCP port (e.g., port 80/443).",
+                "Verify if the target server service is active and listening on the specified port.",
+                "Inspect TCP SYN retransmission timeouts."
+            ],
+            "fix": "Ensure destination firewall permits incoming TCP SYN packets on target port. Verify server service status (e.g., systemctl status nginx) and check port binding using netstat -an."
+        },
+        "viva": [
+            {
+                "q": "What are the flags set in the second step of a TCP 3-way handshake?",
+                "a": "SYN flag = 1 and ACK flag = 1 (SYN-ACK)."
+            },
+            {
+                "q": "Why is UDP preferred over TCP for Voice over IP (VoIP)?",
+                "a": "UDP has low overhead (8-byte header) and no retransmission delays, prioritizing real-time latency over packet loss recovery."
+            }
+        ],
+        "evaluations": [
+            {
+                "type": "pre",
+                "question": "Which Transport Layer protocol provides reliable, connection-oriented data delivery with error checking and flow control?",
+                "options": [
+                    "UDP",
+                    "TCP",
+                    "IP",
+                    "ICMP"
+                ],
+                "answer": "TCP",
+                "explanation": "TCP (Transmission Control Protocol) is connection-oriented and reliable."
+            },
+            {
+                "type": "pre",
+                "question": "Which Transport Layer protocol is connectionless, lightweight, and used for real-time video streaming and DNS?",
+                "options": [
+                    "TCP",
+                    "UDP",
+                    "FTP",
+                    "HTTP"
+                ],
+                "answer": "UDP",
+                "explanation": "UDP (User Datagram Protocol) is connectionless with low overhead."
+            },
+            {
+                "type": "pre",
+                "question": "What mechanism does TCP use to establish a connection between client and server?",
+                "options": [
+                    "3-Way Handshake (SYN, SYN-ACK, ACK)",
+                    "2-Way Ping",
+                    "4-Way Teardown",
+                    "DHCP Lease"
+                ],
+                "answer": "3-Way Handshake (SYN, SYN-ACK, ACK)",
+                "explanation": "TCP 3-way handshake exchanges SYN, SYN-ACK, and ACK flags."
+            },
+            {
+                "type": "pre",
+                "question": "What is the header size of a UDP packet compared to TCP?",
+                "options": [
+                    "UDP header is 8 bytes; TCP header is 20 bytes minimum",
+                    "UDP header is 20 bytes; TCP header is 8 bytes",
+                    "Both are 64 bytes",
+                    "UDP has no header"
+                ],
+                "answer": "UDP header is 8 bytes; TCP header is 20 bytes minimum",
+                "explanation": "UDP header is only 8 bytes (Source Port, Dest Port, Length, Checksum)."
+            },
+            {
+                "type": "pre",
+                "question": "What is the port number for HTTP web traffic?",
+                "options": [
+                    "21",
+                    "22",
+                    "80",
+                    "443"
+                ],
+                "answer": "80",
+                "explanation": "HTTP uses TCP port 80 (HTTPS uses TCP port 443)."
+            },
+            {
+                "type": "post",
+                "question": "What TCP flag is sent to initiate connection termination?",
+                "options": [
+                    "SYN",
+                    "FIN",
+                    "RST",
+                    "PSH"
+                ],
+                "answer": "FIN",
+                "explanation": "FIN (Finish) flag initiates graceful connection termination."
+            },
+            {
+                "type": "post",
+                "question": "What TCP flow control mechanism regulates how much unacknowledged data a sender can transmit?",
+                "options": [
+                    "Sliding Window Mechanism",
+                    "Slow Start",
+                    "Congestion Avoidance",
+                    "Checksumming"
+                ],
+                "answer": "Sliding Window Mechanism",
+                "explanation": "Sliding Window adjusts data volume sent before requiring ACKs."
+            },
+            {
+                "type": "post",
+                "question": "Which application layer protocol uses UDP port 53 for fast query resolution?",
+                "options": [
+                    "HTTP",
+                    "DNS",
+                    "SSH",
+                    "FTP"
+                ],
+                "answer": "DNS",
+                "explanation": "DNS uses UDP port 53 for fast domain name queries."
+            },
+            {
+                "type": "post",
+                "question": "What field in the TCP header provides ordered delivery and reassembly of segments?",
+                "options": [
+                    "Sequence Number",
+                    "Port Number",
+                    "Window Size",
+                    "Checksum"
+                ],
+                "answer": "Sequence Number",
+                "explanation": "Sequence numbers allow receiver to reorder out-of-order segments."
+            },
+            {
+                "type": "post",
+                "question": "What happens if a UDP packet is corrupted during transmission?",
+                "options": [
+                    "Sender retransmits automatically",
+                    "UDP drops the packet without retransmission",
+                    "Network halts",
+                    "Packet converted to TCP"
+                ],
+                "answer": "UDP drops the packet without retransmission",
+                "explanation": "UDP checksum detects errors, but dropped packets are not retransmitted by UDP."
+            },
+            {
+                "type": "post",
+                "question": "Which application protocol uses TCP port 22 for secure remote administration?",
+                "options": [
+                    "Telnet (Port 23)",
+                    "SSH (Port 22)",
+                    "FTP (Port 21)",
+                    "SMTP (Port 25)"
+                ],
+                "answer": "SSH (Port 22)",
+                "explanation": "SSH uses TCP port 22 for encrypted shell access."
+            },
+            {
+                "type": "post",
+                "question": "What TCP flag forces immediate delivery of buffered data without waiting for buffer to fill?",
+                "options": [
+                    "URG",
+                    "PSH",
+                    "SYN",
+                    "ACK"
+                ],
+                "answer": "PSH",
+                "explanation": "PSH (Push) flag forces immediate push of data to application layer."
+            },
+            {
+                "type": "post",
+                "question": "What is the TCP 4-Way Teardown sequence for closing a connection?",
+                "options": [
+                    "FIN ➔ ACK ➔ FIN ➔ ACK",
+                    "SYN ➔ SYN-ACK ➔ ACK",
+                    "RST ➔ RST-ACK",
+                    "DISCONNECT"
+                ],
+                "answer": "FIN ➔ ACK ➔ FIN ➔ ACK",
+                "explanation": "TCP connection close exchanges FIN, ACK, FIN, ACK."
+            },
+            {
+                "type": "post",
+                "question": "What well-known port range is assigned by IANA for standard services (e.g. HTTP, SSH, DNS)?",
+                "options": [
+                    "0 to 1023",
+                    "1024 to 49151",
+                    "49152 to 65535",
+                    "1 to 100"
+                ],
+                "answer": "0 to 1023",
+                "explanation": "Ports 0-1023 are Well-Known System Ports."
+            },
+            {
+                "type": "post",
+                "question": "Why is UDP preferred over TCP for Voice over IP (VoIP) and online gaming?",
+                "options": [
+                    "VoIP requires 100% data accuracy",
+                    "Low latency is critical and missing audio packets are preferable to delayed retransmissions",
+                    "UDP encrypts audio",
+                    "UDP requires less power"
+                ],
+                "answer": "Low latency is critical and missing audio packets are preferable to delayed retransmissions",
+                "explanation": "Real-time audio demands low latency; retransmitting old audio packets causes speech distortion."
+            }
+        ],
+        "simType": "udp_tcp_sim"
+    },
+    "tcp": {
+        "title": "Practical 12: UDP & TCP Transport Protocols",
+        "aim": "To examine end-to-end transport layer communication, analyze process-to-process port addressing, compare connection-oriented TCP (3-way handshake, flow control, sliding window, retransmission) vs connectionless UDP (best-effort, low overhead), and select appropriate transport protocols for network applications.",
+        "intro": {
+            "summary": "The Transport Layer (Layer 4) manages process-to-process communication between host applications. TCP provides connection-oriented, reliable, ordered delivery with error recovery and sliding-window flow control. UDP provides connectionless, lightweight, low-latency transmission for real-time applications like DNS, video streaming, and VoIP.",
+            "importance": "Understanding Layer 4 protocol selection is fundamental to network engineering. Students learn why web browsing (HTTP/HTTPS), email (SMTP), and file transfer (FTP) rely on TCP reliability, whereas VoIP, live streaming, and gaming prioritize UDP speed.",
+            "applications": [
+                "Web Browsing & E-Commerce (TCP 80/443)",
+                "Real-Time Video Conferencing & Streaming (UDP)",
+                "Domain Name Resolution (DNS UDP 53)",
+                "Secure Administrative Shell Access (SSH TCP 22)"
+            ],
+            "outcome": "Students will be able to visualize the TCP 3-Way Handshake, explain sliding window flow control, analyze port numbers and socket pairs, and diagnose packet loss retransmissions."
+        },
+        "prerequisites": [
+            "Practical 4: IPv4 & IPv6 Address Classification",
+            "Practical 11: Static Routing Configuration"
+        ],
+        "outcomes": [
+            "Differentiate between TCP (connection-oriented) and UDP (connectionless).",
+            "Explain the TCP 3-Way Handshake (SYN, SYN-ACK, ACK) and 4-Way Connection Termination (FIN, ACK).",
+            "Describe sequence numbers, acknowledgements, and sliding window flow control.",
+            "Identify well-known port numbers (HTTP 80, HTTPS 443, SSH 22, DNS 53, DHCP 67/68).",
+            "Analyze socket pairs (Source IP:Port ⇹ Destination IP:Port).",
+            "Select appropriate transport protocols based on application performance requirements."
+        ],
+        "theory": {
+            "intro": "Layer 4 ensures process-to-process data delivery between endpoints. TCP provides reliability through connection management and error recovery, while UDP provides fast, unacknowledged datagram transport.",
+            "sections": [
+                {
+                    "heading": "1. Introduction to Transport Protocols",
+                    "content": "The Transport Layer bridges application processes with the underlying IP network. It performs segmentation, flow control, and port multiplexing to run multiple network applications simultaneously on a single device."
+                },
+                {
+                    "heading": "2. Learning Objectives",
+                    "content": "Master Layer 4 concepts:\\n• TCP 3-Way Handshake.\\n• Sliding window flow control.\\n• Error detection & ARQ retransmissions.\\n• UDP connectionless datagram delivery.\\n• Port number classification and socket pairing."
+                },
+                {
+                    "heading": "3. What is the Transport Layer?",
+                    "content": "Layer 4 of the OSI model. Responsible for end-to-end communication, segmenting data, managing ports, enforcing reliability, and controlling transmission rates."
+                },
+                {
+                    "heading": "4. Why Transport Protocols are Required",
+                    "content": "An IP address delivers packets to a computer, but multiple applications (browser, email, video) run concurrently. Transport layer port numbers ensure incoming packets reach the correct receiving application process."
+                },
+                {
+                    "heading": "5. What is TCP?",
+                    "content": "Transmission Control Protocol (TCP) is a reliable, connection-oriented protocol (RFC 793). It guarantees ordered packet delivery, error recovery, flow control, and congestion control."
+                },
+                {
+                    "heading": "6. What is UDP?",
+                    "content": "User Datagram Protocol (UDP) is a connectionless, best-effort protocol (RFC 768). It transmits datagrams without handshake overhead, acknowledgements, or retransmissions, minimizing latency."
+                },
+                {
+                    "heading": "7. Detailed TCP vs UDP Comparison",
+                    "content": "• Connection: TCP is Connection-Oriented; UDP is Connectionless.\\n• Reliability: TCP guarantees delivery via ACKs; UDP provides Best-Effort.\\n• Ordering: TCP maintains sequence numbers; UDP segments may arrive out of order.\\n• Header Size: TCP is 20 Bytes minimum; UDP is 8 Bytes.\\n• Speed: UDP is faster with lower overhead."
+                },
+                {
+                    "heading": "8. Connection-Oriented Communication",
+                    "content": "TCP establishes a logical stateful connection across 3 phases: Connection Setup (Handshake), Data Transfer, and Connection Teardown."
+                },
+                {
+                    "heading": "9. Connectionless Communication",
+                    "content": "UDP transmits datagrams immediately without setup packets. Ideal for real-time applications where dropping a frame is preferable to delaying speech or video."
+                },
+                {
+                    "heading": "10. TCP Three-Way Handshake",
+                    "content": "1. Client sends SYN (Seq=X).\\n2. Server responds with SYN-ACK (Seq=Y, Ack=X+1).\\n3. Client responds with ACK (Ack=Y+1). Connection transitions to ESTABLISHED."
+                },
+                {
+                    "heading": "11. TCP Data Transfer & ARQ",
+                    "content": "Data is split into segments with sequence numbers. Positive Acknowledgement with Retransmission (PAR) resends lost segments if timer expires."
+                },
+                {
+                    "heading": "12. Sequence Numbers & Ordering",
+                    "content": "Sequence numbers allow the receiver to reassemble out-of-order segments into the exact original byte stream."
+                },
+                {
+                    "heading": "13. Acknowledgements (ACK)",
+                    "content": "Receivers send ACK numbers indicating the NEXT expected byte sequence number."
+                },
+                {
+                    "heading": "14. Sliding Window Protocol",
+                    "content": "Sliding window allows sending multiple unacknowledged segments up to the advertised Window Size, maximizing bandwidth utilization."
+                },
+                {
+                    "heading": "15. Flow Control & Window Sizing",
+                    "content": "Receivers advertise Window Size based on buffer capacity. If buffer fills, Window Size drops to zero, pausing the sender."
+                },
+                {
+                    "heading": "16. Error Detection & Retransmission",
+                    "content": "Checksums detect bit corruption. Retransmission timers (RTO) trigger resending missing segments."
+                },
+                {
+                    "heading": "17. Connection Termination (4-Way Handshake)",
+                    "content": "Closing connection uses FIN ➔ ACK ➔ FIN ➔ ACK sequence."
+                },
+                {
+                    "heading": "18. Port Numbers & Classification",
+                    "content": "• Well-Known Ports: 0-1023 (HTTP 80, HTTPS 443, SSH 22, DNS 53).\\n• Registered Ports: 1024-49151.\\n• Dynamic/Private Ports: 49152-65535."
+                },
+                {
+                    "heading": "19. Socket Communication",
+                    "content": "A socket pair uniquely identifies a connection: (Source IP : Source Port ⇹ Dest IP : Dest Port, Protocol)."
+                },
+                {
+                    "heading": "20. Applications of TCP",
+                    "content": "Web (HTTP/HTTPS), File Transfer (FTP), Email (SMTP/IMAP), Remote Access (SSH)."
+                },
+                {
+                    "heading": "21. Applications of UDP",
+                    "content": "DNS, VoIP (SIP/RTP), Video Streaming, Online Gaming, DHCP, SNMP."
+                },
+                {
+                    "heading": "22. Advantages & Limitations",
+                    "content": "TCP ensures zero data loss but adds overhead. UDP provides ultra-low latency but offers no loss recovery."
+                },
+                {
+                    "heading": "23. Best Practices",
+                    "content": "Use TCP for financial, web, and file data. Use UDP for time-sensitive voice, video, and DNS lookups."
+                },
+                {
+                    "heading": "24. Summary",
+                    "content": "TCP and UDP provide essential end-to-end transport services, balancing reliability vs speed across modern IP networks."
+                }
+            ]
+        },
+        "hardware_inspector": [
+            {
+                "id": "tcp_handshake_engine",
+                "name": "TCP 3-Way Handshake & State Engine",
+                "category": "Layer 4 Stateful Connection Engine",
+                "description": "Visualizes TCP state transitions (CLOSED ➔ SYN_SENT ➔ SYN_RCVD ➔ ESTABLISHED) during 3-way handshake.",
+                "svg": "<svg viewBox=\"0 0 400 220\" xmlns=\"http://www.w3.org/2000/svg\">\n                <rect x=\"20\" y=\"20\" width=\"360\" height=\"180\" rx=\"8\" fill=\"#0f172a\" stroke=\"#ec4899\" stroke-width=\"2\"/>\n                <text x=\"200\" y=\"45\" fill=\"#ec4899\" font-size=\"14\" font-weight=\"bold\" text-anchor=\"middle\">TCP 3-WAY HANDSHAKE STATE ENGINE</text>\n                <text x=\"60\" y=\"80\" fill=\"#38bdf8\" font-size=\"12\" font-weight=\"bold\">Client (SYN_SENT)</text>\n                <text x=\"340\" y=\"80\" fill=\"#10b981\" font-size=\"12\" font-weight=\"bold\" text-anchor=\"end\">Server (LISTEN)</text>\n                <line x1=\"70\" y1=\"95\" x2=\"330\" y2=\"115\" stroke=\"#ec4899\" stroke-width=\"2.5\" stroke-dasharray=\"4,4\"/>\n                <text x=\"200\" y=\"100\" fill=\"#ec4899\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">1. SYN (Seq=100)</text>\n                <line x1=\"330\" y1=\"125\" x2=\"70\" y2=\"145\" stroke=\"#38bdf8\" stroke-width=\"2.5\" stroke-dasharray=\"4,4\"/>\n                <text x=\"200\" y=\"130\" fill=\"#38bdf8\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">2. SYN-ACK (Seq=300, Ack=101)</text>\n                <line x1=\"70\" y1=\"155\" x2=\"330\" y2=\"175\" stroke=\"#10b981\" stroke-width=\"2.5\" stroke-dasharray=\"4,4\"/>\n                <text x=\"200\" y=\"160\" fill=\"#10b981\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">3. ACK (Ack=301) [ESTABLISHED]</text>\n            </svg>"
+            }
         ],
         "troubleshooting": {
-            "problem": "Client PC receives APIPA address (169.254.x.x) instead of DHCP IP.",
+            "problem": "TCP Connection Timeout / Dropped Handshake (SYN Sent but No SYN-ACK Received)",
             "hints": [
-                "Check if router interface in LAN is UP/UP.",
-                "Verify `ip dhcp pool` subnet matches LAN."
+                "Verify if the destination IP address is reachable via ICMP ping.",
+                "Check if a firewall or Access Control List (ACL) is blocking the target TCP port (e.g., port 80/443).",
+                "Verify if the target server service is active and listening on the specified port.",
+                "Inspect TCP SYN retransmission timeouts."
             ],
-            "fix": "Execute `ip dhcp pool LAN_POOL` and set `network 192.168.1.0 255.255.255.0`."
+            "fix": "Ensure destination firewall permits incoming TCP SYN packets on target port. Verify server service status (e.g., systemctl status nginx) and check port binding using netstat -an."
+        },
+        "viva": [
+            {
+                "q": "What are the flags set in the second step of a TCP 3-way handshake?",
+                "a": "SYN flag = 1 and ACK flag = 1 (SYN-ACK)."
+            },
+            {
+                "q": "Why is UDP preferred over TCP for Voice over IP (VoIP)?",
+                "a": "UDP has low overhead (8-byte header) and no retransmission delays, prioritizing real-time latency over packet loss recovery."
+            }
+        ],
+        "evaluations": [
+            {
+                "type": "pre",
+                "question": "Which Transport Layer protocol provides reliable, connection-oriented data delivery with error checking and flow control?",
+                "options": [
+                    "UDP",
+                    "TCP",
+                    "IP",
+                    "ICMP"
+                ],
+                "answer": "TCP",
+                "explanation": "TCP (Transmission Control Protocol) is connection-oriented and reliable."
+            },
+            {
+                "type": "pre",
+                "question": "Which Transport Layer protocol is connectionless, lightweight, and used for real-time video streaming and DNS?",
+                "options": [
+                    "TCP",
+                    "UDP",
+                    "FTP",
+                    "HTTP"
+                ],
+                "answer": "UDP",
+                "explanation": "UDP (User Datagram Protocol) is connectionless with low overhead."
+            },
+            {
+                "type": "pre",
+                "question": "What mechanism does TCP use to establish a connection between client and server?",
+                "options": [
+                    "3-Way Handshake (SYN, SYN-ACK, ACK)",
+                    "2-Way Ping",
+                    "4-Way Teardown",
+                    "DHCP Lease"
+                ],
+                "answer": "3-Way Handshake (SYN, SYN-ACK, ACK)",
+                "explanation": "TCP 3-way handshake exchanges SYN, SYN-ACK, and ACK flags."
+            },
+            {
+                "type": "pre",
+                "question": "What is the header size of a UDP packet compared to TCP?",
+                "options": [
+                    "UDP header is 8 bytes; TCP header is 20 bytes minimum",
+                    "UDP header is 20 bytes; TCP header is 8 bytes",
+                    "Both are 64 bytes",
+                    "UDP has no header"
+                ],
+                "answer": "UDP header is 8 bytes; TCP header is 20 bytes minimum",
+                "explanation": "UDP header is only 8 bytes (Source Port, Dest Port, Length, Checksum)."
+            },
+            {
+                "type": "pre",
+                "question": "What is the port number for HTTP web traffic?",
+                "options": [
+                    "21",
+                    "22",
+                    "80",
+                    "443"
+                ],
+                "answer": "80",
+                "explanation": "HTTP uses TCP port 80 (HTTPS uses TCP port 443)."
+            },
+            {
+                "type": "post",
+                "question": "What TCP flag is sent to initiate connection termination?",
+                "options": [
+                    "SYN",
+                    "FIN",
+                    "RST",
+                    "PSH"
+                ],
+                "answer": "FIN",
+                "explanation": "FIN (Finish) flag initiates graceful connection termination."
+            },
+            {
+                "type": "post",
+                "question": "What TCP flow control mechanism regulates how much unacknowledged data a sender can transmit?",
+                "options": [
+                    "Sliding Window Mechanism",
+                    "Slow Start",
+                    "Congestion Avoidance",
+                    "Checksumming"
+                ],
+                "answer": "Sliding Window Mechanism",
+                "explanation": "Sliding Window adjusts data volume sent before requiring ACKs."
+            },
+            {
+                "type": "post",
+                "question": "Which application layer protocol uses UDP port 53 for fast query resolution?",
+                "options": [
+                    "HTTP",
+                    "DNS",
+                    "SSH",
+                    "FTP"
+                ],
+                "answer": "DNS",
+                "explanation": "DNS uses UDP port 53 for fast domain name queries."
+            },
+            {
+                "type": "post",
+                "question": "What field in the TCP header provides ordered delivery and reassembly of segments?",
+                "options": [
+                    "Sequence Number",
+                    "Port Number",
+                    "Window Size",
+                    "Checksum"
+                ],
+                "answer": "Sequence Number",
+                "explanation": "Sequence numbers allow receiver to reorder out-of-order segments."
+            },
+            {
+                "type": "post",
+                "question": "What happens if a UDP packet is corrupted during transmission?",
+                "options": [
+                    "Sender retransmits automatically",
+                    "UDP drops the packet without retransmission",
+                    "Network halts",
+                    "Packet converted to TCP"
+                ],
+                "answer": "UDP drops the packet without retransmission",
+                "explanation": "UDP checksum detects errors, but dropped packets are not retransmitted by UDP."
+            },
+            {
+                "type": "post",
+                "question": "Which application protocol uses TCP port 22 for secure remote administration?",
+                "options": [
+                    "Telnet (Port 23)",
+                    "SSH (Port 22)",
+                    "FTP (Port 21)",
+                    "SMTP (Port 25)"
+                ],
+                "answer": "SSH (Port 22)",
+                "explanation": "SSH uses TCP port 22 for encrypted shell access."
+            },
+            {
+                "type": "post",
+                "question": "What TCP flag forces immediate delivery of buffered data without waiting for buffer to fill?",
+                "options": [
+                    "URG",
+                    "PSH",
+                    "SYN",
+                    "ACK"
+                ],
+                "answer": "PSH",
+                "explanation": "PSH (Push) flag forces immediate push of data to application layer."
+            },
+            {
+                "type": "post",
+                "question": "What is the TCP 4-Way Teardown sequence for closing a connection?",
+                "options": [
+                    "FIN ➔ ACK ➔ FIN ➔ ACK",
+                    "SYN ➔ SYN-ACK ➔ ACK",
+                    "RST ➔ RST-ACK",
+                    "DISCONNECT"
+                ],
+                "answer": "FIN ➔ ACK ➔ FIN ➔ ACK",
+                "explanation": "TCP connection close exchanges FIN, ACK, FIN, ACK."
+            },
+            {
+                "type": "post",
+                "question": "What well-known port range is assigned by IANA for standard services (e.g. HTTP, SSH, DNS)?",
+                "options": [
+                    "0 to 1023",
+                    "1024 to 49151",
+                    "49152 to 65535",
+                    "1 to 100"
+                ],
+                "answer": "0 to 1023",
+                "explanation": "Ports 0-1023 are Well-Known System Ports."
+            },
+            {
+                "type": "post",
+                "question": "Why is UDP preferred over TCP for Voice over IP (VoIP) and online gaming?",
+                "options": [
+                    "VoIP requires 100% data accuracy",
+                    "Low latency is critical and missing audio packets are preferable to delayed retransmissions",
+                    "UDP encrypts audio",
+                    "UDP requires less power"
+                ],
+                "answer": "Low latency is critical and missing audio packets are preferable to delayed retransmissions",
+                "explanation": "Real-time audio demands low latency; retransmitting old audio packets causes speech distortion."
+            }
+        ],
+        "simType": "udp_tcp_sim"
+    },
+    "dns": {
+        "title": "Practical 13: DHCP Configuration & IP Pools",
+        "aim": "To examine automatic IP address allocation via Dynamic Host Configuration Protocol (DHCP), master the 4-step DORA process (Discover, Offer, Request, ACK), configure DHCP pools, excluded IP ranges, default routers, and DNS servers on Cisco IOS routers, configure DHCP Relay Agents (ip helper-address) across multi-subnet networks, and verify leases.",
+        "intro": {
+            "summary": "Dynamic Host Configuration Protocol (DHCP) automates IP address, subnet mask, default gateway, and DNS configuration for network clients. Operating via the 4-step DORA handshake (Discover, Offer, Request, ACK), DHCP eliminates manual configuration errors, manages address leases, and scales client management in enterprise LANs.",
+            "importance": "DHCP is the primary automated addressing protocol used in campus, enterprise, data center, and home networks. Network engineers must know how to configure DHCP pools, exclude gateway IPs, configure lease renewal timers, and set up DHCP Relay Agents to forward client broadcasts across routed VLAN boundaries.",
+            "applications": [
+                "Enterprise Campus & Student Wi-Fi LANs",
+                "Corporate Desktop & Mobile IP Allocation",
+                "DHCP Relay Across Multi-VLAN Routers (ip helper-address)",
+                "Automated Voice over IP (VoIP) Phone Provisioning"
+            ],
+            "outcome": "Students will be able to trace the DORA process, configure Cisco IOS DHCP pools and excluded address ranges, set up DHCP Relay on router interfaces, and verify active bindings using `show ip dhcp binding`."
+        },
+        "prerequisites": [
+            "Practical 4: IPv4 & IPv6 Address Classification",
+            "Practical 6: Subnetting, VLSM & CIDR",
+            "Practical 7: Virtual LANs (VLAN) & Trunking"
+        ],
+        "outcomes": [
+            "Explain the purpose and advantages of DHCP over Static IP addressing.",
+            "Describe the 4-step DORA process (Discover, Offer, Request, ACK).",
+            "Configure Cisco IOS DHCP Pools (`ip dhcp pool`), subnet networks, default routers, and DNS servers.",
+            "Configure Excluded IP Addresses (`ip dhcp excluded-address`) for gateways and servers.",
+            "Explain DHCP Lease duration, renewal timers (T1 at 50%), and MAC reservations.",
+            "Configure DHCP Relay Agent (`ip helper-address`) to forward broadcasts across routers.",
+            "Verify DHCP operation using `show ip dhcp binding` and `ipconfig /renew`."
+        ],
+        "theory": {
+            "intro": "DHCP automates network configuration by assigning dynamic IP addresses from a managed pool, reducing network administrative effort and eliminating duplicate IP conflicts.",
+            "sections": [
+                {
+                    "heading": "1. Introduction to DHCP",
+                    "content": "Manual IP configuration on hundreds of workstations is inefficient and prone to duplicate address conflicts. DHCP automates IP allocation, providing subnet masks, default gateways, and DNS server addresses dynamically when devices connect."
+                },
+                {
+                    "heading": "2. Learning Objectives",
+                    "content": "Master DHCP concepts:\\n• The DORA 4-step client-server exchange.\\n• Configuring Cisco IOS DHCP pools and excluded ranges.\\n• Lease duration and T1/T2 renewal timers.\\n• DHCP Relay Agent (ip helper-address).\\n• Verifying bindings with show ip dhcp binding."
+                },
+                {
+                    "heading": "3. Why DHCP is Required",
+                    "content": "In networks with hundreds or thousands of mobile devices, manual static IP entry is impossible. DHCP centralizes IP pool management, automatically recycling unused addresses."
+                },
+                {
+                    "heading": "4. What is DHCP?",
+                    "content": "Dynamic Host Configuration Protocol (DHCP) is an application layer protocol operating over UDP ports 67 (Server) and 68 (Client) defined in RFC 2131."
+                },
+                {
+                    "heading": "5. Static IP vs Dynamic IP Comparison",
+                    "content": "• Static: Manual entry; suitable for Servers/Routers; zero protocol load.\\n• Dynamic: Automatic allocation; suitable for PCs/Laptops/Phones; managed via central pools."
+                },
+                {
+                    "heading": "6. DHCP Architecture Components",
+                    "content": "• DHCP Client: Device requesting network settings.\\n• DHCP Server: Central router or server issuing IP leases.\\n• DHCP Relay Agent: Router forwarding client broadcasts across subnets."
+                },
+                {
+                    "heading": "7. DHCP IP Address Pools",
+                    "content": "An IP Pool defines the range of contiguous IP addresses available for dynamic allocation to requesting clients (e.g. 192.168.10.10 to 192.168.10.200)."
+                },
+                {
+                    "heading": "8. The 4-Step DORA Process",
+                    "content": "1. DISCOVER: Client broadcasts DHCP Discover (255.255.255.255).\\n2. OFFER: Server unicasts/broadcasts DHCP Offer with proposed IP.\\n3. REQUEST: Client broadcasts DHCP Request accepting offered IP.\\n4. ACK: Server sends DHCP ACK confirming lease."
+                },
+                {
+                    "heading": "9. DHCP Lease Mechanism",
+                    "content": "IP addresses are leased temporarily. Information includes IP address, subnet mask, gateway, DNS, lease time, and renewal deadlines."
+                },
+                {
+                    "heading": "10. Lease Renewal Process (T1 & T2 Timers)",
+                    "content": "At 50% of lease duration (T1 timer), client unicasts a DHCP Request to renew its lease. At 87.5% (T2 timer), if original server fails to respond, client broadcasts to any available DHCP server."
+                },
+                {
+                    "heading": "11. DHCP MAC Address Reservation",
+                    "content": "Maps a client's static MAC address to a fixed reserved IP address within the DHCP server database."
+                },
+                {
+                    "heading": "12. DHCP Relay Agent (ip helper-address)",
+                    "content": "Routers drop Layer 2 broadcasts by default. A DHCP Relay Agent intercepts client Discover broadcasts on an interface and forwards them as unicast packets to a remote DHCP server."
+                },
+                {
+                    "heading": "13. DHCP Message Types",
+                    "content": "Discover, Offer, Request, ACK, NAK (Negative Ack), Release (Client releases IP), Decline (Client detects IP collision), Inform."
+                },
+                {
+                    "heading": "14. Cisco IOS Configuration Commands",
+                    "content": "• Exclude IPs: `ip dhcp excluded-address 192.168.10.1 192.168.10.20`\\n• Create Pool: `ip dhcp pool LAN_POOL`\\n• Specify Subnet: `network 192.168.10.0 255.255.255.0`\\n• Gateway: `default-router 192.168.10.1`\\n• DNS: `dns-server 8.8.8.8`\\n• Relay: `interface Gi0/0 -> ip helper-address 10.0.0.5`"
+                },
+                {
+                    "heading": "15. Verification Commands",
+                    "content": "• `show ip dhcp binding` - Lists active leased IP/MAC mappings.\\n• `show ip dhcp pool` - Displays pool utilization and statistics.\\n• `ipconfig /all` or `ipconfig /renew` - Verifies client settings."
+                },
+                {
+                    "heading": "16. Common DHCP Problems",
+                    "content": "Exhausted IP pool, missing ip helper-address on router, excluded gateway ranges missing, rogue DHCP servers."
+                },
+                {
+                    "heading": "17. Advantages of DHCP",
+                    "content": "Automated configuration, zero IP conflict risk, centralized management, mobile device support."
+                },
+                {
+                    "heading": "18. Limitations of DHCP",
+                    "content": "Single point of failure if server goes offline without redundancy; broadcast traffic per subnet."
+                },
+                {
+                    "heading": "19. Real-World Enterprise Applications",
+                    "content": "Universities, corporate LANs, airport Wi-Fi, ISP broadband gateways, data centers."
+                },
+                {
+                    "heading": "20. Best Practices",
+                    "content": "1. Always exclude gateway and static server IPs before creating pools.\\n2. Configure redundant DHCP servers.\\n3. Enable DHCP Snooping on switches for security."
+                },
+                {
+                    "heading": "21. Summary",
+                    "content": "DHCP automates IP parameter management via the DORA process and Relay Agents, serving as a core enterprise network service."
+                }
+            ]
+        },
+        "hardware_inspector": [
+            {
+                "id": "dhcp_dora_engine",
+                "name": "DHCP DORA Process & Lease Inspector",
+                "category": "Layer 7 Automated Configuration Engine",
+                "description": "Visualizes the 4-step DORA packet exchange between DHCP Client (UDP 68) and DHCP Server (UDP 67).",
+                "svg": "<svg viewBox=\"0 0 400 220\" xmlns=\"http://www.w3.org/2000/svg\">\n                <rect x=\"20\" y=\"20\" width=\"360\" height=\"180\" rx=\"8\" fill=\"#0f172a\" stroke=\"#10b981\" stroke-width=\"2\"/>\n                <text x=\"200\" y=\"45\" fill=\"#10b981\" font-size=\"14\" font-weight=\"bold\" text-anchor=\"middle\">DHCP 4-STEP DORA PROCESS ENGINE</text>\n                <text x=\"60\" y=\"80\" fill=\"#ffffff\" font-size=\"12\" font-weight=\"bold\">Client (UDP 68)</text>\n                <text x=\"340\" y=\"80\" fill=\"#38bdf8\" font-size=\"12\" font-weight=\"bold\" text-anchor=\"end\">DHCP Server (UDP 67)</text>\n                <line x1=\"70\" y1=\"95\" x2=\"330\" y2=\"115\" stroke=\"#ef4444\" stroke-width=\"2.5\"/>\n                <text x=\"200\" y=\"100\" fill=\"#ef4444\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">1. DISCOVER (Broadcast 255.255.255.255)</text>\n                <line x1=\"330\" y1=\"125\" x2=\"70\" y2=\"145\" stroke=\"#f59e0b\" stroke-width=\"2.5\"/>\n                <text x=\"200\" y=\"130\" fill=\"#f59e0b\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">2. OFFER (Offer 192.168.10.50)</text>\n                <line x1=\"70\" y1=\"155\" x2=\"330\" y2=\"175\" stroke=\"#38bdf8\" stroke-width=\"2.5\"/>\n                <text x=\"200\" y=\"160\" fill=\"#38bdf8\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">3. REQUEST (Accept Offer)</text>\n                <line x1=\"330\" y1=\"185\" x2=\"70\" y2=\"200\" stroke=\"#10b981\" stroke-width=\"2.5\"/>\n                <text x=\"200\" y=\"190\" fill=\"#10b981\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">4. ACK (Lease Granted 8 hrs)</text>\n            </svg>"
+            }
+        ],
+        "troubleshooting": {
+            "problem": "Client Receives APIPA Address (169.254.x.x) / DHCP Discover Fails Across Router Subnet",
+            "hints": [
+                "Check if the client is receiving an APIPA self-assigned address (169.254.0.0/16), indicating zero DHCP responses.",
+                "If the DHCP server is on a different VLAN/subnet, check if 'ip helper-address <server-ip>' is configured on the router interface.",
+                "Verify if the DHCP pool has available unallocated IP addresses in 'show ip dhcp pool'.",
+                "Check if gateway IP was incorrectly included in pool range without being excluded."
+            ],
+            "fix": "Configure 'ip helper-address <dhcp-server-ip>' on the client-facing router interface to relay broadcasts. Exclude gateway IPs using 'ip dhcp excluded-address'."
         },
         "viva": [
             {
@@ -8803,14 +9023,6 @@ window.VLAB_DATA = {
                 "a": "To prevent the DHCP server from assigning statically configured IP addresses (like router gateways or servers), avoiding IP conflicts."
             }
         ],
-        "assignment": "Configure a Cisco router with 2 DHCP pools for VLAN 10 and VLAN 20. Verify client IP leases.",
-        "references": [
-            {
-                "title": "RFC 2131 - DHCP Specification",
-                "link": "https://datatracker.ietf.org/doc/html/rfc2131"
-            }
-        ],
-        "simType": "cli",
         "evaluations": [
             {
                 "type": "pre",
@@ -8992,7 +9204,8 @@ window.VLAB_DATA = {
                 "answer": "DHCP Snooping",
                 "explanation": "DHCP Snooping filters untrusted ports to block unauthorized rogue DHCP servers."
             }
-        ]
+        ],
+        "simType": "dhcp_config_sim"
     },
     "vlan": {
         "title": "Practical 7: Virtual LANs (VLAN) & Trunking",
@@ -11813,30 +12026,2248 @@ window.VLAB_DATA = {
             }
         ],
         "simType": "static_routing_sim"
+    },
+    "udp_tcp_sim": {
+        "title": "Practical 12: UDP & TCP Transport Protocols",
+        "aim": "To examine end-to-end transport layer communication, analyze process-to-process port addressing, compare connection-oriented TCP (3-way handshake, flow control, sliding window, retransmission) vs connectionless UDP (best-effort, low overhead), and select appropriate transport protocols for network applications.",
+        "intro": {
+            "summary": "The Transport Layer (Layer 4) manages process-to-process communication between host applications. TCP provides connection-oriented, reliable, ordered delivery with error recovery and sliding-window flow control. UDP provides connectionless, lightweight, low-latency transmission for real-time applications like DNS, video streaming, and VoIP.",
+            "importance": "Understanding Layer 4 protocol selection is fundamental to network engineering. Students learn why web browsing (HTTP/HTTPS), email (SMTP), and file transfer (FTP) rely on TCP reliability, whereas VoIP, live streaming, and gaming prioritize UDP speed.",
+            "applications": [
+                "Web Browsing & E-Commerce (TCP 80/443)",
+                "Real-Time Video Conferencing & Streaming (UDP)",
+                "Domain Name Resolution (DNS UDP 53)",
+                "Secure Administrative Shell Access (SSH TCP 22)"
+            ],
+            "outcome": "Students will be able to visualize the TCP 3-Way Handshake, explain sliding window flow control, analyze port numbers and socket pairs, and diagnose packet loss retransmissions."
+        },
+        "prerequisites": [
+            "Practical 4: IPv4 & IPv6 Address Classification",
+            "Practical 11: Static Routing Configuration"
+        ],
+        "outcomes": [
+            "Differentiate between TCP (connection-oriented) and UDP (connectionless).",
+            "Explain the TCP 3-Way Handshake (SYN, SYN-ACK, ACK) and 4-Way Connection Termination (FIN, ACK).",
+            "Describe sequence numbers, acknowledgements, and sliding window flow control.",
+            "Identify well-known port numbers (HTTP 80, HTTPS 443, SSH 22, DNS 53, DHCP 67/68).",
+            "Analyze socket pairs (Source IP:Port ⇹ Destination IP:Port).",
+            "Select appropriate transport protocols based on application performance requirements."
+        ],
+        "theory": {
+            "intro": "Layer 4 ensures process-to-process data delivery between endpoints. TCP provides reliability through connection management and error recovery, while UDP provides fast, unacknowledged datagram transport.",
+            "sections": [
+                {
+                    "heading": "1. Introduction to Transport Protocols",
+                    "content": "The Transport Layer bridges application processes with the underlying IP network. It performs segmentation, flow control, and port multiplexing to run multiple network applications simultaneously on a single device."
+                },
+                {
+                    "heading": "2. Learning Objectives",
+                    "content": "Master Layer 4 concepts:\\n• TCP 3-Way Handshake.\\n• Sliding window flow control.\\n• Error detection & ARQ retransmissions.\\n• UDP connectionless datagram delivery.\\n• Port number classification and socket pairing."
+                },
+                {
+                    "heading": "3. What is the Transport Layer?",
+                    "content": "Layer 4 of the OSI model. Responsible for end-to-end communication, segmenting data, managing ports, enforcing reliability, and controlling transmission rates."
+                },
+                {
+                    "heading": "4. Why Transport Protocols are Required",
+                    "content": "An IP address delivers packets to a computer, but multiple applications (browser, email, video) run concurrently. Transport layer port numbers ensure incoming packets reach the correct receiving application process."
+                },
+                {
+                    "heading": "5. What is TCP?",
+                    "content": "Transmission Control Protocol (TCP) is a reliable, connection-oriented protocol (RFC 793). It guarantees ordered packet delivery, error recovery, flow control, and congestion control."
+                },
+                {
+                    "heading": "6. What is UDP?",
+                    "content": "User Datagram Protocol (UDP) is a connectionless, best-effort protocol (RFC 768). It transmits datagrams without handshake overhead, acknowledgements, or retransmissions, minimizing latency."
+                },
+                {
+                    "heading": "7. Detailed TCP vs UDP Comparison",
+                    "content": "• Connection: TCP is Connection-Oriented; UDP is Connectionless.\\n• Reliability: TCP guarantees delivery via ACKs; UDP provides Best-Effort.\\n• Ordering: TCP maintains sequence numbers; UDP segments may arrive out of order.\\n• Header Size: TCP is 20 Bytes minimum; UDP is 8 Bytes.\\n• Speed: UDP is faster with lower overhead."
+                },
+                {
+                    "heading": "8. Connection-Oriented Communication",
+                    "content": "TCP establishes a logical stateful connection across 3 phases: Connection Setup (Handshake), Data Transfer, and Connection Teardown."
+                },
+                {
+                    "heading": "9. Connectionless Communication",
+                    "content": "UDP transmits datagrams immediately without setup packets. Ideal for real-time applications where dropping a frame is preferable to delaying speech or video."
+                },
+                {
+                    "heading": "10. TCP Three-Way Handshake",
+                    "content": "1. Client sends SYN (Seq=X).\\n2. Server responds with SYN-ACK (Seq=Y, Ack=X+1).\\n3. Client responds with ACK (Ack=Y+1). Connection transitions to ESTABLISHED."
+                },
+                {
+                    "heading": "11. TCP Data Transfer & ARQ",
+                    "content": "Data is split into segments with sequence numbers. Positive Acknowledgement with Retransmission (PAR) resends lost segments if timer expires."
+                },
+                {
+                    "heading": "12. Sequence Numbers & Ordering",
+                    "content": "Sequence numbers allow the receiver to reassemble out-of-order segments into the exact original byte stream."
+                },
+                {
+                    "heading": "13. Acknowledgements (ACK)",
+                    "content": "Receivers send ACK numbers indicating the NEXT expected byte sequence number."
+                },
+                {
+                    "heading": "14. Sliding Window Protocol",
+                    "content": "Sliding window allows sending multiple unacknowledged segments up to the advertised Window Size, maximizing bandwidth utilization."
+                },
+                {
+                    "heading": "15. Flow Control & Window Sizing",
+                    "content": "Receivers advertise Window Size based on buffer capacity. If buffer fills, Window Size drops to zero, pausing the sender."
+                },
+                {
+                    "heading": "16. Error Detection & Retransmission",
+                    "content": "Checksums detect bit corruption. Retransmission timers (RTO) trigger resending missing segments."
+                },
+                {
+                    "heading": "17. Connection Termination (4-Way Handshake)",
+                    "content": "Closing connection uses FIN ➔ ACK ➔ FIN ➔ ACK sequence."
+                },
+                {
+                    "heading": "18. Port Numbers & Classification",
+                    "content": "• Well-Known Ports: 0-1023 (HTTP 80, HTTPS 443, SSH 22, DNS 53).\\n• Registered Ports: 1024-49151.\\n• Dynamic/Private Ports: 49152-65535."
+                },
+                {
+                    "heading": "19. Socket Communication",
+                    "content": "A socket pair uniquely identifies a connection: (Source IP : Source Port ⇹ Dest IP : Dest Port, Protocol)."
+                },
+                {
+                    "heading": "20. Applications of TCP",
+                    "content": "Web (HTTP/HTTPS), File Transfer (FTP), Email (SMTP/IMAP), Remote Access (SSH)."
+                },
+                {
+                    "heading": "21. Applications of UDP",
+                    "content": "DNS, VoIP (SIP/RTP), Video Streaming, Online Gaming, DHCP, SNMP."
+                },
+                {
+                    "heading": "22. Advantages & Limitations",
+                    "content": "TCP ensures zero data loss but adds overhead. UDP provides ultra-low latency but offers no loss recovery."
+                },
+                {
+                    "heading": "23. Best Practices",
+                    "content": "Use TCP for financial, web, and file data. Use UDP for time-sensitive voice, video, and DNS lookups."
+                },
+                {
+                    "heading": "24. Summary",
+                    "content": "TCP and UDP provide essential end-to-end transport services, balancing reliability vs speed across modern IP networks."
+                }
+            ]
+        },
+        "hardware_inspector": [
+            {
+                "id": "tcp_handshake_engine",
+                "name": "TCP 3-Way Handshake & State Engine",
+                "category": "Layer 4 Stateful Connection Engine",
+                "description": "Visualizes TCP state transitions (CLOSED ➔ SYN_SENT ➔ SYN_RCVD ➔ ESTABLISHED) during 3-way handshake.",
+                "svg": "<svg viewBox=\"0 0 400 220\" xmlns=\"http://www.w3.org/2000/svg\">\n                <rect x=\"20\" y=\"20\" width=\"360\" height=\"180\" rx=\"8\" fill=\"#0f172a\" stroke=\"#ec4899\" stroke-width=\"2\"/>\n                <text x=\"200\" y=\"45\" fill=\"#ec4899\" font-size=\"14\" font-weight=\"bold\" text-anchor=\"middle\">TCP 3-WAY HANDSHAKE STATE ENGINE</text>\n                <text x=\"60\" y=\"80\" fill=\"#38bdf8\" font-size=\"12\" font-weight=\"bold\">Client (SYN_SENT)</text>\n                <text x=\"340\" y=\"80\" fill=\"#10b981\" font-size=\"12\" font-weight=\"bold\" text-anchor=\"end\">Server (LISTEN)</text>\n                <line x1=\"70\" y1=\"95\" x2=\"330\" y2=\"115\" stroke=\"#ec4899\" stroke-width=\"2.5\" stroke-dasharray=\"4,4\"/>\n                <text x=\"200\" y=\"100\" fill=\"#ec4899\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">1. SYN (Seq=100)</text>\n                <line x1=\"330\" y1=\"125\" x2=\"70\" y2=\"145\" stroke=\"#38bdf8\" stroke-width=\"2.5\" stroke-dasharray=\"4,4\"/>\n                <text x=\"200\" y=\"130\" fill=\"#38bdf8\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">2. SYN-ACK (Seq=300, Ack=101)</text>\n                <line x1=\"70\" y1=\"155\" x2=\"330\" y2=\"175\" stroke=\"#10b981\" stroke-width=\"2.5\" stroke-dasharray=\"4,4\"/>\n                <text x=\"200\" y=\"160\" fill=\"#10b981\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">3. ACK (Ack=301) [ESTABLISHED]</text>\n            </svg>"
+            }
+        ],
+        "troubleshooting": {
+            "problem": "TCP Connection Timeout / Dropped Handshake (SYN Sent but No SYN-ACK Received)",
+            "hints": [
+                "Verify if the destination IP address is reachable via ICMP ping.",
+                "Check if a firewall or Access Control List (ACL) is blocking the target TCP port (e.g., port 80/443).",
+                "Verify if the target server service is active and listening on the specified port.",
+                "Inspect TCP SYN retransmission timeouts."
+            ],
+            "fix": "Ensure destination firewall permits incoming TCP SYN packets on target port. Verify server service status (e.g., systemctl status nginx) and check port binding using netstat -an."
+        },
+        "viva": [
+            {
+                "q": "What are the flags set in the second step of a TCP 3-way handshake?",
+                "a": "SYN flag = 1 and ACK flag = 1 (SYN-ACK)."
+            },
+            {
+                "q": "Why is UDP preferred over TCP for Voice over IP (VoIP)?",
+                "a": "UDP has low overhead (8-byte header) and no retransmission delays, prioritizing real-time latency over packet loss recovery."
+            }
+        ],
+        "evaluations": [
+            {
+                "type": "pre",
+                "question": "Which Transport Layer protocol provides reliable, connection-oriented data delivery with error checking and flow control?",
+                "options": [
+                    "UDP",
+                    "TCP",
+                    "IP",
+                    "ICMP"
+                ],
+                "answer": "TCP",
+                "explanation": "TCP (Transmission Control Protocol) is connection-oriented and reliable."
+            },
+            {
+                "type": "pre",
+                "question": "Which Transport Layer protocol is connectionless, lightweight, and used for real-time video streaming and DNS?",
+                "options": [
+                    "TCP",
+                    "UDP",
+                    "FTP",
+                    "HTTP"
+                ],
+                "answer": "UDP",
+                "explanation": "UDP (User Datagram Protocol) is connectionless with low overhead."
+            },
+            {
+                "type": "pre",
+                "question": "What mechanism does TCP use to establish a connection between client and server?",
+                "options": [
+                    "3-Way Handshake (SYN, SYN-ACK, ACK)",
+                    "2-Way Ping",
+                    "4-Way Teardown",
+                    "DHCP Lease"
+                ],
+                "answer": "3-Way Handshake (SYN, SYN-ACK, ACK)",
+                "explanation": "TCP 3-way handshake exchanges SYN, SYN-ACK, and ACK flags."
+            },
+            {
+                "type": "pre",
+                "question": "What is the header size of a UDP packet compared to TCP?",
+                "options": [
+                    "UDP header is 8 bytes; TCP header is 20 bytes minimum",
+                    "UDP header is 20 bytes; TCP header is 8 bytes",
+                    "Both are 64 bytes",
+                    "UDP has no header"
+                ],
+                "answer": "UDP header is 8 bytes; TCP header is 20 bytes minimum",
+                "explanation": "UDP header is only 8 bytes (Source Port, Dest Port, Length, Checksum)."
+            },
+            {
+                "type": "pre",
+                "question": "What is the port number for HTTP web traffic?",
+                "options": [
+                    "21",
+                    "22",
+                    "80",
+                    "443"
+                ],
+                "answer": "80",
+                "explanation": "HTTP uses TCP port 80 (HTTPS uses TCP port 443)."
+            },
+            {
+                "type": "post",
+                "question": "What TCP flag is sent to initiate connection termination?",
+                "options": [
+                    "SYN",
+                    "FIN",
+                    "RST",
+                    "PSH"
+                ],
+                "answer": "FIN",
+                "explanation": "FIN (Finish) flag initiates graceful connection termination."
+            },
+            {
+                "type": "post",
+                "question": "What TCP flow control mechanism regulates how much unacknowledged data a sender can transmit?",
+                "options": [
+                    "Sliding Window Mechanism",
+                    "Slow Start",
+                    "Congestion Avoidance",
+                    "Checksumming"
+                ],
+                "answer": "Sliding Window Mechanism",
+                "explanation": "Sliding Window adjusts data volume sent before requiring ACKs."
+            },
+            {
+                "type": "post",
+                "question": "Which application layer protocol uses UDP port 53 for fast query resolution?",
+                "options": [
+                    "HTTP",
+                    "DNS",
+                    "SSH",
+                    "FTP"
+                ],
+                "answer": "DNS",
+                "explanation": "DNS uses UDP port 53 for fast domain name queries."
+            },
+            {
+                "type": "post",
+                "question": "What field in the TCP header provides ordered delivery and reassembly of segments?",
+                "options": [
+                    "Sequence Number",
+                    "Port Number",
+                    "Window Size",
+                    "Checksum"
+                ],
+                "answer": "Sequence Number",
+                "explanation": "Sequence numbers allow receiver to reorder out-of-order segments."
+            },
+            {
+                "type": "post",
+                "question": "What happens if a UDP packet is corrupted during transmission?",
+                "options": [
+                    "Sender retransmits automatically",
+                    "UDP drops the packet without retransmission",
+                    "Network halts",
+                    "Packet converted to TCP"
+                ],
+                "answer": "UDP drops the packet without retransmission",
+                "explanation": "UDP checksum detects errors, but dropped packets are not retransmitted by UDP."
+            },
+            {
+                "type": "post",
+                "question": "Which application protocol uses TCP port 22 for secure remote administration?",
+                "options": [
+                    "Telnet (Port 23)",
+                    "SSH (Port 22)",
+                    "FTP (Port 21)",
+                    "SMTP (Port 25)"
+                ],
+                "answer": "SSH (Port 22)",
+                "explanation": "SSH uses TCP port 22 for encrypted shell access."
+            },
+            {
+                "type": "post",
+                "question": "What TCP flag forces immediate delivery of buffered data without waiting for buffer to fill?",
+                "options": [
+                    "URG",
+                    "PSH",
+                    "SYN",
+                    "ACK"
+                ],
+                "answer": "PSH",
+                "explanation": "PSH (Push) flag forces immediate push of data to application layer."
+            },
+            {
+                "type": "post",
+                "question": "What is the TCP 4-Way Teardown sequence for closing a connection?",
+                "options": [
+                    "FIN ➔ ACK ➔ FIN ➔ ACK",
+                    "SYN ➔ SYN-ACK ➔ ACK",
+                    "RST ➔ RST-ACK",
+                    "DISCONNECT"
+                ],
+                "answer": "FIN ➔ ACK ➔ FIN ➔ ACK",
+                "explanation": "TCP connection close exchanges FIN, ACK, FIN, ACK."
+            },
+            {
+                "type": "post",
+                "question": "What well-known port range is assigned by IANA for standard services (e.g. HTTP, SSH, DNS)?",
+                "options": [
+                    "0 to 1023",
+                    "1024 to 49151",
+                    "49152 to 65535",
+                    "1 to 100"
+                ],
+                "answer": "0 to 1023",
+                "explanation": "Ports 0-1023 are Well-Known System Ports."
+            },
+            {
+                "type": "post",
+                "question": "Why is UDP preferred over TCP for Voice over IP (VoIP) and online gaming?",
+                "options": [
+                    "VoIP requires 100% data accuracy",
+                    "Low latency is critical and missing audio packets are preferable to delayed retransmissions",
+                    "UDP encrypts audio",
+                    "UDP requires less power"
+                ],
+                "answer": "Low latency is critical and missing audio packets are preferable to delayed retransmissions",
+                "explanation": "Real-time audio demands low latency; retransmitting old audio packets causes speech distortion."
+            }
+        ],
+        "simType": "udp_tcp_sim"
+    },
+    "dhcp_config_sim": {
+        "title": "Practical 13: DHCP Configuration & IP Pools",
+        "aim": "To examine automatic IP address allocation via Dynamic Host Configuration Protocol (DHCP), master the 4-step DORA process (Discover, Offer, Request, ACK), configure DHCP pools, excluded IP ranges, default routers, and DNS servers on Cisco IOS routers, configure DHCP Relay Agents (ip helper-address) across multi-subnet networks, and verify leases.",
+        "intro": {
+            "summary": "Dynamic Host Configuration Protocol (DHCP) automates IP address, subnet mask, default gateway, and DNS configuration for network clients. Operating via the 4-step DORA handshake (Discover, Offer, Request, ACK), DHCP eliminates manual configuration errors, manages address leases, and scales client management in enterprise LANs.",
+            "importance": "DHCP is the primary automated addressing protocol used in campus, enterprise, data center, and home networks. Network engineers must know how to configure DHCP pools, exclude gateway IPs, configure lease renewal timers, and set up DHCP Relay Agents to forward client broadcasts across routed VLAN boundaries.",
+            "applications": [
+                "Enterprise Campus & Student Wi-Fi LANs",
+                "Corporate Desktop & Mobile IP Allocation",
+                "DHCP Relay Across Multi-VLAN Routers (ip helper-address)",
+                "Automated Voice over IP (VoIP) Phone Provisioning"
+            ],
+            "outcome": "Students will be able to trace the DORA process, configure Cisco IOS DHCP pools and excluded address ranges, set up DHCP Relay on router interfaces, and verify active bindings using `show ip dhcp binding`."
+        },
+        "prerequisites": [
+            "Practical 4: IPv4 & IPv6 Address Classification",
+            "Practical 6: Subnetting, VLSM & CIDR",
+            "Practical 7: Virtual LANs (VLAN) & Trunking"
+        ],
+        "outcomes": [
+            "Explain the purpose and advantages of DHCP over Static IP addressing.",
+            "Describe the 4-step DORA process (Discover, Offer, Request, ACK).",
+            "Configure Cisco IOS DHCP Pools (`ip dhcp pool`), subnet networks, default routers, and DNS servers.",
+            "Configure Excluded IP Addresses (`ip dhcp excluded-address`) for gateways and servers.",
+            "Explain DHCP Lease duration, renewal timers (T1 at 50%), and MAC reservations.",
+            "Configure DHCP Relay Agent (`ip helper-address`) to forward broadcasts across routers.",
+            "Verify DHCP operation using `show ip dhcp binding` and `ipconfig /renew`."
+        ],
+        "theory": {
+            "intro": "DHCP automates network configuration by assigning dynamic IP addresses from a managed pool, reducing network administrative effort and eliminating duplicate IP conflicts.",
+            "sections": [
+                {
+                    "heading": "1. Introduction to DHCP",
+                    "content": "Manual IP configuration on hundreds of workstations is inefficient and prone to duplicate address conflicts. DHCP automates IP allocation, providing subnet masks, default gateways, and DNS server addresses dynamically when devices connect."
+                },
+                {
+                    "heading": "2. Learning Objectives",
+                    "content": "Master DHCP concepts:\\n• The DORA 4-step client-server exchange.\\n• Configuring Cisco IOS DHCP pools and excluded ranges.\\n• Lease duration and T1/T2 renewal timers.\\n• DHCP Relay Agent (ip helper-address).\\n• Verifying bindings with show ip dhcp binding."
+                },
+                {
+                    "heading": "3. Why DHCP is Required",
+                    "content": "In networks with hundreds or thousands of mobile devices, manual static IP entry is impossible. DHCP centralizes IP pool management, automatically recycling unused addresses."
+                },
+                {
+                    "heading": "4. What is DHCP?",
+                    "content": "Dynamic Host Configuration Protocol (DHCP) is an application layer protocol operating over UDP ports 67 (Server) and 68 (Client) defined in RFC 2131."
+                },
+                {
+                    "heading": "5. Static IP vs Dynamic IP Comparison",
+                    "content": "• Static: Manual entry; suitable for Servers/Routers; zero protocol load.\\n• Dynamic: Automatic allocation; suitable for PCs/Laptops/Phones; managed via central pools."
+                },
+                {
+                    "heading": "6. DHCP Architecture Components",
+                    "content": "• DHCP Client: Device requesting network settings.\\n• DHCP Server: Central router or server issuing IP leases.\\n• DHCP Relay Agent: Router forwarding client broadcasts across subnets."
+                },
+                {
+                    "heading": "7. DHCP IP Address Pools",
+                    "content": "An IP Pool defines the range of contiguous IP addresses available for dynamic allocation to requesting clients (e.g. 192.168.10.10 to 192.168.10.200)."
+                },
+                {
+                    "heading": "8. The 4-Step DORA Process",
+                    "content": "1. DISCOVER: Client broadcasts DHCP Discover (255.255.255.255).\\n2. OFFER: Server unicasts/broadcasts DHCP Offer with proposed IP.\\n3. REQUEST: Client broadcasts DHCP Request accepting offered IP.\\n4. ACK: Server sends DHCP ACK confirming lease."
+                },
+                {
+                    "heading": "9. DHCP Lease Mechanism",
+                    "content": "IP addresses are leased temporarily. Information includes IP address, subnet mask, gateway, DNS, lease time, and renewal deadlines."
+                },
+                {
+                    "heading": "10. Lease Renewal Process (T1 & T2 Timers)",
+                    "content": "At 50% of lease duration (T1 timer), client unicasts a DHCP Request to renew its lease. At 87.5% (T2 timer), if original server fails to respond, client broadcasts to any available DHCP server."
+                },
+                {
+                    "heading": "11. DHCP MAC Address Reservation",
+                    "content": "Maps a client's static MAC address to a fixed reserved IP address within the DHCP server database."
+                },
+                {
+                    "heading": "12. DHCP Relay Agent (ip helper-address)",
+                    "content": "Routers drop Layer 2 broadcasts by default. A DHCP Relay Agent intercepts client Discover broadcasts on an interface and forwards them as unicast packets to a remote DHCP server."
+                },
+                {
+                    "heading": "13. DHCP Message Types",
+                    "content": "Discover, Offer, Request, ACK, NAK (Negative Ack), Release (Client releases IP), Decline (Client detects IP collision), Inform."
+                },
+                {
+                    "heading": "14. Cisco IOS Configuration Commands",
+                    "content": "• Exclude IPs: `ip dhcp excluded-address 192.168.10.1 192.168.10.20`\\n• Create Pool: `ip dhcp pool LAN_POOL`\\n• Specify Subnet: `network 192.168.10.0 255.255.255.0`\\n• Gateway: `default-router 192.168.10.1`\\n• DNS: `dns-server 8.8.8.8`\\n• Relay: `interface Gi0/0 -> ip helper-address 10.0.0.5`"
+                },
+                {
+                    "heading": "15. Verification Commands",
+                    "content": "• `show ip dhcp binding` - Lists active leased IP/MAC mappings.\\n• `show ip dhcp pool` - Displays pool utilization and statistics.\\n• `ipconfig /all` or `ipconfig /renew` - Verifies client settings."
+                },
+                {
+                    "heading": "16. Common DHCP Problems",
+                    "content": "Exhausted IP pool, missing ip helper-address on router, excluded gateway ranges missing, rogue DHCP servers."
+                },
+                {
+                    "heading": "17. Advantages of DHCP",
+                    "content": "Automated configuration, zero IP conflict risk, centralized management, mobile device support."
+                },
+                {
+                    "heading": "18. Limitations of DHCP",
+                    "content": "Single point of failure if server goes offline without redundancy; broadcast traffic per subnet."
+                },
+                {
+                    "heading": "19. Real-World Enterprise Applications",
+                    "content": "Universities, corporate LANs, airport Wi-Fi, ISP broadband gateways, data centers."
+                },
+                {
+                    "heading": "20. Best Practices",
+                    "content": "1. Always exclude gateway and static server IPs before creating pools.\\n2. Configure redundant DHCP servers.\\n3. Enable DHCP Snooping on switches for security."
+                },
+                {
+                    "heading": "21. Summary",
+                    "content": "DHCP automates IP parameter management via the DORA process and Relay Agents, serving as a core enterprise network service."
+                }
+            ]
+        },
+        "hardware_inspector": [
+            {
+                "id": "dhcp_dora_engine",
+                "name": "DHCP DORA Process & Lease Inspector",
+                "category": "Layer 7 Automated Configuration Engine",
+                "description": "Visualizes the 4-step DORA packet exchange between DHCP Client (UDP 68) and DHCP Server (UDP 67).",
+                "svg": "<svg viewBox=\"0 0 400 220\" xmlns=\"http://www.w3.org/2000/svg\">\n                <rect x=\"20\" y=\"20\" width=\"360\" height=\"180\" rx=\"8\" fill=\"#0f172a\" stroke=\"#10b981\" stroke-width=\"2\"/>\n                <text x=\"200\" y=\"45\" fill=\"#10b981\" font-size=\"14\" font-weight=\"bold\" text-anchor=\"middle\">DHCP 4-STEP DORA PROCESS ENGINE</text>\n                <text x=\"60\" y=\"80\" fill=\"#ffffff\" font-size=\"12\" font-weight=\"bold\">Client (UDP 68)</text>\n                <text x=\"340\" y=\"80\" fill=\"#38bdf8\" font-size=\"12\" font-weight=\"bold\" text-anchor=\"end\">DHCP Server (UDP 67)</text>\n                <line x1=\"70\" y1=\"95\" x2=\"330\" y2=\"115\" stroke=\"#ef4444\" stroke-width=\"2.5\"/>\n                <text x=\"200\" y=\"100\" fill=\"#ef4444\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">1. DISCOVER (Broadcast 255.255.255.255)</text>\n                <line x1=\"330\" y1=\"125\" x2=\"70\" y2=\"145\" stroke=\"#f59e0b\" stroke-width=\"2.5\"/>\n                <text x=\"200\" y=\"130\" fill=\"#f59e0b\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">2. OFFER (Offer 192.168.10.50)</text>\n                <line x1=\"70\" y1=\"155\" x2=\"330\" y2=\"175\" stroke=\"#38bdf8\" stroke-width=\"2.5\"/>\n                <text x=\"200\" y=\"160\" fill=\"#38bdf8\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">3. REQUEST (Accept Offer)</text>\n                <line x1=\"330\" y1=\"185\" x2=\"70\" y2=\"200\" stroke=\"#10b981\" stroke-width=\"2.5\"/>\n                <text x=\"200\" y=\"190\" fill=\"#10b981\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">4. ACK (Lease Granted 8 hrs)</text>\n            </svg>"
+            }
+        ],
+        "troubleshooting": {
+            "problem": "Client Receives APIPA Address (169.254.x.x) / DHCP Discover Fails Across Router Subnet",
+            "hints": [
+                "Check if the client is receiving an APIPA self-assigned address (169.254.0.0/16), indicating zero DHCP responses.",
+                "If the DHCP server is on a different VLAN/subnet, check if 'ip helper-address <server-ip>' is configured on the router interface.",
+                "Verify if the DHCP pool has available unallocated IP addresses in 'show ip dhcp pool'.",
+                "Check if gateway IP was incorrectly included in pool range without being excluded."
+            ],
+            "fix": "Configure 'ip helper-address <dhcp-server-ip>' on the client-facing router interface to relay broadcasts. Exclude gateway IPs using 'ip dhcp excluded-address'."
+        },
+        "viva": [
+            {
+                "q": "What does the DORA acronym stand for in DHCP?",
+                "a": "Discover, Offer, Request, Acknowledge."
+            },
+            {
+                "q": "Why is `ip dhcp excluded-address` necessary?",
+                "a": "To prevent the DHCP server from assigning statically configured IP addresses (like router gateways or servers), avoiding IP conflicts."
+            }
+        ],
+        "evaluations": [
+            {
+                "type": "pre",
+                "question": "What is the primary function of a DHCP server in a computer network?",
+                "options": [
+                    "To translate domain names to IP addresses",
+                    "To automatically assign dynamic IP addresses, subnet masks, default gateways, and DNS servers to client devices",
+                    "To route packets between subnets",
+                    "To filter firewall ports"
+                ],
+                "answer": "To automatically assign dynamic IP addresses, subnet masks, default gateways, and DNS servers to client devices",
+                "explanation": "DHCP automates IP address configuration for network hosts."
+            },
+            {
+                "type": "pre",
+                "question": "What is the 4-step message exchange process used by DHCP clients to acquire an IP address?",
+                "options": [
+                    "DORA (Discover, Offer, Request, Acknowledge)",
+                    "SYN, SYN-ACK, ACK",
+                    "ARP Request, ARP Reply",
+                    "Ping, Pong"
+                ],
+                "answer": "DORA (Discover, Offer, Request, Acknowledge)",
+                "explanation": "DHCP uses the DORA process: Discover, Offer, Request, Acknowledge."
+            },
+            {
+                "type": "pre",
+                "question": "What UDP port numbers are used by DHCP clients and servers?",
+                "options": [
+                    "Client: 68, Server: 67",
+                    "Client: 80, Server: 443",
+                    "Client: 53, Server: 53",
+                    "Client: 21, Server: 20"
+                ],
+                "answer": "Client: 68, Server: 67",
+                "explanation": "DHCP Server listens on UDP port 67; DHCP Client listens on UDP port 68."
+            },
+            {
+                "type": "pre",
+                "question": "What feature allows a router to forward DHCP broadcast requests from clients to a DHCP server located on a different subnet?",
+                "options": [
+                    "DHCP Relay Agent (ip helper-address)",
+                    "NAT/PAT",
+                    "VLAN Trunking",
+                    "DNS Forwarder"
+                ],
+                "answer": "DHCP Relay Agent (ip helper-address)",
+                "explanation": "DHCP Relay Agent converts client broadcasts to unicasts toward remote DHCP server."
+            },
+            {
+                "type": "pre",
+                "question": "What command excludes IP addresses 192.168.1.1 through 192.168.1.10 from a Cisco DHCP pool?",
+                "options": [
+                    "ip dhcp excluded-address 192.168.1.1 192.168.1.10",
+                    "dhcp exclude 192.168.1.1-10",
+                    "no dhcp pool 192.168.1.1",
+                    "deny ip 192.168.1.1"
+                ],
+                "answer": "ip dhcp excluded-address 192.168.1.1 192.168.1.10",
+                "explanation": "Syntax: ip dhcp excluded-address <start-ip> <end-ip>."
+            },
+            {
+                "type": "post",
+                "question": "In the DORA process, which message is broadcast by a client looking for a DHCP server?",
+                "options": [
+                    "DHCP Discover",
+                    "DHCP Offer",
+                    "DHCP Request",
+                    "DHCP ACK"
+                ],
+                "answer": "DHCP Discover",
+                "explanation": "DHCP Discover is broadcast to 255.255.255.255 by unconfigured clients."
+            },
+            {
+                "type": "post",
+                "question": "What Cisco command configures a DHCP address pool named LAN_POOL?",
+                "options": [
+                    "ip dhcp pool LAN_POOL",
+                    "create pool LAN_POOL",
+                    "dhcp server LAN_POOL",
+                    "set pool LAN_POOL"
+                ],
+                "answer": "ip dhcp pool LAN_POOL",
+                "explanation": "Syntax: ip dhcp pool <pool-name>."
+            },
+            {
+                "type": "post",
+                "question": "What command specifies the subnet network and mask inside a Cisco DHCP pool?",
+                "options": [
+                    "network 192.168.1.0 255.255.255.0",
+                    "ip address 192.168.1.0",
+                    "subnet 192.168.1.0",
+                    "pool network 192.168.1.0"
+                ],
+                "answer": "network 192.168.1.0 255.255.255.0",
+                "explanation": "`network <net-ip> <mask>` defines IP address pool scope."
+            },
+            {
+                "type": "post",
+                "question": "What command specifies the default gateway assigned to DHCP clients?",
+                "options": [
+                    "default-router 192.168.1.1",
+                    "ip default-gateway 192.168.1.1",
+                    "gateway 192.168.1.1",
+                    "next-hop 192.168.1.1"
+                ],
+                "answer": "default-router 192.168.1.1",
+                "explanation": "`default-router <ip>` configures default gateway option."
+            },
+            {
+                "type": "post",
+                "question": "What command specifies DNS server IP addresses assigned to DHCP clients?",
+                "options": [
+                    "dns-server 8.8.8.8 8.8.4.4",
+                    "ip dns 8.8.8.8",
+                    "nameserver 8.8.8.8",
+                    "dns 8.8.8.8"
+                ],
+                "answer": "dns-server 8.8.8.8 8.8.4.4",
+                "explanation": "`dns-server <ip1> <ip2>` configures DNS options."
+            },
+            {
+                "type": "post",
+                "question": "What command displays all active DHCP leases granted by a Cisco router?",
+                "options": [
+                    "show ip dhcp binding",
+                    "show ip dhcp pool",
+                    "show ip dhcp leases",
+                    "show ip dhcp server"
+                ],
+                "answer": "show ip dhcp binding",
+                "explanation": "`show ip dhcp binding` lists client MAC addresses, assigned IPs, and lease expiration."
+            },
+            {
+                "type": "post",
+                "question": "What IP address range is automatically assigned by Windows APIPA if no DHCP server responds?",
+                "options": [
+                    "169.254.0.0/16",
+                    "192.168.0.0/16",
+                    "10.0.0.0/8",
+                    "127.0.0.0/8"
+                ],
+                "answer": "169.254.0.0/16",
+                "explanation": "Automatic Private IP Addressing (APIPA) assigns 169.254.x.x addresses when DHCP fails."
+            },
+            {
+                "type": "post",
+                "question": "How do you configure a router interface to forward DHCP broadcasts to server 10.0.0.5?",
+                "options": [
+                    "ip helper-address 10.0.0.5",
+                    "dhcp relay 10.0.0.5",
+                    "ip forward dhcp 10.0.0.5",
+                    "forward-dhcp 10.0.0.5"
+                ],
+                "answer": "ip helper-address 10.0.0.5",
+                "explanation": "`ip helper-address <server-ip>` enables DHCP relay on an interface."
+            },
+            {
+                "type": "post",
+                "question": "When does a DHCP client attempt to renew its IP address lease?",
+                "options": [
+                    "At 50% of lease duration (T1 timer)",
+                    "At 100% of lease duration",
+                    "Every 60 seconds",
+                    "Never"
+                ],
+                "answer": "At 50% of lease duration (T1 timer)",
+                "explanation": "Clients send unicast DHCP Request to renew lease at 50% expiration (T1)."
+            },
+            {
+                "type": "post",
+                "question": "What security feature prevents unauthorized rogue DHCP servers from assigning invalid IP parameters?",
+                "options": [
+                    "DHCP Snooping",
+                    "Port Security",
+                    "Dynamic ARP Inspection",
+                    "IP Source Guard"
+                ],
+                "answer": "DHCP Snooping",
+                "explanation": "DHCP Snooping filters untrusted ports to block unauthorized rogue DHCP servers."
+            }
+        ],
+        "simType": "dhcp_config_sim"
+    },
+    "static_nat_sim": {
+        "title": "Practical 14: Static Network Address Translation (Static NAT)",
+        "aim": "To examine Network Address Translation (NAT) principles, understand private RFC 1918 vs public IPv4 address spaces, configure 1-to-1 Static NAT mappings on Cisco IOS routers for publishing internal web/mail servers, observe IP packet header translations (Inside Local ⇹ Inside Global), and verify translation tables.",
+        "intro": {
+            "summary": "Static Network Address Translation (Static NAT) establishes a permanent 1-to-1 mapping between an internal private RFC 1918 IP address (Inside Local) and an external public IP address (Inside Global). Static NAT enables external Internet users to initiate inbound connections to internal servers while shielding the rest of the internal network behind the NAT gateway.",
+            "importance": "Static NAT is mandatory for enterprise server publishing. Web servers, mail servers, and VPN gateways located inside private subnets require static public IP mappings to be accessible via public DNS host records while preserving internal network architecture.",
+            "applications": [
+                "Public Web Server Publishing (Port 80/443)",
+                "Enterprise Mail Server Inbound MX Routing",
+                "CCTV Surveillance & Remote Gateway Access",
+                "DMZ Server Perimeter Protection"
+            ],
+            "outcome": "Students will be able to define Inside Local, Inside Global, Outside Local, and Outside Global addresses, configure Cisco IOS static NAT (`ip nat inside source static`), assign NAT inside/outside interfaces, and verify translations using `show ip nat translations`."
+        },
+        "prerequisites": [
+            "Practical 4: IPv4 & IPv6 Address Classification",
+            "Practical 11: Static Routing Configuration"
+        ],
+        "outcomes": [
+            "Explain why NAT is required due to IPv4 address depletion.",
+            "Differentiate private non-routable RFC 1918 addresses from public routable IP addresses.",
+            "Define the 4 NAT address terms: Inside Local, Inside Global, Outside Local, Outside Global.",
+            "Configure Cisco IOS Static NAT (`ip nat inside source static <local-ip> <global-ip>`).",
+            "Assign `ip nat inside` and `ip nat outside` on router interfaces.",
+            "Verify translation entries using `show ip nat translations` and `show ip nat statistics`.",
+            "Troubleshoot misconfigured inside/outside NAT interfaces and ACL blocks."
+        ],
+        "theory": {
+            "intro": "Static NAT maps a specific private IP address to a specific public IP address permanently, allowing external hosts to connect inbound to internal servers.",
+            "sections": [
+                {
+                    "heading": "1. Introduction to Static NAT",
+                    "content": "IPv4 address space depletion necessitated Network Address Translation (NAT). Static NAT provides fixed 1-to-1 translation between an internal private IP address and an external public IP address."
+                },
+                {
+                    "heading": "2. Learning Objectives",
+                    "content": "Master Static NAT concepts:\\n• Private RFC 1918 vs public IP addressing.\\n• Inside Local, Inside Global, Outside Local, Outside Global definitions.\\n• Configuring `ip nat inside source static`.\\n• Assigning inside/outside NAT interfaces.\\n• Verifying NAT tables with `show ip nat translations`."
+                },
+                {
+                    "heading": "3. Why NAT is Required",
+                    "content": "With ~4.3 billion IPv4 addresses and tens of billions of devices, NAT enables private subnets (10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16) to communicate over the Internet using public IPs."
+                },
+                {
+                    "heading": "4. What is NAT?",
+                    "content": "Network Address Translation (NAT) modifies IP address headers in transit across a Layer 3 boundary router separating private and public networks."
+                },
+                {
+                    "heading": "5. Private vs Public IP Address Space",
+                    "content": "• Private (RFC 1918): Non-routable on global Internet (10.x.x.x, 172.16-31.x.x, 192.168.x.x).\\n• Public: Globally unique, ISP-assigned routable addresses."
+                },
+                {
+                    "heading": "6. Types of NAT Overview",
+                    "content": "Static NAT (1-to-1 fixed), Dynamic NAT (1-to-1 pool-based), PAT / NAT Overload (Many-to-1 port multiplexed)."
+                },
+                {
+                    "heading": "7. What is Static NAT?",
+                    "content": "Static NAT creates a permanent 1-to-1 mapping between one private IP and one public IP."
+                },
+                {
+                    "heading": "8. One-to-One Address Mapping",
+                    "content": "Example: Private Server `192.168.1.10` is permanently mapped to Public IP `203.0.113.10`. Outbound and inbound traffic always translate symmetrically."
+                },
+                {
+                    "heading": "9. Essential NAT Terminology",
+                    "content": "• Inside Local: Private IP assigned to internal device (e.g., 192.168.1.10).\\n• Inside Global: Public IP representing internal device to the Internet (e.g., 203.0.113.10).\\n• Outside Global: Public IP of external destination server (e.g., 8.8.8.8).\\n• Outside Local: IP of external host as seen from internal network."
+                },
+                {
+                    "heading": "10. How Static NAT Operates",
+                    "content": "When an external client requests `http://203.0.113.10`, the NAT router rewrites destination IP to `192.168.1.10`. On return, router rewrites source IP `192.168.1.10` to `203.0.113.10`."
+                },
+                {
+                    "heading": "11. Packet Translation Steps",
+                    "content": "Outbound: Source IP rewritten from Inside Local to Inside Global.\\nInbound: Destination IP rewritten from Inside Global to Inside Local."
+                },
+                {
+                    "heading": "12. Cisco IOS Configuration Commands",
+                    "content": "1. Specify Inside Interface: `interface Gi0/0 -> ip nat inside`\\n2. Specify Outside Interface: `interface Gi0/1 -> ip nat outside`\\n3. Configure Static Mapping: `ip nat inside source static 192.168.1.10 203.0.113.10`"
+                },
+                {
+                    "heading": "13. Verification Commands",
+                    "content": "• `show ip nat translations` - Displays active 1-to-1 static NAT table.\\n• `show ip nat statistics` - Displays total translations, hits, misses, and interface roles."
+                },
+                {
+                    "heading": "14. Advantages of Static NAT",
+                    "content": "Fixed public IP mapping, inbound accessibility for servers, transparent header conversion."
+                },
+                {
+                    "heading": "15. Limitations of Static NAT",
+                    "content": "Requires 1 public IP for every 1 internal server; does not conserve public IPv4 addresses for general workstation pools."
+                },
+                {
+                    "heading": "16. Real-World Applications",
+                    "content": "Web servers, mail servers, FTP, CCTV gateways, VPN concentrators."
+                },
+                {
+                    "heading": "17. Best Practices",
+                    "content": "1. Restrict Static NAT to servers requiring inbound access.\\n2. Protect translated servers with firewall ACLs."
+                },
+                {
+                    "heading": "18. Common Configuration Errors",
+                    "content": "Inverted inside/outside interface commands, mistyped IP addresses, firewall blocking return packets."
+                },
+                {
+                    "heading": "19. Summary",
+                    "content": "Static NAT provides fixed 1-to-1 private-to-public address translation, making internal enterprise servers securely accessible from the public Internet."
+                }
+            ]
+        },
+        "hardware_inspector": [
+            {
+                "id": "static_nat_engine",
+                "name": "Static NAT 1-to-1 Translation Engine",
+                "category": "Layer 3 Address Rewrite Engine",
+                "description": "Visualizes symmetric 1-to-1 header translation between Inside Local (192.168.1.10) and Inside Global (203.0.113.10).",
+                "svg": "<svg viewBox=\"0 0 400 220\" xmlns=\"http://www.w3.org/2000/svg\">\n                <rect x=\"20\" y=\"20\" width=\"360\" height=\"180\" rx=\"8\" fill=\"#0f172a\" stroke=\"#f59e0b\" stroke-width=\"2\"/>\n                <text x=\"200\" y=\"45\" fill=\"#f59e0b\" font-size=\"14\" font-weight=\"bold\" text-anchor=\"middle\">STATIC NAT 1-TO-1 TRANSLATION TABLE</text>\n                <rect x=\"40\" y=\"70\" width=\"320\" height=\"35\" rx=\"5\" fill=\"#1e293b\" stroke=\"#38bdf8\" stroke-width=\"1.5\"/>\n                <text x=\"50\" y=\"92\" fill=\"#38bdf8\" font-size=\"11\" font-weight=\"bold\" font-family=\"monospace\">Inside Local: 192.168.1.10 (Private Server)</text>\n                <text x=\"200\" y=\"125\" fill=\"#10b981\" font-size=\"16\" font-weight=\"bold\" text-anchor=\"middle\">⇳ PERMANENT 1-TO-1 MAPPING ⇳</text>\n                <rect x=\"40\" y=\"140\" width=\"320\" height=\"35\" rx=\"5\" fill=\"#1e293b\" stroke=\"#f59e0b\" stroke-width=\"1.5\"/>\n                <text x=\"50\" y=\"162\" fill=\"#fbbf24\" font-size=\"11\" font-weight=\"bold\" font-family=\"monospace\">Inside Global: 203.0.113.10 (Public IP)</text>\n            </svg>"
+            }
+        ],
+        "troubleshooting": {
+            "problem": "External Clients Cannot Connect to Internal Web Server (Inbound NAT Translation Fails)",
+            "hints": [
+                "Verify if 'ip nat inside' is applied to private LAN interface and 'ip nat outside' on WAN interface.",
+                "Check if the static NAT mapping 'ip nat inside source static 192.168.1.10 203.0.113.10' is present in 'show running-config'.",
+                "Verify if the router has a valid default route pointing to the ISP gateway.",
+                "Check if an inbound access-list on the outside interface is dropping TCP port 80/443."
+            ],
+            "fix": "Correct inside/outside interface roles, verify static NAT command syntax, and ensure WAN ACL permits inbound traffic to Inside Global IP 203.0.113.10."
+        },
+        "viva": [
+            {
+                "q": "What is the difference between Inside Local and Inside Global IP addresses?",
+                "a": "Inside Local is the private IP assigned inside the LAN. Inside Global is the public IP seen by external internet hosts."
+            },
+            {
+                "q": "Is Static NAT suitable for giving 100 internal PCs internet access?",
+                "a": "No, Static NAT requires 100 public IPs for 100 private PCs. PAT / Dynamic NAT Overload is required instead."
+            }
+        ],
+        "evaluations": [
+            {
+                "type": "pre",
+                "question": "What is the primary purpose of Network Address Translation (NAT)?",
+                "options": [
+                    "To translate private RFC 1918 IP addresses to public routable IP addresses for Internet communication",
+                    "To assign DNS names to servers",
+                    "To speed up Ethernet switching",
+                    "To block ICMP ping"
+                ],
+                "answer": "To translate private RFC 1918 IP addresses to public routable IP addresses for Internet communication",
+                "explanation": "NAT maps private local addresses to public global addresses."
+            },
+            {
+                "type": "pre",
+                "question": "What is Static NAT?",
+                "options": [
+                    "A permanent 1-to-1 mapping between a private IP address and a public IP address",
+                    "Dynamic IP assignment from a pool",
+                    "Port address translation for 1000 hosts",
+                    "DHCP routing"
+                ],
+                "answer": "A permanent 1-to-1 mapping between a private IP address and a public IP address",
+                "explanation": "Static NAT provides fixed 1-to-1 mapping, ideal for web and mail servers."
+            },
+            {
+                "type": "pre",
+                "question": "In Cisco NAT terminology, what is the \"Inside Local\" address?",
+                "options": [
+                    "The private IP address assigned to a host on the internal network",
+                    "The public IP address assigned by the ISP",
+                    "The destination web server IP",
+                    "The router loopback IP"
+                ],
+                "answer": "The private IP address assigned to a host on the internal network",
+                "explanation": "Inside Local is the private IP address of an internal host."
+            },
+            {
+                "type": "pre",
+                "question": "In Cisco NAT terminology, what is the \"Inside Global\" address?",
+                "options": [
+                    "The public IP address representing an internal host to the outside world",
+                    "The private IP address of the host",
+                    "The default gateway",
+                    "The MAC address"
+                ],
+                "answer": "The public IP address representing an internal host to the outside world",
+                "explanation": "Inside Global is the public IP address exposed on the Internet."
+            },
+            {
+                "type": "pre",
+                "question": "Which Cisco command defines an interface as facing the internal private network for NAT?",
+                "options": [
+                    "ip nat inside",
+                    "ip nat outside",
+                    "ip nat enable",
+                    "nat inside-interface"
+                ],
+                "answer": "ip nat inside",
+                "explanation": "`ip nat inside` designates the private LAN interface for NAT translation."
+            },
+            {
+                "type": "post",
+                "question": "Which Cisco CLI command configures Static NAT for internal server 192.168.1.10 to public IP 203.0.113.10?",
+                "options": [
+                    "ip nat inside source static 192.168.1.10 203.0.113.10",
+                    "nat static 192.168.1.10 203.0.113.10",
+                    "ip static nat 192.168.1.10 203.0.113.10",
+                    "set nat 192.168.1.10 203.0.113.10"
+                ],
+                "answer": "ip nat inside source static 192.168.1.10 203.0.113.10",
+                "explanation": "Syntax: ip nat inside source static <inside-local-ip> <inside-global-ip>."
+            },
+            {
+                "type": "post",
+                "question": "Which Cisco CLI command defines an interface as facing the external public Internet for NAT?",
+                "options": [
+                    "ip nat outside",
+                    "ip nat inside",
+                    "ip nat public",
+                    "nat exit-interface"
+                ],
+                "answer": "ip nat outside",
+                "explanation": "`ip nat outside` designates the WAN interface facing the ISP."
+            },
+            {
+                "type": "post",
+                "question": "Which command displays active NAT translation entries on a Cisco router?",
+                "options": [
+                    "show ip nat translations",
+                    "show ip nat statistics",
+                    "show ip route nat",
+                    "debug ip nat"
+                ],
+                "answer": "show ip nat translations",
+                "explanation": "`show ip nat translations` displays active NAT mappings."
+            },
+            {
+                "type": "post",
+                "question": "Why is Static NAT preferred for web servers hosting public websites?",
+                "options": [
+                    "It allows external Internet users to initiate connections to the server using a consistent public IP",
+                    "It is faster than routing",
+                    "It requires no configuration",
+                    "It encrypts HTTP traffic"
+                ],
+                "answer": "It allows external Internet users to initiate connections to the server using a consistent public IP",
+                "explanation": "Static NAT maintains a fixed 1-to-1 public mapping required for inbound DNS resolution."
+            },
+            {
+                "type": "post",
+                "question": "What command clears all dynamic or active NAT translation entries from router memory?",
+                "options": [
+                    "clear ip nat translation *",
+                    "reset ip nat",
+                    "no ip nat",
+                    "flush nat"
+                ],
+                "answer": "clear ip nat translation *",
+                "explanation": "`clear ip nat translation *` clears NAT translation table entries."
+            },
+            {
+                "type": "post",
+                "question": "Which RFC defines private IP address ranges (10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16)?",
+                "options": [
+                    "RFC 1918",
+                    "RFC 791",
+                    "RFC 2328",
+                    "RFC 3022"
+                ],
+                "answer": "RFC 1918",
+                "explanation": "RFC 1918 reserves private non-routable IPv4 address ranges."
+            },
+            {
+                "type": "post",
+                "question": "What is the \"Outside Global\" address in NAT terminology?",
+                "options": [
+                    "The public IP address assigned to a host on the external network",
+                    "The private IP of internal host",
+                    "The router serial IP",
+                    "The DNS IP"
+                ],
+                "answer": "The public IP address assigned to a host on the external network",
+                "explanation": "Outside Global is the real public IP address of an Internet destination server."
+            },
+            {
+                "type": "post",
+                "question": "What is the \"Outside Local\" address in NAT terminology?",
+                "options": [
+                    "The IP address of an external host as it appears to the internal network",
+                    "The internal PC IP",
+                    "The MAC address",
+                    "The Loopback IP"
+                ],
+                "answer": "The IP address of an external host as it appears to the internal network",
+                "explanation": "Outside Local is how external hosts appear to internal LAN clients."
+            },
+            {
+                "type": "post",
+                "question": "Can Static NAT be used to translate port numbers for specific services (Static PAT / Port Forwarding)?",
+                "options": [
+                    "Yes, by adding tcp/udp and port numbers to the `ip nat inside source static` command",
+                    "No, Static NAT only supports IP addresses",
+                    "Only for ICMP",
+                    "Only for DNS"
+                ],
+                "answer": "Yes, by adding tcp/udp and port numbers to the `ip nat inside source static` command",
+                "explanation": "Adding tcp/udp and port parameters enables static port forwarding (Port Address Translation)."
+            },
+            {
+                "type": "post",
+                "question": "Which command displays NAT statistics, including active translations, hits, and misses?",
+                "options": [
+                    "show ip nat statistics",
+                    "show ip nat translations",
+                    "show ip nat config",
+                    "show ip route"
+                ],
+                "answer": "show ip nat statistics",
+                "explanation": "`show ip nat statistics` displays total active translations, inside/outside interfaces, and hit/miss counters."
+            }
+        ],
+        "simType": "static_nat_sim"
+    },
+    "dynamic_nat_sim": {
+        "title": "Practical 15: Dynamic NAT & PAT (NAT Overload)",
+        "aim": "To master advanced Network Address Translation techniques, examine Dynamic NAT (pool-based 1-to-1 allocation) vs Port Address Translation (PAT / NAT Overload), configure NAT pools, access control lists (ACLs), and port multiplexing on Cisco IOS gateways, observe how thousands of private LAN hosts share a single public IP via unique source port numbers, and complete the VLAB Capstone Integration Challenge.",
+        "intro": {
+            "summary": "Dynamic NAT allocates public IP addresses from a pool to private hosts on a first-come, first-served basis. Port Address Translation (PAT / NAT Overload) extends NAT by multiplexing multiple private IP addresses over a single public IP address using unique Layer 4 source port numbers. PAT is the universal standard used in home Wi-Fi routers and enterprise edge gateways worldwide.",
+            "importance": "PAT (NAT Overload) is the cornerstone of modern Internet connectivity, enabling millions of private devices to browse the Internet concurrently over limited public IPv4 allocations. As the capstone practical of the VLAB suite, students synthesize IP addressing, subnetting, routing, transport ports, and NAT into a unified enterprise network deployment.",
+            "applications": [
+                "Home Wi-Fi Broadband Routers (Single Public IP PAT)",
+                "Enterprise Edge Gateways (Thousands of LAN Hosts via PAT)",
+                "Dynamic ISP Address Pool Translation",
+                "Enterprise WAN Internet Perimeter Defense"
+            ],
+            "outcome": "Students will be able to configure Cisco IOS PAT (`ip nat inside source list 1 interface Gi0/1 overload`), set up pool-based Dynamic NAT, inspect port-multiplexed NAT translation tables using `show ip nat translations`, and solve end-to-end multi-subnet enterprise network challenges."
+        },
+        "prerequisites": [
+            "Practical 4: IPv4 & IPv6 Address Classification",
+            "Practical 7: Virtual LANs (VLAN) & Trunking",
+            "Practical 11: Static Routing Configuration",
+            "Practical 12: UDP & TCP Transport Protocols",
+            "Practical 13: DHCP Configuration & IP Pools",
+            "Practical 14: Static Network Address Translation (Static NAT)"
+        ],
+        "outcomes": [
+            "Differentiate Static NAT, Dynamic NAT, and Port Address Translation (PAT / NAT Overload).",
+            "Explain how PAT uses 16-bit Layer 4 port numbers (~65,535 sockets) to multiplex LAN hosts onto one public IP.",
+            "Configure Dynamic NAT Pools (`ip nat pool`) and binding ACLs (`access-list 1 permit`).",
+            "Configure PAT (NAT Overload) using router exit interface (`ip nat inside source list 1 interface Gi0/1 overload`).",
+            "Read and interpret multiplexed NAT translation tables in `show ip nat translations`.",
+            "Troubleshoot pool exhaustion, ACL subnet mismatches, and idle connection timeouts.",
+            "Synthesize end-to-end networking concepts in the Capstone VLAB Enterprise Challenge."
+        ],
+        "theory": {
+            "intro": "Dynamic NAT and PAT enable scalable Internet access for private networks by mapping dynamic LAN hosts to public IP pools or multiplexing them over a single public IP address using unique port numbers.",
+            "sections": [
+                {
+                    "heading": "1. Introduction to Dynamic NAT & PAT",
+                    "content": "While Static NAT provides 1-to-1 server publishing, enterprise networks require thousands of workstations to access the Internet simultaneously. Dynamic NAT uses a pool of public IPs, while PAT (NAT Overload) multiplexes thousands of private hosts over a single public IP address using unique source port numbers."
+                },
+                {
+                    "heading": "2. Learning Objectives",
+                    "content": "Master Dynamic NAT & PAT concepts:\\n• Dynamic NAT pool allocation.\\n• PAT / NAT Overload port multiplexing mechanics.\\n• Configuring `ip nat pool` and matching ACLs.\\n• Configuring `ip nat inside source list <acl> interface <if> overload`.\\n• Reading `show ip nat translations`."
+                },
+                {
+                    "heading": "3. Why Dynamic NAT & PAT are Required",
+                    "content": "Public IPv4 address scarcity makes assigning public IPs to every client host cost-prohibitive. PAT allows an entire organization (or home) to share a single public IP address."
+                },
+                {
+                    "heading": "4. What is Dynamic NAT?",
+                    "content": "Dynamic NAT maps internal private IP addresses to available public IP addresses from a configured pool on a first-come, first-served basis. When a host stops communicating, its public IP is returned to the pool."
+                },
+                {
+                    "heading": "5. What is Port Address Translation (PAT / NAT Overload)?",
+                    "content": "PAT maps multiple private IP addresses to a single public IP address by tracking unique Layer 4 source port numbers (e.g. 192.168.1.10:50001 and 192.168.1.11:50002 both translate to public IP 203.0.113.1 with distinct ports)."
+                },
+                {
+                    "heading": "6. How PAT Multiplexing Operates",
+                    "content": "With 16-bit port numbers, PAT can theoretically support up to ~65,535 simultaneous TCP/UDP socket connections per public IP address."
+                },
+                {
+                    "heading": "7. Comparison of NAT Types",
+                    "content": "• Static NAT: 1 Private IP ⇹ 1 Public IP (Fixed, Inbound Server Access).\\n• Dynamic NAT: 1 Private IP ⇹ 1 Public IP from Pool (Temporary).\\n• PAT (Overload): Many Private IPs ⇹ 1 Public IP + Unique Ports (Outbound Access)."
+                },
+                {
+                    "heading": "8. Defining Inside Match ACLs",
+                    "content": "A Standard Access Control List (ACL) identifies which internal private subnets are permitted to undergo NAT translation (e.g., `access-list 1 permit 192.168.1.0 0.0.0.255`)."
+                },
+                {
+                    "heading": "9. Cisco IOS Dynamic NAT Pool Commands",
+                    "content": "1. Create Pool: `ip nat pool MY_POOL 203.0.113.1 203.0.113.10 netmask 255.255.255.240`\\n2. Match ACL: `access-list 1 permit 192.168.1.0 0.0.0.255`\\n3. Enable Dynamic NAT: `ip nat inside source list 1 pool MY_POOL`"
+                },
+                {
+                    "heading": "10. Cisco IOS PAT (NAT Overload) Commands",
+                    "content": "1. Match ACL: `access-list 1 permit 192.168.1.0 0.0.0.255`\\n2. Enable PAT on Exit Interface: `ip nat inside source list 1 interface GigabitEthernet0/1 overload`\\n3. Apply `ip nat inside` on LAN interface and `ip nat outside` on WAN interface."
+                },
+                {
+                    "heading": "11. Multiplexed Translation Table Example",
+                    "content": "Pro Inside Local           Inside Global          Outside Global\\ntcp 192.168.1.10:50001     203.0.113.1:50001      142.250.183.206:80\\ntcp 192.168.1.11:50002     203.0.113.1:50002      142.250.183.206:80"
+                },
+                {
+                    "heading": "12. Verification & Diagnostic Commands",
+                    "content": "• `show ip nat translations` - Lists multiplexed socket translations.\\n• `show ip nat statistics` - Displays total active translations, pool utilization, hits, and misses.\\n• `clear ip nat translation *` - Flushes dynamic translation cache."
+                },
+                {
+                    "heading": "13. Advantages of PAT",
+                    "content": "Maximum public IPv4 conservation, high security (blocks unsolicited external inbound probes), cost-effective single public IP deployment."
+                },
+                {
+                    "heading": "14. Limitations of PAT",
+                    "content": "Does not support inbound connections directly without static port forwarding entries; CPU overhead for tracking thousands of translation sockets."
+                },
+                {
+                    "heading": "15. Real-World Applications",
+                    "content": "Home Wi-Fi routers, enterprise campus internet access, ISP CGNAT (Carrier-Grade NAT)."
+                },
+                {
+                    "heading": "16. Best Practices",
+                    "content": "1. Always append `overload` when sharing a single public IP or pool.\\n2. Restrict matching ACLs to active internal subnets only."
+                },
+                {
+                    "heading": "17. Common Configuration Errors",
+                    "content": "Forgetting the `overload` keyword (causing pool exhaustion after 1-to-1 assignments fill up), incorrect ACL wildcard mask."
+                },
+                {
+                    "heading": "18. Capstone VLAB Integration Overview",
+                    "content": "Combines IP subnets, VLAN trunks, OSPF/EIGRP routing, DHCP automatic addressing, and PAT NAT Overload into an integrated enterprise solution."
+                },
+                {
+                    "heading": "19. Summary",
+                    "content": "PAT (NAT Overload) is the essential technology powering global IPv4 internet connectivity, multiplexing private subnets over public IP gateways."
+                }
+            ]
+        },
+        "hardware_inspector": [
+            {
+                "id": "pat_multiplex_engine",
+                "name": "PAT / NAT Overload Port Multiplexing Engine",
+                "category": "Layer 4 Port-Multiplexed Gateway",
+                "description": "Visualizes multiple internal private hosts sharing 1 public IP via unique source port numbers.",
+                "svg": "<svg viewBox=\"0 0 400 220\" xmlns=\"http://www.w3.org/2000/svg\">\n                <rect x=\"20\" y=\"20\" width=\"360\" height=\"180\" rx=\"8\" fill=\"#0f172a\" stroke=\"#10b981\" stroke-width=\"2\"/>\n                <text x=\"200\" y=\"45\" fill=\"#10b981\" font-size=\"14\" font-weight=\"bold\" text-anchor=\"middle\">PAT / NAT OVERLOAD PORT MULTIPLEXING</text>\n                <text x=\"50\" y=\"80\" fill=\"#38bdf8\" font-size=\"10\" font-family=\"monospace\">Host 1: 192.168.1.10:50001 ──┐</text>\n                <text x=\"50\" y=\"110\" fill=\"#38bdf8\" font-size=\"10\" font-family=\"monospace\">Host 2: 192.168.1.11:50002 ──┼──> PAT Gateway (203.0.113.1) ──> Internet</text>\n                <text x=\"50\" y=\"140\" fill=\"#38bdf8\" font-size=\"10\" font-family=\"monospace\">Host 3: 192.168.1.12:50003 ──┘</text>\n                <rect x=\"40\" y=\"160\" width=\"320\" height=\"30\" rx=\"4\" fill=\"#1e293b\" stroke=\"#10b981\"/>\n                <text x=\"200\" y=\"180\" fill=\"#10b981\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">Single Public IP (203.0.113.1) with Unique Port Sockets</text>\n            </svg>"
+            }
+        ],
+        "troubleshooting": {
+            "problem": "LAN Hosts Cannot Access Internet / PAT Overload Fails (Pool Exhaustion or Missing 'overload' Keyword)",
+            "hints": [
+                "Check if the 'overload' keyword was omitted from 'ip nat inside source list 1 interface Gi0/1 overload'. Without 'overload', NAT acts as dynamic 1-to-1 and drops traffic after 1 host connects!",
+                "Verify if Access List 1 permits the correct internal subnet and wildcard mask.",
+                "Check if 'ip nat inside' and 'ip nat outside' are applied to the correct router interfaces.",
+                "Verify default route pointing to the ISP gateway."
+            ],
+            "fix": "Append 'overload' to the 'ip nat inside source list' command. Ensure ACL permits LAN subnets and verify WAN default route."
+        },
+        "viva": [
+            {
+                "q": "How does PAT distinguish between traffic coming from two different internal PCs using the same public IP?",
+                "a": "By assigning a unique source port number to each connection."
+            },
+            {
+                "q": "How many maximum concurrent socket connections can PAT support on a single public IP?",
+                "a": "Approximately 65,535 concurrent connections (based on 16-bit port numbers)."
+            }
+        ],
+        "evaluations": [
+            {
+                "type": "pre",
+                "question": "What is Dynamic NAT?",
+                "options": [
+                    "Mapping internal private IP addresses to a pool of public IP addresses on a first-come, first-served basis",
+                    "Permanent 1-to-1 mapping",
+                    "Port forwarding",
+                    "Static routing"
+                ],
+                "answer": "Mapping internal private IP addresses to a pool of public IP addresses on a first-come, first-served basis",
+                "explanation": "Dynamic NAT maps private IPs to available public IPs from a defined pool."
+            },
+            {
+                "type": "pre",
+                "question": "What is Port Address Translation (PAT) / NAT Overload?",
+                "options": [
+                    "Mapping multiple private IP addresses to a single public IP address using unique TCP/UDP port numbers",
+                    "Assigning 1 public IP to 1 private IP",
+                    "Configuring DNS",
+                    "Creating VLANs"
+                ],
+                "answer": "Mapping multiple private IP addresses to a single public IP address using unique TCP/UDP port numbers",
+                "explanation": "PAT (NAT Overload) allows thousands of internal hosts to share 1 public IP using unique source port numbers."
+            },
+            {
+                "type": "pre",
+                "question": "What keyword is appended to the Cisco NAT command to enable Port Address Translation (PAT)?",
+                "options": [
+                    "overload",
+                    "pat",
+                    "share",
+                    "multi"
+                ],
+                "answer": "overload",
+                "explanation": "The `overload` keyword enables Port Address Translation."
+            },
+            {
+                "type": "pre",
+                "question": "What Cisco configuration element is used to define which internal subnets are allowed to be translated by NAT?",
+                "options": [
+                    "Standard Access Control List (ACL)",
+                    "VLAN ID",
+                    "Routing Table",
+                    "DHCP Pool"
+                ],
+                "answer": "Standard Access Control List (ACL)",
+                "explanation": "An Access Control List (ACL) identifies inside local IP addresses eligible for NAT translation."
+            },
+            {
+                "type": "pre",
+                "question": "How many simultaneous connections can PAT theoretically support on a single public IP address?",
+                "options": [
+                    "Up to ~65,535 TCP/UDP port connections",
+                    "254",
+                    "1,024",
+                    "Unlimited"
+                ],
+                "answer": "Up to ~65,535 TCP/UDP port connections",
+                "explanation": "16-bit port numbers support up to ~65,535 concurrent socket connections."
+            },
+            {
+                "type": "post",
+                "question": "Which command configures a public NAT pool named PUBLIC_POOL from 203.0.113.1 to 203.0.113.10 with netmask 255.255.255.240?",
+                "options": [
+                    "ip nat pool PUBLIC_POOL 203.0.113.1 203.0.113.10 netmask 255.255.255.240",
+                    "create nat pool PUBLIC_POOL 203.0.113.1-10",
+                    "nat pool PUBLIC_POOL 203.0.113.1 203.0.113.10",
+                    "set nat pool PUBLIC_POOL"
+                ],
+                "answer": "ip nat pool PUBLIC_POOL 203.0.113.1 203.0.113.10 netmask 255.255.255.240",
+                "explanation": "Syntax: ip nat pool <name> <start-ip> <end-ip> netmask <mask>."
+            },
+            {
+                "type": "post",
+                "question": "Which CLI command configures PAT using exit interface GigabitEthernet0/0 for ACL 1?",
+                "options": [
+                    "ip nat inside source list 1 interface GigabitEthernet0/0 overload",
+                    "ip nat overload list 1 interface Gi0/0",
+                    "nat inside list 1 interface Gi0/0",
+                    "ip pat list 1 Gi0/0"
+                ],
+                "answer": "ip nat inside source list 1 interface GigabitEthernet0/0 overload",
+                "explanation": "Syntax: ip nat inside source list <acl> interface <if> overload."
+            },
+            {
+                "type": "post",
+                "question": "What happens in Dynamic NAT if all public IP addresses in the pool are currently in use and another internal host attempts to access the Internet?",
+                "options": [
+                    "The router drops the packet and access is denied until an IP is freed",
+                    "The router switches to OSPF",
+                    "The host gets a public IP from Google",
+                    "No impact"
+                ],
+                "answer": "The router drops the packet and access is denied until an IP is freed",
+                "explanation": "Without PAT overload, Dynamic NAT fails when the public pool is exhausted."
+            },
+            {
+                "type": "post",
+                "question": "Which command permits internal subnet 192.168.1.0/24 in Access List 1 for NAT?",
+                "options": [
+                    "access-list 1 permit 192.168.1.0 0.0.0.255",
+                    "access-list 1 permit 192.168.1.0 255.255.255.0",
+                    "acl 1 allow 192.168.1.0/24",
+                    "permit ip 192.168.1.0"
+                ],
+                "answer": "access-list 1 permit 192.168.1.0 0.0.0.255",
+                "explanation": "Cisco standard ACL uses wildcard mask 0.0.0.255 for /24."
+            },
+            {
+                "type": "post",
+                "question": "How does PAT distinguish return traffic from the Internet intended for different internal hosts sharing the same public IP?",
+                "options": [
+                    "By inspecting unique destination TCP/UDP port numbers mapped in the translation table",
+                    "By MAC address",
+                    "By hostname",
+                    "By VLAN tag"
+                ],
+                "answer": "By inspecting unique destination TCP/UDP port numbers mapped in the translation table",
+                "explanation": "PAT tracks unique source and destination port numbers in its translation table."
+            },
+            {
+                "type": "post",
+                "question": "What command displays real-time NAT translation events as packets cross the router?",
+                "options": [
+                    "debug ip nat",
+                    "show ip nat log",
+                    "monitor ip nat",
+                    "trace ip nat"
+                ],
+                "answer": "debug ip nat",
+                "explanation": "`debug ip nat` displays real-time translation logs in console."
+            },
+            {
+                "type": "post",
+                "question": "What is the default timeout for dynamic NAT translation entries in Cisco IOS if idle?",
+                "options": [
+                    "24 hours (86,400 seconds)",
+                    "60 seconds",
+                    "5 minutes",
+                    "10 seconds"
+                ],
+                "answer": "24 hours (86,400 seconds)",
+                "explanation": "Default dynamic NAT translation timeout for non-PAT entries is 24 hours."
+            },
+            {
+                "type": "post",
+                "question": "What is the default timeout for UDP translations in PAT?",
+                "options": [
+                    "5 minutes (300 seconds)",
+                    "24 hours",
+                    "1 second",
+                    "10 minutes"
+                ],
+                "answer": "5 minutes (300 seconds)",
+                "explanation": "UDP PAT entries time out after 5 minutes of inactivity."
+            },
+            {
+                "type": "post",
+                "question": "Why is PAT widely deployed by residential ISPs for home broadband routers?",
+                "options": [
+                    "ISPs assign 1 public IP per household; PAT allows dozens of family devices to access the Internet simultaneously",
+                    "PAT encrypts Wi-Fi",
+                    "PAT speeds up fiber optics",
+                    "PAT replaces routers"
+                ],
+                "answer": "ISPs assign 1 public IP per household; PAT allows dozens of family devices to access the Internet simultaneously",
+                "explanation": "PAT enables multi-device Internet sharing over a single ISP-assigned public IP."
+            },
+            {
+                "type": "post",
+                "question": "Which command turns off real-time NAT debugging?",
+                "options": [
+                    "undebug ip nat (or no debug ip nat)",
+                    "stop debug",
+                    "clear debug",
+                    "disable debug"
+                ],
+                "answer": "undebug ip nat (or no debug ip nat)",
+                "explanation": "`undebug ip nat` stops real-time NAT debug logging."
+            }
+        ],
+        "simType": "dynamic_nat_sim"
+    },
+    "osi_tcpip": {
+        "title": "Practical 2: Network Communication Models (OSI & TCP/IP)",
+        "theme": "From Bits to Browser – Understanding How Data Travels Across a Network",
+        "aim": "To examine the foundational Open Systems Interconnection (OSI) 7-layer model and 4-layer TCP/IP protocol suite, analyze end-to-end data transmission, observe header encapsulation and decapsulation from Physical bits to Application browser data, map network protocols and hardware devices to their respective layers, and diagnose multi-layer network communication faults.",
+        "intro": {
+            "summary": "Computer networks connect billions of devices globally. To standardize communication between heterogeneous devices and software, networking follows layered architectures: the 7-layer OSI conceptual reference model and the 4-layer TCP/IP Internet protocol suite. Every network packet travels through systematic encapsulation at the sender and decapsulation at the receiver.",
+            "importance": "This practical forms the conceptual backbone of the entire Virtual Lab (VLAB). Every subsequent experiment—including VLANs, Subnetting, RIP/OSPF/EIGRP Routing, TCP/UDP Transport, DHCP, and NAT—directly builds upon the layer-wise understanding gained here.",
+            "applications": [
+                "Web Browsing & E-Commerce (HTTP/HTTPS over TCP/IP)",
+                "Enterprise Network Architecture & Router/Switch Placement",
+                "Packet Inspection & Wireshark Protocol Analysis",
+                "Layer-wise Network Fault Troubleshooting"
+            ],
+            "outcome": "Students will be able to trace end-to-end data flow from 'https://www.google.com' through all 7 OSI layers, explain PDU transformations (Data ➔ Segment ➔ Packet ➔ Frame ➔ Bits), differentiate OSI vs TCP/IP models, and identify affected layers during network outages."
+        },
+        "prerequisites": [
+            "Practical 1: Introduction to Networking Tools & Utilities"
+        ],
+        "outcomes": [
+            "Explain why layered communication models are required in computer networking.",
+            "Describe the specific functions and Protocol Data Units (PDUs) of all seven OSI layers.",
+            "Describe the four layers of the TCP/IP protocol suite and map them to OSI layers.",
+            "Visualize and explain protocol encapsulation (header addition) and decapsulation (header stripping).",
+            "Identify key protocols (HTTP, TLS, TCP, UDP, IP, ARP, Ethernet) operating at each layer.",
+            "Identify hardware networking devices (Hubs, Switches, Routers, Firewalls) associated with each layer.",
+            "Analyze end-to-end packet transmission across local switches, routers, and global Internet gateways.",
+            "Troubleshoot network communication failures by isolating the affected layer."
+        ],
+        "theory": {
+            "intro": "Layered models decompose complex communication into modular, manageable steps, enabling interoperability across diverse vendor hardware and software.",
+            "sections": [
+                {
+                    "heading": "1. Introduction",
+                    "content": "Computer networks connect billions of devices worldwide. Although communication appears instantaneous, data undergoes systematic processing across logical layers before reaching its destination. The OSI model (ISO 7498) and TCP/IP suite (RFC 1122) provide the architecture for modern network engineering."
+                },
+                {
+                    "heading": "2. Learning Objectives",
+                    "content": "Master core concepts:\\n• Requirements for layered communication architectures.\\n• The 7 OSI layers and 4 TCP/IP layers.\\n• Header encapsulation and decapsulation.\\n• Protocols, PDUs, and hardware devices by layer.\\n• End-to-end Digital Twin packet flow."
+                },
+                {
+                    "heading": "3. Why Communication Models are Required",
+                    "content": "Layering offers modularity, vendor independence, standardized interfaces, simplified troubleshooting, and flexible protocol development without affecting adjacent layers."
+                },
+                {
+                    "heading": "4. Evolution of Network Communication",
+                    "content": "From early proprietary protocols (SNA, AppleTalk) to ARPANET's TCP/IP development in the 1970s and ISO's 7-Layer OSI reference standard in 1984."
+                },
+                {
+                    "heading": "5. What is the OSI Model?",
+                    "content": "The Open Systems Interconnection model divides communication into 7 distinct layers: 7-Application, 6-Presentation, 5-Session, 4-Transport, 3-Network, 2-Data Link, and 1-Physical."
+                },
+                {
+                    "heading": "6. Detailed Study of All Seven Layers",
+                    "content": "• Layer 7 (Application): Interface for user software (HTTP, FTP, DNS, SMTP).\\n• Layer 6 (Presentation): Formatting, MIME, SSL/TLS Encryption, Compression (JPEG, ASCII).\\n• Layer 5 (Session): Session establishment, maintenance, and teardown (RPC, NetBIOS).\\n• Layer 4 (Transport): End-to-end connection control, segmentation, flow control, port addressing (TCP, UDP).\\n• Layer 3 (Network): Logical IP addressing, routing across networks (IPv4, IPv6, ICMP, Routers).\\n• Layer 2 (Data Link): Physical MAC addressing, framing, error detection, switch bridging (Ethernet, Switches, NICs).\\n• Layer 1 (Physical): Bit transmission over physical/wireless media, signaling, cables (UTP, Fiber, Wireless, Hubs)."
+                },
+                {
+                    "heading": "7. What is the TCP/IP Model?",
+                    "content": "The practical Internet model consisting of 4 layers: 4-Application, 3-Transport, 2-Internet, 1-Network Access."
+                },
+                {
+                    "heading": "8. OSI vs TCP/IP Comparison",
+                    "content": "OSI is a 7-layer theoretical reference model. TCP/IP is a 4-layer practical implementation standard powering the modern Internet."
+                },
+                {
+                    "heading": "9. Encapsulation & Decapsulation",
+                    "content": "• Encapsulation: As data moves down the stack (7 ➔ 1), each layer prepends its control header, producing PDUs: Data ➔ Segment (L4) ➔ Packet (L3) ➔ Frame (L2) ➔ Bits (L1).\\n• Decapsulation: As bits arrive at destination (1 ➔ 7), each layer strips its header and passes payload up."
+                },
+                {
+                    "heading": "10. End-to-End Communication",
+                    "content": "Tracing data flow from Client Laptop ➔ Switch ➔ Router ➔ Cloud ➔ Destination Server."
+                },
+                {
+                    "heading": "11. Layer-wise Interactive Simulations",
+                    "content": "Exploring individual layer functions through interactive protocol inspectors."
+                },
+                {
+                    "heading": "12. Complete Communication Simulator",
+                    "content": "Full digital twin simulation of browser requests ('https://www.google.com')."
+                },
+                {
+                    "heading": "13. Guided Experiment",
+                    "content": "Step-by-step walkthrough of packet header assembly."
+                },
+                {
+                    "heading": "14. Practice Lab",
+                    "content": "Interactive drag-and-drop layer mapping challenges."
+                },
+                {
+                    "heading": "15. Assessment",
+                    "content": "Pre-test and Post-test evaluations measuring layer conceptual mastery."
+                },
+                {
+                    "heading": "16. Report & Certificate",
+                    "content": "Generating verified academic lab report upon completion."
+                }
+            ]
+        },
+        "hardware_inspector": [
+            {
+                "id": "osi_stack_inspector",
+                "name": "7-Layer OSI & TCP/IP Architecture Inspector",
+                "category": "Architectural Digital Twin",
+                "description": "Interactive visualizer of the 7 OSI layers, 4 TCP/IP layers, headers, and PDUs.",
+                "svg": "<svg viewBox=\"0 0 400 240\" xmlns=\"http://www.w3.org/2000/svg\">\n                <rect x=\"15\" y=\"15\" width=\"370\" height=\"210\" rx=\"10\" fill=\"#0f172a\" stroke=\"#38bdf8\" stroke-width=\"2\"/>\n                <text x=\"200\" y=\"38\" fill=\"#38bdf8\" font-size=\"13\" font-weight=\"bold\" text-anchor=\"middle\">OSI 7-LAYER ⇹ TCP/IP 4-LAYER DIGITAL TWIN</text>\n                \n                <!-- OSI Stack -->\n                <rect x=\"30\" y=\"50\" width=\"160\" height=\"20\" fill=\"#ec4899\" rx=\"3\"/><text x=\"110\" y=\"64\" fill=\"#fff\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">7. Application (Data)</text>\n                <rect x=\"30\" y=\"73\" width=\"160\" height=\"20\" fill=\"#a855f7\" rx=\"3\"/><text x=\"110\" y=\"87\" fill=\"#fff\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">6. Presentation (Data)</text>\n                <rect x=\"30\" y=\"96\" width=\"160\" height=\"20\" fill=\"#8b5cf6\" rx=\"3\"/><text x=\"110\" y=\"110\" fill=\"#fff\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">5. Session (Data)</text>\n                <rect x=\"30\" y=\"119\" width=\"160\" height=\"20\" fill=\"#3b82f6\" rx=\"3\"/><text x=\"110\" y=\"133\" fill=\"#fff\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">4. Transport (Segment)</text>\n                <rect x=\"30\" y=\"142\" width=\"160\" height=\"20\" fill=\"#10b981\" rx=\"3\"/><text x=\"110\" y=\"156\" fill=\"#fff\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">3. Network (Packet)</text>\n                <rect x=\"30\" y=\"165\" width=\"160\" height=\"20\" fill=\"#f59e0b\" rx=\"3\"/><text x=\"110\" y=\"179\" fill=\"#fff\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">2. Data Link (Frame)</text>\n                <rect x=\"30\" y=\"188\" width=\"160\" height=\"20\" fill=\"#ef4444\" rx=\"3\"/><text x=\"110\" y=\"202\" fill=\"#fff\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">1. Physical (Bits)</text>\n\n                <!-- TCP/IP Stack -->\n                <rect x=\"210\" y=\"50\" width=\"160\" height=\"66\" fill=\"#a855f7\" rx=\"4\" stroke=\"#fff\" stroke-width=\"1\"/>\n                <text x=\"290\" y=\"88\" fill=\"#fff\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">1. Application</text>\n                \n                <rect x=\"210\" y=\"119\" width=\"160\" height=\"20\" fill=\"#3b82f6\" rx=\"4\" stroke=\"#fff\" stroke-width=\"1\"/>\n                <text x=\"290\" y=\"133\" fill=\"#fff\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">2. Transport</text>\n                \n                <rect x=\"210\" y=\"142\" width=\"160\" height=\"20\" fill=\"#10b981\" rx=\"4\" stroke=\"#fff\" stroke-width=\"1\"/>\n                <text x=\"290\" y=\"156\" fill=\"#fff\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">3. Internet</text>\n                \n                <rect x=\"210\" y=\"165\" width=\"160\" height=\"43\" fill=\"#f59e0b\" rx=\"4\" stroke=\"#fff\" stroke-width=\"1\"/>\n                <text x=\"290\" y=\"190\" fill=\"#fff\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">4. Network Access</text>\n            </svg>"
+            }
+        ],
+        "troubleshooting": {
+            "problem": "Multi-Layer Network Communication Failure (Diagnose Affected Layer)",
+            "hints": [
+                "Check if physical Ethernet cable is unplugged or Wi-Fi radio is disabled (Layer 1 Physical).",
+                "Check if MAC address table is unpopulated or ARP resolution failed (Layer 2 Data Link).",
+                "Check if device has an invalid IP address or gateway router is unreachable (Layer 3 Network).",
+                "Check if firewall is blocking TCP port 80/443 (Layer 4 Transport).",
+                "Check if DNS domain resolution fails for www.google.com (Layer 7 Application)."
+            ],
+            "fix": "Isolate fault using layer-by-layer troubleshooting: Verify Physical cable link ➔ Check Link-Layer MAC/ARP ➔ Verify Network Layer IP ping ➔ Verify Transport Layer port socket ➔ Test Application Layer DNS & HTTP."
+        },
+        "evaluations": {
+            "pretest": [
+                {
+                    "q": "Which OSI layer is responsible for logical IP address routing across different networks?",
+                    "options": [
+                        "Layer 2 - Data Link",
+                        "Layer 3 - Network",
+                        "Layer 4 - Transport",
+                        "Layer 7 - Application"
+                    ],
+                    "answer": 1,
+                    "explanation": "Layer 3 (Network) handles logical IP addressing and routing."
+                },
+                {
+                    "q": "What is the Protocol Data Unit (PDU) of the Data Link Layer (Layer 2)?",
+                    "options": [
+                        "Bits",
+                        "Frame",
+                        "Packet",
+                        "Segment"
+                    ],
+                    "answer": 1,
+                    "explanation": "Layer 2 packages data into Frames containing MAC addresses."
+                },
+                {
+                    "q": "Which layer performs SSL/TLS encryption, compression, and character encoding?",
+                    "options": [
+                        "Presentation Layer (Layer 6)",
+                        "Session Layer (Layer 5)",
+                        "Transport Layer (Layer 4)",
+                        "Application Layer (Layer 7)"
+                    ],
+                    "answer": 0,
+                    "explanation": "Layer 6 (Presentation) formats, compresses, and encrypts data."
+                },
+                {
+                    "q": "Which device operates primarily at Layer 2 of the OSI model?",
+                    "options": [
+                        "Hub",
+                        "Layer 2 Switch",
+                        "Router",
+                        "Application Gateway"
+                    ],
+                    "answer": 1,
+                    "explanation": "Switches forward Ethernet frames using Layer 2 MAC address tables."
+                },
+                {
+                    "q": "What is the process of adding headers as data moves down the OSI stack?",
+                    "options": [
+                        "Decapsulation",
+                        "Encapsulation",
+                        "Multiplexing",
+                        "Segmentation"
+                    ],
+                    "answer": 1,
+                    "explanation": "Encapsulation adds headers at each layer from top to bottom."
+                }
+            ],
+            "posttest": [
+                {
+                    "q": "How many layers are defined in the conceptual OSI reference model vs TCP/IP model?",
+                    "options": [
+                        "7 OSI, 4 TCP/IP",
+                        "4 OSI, 7 TCP/IP",
+                        "7 OSI, 7 TCP/IP",
+                        "5 OSI, 4 TCP/IP"
+                    ],
+                    "answer": 0,
+                    "explanation": "OSI defines 7 layers; TCP/IP defines 4 layers."
+                },
+                {
+                    "q": "Which TCP/IP layer corresponds to OSI Layers 5, 6, and 7 combined?",
+                    "options": [
+                        "Network Access Layer",
+                        "Internet Layer",
+                        "Transport Layer",
+                        "Application Layer"
+                    ],
+                    "answer": 3,
+                    "explanation": "TCP/IP Application Layer encompasses Session, Presentation, and Application functions."
+                },
+                {
+                    "q": "What happens during Decapsulation at the receiving host?",
+                    "options": [
+                        "Headers are added to the payload",
+                        "Headers are stripped layer by layer from bottom to top",
+                        "Packets are converted to analog signals",
+                        "IP addresses are rewritten"
+                    ],
+                    "answer": 1,
+                    "explanation": "Decapsulation strips headers at each layer as payload moves up to Layer 7."
+                },
+                {
+                    "q": "Which protocols operate at Layer 4 (Transport Layer)?",
+                    "options": [
+                        "HTTP & HTTPS",
+                        "IPv4 & IPv6",
+                        "TCP & UDP",
+                        "Ethernet & Wi-Fi"
+                    ],
+                    "answer": 2,
+                    "explanation": "TCP and UDP manage process-to-process transport at Layer 4."
+                },
+                {
+                    "q": "If a ping command fails due to an incorrect default gateway IP, at which layer is the problem?",
+                    "options": [
+                        "Layer 1 Physical",
+                        "Layer 2 Data Link",
+                        "Layer 3 Network",
+                        "Layer 7 Application"
+                    ],
+                    "answer": 2,
+                    "explanation": "IP address and gateway misconfigurations occur at Layer 3 Network."
+                },
+                {
+                    "q": "What is the PDU at Layer 4 (Transport Layer) for TCP?",
+                    "options": [
+                        "Bits",
+                        "Frame",
+                        "Packet",
+                        "Segment"
+                    ],
+                    "answer": 3,
+                    "explanation": "Layer 4 divides data streams into TCP Segments."
+                },
+                {
+                    "q": "Which layer uses 48-bit hardware MAC addresses for node-to-node delivery?",
+                    "options": [
+                        "Layer 1",
+                        "Layer 2",
+                        "Layer 3",
+                        "Layer 4"
+                    ],
+                    "answer": 1,
+                    "explanation": "Layer 2 (Data Link) uses MAC addresses inside Ethernet frame headers."
+                },
+                {
+                    "q": "Which layer establishes, manages, and terminates session dialogues between applications?",
+                    "options": [
+                        "Session Layer (Layer 5)",
+                        "Transport Layer (Layer 4)",
+                        "Network Layer (Layer 3)",
+                        "Presentation Layer (Layer 6)"
+                    ],
+                    "answer": 0,
+                    "explanation": "Layer 5 manages application session connections."
+                },
+                {
+                    "q": "At which layer do hubs and physical cables operate?",
+                    "options": [
+                        "Layer 1 Physical",
+                        "Layer 2 Data Link",
+                        "Layer 3 Network",
+                        "Layer 4 Transport"
+                    ],
+                    "answer": 0,
+                    "explanation": "Hubs, cables, and connectors operate at Layer 1 Physical."
+                },
+                {
+                    "q": "What protocol resolves a Layer 3 IP address to a Layer 2 MAC address?",
+                    "options": [
+                        "DNS",
+                        "DHCP",
+                        "ARP",
+                        "ICMP"
+                    ],
+                    "answer": 2,
+                    "explanation": "Address Resolution Protocol (ARP) bridges Layer 3 IP to Layer 2 MAC."
+                }
+            ]
+        },
+        "viva": [
+            {
+                "q": "Why is the OSI model referred to as a reference model while TCP/IP is an implementation protocol suite?",
+                "a": "The OSI model was developed by ISO as a theoretical architecture standard. TCP/IP was developed empirically by ARPANET and became the actual protocol suite used on the commercial Internet."
+            },
+            {
+                "q": "Explain the concept of Encapsulation with an example.",
+                "a": "Encapsulation is the process where each layer prepends a control header to the data payload from above. For example, an HTTP GET request (L7) gets a TCP header (L4, Segment), then an IP header (L3, Packet), then an Ethernet header (L2, Frame), before being transmitted as bits (L1)."
+            },
+            {
+                "q": "What is the difference between Layer 2 MAC addressing and Layer 3 IP addressing?",
+                "a": "Layer 2 MAC addresses are 48-bit hardware addresses permanently burned into network interface cards for local node-to-node delivery. Layer 3 IP addresses are 32-bit (IPv4) or 128-bit (IPv6) logical addresses assigned dynamically for global inter-network routing."
+            },
+            {
+                "q": "What is a Protocol Data Unit (PDU)?",
+                "a": "A PDU is the specific format of data payload plus headers at a given layer: L7/6/5 = Data, L4 = Segment (TCP) / Datagram (UDP), L3 = Packet, L2 = Frame, L1 = Bits."
+            }
+        ],
+        "simType": "osi_tcpip_sim"
+    },
+    "communication_models": {
+        "title": "Practical 2: Network Communication Models (OSI & TCP/IP)",
+        "theme": "From Bits to Browser – Understanding How Data Travels Across a Network",
+        "aim": "To examine the foundational Open Systems Interconnection (OSI) 7-layer model and 4-layer TCP/IP protocol suite, analyze end-to-end data transmission, observe header encapsulation and decapsulation from Physical bits to Application browser data, map network protocols and hardware devices to their respective layers, and diagnose multi-layer network communication faults.",
+        "intro": {
+            "summary": "Computer networks connect billions of devices globally. To standardize communication between heterogeneous devices and software, networking follows layered architectures: the 7-layer OSI conceptual reference model and the 4-layer TCP/IP Internet protocol suite. Every network packet travels through systematic encapsulation at the sender and decapsulation at the receiver.",
+            "importance": "This practical forms the conceptual backbone of the entire Virtual Lab (VLAB). Every subsequent experiment—including VLANs, Subnetting, RIP/OSPF/EIGRP Routing, TCP/UDP Transport, DHCP, and NAT—directly builds upon the layer-wise understanding gained here.",
+            "applications": [
+                "Web Browsing & E-Commerce (HTTP/HTTPS over TCP/IP)",
+                "Enterprise Network Architecture & Router/Switch Placement",
+                "Packet Inspection & Wireshark Protocol Analysis",
+                "Layer-wise Network Fault Troubleshooting"
+            ],
+            "outcome": "Students will be able to trace end-to-end data flow from 'https://www.google.com' through all 7 OSI layers, explain PDU transformations (Data ➔ Segment ➔ Packet ➔ Frame ➔ Bits), differentiate OSI vs TCP/IP models, and identify affected layers during network outages."
+        },
+        "prerequisites": [
+            "Practical 1: Introduction to Networking Tools & Utilities"
+        ],
+        "outcomes": [
+            "Explain why layered communication models are required in computer networking.",
+            "Describe the specific functions and Protocol Data Units (PDUs) of all seven OSI layers.",
+            "Describe the four layers of the TCP/IP protocol suite and map them to OSI layers.",
+            "Visualize and explain protocol encapsulation (header addition) and decapsulation (header stripping).",
+            "Identify key protocols (HTTP, TLS, TCP, UDP, IP, ARP, Ethernet) operating at each layer.",
+            "Identify hardware networking devices (Hubs, Switches, Routers, Firewalls) associated with each layer.",
+            "Analyze end-to-end packet transmission across local switches, routers, and global Internet gateways.",
+            "Troubleshoot network communication failures by isolating the affected layer."
+        ],
+        "theory": {
+            "intro": "Layered models decompose complex communication into modular, manageable steps, enabling interoperability across diverse vendor hardware and software.",
+            "sections": [
+                {
+                    "heading": "1. Introduction",
+                    "content": "Computer networks connect billions of devices worldwide. Although communication appears instantaneous, data undergoes systematic processing across logical layers before reaching its destination. The OSI model (ISO 7498) and TCP/IP suite (RFC 1122) provide the architecture for modern network engineering."
+                },
+                {
+                    "heading": "2. Learning Objectives",
+                    "content": "Master core concepts:\\n• Requirements for layered communication architectures.\\n• The 7 OSI layers and 4 TCP/IP layers.\\n• Header encapsulation and decapsulation.\\n• Protocols, PDUs, and hardware devices by layer.\\n• End-to-end Digital Twin packet flow."
+                },
+                {
+                    "heading": "3. Why Communication Models are Required",
+                    "content": "Layering offers modularity, vendor independence, standardized interfaces, simplified troubleshooting, and flexible protocol development without affecting adjacent layers."
+                },
+                {
+                    "heading": "4. Evolution of Network Communication",
+                    "content": "From early proprietary protocols (SNA, AppleTalk) to ARPANET's TCP/IP development in the 1970s and ISO's 7-Layer OSI reference standard in 1984."
+                },
+                {
+                    "heading": "5. What is the OSI Model?",
+                    "content": "The Open Systems Interconnection model divides communication into 7 distinct layers: 7-Application, 6-Presentation, 5-Session, 4-Transport, 3-Network, 2-Data Link, and 1-Physical."
+                },
+                {
+                    "heading": "6. Detailed Study of All Seven Layers",
+                    "content": "• Layer 7 (Application): Interface for user software (HTTP, FTP, DNS, SMTP).\\n• Layer 6 (Presentation): Formatting, MIME, SSL/TLS Encryption, Compression (JPEG, ASCII).\\n• Layer 5 (Session): Session establishment, maintenance, and teardown (RPC, NetBIOS).\\n• Layer 4 (Transport): End-to-end connection control, segmentation, flow control, port addressing (TCP, UDP).\\n• Layer 3 (Network): Logical IP addressing, routing across networks (IPv4, IPv6, ICMP, Routers).\\n• Layer 2 (Data Link): Physical MAC addressing, framing, error detection, switch bridging (Ethernet, Switches, NICs).\\n• Layer 1 (Physical): Bit transmission over physical/wireless media, signaling, cables (UTP, Fiber, Wireless, Hubs)."
+                },
+                {
+                    "heading": "7. What is the TCP/IP Model?",
+                    "content": "The practical Internet model consisting of 4 layers: 4-Application, 3-Transport, 2-Internet, 1-Network Access."
+                },
+                {
+                    "heading": "8. OSI vs TCP/IP Comparison",
+                    "content": "OSI is a 7-layer theoretical reference model. TCP/IP is a 4-layer practical implementation standard powering the modern Internet."
+                },
+                {
+                    "heading": "9. Encapsulation & Decapsulation",
+                    "content": "• Encapsulation: As data moves down the stack (7 ➔ 1), each layer prepends its control header, producing PDUs: Data ➔ Segment (L4) ➔ Packet (L3) ➔ Frame (L2) ➔ Bits (L1).\\n• Decapsulation: As bits arrive at destination (1 ➔ 7), each layer strips its header and passes payload up."
+                },
+                {
+                    "heading": "10. End-to-End Communication",
+                    "content": "Tracing data flow from Client Laptop ➔ Switch ➔ Router ➔ Cloud ➔ Destination Server."
+                },
+                {
+                    "heading": "11. Layer-wise Interactive Simulations",
+                    "content": "Exploring individual layer functions through interactive protocol inspectors."
+                },
+                {
+                    "heading": "12. Complete Communication Simulator",
+                    "content": "Full digital twin simulation of browser requests ('https://www.google.com')."
+                },
+                {
+                    "heading": "13. Guided Experiment",
+                    "content": "Step-by-step walkthrough of packet header assembly."
+                },
+                {
+                    "heading": "14. Practice Lab",
+                    "content": "Interactive drag-and-drop layer mapping challenges."
+                },
+                {
+                    "heading": "15. Assessment",
+                    "content": "Pre-test and Post-test evaluations measuring layer conceptual mastery."
+                },
+                {
+                    "heading": "16. Report & Certificate",
+                    "content": "Generating verified academic lab report upon completion."
+                }
+            ]
+        },
+        "hardware_inspector": [
+            {
+                "id": "osi_stack_inspector",
+                "name": "7-Layer OSI & TCP/IP Architecture Inspector",
+                "category": "Architectural Digital Twin",
+                "description": "Interactive visualizer of the 7 OSI layers, 4 TCP/IP layers, headers, and PDUs.",
+                "svg": "<svg viewBox=\"0 0 400 240\" xmlns=\"http://www.w3.org/2000/svg\">\n                <rect x=\"15\" y=\"15\" width=\"370\" height=\"210\" rx=\"10\" fill=\"#0f172a\" stroke=\"#38bdf8\" stroke-width=\"2\"/>\n                <text x=\"200\" y=\"38\" fill=\"#38bdf8\" font-size=\"13\" font-weight=\"bold\" text-anchor=\"middle\">OSI 7-LAYER ⇹ TCP/IP 4-LAYER DIGITAL TWIN</text>\n                \n                <!-- OSI Stack -->\n                <rect x=\"30\" y=\"50\" width=\"160\" height=\"20\" fill=\"#ec4899\" rx=\"3\"/><text x=\"110\" y=\"64\" fill=\"#fff\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">7. Application (Data)</text>\n                <rect x=\"30\" y=\"73\" width=\"160\" height=\"20\" fill=\"#a855f7\" rx=\"3\"/><text x=\"110\" y=\"87\" fill=\"#fff\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">6. Presentation (Data)</text>\n                <rect x=\"30\" y=\"96\" width=\"160\" height=\"20\" fill=\"#8b5cf6\" rx=\"3\"/><text x=\"110\" y=\"110\" fill=\"#fff\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">5. Session (Data)</text>\n                <rect x=\"30\" y=\"119\" width=\"160\" height=\"20\" fill=\"#3b82f6\" rx=\"3\"/><text x=\"110\" y=\"133\" fill=\"#fff\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">4. Transport (Segment)</text>\n                <rect x=\"30\" y=\"142\" width=\"160\" height=\"20\" fill=\"#10b981\" rx=\"3\"/><text x=\"110\" y=\"156\" fill=\"#fff\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">3. Network (Packet)</text>\n                <rect x=\"30\" y=\"165\" width=\"160\" height=\"20\" fill=\"#f59e0b\" rx=\"3\"/><text x=\"110\" y=\"179\" fill=\"#fff\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">2. Data Link (Frame)</text>\n                <rect x=\"30\" y=\"188\" width=\"160\" height=\"20\" fill=\"#ef4444\" rx=\"3\"/><text x=\"110\" y=\"202\" fill=\"#fff\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">1. Physical (Bits)</text>\n\n                <!-- TCP/IP Stack -->\n                <rect x=\"210\" y=\"50\" width=\"160\" height=\"66\" fill=\"#a855f7\" rx=\"4\" stroke=\"#fff\" stroke-width=\"1\"/>\n                <text x=\"290\" y=\"88\" fill=\"#fff\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">1. Application</text>\n                \n                <rect x=\"210\" y=\"119\" width=\"160\" height=\"20\" fill=\"#3b82f6\" rx=\"4\" stroke=\"#fff\" stroke-width=\"1\"/>\n                <text x=\"290\" y=\"133\" fill=\"#fff\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">2. Transport</text>\n                \n                <rect x=\"210\" y=\"142\" width=\"160\" height=\"20\" fill=\"#10b981\" rx=\"4\" stroke=\"#fff\" stroke-width=\"1\"/>\n                <text x=\"290\" y=\"156\" fill=\"#fff\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">3. Internet</text>\n                \n                <rect x=\"210\" y=\"165\" width=\"160\" height=\"43\" fill=\"#f59e0b\" rx=\"4\" stroke=\"#fff\" stroke-width=\"1\"/>\n                <text x=\"290\" y=\"190\" fill=\"#fff\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">4. Network Access</text>\n            </svg>"
+            }
+        ],
+        "troubleshooting": {
+            "problem": "Multi-Layer Network Communication Failure (Diagnose Affected Layer)",
+            "hints": [
+                "Check if physical Ethernet cable is unplugged or Wi-Fi radio is disabled (Layer 1 Physical).",
+                "Check if MAC address table is unpopulated or ARP resolution failed (Layer 2 Data Link).",
+                "Check if device has an invalid IP address or gateway router is unreachable (Layer 3 Network).",
+                "Check if firewall is blocking TCP port 80/443 (Layer 4 Transport).",
+                "Check if DNS domain resolution fails for www.google.com (Layer 7 Application)."
+            ],
+            "fix": "Isolate fault using layer-by-layer troubleshooting: Verify Physical cable link ➔ Check Link-Layer MAC/ARP ➔ Verify Network Layer IP ping ➔ Verify Transport Layer port socket ➔ Test Application Layer DNS & HTTP."
+        },
+        "evaluations": {
+            "pretest": [
+                {
+                    "q": "Which OSI layer is responsible for logical IP address routing across different networks?",
+                    "options": [
+                        "Layer 2 - Data Link",
+                        "Layer 3 - Network",
+                        "Layer 4 - Transport",
+                        "Layer 7 - Application"
+                    ],
+                    "answer": 1,
+                    "explanation": "Layer 3 (Network) handles logical IP addressing and routing."
+                },
+                {
+                    "q": "What is the Protocol Data Unit (PDU) of the Data Link Layer (Layer 2)?",
+                    "options": [
+                        "Bits",
+                        "Frame",
+                        "Packet",
+                        "Segment"
+                    ],
+                    "answer": 1,
+                    "explanation": "Layer 2 packages data into Frames containing MAC addresses."
+                },
+                {
+                    "q": "Which layer performs SSL/TLS encryption, compression, and character encoding?",
+                    "options": [
+                        "Presentation Layer (Layer 6)",
+                        "Session Layer (Layer 5)",
+                        "Transport Layer (Layer 4)",
+                        "Application Layer (Layer 7)"
+                    ],
+                    "answer": 0,
+                    "explanation": "Layer 6 (Presentation) formats, compresses, and encrypts data."
+                },
+                {
+                    "q": "Which device operates primarily at Layer 2 of the OSI model?",
+                    "options": [
+                        "Hub",
+                        "Layer 2 Switch",
+                        "Router",
+                        "Application Gateway"
+                    ],
+                    "answer": 1,
+                    "explanation": "Switches forward Ethernet frames using Layer 2 MAC address tables."
+                },
+                {
+                    "q": "What is the process of adding headers as data moves down the OSI stack?",
+                    "options": [
+                        "Decapsulation",
+                        "Encapsulation",
+                        "Multiplexing",
+                        "Segmentation"
+                    ],
+                    "answer": 1,
+                    "explanation": "Encapsulation adds headers at each layer from top to bottom."
+                }
+            ],
+            "posttest": [
+                {
+                    "q": "How many layers are defined in the conceptual OSI reference model vs TCP/IP model?",
+                    "options": [
+                        "7 OSI, 4 TCP/IP",
+                        "4 OSI, 7 TCP/IP",
+                        "7 OSI, 7 TCP/IP",
+                        "5 OSI, 4 TCP/IP"
+                    ],
+                    "answer": 0,
+                    "explanation": "OSI defines 7 layers; TCP/IP defines 4 layers."
+                },
+                {
+                    "q": "Which TCP/IP layer corresponds to OSI Layers 5, 6, and 7 combined?",
+                    "options": [
+                        "Network Access Layer",
+                        "Internet Layer",
+                        "Transport Layer",
+                        "Application Layer"
+                    ],
+                    "answer": 3,
+                    "explanation": "TCP/IP Application Layer encompasses Session, Presentation, and Application functions."
+                },
+                {
+                    "q": "What happens during Decapsulation at the receiving host?",
+                    "options": [
+                        "Headers are added to the payload",
+                        "Headers are stripped layer by layer from bottom to top",
+                        "Packets are converted to analog signals",
+                        "IP addresses are rewritten"
+                    ],
+                    "answer": 1,
+                    "explanation": "Decapsulation strips headers at each layer as payload moves up to Layer 7."
+                },
+                {
+                    "q": "Which protocols operate at Layer 4 (Transport Layer)?",
+                    "options": [
+                        "HTTP & HTTPS",
+                        "IPv4 & IPv6",
+                        "TCP & UDP",
+                        "Ethernet & Wi-Fi"
+                    ],
+                    "answer": 2,
+                    "explanation": "TCP and UDP manage process-to-process transport at Layer 4."
+                },
+                {
+                    "q": "If a ping command fails due to an incorrect default gateway IP, at which layer is the problem?",
+                    "options": [
+                        "Layer 1 Physical",
+                        "Layer 2 Data Link",
+                        "Layer 3 Network",
+                        "Layer 7 Application"
+                    ],
+                    "answer": 2,
+                    "explanation": "IP address and gateway misconfigurations occur at Layer 3 Network."
+                },
+                {
+                    "q": "What is the PDU at Layer 4 (Transport Layer) for TCP?",
+                    "options": [
+                        "Bits",
+                        "Frame",
+                        "Packet",
+                        "Segment"
+                    ],
+                    "answer": 3,
+                    "explanation": "Layer 4 divides data streams into TCP Segments."
+                },
+                {
+                    "q": "Which layer uses 48-bit hardware MAC addresses for node-to-node delivery?",
+                    "options": [
+                        "Layer 1",
+                        "Layer 2",
+                        "Layer 3",
+                        "Layer 4"
+                    ],
+                    "answer": 1,
+                    "explanation": "Layer 2 (Data Link) uses MAC addresses inside Ethernet frame headers."
+                },
+                {
+                    "q": "Which layer establishes, manages, and terminates session dialogues between applications?",
+                    "options": [
+                        "Session Layer (Layer 5)",
+                        "Transport Layer (Layer 4)",
+                        "Network Layer (Layer 3)",
+                        "Presentation Layer (Layer 6)"
+                    ],
+                    "answer": 0,
+                    "explanation": "Layer 5 manages application session connections."
+                },
+                {
+                    "q": "At which layer do hubs and physical cables operate?",
+                    "options": [
+                        "Layer 1 Physical",
+                        "Layer 2 Data Link",
+                        "Layer 3 Network",
+                        "Layer 4 Transport"
+                    ],
+                    "answer": 0,
+                    "explanation": "Hubs, cables, and connectors operate at Layer 1 Physical."
+                },
+                {
+                    "q": "What protocol resolves a Layer 3 IP address to a Layer 2 MAC address?",
+                    "options": [
+                        "DNS",
+                        "DHCP",
+                        "ARP",
+                        "ICMP"
+                    ],
+                    "answer": 2,
+                    "explanation": "Address Resolution Protocol (ARP) bridges Layer 3 IP to Layer 2 MAC."
+                }
+            ]
+        },
+        "viva": [
+            {
+                "q": "Why is the OSI model referred to as a reference model while TCP/IP is an implementation protocol suite?",
+                "a": "The OSI model was developed by ISO as a theoretical architecture standard. TCP/IP was developed empirically by ARPANET and became the actual protocol suite used on the commercial Internet."
+            },
+            {
+                "q": "Explain the concept of Encapsulation with an example.",
+                "a": "Encapsulation is the process where each layer prepends a control header to the data payload from above. For example, an HTTP GET request (L7) gets a TCP header (L4, Segment), then an IP header (L3, Packet), then an Ethernet header (L2, Frame), before being transmitted as bits (L1)."
+            },
+            {
+                "q": "What is the difference between Layer 2 MAC addressing and Layer 3 IP addressing?",
+                "a": "Layer 2 MAC addresses are 48-bit hardware addresses permanently burned into network interface cards for local node-to-node delivery. Layer 3 IP addresses are 32-bit (IPv4) or 128-bit (IPv6) logical addresses assigned dynamically for global inter-network routing."
+            },
+            {
+                "q": "What is a Protocol Data Unit (PDU)?",
+                "a": "A PDU is the specific format of data payload plus headers at a given layer: L7/6/5 = Data, L4 = Segment (TCP) / Datagram (UDP), L3 = Packet, L2 = Frame, L1 = Bits."
+            }
+        ],
+        "simType": "osi_tcpip_sim"
+    },
+    "osi_tcpip_sim": {
+        "title": "Practical 2: Network Communication Models (OSI & TCP/IP)",
+        "theme": "From Bits to Browser – Understanding How Data Travels Across a Network",
+        "aim": "To examine the foundational Open Systems Interconnection (OSI) 7-layer model and 4-layer TCP/IP protocol suite, analyze end-to-end data transmission, observe header encapsulation and decapsulation from Physical bits to Application browser data, map network protocols and hardware devices to their respective layers, and diagnose multi-layer network communication faults.",
+        "intro": {
+            "summary": "Computer networks connect billions of devices globally. To standardize communication between heterogeneous devices and software, networking follows layered architectures: the 7-layer OSI conceptual reference model and the 4-layer TCP/IP Internet protocol suite. Every network packet travels through systematic encapsulation at the sender and decapsulation at the receiver.",
+            "importance": "This practical forms the conceptual backbone of the entire Virtual Lab (VLAB). Every subsequent experiment—including VLANs, Subnetting, RIP/OSPF/EIGRP Routing, TCP/UDP Transport, DHCP, and NAT—directly builds upon the layer-wise understanding gained here.",
+            "applications": [
+                "Web Browsing & E-Commerce (HTTP/HTTPS over TCP/IP)",
+                "Enterprise Network Architecture & Router/Switch Placement",
+                "Packet Inspection & Wireshark Protocol Analysis",
+                "Layer-wise Network Fault Troubleshooting"
+            ],
+            "outcome": "Students will be able to trace end-to-end data flow from 'https://www.google.com' through all 7 OSI layers, explain PDU transformations (Data ➔ Segment ➔ Packet ➔ Frame ➔ Bits), differentiate OSI vs TCP/IP models, and identify affected layers during network outages."
+        },
+        "prerequisites": [
+            "Practical 1: Introduction to Networking Tools & Utilities"
+        ],
+        "outcomes": [
+            "Explain why layered communication models are required in computer networking.",
+            "Describe the specific functions and Protocol Data Units (PDUs) of all seven OSI layers.",
+            "Describe the four layers of the TCP/IP protocol suite and map them to OSI layers.",
+            "Visualize and explain protocol encapsulation (header addition) and decapsulation (header stripping).",
+            "Identify key protocols (HTTP, TLS, TCP, UDP, IP, ARP, Ethernet) operating at each layer.",
+            "Identify hardware networking devices (Hubs, Switches, Routers, Firewalls) associated with each layer.",
+            "Analyze end-to-end packet transmission across local switches, routers, and global Internet gateways.",
+            "Troubleshoot network communication failures by isolating the affected layer."
+        ],
+        "theory": {
+            "intro": "Layered models decompose complex communication into modular, manageable steps, enabling interoperability across diverse vendor hardware and software.",
+            "sections": [
+                {
+                    "heading": "1. Introduction",
+                    "content": "Computer networks connect billions of devices worldwide. Although communication appears instantaneous, data undergoes systematic processing across logical layers before reaching its destination. The OSI model (ISO 7498) and TCP/IP suite (RFC 1122) provide the architecture for modern network engineering."
+                },
+                {
+                    "heading": "2. Learning Objectives",
+                    "content": "Master core concepts:\\n• Requirements for layered communication architectures.\\n• The 7 OSI layers and 4 TCP/IP layers.\\n• Header encapsulation and decapsulation.\\n• Protocols, PDUs, and hardware devices by layer.\\n• End-to-end Digital Twin packet flow."
+                },
+                {
+                    "heading": "3. Why Communication Models are Required",
+                    "content": "Layering offers modularity, vendor independence, standardized interfaces, simplified troubleshooting, and flexible protocol development without affecting adjacent layers."
+                },
+                {
+                    "heading": "4. Evolution of Network Communication",
+                    "content": "From early proprietary protocols (SNA, AppleTalk) to ARPANET's TCP/IP development in the 1970s and ISO's 7-Layer OSI reference standard in 1984."
+                },
+                {
+                    "heading": "5. What is the OSI Model?",
+                    "content": "The Open Systems Interconnection model divides communication into 7 distinct layers: 7-Application, 6-Presentation, 5-Session, 4-Transport, 3-Network, 2-Data Link, and 1-Physical."
+                },
+                {
+                    "heading": "6. Detailed Study of All Seven Layers",
+                    "content": "• Layer 7 (Application): Interface for user software (HTTP, FTP, DNS, SMTP).\\n• Layer 6 (Presentation): Formatting, MIME, SSL/TLS Encryption, Compression (JPEG, ASCII).\\n• Layer 5 (Session): Session establishment, maintenance, and teardown (RPC, NetBIOS).\\n• Layer 4 (Transport): End-to-end connection control, segmentation, flow control, port addressing (TCP, UDP).\\n• Layer 3 (Network): Logical IP addressing, routing across networks (IPv4, IPv6, ICMP, Routers).\\n• Layer 2 (Data Link): Physical MAC addressing, framing, error detection, switch bridging (Ethernet, Switches, NICs).\\n• Layer 1 (Physical): Bit transmission over physical/wireless media, signaling, cables (UTP, Fiber, Wireless, Hubs)."
+                },
+                {
+                    "heading": "7. What is the TCP/IP Model?",
+                    "content": "The practical Internet model consisting of 4 layers: 4-Application, 3-Transport, 2-Internet, 1-Network Access."
+                },
+                {
+                    "heading": "8. OSI vs TCP/IP Comparison",
+                    "content": "OSI is a 7-layer theoretical reference model. TCP/IP is a 4-layer practical implementation standard powering the modern Internet."
+                },
+                {
+                    "heading": "9. Encapsulation & Decapsulation",
+                    "content": "• Encapsulation: As data moves down the stack (7 ➔ 1), each layer prepends its control header, producing PDUs: Data ➔ Segment (L4) ➔ Packet (L3) ➔ Frame (L2) ➔ Bits (L1).\\n• Decapsulation: As bits arrive at destination (1 ➔ 7), each layer strips its header and passes payload up."
+                },
+                {
+                    "heading": "10. End-to-End Communication",
+                    "content": "Tracing data flow from Client Laptop ➔ Switch ➔ Router ➔ Cloud ➔ Destination Server."
+                },
+                {
+                    "heading": "11. Layer-wise Interactive Simulations",
+                    "content": "Exploring individual layer functions through interactive protocol inspectors."
+                },
+                {
+                    "heading": "12. Complete Communication Simulator",
+                    "content": "Full digital twin simulation of browser requests ('https://www.google.com')."
+                },
+                {
+                    "heading": "13. Guided Experiment",
+                    "content": "Step-by-step walkthrough of packet header assembly."
+                },
+                {
+                    "heading": "14. Practice Lab",
+                    "content": "Interactive drag-and-drop layer mapping challenges."
+                },
+                {
+                    "heading": "15. Assessment",
+                    "content": "Pre-test and Post-test evaluations measuring layer conceptual mastery."
+                },
+                {
+                    "heading": "16. Report & Certificate",
+                    "content": "Generating verified academic lab report upon completion."
+                }
+            ]
+        },
+        "hardware_inspector": [
+            {
+                "id": "osi_stack_inspector",
+                "name": "7-Layer OSI & TCP/IP Architecture Inspector",
+                "category": "Architectural Digital Twin",
+                "description": "Interactive visualizer of the 7 OSI layers, 4 TCP/IP layers, headers, and PDUs.",
+                "svg": "<svg viewBox=\"0 0 400 240\" xmlns=\"http://www.w3.org/2000/svg\">\n                <rect x=\"15\" y=\"15\" width=\"370\" height=\"210\" rx=\"10\" fill=\"#0f172a\" stroke=\"#38bdf8\" stroke-width=\"2\"/>\n                <text x=\"200\" y=\"38\" fill=\"#38bdf8\" font-size=\"13\" font-weight=\"bold\" text-anchor=\"middle\">OSI 7-LAYER ⇹ TCP/IP 4-LAYER DIGITAL TWIN</text>\n                \n                <!-- OSI Stack -->\n                <rect x=\"30\" y=\"50\" width=\"160\" height=\"20\" fill=\"#ec4899\" rx=\"3\"/><text x=\"110\" y=\"64\" fill=\"#fff\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">7. Application (Data)</text>\n                <rect x=\"30\" y=\"73\" width=\"160\" height=\"20\" fill=\"#a855f7\" rx=\"3\"/><text x=\"110\" y=\"87\" fill=\"#fff\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">6. Presentation (Data)</text>\n                <rect x=\"30\" y=\"96\" width=\"160\" height=\"20\" fill=\"#8b5cf6\" rx=\"3\"/><text x=\"110\" y=\"110\" fill=\"#fff\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">5. Session (Data)</text>\n                <rect x=\"30\" y=\"119\" width=\"160\" height=\"20\" fill=\"#3b82f6\" rx=\"3\"/><text x=\"110\" y=\"133\" fill=\"#fff\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">4. Transport (Segment)</text>\n                <rect x=\"30\" y=\"142\" width=\"160\" height=\"20\" fill=\"#10b981\" rx=\"3\"/><text x=\"110\" y=\"156\" fill=\"#fff\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">3. Network (Packet)</text>\n                <rect x=\"30\" y=\"165\" width=\"160\" height=\"20\" fill=\"#f59e0b\" rx=\"3\"/><text x=\"110\" y=\"179\" fill=\"#fff\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">2. Data Link (Frame)</text>\n                <rect x=\"30\" y=\"188\" width=\"160\" height=\"20\" fill=\"#ef4444\" rx=\"3\"/><text x=\"110\" y=\"202\" fill=\"#fff\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">1. Physical (Bits)</text>\n\n                <!-- TCP/IP Stack -->\n                <rect x=\"210\" y=\"50\" width=\"160\" height=\"66\" fill=\"#a855f7\" rx=\"4\" stroke=\"#fff\" stroke-width=\"1\"/>\n                <text x=\"290\" y=\"88\" fill=\"#fff\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">1. Application</text>\n                \n                <rect x=\"210\" y=\"119\" width=\"160\" height=\"20\" fill=\"#3b82f6\" rx=\"4\" stroke=\"#fff\" stroke-width=\"1\"/>\n                <text x=\"290\" y=\"133\" fill=\"#fff\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">2. Transport</text>\n                \n                <rect x=\"210\" y=\"142\" width=\"160\" height=\"20\" fill=\"#10b981\" rx=\"4\" stroke=\"#fff\" stroke-width=\"1\"/>\n                <text x=\"290\" y=\"156\" fill=\"#fff\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">3. Internet</text>\n                \n                <rect x=\"210\" y=\"165\" width=\"160\" height=\"43\" fill=\"#f59e0b\" rx=\"4\" stroke=\"#fff\" stroke-width=\"1\"/>\n                <text x=\"290\" y=\"190\" fill=\"#fff\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">4. Network Access</text>\n            </svg>"
+            }
+        ],
+        "troubleshooting": {
+            "problem": "Multi-Layer Network Communication Failure (Diagnose Affected Layer)",
+            "hints": [
+                "Check if physical Ethernet cable is unplugged or Wi-Fi radio is disabled (Layer 1 Physical).",
+                "Check if MAC address table is unpopulated or ARP resolution failed (Layer 2 Data Link).",
+                "Check if device has an invalid IP address or gateway router is unreachable (Layer 3 Network).",
+                "Check if firewall is blocking TCP port 80/443 (Layer 4 Transport).",
+                "Check if DNS domain resolution fails for www.google.com (Layer 7 Application)."
+            ],
+            "fix": "Isolate fault using layer-by-layer troubleshooting: Verify Physical cable link ➔ Check Link-Layer MAC/ARP ➔ Verify Network Layer IP ping ➔ Verify Transport Layer port socket ➔ Test Application Layer DNS & HTTP."
+        },
+        "evaluations": {
+            "pretest": [
+                {
+                    "q": "Which OSI layer is responsible for logical IP address routing across different networks?",
+                    "options": [
+                        "Layer 2 - Data Link",
+                        "Layer 3 - Network",
+                        "Layer 4 - Transport",
+                        "Layer 7 - Application"
+                    ],
+                    "answer": 1,
+                    "explanation": "Layer 3 (Network) handles logical IP addressing and routing."
+                },
+                {
+                    "q": "What is the Protocol Data Unit (PDU) of the Data Link Layer (Layer 2)?",
+                    "options": [
+                        "Bits",
+                        "Frame",
+                        "Packet",
+                        "Segment"
+                    ],
+                    "answer": 1,
+                    "explanation": "Layer 2 packages data into Frames containing MAC addresses."
+                },
+                {
+                    "q": "Which layer performs SSL/TLS encryption, compression, and character encoding?",
+                    "options": [
+                        "Presentation Layer (Layer 6)",
+                        "Session Layer (Layer 5)",
+                        "Transport Layer (Layer 4)",
+                        "Application Layer (Layer 7)"
+                    ],
+                    "answer": 0,
+                    "explanation": "Layer 6 (Presentation) formats, compresses, and encrypts data."
+                },
+                {
+                    "q": "Which device operates primarily at Layer 2 of the OSI model?",
+                    "options": [
+                        "Hub",
+                        "Layer 2 Switch",
+                        "Router",
+                        "Application Gateway"
+                    ],
+                    "answer": 1,
+                    "explanation": "Switches forward Ethernet frames using Layer 2 MAC address tables."
+                },
+                {
+                    "q": "What is the process of adding headers as data moves down the OSI stack?",
+                    "options": [
+                        "Decapsulation",
+                        "Encapsulation",
+                        "Multiplexing",
+                        "Segmentation"
+                    ],
+                    "answer": 1,
+                    "explanation": "Encapsulation adds headers at each layer from top to bottom."
+                }
+            ],
+            "posttest": [
+                {
+                    "q": "How many layers are defined in the conceptual OSI reference model vs TCP/IP model?",
+                    "options": [
+                        "7 OSI, 4 TCP/IP",
+                        "4 OSI, 7 TCP/IP",
+                        "7 OSI, 7 TCP/IP",
+                        "5 OSI, 4 TCP/IP"
+                    ],
+                    "answer": 0,
+                    "explanation": "OSI defines 7 layers; TCP/IP defines 4 layers."
+                },
+                {
+                    "q": "Which TCP/IP layer corresponds to OSI Layers 5, 6, and 7 combined?",
+                    "options": [
+                        "Network Access Layer",
+                        "Internet Layer",
+                        "Transport Layer",
+                        "Application Layer"
+                    ],
+                    "answer": 3,
+                    "explanation": "TCP/IP Application Layer encompasses Session, Presentation, and Application functions."
+                },
+                {
+                    "q": "What happens during Decapsulation at the receiving host?",
+                    "options": [
+                        "Headers are added to the payload",
+                        "Headers are stripped layer by layer from bottom to top",
+                        "Packets are converted to analog signals",
+                        "IP addresses are rewritten"
+                    ],
+                    "answer": 1,
+                    "explanation": "Decapsulation strips headers at each layer as payload moves up to Layer 7."
+                },
+                {
+                    "q": "Which protocols operate at Layer 4 (Transport Layer)?",
+                    "options": [
+                        "HTTP & HTTPS",
+                        "IPv4 & IPv6",
+                        "TCP & UDP",
+                        "Ethernet & Wi-Fi"
+                    ],
+                    "answer": 2,
+                    "explanation": "TCP and UDP manage process-to-process transport at Layer 4."
+                },
+                {
+                    "q": "If a ping command fails due to an incorrect default gateway IP, at which layer is the problem?",
+                    "options": [
+                        "Layer 1 Physical",
+                        "Layer 2 Data Link",
+                        "Layer 3 Network",
+                        "Layer 7 Application"
+                    ],
+                    "answer": 2,
+                    "explanation": "IP address and gateway misconfigurations occur at Layer 3 Network."
+                },
+                {
+                    "q": "What is the PDU at Layer 4 (Transport Layer) for TCP?",
+                    "options": [
+                        "Bits",
+                        "Frame",
+                        "Packet",
+                        "Segment"
+                    ],
+                    "answer": 3,
+                    "explanation": "Layer 4 divides data streams into TCP Segments."
+                },
+                {
+                    "q": "Which layer uses 48-bit hardware MAC addresses for node-to-node delivery?",
+                    "options": [
+                        "Layer 1",
+                        "Layer 2",
+                        "Layer 3",
+                        "Layer 4"
+                    ],
+                    "answer": 1,
+                    "explanation": "Layer 2 (Data Link) uses MAC addresses inside Ethernet frame headers."
+                },
+                {
+                    "q": "Which layer establishes, manages, and terminates session dialogues between applications?",
+                    "options": [
+                        "Session Layer (Layer 5)",
+                        "Transport Layer (Layer 4)",
+                        "Network Layer (Layer 3)",
+                        "Presentation Layer (Layer 6)"
+                    ],
+                    "answer": 0,
+                    "explanation": "Layer 5 manages application session connections."
+                },
+                {
+                    "q": "At which layer do hubs and physical cables operate?",
+                    "options": [
+                        "Layer 1 Physical",
+                        "Layer 2 Data Link",
+                        "Layer 3 Network",
+                        "Layer 4 Transport"
+                    ],
+                    "answer": 0,
+                    "explanation": "Hubs, cables, and connectors operate at Layer 1 Physical."
+                },
+                {
+                    "q": "What protocol resolves a Layer 3 IP address to a Layer 2 MAC address?",
+                    "options": [
+                        "DNS",
+                        "DHCP",
+                        "ARP",
+                        "ICMP"
+                    ],
+                    "answer": 2,
+                    "explanation": "Address Resolution Protocol (ARP) bridges Layer 3 IP to Layer 2 MAC."
+                }
+            ]
+        },
+        "viva": [
+            {
+                "q": "Why is the OSI model referred to as a reference model while TCP/IP is an implementation protocol suite?",
+                "a": "The OSI model was developed by ISO as a theoretical architecture standard. TCP/IP was developed empirically by ARPANET and became the actual protocol suite used on the commercial Internet."
+            },
+            {
+                "q": "Explain the concept of Encapsulation with an example.",
+                "a": "Encapsulation is the process where each layer prepends a control header to the data payload from above. For example, an HTTP GET request (L7) gets a TCP header (L4, Segment), then an IP header (L3, Packet), then an Ethernet header (L2, Frame), before being transmitted as bits (L1)."
+            },
+            {
+                "q": "What is the difference between Layer 2 MAC addressing and Layer 3 IP addressing?",
+                "a": "Layer 2 MAC addresses are 48-bit hardware addresses permanently burned into network interface cards for local node-to-node delivery. Layer 3 IP addresses are 32-bit (IPv4) or 128-bit (IPv6) logical addresses assigned dynamically for global inter-network routing."
+            },
+            {
+                "q": "What is a Protocol Data Unit (PDU)?",
+                "a": "A PDU is the specific format of data payload plus headers at a given layer: L7/6/5 = Data, L4 = Segment (TCP) / Datagram (UDP), L3 = Packet, L2 = Frame, L1 = Bits."
+            }
+        ],
+        "simType": "osi_tcpip_sim"
     }
 };
 
-// Legacy key alias mappings for 100% backwards compatibility with old bookmarks / localStorage keys
-window.VLAB_DATA['cables_devices'] = window.VLAB_DATA['intro_tools'];
-window.VLAB_DATA['modulation'] = window.VLAB_DATA['lan_cables'];
-window.VLAB_DATA['csma'] = window.VLAB_DATA['topologies'];
-window.VLAB_DATA['csma_ca'] = window.VLAB_DATA['topologies'];
-window.VLAB_DATA['subnet'] = window.VLAB_DATA['subnetting'];
-window.VLAB_DATA['routing_protocols'] = window.VLAB_DATA['routing_ospf'];
-window.VLAB_DATA['routing_dv'] = window.VLAB_DATA['routing_rip'];
-window.VLAB_DATA['routing_ls'] = window.VLAB_DATA['routing_eigrp'];
-window.VLAB_DATA['udp'] = window.VLAB_DATA['udp_tcp'];
-window.VLAB_DATA['tcp'] = window.VLAB_DATA['udp_tcp'];
-window.VLAB_DATA['dns'] = window.VLAB_DATA['dhcp_config'];
-window.VLAB_DATA['vlan'] = window.VLAB_DATA['vlan_sim'];
-window.VLAB_DATA['rip_sim'] = window.VLAB_DATA['routing_rip'];
-window.VLAB_DATA['rip'] = window.VLAB_DATA['routing_rip'];
-window.VLAB_DATA['ospf_sim'] = window.VLAB_DATA['routing_ospf'];
-window.VLAB_DATA['ospf'] = window.VLAB_DATA['routing_ospf'];
-window.VLAB_DATA['eigrp_sim'] = window.VLAB_DATA['routing_eigrp'];
-window.VLAB_DATA['eigrp'] = window.VLAB_DATA['routing_eigrp'];
-window.VLAB_DATA['static_routing_sim'] = window.VLAB_DATA['static_routing'];
-window.VLAB_DATA['udp_tcp_sim'] = window.VLAB_DATA['udp_tcp'];
-window.VLAB_DATA['dhcp_config_sim'] = window.VLAB_DATA['dhcp_config'];
-window.VLAB_DATA['static_nat_sim'] = window.VLAB_DATA['static_nat'];
-window.VLAB_DATA['dynamic_nat_sim'] = window.VLAB_DATA['dynamic_nat'];
+window.VLAB_DATA['communication_models'] = window.VLAB_DATA['osi_tcpip'];
+window.VLAB_DATA['osi_tcpip_sim'] = window.VLAB_DATA['osi_tcpip'];

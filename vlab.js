@@ -14790,6 +14790,285 @@ const initDynamicNatSim = (container) => {
 };
 
 
+        // --- PRACTICAL 2: NETWORK COMMUNICATION MODELS (OSI & TCP/IP) ---
+// --- PRACTICAL 2: NETWORK COMMUNICATION MODELS (OSI & TCP/IP) DIGITAL TWIN SIMULATOR ---
+const initOsiTcpipSim = (container) => {
+    const AC = '#38bdf8'; // Sky Blue
+    container.innerHTML = `
+        <div style="padding:15px; font-family:var(--font-sans); color:var(--text-main); height:100%; display:flex; flex-direction:column; gap:12px; box-sizing:border-box;">
+            <div style="background:linear-gradient(135deg, rgba(56,189,248,0.15) 0%, rgba(15,23,42,0.6) 100%); border:1px solid ${AC}; border-radius:12px; padding:12px 18px; display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                    <h3 style="margin:0; color:${AC}; font-size:17px; font-weight:800; display:flex; align-items:center; gap:8px;">
+                        <span>🌐</span> Digital Twin of Network Communication (OSI & TCP/IP)
+                    </h3>
+                    <p style="margin:4px 0 0 0; font-size:12px; color:var(--text-muted);">
+                        "From Bits to Browser – Understanding How Data Travels Across a Network" • End-to-End Encapsulation & Decapsulation
+                    </p>
+                </div>
+            </div>
+
+            <!-- Tab Buttons -->
+            <div style="display:flex; gap:8px; border-bottom:1px solid var(--border); padding-bottom:8px;">
+                <button id="tab-btn-twin" style="background:${AC}; color:#0f172a; border:none; padding:8px 16px; border-radius:8px; font-weight:800; font-size:12px; cursor:pointer;">
+                    🌐 1. End-to-End Digital Twin Flow
+                </button>
+                <button id="tab-btn-mapper" style="background:var(--bg-alt); color:var(--text-main); border:1px solid var(--border); padding:8px 16px; border-radius:8px; font-weight:700; font-size:12px; cursor:pointer;">
+                    📊 2. OSI 7-Layer ⇹ TCP/IP 4-Layer Mapper
+                </button>
+                <button id="tab-btn-encap" style="background:var(--bg-alt); color:var(--text-main); border:1px solid var(--border); padding:8px 16px; border-radius:8px; font-weight:700; font-size:12px; cursor:pointer;">
+                    📦 3. Encapsulation & Header Assembly
+                </button>
+                <button id="tab-btn-faults" style="background:var(--bg-alt); color:var(--text-main); border:1px solid var(--border); padding:8px 16px; border-radius:8px; font-weight:700; font-size:12px; cursor:pointer;">
+                    🛠️ 4. Layer Fault Diagnoser
+                </button>
+            </div>
+
+            <!-- TAB 1: END-TO-END DIGITAL TWIN -->
+            <div id="tab-content-twin" style="display:grid; grid-template-columns: 1fr 360px; gap:16px; flex:1;">
+                <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:14px; display:flex; flex-direction:column; gap:12px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <h4 style="margin:0; color:${AC}; font-size:14px;">End-to-End Digital Twin: Laptop ➔ Switch ➔ Router ➔ Web Server</h4>
+                        <button id="btn-trigger-google-request" style="background:${AC}; color:#0f172a; border:none; padding:8px 16px; border-radius:8px; font-weight:800; font-size:12px; cursor:pointer;">
+                            🚀 Open https://www.google.com
+                        </button>
+                    </div>
+
+                    <div style="position:relative; width:100%; height:260px; background:#0b0f19; border:1px solid #1e293b; border-radius:10px; overflow:hidden;">
+                        <svg width="100%" height="100%" viewBox="0 0 540 240">
+                            <!-- Laptop -->
+                            <rect x="20" y="90" width="70" height="45" rx="5" fill="#1e293b" stroke="#38bdf8" stroke-width="2"/>
+                            <text x="55" y="112" fill="#38bdf8" font-size="10" font-weight="bold" text-anchor="middle">Laptop</text>
+                            <text x="55" y="126" fill="#cbd5e1" font-size="8" text-anchor="middle">192.168.1.10</text>
+
+                            <!-- Switch -->
+                            <rect x="130" y="90" width="60" height="45" rx="5" fill="#1e293b" stroke="#10b981" stroke-width="2"/>
+                            <text x="160" y="112" fill="#10b981" font-size="10" font-weight="bold" text-anchor="middle">Switch</text>
+                            <text x="160" y="126" fill="#cbd5e1" font-size="8" text-anchor="middle">L2 Bridge</text>
+
+                            <!-- Router A -->
+                            <circle cx="260" cy="112" r="22" fill="#1e293b" stroke="#f59e0b" stroke-width="2"/>
+                            <text x="260" y="116" fill="#fbbf24" font-size="10" font-weight="bold" text-anchor="middle">RTR A</text>
+
+                            <!-- Internet Cloud -->
+                            <ellipse cx="360" cy="112" rx="35" ry="25" fill="#1e293b" stroke="#a855f7" stroke-width="2" stroke-dasharray="4,4"/>
+                            <text x="360" y="116" fill="#c084fc" font-size="9" font-weight="bold" text-anchor="middle">Internet</text>
+
+                            <!-- Web Server -->
+                            <rect x="440" y="90" width="75" height="45" rx="5" fill="#1e293b" stroke="#ec4899" stroke-width="2"/>
+                            <text x="477" y="112" fill="#f472b6" font-size="10" font-weight="bold" text-anchor="middle">Google Server</text>
+                            <text x="477" y="126" fill="#cbd5e1" font-size="8" text-anchor="middle">142.250.183.206</text>
+
+                            <!-- Connection Lines -->
+                            <line x1="90" y1="112" x2="130" y2="112" stroke="#38bdf8" stroke-width="2"/>
+                            <line x1="190" y1="112" x2="238" y2="112" stroke="#10b981" stroke-width="2"/>
+                            <line x1="282" y1="112" x2="325" y2="112" stroke="#f59e0b" stroke-width="2"/>
+                            <line x1="395" y1="112" x2="440" y2="112" stroke="#ec4899" stroke-width="2"/>
+
+                            <circle id="dt-pkt" cx="55" cy="112" r="7" fill="#38bdf8" style="display:none; transition: all 0.6s linear;"/>
+                        </svg>
+                    </div>
+
+                    <div id="dt-status" style="background:rgba(56,189,248,0.1); border:1px solid ${AC}; border-radius:8px; padding:10px; font-size:12px; color:#38bdf8;">
+                        <b>Status: Ready</b>. Click 'Open https://www.google.com' to trace data through all 7 OSI layers.
+                    </div>
+                </div>
+
+                <!-- Right: Active Layer Inspector -->
+                <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:14px; display:flex; flex-direction:column; gap:10px;">
+                    <h4 style="margin:0; color:${AC}; font-size:14px;">Active OSI Layer Header Breakdown</h4>
+                    
+                    <div id="dt-layer-inspector" style="display:flex; flex-direction:column; gap:6px;">
+                        <div class="dt-layer-item" style="padding:6px 10px; background:#1e293b; border-left:4px solid #ec4899; border-radius:4px; font-size:11px;">
+                            <b style="color:#ec4899;">L7 Application:</b> HTTP GET / HTTP 1.1 Host: google.com
+                        </div>
+                        <div class="dt-layer-item" style="padding:6px 10px; background:#1e293b; border-left:4px solid #a855f7; border-radius:4px; font-size:11px;">
+                            <b style="color:#a855f7;">L6 Presentation:</b> SSL/TLS v1.3 Encryption & UTF-8 Encoding
+                        </div>
+                        <div class="dt-layer-item" style="padding:6px 10px; background:#1e293b; border-left:4px solid #8b5cf6; border-radius:4px; font-size:11px;">
+                            <b style="color:#8b5cf6;">L5 Session:</b> Session ID: #98412 (Connection Active)
+                        </div>
+                        <div class="dt-layer-item" style="padding:6px 10px; background:#1e293b; border-left:4px solid #3b82f6; border-radius:4px; font-size:11px;">
+                            <b style="color:#3b82f6;">L4 Transport:</b> TCP Src Port: 54321 ⇹ Dst Port: 443 (HTTPS)
+                        </div>
+                        <div class="dt-layer-item" style="padding:6px 10px; background:#1e293b; border-left:4px solid #10b981; border-radius:4px; font-size:11px;">
+                            <b style="color:#10b981;">L3 Network:</b> IPv4 Src: 192.168.1.10 ⇹ Dst: 142.250.183.206
+                        </div>
+                        <div class="dt-layer-item" style="padding:6px 10px; background:#1e293b; border-left:4px solid #f59e0b; border-radius:4px; font-size:11px;">
+                            <b style="color:#f59e0b;">L2 Data Link:</b> Ethernet Src MAC: 00:1A:2B:3C ⇹ Dst: 00:80:C8:11
+                        </div>
+                        <div class="dt-layer-item" style="padding:6px 10px; background:#1e293b; border-left:4px solid #ef4444; border-radius:4px; font-size:11px;">
+                            <b style="color:#ef4444;">L1 Physical:</b> UTP Copper Voltage / Bits: 010101100101...
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 2: MAPPER (Hidden by default) -->
+            <div id="tab-content-mapper" style="display:none; flex-direction:column; gap:12px;">
+                <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:16px;">
+                    <h4 style="margin:0 0 10px 0; color:${AC};">OSI 7-Layer vs TCP/IP 4-Layer Interactive Protocol Mapping</h4>
+                    <p style="font-size:12px; color:var(--text-muted); margin-bottom:15px;">Click any protocol card below to map it to its corresponding OSI and TCP/IP layers.</p>
+
+                    <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:20px;">
+                        <button class="proto-btn" data-osi="7" data-tcp="4" style="padding:8px 14px; background:#1e293b; border:1px solid #38bdf8; color:#38bdf8; border-radius:8px; font-weight:bold; cursor:pointer;">HTTP / HTTPS (L7)</button>
+                        <button class="proto-btn" data-osi="6" data-tcp="4" style="padding:8px 14px; background:#1e293b; border:1px solid #a855f7; color:#a855f7; border-radius:8px; font-weight:bold; cursor:pointer;">SSL / TLS Encryption (L6)</button>
+                        <button class="proto-btn" data-osi="5" data-tcp="4" style="padding:8px 14px; background:#1e293b; border:1px solid #8b5cf6; color:#8b5cf6; border-radius:8px; font-weight:bold; cursor:pointer;">NetBIOS Session (L5)</button>
+                        <button class="proto-btn" data-osi="4" data-tcp="2" style="padding:8px 14px; background:#1e293b; border:1px solid #3b82f6; color:#3b82f6; border-radius:8px; font-weight:bold; cursor:pointer;">TCP & UDP (L4)</button>
+                        <button class="proto-btn" data-osi="3" data-tcp="3" style="padding:8px 14px; background:#1e293b; border:1px solid #10b981; color:#10b981; border-radius:8px; font-weight:bold; cursor:pointer;">IPv4 / IPv6 & ICMP (L3)</button>
+                        <button class="proto-btn" data-osi="2" data-tcp="1" style="padding:8px 14px; background:#1e293b; border:1px solid #f59e0b; color:#f59e0b; border-radius:8px; font-weight:bold; cursor:pointer;">Ethernet & MAC Framing (L2)</button>
+                        <button class="proto-btn" data-osi="1" data-tcp="1" style="padding:8px 14px; background:#1e293b; border:1px solid #ef4444; color:#ef4444; border-radius:8px; font-weight:bold; cursor:pointer;">UTP Copper & Fiber Optics (L1)</button>
+                    </div>
+
+                    <div id="mapper-result-box" style="background:#0b0f19; border:1px solid #334155; border-radius:8px; padding:12px; font-size:12px; color:#38bdf8; line-height:1.6;">
+                        Click a protocol button above to view its exact mapping between the OSI reference model and the TCP/IP architecture!
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 3: ENCAPSULATION & HEADER ASSEMBLY -->
+            <div id="tab-content-encap" style="display:none; flex-direction:column; gap:12px;">
+                <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:16px;">
+                    <h4 style="margin:0 0 10px 0; color:${AC};">Header Encapsulation & Decapsulation Inspection Engine</h4>
+                    <div style="background:#0b0f19; border:1px solid #334155; border-radius:8px; padding:16px; font-family:monospace; font-size:12px; line-height:1.8;">
+                        <b style="color:#ec4899;">[L7 Application Data]</b>: "GET /index.html HTTP/1.1"<br>
+                        <b style="color:#3b82f6;">[L4 TCP Segment]</b>: [SrcPort: 54321 | DstPort: 80 | Seq: 100] + <span style="color:#ec4899;">[Data]</span><br>
+                        <b style="color:#10b981;">[L3 IP Packet]</b>: [SrcIP: 192.168.1.10 | DstIP: 93.184.216.34 | TTL: 64] + <span style="color:#3b82f6;">[TCP Segment]</span><br>
+                        <b style="color:#f59e0b;">[L2 Ethernet Frame]</b>: [SrcMAC: 00:1A:2B:3C:4D:5E | DstMAC: 00:80:C8:11:22:33 | CRC: 0x9F] + <span style="color:#10b981;">[IP Packet]</span><br>
+                        <b style="color:#ef4444;">[L1 Bit Stream]</b>: 0101011001100101011011000110110001101111...
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 4: FAULT DIAGNOSER -->
+            <div id="tab-content-faults" style="display:none; flex-direction:column; gap:12px;">
+                <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:16px;">
+                    <h4 style="margin:0 0 10px 0; color:${AC};">Multi-Layer Network Fault Diagnoser</h4>
+                    <p style="font-size:12px; color:var(--text-muted); margin-bottom:12px;">Select a fault scenario below to isolate the broken OSI/TCP-IP layer, diagnose the root cause, and apply the fix.</p>
+                    
+                    <select id="fault-scenario-select" class="eval-box" style="margin-bottom:12px; font-weight:bold;">
+                        <option value="l1">Scenario 1: Cable Unplugged / Link Down (Layer 1 Physical)</option>
+                        <option value="l2">Scenario 2: Incorrect MAC / ARP Table Cache Conflict (Layer 2 Data Link)</option>
+                        <option value="l3">Scenario 3: Wrong Gateway IP / Subnet Mask Mismatch (Layer 3 Network)</option>
+                        <option value="l4">Scenario 4: Firewall Blocking TCP Port 443 (Layer 4 Transport)</option>
+                        <option value="l7">Scenario 5: DNS Domain Resolution Failure (Layer 7 Application)</option>
+                    </select>
+
+                    <div id="fault-diag-result" style="background:#0b0f19; border:1px solid #334155; border-radius:8px; padding:14px; font-size:12px; line-height:1.7;">
+                        Select a scenario to view layer isolation details.
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    // Tab Switching Logic
+    const btnTwin = container.querySelector('#tab-btn-twin');
+    const btnMapper = container.querySelector('#tab-btn-mapper');
+    const btnEncap = container.querySelector('#tab-btn-encap');
+    const btnFaults = container.querySelector('#tab-btn-faults');
+
+    const tabTwin = container.querySelector('#tab-content-twin');
+    const tabMapper = container.querySelector('#tab-content-mapper');
+    const tabEncap = container.querySelector('#tab-content-encap');
+    const tabFaults = container.querySelector('#tab-content-faults');
+
+    const resetTabs = () => {
+        [btnTwin, btnMapper, btnEncap, btnFaults].forEach(b => { b.style.background = 'var(--bg-alt)'; b.style.color = 'var(--text-main)'; });
+        [tabTwin, tabMapper, tabEncap, tabFaults].forEach(t => t.style.display = 'none');
+    };
+
+    if (btnTwin) btnTwin.onclick = () => { resetTabs(); btnTwin.style.background = AC; btnTwin.style.color = '#0f172a'; tabTwin.style.display = 'grid'; };
+    if (btnMapper) btnMapper.onclick = () => { resetTabs(); btnMapper.style.background = AC; btnMapper.style.color = '#0f172a'; tabMapper.style.display = 'flex'; };
+    if (btnEncap) btnEncap.onclick = () => { resetTabs(); btnEncap.style.background = AC; btnEncap.style.color = '#0f172a'; tabEncap.style.display = 'flex'; };
+    if (btnFaults) btnFaults.onclick = () => { resetTabs(); btnFaults.style.background = AC; btnFaults.style.color = '#0f172a'; tabFaults.style.display = 'flex'; updateFaultDiag(); };
+
+    // Digital Twin Animation Logic
+    const reqBtn = container.querySelector('#btn-trigger-google-request');
+    const pkt = container.querySelector('#dt-pkt');
+    const statusEl = container.querySelector('#dt-status');
+
+    if (reqBtn && pkt && statusEl) {
+        reqBtn.onclick = () => {
+            pkt.style.display = 'block';
+            statusEl.innerHTML = '<b style="color:#38bdf8;">Step 1: Laptop generates HTTP request for https://www.google.com [L7-L1 Encapsulation Complete]</b>';
+            pkt.setAttribute('cx', '55'); pkt.setAttribute('cy', '112');
+
+            setTimeout(() => { pkt.setAttribute('cx', '160'); pkt.setAttribute('cy', '112'); }, 100);
+
+            setTimeout(() => {
+                statusEl.innerHTML = '<b style="color:#10b981;">Step 2: Switch reads Layer 2 Ethernet MAC address and forwards frame to Default Gateway Router A...</b>';
+            }, 700);
+
+            setTimeout(() => { pkt.setAttribute('cx', '260'); pkt.setAttribute('cy', '112'); }, 900);
+
+            setTimeout(() => {
+                statusEl.innerHTML = '<b style="color:#f59e0b;">Step 3: Router A inspects Layer 3 IPv4 address (142.250.183.206) and routes packet over Internet Cloud...</b>';
+            }, 1500);
+
+            setTimeout(() => { pkt.setAttribute('cx', '360'); pkt.setAttribute('cy', '112'); }, 1700);
+
+            setTimeout(() => {
+                statusEl.innerHTML = '<b style="color:#a855f7;">Step 4: Internet routers route packet to Google Web Server data center...</b>';
+            }, 2300);
+
+            setTimeout(() => { pkt.setAttribute('cx', '477'); pkt.setAttribute('cy', '112'); }, 2500);
+
+            setTimeout(() => {
+                statusEl.innerHTML = '<b style="color:#ec4899;">Step 5: Google Server receives packet and decapsulates headers from Layer 1 up to Layer 7 HTTP GET! 🟢</b>';
+            }, 3100);
+
+            setTimeout(() => { pkt.style.display = 'none'; }, 3800);
+        };
+    }
+
+    // Mapper buttons logic
+    const protoBtns = container.querySelectorAll('.proto-btn');
+    const mapperResult = container.querySelector('#mapper-result-box');
+    protoBtns.forEach(b => {
+        b.onclick = () => {
+            const osi = b.getAttribute('data-osi');
+            const tcp = b.getAttribute('data-tcp');
+            const txt = b.textContent;
+            mapperResult.innerHTML = `
+                <b style="color:#38bdf8; font-size:14px;">Protocol: ${txt}</b><br>
+                • <b>OSI Reference Layer:</b> Layer ${osi} (${getOsiName(osi)})<br>
+                • <b>TCP/IP Layer:</b> Layer ${tcp} (${getTcpName(tcp)})<br>
+                • <b>Function:</b> Standardized communication processing at this architectural tier.
+            `;
+        };
+    });
+
+    const getOsiName = (num) => {
+        const names = { "7": "Application", "6": "Presentation", "5": "Session", "4": "Transport", "3": "Network", "2": "Data Link", "1": "Physical" };
+        return names[num] || "Layer";
+    };
+    const getTcpName = (num) => {
+        const names = { "4": "Application", "3": "Transport", "2": "Internet", "1": "Network Access" };
+        return names[num] || "Layer";
+    };
+
+    // Fault diagnoser logic
+    const faultSelect = container.querySelector('#fault-scenario-select');
+    const faultDiagBox = container.querySelector('#fault-diag-result');
+    const updateFaultDiag = () => {
+        if (!faultSelect || !faultDiagBox) return;
+        const val = faultSelect.value;
+        if (val === 'l1') {
+            faultDiagBox.innerHTML = `<b style="color:#ef4444;">Layer 1 (Physical Layer Fault):</b> Cable unplugged or damaged fiber.<br><b>Symptom:</b> Link LED OFF, 0 bits transmitted.<br><b>Fix:</b> Replace UTP/Fiber cable and verify PHY auto-negotiation speeds.`;
+        } else if (val === 'l2') {
+            faultDiagBox.innerHTML = `<b style="color:#f59e0b;">Layer 2 (Data Link Fault):</b> ARP resolution failure or MAC address table conflict.<br><b>Symptom:</b> Packets dropped at Switch port.<br><b>Fix:</b> Flush ARP table (arp -d) and verify switch port VLAN assignment.`;
+        } else if (val === 'l3') {
+            faultDiagBox.innerHTML = `<b style="color:#10b981;">Layer 3 (Network Layer Fault):</b> Invalid IP address or wrong default gateway.<br><b>Symptom:</b> Destination Host Unreachable ICMP error.<br><b>Fix:</b> Correct IP address/subnet mask and set valid gateway router IP.`;
+        } else if (val === 'l4') {
+            faultDiagBox.innerHTML = `<b style="color:#3b82f6;">Layer 4 (Transport Layer Fault):</b> Firewall blocking TCP Port 443 / 80.<br><b>Symptom:</b> TCP SYN sent but no SYN-ACK received (Connection Timeout).<br><b>Fix:</b> Update firewall ACL to permit TCP port 443 outbound.`;
+        } else if (val === 'l7') {
+            faultDiagBox.innerHTML = `<b style="color:#ec4899;">Layer 7 (Application Layer Fault):</b> DNS Server unreachable or bad URL.<br><b>Symptom:</b> Browser displays ERR_NAME_NOT_RESOLVED.<br><b>Fix:</b> Configure valid DNS server IP (8.8.8.8) or check web application status.`;
+        }
+    };
+    if (faultSelect) faultSelect.onchange = updateFaultDiag;
+};
+
+
 const initRipSim = (container) => {
     let currentTab = 'hop_sim'; // 'hop_sim', 'tables', 'infinity', 'cli', 'timers'
 
@@ -19764,6 +20043,7 @@ const initRipSim = (container) => {
             `;
                 return;
             }
+            if (id === 'osi_tcpip' || id === 'osi_tcpip_sim' || id === 'communication_models' || (data && (data.simType === 'osi_tcpip_sim' || data.simType === 'osi_tcpip'))) { initOsiTcpipSim(container); return; }
             if (id === 'udp_tcp' || id === 'udp_tcp_sim' || (data && (data.simType === 'udp_tcp_sim' || data.simType === 'udp_tcp'))) { initUdpTcpSim(container); return; }
             if (id === 'dhcp_config' || id === 'dhcp_config_sim' || (data && (data.simType === 'dhcp_config_sim' || data.simType === 'dhcp_config'))) { initDhcpSim(container); return; }
             if (id === 'static_nat' || id === 'static_nat_sim' || (data && (data.simType === 'static_nat_sim' || data.simType === 'static_nat'))) { initStaticNatSim(container); return; }

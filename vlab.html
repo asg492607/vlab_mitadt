@@ -28,20 +28,21 @@
             <div class="header-actions">
                 <select id="labSelect" class="sim-select" style="margin-right: 16px; font-weight: 800;">
                     <option value="intro_tools">1. Introduction to Networking Tools</option>
-                    <option value="net_commands">2. Network Commands & Utilities</option>
-                    <option value="topologies">3. Network Topologies (Bus, Star, Ring, Mesh, Tree)</option>
-                    <option value="ip_class">4. IPv4 & IPv6 Address Classification</option>
-                    <option value="lan_cables">5. LAN Setup & Cabling (Straight/Crossover)</option>
-                    <option value="subnetting">6. Subnetting, VLSM & CIDR</option>
-                    <option value="vlan">7. Virtual LANs (VLAN) & Trunking</option>
-                    <option value="routing_rip">8. Distance Vector Routing Protocol (RIP)</option>
-                    <option value="routing_ospf">9. Link State Routing Protocol (OSPF)</option>
-                    <option value="routing_eigrp">10. Dynamic Routing Protocol (EIGRP)</option>
-                    <option value="static_routing">11. Static Routing Configuration</option>
-                    <option value="udp_tcp">12. UDP & TCP Transport Protocols</option>
-                    <option value="dhcp_config">13. DHCP Configuration & IP Pools</option>
-                    <option value="static_nat">14. Static Network Address Translation (NAT)</option>
-                    <option value="dynamic_nat">15. Dynamic NAT & PAT Overload</option>
+                    <option value="osi_tcpip">2. Network Communication Models (OSI & TCP/IP)</option>
+                    <option value="net_commands">3. Network Commands & Utilities</option>
+                    <option value="topologies">4. Network Topologies (Bus, Star, Ring, Mesh, Tree)</option>
+                    <option value="ip_class">5. IPv4 & IPv6 Address Classification</option>
+                    <option value="lan_cables">6. LAN Setup & Cabling (Straight/Crossover)</option>
+                    <option value="subnetting">7. Subnetting, VLSM & CIDR</option>
+                    <option value="vlan">8. Virtual LANs (VLAN) & Trunking</option>
+                    <option value="routing_rip">9. Distance Vector Routing Protocol (RIP)</option>
+                    <option value="routing_ospf">10. Link State Routing Protocol (OSPF)</option>
+                    <option value="routing_eigrp">11. Dynamic Routing Protocol (EIGRP)</option>
+                    <option value="static_routing">12. Static Routing Configuration</option>
+                    <option value="udp_tcp">13. UDP & TCP Transport Protocols</option>
+                    <option value="dhcp_config">14. DHCP Configuration & IP Pools</option>
+                    <option value="static_nat">15. Static Network Address Translation (NAT)</option>
+                    <option value="dynamic_nat">16. Dynamic NAT & PAT Overload</option>
                     <option value="practice" style="display:none;">Practice Sandbox Lab</option>
                 </select>
                 <select id="moduleSelect" class="sim-select" style="margin-right: 16px; font-weight: 800; display: none;">
@@ -363,8 +364,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" integrity="sha384-JcnsjUPPylna1s1fvi1u12X5qjY5OL56iySh75FdtrwhO/SWXgMjoVqcKyIIWOLk" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha384-ZZ1pncU3bQe8y31yfZdMFdSpttDoPmOZg2wguVK9almUodir1PghgT0eY7Mrty8H" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js" integrity="sha384-QQBwnzmpf8eCm7WvgJ/dpvJ51cajsTkfDMgOq5QVBZav9687X5xjlZo8zroLyU3+" crossorigin="anonymous"></script>
-    <script src="vlabData.js?v=64"></script>
-    <script type="module" src="vlab.js?v=64"></script>
+    <script src="vlabData.js?v=65"></script>
+    <script type="module" src="vlab.js?v=65"></script>
     
     <!-- Global AI Tutor Assistant HTML Components -->
     <div id="global-ai-bubble" class="global-ai-bubble" title="Ask MIT VLab AI Tutor">✨</div>
@@ -392,7 +393,7 @@
         // Register PWA Service Worker with auto-update cache invalidation
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=64').then(reg => {
+                navigator.serviceWorker.register('./sw.js?v=65').then(reg => {
                     console.log('Service Worker registered successfully:', reg.scope);
                     reg.update();
                 }).catch(err => {
