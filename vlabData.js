@@ -359,50 +359,324 @@ window.VLAB_DATA = {
         simType: "pkt_tracer"
     },
     'net_commands': {
-        title: "Network Commands & CLI Utilities",
-        aim: "To execute and master core network diagnostic CLI utilities including ping, traceroute, ipconfig, netstat, nslookup, and arp.",
+        title: "Practical 2: Network Commands & CLI Utilities",
+        aim: "To master, execute, and verify core network diagnostic CLI utilities including ipconfig/ifconfig, ping, tracert/traceroute, arp, netstat, nslookup, route, pathping, and Cisco IOS verification commands.",
         intro: {
             summary: "Command-Line Interface (CLI) diagnostic utilities enable network engineers to inspect L3 connectivity, trace packet paths, view active socket connections, and troubleshoot DNS resolutions.",
             importance: "CLI diagnostic tools are essential for diagnosing network latency, packet loss, DNS lookup failures, and address resolution issues.",
             applications: ["ISP Network Diagnostics", "Enterprise Helpdesk Troubleshooting", "Server Socket Audit"],
-            outcome: "Students will become proficient in terminal commands `ping`, `tracert`, `ipconfig`, `netstat`, `nslookup`, and `arp`."
+            outcome: "Students will become proficient in terminal commands `ping`, `tracert`, `ipconfig`, `netstat`, `nslookup`, `arp`, and Cisco IOS verification utilities."
         },
-        prerequisites: ["Practical 1: Introduction to Networking Tools", "Understanding of IP Addresses and Domain Names"],
+        prerequisites: ["Practical 1: Introduction to Networking Tools, Devices & Media", "Understanding of IP Addresses and Domain Names"],
         outcomes: [
-            "Execute ping to measure packet loss and round-trip time (RTT).",
-            "Trace hop-by-hop path using traceroute / tracert.",
-            "Inspect local ARP cache and netstat active TCP sockets."
+            "Execute ipconfig/ifconfig to inspect IPv4, IPv6, Subnet Mask, Default Gateway, and MAC address.",
+            "Execute ping to test L3 reachability, measure RTT latency, and calculate packet loss %.",
+            "Execute tracert / traceroute to discover hop-by-hop packet path using TTL decrementing.",
+            "Inspect local ARP cache (`arp -a`) mapping IP addresses to physical MAC addresses.",
+            "Monitor active TCP/UDP sockets and listening ports using `netstat -an`.",
+            "Resolve domain names and test DNS record types using `nslookup`.",
+            "Inspect local IPv4/IPv6 routing tables using `route print` / `ip route`.",
+            "Execute Cisco IOS verification commands (`show ip interface brief`, `show mac address-table`, `show ip route`)."
         ],
         theory: {
-            intro: "Network diagnostic utilities leverage ICMP, ARP, and DNS protocols to inspect connectivity, routing hops, domain resolution, and active socket connections.",
+            intro: "Network diagnostic utilities leverage ICMP, ARP, and DNS protocols to inspect connectivity, routing hops, domain resolution, active socket connections, and Cisco IOS device states.",
             cards: [
-                { title: "ICMP Ping", content: "Sends Echo Request packets to test L3 reachability and measure round-trip time." },
-                { title: "Traceroute", content: "Decrements TTL values sequentially to discover all intermediate router hop IP addresses." },
-                { title: "ARP Protocol", content: "Maps 32-bit IPv4 addresses to 48-bit physical MAC addresses." }
+                {
+                    title: "1. Introduction to Network CLI Commands",
+                    content: "A computer network is managed, monitored, and troubleshooted using command-line utilities. Network administrators use these commands every day to verify connectivity, diagnose problems, view configurations, and monitor device communications across Windows, Linux, and Cisco IOS environments."
+                },
+                {
+                    title: "2. Learning Objectives",
+                    content: "After completing this practical, students will be able to display network configurations, test reachability, trace packet paths, resolve domain names, inspect ARP/routing tables, monitor socket connections, and execute Cisco IOS verification commands."
+                },
+                {
+                    title: "3. What is CLI (Command Line Interface)?",
+                    content: "CLI is a text-based environment where users interact with networking devices by typing commands instead of graphical menus. CLI provides faster administration, greater control, remote management via SSH/Telnet, script automation, and detailed diagnostic logs unavailable in GUIs."
+                },
+                {
+                    title: "4. Why Network Commands Are Important",
+                    content: "Network commands allow engineers to verify L1-L3 connectivity, identify IP configuration errors, check default gateway reachability, diagnose routing loops or slow links, monitor active TCP/UDP sockets, troubleshoot DNS resolution failures, and inspect physical MAC address mappings."
+                },
+                {
+                    title: "5. Command Prompt, Terminal & Cisco IOS Environments",
+                    content: "Commands vary slightly by OS: Windows uses Command Prompt (CMD) & PowerShell; Linux uses Terminal & Bash Shell; Cisco routers and switches use Cisco IOS CLI (User EXEC `Router>`, Privileged EXEC `Router#`, Global Config `Router(config)#`)."
+                },
+                {
+                    title: "6. Network Configuration Commands (ipconfig / ifconfig / ip addr)",
+                    content: "Windows `ipconfig` displays IPv4 Address, IPv6 Address, Subnet Mask, and Default Gateway. `ipconfig /all` displays MAC Address, DHCP Status, DNS Servers, and Lease Info. Linux `ifconfig` or `ip addr` displays IP, MAC, MTU, and interface flags."
+                },
+                {
+                    title: "7. Hostname Command",
+                    content: "The `hostname` command displays the computer's network identification name (e.g. `LAB-PC-01`). Used for device identification, Active Directory domain joins, and network inventory management."
+                },
+                {
+                    title: "8. Ping Command (ICMP Echo Request & Reply)",
+                    content: "Tests L3 reachability using ICMP. Sends ICMP Echo Request (Type 8); destination replies with Echo Reply (Type 0). Measures RTT (Round Trip Time) in ms and packet loss %. Options: `ping -t` (continuous), `ping -n 10` (count), `ping -l 1000` (buffer size)."
+                },
+                {
+                    title: "9. Tracert / Traceroute (Hop-by-Hop Path Discovery)",
+                    content: "Reveals packet path from source to destination. Sends packets with sequentially incrementing TTL (TTL=1, 2, 3...). Intermediate routers decrement TTL and return ICMP Time Exceeded (Type 11) when TTL reaches zero, identifying every hop IP."
+                },
+                {
+                    title: "10. ARP Command (Address Resolution Protocol Cache)",
+                    content: "`arp -a` displays the local ARP cache table mapping 32-bit IPv4 addresses to 48-bit physical MAC addresses. `arp -d` flushes stale ARP entries. Used for verifying MAC mappings and detecting duplicate IP conflicts."
+                },
+                {
+                    title: "11. Netstat (Network Statistics & Socket Inspection)",
+                    content: "Displays active TCP/UDP network connections. `netstat -a` shows all connections & listening ports; `netstat -n` displays numeric IP:Port addresses; `netstat -r` shows routing table; `netstat -e` displays Ethernet packet statistics."
+                },
+                {
+                    title: "12. NSLookup (Domain Name System Query)",
+                    content: "`nslookup google.com` queries configured DNS server to resolve domain names to IP addresses. Displays Domain Name, IP Address, and DNS Server. Supports querying A, AAAA, MX, and CNAME records (`nslookup -type=mx domain.com`)."
+                },
+                {
+                    title: "13. Route Command (Routing Table Inspection)",
+                    content: "`route print` (Windows) or `ip route` (Linux) displays the OS routing table, showing Destination Subnets, Subnet Masks, Gateway IPs, Interface IPs, and Route Metrics."
+                },
+                {
+                    title: "14. PathPing Utility (Windows Packet Loss Diagnostic)",
+                    content: "Combines `ping` and `tracert`. Traces path to destination then sends 100 pings to each intermediate router hop over 25 seconds to pinpoint exact link packet loss % and latency bottlenecks."
+                },
+                {
+                    title: "15. Cisco IOS Verification Commands",
+                    content: "Essential Cisco IOS status commands: `show ip interface brief` (summary status UP/DOWN & IPs), `show running-config` (active RAM config), `show version` (IOS version & serials), `show interfaces` (detailed L1/L2 stats & CRC errors), `show mac address-table` (switch MAC table), `show ip route` (router routing table), `show arp` (Cisco ARP cache)."
+                },
+                {
+                    title: "16. Common Network Problems & Diagnostic Command Matrix",
+                    content: "No Internet → `ping 8.8.8.8` | Wrong IP → `ipconfig /all` | DNS Failure → `nslookup` | Gateway Unreachable → `ping gateway` | Slow Path → `tracert` | Routing Problem → `route print` | MAC Issue → `arp -a` | Open Ports → `netstat -an`."
+                },
+                {
+                    title: "17. Best Practices in CLI Troubleshooting",
+                    content: "1. Verify local IP with `ipconfig`, 2. Test local loopback (`ping 127.0.0.1`), 3. Ping local default gateway, 4. Ping external IP (`8.8.8.8`), 5. Test DNS with `nslookup`, 6. Trace path with `tracert`, 7. Record command outputs for documentation."
+                },
+                {
+                    title: "18. Real-World Enterprise Scenario Walkthrough",
+                    content: "User reports 'Internet Down'. Engineer sequence: 1. `ipconfig /all` (check IP & Gateway), 2. `ping 192.168.1.1` (test Gateway), 3. `ping 8.8.8.8` (test WAN L3), 4. `nslookup google.com` (test DNS), 5. `tracert 8.8.8.8` (isolate drop hop), 6. `ipconfig /flushdns` & fix DNS server."
+                },
+                {
+                    title: "19. Practical 2 Summary",
+                    content: "Students learned essential CLI tools to inspect configurations, test connectivity, trace routing paths, query DNS, view ARP/MAC tables, and run Cisco IOS verification commands. These form the foundation for all subsequent practicals on VLANs, Routing, DHCP, and NAT."
+                }
             ],
-            formulas: ["Packet Loss % = ((Sent - Received) / Sent) * 100", "TTL Initial = 64 (Linux), 128 (Windows)"],
-            standards: ["RFC 792 - Internet Control Message Protocol (ICMP)", "RFC 826 - An Ethernet Address Resolution Protocol (ARP)"]
+            formulas: [
+                "Packet Loss % = ((Packets Sent - Packets Received) / Packets Sent) * 100",
+                "Default Initial TTL = 64 (Linux / macOS), 128 (Windows), 255 (Cisco IOS)",
+                "Round Trip Time (RTT) Average = (RTT_min + RTT_max) / 2"
+            ],
+            standards: [
+                "RFC 792 - Internet Control Message Protocol (ICMP Specification)",
+                "RFC 826 - An Ethernet Address Resolution Protocol (ARP Specification)",
+                "RFC 1034 / 1035 - Domain Names Concepts and Facilities (DNS Specification)"
+            ]
         },
         tools: [
-            { name: "Command Prompt / Bash Terminal", layer: "Application Layer CLI", ports: "Virtual Terminal TTY", usage: "CLI command execution", statusLED: "Active Cursor Prompt" }
+            {
+                name: "Windows Command Prompt (cmd.exe)",
+                layer: "Application Layer CLI",
+                ports: "Virtual Terminal TTY",
+                usage: "Executing ipconfig, ping, tracert, arp -a, netstat -an, nslookup, route print",
+                statusLED: "Active Cursor Prompt (C:\\>",
+                image: `<svg viewBox="0 0 380 120" style="width:100%; height:100%;"><rect x="10" y="15" width="360" height="90" rx="6" fill="#0f172a" stroke="#334155" stroke-width="2"/><rect x="10" y="15" width="360" height="20" rx="6" fill="#1e293b"/><circle cx="24" cy="25" r="4" fill="#ef4444"/><circle cx="36" cy="25" r="4" fill="#f59e0b"/><circle cx="48" cy="25" r="4" fill="#22c55e"/><text x="180" y="28" fill="#94a3b8" font-size="9" font-family="monospace" text-anchor="middle">Command Prompt - ipconfig /all</text><text x="25" y="52" fill="#38bdf8" font-size="10" font-family="monospace">C:\\Users\\Student&gt; ipconfig /all</text><text x="25" y="68" fill="#cbd5e1" font-size="9" font-family="monospace">IPv4 Address . . . : 192.168.1.10</text><text x="25" y="82" fill="#cbd5e1" font-size="9" font-family="monospace">Subnet Mask . . . . : 255.255.255.0</text><text x="25" y="96" fill="#cbd5e1" font-size="9" font-family="monospace">Default Gateway . . : 192.168.1.1</text></svg>`
+            },
+            {
+                name: "Linux Bash Terminal",
+                layer: "Application Layer Shell",
+                ports: "Pseudo-Terminal (pty/pts)",
+                usage: "Executing ifconfig, ip addr, ping -c 4, traceroute, arp -n, netstat -tulpn, dig",
+                statusLED: "Active Shell Prompt ($)",
+                image: `<svg viewBox="0 0 380 120" style="width:100%; height:100%;"><rect x="10" y="15" width="360" height="90" rx="6" fill="#18181b" stroke="#3f3f46" stroke-width="2"/><rect x="10" y="15" width="360" height="20" rx="6" fill="#27272a"/><circle cx="24" cy="25" r="4" fill="#ef4444"/><circle cx="36" cy="25" r="4" fill="#f59e0b"/><circle cx="48" cy="25" r="4" fill="#22c55e"/><text x="180" y="28" fill="#a1a1aa" font-size="9" font-family="monospace" text-anchor="middle">bash - user@vlab-terminal:~</text><text x="25" y="52" fill="#22c55e" font-size="10" font-family="monospace">student@vlab:~$ ping -c 4 8.8.8.8</text><text x="25" y="68" fill="#e4e4e7" font-size="9" font-family="monospace">64 bytes from 8.8.8.8: icmp_seq=1 ttl=118 time=14.2 ms</text><text x="25" y="82" fill="#e4e4e7" font-size="9" font-family="monospace">64 bytes from 8.8.8.8: icmp_seq=2 ttl=118 time=13.8 ms</text><text x="25" y="96" fill="#22c55e" font-size="9" font-family="monospace">--- 8.8.8.8 ping statistics --- 0% packet loss</text></svg>`
+            },
+            {
+                name: "Cisco IOS CLI Console Shell",
+                layer: "Network OS Management",
+                ports: "Console Serial RS-232 / SSH",
+                usage: "Executing show ip interface brief, show running-config, show mac address-table, show ip route",
+                statusLED: "Privileged EXEC Prompt (#)",
+                image: `<svg viewBox="0 0 380 120" style="width:100%; height:100%;"><rect x="10" y="15" width="360" height="90" rx="6" fill="#0f172a" stroke="#0284c7" stroke-width="2"/><rect x="10" y="15" width="360" height="20" rx="6" fill="#1e293b"/><text x="180" y="28" fill="#38bdf8" font-size="9" font-family="monospace" text-anchor="middle">Cisco IOS Software - 2911 Router Console</text><text x="25" y="50" fill="#f59e0b" font-size="10" font-family="monospace">Router# show ip interface brief</text><text x="25" y="65" fill="#cbd5e1" font-size="8" font-family="monospace">Interface      IP-Address      OK? Method Status   Protocol</text><text x="25" y="78" fill="#22c55e" font-size="8" font-family="monospace">GigabitEthernet0/0 192.168.1.1 YES NVRAM  up       up</text><text x="25" y="91" fill="#22c55e" font-size="8" font-family="monospace">GigabitEthernet0/1 10.0.0.1    YES NVRAM  up       up</text></svg>`
+            },
+            {
+                name: "ICMP Ping & RTT Packet Analyzer",
+                layer: "Layer 3 (Network Layer)",
+                ports: "ICMP Protocol 1 (Type 8/0)",
+                usage: "Measuring round-trip latency, jitter, and reachability between nodes",
+                statusLED: "Green (ICMP Echo Reply OK)",
+                image: `<svg viewBox="0 0 380 120" style="width:100%; height:100%;"><rect x="30" y="30" width="70" height="50" rx="6" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/><text x="65" y="60" fill="#1e40af" font-size="10" font-family="sans-serif" font-weight="bold" text-anchor="middle">PC1</text><rect x="280" y="30" width="70" height="50" rx="6" fill="#f0fdf4" stroke="#16a34a" stroke-width="2"/><text x="315" y="60" fill="#166534" font-size="10" font-family="sans-serif" font-weight="bold" text-anchor="middle">Server</text><path d="M 105 45 L 275 45" stroke="#2563eb" stroke-width="3" stroke-dasharray="4,4"/><polygon points="275,45 265,40 265,50" fill="#2563eb"/><text x="190" y="40" fill="#2563eb" font-size="8" font-family="monospace" text-anchor="middle">Echo Request (Type 8)</text><path d="M 275 65 L 105 65" stroke="#16a34a" stroke-width="3" stroke-dasharray="4,4"/><polygon points="105,65 115,60 115,70" fill="#16a34a"/><text x="190" y="78" fill="#16a34a" font-size="8" font-family="monospace" text-anchor="middle">Echo Reply (Type 0) RTT=2ms</text></svg>`
+            },
+            {
+                name: "Traceroute Hop Path Discovery Engine",
+                layer: "Layer 3 (Network Layer)",
+                ports: "ICMP Type 11 (Time Exceeded)",
+                usage: "Tracing hop-by-hop router paths by incrementing TTL (TTL=1, 2, 3...)",
+                statusLED: "Yellow (Hop Discovered)",
+                image: `<svg viewBox="0 0 380 120" style="width:100%; height:100%;"><circle cx="40" cy="60" r="22" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/><text x="40" y="64" fill="#1d4ed8" font-size="9" font-family="sans-serif" font-weight="bold" text-anchor="middle">Host</text><circle cx="140" cy="60" r="22" fill="#fef3c7" stroke="#d97706" stroke-width="2"/><text x="140" y="64" fill="#b45309" font-size="8" font-family="sans-serif" font-weight="bold" text-anchor="middle">Rtr 1</text><circle cx="240" cy="60" r="22" fill="#fef3c7" stroke="#d97706" stroke-width="2"/><text x="240" y="64" fill="#b45309" font-size="8" font-family="sans-serif" font-weight="bold" text-anchor="middle">Rtr 2</text><circle cx="340" cy="60" r="22" fill="#f0fdf4" stroke="#16a34a" stroke-width="2"/><text x="340" y="64" fill="#15803d" font-size="8" font-family="sans-serif" font-weight="bold" text-anchor="middle">Dest</text><path d="M 62 60 L 118 60" stroke="#cbd5e1" stroke-width="2"/><path d="M 162 60 L 218 60" stroke="#cbd5e1" stroke-width="2"/><path d="M 262 60 L 318 60" stroke="#cbd5e1" stroke-width="2"/><text x="90" y="52" fill="#d97706" font-size="8" font-family="monospace">TTL=1</text><text x="190" y="52" fill="#d97706" font-size="8" font-family="monospace">TTL=2</text><text x="290" y="52" fill="#16a34a" font-size="8" font-family="monospace">TTL=3</text></svg>`
+            },
+            {
+                name: "ARP & MAC Cache Table Inspector",
+                layer: "Layer 2 & Layer 3 Bridge",
+                ports: "Ethernet Type 0x0806",
+                usage: "Inspecting dynamic IP-to-MAC hardware address mappings in RAM",
+                statusLED: "Green (Active Binding)",
+                image: `<svg viewBox="0 0 380 120" style="width:100%; height:100%;"><rect x="20" y="20" width="340" height="80" rx="6" fill="#ffffff" stroke="#cbd5e1" stroke-width="2"/><rect x="20" y="20" width="340" height="24" rx="6" fill="#f1f5f9"/><text x="35" y="36" fill="#334155" font-size="10" font-family="monospace" font-weight="bold">Internet Address</text><text x="170" y="36" fill="#334155" font-size="10" font-family="monospace" font-weight="bold">Physical Address (MAC)</text><text x="300" y="36" fill="#334155" font-size="10" font-family="monospace" font-weight="bold">Type</text><text x="35" y="60" fill="#0f172a" font-size="9" font-family="monospace">192.168.1.1</text><text x="170" y="60" fill="#2563eb" font-size="9" font-family="monospace">00-1A-2B-3C-4D-01</text><text x="300" y="60" fill="#16a34a" font-size="9" font-family="monospace">dynamic</text><text x="35" y="80" fill="#0f172a" font-size="9" font-family="monospace">192.168.1.11</text><text x="170" y="80" fill="#2563eb" font-size="9" font-family="monospace">00-1A-2B-3C-4D-02</text><text x="300" y="80" fill="#16a34a" font-size="9" font-family="monospace">dynamic</text></svg>`
+            }
         ],
         procedure: [
-            "Open Command Prompt terminal on the virtual workstation.",
-            "Type 'ping 8.8.8.8' and observe ICMP reply packet statistics.",
-            "Type 'tracert google.com' to trace intermediate hop routers.",
-            "Execute 'arp -a' to view local ARP cache table."
+            "Step 1: Open the CLI terminal window on the virtual workstation.",
+            "Step 2: Execute `ipconfig /all` (Windows) or `ip addr` (Linux) to display local IP, Subnet Mask, Default Gateway, and MAC address.",
+            "Step 3: Execute `ping 192.168.1.1` to verify connectivity to the local Default Gateway.",
+            "Step 4: Execute `ping 8.8.8.8` to test L3 reachability to an external WAN server and observe RTT latency.",
+            "Step 5: Execute `tracert google.com` to discover all intermediate router hop IP addresses.",
+            "Step 6: Execute `arp -a` to inspect the local ARP table mapping IP addresses to physical MAC addresses.",
+            "Step 7: Execute `nslookup google.com` to test DNS domain name resolution.",
+            "Step 8: Execute `netstat -an` to inspect active TCP/UDP socket connections and listening ports.",
+            "Step 9: Execute `route print` to view the local IPv4/IPv6 operating system routing table.",
+            "Step 10: Log into the Cisco 2911 Router CLI and execute `show ip interface brief` and `show ip route` to verify hardware interfaces."
         ],
         troubleshooting: {
-            problem: "Ping returns 'Request timed out' for external domain.",
-            hints: ["Check default gateway IP configuration.", "Test DNS resolution using 'nslookup domain.com'."],
-            fix: "Configure primary DNS server address to 8.8.8.8."
+            problem: "Ping returns 'Request timed out' for external domain names (e.g. google.com), but pinging external IP 8.8.8.8 succeeds.",
+            hints: [
+                "Verify if L3 WAN connectivity is working (ping 8.8.8.8 returns replies).",
+                "Check whether DNS server IP address is correctly assigned in `ipconfig /all`.",
+                "Execute `nslookup google.com` to test domain name resolution."
+            ],
+            fix: "Execute `ipconfig /flushdns` to clear stale DNS cache and configure primary DNS server IP to 8.8.8.8."
         },
-        viva: [
-            { q: "What ICMP message type is sent by ping?", a: "ICMP Type 8 (Echo Request) and ICMP Type 0 (Echo Reply)." },
-            { q: "How does traceroute discover intermediate routers?", a: "By sending packets with incrementing Time-To-Live (TTL = 1, 2, 3...) and catching ICMP Time Exceeded messages." }
+        posttest: [
+            {
+                q: "Which command displays the computer's IPv4 address, Subnet Mask, Default Gateway, and physical MAC address in Windows?",
+                options: [
+                    "ipconfig",
+                    "ipconfig /all",
+                    "netstat -a",
+                    "arp -a"
+                ],
+                correct: 1,
+                answer: 1,
+                explanation: "`ipconfig /all` displays detailed configuration including Physical Address (MAC), DHCP status, DNS servers, and lease details."
+            },
+            {
+                q: "Which ICMP message types are utilized by the `ping` utility to test Layer-3 reachability?",
+                options: [
+                    "Type 8 (Echo Request) & Type 0 (Echo Reply)",
+                    "Type 3 (Destination Unreachable)",
+                    "Type 11 (Time Exceeded)",
+                    "Type 5 (Redirect)"
+                ],
+                correct: 0,
+                answer: 0,
+                explanation: "Ping sends ICMP Type 8 (Echo Request) and expects destination to reply with ICMP Type 0 (Echo Reply)."
+            },
+            {
+                q: "How does the `tracert` / `traceroute` command discover intermediate router hops along a network path?",
+                options: [
+                    "By sending ARP broadcasts to all routers",
+                    "By sending packets with sequentially incrementing TTL values and catching ICMP Time Exceeded replies",
+                    "By querying DNS MX records",
+                    "By establishing TCP connections on port 80"
+                ],
+                correct: 1,
+                answer: 1,
+                explanation: "Tracert sends packets with incrementing TTL (TTL=1, 2, 3...). Each router decrements TTL, returning ICMP Time Exceeded (Type 11) when TTL reaches zero."
+            },
+            {
+                q: "What command displays the local Address Resolution Protocol (ARP) cache table mapping IP addresses to physical MAC addresses?",
+                options: [
+                    "netstat -r",
+                    "arp -a",
+                    "route print",
+                    "nslookup -a"
+                ],
+                correct: 1,
+                answer: 1,
+                explanation: "`arp -a` displays the current ARP cache entries mapping 32-bit IP addresses to 48-bit physical MAC addresses."
+            },
+            {
+                q: "Which `netstat` command option displays all active TCP/UDP connections and listening ports in numeric format (IP:Port)?",
+                options: [
+                    "netstat -n",
+                    "netstat -an",
+                    "netstat -r",
+                    "netstat -e"
+                ],
+                correct: 1,
+                answer: 1,
+                explanation: "`netstat -an` displays all active sockets (-a) in numeric format (-n) showing local and foreign IP:Port pairs."
+            },
+            {
+                q: "A user cannot open websites by domain name but CAN ping IP 8.8.8.8 successfully. Which CLI command should be executed to test DNS resolution?",
+                options: [
+                    "arp -a",
+                    "nslookup google.com",
+                    "route print",
+                    "netstat -a"
+                ],
+                correct: 1,
+                answer: 1,
+                explanation: "`nslookup` queries DNS servers to test domain-to-IP resolution and verify DNS server responsiveness."
+            },
+            {
+                q: "Which Cisco IOS CLI command provides a concise summary of all router interfaces, assigned IP addresses, and their UP/DOWN status?",
+                options: [
+                    "show running-config",
+                    "show ip interface brief",
+                    "show version",
+                    "show mac address-table"
+                ],
+                correct: 1,
+                answer: 1,
+                explanation: "`show ip interface brief` displays a compact table of all interfaces, IP addresses, OK method, and L1/L2 status."
+            },
+            {
+                q: "What command combines `ping` and `tracert` by sending 100 pings per hop to measure exact packet loss percentage across intermediate routers in Windows?",
+                options: [
+                    "traceroute",
+                    "pathping",
+                    "netstat",
+                    "ipconfig /renew"
+                ],
+                correct: 1,
+                answer: 1,
+                explanation: "`pathping` traces the path to a destination then pings each intermediate router 100 times over 25 seconds to quantify hop packet loss %."
+            },
+            {
+                q: "Which Cisco IOS command displays the Layer-2 switch table mapping learned MAC addresses to specific physical switch ports?",
+                options: [
+                    "show ip route",
+                    "show mac address-table",
+                    "show arp",
+                    "show interfaces"
+                ],
+                correct: 1,
+                answer: 1,
+                explanation: "`show mac address-table` displays the dynamic MAC table mapping learned source MAC addresses to specific switch ports."
+            },
+            {
+                q: "Which command displays the local operating system routing table showing destination subnets, gateway IPs, and metrics?",
+                options: [
+                    "route print (Windows) / ip route (Linux)",
+                    "ipconfig /all",
+                    "nslookup",
+                    "ping 127.0.0.1"
+                ],
+                correct: 0,
+                answer: 0,
+                explanation: "`route print` in Windows or `ip route` in Linux displays the operating system IPv4/IPv6 routing table."
+            }
         ],
-        assignment: "Execute `netstat -an` on your workstation. Document all active TCP connections in ESTABLISHED state.",
-        references: [{ title: "RFC 792 - ICMP Specification", link: "https://datatracker.ietf.org/doc/html/rfc792" }],
+        viva: [
+            { q: "What ICMP message type is sent by ping, and what is the expected response?", a: "Ping sends an ICMP Type 8 (Echo Request) message. The destination host responds with an ICMP Type 0 (Echo Reply) message." },
+            { q: "How does traceroute discover intermediate routers along a network path?", a: "Traceroute sends IP packets with sequentially incrementing Time-To-Live (TTL = 1, 2, 3...). Each intermediate router decrements TTL by 1. When TTL reaches 0, the router drops the packet and returns an ICMP Time Exceeded (Type 11) message, revealing its IP." },
+            { q: "What is the purpose of the ARP cache and why is it needed?", a: "The ARP cache stores dynamic mappings between 32-bit IPv4 addresses and 48-bit physical MAC addresses. It prevents devices from having to broadcast ARP requests for every single packet transmitted." },
+            { q: "What does `netstat -an` display?", a: "It displays all active TCP and UDP socket connections and listening ports in numeric IP:Port format." },
+            { q: "What is the difference between `ipconfig` and `ipconfig /all`?", a: "`ipconfig` displays basic IPv4, Subnet Mask, and Gateway info. `ipconfig /all` displays detailed info including Physical MAC address, DHCP lease timestamps, and DNS server IPs." },
+            { q: "What Cisco IOS command displays the router's Layer 3 routing table?", a: "`show ip route` displays the active IP routing table showing Connected (C), Static (S), RIP (R), and OSPF (O) routes." }
+        ],
+        assignment: "Execute `ipconfig /all`, `arp -a`, `netstat -an`, `nslookup google.com`, and `tracert 8.8.8.8` in your workstation CLI terminal. Record the outputs and analyze your network topology.",
+        references: [
+            { title: "RFC 792 - Internet Control Message Protocol (ICMP Specification)", link: "https://datatracker.ietf.org/doc/html/rfc792" },
+            { title: "RFC 826 - An Ethernet Address Resolution Protocol (ARP Specification)", link: "https://datatracker.ietf.org/doc/html/rfc826" },
+            { title: "RFC 1035 - Domain Names - Implementation and Specification", link: "https://datatracker.ietf.org/doc/html/rfc1035" },
+            { title: "Cisco IOS Command Reference - Verification Commands", link: "https://www.cisco.com" }
+        ],
         simType: "cli"
     },
     'topologies': {
