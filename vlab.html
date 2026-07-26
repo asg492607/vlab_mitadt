@@ -355,23 +355,22 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" integrity="sha384-JcnsjUPPylna1s1fvi1u12X5qjY5OL56iySh75FdtrwhO/SWXgMjoVqcKyIIWOLk" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha384-ZZ1pncU3bQe8y31yfZdMFdSpttDoPmOZg2wguVK9almUodir1PghgT0eY7Mrty8H" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js" integrity="sha384-QQBwnzmpf8eCm7WvgJ/dpvJ51cajsTkfDMgOq5QVBZav9687X5xjlZo8zroLyU3+" crossorigin="anonymous"></script>
-    <script src="vlabData.js?v=41"></script>
-    <script type="module" src="vlab.js?v=41"></script>
+    <script src="vlabData.js?v=42"></script>
+    <script type="module" src="vlab.js?v=42"></script>
     
     <!-- Global AI Tutor Assistant HTML Components -->
     <div id="global-ai-bubble" class="global-ai-bubble" title="Ask MIT VLab AI Tutor">✨</div>
     <div id="global-ai-drawer" class="global-ai-drawer">
         <div class="global-ai-header">
             <span>✨ Academic AI Tutor Assistant</span>
-            <button id="btnGlobalAiClose" class="global-ai-close-btn">&times;</button>
+            <button id="btnGlobalAiClose" style="background:transparent; border:none; color:white; font-size:16px; cursor:pointer;">&times;</button>
         </div>
-        <div class="global-ai-toolbar">
-            <button id="btnGlobalAiExplain" class="global-ai-tool-btn">📖 Explain Theory</button>
-            <button id="btnGlobalAiAudit" class="global-ai-tool-btn">🔍 Check My Work</button>
-            <button id="btnGlobalAiSpeakToggle" class="global-ai-tool-btn" style="border: 1px solid var(--border);" title="Toggle Speak AI Responses">🔊 Read: Off</button>
-        </div>
-        <div id="global-ai-chat-logs" class="global-ai-chat-logs">
-            <div class="global-ai-msg ai">Hello! I am your MIT VLab Academic AI Tutor. I can help guide you through configurations, CLI logs, SQL queries, or CPU scheduling concepts. How can I assist you today?</div>
+        <div id="global-ai-chat-logs" class="global-ai-chat-logs"></div>
+        <div class="global-ai-speak-row">
+            <button id="btnGlobalAiSpeakToggle" class="global-ai-speak-btn">🔊 Read: Off</button>
+            <span style="flex:1;"></span>
+            <button id="btnGlobalAiExplain" class="global-ai-quick-btn">💡 Explain Theory</button>
+            <button id="btnGlobalAiAudit" class="global-ai-quick-btn">🔍 Audit Work</button>
         </div>
         <div class="global-ai-input-area">
             <input id="global-ai-chat-input" type="text" placeholder="Ask about loops, subnets, CPU scheduling...">
@@ -385,7 +384,7 @@
         // Register PWA Service Worker with auto-update cache invalidation
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=41').then(reg => {
+                navigator.serviceWorker.register('./sw.js?v=42').then(reg => {
                     console.log('Service Worker registered successfully:', reg.scope);
                     reg.update();
                 }).catch(err => {
