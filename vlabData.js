@@ -1,6 +1,6 @@
 window.VLAB_DATA = {
     "intro_tools": {
-        "title": "Practical 1: Introduction to Computer Networking Tools, Devices & Transmission Media",
+        "title": "Practical 1: Introduction to Networking Tools, Devices & Media",
         "aim": "To study and understand the fundamentals of computer networks, networking devices (Hub, Switch, Router, Bridge, Repeater, Gateway, Modem, Firewall, WAP, Server, Client), transmission media (Twisted Pair, Coaxial, Fiber Optic), connectors (RJ45, RJ11, BNC, LC, SC, ST), ports, MAC addressing, status LEDs, and real-world data transmission.",
         "intro": {
             "summary": "Computer networks have become an essential part of modern life. Every time we browse a website, send an email, attend an online class, stream a video, or transfer files between computers, we are using a computer network. A computer network allows two or more computing devices to communicate, exchange data, and share resources efficiently.",
@@ -374,7 +374,7 @@ window.VLAB_DATA = {
         "simType": "pkt_tracer"
     },
     "net_commands": {
-        "title": "Practical 2: Network Commands & CLI Utilities",
+        "title": "Practical 3: Network Commands & CLI Utilities",
         "aim": "To master, execute, and verify core network diagnostic CLI utilities including ipconfig/ifconfig, ping, tracert/traceroute, arp, netstat, nslookup, route, pathping, and Cisco IOS verification commands.",
         "intro": {
             "summary": "Command-Line Interface (CLI) diagnostic utilities enable network engineers to inspect L3 connectivity, trace packet paths, view active socket connections, and troubleshoot DNS resolutions.",
@@ -732,7 +732,7 @@ window.VLAB_DATA = {
         "simType": "cli"
     },
     "topologies": {
-        "title": "Practical 3: Network Topologies (Bus, Star, Ring, Mesh, Tree & Hybrid)",
+        "title": "Practical 4: Network Topologies (Bus, Star, Ring, Mesh, Tree)",
         "aim": "To understand, construct, analyze, and compare physical and logical network topologies (Bus, Star, Ring, Full/Partial Mesh, Tree, and Hybrid) and evaluate failure scenarios and fault tolerance.",
         "intro": {
             "summary": "A network topology defines the physical and logical arrangement of computing devices, switches, routers, and transmission links. Choosing the correct topology dictates network performance, cabling cost, fault tolerance, maintenance complexity, and scalability.",
@@ -1169,7 +1169,7 @@ window.VLAB_DATA = {
         ]
     },
     "ip_class": {
-        "title": "Practical 4: IPv4 & IPv6 Address Classification",
+        "title": "Practical 5: IPv4 & IPv6 Address Classification",
         "aim": "To study, analyze, and classify IPv4 address classes (A, B, C, D, E), determine Network ID and Host ID boundary divisions, calculate subnet masks, evaluate RFC 1918 private vs public ranges, examine special IP addresses, and master IPv6 128-bit hexadecimal notation and zero-compression rules.",
         "intro": {
             "summary": "Every device connected to a computer network requires a unique address to communicate with other devices. Just as every house has a unique postal address for receiving mail, every computer, smartphone, server, printer, router, and IoT device requires a unique network address called an Internet Protocol (IP) Address. An IP address identifies a device and enables data packets to be delivered to the correct destination across local networks and the global Internet.",
@@ -1508,7 +1508,7 @@ window.VLAB_DATA = {
         "simType": "ip_class"
     },
     "lan_cables": {
-        "title": "Practical 5: LAN Setup & Cabling (Straight-Through & Crossover)",
+        "title": "Practical 6: LAN Setup & Cabling (Straight/Crossover)",
         "aim": "To build a Local Area Network (LAN), understand Ethernet physical media standards, crimp RJ-45 connectors using T568A and T568B standards, select correct Straight-Through vs Crossover cables for device combinations, analyze Auto-MDI/MDIX operation, configure IPv4 addresses, test communication using the ping command, and troubleshoot physical layer cabling faults.",
         "intro": {
             "summary": "A Local Area Network (LAN) connects computers and devices within a limited geographical area such as a classroom, laboratory, office building, or home. One of the most important steps in building a LAN is selecting and terminating the correct network cable. Modern Ethernet uses 4 twisted pairs (8 wires) terminated with RJ-45 connectors. Understanding T568A/T568B pinouts, Straight-Through vs Crossover cabling, and Layer 2 Ethernet frame forwarding is foundational for network installation and troubleshooting.",
@@ -1836,7 +1836,7 @@ window.VLAB_DATA = {
         ]
     },
     "subnetting": {
-        "title": "Practical 6: Subnetting, VLSM & CIDR",
+        "title": "Practical 7: Subnetting, VLSM & CIDR",
         "aim": "To study, analyze, and implement Classless Inter-Domain Routing (CIDR), Variable Length Subnet Masking (VLSM), and IPv4 subnetting to efficiently divide IP address space, minimize broadcast traffic, and design departmental networks.",
         "intro": {
             "summary": "In modern computer networks, efficient utilization of IP addresses is essential. Assigning a large unsegmented network to an entire organization wastes IP addresses and increases broadcast traffic. Subnetting divides a large network into smaller logical networks (subnets), enhancing performance, security, and administrative control. Variable Length Subnet Masking (VLSM) and Classless Inter-Domain Routing (CIDR) allow subnet sizes to be customized to exact department requirements without wasting IP space.",
@@ -2161,7 +2161,7 @@ window.VLAB_DATA = {
         "simType": "subnetting"
     },
     "vlan_sim": {
-        "title": "Practical 7: Virtual LANs (VLAN) & Trunking",
+        "title": "Practical 8: Virtual LANs (VLAN) & Trunking",
         "aim": "To study, configure, and analyze Virtual Local Area Networks (VLANs), IEEE 802.1Q trunking links, access ports, native VLANs, and Inter-VLAN Routing to logically segment enterprise networks and contain broadcast domains.",
         "intro": {
             "summary": "In traditional Local Area Networks (LANs), all devices connected to the same switch belong to a single physical broadcast domain. As networks grow, excessive broadcast traffic, security vulnerabilities, and management complexity become major obstacles. Virtual Local Area Networks (VLANs) logically divide a single physical switch into multiple independent broadcast domains. Devices can be grouped logically by department (e.g. Accounts, Sales, IT) regardless of their physical location. Communication between different VLANs requires Layer 3 routing (Inter-VLAN Routing).",
@@ -2482,7 +2482,7 @@ window.VLAB_DATA = {
         "simType": "vlan_sim"
     },
     "routing_rip": {
-        "title": "Practical 8: Distance Vector Routing Protocol (RIP)",
+        "title": "Practical 9: Distance Vector Routing Protocol (RIP)",
         "aim": "To understand dynamic routing principles, configure RIP Version 2 across a multi-router network, observe periodic routing updates, inspect hop count metric calculation, verify routing table convergence, and evaluate loop prevention mechanisms (Split Horizon, Poison Reverse, and Triggered Updates).",
         "intro": {
             "summary": "As computer networks grow larger, connecting multiple subnets across different geographical sites requires multiple routers exchanging routing tables dynamically. Routing Information Protocol (RIP) is one of the foundational Distance Vector Dynamic Routing Protocols in computer networking.",
@@ -2853,7 +2853,7 @@ window.VLAB_DATA = {
         "simType": "rip_sim"
     },
     "routing_ospf": {
-        "title": "Practical 9: Link State Routing Protocol (OSPF)",
+        "title": "Practical 10: Link State Routing Protocol (OSPF)",
         "aim": "To understand Link-State dynamic routing principles, configure Open Shortest Path First (OSPF Version 2 Area 0) across a multi-router enterprise network, analyze Hello neighbor discovery, inspect Link State Database (LSDB) synchronization, calculate OSPF Cost metrics using Dijkstra's Shortest Path First (SPF) algorithm, and verify DR/BDR elections.",
         "intro": {
             "summary": "As enterprise networks continue to grow in size and complexity, traditional routing protocols such as RIP become inefficient because they use only hop count as their routing metric and exchange complete routing tables periodically. Open Shortest Path First (OSPF) is the industry-standard Link-State Interior Gateway Protocol (IGP) engineered for high scalability and rapid convergence.",
@@ -3249,7 +3249,7 @@ window.VLAB_DATA = {
         "simType": "ospf_sim"
     },
     "routing_eigrp": {
-        "title": "Practical 10: Enhanced Interior Gateway Routing Protocol (EIGRP)",
+        "title": "Practical 11: Dynamic Routing Protocol (EIGRP)",
         "aim": "To understand Advanced Distance Vector and Hybrid routing principles, configure Cisco EIGRP (Autonomous System 100) across a multi-router enterprise topology, evaluate composite metrics (Bandwidth and Delay), inspect the 3 EIGRP tables (Neighbor Table, Topology Table, and Routing Table), and verify instant failover using the Diffusing Update Algorithm (DUAL) with Successor and Feasible Successor routes.",
         "intro": {
             "summary": "As enterprise networks become larger and more complex, routing protocols must quickly adapt to changes while efficiently utilizing available network resources. Enhanced Interior Gateway Routing Protocol (EIGRP) is Cisco's Advanced Distance Vector / Hybrid Routing Protocol designed to combine the configuration simplicity of Distance Vector protocols with the rapid convergence, topology awareness, and loop-free operation of Link State protocols.",
@@ -3645,7 +3645,7 @@ window.VLAB_DATA = {
         "simType": "eigrp_sim"
     },
     "static_routing": {
-        "title": "Practical 11: Static Routing Configuration",
+        "title": "Practical 12: Static Routing Configuration",
         "aim": "To understand the fundamental principles of Layer 3 packet forwarding, examine routing table structures, manually configure static and default routes using Cisco IOS CLI commands, observe hop-by-hop next-hop forwarding decisions, and troubleshoot missing return routes.",
         "intro": {
             "summary": "In computer networks, communication between devices located on different subnets requires a router. To make forwarding decisions, every router maintains a Routing Table. Static Routing is the foundational method where network administrators manually define explicit paths for destination subnets, offering complete control, high security, and low CPU overhead.",
@@ -3818,7 +3818,7 @@ window.VLAB_DATA = {
         "simType": "static_routing_sim"
     },
     "udp_tcp": {
-        "title": "Practical 12: UDP & TCP Transport Protocols",
+        "title": "Practical 13: UDP & TCP Transport Protocols",
         "aim": "To examine end-to-end transport layer communication, analyze process-to-process port addressing, compare connection-oriented TCP (3-way handshake, flow control, sliding window, retransmission) vs connectionless UDP (best-effort, low overhead), and select appropriate transport protocols for network applications.",
         "intro": {
             "summary": "The Transport Layer (Layer 4) manages process-to-process communication between host applications. TCP provides connection-oriented, reliable, ordered delivery with error recovery and sliding-window flow control. UDP provides connectionless, lightweight, low-latency transmission for real-time applications like DNS, video streaming, and VoIP.",
@@ -4158,7 +4158,7 @@ window.VLAB_DATA = {
         "simType": "udp_tcp_sim"
     },
     "dhcp_config": {
-        "title": "Practical 13: DHCP Configuration & IP Pools",
+        "title": "Practical 14: DHCP Configuration & IP Pools",
         "aim": "To examine automatic IP address allocation via Dynamic Host Configuration Protocol (DHCP), master the 4-step DORA process (Discover, Offer, Request, ACK), configure DHCP pools, excluded IP ranges, default routers, and DNS servers on Cisco IOS routers, configure DHCP Relay Agents (ip helper-address) across multi-subnet networks, and verify leases.",
         "intro": {
             "summary": "Dynamic Host Configuration Protocol (DHCP) automates IP address, subnet mask, default gateway, and DNS configuration for network clients. Operating via the 4-step DORA handshake (Discover, Offer, Request, ACK), DHCP eliminates manual configuration errors, manages address leases, and scales client management in enterprise LANs.",
@@ -4488,7 +4488,7 @@ window.VLAB_DATA = {
         "simType": "dhcp_config_sim"
     },
     "static_nat": {
-        "title": "Practical 14: Static Network Address Translation (Static NAT)",
+        "title": "Practical 15: Static Network Address Translation (NAT)",
         "aim": "To examine Network Address Translation (NAT) principles, understand private RFC 1918 vs public IPv4 address spaces, configure 1-to-1 Static NAT mappings on Cisco IOS routers for publishing internal web/mail servers, observe IP packet header translations (Inside Local ⇹ Inside Global), and verify translation tables.",
         "intro": {
             "summary": "Static Network Address Translation (Static NAT) establishes a permanent 1-to-1 mapping between an internal private RFC 1918 IP address (Inside Local) and an external public IP address (Inside Global). Static NAT enables external Internet users to initiate inbound connections to internal servers while shielding the rest of the internal network behind the NAT gateway.",
@@ -4809,7 +4809,7 @@ window.VLAB_DATA = {
         "simType": "static_nat_sim"
     },
     "dynamic_nat": {
-        "title": "Practical 15: Dynamic NAT & PAT (NAT Overload)",
+        "title": "Practical 16: Dynamic NAT & PAT Overload",
         "aim": "To master advanced Network Address Translation techniques, examine Dynamic NAT (pool-based 1-to-1 allocation) vs Port Address Translation (PAT / NAT Overload), configure NAT pools, access control lists (ACLs), and port multiplexing on Cisco IOS gateways, observe how thousands of private LAN hosts share a single public IP via unique source port numbers, and complete the VLAB Capstone Integration Challenge.",
         "intro": {
             "summary": "Dynamic NAT allocates public IP addresses from a pool to private hosts on a first-come, first-served basis. Port Address Translation (PAT / NAT Overload) extends NAT by multiplexing multiple private IP addresses over a single public IP address using unique Layer 4 source port numbers. PAT is the universal standard used in home Wi-Fi routers and enterprise edge gateways worldwide.",
@@ -5134,7 +5134,7 @@ window.VLAB_DATA = {
         "simType": "dynamic_nat_sim"
     },
     "cables_devices": {
-        "title": "Practical 1: Introduction to Computer Networking Tools, Devices & Transmission Media",
+        "title": "Practical 1: Introduction to Networking Tools, Devices & Media",
         "aim": "To study and understand the fundamentals of computer networks, networking devices (Hub, Switch, Router, Bridge, Repeater, Gateway, Modem, Firewall, WAP, Server, Client), transmission media (Twisted Pair, Coaxial, Fiber Optic), connectors (RJ45, RJ11, BNC, LC, SC, ST), ports, MAC addressing, status LEDs, and real-world data transmission.",
         "intro": {
             "summary": "Computer networks have become an essential part of modern life. Every time we browse a website, send an email, attend an online class, stream a video, or transfer files between computers, we are using a computer network. A computer network allows two or more computing devices to communicate, exchange data, and share resources efficiently.",
@@ -5508,7 +5508,7 @@ window.VLAB_DATA = {
         "simType": "pkt_tracer"
     },
     "modulation": {
-        "title": "Practical 5: LAN Setup & Cabling (Straight-Through & Crossover)",
+        "title": "Practical 6: LAN Setup & Cabling (Straight/Crossover)",
         "aim": "To build a Local Area Network (LAN), understand Ethernet physical media standards, crimp RJ-45 connectors using T568A and T568B standards, select correct Straight-Through vs Crossover cables for device combinations, analyze Auto-MDI/MDIX operation, configure IPv4 addresses, test communication using the ping command, and troubleshoot physical layer cabling faults.",
         "intro": {
             "summary": "A Local Area Network (LAN) connects computers and devices within a limited geographical area such as a classroom, laboratory, office building, or home. One of the most important steps in building a LAN is selecting and terminating the correct network cable. Modern Ethernet uses 4 twisted pairs (8 wires) terminated with RJ-45 connectors. Understanding T568A/T568B pinouts, Straight-Through vs Crossover cabling, and Layer 2 Ethernet frame forwarding is foundational for network installation and troubleshooting.",
@@ -5836,7 +5836,7 @@ window.VLAB_DATA = {
         ]
     },
     "csma": {
-        "title": "Practical 3: Network Topologies (Bus, Star, Ring, Mesh, Tree & Hybrid)",
+        "title": "Practical 4: Network Topologies (Bus, Star, Ring, Mesh, Tree)",
         "aim": "To understand, construct, analyze, and compare physical and logical network topologies (Bus, Star, Ring, Full/Partial Mesh, Tree, and Hybrid) and evaluate failure scenarios and fault tolerance.",
         "intro": {
             "summary": "A network topology defines the physical and logical arrangement of computing devices, switches, routers, and transmission links. Choosing the correct topology dictates network performance, cabling cost, fault tolerance, maintenance complexity, and scalability.",
@@ -6273,7 +6273,7 @@ window.VLAB_DATA = {
         ]
     },
     "csma_ca": {
-        "title": "Practical 3: Network Topologies (Bus, Star, Ring, Mesh, Tree & Hybrid)",
+        "title": "Practical 4: Network Topologies (Bus, Star, Ring, Mesh, Tree)",
         "aim": "To understand, construct, analyze, and compare physical and logical network topologies (Bus, Star, Ring, Full/Partial Mesh, Tree, and Hybrid) and evaluate failure scenarios and fault tolerance.",
         "intro": {
             "summary": "A network topology defines the physical and logical arrangement of computing devices, switches, routers, and transmission links. Choosing the correct topology dictates network performance, cabling cost, fault tolerance, maintenance complexity, and scalability.",
@@ -6710,7 +6710,7 @@ window.VLAB_DATA = {
         ]
     },
     "subnet": {
-        "title": "Practical 6: Subnetting, VLSM & CIDR",
+        "title": "Practical 7: Subnetting, VLSM & CIDR",
         "aim": "To study, analyze, and implement Classless Inter-Domain Routing (CIDR), Variable Length Subnet Masking (VLSM), and IPv4 subnetting to efficiently divide IP address space, minimize broadcast traffic, and design departmental networks.",
         "intro": {
             "summary": "In modern computer networks, efficient utilization of IP addresses is essential. Assigning a large unsegmented network to an entire organization wastes IP addresses and increases broadcast traffic. Subnetting divides a large network into smaller logical networks (subnets), enhancing performance, security, and administrative control. Variable Length Subnet Masking (VLSM) and Classless Inter-Domain Routing (CIDR) allow subnet sizes to be customized to exact department requirements without wasting IP space.",
@@ -7035,7 +7035,7 @@ window.VLAB_DATA = {
         "simType": "subnetting"
     },
     "routing_protocols": {
-        "title": "Practical 9: Link State Routing Protocol (OSPF)",
+        "title": "Practical 10: Link State Routing Protocol (OSPF)",
         "aim": "To understand Link-State dynamic routing principles, configure Open Shortest Path First (OSPF Version 2 Area 0) across a multi-router enterprise network, analyze Hello neighbor discovery, inspect Link State Database (LSDB) synchronization, calculate OSPF Cost metrics using Dijkstra's Shortest Path First (SPF) algorithm, and verify DR/BDR elections.",
         "intro": {
             "summary": "As enterprise networks continue to grow in size and complexity, traditional routing protocols such as RIP become inefficient because they use only hop count as their routing metric and exchange complete routing tables periodically. Open Shortest Path First (OSPF) is the industry-standard Link-State Interior Gateway Protocol (IGP) engineered for high scalability and rapid convergence.",
@@ -7431,7 +7431,7 @@ window.VLAB_DATA = {
         "simType": "ospf_sim"
     },
     "routing_dv": {
-        "title": "Practical 8: Distance Vector Routing Protocol (RIP)",
+        "title": "Practical 9: Distance Vector Routing Protocol (RIP)",
         "aim": "To understand dynamic routing principles, configure RIP Version 2 across a multi-router network, observe periodic routing updates, inspect hop count metric calculation, verify routing table convergence, and evaluate loop prevention mechanisms (Split Horizon, Poison Reverse, and Triggered Updates).",
         "intro": {
             "summary": "As computer networks grow larger, connecting multiple subnets across different geographical sites requires multiple routers exchanging routing tables dynamically. Routing Information Protocol (RIP) is one of the foundational Distance Vector Dynamic Routing Protocols in computer networking.",
@@ -7802,7 +7802,7 @@ window.VLAB_DATA = {
         "simType": "rip_sim"
     },
     "routing_ls": {
-        "title": "Practical 10: Enhanced Interior Gateway Routing Protocol (EIGRP)",
+        "title": "Practical 11: Dynamic Routing Protocol (EIGRP)",
         "aim": "To understand Advanced Distance Vector and Hybrid routing principles, configure Cisco EIGRP (Autonomous System 100) across a multi-router enterprise topology, evaluate composite metrics (Bandwidth and Delay), inspect the 3 EIGRP tables (Neighbor Table, Topology Table, and Routing Table), and verify instant failover using the Diffusing Update Algorithm (DUAL) with Successor and Feasible Successor routes.",
         "intro": {
             "summary": "As enterprise networks become larger and more complex, routing protocols must quickly adapt to changes while efficiently utilizing available network resources. Enhanced Interior Gateway Routing Protocol (EIGRP) is Cisco's Advanced Distance Vector / Hybrid Routing Protocol designed to combine the configuration simplicity of Distance Vector protocols with the rapid convergence, topology awareness, and loop-free operation of Link State protocols.",
@@ -8198,7 +8198,7 @@ window.VLAB_DATA = {
         "simType": "eigrp_sim"
     },
     "udp": {
-        "title": "Practical 12: UDP & TCP Transport Protocols",
+        "title": "Practical 13: UDP & TCP Transport Protocols",
         "aim": "To examine end-to-end transport layer communication, analyze process-to-process port addressing, compare connection-oriented TCP (3-way handshake, flow control, sliding window, retransmission) vs connectionless UDP (best-effort, low overhead), and select appropriate transport protocols for network applications.",
         "intro": {
             "summary": "The Transport Layer (Layer 4) manages process-to-process communication between host applications. TCP provides connection-oriented, reliable, ordered delivery with error recovery and sliding-window flow control. UDP provides connectionless, lightweight, low-latency transmission for real-time applications like DNS, video streaming, and VoIP.",
@@ -8538,7 +8538,7 @@ window.VLAB_DATA = {
         "simType": "udp_tcp_sim"
     },
     "tcp": {
-        "title": "Practical 12: UDP & TCP Transport Protocols",
+        "title": "Practical 13: UDP & TCP Transport Protocols",
         "aim": "To examine end-to-end transport layer communication, analyze process-to-process port addressing, compare connection-oriented TCP (3-way handshake, flow control, sliding window, retransmission) vs connectionless UDP (best-effort, low overhead), and select appropriate transport protocols for network applications.",
         "intro": {
             "summary": "The Transport Layer (Layer 4) manages process-to-process communication between host applications. TCP provides connection-oriented, reliable, ordered delivery with error recovery and sliding-window flow control. UDP provides connectionless, lightweight, low-latency transmission for real-time applications like DNS, video streaming, and VoIP.",
@@ -8878,7 +8878,7 @@ window.VLAB_DATA = {
         "simType": "udp_tcp_sim"
     },
     "dns": {
-        "title": "Practical 13: DHCP Configuration & IP Pools",
+        "title": "Practical 14: DHCP Configuration & IP Pools",
         "aim": "To examine automatic IP address allocation via Dynamic Host Configuration Protocol (DHCP), master the 4-step DORA process (Discover, Offer, Request, ACK), configure DHCP pools, excluded IP ranges, default routers, and DNS servers on Cisco IOS routers, configure DHCP Relay Agents (ip helper-address) across multi-subnet networks, and verify leases.",
         "intro": {
             "summary": "Dynamic Host Configuration Protocol (DHCP) automates IP address, subnet mask, default gateway, and DNS configuration for network clients. Operating via the 4-step DORA handshake (Discover, Offer, Request, ACK), DHCP eliminates manual configuration errors, manages address leases, and scales client management in enterprise LANs.",
@@ -9208,7 +9208,7 @@ window.VLAB_DATA = {
         "simType": "dhcp_config_sim"
     },
     "vlan": {
-        "title": "Practical 7: Virtual LANs (VLAN) & Trunking",
+        "title": "Practical 8: Virtual LANs (VLAN) & Trunking",
         "aim": "To study, configure, and analyze Virtual Local Area Networks (VLANs), IEEE 802.1Q trunking links, access ports, native VLANs, and Inter-VLAN Routing to logically segment enterprise networks and contain broadcast domains.",
         "intro": {
             "summary": "In traditional Local Area Networks (LANs), all devices connected to the same switch belong to a single physical broadcast domain. As networks grow, excessive broadcast traffic, security vulnerabilities, and management complexity become major obstacles. Virtual Local Area Networks (VLANs) logically divide a single physical switch into multiple independent broadcast domains. Devices can be grouped logically by department (e.g. Accounts, Sales, IT) regardless of their physical location. Communication between different VLANs requires Layer 3 routing (Inter-VLAN Routing).",
@@ -9529,7 +9529,7 @@ window.VLAB_DATA = {
         "simType": "vlan_sim"
     },
     "rip_sim": {
-        "title": "Practical 8: Distance Vector Routing Protocol (RIP)",
+        "title": "Practical 9: Distance Vector Routing Protocol (RIP)",
         "aim": "To understand dynamic routing principles, configure RIP Version 2 across a multi-router network, observe periodic routing updates, inspect hop count metric calculation, verify routing table convergence, and evaluate loop prevention mechanisms (Split Horizon, Poison Reverse, and Triggered Updates).",
         "intro": {
             "summary": "As computer networks grow larger, connecting multiple subnets across different geographical sites requires multiple routers exchanging routing tables dynamically. Routing Information Protocol (RIP) is one of the foundational Distance Vector Dynamic Routing Protocols in computer networking.",
@@ -9900,7 +9900,7 @@ window.VLAB_DATA = {
         "simType": "rip_sim"
     },
     "rip": {
-        "title": "Practical 8: Distance Vector Routing Protocol (RIP)",
+        "title": "Practical 9: Distance Vector Routing Protocol (RIP)",
         "aim": "To understand dynamic routing principles, configure RIP Version 2 across a multi-router network, observe periodic routing updates, inspect hop count metric calculation, verify routing table convergence, and evaluate loop prevention mechanisms (Split Horizon, Poison Reverse, and Triggered Updates).",
         "intro": {
             "summary": "As computer networks grow larger, connecting multiple subnets across different geographical sites requires multiple routers exchanging routing tables dynamically. Routing Information Protocol (RIP) is one of the foundational Distance Vector Dynamic Routing Protocols in computer networking.",
@@ -10271,7 +10271,7 @@ window.VLAB_DATA = {
         "simType": "rip_sim"
     },
     "ospf_sim": {
-        "title": "Practical 9: Link State Routing Protocol (OSPF)",
+        "title": "Practical 10: Link State Routing Protocol (OSPF)",
         "aim": "To understand Link-State dynamic routing principles, configure Open Shortest Path First (OSPF Version 2 Area 0) across a multi-router enterprise network, analyze Hello neighbor discovery, inspect Link State Database (LSDB) synchronization, calculate OSPF Cost metrics using Dijkstra's Shortest Path First (SPF) algorithm, and verify DR/BDR elections.",
         "intro": {
             "summary": "As enterprise networks continue to grow in size and complexity, traditional routing protocols such as RIP become inefficient because they use only hop count as their routing metric and exchange complete routing tables periodically. Open Shortest Path First (OSPF) is the industry-standard Link-State Interior Gateway Protocol (IGP) engineered for high scalability and rapid convergence.",
@@ -10667,7 +10667,7 @@ window.VLAB_DATA = {
         "simType": "ospf_sim"
     },
     "ospf": {
-        "title": "Practical 9: Link State Routing Protocol (OSPF)",
+        "title": "Practical 10: Link State Routing Protocol (OSPF)",
         "aim": "To understand Link-State dynamic routing principles, configure Open Shortest Path First (OSPF Version 2 Area 0) across a multi-router enterprise network, analyze Hello neighbor discovery, inspect Link State Database (LSDB) synchronization, calculate OSPF Cost metrics using Dijkstra's Shortest Path First (SPF) algorithm, and verify DR/BDR elections.",
         "intro": {
             "summary": "As enterprise networks continue to grow in size and complexity, traditional routing protocols such as RIP become inefficient because they use only hop count as their routing metric and exchange complete routing tables periodically. Open Shortest Path First (OSPF) is the industry-standard Link-State Interior Gateway Protocol (IGP) engineered for high scalability and rapid convergence.",
@@ -11063,7 +11063,7 @@ window.VLAB_DATA = {
         "simType": "ospf_sim"
     },
     "eigrp_sim": {
-        "title": "Practical 10: Enhanced Interior Gateway Routing Protocol (EIGRP)",
+        "title": "Practical 11: Dynamic Routing Protocol (EIGRP)",
         "aim": "To understand Advanced Distance Vector and Hybrid routing principles, configure Cisco EIGRP (Autonomous System 100) across a multi-router enterprise topology, evaluate composite metrics (Bandwidth and Delay), inspect the 3 EIGRP tables (Neighbor Table, Topology Table, and Routing Table), and verify instant failover using the Diffusing Update Algorithm (DUAL) with Successor and Feasible Successor routes.",
         "intro": {
             "summary": "As enterprise networks become larger and more complex, routing protocols must quickly adapt to changes while efficiently utilizing available network resources. Enhanced Interior Gateway Routing Protocol (EIGRP) is Cisco's Advanced Distance Vector / Hybrid Routing Protocol designed to combine the configuration simplicity of Distance Vector protocols with the rapid convergence, topology awareness, and loop-free operation of Link State protocols.",
@@ -11459,7 +11459,7 @@ window.VLAB_DATA = {
         "simType": "eigrp_sim"
     },
     "eigrp": {
-        "title": "Practical 10: Enhanced Interior Gateway Routing Protocol (EIGRP)",
+        "title": "Practical 11: Dynamic Routing Protocol (EIGRP)",
         "aim": "To understand Advanced Distance Vector and Hybrid routing principles, configure Cisco EIGRP (Autonomous System 100) across a multi-router enterprise topology, evaluate composite metrics (Bandwidth and Delay), inspect the 3 EIGRP tables (Neighbor Table, Topology Table, and Routing Table), and verify instant failover using the Diffusing Update Algorithm (DUAL) with Successor and Feasible Successor routes.",
         "intro": {
             "summary": "As enterprise networks become larger and more complex, routing protocols must quickly adapt to changes while efficiently utilizing available network resources. Enhanced Interior Gateway Routing Protocol (EIGRP) is Cisco's Advanced Distance Vector / Hybrid Routing Protocol designed to combine the configuration simplicity of Distance Vector protocols with the rapid convergence, topology awareness, and loop-free operation of Link State protocols.",
@@ -11855,7 +11855,7 @@ window.VLAB_DATA = {
         "simType": "eigrp_sim"
     },
     "static_routing_sim": {
-        "title": "Practical 11: Static Routing Configuration",
+        "title": "Practical 12: Static Routing Configuration",
         "aim": "To understand the fundamental principles of Layer 3 packet forwarding, examine routing table structures, manually configure static and default routes using Cisco IOS CLI commands, observe hop-by-hop next-hop forwarding decisions, and troubleshoot missing return routes.",
         "intro": {
             "summary": "In computer networks, communication between devices located on different subnets requires a router. To make forwarding decisions, every router maintains a Routing Table. Static Routing is the foundational method where network administrators manually define explicit paths for destination subnets, offering complete control, high security, and low CPU overhead.",
@@ -12028,7 +12028,7 @@ window.VLAB_DATA = {
         "simType": "static_routing_sim"
     },
     "udp_tcp_sim": {
-        "title": "Practical 12: UDP & TCP Transport Protocols",
+        "title": "Practical 13: UDP & TCP Transport Protocols",
         "aim": "To examine end-to-end transport layer communication, analyze process-to-process port addressing, compare connection-oriented TCP (3-way handshake, flow control, sliding window, retransmission) vs connectionless UDP (best-effort, low overhead), and select appropriate transport protocols for network applications.",
         "intro": {
             "summary": "The Transport Layer (Layer 4) manages process-to-process communication between host applications. TCP provides connection-oriented, reliable, ordered delivery with error recovery and sliding-window flow control. UDP provides connectionless, lightweight, low-latency transmission for real-time applications like DNS, video streaming, and VoIP.",
@@ -12368,7 +12368,7 @@ window.VLAB_DATA = {
         "simType": "udp_tcp_sim"
     },
     "dhcp_config_sim": {
-        "title": "Practical 13: DHCP Configuration & IP Pools",
+        "title": "Practical 14: DHCP Configuration & IP Pools",
         "aim": "To examine automatic IP address allocation via Dynamic Host Configuration Protocol (DHCP), master the 4-step DORA process (Discover, Offer, Request, ACK), configure DHCP pools, excluded IP ranges, default routers, and DNS servers on Cisco IOS routers, configure DHCP Relay Agents (ip helper-address) across multi-subnet networks, and verify leases.",
         "intro": {
             "summary": "Dynamic Host Configuration Protocol (DHCP) automates IP address, subnet mask, default gateway, and DNS configuration for network clients. Operating via the 4-step DORA handshake (Discover, Offer, Request, ACK), DHCP eliminates manual configuration errors, manages address leases, and scales client management in enterprise LANs.",
@@ -12698,7 +12698,7 @@ window.VLAB_DATA = {
         "simType": "dhcp_config_sim"
     },
     "static_nat_sim": {
-        "title": "Practical 14: Static Network Address Translation (Static NAT)",
+        "title": "Practical 15: Static Network Address Translation (NAT)",
         "aim": "To examine Network Address Translation (NAT) principles, understand private RFC 1918 vs public IPv4 address spaces, configure 1-to-1 Static NAT mappings on Cisco IOS routers for publishing internal web/mail servers, observe IP packet header translations (Inside Local ⇹ Inside Global), and verify translation tables.",
         "intro": {
             "summary": "Static Network Address Translation (Static NAT) establishes a permanent 1-to-1 mapping between an internal private RFC 1918 IP address (Inside Local) and an external public IP address (Inside Global). Static NAT enables external Internet users to initiate inbound connections to internal servers while shielding the rest of the internal network behind the NAT gateway.",
@@ -13019,7 +13019,7 @@ window.VLAB_DATA = {
         "simType": "static_nat_sim"
     },
     "dynamic_nat_sim": {
-        "title": "Practical 15: Dynamic NAT & PAT (NAT Overload)",
+        "title": "Practical 16: Dynamic NAT & PAT Overload",
         "aim": "To master advanced Network Address Translation techniques, examine Dynamic NAT (pool-based 1-to-1 allocation) vs Port Address Translation (PAT / NAT Overload), configure NAT pools, access control lists (ACLs), and port multiplexing on Cisco IOS gateways, observe how thousands of private LAN hosts share a single public IP via unique source port numbers, and complete the VLAB Capstone Integration Challenge.",
         "intro": {
             "summary": "Dynamic NAT allocates public IP addresses from a pool to private hosts on a first-come, first-served basis. Port Address Translation (PAT / NAT Overload) extends NAT by multiplexing multiple private IP addresses over a single public IP address using unique Layer 4 source port numbers. PAT is the universal standard used in home Wi-Fi routers and enterprise edge gateways worldwide.",
@@ -14271,3 +14271,26 @@ window.VLAB_DATA = {
 
 window.VLAB_DATA['communication_models'] = window.VLAB_DATA['osi_tcpip'];
 window.VLAB_DATA['osi_tcpip_sim'] = window.VLAB_DATA['osi_tcpip'];
+window.VLAB_DATA['cables_devices'] = window.VLAB_DATA['intro_tools'];
+window.VLAB_DATA['modulation'] = window.VLAB_DATA['lan_cables'];
+window.VLAB_DATA['csma'] = window.VLAB_DATA['topologies'];
+window.VLAB_DATA['csma_ca'] = window.VLAB_DATA['topologies'];
+window.VLAB_DATA['subnet'] = window.VLAB_DATA['subnetting'];
+window.VLAB_DATA['routing_protocols'] = window.VLAB_DATA['routing_ospf'];
+window.VLAB_DATA['routing_dv'] = window.VLAB_DATA['routing_rip'];
+window.VLAB_DATA['routing_ls'] = window.VLAB_DATA['routing_eigrp'];
+window.VLAB_DATA['udp'] = window.VLAB_DATA['udp_tcp'];
+window.VLAB_DATA['tcp'] = window.VLAB_DATA['udp_tcp'];
+window.VLAB_DATA['dns'] = window.VLAB_DATA['dhcp_config'];
+window.VLAB_DATA['vlan_sim'] = window.VLAB_DATA['vlan'];
+window.VLAB_DATA['rip_sim'] = window.VLAB_DATA['routing_rip'];
+window.VLAB_DATA['rip'] = window.VLAB_DATA['routing_rip'];
+window.VLAB_DATA['ospf_sim'] = window.VLAB_DATA['routing_ospf'];
+window.VLAB_DATA['ospf'] = window.VLAB_DATA['routing_ospf'];
+window.VLAB_DATA['eigrp_sim'] = window.VLAB_DATA['routing_eigrp'];
+window.VLAB_DATA['eigrp'] = window.VLAB_DATA['routing_eigrp'];
+window.VLAB_DATA['static_routing_sim'] = window.VLAB_DATA['static_routing'];
+window.VLAB_DATA['udp_tcp_sim'] = window.VLAB_DATA['udp_tcp'];
+window.VLAB_DATA['dhcp_config_sim'] = window.VLAB_DATA['dhcp_config'];
+window.VLAB_DATA['static_nat_sim'] = window.VLAB_DATA['static_nat'];
+window.VLAB_DATA['dynamic_nat_sim'] = window.VLAB_DATA['dynamic_nat'];

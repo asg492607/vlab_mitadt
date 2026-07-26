@@ -7365,6 +7365,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         window.setTimeout(() => {
             document.querySelectorAll('.section-title').forEach(el => el.textContent = data.title);
+            const headerTitle = document.getElementById('lab-title-display');
+            if (headerTitle) headerTitle.textContent = data.title;
+            const crumbLab = document.getElementById('breadcrumb-lab');
+            if (crumbLab) crumbLab.textContent = data.title;
+            document.title = "MIT ADT VLAB - " + data.title;
 
             const setBody = (id, html) => {
                 const sec = document.getElementById(id);
@@ -20688,7 +20693,9 @@ student@mitadt-os:~$ </div>
         const cloudLabs = ['cloud_virtualization', 'cloud_docker', 'cloud_loadbalancer', 'cloud_autoscaling', 'cloud_storage', 'cloud_cdn', 'cloud_iam', 'cloud_serverless', 'cloud_sla', 'cloud_mapreduce', 'cloud_kubernetes'];
         const cyberLabs = ['cyber_caesar', 'cyber_vigenere', 'cyber_rsa', 'cyber_aes', 'cyber_hashing', 'cyber_firewall', 'cyber_ids', 'cyber_sql_inject', 'cyber_xss', 'cyber_mitm', 'cyber_steganography', 'cyber_network_scan'];
 
-        let initialLab = localStorage.getItem('vlab_current_lab');
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlLab = urlParams.get('lab');
+        let initialLab = urlLab || localStorage.getItem('vlab_current_lab');
         if (currentSubject === 'os') {
             if (!osLabs.includes(initialLab)) {
                 initialLab = 'cpu_scheduling';
