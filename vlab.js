@@ -11949,314 +11949,347 @@ const initSubnettingSim = (container) => {
             drawGrid();
         };
 
-        const initVlanSim = (container) => {
-            container.innerHTML = `
-            <div class="sim-toolbar">
-                <div class="section-title" style="font-size:22px; margin:0; color:var(--primary);">VLAN & IEEE 802.1Q Trunking</div>
+// Interactive Practical 7 Virtual LANs & Trunking Simulator
+const initVlanSim = (container) => {
+    let currentTab = 'broadcast'; // 'broadcast', 'access', 'tag', 'roas', 'cli', 'faults'
+
+    // Module 1 State: Broadcast Visualizer
+    let vlanMode = 'segmented'; // 'flat' or 'segmented'
+
+    // Module 2 State: Access Port Assignments (Ports 1 to 12)
+    let portVlans = {
+        1: 10, 2: 10, 3: 10, 4: 10,
+        5: 20, 6: 20, 7: 20, 8: 20,
+        9: 30, 10: 30, 11: 30, 12: 30
+    };
+    let selectedPort = 1;
+
+    // Module 7 State: Fault Injection Lab
+    let activeFault = 'none';
+
+    const vlanColors = {
+        10: '#3b82f6', // Blue
+        20: '#10b981', // Green
+        30: '#a855f7', // Purple
+        1: '#64748b'   // Gray (Default)
+    };
+
+    const render = () => {
+        container.innerHTML = `
+        <div class="sim-toolbar" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; padding:12px 16px; background:var(--bg-card); border-bottom:1px solid var(--border);">
+            <div style="font-size:20px; font-weight:800; color:var(--primary); display:flex; align-items:center; gap:8px;">
+                <span>VLAN & Trunking Engine 🏷️</span>
             </div>
-            <div class="sim-workspace" style="padding:20px; gap:20px; flex-direction:column; overflow-y:auto; overflow-x:hidden;">
-                <div style="display:flex; gap:20px; flex-wrap:wrap;">
-                    <div class="theory-card" style="flex:1; min-width:400px; margin:0; position:relative; min-height:400px; overflow:hidden;">
-                        <canvas id="vlanCanvas" style="position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none;"></canvas>
-                        
-                        <div style="position:absolute; top:40%; left:30%; transform:translate(-50%,-50%); background:var(--bg-card); border:2px solid #64748b; padding:10px 20px; border-radius:8px; font-weight:800; font-family:'JetBrains Mono', monospace;" id="sw1">SW-1</div>
-                        <div style="position:absolute; top:40%; left:70%; transform:translate(-50%,-50%); background:var(--bg-card); border:2px solid #64748b; padding:10px 20px; border-radius:8px; font-weight:800; font-family:'JetBrains Mono', monospace;" id="sw2">SW-2</div>
-                        
-                        <div style="position:absolute; top:15%; left:10%; transform:translate(-50%,-50%); background:var(--bg-card); border:2px solid #3b82f6; padding:10px; border-radius:8px; text-align:center; z-index:2;" id="pc1">
-                            <div style="font-weight:800; font-size:12px;">PC-1</div>
-                            <div id="pc1VlanTag" style="font-size:10px; background:#3b82f6; color:#fff; padding:2px 6px; border-radius:4px; margin-top:5px;">VLAN 10</div>
+            <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                <button class="btn-sim ${currentTab === 'broadcast' ? 'primary' : ''}" id="tabBroadcast" style="font-size:12px; padding:6px 12px;">Broadcast Visualizer 📢</button>
+                <button class="btn-sim ${currentTab === 'access' ? 'primary' : ''}" id="tabAccess" style="font-size:12px; padding:6px 12px;">Access Port Configurator 🔀</button>
+                <button class="btn-sim ${currentTab === 'tag' ? 'primary' : ''}" id="tabTag" style="font-size:12px; padding:6px 12px;">802.1Q Tag Inspector 🏷️</button>
+                <button class="btn-sim ${currentTab === 'roas' ? 'primary' : ''}" id="tabRoas" style="font-size:12px; padding:6px 12px;">Router-on-a-Stick (ROAS) 🌐</button>
+                <button class="btn-sim ${currentTab === 'cli' ? 'primary' : ''}" id="tabCli" style="font-size:12px; padding:6px 12px;">Cisco Switch CLI 💻</button>
+                <button class="btn-sim ${currentTab === 'faults' ? 'primary' : ''}" id="tabFaults" style="font-size:12px; padding:6px 12px;">VLAN Fault Detector ⚠️</button>
+            </div>
+        </div>
+
+        <div class="sim-workspace" style="padding:16px; display:flex; flex-direction:column; gap:16px; background:var(--bg-page);">
+            ${currentTab === 'broadcast' ? `
+                <!-- Module 1: Broadcast Domain Visualizer -->
+                <div class="theory-card" style="margin:0; display:flex; flex-direction:column; gap:16px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap;">
+                        <h3 style="color:var(--primary); margin:0;">Broadcast Domain Isolation Visualizer</h3>
+                        <div style="display:flex; gap:8px;">
+                            <button class="btn-sim ${vlanMode === 'flat' ? 'primary' : ''}" id="btnModeFlat">Flat Network (No VLANs) ❌</button>
+                            <button class="btn-sim ${vlanMode === 'segmented' ? 'primary' : ''}" id="btnModeSegmented">VLAN Segmented ✅</button>
                         </div>
-                        <div style="position:absolute; top:65%; left:10%; transform:translate(-50%,-50%); background:var(--bg-card); border:2px solid #ef4444; padding:10px; border-radius:8px; text-align:center; z-index:2;" id="pc3">
-                            <div style="font-weight:800; font-size:12px;">PC-3</div>
-                            <div id="pc3VlanTag" style="font-size:10px; background:#ef4444; color:#fff; padding:2px 6px; border-radius:4px; margin-top:5px;">VLAN 20</div>
-                        </div>
-                        
-                        <div style="position:absolute; top:15%; left:90%; transform:translate(-50%,-50%); background:var(--bg-card); border:2px solid #3b82f6; padding:10px; border-radius:8px; text-align:center; z-index:2;" id="pc2">
-                            <div style="font-weight:800; font-size:12px;">PC-2</div>
-                            <div id="pc2VlanTag" style="font-size:10px; background:#3b82f6; color:#fff; padding:2px 6px; border-radius:4px; margin-top:5px;">VLAN 10</div>
-                        </div>
-                        <div style="position:absolute; top:65%; left:90%; transform:translate(-50%,-50%); background:var(--bg-card); border:2px solid #ef4444; padding:10px; border-radius:8px; text-align:center; z-index:2;" id="pc4">
-                            <div style="font-weight:800; font-size:12px;">PC-4</div>
-                            <div id="pc4VlanTag" style="font-size:10px; background:#ef4444; color:#fff; padding:2px 6px; border-radius:4px; margin-top:5px;">VLAN 20</div>
-                        </div>
-                        
-                        <div style="position:absolute; top:33%; left:50%; transform:translate(-50%,-50%); font-size:11px; font-weight:800; background:rgba(0,0,0,0.5); color:#fff; padding:4px 10px; border-radius:12px; border:1px solid #64748b;">802.1Q TRUNK</div>
                     </div>
-                    
-                    <div class="theory-card" style="width:320px; margin:0; display:flex; flex-direction:column;">
-                        <h3 style="color:var(--primary); margin-bottom:12px;">Port Configuration</h3>
-                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:15px;" id="vlanConfigSection">
+
+                    <p style="font-size:13px; color:var(--text-main); margin:0; line-height:1.6;">
+                        ${vlanMode === 'flat' ? 
+                            '<b>Flat Unsegmented Network:</b> All 12 PCs belong to VLAN 1 (Default). Broadcast frames sent by PC1 flood to <b>ALL 11 OTHER PCs</b>.' :
+                            '<b>Segmented VLAN Network:</b> Switch is carved into 3 VLANs (VLAN 10 Accounts, VLAN 20 Sales, VLAN 30 HR). Broadcast frames sent by PC1 flood <b>ONLY to VLAN 10 PCs</b>.'
+                        }
+                    </p>
+
+                    <!-- Switch Topology Visual Board -->
+                    <div style="background:#0b0f19; padding:20px; border-radius:12px; border:1px solid var(--border); display:flex; flex-direction:column; gap:16px; align-items:center;">
+                        <div style="font-size:14px; font-weight:800; color:#ffffff; display:flex; align-items:center; gap:8px;">
+                            <span>🔀 Core Catalyst 2960 Switch</span>
+                            <span style="font-size:10px; font-family:monospace; color:#94a3b8;">(${vlanMode === 'flat' ? '1 Broadcast Domain' : '3 Isolated Broadcast Domains'})</span>
                         </div>
-                        <h3 style="color:var(--primary); margin-bottom:12px;">Diagnostics</h3>
-                        <div style="display:flex; flex-direction:column; gap:8px;">
-                            <button id="btnVlanBc1" class="btn-sim primary">Broadcast from PC-1</button>
-                            <button id="btnVlanBc3" class="btn-sim primary">Broadcast from PC-3</button>
-                            <button id="btnVlanPing12" class="btn-sim">Ping PC-1 ➔ PC-2</button>
-                            <button id="btnVlanPing13" class="btn-sim">Ping PC-1 ➔ PC-3</button>
+
+                        <!-- 12 PC Nodes Grid -->
+                        <div style="display:grid; grid-template-columns:repeat(6, 1fr); gap:12px; width:100%;">
+                            ${[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(pcId => {
+                                const vlanId = vlanMode === 'flat' ? 1 : portVlans[pcId];
+                                const color = vlanColors[vlanId];
+                                return `
+                                    <div style="display:flex; flex-direction:column; align-items:center; gap:4px; padding:10px; background:#1e293b; border:2px solid ${color}; border-radius:8px; box-shadow:0 0 10px ${color}33;">
+                                        <div style="font-size:24px;">💻</div>
+                                        <div style="font-size:11px; font-weight:800; color:#ffffff;">PC ${pcId}</div>
+                                        <div style="font-size:9px; font-family:monospace; color:${color}; font-weight:800;">
+                                            VLAN ${vlanId}
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('')}
                         </div>
-                        <div id="vlanConsole" style="background:#f8fafc; border-radius:8px; padding:10px; font-family:'JetBrains Mono', monospace; font-size:11px; color:#10b981; height:120px; overflow-y:auto; margin-top:15px; border:1px solid var(--border);">
-                            > VLAN Simulator Initialized
+                    </div>
+
+                    <!-- Action Controls -->
+                    <div style="display:flex; gap:10px; justify-content:center;">
+                        <button id="btnSendBcast" class="btn-sim primary" style="font-weight:700;">Transmit ARP Broadcast Packet from PC1 (VLAN 10) 🚀</button>
+                    </div>
+
+                    <div id="bcastLogOut" style="padding:14px; background:var(--bg-page); border:1px solid var(--border); border-radius:10px; font-size:13px; min-height:50px; line-height:1.6;">
+                        💡 Click <b>Transmit ARP Broadcast Packet</b> to observe broadcast containment.
+                    </div>
+                </div>
+            ` : ''}
+
+            ${currentTab === 'access' ? `
+                <!-- Module 2: Access Port Configurator -->
+                <div class="theory-card" style="margin:0; display:flex; flex-direction:column; gap:16px;">
+                    <h3 style="color:var(--primary); margin:0;">Interactive Switch Access Port Configurator 🔀</h3>
+                    <p style="font-size:13px; color:var(--text-main); margin:0; line-height:1.6;">
+                        Select a switch port (FastEthernet0/1 to 0/12) and assign it to a specific VLAN membership.
+                    </p>
+
+                    <!-- 12 Ports Grid -->
+                    <div style="display:grid; grid-template-columns:repeat(6, 1fr); gap:10px; background:#0b0f19; padding:16px; border-radius:12px; border:1px solid var(--border);">
+                        ${[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(portNum => {
+                            const vId = portVlans[portNum];
+                            const color = vlanColors[vId];
+                            const isSel = selectedPort === portNum;
+                            return `
+                                <div class="port-card" data-port="${portNum}" style="display:flex; flex-direction:column; align-items:center; gap:6px; padding:10px; background:${isSel ? 'rgba(59,130,246,0.25)' : '#1e293b'}; border:2px solid ${isSel ? '#38bdf8' : color}; border-radius:8px; cursor:pointer;">
+                                    <div style="font-size:10px; font-weight:800; color:#94a3b8;">Fa0/${portNum}</div>
+                                    <div style="width:12px; height:12px; border-radius:50%; background:${color}; box-shadow:0 0 8px ${color};"></div>
+                                    <div style="font-size:9px; font-weight:800; color:${color}; font-family:monospace;">VLAN ${vId}</div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+
+                    <!-- Port Setting Box -->
+                    <div style="display:flex; gap:12px; align-items:center; background:var(--bg-page); padding:14px; border:1px solid var(--border); border-radius:10px;">
+                        <span style="font-size:13px; font-weight:800; color:var(--primary);">Configuring Interface FastEthernet0/${selectedPort}:</span>
+                        <select id="selPortVlan" class="sim-select" style="flex:1; font-weight:700;">
+                            <option value="10" ${portVlans[selectedPort] === 10 ? 'selected' : ''}>Assign to VLAN 10 (ACCOUNTS - Blue)</option>
+                            <option value="20" ${portVlans[selectedPort] === 20 ? 'selected' : ''}>Assign to VLAN 20 (SALES - Green)</option>
+                            <option value="30" ${portVlans[selectedPort] === 30 ? 'selected' : ''}>Assign to VLAN 30 (HUMAN_RES - Purple)</option>
+                            <option value="1" ${portVlans[selectedPort] === 1 ? 'selected' : ''}>Assign to VLAN 1 (DEFAULT - Gray)</option>
+                        </select>
+                    </div>
+                </div>
+            ` : ''}
+
+            ${currentTab === 'tag' ? `
+                <!-- Module 3: IEEE 802.1Q Frame Tag Inspector -->
+                <div class="theory-card" style="margin:0; display:flex; flex-direction:column; gap:16px;">
+                    <h3 style="color:var(--primary); margin:0;">IEEE 802.1Q 4-Byte Tag Frame Inspector 🏷️</h3>
+                    <p style="font-size:13px; color:var(--text-main); margin:0; line-height:1.6;">
+                        Inspect the 4-byte 802.1Q header inserted into Ethernet frames as they cross inter-switch Trunk links.
+                    </p>
+
+                    <!-- Frame Structure Box -->
+                    <div style="background:#0b0f19; padding:20px; border-radius:12px; border:1px solid var(--border); display:flex; flex-direction:column; gap:14px;">
+                        <div style="font-size:12px; font-weight:800; color:#ffffff; text-align:center;">
+                            802.1Q TRUNK ETHERNET FRAME STRUCTURE:
+                        </div>
+
+                        <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                            <div style="flex:1; min-width:80px; padding:10px; background:#1e293b; border:1px solid #475569; border-radius:6px; text-align:center;">
+                                <div style="font-size:10px; color:#cbd5e1; font-weight:bold;">DST MAC</div>
+                                <div style="font-size:8px; color:#94a3b8; font-family:monospace;">6 Bytes</div>
+                            </div>
+                            <div style="flex:1; min-width:80px; padding:10px; background:#1e293b; border:1px solid #475569; border-radius:6px; text-align:center;">
+                                <div style="font-size:10px; color:#cbd5e1; font-weight:bold;">SRC MAC</div>
+                                <div style="font-size:8px; color:#94a3b8; font-family:monospace;">6 Bytes</div>
+                            </div>
+                            <div style="flex:2; min-width:160px; padding:10px; background:rgba(16,185,129,0.25); border:2px solid #10b981; border-radius:6px; text-align:center;">
+                                <div style="font-size:11px; color:#10b981; font-weight:bold;">802.1Q TAG HEADER</div>
+                                <div style="font-size:9px; color:#10b981; font-family:monospace; font-weight:bold;">4 Bytes (TPID 0x8100 + VID 10)</div>
+                            </div>
+                            <div style="flex:1; min-width:80px; padding:10px; background:#1e293b; border:1px solid #475569; border-radius:6px; text-align:center;">
+                                <div style="font-size:10px; color:#cbd5e1; font-weight:bold;">TYPE</div>
+                                <div style="font-size:8px; color:#94a3b8; font-family:monospace;">2 Bytes</div>
+                            </div>
+                            <div style="flex:1; min-width:80px; padding:10px; background:#1e293b; border:1px solid #475569; border-radius:6px; text-align:center;">
+                                <div style="font-size:10px; color:#cbd5e1; font-weight:bold;">PAYLOAD</div>
+                                <div style="font-size:8px; color:#94a3b8; font-family:monospace;">46–1500 B</div>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            ` : ''}
+
+            ${currentTab === 'roas' ? `
+                <!-- Module 4: Router-on-a-Stick ROAS Simulator -->
+                <div class="theory-card" style="margin:0; display:flex; flex-direction:column; gap:16px;">
+                    <h3 style="color:var(--primary); margin:0;">Router-on-a-Stick (ROAS) Inter-VLAN Routing 🌐</h3>
+                    <p style="font-size:13px; color:var(--text-main); margin:0; line-height:1.6;">
+                        Trace packet flow between PC1 (VLAN 10: 192.168.10.10) and PC2 (VLAN 20: 192.168.20.20) through router subinterfaces G0/0.10 & G0/0.20.
+                    </p>
+
+                    <div style="display:flex; gap:10px; justify-content:center;">
+                        <button id="btnRunRoasPacket" class="btn-sim primary" style="font-weight:700;">Transmit Inter-VLAN Packet ▶</button>
+                    </div>
+
+                    <div id="roasLogOut" style="padding:14px; background:#0b0f19; border:1px solid var(--border); border-radius:10px; font-family:'JetBrains Mono', monospace; font-size:12px; color:#10b981; min-height:80px; line-height:1.8;">
+                        💡 Click <b>Transmit Inter-VLAN Packet ▶</b> to simulate Router-on-a-Stick forwarding.
+                    </div>
+                </div>
+            ` : ''}
+
+            ${currentTab === 'cli' ? `
+                <!-- Module 5: Cisco Switch CLI Terminal -->
+                <div class="theory-card" style="margin:0; display:flex; flex-direction:column; gap:16px;">
+                    <h3 style="color:var(--primary); margin:0;">Cisco Catalyst Switch IOS CLI Terminal 💻</h3>
+
+                    <!-- CLI Prompt & Input -->
+                    <div style="display:flex; gap:10px; align-items:center;">
+                        <span style="font-family:'JetBrains Mono', monospace; font-size:13px; font-weight:800; color:var(--primary);">Switch(config-if)#</span>
+                        <input type="text" id="txtCliCmd" value="show vlan brief" class="sim-select" style="flex:1; font-family:'JetBrains Mono', monospace; font-size:13px; padding:8px;">
+                        <button id="btnExecCliCmd" class="btn-sim primary" style="font-weight:700;">Execute Command ↵</button>
+                    </div>
+
+                    <!-- Output Console -->
+                    <div id="cliLogBox" style="padding:16px; background:#0b0f19; border:1px solid var(--border); border-radius:10px; font-family:'JetBrains Mono', monospace; font-size:12px; color:#10b981; min-height:160px; max-height:260px; overflow-y:auto; line-height:1.8;">
+                        Cisco IOS Software, C2960 Software (C2960-LANBASEK9-M), Version 15.0(2)SE4<br>
+                        Type 'show vlan brief' or 'switchport mode trunk' to configure switch...
+                    </div>
+                </div>
+            ` : ''}
+
+            ${currentTab === 'faults' ? `
+                <!-- Module 7: VLAN Fault Detector -->
+                <div class="theory-card" style="margin:0; display:flex; flex-direction:column; gap:16px;">
+                    <h3 style="color:var(--primary); margin:0;">VLAN Configuration Error & Fault Detector ⚠️</h3>
+
+                    <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                        <button class="btn-sim ${activeFault === 'native_mismatch' ? 'danger' : ''}" id="btnFaultNative">Fault: Native VLAN Mismatch (VLAN 1 vs 99) 🚨</button>
+                        <button class="btn-sim ${activeFault === 'mode_mismatch' ? 'danger' : ''}" id="btnFaultMode">Fault: Switchport Mode Mismatch (Access vs Trunk) 🚨</button>
+                        <button class="btn-sim ${activeFault === 'missing_roas' ? 'danger' : ''}" id="btnFaultRoas">Fault: Missing Subinterface Encapsulation ⚡</button>
+                        <button class="btn-sim" id="btnClearVlanFault">Clear All Faults 💚</button>
+                    </div>
+
+                    <div id="vlanFaultDiagOut" style="padding:16px; background:var(--bg-page); border:1px solid var(--border); border-radius:10px; font-size:13px; min-height:80px; line-height:1.7;">
+                        💡 Select a VLAN fault scenario above to diagnose configuration errors.
+                    </div>
+                </div>
+            ` : ''}
+        </div>
         `;
 
-            const canvas = document.getElementById('vlanCanvas');
-            const ctx = canvas.getContext('2d');
-            let aniFrame = null;
-            let isSimRunning = false;
+        // Tab Switch Handlers
+        document.getElementById('tabBroadcast').onclick = () => { currentTab = 'broadcast'; render(); };
+        document.getElementById('tabAccess').onclick = () => { currentTab = 'access'; render(); };
+        document.getElementById('tabTag').onclick = () => { currentTab = 'tag'; render(); };
+        document.getElementById('tabRoas').onclick = () => { currentTab = 'roas'; render(); };
+        document.getElementById('tabCli').onclick = () => { currentTab = 'cli'; render(); };
+        document.getElementById('tabFaults').onclick = () => { currentTab = 'faults'; render(); };
 
-            const pcVlans = { pc1: 10, pc2: 10, pc3: 20, pc4: 20 };
+        // Module 1 Handlers
+        if (currentTab === 'broadcast') {
+            document.getElementById('btnModeFlat').onclick = () => { vlanMode = 'flat'; render(); };
+            document.getElementById('btnModeSegmented').onclick = () => { vlanMode = 'segmented'; render(); };
 
-            const getPos = (id) => {
-                const el = document.getElementById(id);
-                const rect = el.getBoundingClientRect();
-                const parentRect = canvas.parentElement.getBoundingClientRect();
-                return {
-                    x: rect.left - parentRect.left + (rect.width / 2),
-                    y: rect.top - parentRect.top + (rect.height / 2)
-                };
-            };
-
-            const drawLine = (p1, p2, color, isTrunk = false) => {
-                ctx.beginPath();
-                ctx.moveTo(p1.x, p1.y);
-                ctx.lineTo(p2.x, p2.y);
-                ctx.strokeStyle = color;
-                ctx.lineWidth = isTrunk ? 4 : 2;
-                if (isTrunk) ctx.setLineDash([5, 5]); else ctx.setLineDash([]);
-                ctx.stroke();
-                ctx.setLineDash([]);
-            };
-
-            const getVlanColor = (vlanVal) => {
-                return vlanVal === 10 ? '#3b82f6' : '#ef4444';
-            };
-
-            const drawTopology = () => {
-                canvas.width = canvas.parentElement.clientWidth;
-                canvas.height = canvas.parentElement.clientHeight;
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-                const sw1 = getPos('sw1'), sw2 = getPos('sw2');
-                const pc1 = getPos('pc1'), pc2 = getPos('pc2');
-                const pc3 = getPos('pc3'), pc4 = getPos('pc4');
-
-                drawLine(pc1, sw1, getVlanColor(pcVlans.pc1) + '4D');
-                drawLine(pc3, sw1, getVlanColor(pcVlans.pc3) + '4D');
-                drawLine(pc2, sw2, getVlanColor(pcVlans.pc2) + '4D');
-                drawLine(pc4, sw2, getVlanColor(pcVlans.pc4) + '4D');
-                drawLine(sw1, sw2, 'rgba(100,116,139,0.8)', true);
-            };
-
-            const log = (msg, color = '#10b981') => {
-                const c = document.getElementById('vlanConsole');
-                if (c) {
-                    c.innerHTML += `<div style="color:${color}; margin-bottom:4px;">> ${msg}</div>`;
-                    c.scrollTop = c.scrollHeight;
+            document.getElementById('btnSendBcast').onclick = () => {
+                const out = document.getElementById('bcastLogOut');
+                if (vlanMode === 'flat') {
+                    out.innerHTML = `<span style="color:#ef4444; font-weight:bold;">[FLAT NETWORK BROADCAST FLOOD]</span><br>PC1 sends ARP Request (FF:FF:FF:FF:FF:FF).<br><b>Result:</b> Frame floods out all 11 ports to <b>PC2, PC3, PC4, PC5, PC6, PC7, PC8, PC9, PC10, PC11, PC12</b> (Zero Isolation!).`;
+                } else {
+                    out.innerHTML = `<span style="color:#10b981; font-weight:bold;">[VLAN 10 SEGMENTED BROADCAST CONTAINED]</span><br>PC1 (VLAN 10) sends ARP Request (FF:FF:FF:FF:FF:FF).<br><b>Result:</b> Frame floods ONLY to <b>PC2, PC3, PC4 (VLAN 10 Accounts)</b>.<br><span style="color:#a78bfa;">VLAN 20 (Sales) and VLAN 30 (HR) receive ZERO broadcast traffic!</span>`;
                 }
             };
+        }
 
-            const updateVlanUI = () => {
-                ['pc1', 'pc2', 'pc3', 'pc4'].forEach(id => {
-                    const tagEl = document.getElementById(id + 'VlanTag');
-                    const pcEl = document.getElementById(id);
-                    if (tagEl && pcEl) {
-                        const val = pcVlans[id];
-                        tagEl.textContent = 'VLAN ' + val;
-                        tagEl.style.background = getVlanColor(val);
-                        pcEl.style.borderColor = getVlanColor(val);
-                    }
-                });
-                drawTopology();
-            };
-
-            const buildInputs = () => {
-                const container = document.getElementById('vlanConfigSection');
-                if (!container) return;
-                container.innerHTML = '';
-                ['pc1', 'pc2', 'pc3', 'pc4'].forEach(id => {
-                    container.innerHTML += `
-                    <div style="display:flex; flex-direction:column; gap:3px;">
-                        <label style="font-size:11px; font-weight:800; color:var(--text-muted); text-transform:uppercase;">${id.toUpperCase()} VLAN:</label>
-                        <select data-pc="${id}" class="sim-select" style="padding:4px; font-size:12px;">
-                            <option value="10" ${pcVlans[id] === 10 ? 'selected' : ''}>VLAN 10</option>
-                            <option value="20" ${pcVlans[id] === 20 ? 'selected' : ''}>VLAN 20</option>
-                        </select>
-                    </div>
-                `;
-                });
-
-                container.querySelectorAll('select').forEach(sel => {
-                    sel.addEventListener('change', (e) => {
-                        const pc = e.target.dataset.pc;
-                        pcVlans[pc] = parseInt(e.target.value);
-                        updateVlanUI();
-                        log(`${pc.toUpperCase()} reassigned to VLAN ${pcVlans[pc]}`, '#fff');
-                    });
-                });
-            };
-
-            const animatePacket = (path, color, tag, onComplete) => {
-                let start = performance.now();
-                const duration = 1000;
-
-                const animate = (time) => {
-                    if (!document.getElementById('vlanCanvas')) return;
-                    let progress = (time - start) / duration;
-                    if (progress > 1) progress = 1;
-
-                    drawTopology();
-                    const x = path[0].x + (path[1].x - path[0].x) * progress;
-                    const y = path[0].y + (path[1].y - path[0].y) * progress;
-
-                    ctx.fillStyle = color;
-                    ctx.beginPath();
-                    ctx.arc(x, y, 8, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.strokeStyle = '#fff';
-                    ctx.lineWidth = 2;
-                    ctx.stroke();
-
-                    if (tag) {
-                        ctx.fillStyle = 'rgba(0,0,0,0.8)';
-                        ctx.fillRect(x - 20, y - 25, 40, 14);
-                        ctx.fillStyle = '#f59e0b';
-                        ctx.font = 'bold 9px Outfit, sans-serif';
-                        ctx.textAlign = 'center';
-                        ctx.fillText(tag, x, y - 15);
-                    }
-
-                    if (progress < 1) {
-                        aniFrame = requestAnimationFrame(animate);
-                    } else {
-                        if (onComplete) onComplete();
-                    }
+        // Module 2 Handlers
+        if (currentTab === 'access') {
+            container.querySelectorAll('.port-card').forEach(card => {
+                card.onclick = () => {
+                    selectedPort = parseInt(card.dataset.port);
+                    render();
                 };
-                aniFrame = requestAnimationFrame(animate);
+            });
+
+            const sel = document.getElementById('selPortVlan');
+            if (sel) sel.onchange = (e) => {
+                portVlans[selectedPort] = parseInt(e.target.value);
+                render();
             };
+        }
 
-            const runVlanBroadcast = (srcPcId) => {
-                if (isSimRunning) return;
-                isSimRunning = true;
-
-                const sw1 = getPos('sw1'), sw2 = getPos('sw2');
-                const srcPos = getPos(srcPcId);
-                const vlanId = pcVlans[srcPcId];
-                const color = getVlanColor(vlanId);
-
-                document.querySelectorAll('button, select').forEach(b => b.disabled = true);
-                log(`${srcPcId.toUpperCase()} (VLAN ${vlanId}) broadcasting frame...`, '#fff');
-
-                animatePacket([srcPos, sw1], color, null, () => {
-                    log(`SW-1 received frame. Attaching 802.1Q Tag: [VLAN ${vlanId}]`, '#f59e0b');
-
-                    const otherLocalPc = srcPcId === 'pc1' ? 'pc3' : 'pc1';
-                    const otherLocalPos = getPos(otherLocalPc);
-
-                    if (pcVlans[otherLocalPc] === vlanId) {
-                        log(`SW-1 forwards copy to ${otherLocalPc.toUpperCase()} (Match)`, '#10b981');
-                        animatePacket([sw1, otherLocalPos], color, null);
-                    } else {
-                        ctx.fillStyle = 'rgba(239,68,68,0.8)';
-                        ctx.font = 'bold 20px Outfit, sans-serif';
-                        ctx.fillText('X', otherLocalPos.x + 30, otherLocalPos.y);
-                        log(`SW-1 drops frame for ${otherLocalPc.toUpperCase()} (VLAN Mismatch)`, '#ef4444');
-                    }
-
-                    setTimeout(() => {
-                        log(`SW-1 forwarding tagged frame across TRUNK...`);
-                        animatePacket([sw1, sw2], color, `VLAN ${vlanId}`, () => {
-                            log(`SW-2 received frame. Stripping 802.1Q Tag.`, '#f59e0b');
-
-                            const dests = ['pc2', 'pc4'];
-                            dests.forEach(destId => {
-                                const destPos = getPos(destId);
-                                if (pcVlans[destId] === vlanId) {
-                                    log(`SW-2 forwards untagged copy to ${destId.toUpperCase()} (Match)`, '#10b981');
-                                    animatePacket([sw2, destPos], color, null, () => {
-                                        log(`${destId.toUpperCase()} received Broadcast.`, '#3b82f6');
-                                    });
-                                } else {
-                                    ctx.fillStyle = 'rgba(239,68,68,0.8)';
-                                    ctx.font = 'bold 20px Outfit, sans-serif';
-                                    ctx.fillText('X', destPos.x - 30, destPos.y);
-                                    log(`SW-2 drops frame for ${destId.toUpperCase()} (VLAN Mismatch)`, '#ef4444');
-                                }
-                            });
-
-                            setTimeout(() => {
-                                drawTopology();
-                                isSimRunning = false;
-                                document.querySelectorAll('button, select').forEach(b => b.disabled = false);
-                            }, 2000);
-                        });
-                    }, 1000);
-                });
+        // Module 4 Handlers (ROAS)
+        if (currentTab === 'roas') {
+            document.getElementById('btnRunRoasPacket').onclick = () => {
+                const out = document.getElementById('roasLogOut');
+                out.innerHTML = `[1] PC1 (VLAN 10: 192.168.10.10) generates packet for PC2 (VLAN 20: 192.168.20.20)...<br>`;
+                setTimeout(() => { out.innerHTML += `[2] Switch receives untagged frame on Fa0/1, adds 802.1Q Tag (VID 10), forwards over Trunk to Router...<br>`; }, 400);
+                setTimeout(() => { out.innerHTML += `[3] Router accepts frame on G0/0.10 subinterface, strips VLAN 10 tag, routes to G0/0.20 subinterface...<br>`; }, 800);
+                setTimeout(() => { out.innerHTML += `[4] Router adds 802.1Q Tag (VID 20) and forwards back over Trunk to Switch...<br>`; }, 1200);
+                setTimeout(() => { out.innerHTML += `<span style="color:#10b981; font-weight:bold;">[5] SUCCESS: Switch strips VLAN 20 tag and delivers frame to PC2 (VLAN 20)!</span>`; }, 1600);
             };
+        }
 
-            const runPing = (src, dest) => {
-                if (isSimRunning) return;
-                isSimRunning = true;
+        // Module 5 Handlers (CLI)
+        if (currentTab === 'cli') {
+            document.getElementById('btnExecCliCmd').onclick = () => {
+                const cmd = document.getElementById('txtCliCmd').value.trim();
+                const log = document.getElementById('cliLogBox');
 
-                const srcPos = getPos(src);
-                const destPos = getPos(dest);
-                const sw1 = getPos('sw1'), sw2 = getPos('sw2');
-
-                document.querySelectorAll('button, select').forEach(b => b.disabled = true);
-                log(`Ping: ${src.toUpperCase()} (VLAN ${pcVlans[src]}) ➔ ${dest.toUpperCase()} (VLAN ${pcVlans[dest]})...`, '#fff');
-
-                animatePacket([srcPos, sw1], getVlanColor(pcVlans[src]), null, () => {
-                    if (pcVlans[src] !== pcVlans[dest]) {
-                        log(`SW-1 checking VLAN mappings: Mismatch!`, '#f59e0b');
-                        setTimeout(() => {
-                            ctx.fillStyle = 'rgba(239,68,68,0.8)';
-                            ctx.font = 'bold 24px Outfit, sans-serif';
-                            ctx.fillText('DROP', sw1.x, sw1.y + 40);
-                            log(`SW-1 DROP: Cannot route between VLANs without a Layer 3 Device!`, '#ef4444');
-                            setTimeout(() => {
-                                drawTopology();
-                                isSimRunning = false;
-                                document.querySelectorAll('button, select').forEach(b => b.disabled = false);
-                            }, 2000);
-                        }, 1000);
-                    } else {
-                        log(`SW-1 tag-encapsulates frame and forwards across TRUNK...`, '#10b981');
-                        animatePacket([sw1, sw2], getVlanColor(pcVlans[src]), `VLAN ${pcVlans[src]}`, () => {
-                            log(`SW-2 received frame. Stripping Tag. Forwards to ${dest.toUpperCase()}`, '#10b981');
-                            animatePacket([sw2, destPos], getVlanColor(pcVlans[src]), null, () => {
-                                log(`Ping Request reached ${dest.toUpperCase()}! Sending Reply...`, '#3b82f6');
-                                animatePacket([destPos, sw2], getVlanColor(pcVlans[src]), null, () => {
-                                    animatePacket([sw2, sw1], getVlanColor(pcVlans[src]), `VLAN ${pcVlans[src]}`, () => {
-                                        animatePacket([sw1, srcPos], getVlanColor(pcVlans[src]), null, () => {
-                                            log(`Ping Reply received! RTT < 1ms. Success!`, '#10b981');
-                                            setTimeout(() => {
-                                                drawTopology();
-                                                isSimRunning = false;
-                                                document.querySelectorAll('button, select').forEach(b => b.disabled = false);
-                                            }, 1500);
-                                        });
-                                    });
-                                });
-                            });
-                        });
-                    }
-                });
+                if (cmd === 'show vlan brief') {
+                    log.innerHTML += `
+                        <br><br>&gt; ${cmd}<br>
+                        VLAN Name                             Status    Ports<br>
+                        ---- -------------------------------- --------- -------------------------------<br>
+                        1    default                          active    Fa0/13, Fa0/14, Fa0/15<br>
+                        10   ACCOUNTS                         active    Fa0/1, Fa0/2, Fa0/3, Fa0/4<br>
+                        20   SALES                            active    Fa0/5, Fa0/6, Fa0/7, Fa0/8<br>
+                        30   HUMAN_RES                        active    Fa0/9, Fa0/10, Fa0/11, Fa0/12
+                    `;
+                } else if (cmd.startsWith('vlan')) {
+                    const vid = cmd.split(' ')[1];
+                    log.innerHTML += `<br><br>&gt; ${cmd}<br>% Created VLAN ${vid}`;
+                } else if (cmd === 'show interfaces trunk') {
+                    log.innerHTML += `
+                        <br><br>&gt; ${cmd}<br>
+                        Port        Mode         Encapsulation  Status        Native vlan<br>
+                        Gi0/1       on           802.1q         trunking      1<br><br>
+                        Port        Vlans allowed on trunk<br>
+                        Gi0/1       10,20,30
+                    `;
+                } else {
+                    log.innerHTML += `<br><br>&gt; ${cmd}<br>% Command executed successfully.`;
+                }
+                log.scrollTop = log.scrollHeight;
             };
+        }
 
-            setTimeout(() => {
-                buildInputs();
-                updateVlanUI();
-            }, 50);
+        // Module 7 Handlers (Faults)
+        if (currentTab === 'faults') {
+            const out = document.getElementById('vlanFaultDiagOut');
+            document.getElementById('btnFaultNative').onclick = () => {
+                activeFault = 'native_mismatch';
+                out.innerHTML = `<span style="color:#ef4444; font-weight:800;">⚠️ FAULT INJECTED: NATIVE VLAN MISMATCH</span><br>Switch A Native VLAN = 1 | Switch B Native VLAN = 99.<br><b>Symptom:</b> %CDP-4-NATIVE_VLAN_MISMATCH alert console log, untagged traffic routed to wrong VLAN.<br><b>Fix:</b> Configure matching native VLAN on both switches (switchport trunk native vlan 99).`;
+            };
+            document.getElementById('btnFaultMode').onclick = () => {
+                activeFault = 'mode_mismatch';
+                out.innerHTML = `<span style="color:#ef4444; font-weight:800;">⚠️ FAULT INJECTED: SWITCHPORT MODE MISMATCH</span><br>Switch A interface set to Trunk, Switch B interface set to Access.<br><b>Symptom:</b> Trunk negotiation failure, multi-VLAN traffic blocked.<br><b>Fix:</b> Configure switchport mode trunk on both ends of the link.`;
+            };
+            document.getElementById('btnFaultRoas').onclick = () => {
+                activeFault = 'missing_roas';
+                out.innerHTML = `<span style="color:#ef4444; font-weight:800;">⚠️ FAULT INJECTED: MISSING SUBINTERFACE ENCAPSULATION</span><br>Router G0/0.10 configured without encapsulation dot1Q 10.<br><b>Symptom:</b> Inter-VLAN ping returns 'Destination Host Unreachable'.<br><b>Fix:</b> Issue encapsulation dot1Q 10 on subinterface G0/0.10.`;
+            };
+            document.getElementById('btnClearVlanFault').onclick = () => {
+                activeFault = 'none';
+                out.innerHTML = `<span style="color:#10b981; font-weight:800;">💚 ALL VLAN FAULTS CLEARED:</span> 802.1Q trunking, access ports, and Router-on-a-Stick inter-VLAN routing operating normally.`;
+            };
+        }
+    };
 
-            window.addEventListener('resize', () => { if (document.getElementById('vlanCanvas')) drawTopology(); });
+    render();
+};
 
-            document.getElementById('btnVlanBc1').addEventListener('click', () => runVlanBroadcast('pc1'));
-            document.getElementById('btnVlanBc3').addEventListener('click', () => runVlanBroadcast('pc3'));
-            document.getElementById('btnVlanPing12').addEventListener('click', () => runPing('pc1', 'pc2'));
-            document.getElementById('btnVlanPing13').addEventListener('click', () => runPing('pc1', 'pc3'));
-        };
 
         const initDnsSim = (container) => {
             container.innerHTML = `
@@ -16756,6 +16789,7 @@ const initSubnettingSim = (container) => {
             `;
                 return;
             }
+            if (id === 'vlan_sim' || id === 'vlan' || (data && (data.simType === 'vlan_sim' || data.simType === 'vlan_trunking'))) { initVlanSim(container); return; }
             if (id === 'subnetting' || (data && (data.simType === 'subnetting' || data.simType === 'subnet_calc'))) { initSubnettingSim(container); return; }
             if (id === 'lan_cables' || (data && (data.simType === 'lan_cables' || data.simType === 'cable_crimp'))) { initLanCablesSim(container); return; }
 

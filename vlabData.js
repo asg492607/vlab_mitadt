@@ -1659,6 +1659,327 @@ window.VLAB_DATA = {
     ],
     "simType": "subnetting"
 },
+    'vlan_sim': {
+    "title": "Practical 7: Virtual LANs (VLAN) & Trunking",
+    "aim": "To study, configure, and analyze Virtual Local Area Networks (VLANs), IEEE 802.1Q trunking links, access ports, native VLANs, and Inter-VLAN Routing to logically segment enterprise networks and contain broadcast domains.",
+    "intro": {
+        "summary": "In traditional Local Area Networks (LANs), all devices connected to the same switch belong to a single physical broadcast domain. As networks grow, excessive broadcast traffic, security vulnerabilities, and management complexity become major obstacles. Virtual Local Area Networks (VLANs) logically divide a single physical switch into multiple independent broadcast domains. Devices can be grouped logically by department (e.g. Accounts, Sales, IT) regardless of their physical location. Communication between different VLANs requires Layer 3 routing (Inter-VLAN Routing).",
+        "importance": "VLANs are the foundation of modern campus networks, corporate enterprise infrastructure, data centers, and Cloud Virtual Private Clouds (VPCs). Mastering VLAN configuration, IEEE 802.1Q frame tagging, trunking protocols, and Router-on-a-Stick (ROAS) architecture is essential for network engineers, system administrators, and Cisco CCNA/CCNP candidates.",
+        "applications": [
+            "University Campus Network Isolation (Students, Faculty, Guest Wi-Fi, Administration)",
+            "Enterprise Corporate Departmental Security (Finance, HR, Executive, Engineering)",
+            "Hospital Medical Infrastructure (Patient Data, Medical Equipment, Administrative Workstations)",
+            "Data Center Server Multi-Tenancy & DMZ Perimeter Isolation",
+            "Voice over IP (VoIP) Dedicated Quality of Service (QoS) Voice VLANs"
+        ],
+        "outcome": "Students will be able to create VLANs on Cisco Catalyst switches, assign Access Ports to specific VLANs, configure 802.1Q Trunk Links between switches, inspect 4-byte 802.1Q VLAN tags in Ethernet frames, configure Router-on-a-Stick subinterfaces, and troubleshoot native VLAN mismatches and trunking failures."
+    },
+    "prerequisites": [
+        "Practical 5: LAN Setup & Ethernet Layer 2 Communication",
+        "Practical 6: IPv4 Subnetting & CIDR Notation",
+        "Understanding of Ethernet Frame headers and Layer 2 MAC address switching"
+    ],
+    "outcomes": [
+        "Understand how VLANs logically partition a physical switch into multiple isolated broadcast domains.",
+        "Configure VLAN IDs (1 to 4094) and descriptive names on Cisco switches.",
+        "Differentiate between Access Ports (untagged single-VLAN) and Trunk Ports (multi-VLAN tagged).",
+        "Explain IEEE 802.1Q frame tagging structure (TPID 0x8100, Priority, 12-bit VLAN ID).",
+        "Understand Native VLAN operation and Untagged frame processing.",
+        "Implement Inter-VLAN Routing using Router-on-a-Stick (ROAS) subinterfaces (G0/0.10, G0/0.20).",
+        "Use Cisco IOS CLI commands (`vlan`, `switchport mode access`, `switchport mode trunk`, `show vlan brief`).",
+        "Troubleshoot common VLAN errors including Native VLAN mismatches and blocked trunk ports."
+    ],
+    "theory": {
+        "intro": "A Virtual LAN (VLAN) is a logical subnetwork that groups together a collection of devices on one or more physical LANs. VLANs provide network segmentation, enhanced security, broadcast control, and flexible host management.",
+        "cards": [
+            {
+                "title": "1. What is a VLAN & Why is it Required?",
+                "content": "Without VLANs:\n• All 48 ports on a switch belong to a single physical broadcast domain.\n• Broadcast messages (ARP requests, DHCP discovers) flood to EVERY single connected device, causing severe bandwidth degradation.\n• Devices in Finance can freely sniff or access traffic from Human Resources without authorization.\n\nWith VLANs:\n• A single physical switch is logically carved into multiple isolated virtual switches (VLAN 10 Accounts, VLAN 20 Sales, VLAN 30 IT).\n• Broadcast messages stay strictly contained within their assigned VLAN.\n• Security is enforced because traffic cannot cross between VLANs without passing through an authorized Layer 3 Firewall or Router."
+            },
+            {
+                "title": "2. Broadcast Domain Containment",
+                "content": "A Broadcast Domain consists of all devices that receive an Ethernet broadcast frame (Destination MAC: FF:FF:FF:FF:FF:FF).\n\n• Flat Network (No VLANs): 1 Switch with 100 PCs = 1 Large Broadcast Domain (100 PCs hit by every broadcast).\n• VLAN Segmented Network: 1 Switch with 4 VLANs (25 PCs each) = 4 Independent Broadcast Domains.\n\nWhen PC1 in VLAN 10 sends a broadcast, ONLY the 25 PCs in VLAN 10 receive it. The other 75 PCs in VLANs 20, 30, and 40 experience ZERO performance impact."
+            },
+            {
+                "title": "3. Access Ports vs Trunk Ports",
+                "content": "• Access Port:\n  - Belongs to exactly ONE VLAN.\n  - Connects to end-user devices (Desktop PCs, Laptops, Printers, IP Phones).\n  - Frames entering or leaving an access port are UNTAGGED (standard Ethernet frames).\n  - Command: `switchport mode access` | `switchport access vlan 10`.\n\n• Trunk Port:\n  - Carries traffic for MULTIPLE VLANs simultaneously across a single physical link.\n  - Connects Switch ↔ Switch, Switch ↔ Router, or Switch ↔ Hypervisor Server.\n  - Frames traveling across a trunk are tagged with IEEE 802.1Q headers to identify their source VLAN.\n  - Command: `switchport mode trunk` | `switchport trunk allowed vlan 10,20,30`."
+            },
+            {
+                "title": "4. IEEE 802.1Q Frame Tagging Specification",
+                "content": "When an Ethernet frame travels across a trunk link between switches, how does the receiving switch know which VLAN the frame belongs to?\n\nIEEE 802.1Q inserts a 4-byte (32-bit) VLAN Tag into the standard Ethernet header between the Source MAC field and the EtherType field:\n\n802.1Q Tag Fields:\n1. TPID (Tag Protocol Identifier - 16 bits): Value 0x8100 identifies frame as an 802.1Q tagged frame.\n2. Priority / PCP (3 bits): IEEE 802.1p Quality of Service (QoS) priority (0–7).\n3. DEI (Drop Eligible Indicator - 1 bit): Indicates packets that can be dropped during congestion.\n4. VID (VLAN Identifier - 12 bits): Identifies the exact VLAN number (Supports 2^12 = 4,096 VLANs)."
+            },
+            {
+                "title": "5. Native VLAN Concept & Security",
+                "content": "The Native VLAN is a special designated VLAN on an IEEE 802.1Q trunk port that handles UNTAGGED frames.\n\n• By Default: Native VLAN = VLAN 1 on Cisco Catalyst switches.\n• How it Works: If an untagged Ethernet frame enters a trunk port, the switch assumes it belongs to the Native VLAN.\n• Security Risk: Leaving Native VLAN as default VLAN 1 makes the network vulnerable to 'VLAN Hopping' attack exploits.\n• Best Practice: Change the Native VLAN on all trunk links to an unused dummy VLAN (e.g. VLAN 999) and ensure BOTH ends of the trunk match."
+            },
+            {
+                "title": "6. Inter-VLAN Routing & Router-on-a-Stick (ROAS)",
+                "content": "Because each VLAN is a separate broadcast domain and IP subnet, hosts in VLAN 10 (192.168.10.0/24) CANNOT communicate with hosts in VLAN 20 (192.168.20.0/24) using Layer 2 switching alone.\n\nInter-VLAN Routing Options:\n1. Router-on-a-Stick (ROAS):\n   - A single physical router interface (G0/0) connects to a switch trunk port.\n   - The physical router interface is logically divided into subinterfaces (G0/0.10, G0/0.20).\n   - Each subinterface is configured with `encapsulation dot1Q <vlan-id>` and serves as the Default Gateway IP for that VLAN.\n\n2. Layer 3 Switch (Multilayer Switching):\n   - Uses Switch Virtual Interfaces (SVIs: `interface vlan 10`, `interface vlan 20`) with IP routing enabled internally for wire-speed forwarding."
+            }
+        ],
+        "formulas": [
+            "Valid VLAN ID Range = 1 to 4094 (Standard: 1–1005, Extended: 1006–4094)",
+            "802.1Q Tag Overhead = 4 Bytes (32 Bits inserted into Ethernet Frame)",
+            "Max VLANs per 12-bit VID Field = 2^12 = 4,096 Total VLANs"
+        ],
+        "standards": [
+            "IEEE 802.1Q - Virtual Bridged Local Area Networks & Tagging Standard",
+            "IEEE 802.1p - Traffic Class Expediting & Dynamic Multicast Filtering (QoS)",
+            "Cisco ISL - Inter-Switch Link (Legacy Proprietary Cisco Trunking Protocol)"
+        ]
+    },
+    "tools": [
+        {
+            "name": "Broadcast Domain Containment Visualizer",
+            "layer": "Layer 2 Switching",
+            "ports": "Switch Ports 1-12",
+            "usage": "Compares flat network broadcast flooding vs VLAN isolated broadcast domains",
+            "statusLED": "VLAN Isolated",
+            "image": "<svg viewBox=\"0 0 400 160\" width=\"100%\" height=\"100%\" xmlns=\"http://www.w3.org/2000/svg\">\n  <rect width=\"400\" height=\"160\" fill=\"#0f172a\" rx=\"10\"/>\n  <text x=\"200\" y=\"25\" fill=\"#60a5fa\" font-size=\"12\" text-anchor=\"middle\" font-family=\"sans-serif\" font-weight=\"bold\">BROADCAST DOMAIN CONTAINMENT VISUALIZER</text>\n\n  <!-- Switch Box -->\n  <rect x=\"30\" y=\"40\" width=\"340\" height=\"95\" rx=\"8\" fill=\"#1e293b\" stroke=\"#3b82f6\" stroke-width=\"1.5\"/>\n  \n  <!-- VLAN 10 Block -->\n  <rect x=\"45\" y=\"55\" width=\"95\" height=\"65\" fill=\"rgba(59,130,246,0.2)\" stroke=\"#3b82f6\" stroke-width=\"1.5\" rx=\"6\"/>\n  <text x=\"92\" y=\"75\" fill=\"#60a5fa\" font-size=\"10\" text-anchor=\"middle\" font-family=\"sans-serif\" font-weight=\"bold\">VLAN 10</text>\n  <text x=\"92\" y=\"92\" fill=\"#cbd5e1\" font-size=\"8\" text-anchor=\"middle\" font-family=\"monospace\">ACCOUNTS</text>\n  <circle cx=\"70\" cy=\"107\" r=\"5\" fill=\"#3b82f6\"/>\n  <circle cx=\"114\" cy=\"107\" r=\"5\" fill=\"#3b82f6\"/>\n\n  <!-- VLAN 20 Block -->\n  <rect x=\"152\" y=\"55\" width=\"95\" height=\"65\" fill=\"rgba(16,185,129,0.2)\" stroke=\"#10b981\" stroke-width=\"1.5\" rx=\"6\"/>\n  <text x=\"199\" y=\"75\" fill=\"#10b981\" font-size=\"10\" text-anchor=\"middle\" font-family=\"sans-serif\" font-weight=\"bold\">VLAN 20</text>\n  <text x=\"199\" y=\"92\" fill=\"#cbd5e1\" font-size=\"8\" text-anchor=\"middle\" font-family=\"monospace\">SALES</text>\n  <circle cx=\"177\" cy=\"107\" r=\"5\" fill=\"#10b981\"/>\n  <circle cx=\"221\" cy=\"107\" r=\"5\" fill=\"#10b981\"/>\n\n  <!-- VLAN 30 Block -->\n  <rect x=\"260\" y=\"55\" width=\"95\" height=\"65\" fill=\"rgba(168,85,247,0.2)\" stroke=\"#a855f7\" stroke-width=\"1.5\" rx=\"6\"/>\n  <text x=\"307\" y=\"75\" fill=\"#c084fc\" font-size=\"10\" text-anchor=\"middle\" font-family=\"sans-serif\" font-weight=\"bold\">VLAN 30</text>\n  <text x=\"307\" y=\"92\" fill=\"#cbd5e1\" font-size=\"8\" text-anchor=\"middle\" font-family=\"monospace\">HUMAN RES</text>\n  <circle cx=\"285\" cy=\"107\" r=\"5\" fill=\"#a855f7\"/>\n  <circle cx=\"329\" cy=\"107\" r=\"5\" fill=\"#a855f7\"/>\n</svg>"
+        },
+        {
+            "name": "IEEE 802.1Q 4-Byte Tag Frame Inspector",
+            "layer": "Layer 2 Protocol",
+            "ports": "Trunk Interface",
+            "usage": "Inspects inserted 4-byte 802.1Q VLAN Tag fields (TPID 0x8100, Priority, VID)",
+            "statusLED": "802.1Q Tagged",
+            "image": "<svg viewBox=\"0 0 400 160\" width=\"100%\" height=\"100%\" xmlns=\"http://www.w3.org/2000/svg\">\n  <rect width=\"400\" height=\"160\" fill=\"#0f172a\" rx=\"10\"/>\n  <text x=\"200\" y=\"25\" fill=\"#38bdf8\" font-size=\"12\" text-anchor=\"middle\" font-family=\"sans-serif\" font-weight=\"bold\">IEEE 802.1Q ETHERNET FRAME TAG HEADER</text>\n\n  <!-- Frame Fields -->\n  <g transform=\"translate(20, 45)\">\n    <!-- Dest MAC -->\n    <rect x=\"0\" y=\"0\" width=\"60\" height=\"40\" fill=\"#1e293b\" stroke=\"#64748b\" stroke-width=\"1\" rx=\"4\"/>\n    <text x=\"30\" y=\"20\" fill=\"#cbd5e1\" font-size=\"9\" text-anchor=\"middle\" font-family=\"sans-serif\">DST MAC</text>\n    <text x=\"30\" y=\"32\" fill=\"#94a3b8\" font-size=\"7\" text-anchor=\"middle\" font-family=\"monospace\">(6 Bytes)</text>\n\n    <!-- Src MAC -->\n    <rect x=\"65\" y=\"0\" width=\"60\" height=\"40\" fill=\"#1e293b\" stroke=\"#64748b\" stroke-width=\"1\" rx=\"4\"/>\n    <text x=\"95\" y=\"20\" fill=\"#cbd5e1\" font-size=\"9\" text-anchor=\"middle\" font-family=\"sans-serif\">SRC MAC</text>\n    <text x=\"95\" y=\"32\" fill=\"#94a3b8\" font-size=\"7\" text-anchor=\"middle\" font-family=\"monospace\">(6 Bytes)</text>\n\n    <!-- 802.1Q Tag (Highlighted) -->\n    <rect x=\"130\" y=\"0\" width=\"110\" height=\"40\" fill=\"rgba(16,185,129,0.25)\" stroke=\"#10b981\" stroke-width=\"2\" rx=\"4\"/>\n    <text x=\"185\" y=\"18\" fill=\"#10b981\" font-size=\"10\" text-anchor=\"middle\" font-family=\"sans-serif\" font-weight=\"bold\">802.1Q TAG</text>\n    <text x=\"185\" y=\"32\" fill=\"#10b981\" font-size=\"8\" text-anchor=\"middle\" font-family=\"monospace\">(4 Bytes - VID: 10)</text>\n\n    <!-- EtherType -->\n    <rect x=\"245\" y=\"0\" width=\"55\" height=\"40\" fill=\"#1e293b\" stroke=\"#64748b\" stroke-width=\"1\" rx=\"4\"/>\n    <text x=\"272\" y=\"20\" fill=\"#cbd5e1\" font-size=\"8\" text-anchor=\"middle\" font-family=\"sans-serif\">TYPE</text>\n    <text x=\"272\" y=\"32\" fill=\"#94a3b8\" font-size=\"7\" text-anchor=\"middle\" font-family=\"monospace\">0x0800</text>\n\n    <!-- Payload -->\n    <rect x=\"305\" y=\"0\" width=\"55\" height=\"40\" fill=\"#1e293b\" stroke=\"#64748b\" stroke-width=\"1\" rx=\"4\"/>\n    <text x=\"332\" y=\"20\" fill=\"#cbd5e1\" font-size=\"8\" text-anchor=\"middle\" font-family=\"sans-serif\">PAYLOAD</text>\n    <text x=\"332\" y=\"32\" fill=\"#94a3b8\" font-size=\"7\" text-anchor=\"middle\" font-family=\"monospace\">IP Data</text>\n  </g>\n\n  <!-- Tag Breakdown Box -->\n  <rect x=\"50\" y=\"100\" width=\"300\" height=\"38\" fill=\"#1e293b\" stroke=\"#3b82f6\" stroke-width=\"1\" rx=\"6\"/>\n  <text x=\"200\" y=\"116\" fill=\"#38bdf8\" font-size=\"9\" text-anchor=\"middle\" font-family=\"monospace\" font-weight=\"bold\">TPID: 0x8100 | PRIO: 0 | DEI: 0 | VLAN ID: 10 (12 Bits)</text>\n  <text x=\"200\" y=\"130\" fill=\"#a78bfa\" font-size=\"8\" text-anchor=\"middle\" font-family=\"sans-serif\">Identifies frame membership across multi-switch trunk links</text>\n</svg>"
+        },
+        {
+            "name": "Router-on-a-Stick (ROAS) Inter-VLAN Engine",
+            "layer": "Layer 3 Routing",
+            "ports": "Router Subinterfaces",
+            "usage": "Routes packets between VLAN 10 and VLAN 20 using G0/0.10 & G0/0.20 subinterfaces",
+            "statusLED": "ROAS Active",
+            "image": "<svg viewBox=\"0 0 400 160\" width=\"100%\" height=\"100%\" xmlns=\"http://www.w3.org/2000/svg\">\n  <rect width=\"400\" height=\"160\" fill=\"#0f172a\" rx=\"10\"/>\n  <text x=\"200\" y=\"25\" fill=\"#a78bfa\" font-size=\"12\" text-anchor=\"middle\" font-family=\"sans-serif\" font-weight=\"bold\">ROUTER-ON-A-STICK (ROAS) ARCHITECTURE</text>\n\n  <!-- Router Top -->\n  <circle cx=\"200\" cy=\"55\" r=\"22\" fill=\"#1e293b\" stroke=\"#8b5cf6\" stroke-width=\"2\"/>\n  <text x=\"200\" y=\"59\" fill=\"#a78bfa\" font-size=\"10\" text-anchor=\"middle\" font-family=\"sans-serif\" font-weight=\"bold\">ROUTER</text>\n\n  <!-- Trunk Link Line -->\n  <line x1=\"200\" y1=\"77\" x2=\"200\" y2=\"105\" stroke=\"#10b981\" stroke-width=\"4\" stroke-dasharray=\"6 3\"/>\n  <rect x=\"210\" y=\"82\" width=\"110\" height=\"18\" fill=\"#1e293b\" rx=\"4\"/>\n  <text x=\"265\" y=\"94\" fill=\"#10b981\" font-size=\"8\" text-anchor=\"middle\" font-family=\"monospace\">TRUNK (802.1Q)</text>\n\n  <!-- Switch Bottom -->\n  <rect x=\"120\" y=\"105\" width=\"160\" height=\"40\" fill=\"#1e293b\" stroke=\"#3b82f6\" stroke-width=\"1.5\" rx=\"6\"/>\n  <text x=\"200\" y=\"125\" fill=\"#60a5fa\" font-size=\"10\" text-anchor=\"middle\" font-family=\"sans-serif\" font-weight=\"bold\">LAYER 2 SWITCH</text>\n  <text x=\"200\" y=\"138\" fill=\"#94a3b8\" font-size=\"8\" text-anchor=\"middle\" font-family=\"monospace\">G0/0.10 &amp; G0/0.20</text>\n</svg>"
+        },
+        {
+            "name": "Cisco IOS Switch CLI Terminal",
+            "layer": "Management CLI",
+            "ports": "Console / SSH",
+            "usage": "Executes `vlan`, `switchport mode access`, `switchport mode trunk`, `show vlan brief`",
+            "statusLED": "CLI Configured",
+            "image": "<svg viewBox=\"0 0 400 160\" width=\"100%\" height=\"100%\" xmlns=\"http://www.w3.org/2000/svg\">\n  <rect width=\"400\" height=\"160\" fill=\"#090d16\" rx=\"10\" stroke=\"#334155\" stroke-width=\"2\"/>\n  \n  <!-- Terminal Bar -->\n  <rect x=\"0\" y=\"0\" width=\"400\" height=\"24\" fill=\"#1e293b\" rx=\"10\"/>\n  <circle cx=\"15\" cy=\"12\" r=\"4\" fill=\"#ef4444\"/>\n  <circle cx=\"28\" cy=\"12\" r=\"4\" fill=\"#f59e0b\"/>\n  <circle cx=\"41\" cy=\"12\" r=\"4\" fill=\"#10b981\"/>\n  <text x=\"200\" y=\"16\" fill=\"#94a3b8\" font-size=\"10\" text-anchor=\"middle\" font-family=\"sans-serif\" font-weight=\"bold\">Cisco Catalyst Switch CLI - Putty Terminal</text>\n\n  <!-- CLI Lines -->\n  <text x=\"20\" y=\"45\" fill=\"#38bdf8\" font-size=\"10\" font-family=\"monospace\" font-weight=\"bold\">Switch(config)# vlan 10</text>\n  <text x=\"20\" y=\"62\" fill=\"#38bdf8\" font-size=\"10\" font-family=\"monospace\" font-weight=\"bold\">Switch(config-vlan)# name ACCOUNTS</text>\n  <text x=\"20\" y=\"79\" fill=\"#38bdf8\" font-size=\"10\" font-family=\"monospace\" font-weight=\"bold\">Switch(config)# interface fa0/1</text>\n  <text x=\"20\" y=\"96\" fill=\"#38bdf8\" font-size=\"10\" font-family=\"monospace\" font-weight=\"bold\">Switch(config-if)# switchport mode access</text>\n  <text x=\"20\" y=\"113\" fill=\"#10b981\" font-size=\"10\" font-family=\"monospace\" font-weight=\"bold\">Switch(config-if)# switchport access vlan 10</text>\n  <text x=\"20\" y=\"135\" fill=\"#a78bfa\" font-size=\"9\" font-family=\"monospace\">%VLAN 10 created and assigned to port FastEthernet0/1</text>\n</svg>"
+        }
+    ],
+    "procedure": [
+        "Launch the Virtual LANs & Trunking Simulator in the Interactive Simulation tab.",
+        "Use Module 1 (Broadcast Visualizer) to compare broadcast frame propagation in a Flat Network vs a VLAN-segmented network.",
+        "Use Module 2 (Access Port Configurator) to assign Switch Ports Fa0/1 to Fa0/12 to VLAN 10 (Accounts), VLAN 20 (Sales), and VLAN 30 (HR). Observe LED port colors changing.",
+        "Open Module 3 (802.1Q Frame Tag Inspector) to inspect the 4-byte 802.1Q Tag header (TPID, Priority, VID) as frames travel over a inter-switch Trunk link.",
+        "Use Module 4 (Router-on-a-Stick ROAS) to transmit packets from PC1 (VLAN 10) to PC2 (VLAN 20) and observe subinterface routing on G0/0.10 & G0/0.20.",
+        "Open Module 5 (Cisco IOS Terminal) to issue `vlan 10`, `switchport mode access`, `switchport mode trunk`, and `show vlan brief` commands.",
+        "Execute Module 6 (VLAN Troubleshooting Lab) to resolve Native VLAN mismatches and missing trunk VLANs."
+    ],
+    "troubleshooting": {
+        "problem": "PC1 in VLAN 10 on Switch A cannot communicate with PC2 in VLAN 10 on Switch B across the interconnecting link.",
+        "hints": [
+            "Check if the link between Switch A and Switch B is configured as an Access Port or a Trunk Port.",
+            "Verify Native VLAN match on both switches (`show interfaces trunk`).",
+            "Check if VLAN 10 is listed in the Allowed VLAN list on the trunk."
+        ],
+        "fix": "Configure the link between Switch A and Switch B as an IEEE 802.1Q Trunk using `switchport mode trunk` and verify VLAN 10 is allowed."
+    },
+    "pretest": [
+        {
+            "q": "What is the primary purpose of creating Virtual LANs (VLANs) on an enterprise switch?",
+            "options": [
+                "To replace IP addressing with MAC addressing",
+                "To logically divide a physical switch into multiple isolated broadcast domains",
+                "To increase Wi-Fi signal range",
+                "To convert copper cables into fiber optics"
+            ],
+            "correct": 1,
+            "explanation": "VLANs divide a physical switch into logical subnets, isolating broadcast traffic and improving security."
+        },
+        {
+            "q": "What type of switch port connects to an end-user device (such as a workstation PC or printer) and belongs to a single VLAN?",
+            "options": [
+                "Trunk Port",
+                "Access Port",
+                "Console Port",
+                "Serial Port"
+            ],
+            "correct": 1,
+            "explanation": "An Access port carries traffic for a single assigned VLAN to untagged end-host devices."
+        },
+        {
+            "q": "Which international standard protocol is used to tag Ethernet frames on VLAN trunk links?",
+            "options": [
+                "IEEE 802.11",
+                "IEEE 802.1Q",
+                "IEEE 802.3u",
+                "RFC 1918"
+            ],
+            "correct": 1,
+            "explanation": "IEEE 802.1Q is the industry standard for 4-byte VLAN frame tagging on trunk links."
+        },
+        {
+            "q": "How many bytes does an IEEE 802.1Q tag add to a standard Ethernet frame header?",
+            "options": [
+                "2 Bytes",
+                "4 Bytes",
+                "8 Bytes",
+                "16 Bytes"
+            ],
+            "correct": 1,
+            "explanation": "An 802.1Q tag is 4 bytes (32 bits) long, containing TPID, Priority, DEI, and 12-bit VLAN ID."
+        },
+        {
+            "q": "Can hosts in VLAN 10 and VLAN 20 on the same switch communicate directly without a Layer 3 router or Layer 3 switch?",
+            "options": [
+                "Yes, through Layer 2 switching",
+                "No, different VLANs belong to separate broadcast domains and require Layer 3 routing",
+                "Yes, using a hub",
+                "Yes, if they use the same cable color"
+            ],
+            "correct": 1,
+            "explanation": "Each VLAN is an independent Layer 3 broadcast domain. Traffic between VLANs MUST be routed by a Layer 3 device."
+        }
+    ],
+    "posttest": [
+        {
+            "q": "What is the valid VLAN ID range for standard and extended VLANs on Ethernet switches?",
+            "options": [
+                "1 to 255",
+                "1 to 1024",
+                "1 to 4094",
+                "1 to 65535"
+            ],
+            "correct": 2,
+            "explanation": "The 12-bit VID field in 802.1Q supports 2^12 = 4,096 total VLAN IDs (valid configurable range 1 to 4094)."
+        },
+        {
+            "q": "What happens to untagged frames received on an IEEE 802.1Q trunk port?",
+            "options": [
+                "They are immediately dropped",
+                "They are assigned to the Native VLAN",
+                "They are sent to all VLANs",
+                "They are converted to IPv6"
+            ],
+            "correct": 1,
+            "explanation": "Untagged frames entering a trunk port are automatically associated with the Native VLAN (default VLAN 1)."
+        },
+        {
+            "q": "What Cisco IOS command is used to configure a switch interface to carry traffic for multiple VLANs?",
+            "options": [
+                "switchport mode access",
+                "switchport mode trunk",
+                "ip routing",
+                "vlan 10"
+            ],
+            "correct": 1,
+            "explanation": "`switchport mode trunk` configures an interface as an 802.1Q trunk link."
+        },
+        {
+            "q": "In Router-on-a-Stick (ROAS) architecture, what is configured on the router physical interface?",
+            "options": [
+                "Multiple physical NICs",
+                "Logical subinterfaces with encapsulation dot1Q <vlan-id>",
+                "DHCP relay agents",
+                "BGP autonomous systems"
+            ],
+            "correct": 1,
+            "explanation": "ROAS divides one physical router interface into subinterfaces (e.g. G0/0.10) running 802.1Q encapsulation."
+        },
+        {
+            "q": "What error message occurs on Cisco Catalyst switches if Switch A has Native VLAN 1 and Switch B has Native VLAN 99?",
+            "options": [
+                "%CDP-4-NATIVE_VLAN_MISMATCH: Native VLAN mismatch discovered",
+                "IP Address Conflict Error",
+                "Duplex Mismatch Warning",
+                "Port Security Violation"
+            ],
+            "correct": 0,
+            "explanation": "CDP detects Native VLAN mismatches and displays a `%CDP-4-NATIVE_VLAN_MISMATCH` alert."
+        },
+        {
+            "q": "Which Cisco IOS command displays all configured VLANs and their assigned access ports?",
+            "options": [
+                "show ip route",
+                "show vlan brief",
+                "show interfaces trunk",
+                "show running-config router"
+            ],
+            "correct": 1,
+            "explanation": "`show vlan brief` lists all active VLAN IDs, names, status, and assigned switch ports."
+        },
+        {
+            "q": "What is the purpose of the `switchport trunk allowed vlan 10,20` command?",
+            "options": [
+                "It deletes all other VLANs from the switch",
+                "It restricts trunk link traffic to only VLAN 10 and VLAN 20, pruning unused VLANs",
+                "It creates VLAN 10 and 20 automatically",
+                "It sets port speed to 10/20 Mbps"
+            ],
+            "correct": 1,
+            "explanation": "It prunes unneeded VLANs from the trunk, allowing only specified VLANs to pass across the link."
+        },
+        {
+            "q": "What is the default Native VLAN on unconfigured Cisco Catalyst switches?",
+            "options": [
+                "VLAN 0",
+                "VLAN 1",
+                "VLAN 10",
+                "VLAN 999"
+            ],
+            "correct": 1,
+            "explanation": "VLAN 1 is the default Native VLAN and management VLAN on Cisco switches out of the box."
+        },
+        {
+            "q": "Why should network administrators change the Native VLAN away from default VLAN 1?",
+            "options": [
+                "VLAN 1 cannot transmit data",
+                "To mitigate VLAN Hopping security attacks",
+                "VLAN 1 only supports 10 Mbps speed",
+                "VLAN 1 disables STP"
+            ],
+            "correct": 1,
+            "explanation": "Changing the Native VLAN away from VLAN 1 prevents double-tagging VLAN hopping exploits."
+        },
+        {
+            "q": "What Layer 2 field in an 802.1Q tag specifies Quality of Service (QoS) priority for Voice over IP (VoIP)?",
+            "options": [
+                "TPID (Tag Protocol Identifier)",
+                "PCP / Priority Bits (3 bits)",
+                "DEI Drop Indicator",
+                "VLAN ID (12 bits)"
+            ],
+            "correct": 1,
+            "explanation": "The 3 Priority bits (802.1p) provide 8 QoS levels (0–7) for voice and video latency prioritization."
+        }
+    ],
+    "viva": [
+        {
+            "q": "Explain how an 802.1Q trunk port handles tagged vs untagged Ethernet frames.",
+            "a": "Tagged frames entering a trunk port have their 4-byte 802.1Q header inspected for the 12-bit VLAN ID and are forwarded to that specific VLAN. Untagged frames entering a trunk port do not contain an 802.1Q tag and are automatically processed on the Native VLAN."
+        },
+        {
+            "q": "Describe the step-by-step frame path in Router-on-a-Stick (ROAS) when PC1 (VLAN 10) sends a packet to PC2 (VLAN 20).",
+            "a": "1. PC1 sends untagged frame to Switch Access Port (VLAN 10).\n2. Switch forwards frame out Trunk link to Router, adding 802.1Q Tag (VLAN ID 10).\n3. Router receives frame on subinterface G0/0.10, strips VLAN 10 tag, inspects IP destination header, routes to subinterface G0/0.20.\n4. Router adds 802.1Q Tag (VLAN ID 20) and sends frame back out physical link to Switch.\n5. Switch receives frame on Trunk port, strips VLAN 20 tag, and delivers untagged frame to PC2 Access Port."
+        },
+        {
+            "q": "What is a Switch Virtual Interface (SVI) on a Layer 3 switch?",
+            "a": "An SVI (`interface vlan <id>`) is a logical Layer 3 interface on a Multilayer Switch configured with an IP address that acts as the Default Gateway for devices in that VLAN, enabling wire-speed Inter-VLAN routing inside the switch ASIC without requiring an external router."
+        }
+    ],
+    "assignment": "1. Create VLAN 10 (SALES), VLAN 20 (MARKETING), and VLAN 30 (ENGINEERING) on a Cisco 2960 Switch. Assign ports Fa0/1-4 to VLAN 10, Fa0/5-8 to VLAN 20, and Fa0/9-12 to VLAN 30.\n2. Configure Gi0/1 as an 802.1Q Trunk port allowing only VLANs 10, 20, 30.\n3. Configure Router-on-a-Stick on Router R1 G0/0 interface with subinterfaces G0/0.10, G0/0.20, G0/0.30 and test ping connectivity between PC1 (VLAN 10) and PC2 (VLAN 20).",
+    "references": [
+        {
+            "title": "IEEE 802.1Q Virtual LANs Standard",
+            "link": "https://standards.ieee.org"
+        },
+        {
+            "title": "Cisco Catalyst VLAN Configuration Guide",
+            "link": "https://www.cisco.com"
+        },
+        {
+            "title": "RFC 3069 - VLAN Aggregation for Efficient IP Address Allocation",
+            "link": "https://datatracker.ietf.org/doc/html/rfc3069"
+        }
+    ],
+    "simType": "vlan_sim"
+},
     'routing_rip': {
         title: "Distance Vector Routing - RIP",
         aim: "To configure Routing Information Protocol (RIP v2) on multi-router topologies and inspect hop-count routing tables.",
