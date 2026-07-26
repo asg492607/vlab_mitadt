@@ -7463,8 +7463,24 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
 
             // 6. Pretest & Posttest
-            const preList = data.pretest || (data.evaluations ? data.evaluations.filter(e => e.type === 'pre') : null);
-            const postList = data.posttest || (data.evaluations ? data.evaluations.filter(e => e.type === 'post') : null);
+            let preList = data.pretest || null;
+            if (!preList && data.evaluations) {
+                if (Array.isArray(data.evaluations)) {
+                    preList = data.evaluations.filter(e => e.type === 'pre');
+                } else if (Array.isArray(data.evaluations.pretest)) {
+                    preList = data.evaluations.pretest;
+                }
+            }
+
+            let postList = data.posttest || null;
+            if (!postList && data.evaluations) {
+                if (Array.isArray(data.evaluations)) {
+                    postList = data.evaluations.filter(e => e.type === 'post');
+                } else if (Array.isArray(data.evaluations.posttest)) {
+                    postList = data.evaluations.posttest;
+                }
+            }
+
             renderMCQ('section-pretest', preList, 'pre');
             renderMCQ('section-posttest', postList, 'post');
 
