@@ -15658,18 +15658,91 @@ Academic Rules:
         if (!container) return;
 
         const NODES_POOL = [
-            { label:'PC1',    sub:'192.168.1.10',  mac:'00:1A:2B:3C:4D:01', em:'\uD83D\uDCBB' },
-            { label:'PC2',    sub:'192.168.1.11',  mac:'00:1A:2B:3C:4D:02', em:'\uD83D\uDDA5\uFE0F' },
-            { label:'PC3',    sub:'192.168.1.12',  mac:'00:1A:2B:3C:4D:03', em:'\uD83D\uDDA5\uFE0F' },
-            { label:'PC4',    sub:'192.168.1.13',  mac:'00:1A:2B:3C:4D:04', em:'\uD83D\uDCBB' },
+            { label:'PC1',    sub:'192.168.1.10',  mac:'00:1A:2B:3C:4D:01', em:'💻' },
+            { label:'PC2',    sub:'192.168.1.11',  mac:'00:1A:2B:3C:4D:02', em:'🖥️' },
+            { label:'PC3',    sub:'192.168.1.12',  mac:'00:1A:2B:3C:4D:03', em:'🖥️' },
+            { label:'PC4',    sub:'192.168.1.13',  mac:'00:1A:2B:3C:4D:04', em:'💻' },
         ];
 
         const DEVICES = [
-            { id:'hub',      label:'Ethernet Hub',         sub:'Layer 1 - Broadcasts to ALL ports',               em:'\uD83D\uDCFB', col:'#f59e0b', desc:'A Hub repeats every signal to ALL connected ports. There is NO filtering - every device receives every packet, creating collisions and shared bandwidth.' },
-            { id:'switch',   label:'Cisco 2960 Switch',    sub:'Layer 2 - Unicast forwarding via MAC Table',       em:'\uD83D\uDD00', col:'#38bdf8', desc:'A Switch learns MAC addresses and forwards frames ONLY to the correct destination port. Eliminates collisions, full-duplex, dedicated bandwidth per port.' },
-            { id:'router',   label:'Cisco 2911 Router',    sub:'Layer 3 - Routes packets between subnets',         em:'\uD83C\uDF10', col:'#a78bfa', desc:'A Router connects different IP networks. It inspects IP headers, decrements TTL, runs routing protocols (RIP/OSPF/EIGRP), and forwards to the correct next-hop.' },
-            { id:'firewall', label:'Cisco ASA Firewall',   sub:'Layer 3-7 - Stateful packet inspection and ACLs',  em:'\uD83E\uDDF1', col:'#ef4444', desc:'A Firewall inspects each packet against security rules. Permitted traffic creates a stateful session. Blocked traffic gets TCP-Reset or ICMP-Unreachable.' },
-            { id:'wap',      label:'Wireless Access Point', sub:'IEEE 802.11ax - Wireless bridge to wired LAN',    em:'\uD83D\uDCE1', col:'#22c55e', desc:'A WAP bridges wireless clients to the wired Ethernet LAN. Data travels over RF channels (2.4/5GHz), de-encapsulated from 802.11 to 802.3, forwarded to switch.' },
+            {
+                id: 'hub',
+                label: 'Ethernet Hub',
+                sub: 'Layer 1 - Broadcasts to ALL ports',
+                em: '📻',
+                col: '#d97706',
+                desc: 'A Hub repeats every signal to ALL connected ports. There is NO filtering — every device receives every packet, creating collisions and shared bandwidth.',
+                subtypes: [
+                    { id: 'hub_active', label: 'Active Hub (Signal Regenerator)', desc: 'Regenerates electrical pulses, cleans jitter, and broadcasts to all ports.' },
+                    { id: 'hub_passive', label: 'Passive Hub (Wiring Splitter)', desc: 'Pure electrical splitting without amplification; signal degrades over distance.' },
+                    { id: 'hub_managed', label: 'Intelligent / Managed Hub', desc: 'Layer 1 broadcast hub with SNMP management agent and per-port LED monitoring.' }
+                ]
+            },
+            {
+                id: 'switch',
+                label: 'Ethernet Switch',
+                sub: 'Layer 2 - Unicast forwarding via MAC Table',
+                em: '🔀',
+                col: '#2563eb',
+                desc: 'A Switch learns MAC addresses and forwards frames ONLY to the correct destination port. Eliminates collisions with full-duplex dedicated bandwidth.',
+                subtypes: [
+                    { id: 'sw_l2_unmanaged', label: 'Layer 2 Unmanaged Switch (Cisco 2960)', desc: 'Plug-and-play L2 switch. Builds dynamic MAC Address Table (00:1A:2B:3C:4D:02 -> Fa0/2). Unicasts matching frames.' },
+                    { id: 'sw_l3_managed', label: 'Layer 3 Managed Switch (Cisco 3850)', desc: 'L2 MAC forwarding + L3 IP routing table. Supports VLAN Tagging (802.1Q), SVIs, and ACL filtering.' },
+                    { id: 'sw_poe', label: 'PoE+ Switch (802.3at / 30W Power)', desc: 'Delivers 30W DC power + Fast/Gigabit data down standard Cat6 twisted pair cables to IP Phones and WAPs.' },
+                    { id: 'sw_industrial', label: 'Industrial Managed Switch (PROFINET)', desc: 'Redundant Ring Protocol (MRP < 10ms recovery) for harsh factory floors.' }
+                ]
+            },
+            {
+                id: 'router',
+                label: 'Network Router',
+                sub: 'Layer 3 - Routes packets between subnets',
+                em: '🌐',
+                col: '#7c3aed',
+                desc: 'A Router connects different IP networks. It inspects IP headers, decrements TTL, runs routing protocols (RIP/OSPF/EIGRP), and forwards to next-hop.',
+                subtypes: [
+                    { id: 'rtr_isr', label: 'Branch / Enterprise Router (Cisco 2911)', desc: 'Dual Gigabit interfaces, RIP/OSPF routing, ACLs, and NAT services.' },
+                    { id: 'rtr_core', label: 'Core Backbone Router (Cisco ASR 9000)', desc: 'Multi-terabit BGP routing table, MPLS label switching, and sub-millisecond route lookup.' },
+                    { id: 'rtr_wifi', label: 'Wireless Edge Gateway / Home Router', desc: 'Integrated 4-port L2 switch, Wi-Fi 6 WAP, DHCP Server, NAT Overload (PAT), and SPI Firewall.' }
+                ]
+            },
+            {
+                id: 'firewall',
+                label: 'Security Firewall',
+                sub: 'Layer 3-7 - Stateful packet inspection & ACLs',
+                em: '🧱',
+                col: '#dc2626',
+                desc: 'A Firewall inspects each packet against security rules. Permitted traffic creates stateful sessions. Blocked traffic gets TCP-Reset or ICMP-Unreachable.',
+                subtypes: [
+                    { id: 'fw_stateful', label: 'Stateful Inspection Firewall (Cisco ASA)', desc: 'Tracks TCP state machine (SYN -> SYN-ACK -> ESTABLISHED). Dynamically permits return traffic.' },
+                    { id: 'fw_stateless', label: 'Stateless ACL Packet Filter', desc: 'Evaluates individual packets against strict IP/Port Access Control Lists without session memory.' },
+                    { id: 'fw_ngfw', label: 'Next-Gen Firewall (NGFW / App Filter)', desc: 'Deep Packet Inspection (DPI) up to Layer 7. Filters apps (BitTorrent, Social Media) and scans malware.' }
+                ]
+            },
+            {
+                id: 'wap',
+                label: 'Wireless Access Point',
+                sub: 'IEEE 802.11ax - Wireless bridge to wired LAN',
+                em: '📡',
+                col: '#16a34a',
+                desc: 'A WAP bridges wireless clients to the wired Ethernet LAN. Data travels over RF channels (2.4/5GHz), de-encapsulated from 802.11 to 802.3 Ethernet.',
+                subtypes: [
+                    { id: 'wap_wifi6', label: 'Wi-Fi 6 Enterprise AP (802.11ax)', desc: 'OFDMA and MU-MIMO multi-user beamforming up to 9.6 Gbps throughput over 2.4GHz / 5GHz.' },
+                    { id: 'wap_mesh', label: 'Wireless Mesh Node (802.11s)', desc: 'Dynamic wireless backhaul routing between mesh nodes without requiring copper drops to every AP.' }
+                ]
+            },
+            {
+                id: 'media',
+                label: 'Transmission Media Bridge',
+                sub: 'Layer 1 - Signal & Fiber Optic Converters',
+                em: '⚡',
+                col: '#0284c7',
+                desc: 'Converts electrical pulses into light signals or translates between media formats (Single-Mode Fiber, Multi-Mode Fiber, Copper UTP).',
+                subtypes: [
+                    { id: 'media_smf', label: 'Single-Mode Fiber Converter (1310nm Laser)', desc: 'Converts 802.3 electrical pulses to 1310nm laser pulses over 9µm single-mode glass core (up to 40km).' },
+                    { id: 'media_mmf', label: 'Multi-Mode Fiber Converter (850nm LED)', desc: 'Converts 802.3 electrical pulses to 850nm LED light pulses over 50µm multi-mode glass core (up to 550m).' },
+                    { id: 'media_patch', label: 'Structured Cabling Patch Panel', desc: 'Pass-through TIA-568B punch-down interconnect block for Cat6A gigabit distribution.' }
+                ]
+            }
         ];
 
         container.innerHTML = `
@@ -15687,7 +15760,7 @@ Academic Rules:
             .nsib h3{margin:0 0 4px;font-size:14px;color:#0f172a;font-weight:800;}
             .nsib p{margin:0;font-size:12px;color:#475569;line-height:1.6;}
             .nscr{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;align-items:flex-end;}
-            .nscr .nc{flex:1;min-width:100px;}
+            .nscr .nc{flex:1;min-width:120px;}
             .nscr label{font-size:10px;color:#475569;display:block;margin-bottom:4px;font-family:monospace;text-transform:uppercase;font-weight:700;}
             .nscr select{background:#ffffff;color:#0f172a;border:1.5px solid #cbd5e1;border-radius:8px;padding:8px 10px;font-size:12px;width:100%;outline:none;cursor:pointer;font-weight:600;}
             .nscr select:focus{border-color:#2563eb;}
@@ -15698,7 +15771,7 @@ Academic Rules:
             .nslb{background:#ffffff;border:1px solid #e2e8f0;border-radius:12px;padding:12px 16px;box-shadow:0 1px 3px rgba(0,0,0,0.05);}
             .nslh{display:flex;justify-content:space-between;margin-bottom:6px;}
             .nslh span{font-size:11px;font-family:monospace;color:#334155;text-transform:uppercase;font-weight:800;}
-            .nsl{font-size:12px;line-height:2;max-height:120px;overflow-y:auto;font-family:monospace;background:#f8fafc;padding:10px;border-radius:8px;border:1px solid #e2e8f0;}
+            .nsl{font-size:12px;line-height:2;max-height:130px;overflow-y:auto;font-family:monospace;background:#f8fafc;padding:10px;border-radius:8px;border:1px solid #e2e8f0;}
             .nsl div{border-bottom:1px solid #e2e8f0;color:#0f172a;}
         </style>
         <div class="nsw">
@@ -15708,25 +15781,27 @@ Academic Rules:
                 <div><h3 id="ns-ih">Select a device above to begin</h3><p id="ns-ip">Click a device tab to see how data flows through it.</p></div>
             </div>
             <div class="nscr">
+                <div class="nc" id="ns-subw"><label>Hardware Subtype</label>
+                    <select id="ns-subtype"></select></div>
                 <div class="nc"><label>Number of PCs</label>
                     <select id="ns-cnt"><option value="2">2 PCs</option><option value="3" selected>3 PCs</option><option value="4">4 PCs</option></select></div>
                 <div class="nc"><label>Sender PC</label>
                     <select id="ns-snd"><option value="0">PC1 (192.168.1.10)</option><option value="1">PC2 (192.168.1.11)</option><option value="2">PC3 (192.168.1.12)</option><option value="3">PC4 (192.168.1.13)</option></select></div>
                 <div class="nc" id="ns-tw"><label>Receiver</label>
                     <select id="ns-rcv"><option value="1">PC2</option><option value="0">PC1</option><option value="2">PC3</option><option value="3">PC4</option><option value="all">ALL (Broadcast)</option></select></div>
-                <button class="nsbtn" onclick="window._nsSend()">&#9654;&nbsp;Simulate</button>
+                <button class="nsbtn" onclick="window._nsSend()">▶&nbsp;Simulate</button>
             </div>
             <div class="nscvb">
                 <div class="nscvt">
                     <span id="ns-cl">NETWORK TOPOLOGY - PACKET FLOW VISUALIZATION</span>
-                    <span id="ns-st" style="font-size:11px;font-family:monospace;color:#64748b;">&#9679; IDLE</span>
+                    <span id="ns-st" style="font-size:11px;font-family:monospace;color:#64748b;">● IDLE</span>
                 </div>
                 <canvas class="nscv" id="ns-cv" height="430"></canvas>
             </div>
             <div class="nslb">
                 <div class="nslh">
-                    <span>&#9654; Protocol Console Log</span>
-                    <span id="ns-lb" style="color:#16a34a;">&#9679; READY</span>
+                    <span>▶ Protocol Console Log</span>
+                    <span id="ns-lb" style="color:#16a34a;">● READY</span>
                 </div>
                 <div class="nsl" id="ns-log"><div style="color:#64748b;">Select a device tab then click Simulate.</div></div>
             </div>
@@ -15752,6 +15827,22 @@ Academic Rules:
                 tabsEl.appendChild(t);
             });
 
+            function updateSubtypeDropdown(d) {
+                const subSel = document.getElementById('ns-subtype');
+                if (!subSel) return;
+                subSel.innerHTML = d.subtypes.map(s => `<option value="${s.id}">${s.label}</option>`).join('');
+                subSel.onchange = () => {
+                    const st = d.subtypes.find(x => x.id === subSel.value);
+                    if (st) {
+                        document.getElementById('ns-ip').textContent = st.desc;
+                    }
+                    parts = []; draw();
+                };
+                if (d.subtypes.length > 0) {
+                    document.getElementById('ns-ip').textContent = d.subtypes[0].desc;
+                }
+            }
+
             function pick(id) {
                 curDev = id;
                 document.querySelectorAll('.nstb').forEach(t => t.classList.remove('act'));
@@ -15759,10 +15850,10 @@ Academic Rules:
                 if (tab) tab.classList.add('act');
                 const d = DEVICES.find(x => x.id === id);
                 document.getElementById('ns-ie').textContent = d.em;
-                document.getElementById('ns-ih').textContent = d.label + ' \u2014 ' + d.sub;
-                document.getElementById('ns-ip').textContent = d.desc;
-                document.getElementById('ns-cl').textContent = d.label.toUpperCase() + ' \u2014 PACKET FLOW VISUALIZATION';
+                document.getElementById('ns-ih').textContent = d.label + ' — ' + d.sub;
+                document.getElementById('ns-cl').textContent = d.label.toUpperCase() + ' — PACKET FLOW VISUALIZATION';
                 document.getElementById('ns-tw').style.opacity = id === 'hub' ? '0.4' : '1';
+                updateSubtypeDropdown(d);
                 parts = []; draw();
             }
 
@@ -15795,7 +15886,7 @@ Academic Rules:
                 for (let y = 0; y < H; y += 50) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
 
                 // cables
-                const dash = { hub:[], switch:[], router:[], firewall:[8,4], wap:[3,10] }[curDev] || [];
+                const dash = { hub:[], switch:[], router:[], firewall:[8,4], wap:[3,10], media:[2,6] }[curDev] || [];
                 nodes.forEach(n => {
                     const active = n.idx === si || isBc || String(n.idx) === String(tv);
                     ctx.save(); ctx.beginPath(); ctx.moveTo(n.x, n.y); ctx.lineTo(cx, cy);
@@ -15805,7 +15896,7 @@ Academic Rules:
                     ctx.setLineDash(dash); ctx.stroke(); ctx.restore(); ctx.setLineDash([]);
                     // port label
                     if (active) {
-                        const pl = { switch:'Fa0/'+n.idx, router:'Gi0/'+n.idx, hub:'Port'+(n.idx+1), firewall:'Eth'+n.idx, wap:'Assoc'+n.idx }[curDev] || '';
+                        const pl = { switch:'Fa0/'+n.idx, router:'Gi0/'+n.idx, hub:'Port'+(n.idx+1), firewall:'Eth'+n.idx, wap:'Assoc'+n.idx, media:'Opt'+n.idx }[curDev] || '';
                         if (pl) {
                             const mx = cx + (n.x - cx) * 0.68, my = cy + (n.y - cy) * 0.68;
                             ctx.font = 'bold 9px monospace'; ctx.fillStyle = '#334155';
@@ -15825,8 +15916,10 @@ Academic Rules:
                 ctx.fillText(d.em, cx, cy - 2);
                 ctx.font = 'bold 11px Outfit, sans-serif'; ctx.fillStyle = '#0f172a';
                 ctx.fillText(d.label, cx, cy + 62);
+                const subSel = document.getElementById('ns-subtype');
+                const subTxt = subSel && subSel.options[subSel.selectedIndex] ? subSel.options[subSel.selectedIndex].text.split('(')[0] : d.sub.split('-')[0];
                 ctx.font = '10px monospace'; ctx.fillStyle = '#64748b';
-                ctx.fillText(d.sub.split('-')[0].trim(), cx, cy + 75);
+                ctx.fillText(subTxt.trim(), cx, cy + 75);
 
                 // nodes
                 nodes.forEach(n => {
@@ -15849,7 +15942,7 @@ Academic Rules:
                     ctx.fillText(n.sub, n.x, n.y + 57);
                     ctx.fillText(n.mac, n.x, n.y + 68);
                     if (role !== 'peer') {
-                        const tag = { sender:'\u25b6 TX', target:'\u25b6 RX', bcast:'\u25b6 BC' }[role];
+                        const tag = { sender:'▶ TX', target:'▶ RX', bcast:'▶ BC' }[role];
                         ctx.font = 'bold 10px monospace'; ctx.fillStyle = nc;
                         ctx.fillText(tag, n.x, n.y + 80);
                     }
@@ -15892,123 +15985,188 @@ Academic Rules:
             function stat(t, c) { var e = document.getElementById('ns-st'); if (e) { e.textContent = t; e.style.color = c; } }
             function badge(t, c) { var e = document.getElementById('ns-lb'); if (e) { e.textContent = t; e.style.color = c; } }
             function log(msg, col) {
-                col = col || '#38bdf8';
+                col = col || '#2563eb';
                 var el = document.getElementById('ns-log');
                 if (!el) return;
                 var ts = new Date().toTimeString().slice(0, 8);
-                el.innerHTML += '<div><span style="color:#1e3a5f">[' + ts + ']</span> <span style="color:' + col + '">' + msg + '</span></div>';
+                el.innerHTML += '<div><span style="color:#64748b">[' + ts + ']</span> <span style="color:' + col + '">' + msg + '</span></div>';
                 el.scrollTop = el.scrollHeight;
             }
 
             window._nsSend = function() {
                 layout();
                 var d  = DEVICES.find(function(x){ return x.id === curDev; }) || DEVICES[0];
+                var subId = gv('ns-subtype');
                 var si = gi('ns-snd', 0);
                 var tv = gv('ns-rcv');
                 var isBc = tv === 'all' || curDev === 'hub';
                 var sN = nodes[si] || nodes[0];
                 var tN = isBc ? null : nodes[parseInt(tv)];
                 document.getElementById('ns-log').innerHTML = '';
-                stat('\u25cf TX ACTIVE', d.col); badge('\u25cf TRANSMITTING', d.col);
+                stat('● TX ACTIVE', d.col); badge('● TRANSMITTING', d.col);
 
                 if (curDev === 'hub') {
-                    log('[TX]  ' + sN.label + ' sends frame to Hub Port' + (sN.idx+1) + '  SrcMAC: ' + sN.mac, '#f59e0b');
-                    spawn(sN.x, sN.y, cx, cy, '#f59e0b', 'TX', 0);
+                    if (subId === 'hub_active') {
+                        log('[ACTIVE-HUB] ' + sN.label + ' -> Electrical signal received at Port' + (sN.idx+1), '#d97706');
+                        log('[SIGNAL] Regenerating voltage levels (+5V clean pulse) & removing cable jitter...', '#2563eb');
+                    } else if (subId === 'hub_passive') {
+                        log('[PASSIVE-HUB] ' + sN.label + ' -> Electrical splitting across bus (No amplification)', '#dc2626');
+                        log('[WARNING] Attenuation detected: Signal strength reduced by 3dB across splitters', '#dc2626');
+                    } else {
+                        log('[MANAGED-HUB] ' + sN.label + ' -> Broadcast frame logged by SNMP Agent (Port ' + (sN.idx+1) + ')', '#d97706');
+                        log('[SNMP] Sending RMON MIB MIB-II stat counter update to Management Console...', '#0284c7');
+                    }
+                    spawn(sN.x, sN.y, cx, cy, '#d97706', 'TX', 0);
                     nodes.filter(function(n){ return n.idx !== si; }).forEach(function(n, i) {
-                        spawn(cx, cy, n.x, n.y, '#f59e0b', 'BC', 900 + i * 120);
+                        spawn(cx, cy, n.x, n.y, '#d97706', 'BC', 900 + i * 120);
                     });
                     window.setTimeout(function() {
-                        log('[HUB] Broadcasts to ALL ' + (nodes.length-1) + ' ports — no MAC filtering (collision domain)', '#f59e0b');
-                        log('[ALL] Every PC receives the frame. Each checks DstMAC to accept or discard.', '#94a3b8');
-                        stat('\u25cf DONE', '#22c55e'); badge('\u25cf DONE', '#22c55e');
-                        window.setTimeout(function(){ stat('\u25cf IDLE','#334155'); badge('\u25cf IDLE','#334155'); }, 2000);
+                        log('[HUB] Repeated to ALL ' + (nodes.length-1) + ' connected ports (single shared collision domain)', '#d97706');
+                        log('[ALL] Every PC receives the electrical pulse. NIC checks DstMAC to accept or discard.', '#64748b');
+                        stat('● DONE', '#16a34a'); badge('● DONE', '#16a34a');
+                        window.setTimeout(function(){ stat('● IDLE','#64748b'); badge('● IDLE','#64748b'); }, 2000);
                     }, 1900);
 
                 } else if (curDev === 'switch') {
-                    log('[ARP]  ' + sN.label + ': Who has ' + (tN ? tN.sub : '?') + '? Tell ' + sN.sub, '#38bdf8');
-                    spawn(sN.x, sN.y, cx, cy, '#38bdf8', 'ARP', 0);
+                    if (subId === 'sw_l3_managed') {
+                        log('[L3-SW] ' + sN.label + ' -> Frame received on VLAN 10 (SVI 192.168.1.1)', '#7c3aed');
+                        log('[802.1Q] Tagging frame with VLAN ID 10 -> Inter-VLAN Routing to SVI 20', '#2563eb');
+                    } else if (subId === 'sw_poe') {
+                        log('[PoE+ SW] Negotiated IEEE 802.3at (Class 4 Power: 30.0W DC down Pins 1,2,3,6)', '#16a34a');
+                        log('[PoE+ SW] Power active on Fa0/' + (sN.idx+1) + ' + 1 Gbps Gigabit Ethernet Data', '#16a34a');
+                    } else if (subId === 'sw_industrial') {
+                        log('[PROFINET SW] MRP Ring Health Check OK (<10ms failover recovery guarantee)', '#0284c7');
+                        log('[REALTIME] Industrial Priority Queue #0 processed with 0% frame loss', '#0284c7');
+                    }
+                    log('[ARP] ' + sN.label + ': Who has ' + (tN ? tN.sub : '?') + '? Tell ' + sN.sub, '#2563eb');
+                    spawn(sN.x, sN.y, cx, cy, '#2563eb', 'ARP', 0);
                     nodes.filter(function(n){ return n.idx !== si; }).forEach(function(n, i) {
                         spawn(cx, cy, n.x, n.y, '#64748b', 'BC', 900 + i * 90);
                     });
                     window.setTimeout(function() {
-                        log('[SW]   Learned: ' + sN.mac + ' -> Fa0/' + si, '#64748b');
+                        log('[MAC-TBL] Learned: ' + sN.mac + ' -> Port Fa0/' + (sN.idx+1), '#64748b');
                         if (tN) {
-                            log('[ARP-R] ' + tN.label + ' replies: ' + tN.mac + ' is at ' + tN.sub, '#22c55e');
-                            spawn(tN.x, tN.y, cx, cy, '#22c55e', 'REP', 0);
-                            spawn(cx, cy, sN.x, sN.y, '#22c55e', 'REP', 800);
+                            log('[ARP-REP] ' + tN.label + ' replies: ' + tN.mac + ' is at ' + tN.sub, '#16a34a');
+                            spawn(tN.x, tN.y, cx, cy, '#16a34a', 'REP', 0);
+                            spawn(cx, cy, sN.x, sN.y, '#16a34a', 'REP', 800);
                         }
                     }, 1500);
                     window.setTimeout(function() {
                         if (tN) {
-                            log('[SW]   Learned: ' + tN.mac + ' -> Fa0/' + tN.idx + '  Table complete', '#38bdf8');
-                            log('[TX]   UNICAST ' + sN.label + ' -> Switch -> ' + tN.label + '  (no broadcast!)', '#38bdf8');
-                            spawn(sN.x, sN.y, cx, cy, '#38bdf8', 'TX', 0);
-                            spawn(cx, cy, tN.x, tN.y, '#22c55e', 'RX', 900);
+                            log('[MAC-TBL] Learned: ' + tN.mac + ' -> Port Fa0/' + (tN.idx+1) + ' (Table Complete)', '#2563eb');
+                            log('[UNICAST] ' + sN.label + ' -> Switch -> ' + tN.label + ' (Zero Collisions / Full Duplex)', '#2563eb');
+                            spawn(sN.x, sN.y, cx, cy, '#2563eb', 'TX', 0);
+                            spawn(cx, cy, tN.x, tN.y, '#16a34a', 'RX', 900);
                         }
                     }, 3000);
                     window.setTimeout(function() {
                         if (tN) {
-                            spawn(tN.x, tN.y, cx, cy, '#f59e0b', 'ACK', 0);
-                            spawn(cx, cy, sN.x, sN.y, '#f59e0b', 'ACK', 900);
-                            log('[ACK]  ' + tN.label + ' -> ' + sN.label + '  RTT ~1ms  OK', '#f59e0b');
+                            spawn(tN.x, tN.y, cx, cy, '#d97706', 'ACK', 0);
+                            spawn(cx, cy, sN.x, sN.y, '#d97706', 'ACK', 900);
+                            log('[ACK] ' + tN.label + ' -> ' + sN.label + ' RTT ~0.4ms OK', '#d97706');
                         }
-                        stat('\u25cf DONE', '#22c55e'); badge('\u25cf DONE', '#22c55e');
-                        window.setTimeout(function(){ stat('\u25cf IDLE','#334155'); badge('\u25cf IDLE','#334155'); }, 2500);
+                        stat('● DONE', '#16a34a'); badge('● DONE', '#16a34a');
+                        window.setTimeout(function(){ stat('● IDLE','#64748b'); badge('● IDLE','#64748b'); }, 2500);
                     }, 4800);
 
                 } else if (curDev === 'router') {
+                    if (subId === 'rtr_core') {
+                        log('[BGP CORE] AS65001 Core BGP Route Lookup (Table size: 920,000 routes)', '#7c3aed');
+                        log('[MPLS] Pushing Label 24012 -> Forwarding over 100Gbps Optical Core Backbone', '#2563eb');
+                    } else if (subId === 'rtr_wifi') {
+                        log('[NAT OVERLOAD] PAT Translation: ' + sN.sub + ':49152 -> 203.0.113.5:54321', '#d97706');
+                        log('[FIREWALL] Outbound SPI Connection Entry tracked in state table', '#16a34a');
+                    }
                     var dstIP = tN ? tN.sub.replace('192.168.1.', '10.0.0.') : '10.0.0.X';
-                    log('[IP]   SrcIP: ' + sN.sub + '  DstIP: ' + dstIP + '  TTL: 64  Proto: ICMP', '#a78bfa');
-                    log('[RT]   ' + sN.label + ' sends to default-gw (Router Gi0/' + si + ')', '#a78bfa');
-                    spawn(sN.x, sN.y, cx, cy, '#a78bfa', 'PKT', 0);
+                    log('[IP ROUTE] SrcIP: ' + sN.sub + ' DstIP: ' + dstIP + ' TTL: 64 Proto: ICMP', '#7c3aed');
+                    log('[GATEWAY] ' + sN.label + ' sends to Default Gateway (Gi0/' + (sN.idx+1) + ')', '#7c3aed');
+                    spawn(sN.x, sN.y, cx, cy, '#7c3aed', 'PKT', 0);
                     window.setTimeout(function() {
-                        log('[RT]   Routing table: 10.0.0.0/24 via Gi0/' + (tN ? tN.idx : 1) + '  TTL 64->63', '#6366f1');
-                        if (tN) { spawn(cx, cy, tN.x, tN.y, '#6366f1', 'RX', 0); }
+                        log('[ROUTER] Route Match: 10.0.0.0/24 via Gi0/' + (tN ? tN.idx+1 : 1) + ' (TTL 64 -> 63)', '#4f46e5');
+                        if (tN) { spawn(cx, cy, tN.x, tN.y, '#4f46e5', 'RX', 0); }
                     }, 1100);
                     window.setTimeout(function() {
                         if (tN) {
-                            log('[OK]   Packet delivered to ' + tN.label + ' (10.0.0.' + (tN.idx+1) + ')  checksum OK', '#22c55e');
-                            spawn(tN.x, tN.y, cx, cy, '#f59e0b', 'ACK', 0);
-                            spawn(cx, cy, sN.x, sN.y, '#f59e0b', 'ACK', 900);
+                            log('[DELIVERED] Packet delivered to ' + tN.label + ' (10.0.0.' + (tN.idx+1) + ') Checksum OK', '#16a34a');
+                            spawn(tN.x, tN.y, cx, cy, '#d97706', 'ACK', 0);
+                            spawn(cx, cy, sN.x, sN.y, '#d97706', 'ACK', 900);
                         }
-                        stat('\u25cf DONE', '#22c55e'); badge('\u25cf DONE', '#22c55e');
-                        window.setTimeout(function(){ stat('\u25cf IDLE','#334155'); badge('\u25cf IDLE','#334155'); }, 2000);
+                        stat('● DONE', '#16a34a'); badge('● DONE', '#16a34a');
+                        window.setTimeout(function(){ stat('● IDLE','#64748b'); badge('● IDLE','#64748b'); }, 2000);
                     }, 2800);
 
                 } else if (curDev === 'firewall') {
-                    log('[FW]   Packet: ' + sN.sub + ' -> ' + (tN ? tN.sub : 'ALL') + '  Proto: ICMP', '#ef4444');
-                    spawn(sN.x, sN.y, cx, cy, '#ef4444', 'PKT', 0);
+                    if (subId === 'fw_stateless') {
+                        log('[STATELESS] ACL Entry: access-list 101 permit ip ' + sN.sub + ' ' + (tN ? tN.sub : 'any'), '#dc2626');
+                        log('[NOTE] Stateless filter does NOT remember session state for return packets', '#dc2626');
+                    } else if (subId === 'fw_ngfw') {
+                        log('[NGFW L7] Deep Packet Inspection (DPI) App: ICMP Echo / HTTP Payload', '#2563eb');
+                        log('[IPS/AV] Signature Scan: Clean (No malware / exploit payloads detected)', '#16a34a');
+                    }
+                    log('[FIREWALL] Inspecting packet: ' + sN.sub + ' -> ' + (tN ? tN.sub : 'ALL'), '#dc2626');
+                    spawn(sN.x, sN.y, cx, cy, '#dc2626', 'PKT', 0);
                     window.setTimeout(function() {
-                        log('[ACL]  Rule: permit ip ' + sN.sub + ' ' + (tN ? tN.sub : 'any') + '  Action: PERMIT', '#22c55e');
-                        log('[SPI]  Stateful session created  TCP flags: SYN', '#ef4444');
-                        if (tN) { spawn(cx, cy, tN.x, tN.y, '#22c55e', 'OK', 0); }
-                        else { nodes.filter(function(n){ return n.idx !== si; }).forEach(function(n, i){ spawn(cx, cy, n.x, n.y, '#ef4444', 'OK', i*100); }); }
+                        log('[STATEFUL] Permitted by Rule #1 -> Session table created (TCP Flags: SYN)', '#16a34a');
+                        if (tN) { spawn(cx, cy, tN.x, tN.y, '#16a34a', 'OK', 0); }
+                        else { nodes.filter(function(n){ return n.idx !== si; }).forEach(function(n, i){ spawn(cx, cy, n.x, n.y, '#dc2626', 'OK', i*100); }); }
                     }, 1100);
                     window.setTimeout(function() {
-                        log('[SPI]  Return traffic PERMITTED (stateful match)  ACK forwarded', '#f59e0b');
-                        if (tN) { spawn(tN.x, tN.y, cx, cy, '#f59e0b', 'ACK', 0); spawn(cx, cy, sN.x, sN.y, '#f59e0b', 'ACK', 900); }
-                        stat('\u25cf DONE', '#22c55e'); badge('\u25cf DONE', '#22c55e');
-                        window.setTimeout(function(){ stat('\u25cf IDLE','#334155'); badge('\u25cf IDLE','#334155'); }, 2000);
+                        log('[RETURN] Stateful Return Traffic MATCHED in Session Table -> Forwarding ACK', '#d97706');
+                        if (tN) { spawn(tN.x, tN.y, cx, cy, '#d97706', 'ACK', 0); spawn(cx, cy, sN.x, sN.y, '#d97706', 'ACK', 900); }
+                        stat('● DONE', '#16a34a'); badge('● DONE', '#16a34a');
+                        window.setTimeout(function(){ stat('● IDLE','#64748b'); badge('● IDLE','#64748b'); }, 2000);
                     }, 2600);
 
                 } else if (curDev === 'wap') {
-                    log('[WAP]  ' + sN.label + ' -> Association Request  SSID: VLabNet  Band: 5GHz', '#22c55e');
-                    log('[WAP]  Beacon received  Channel: 36  RSSI: -45dBm  MCS: 11', '#64748b');
-                    spawn(sN.x, sN.y, cx, cy, '#22c55e', 'RF', 0);
+                    if (subId === 'wap_mesh') {
+                        log('[MESH 802.11s] Multi-hop wireless backhaul relay to Gateway Node', '#16a34a');
+                        log('[LINK STATUS] RSSI: -52dBm | SNR: 34dB | Dynamic Channel: 149 (5GHz)', '#2563eb');
+                    } else {
+                        log('[Wi-Fi 6] IEEE 802.11ax OFDMA & MU-MIMO 5GHz Beamforming active', '#16a34a');
+                        log('[ASSOC] ' + sN.label + ' connected at 1.2 Gbps (WPA3-Enterprise Security)', '#16a34a');
+                    }
+                    spawn(sN.x, sN.y, cx, cy, '#16a34a', 'RF', 0);
                     window.setTimeout(function() {
-                        log('[WAP]  De-encapsulate: 802.11 frame -> 802.3 Ethernet frame', '#22c55e');
+                        log('[BRIDGE] De-encapsulating 802.11 Wi-Fi frame -> 802.3 Ethernet frame', '#16a34a');
                         if (tN) {
-                            log('[WAP]  Forwarding unicast to ' + tN.label + ' via wired uplink', '#38bdf8');
-                            spawn(cx, cy, tN.x, tN.y, '#38bdf8', 'TX', 0);
+                            log('[UPLINK] Forwarding to wired switch port for ' + tN.label, '#2563eb');
+                            spawn(cx, cy, tN.x, tN.y, '#2563eb', 'TX', 0);
                         } else {
-                            nodes.filter(function(n){ return n.idx !== si; }).forEach(function(n, i){ spawn(cx, cy, n.x, n.y, '#22c55e', 'TX', i*110); });
+                            nodes.filter(function(n){ return n.idx !== si; }).forEach(function(n, i){ spawn(cx, cy, n.x, n.y, '#16a34a', 'TX', i*110); });
                         }
                     }, 1100);
                     window.setTimeout(function() {
-                        if (tN) { spawn(tN.x, tN.y, cx, cy, '#f59e0b', 'ACK', 0); spawn(cx, cy, sN.x, sN.y, '#22c55e', 'RF', 900); }
-                        log('[OK]   Round-trip complete  RTT ~3ms  Throughput ~1.2Gbps', '#22c55e');
-                        stat('\u25cf DONE', '#22c55e'); badge('\u25cf DONE', '#22c55e');
-                        window.setTimeout(function(){ stat('\u25cf IDLE','#334155'); badge('\u25cf IDLE','#334155'); }, 2000);
+                        if (tN) { spawn(tN.x, tN.y, cx, cy, '#d97706', 'ACK', 0); spawn(cx, cy, sN.x, sN.y, '#16a34a', 'RF', 900); }
+                        log('[OK] Wi-Fi 6 Transmission Complete RTT ~2ms', '#16a34a');
+                        stat('● DONE', '#16a34a'); badge('● DONE', '#16a34a');
+                        window.setTimeout(function(){ stat('● IDLE','#64748b'); badge('● IDLE','#64748b'); }, 2000);
+                    }, 2500);
+
+                } else if (curDev === 'media') {
+                    if (subId === 'media_smf') {
+                        log('[SMF CONVERTER] Translating 802.3 Electrical Signal -> 1310nm Laser Pulse', '#0284c7');
+                        log('[OPTICAL LINK] Single-Mode 9µm Glass Core (Zero dispersion up to 40km)', '#0284c7');
+                    } else if (subId === 'media_mmf') {
+                        log('[MMF CONVERTER] Translating 802.3 Electrical Signal -> 850nm VCSEL Light Pulse', '#0284c7');
+                        log('[OPTICAL LINK] Multi-Mode 50µm Glass Core (Modal dispersion up to 550m)', '#0284c7');
+                    } else {
+                        log('[PATCH PANEL] TIA-568B Structured Copper Interconnect Pass-Through', '#0284c7');
+                        log('[COPPER] Cat6A 10Gbps Shielded Twisted Pair (S/FTP) continuity verified', '#0284c7');
+                    }
+                    spawn(sN.x, sN.y, cx, cy, '#0284c7', 'OPT', 0);
+                    window.setTimeout(function() {
+                        if (tN) {
+                            log('[CONVERTED] Signal converted & delivered to ' + tN.label + ' via high-speed link', '#16a34a');
+                            spawn(cx, cy, tN.x, tN.y, '#16a34a', 'RX', 0);
+                        } else {
+                            nodes.filter(function(n){ return n.idx !== si; }).forEach(function(n, i){ spawn(cx, cy, n.x, n.y, '#0284c7', 'TX', i*110); });
+                        }
+                    }, 1100);
+                    window.setTimeout(function() {
+                        if (tN) { spawn(tN.x, tN.y, cx, cy, '#d97706', 'ACK', 0); spawn(cx, cy, sN.x, sN.y, '#0284c7', 'ACK', 900); }
+                        log('[OK] Transmission Media Converter Pass Complete (Loss < 0.2dB)', '#16a34a');
+                        stat('● DONE', '#16a34a'); badge('● DONE', '#16a34a');
+                        window.setTimeout(function(){ stat('● IDLE','#64748b'); badge('● IDLE','#64748b'); }, 2000);
                     }, 2500);
                 }
             };
