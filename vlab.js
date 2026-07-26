@@ -119,20 +119,65 @@ const getStateKey = (labId) => {
     return labId;
 };
 
-const syncProgress = async (labId, data) => {
+window.currentLabStartTime = window.currentLabStartTime || {};
+
+const syncProgress = async (labId, data = {}) => {
     const user = auth.currentUser || await getCurrentUser();
-    if (!user || !labId) {
-        console.warn("Sync failed: User or Lab ID missing");
-        return;
+    const pathKey = getStateKey(labId);
+    
+    let startedAt = window.currentLabStartTime[labId];
+    const existingSession = JSON.parse(localStorage.getItem(`vlab_session_${pathKey}`) || '{}');
+    if (!startedAt) {
+        startedAt = existingSession.startedAt || new Date().toISOString();
+        window.currentLabStartTime[labId] = startedAt;
     }
+
+    const now = new Date();
+    const nowIso = now.toISOString();
+    const startMs = new Date(startedAt).getTime();
+    const timeSpentSeconds = Math.max(0, Math.floor((now.getTime() - startMs) / 1000));
+
+    const isCompleted = data.completed || data.posttest || existingSession.completed || false;
+    const completedAt = isCompleted ? (existingSession.completedAt || nowIso) : null;
+
+    const userName = localStorage.getItem('vlab_user_name') || (user ? user.displayName : '') || 'Student User';
+    const userEmail = localStorage.getItem('vlab_user_email') || (user ? user.email : '') || '';
+    const division = localStorage.getItem('vlab_user_division') || 'Division A - Batch B1';
+    const assignedTeacher = localStorage.getItem('vlab_assigned_teacher') || 'Assigned Instructor';
+
+    const labData = window.VLAB_DATA ? window.VLAB_DATA[labId] : null;
+    const labTitle = labData ? labData.title : labId;
+
+    const payload = {
+        ...existingSession,
+        ...data,
+        labId: labId,
+        pathKey: pathKey,
+        labTitle: labTitle,
+        studentUid: user ? user.uid : 'guest',
+        studentName: userName,
+        studentEmail: userEmail,
+        division: division,
+        assignedTeacher: assignedTeacher,
+        startedAt: startedAt,
+        completedAt: completedAt,
+        timeSpentSeconds: timeSpentSeconds,
+        updatedAt: nowIso
+    };
+
     try {
-        const pathKey = getStateKey(labId);
-        await setDoc(doc(db, "users", user.uid, "progress", pathKey), {
-            ...data,
-            lastUpdated: new Date().toISOString()
-        }, { merge: true });
-        console.log("Progress synced to cloud");
-    } catch (e) { console.error("Cloud sync failed", e); }
+        localStorage.setItem(`vlab_session_${pathKey}`, JSON.stringify(payload));
+        const stateObj = JSON.parse(localStorage.getItem(`vlab_state_${pathKey}`) || '{}');
+        localStorage.setItem(`vlab_state_${pathKey}`, JSON.stringify({ ...stateObj, ...payload }));
+    } catch(e) {}
+
+    if (user) {
+        try {
+            await setDoc(doc(db, "users", user.uid, "progress", pathKey), payload, { merge: true });
+            await setDoc(doc(db, "session_logs", `${user.uid}_${pathKey}`), payload, { merge: true });
+            console.log("Session progress & timestamps synced to Firestore for teacher tracking!");
+        } catch (e) { console.error("Cloud session sync notice:", e); }
+    }
 };
 
 const syncTopology = async (labId, topoData) => {

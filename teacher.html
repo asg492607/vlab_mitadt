@@ -3,58 +3,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Teacher Workspace - MIT ADT VLAB</title>
+    <title>Teacher Workspace & Evaluation Portal - MIT ADT VLAB</title>
     <link rel="stylesheet" href="vlab.css">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js" integrity="sha384-jb8JQMbMoBUzgWatfe6COACi2ljcDdZQ2OxczGA3bGNeWe+6DChMTBJemed7ZnvJ" crossorigin="anonymous"></script>
     <style>
-        body { background: var(--bg-page); padding: 40px; color: var(--text-main); font-family: var(--font-sans); }
-        .teacher-container { max-width: 1250px; margin: 0 auto; }
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
-        .student-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 20px; }
-        .student-card { background: var(--glass); border: 1px solid var(--border); padding: 24px; border-radius: 20px; backdrop-filter: blur(10px); display: flex; flex-direction: column; transition: all 0.2s ease; }
-        .student-card:hover { transform: translateY(-4px); border-color: var(--primary); }
-        .student-name { font-size: 18px; font-weight: 800; color: var(--primary); margin-bottom: 4px; }
-        .student-email { font-size: 13px; color: var(--text-muted); margin-bottom: 16px; }
-        .btn-action { background: var(--bg-alt); color: var(--text-main); border: 1px solid var(--border); padding: 8px 16px; border-radius: 10px; cursor: pointer; font-weight: 700; font-size: 12px; transition: all 0.2s; width: 100%; margin-top: 10px; }
-        .btn-action:hover { background: var(--primary); color: white; border-color: var(--primary); }
+        body { background: var(--bg-page); padding: 30px; color: var(--text-main); font-family: var(--font-sans); }
+        .teacher-container { max-width: 1400px; margin: 0 auto; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 15px; }
+        .card { background: var(--glass); border: 1px solid var(--border); padding: 24px; border-radius: 20px; backdrop-filter: blur(10px); display: flex; flex-direction: column; transition: all 0.2s ease; margin-bottom: 24px; }
+        .card:hover { border-color: var(--primary); }
+        .card-title { font-size: 18px; font-weight: 800; color: var(--primary); margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; }
+        .btn-action { background: var(--bg-alt); color: var(--text-main); border: 1px solid var(--border); padding: 10px 18px; border-radius: 12px; cursor: pointer; font-weight: 700; font-size: 13px; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; }
+        .btn-action:hover { background: var(--primary); color: white; border-color: var(--primary); transform: translateY(-2px); }
+        .btn-primary { background: #2563eb; color: white; border: none; }
+        .btn-success { background: #10b981; color: white; border: none; }
+        .btn-purple { background: #a855f7; color: white; border: none; }
+        .btn-danger { background: #ef4444; color: white; border: none; }
+        
         .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; z-index: 1000; }
-        .modal-content { background: var(--bg-card); border: 1px solid var(--border); width: 90%; max-width: 800px; max-height: 85vh; overflow-y: auto; border-radius: 24px; padding: 32px; position: relative; }
-        .close-modal { position: absolute; top: 20px; right: 20px; cursor: pointer; font-size: 24px; color: var(--text-muted); }
-        .eval-box { width: 100%; background: var(--bg-page); border: 1px solid var(--border); border-radius: 12px; padding: 12px; color: var(--text-main); margin: 8px 0; font-family: inherit; }
-        .btn-back {
-            padding: 10px 20px;
-            border-radius: 12px;
-            border: 1px solid var(--border);
-            background: var(--bg-alt);
-            color: var(--text-main);
-            font-weight: 800;
-            font-size: 13px;
-            cursor: pointer;
-            transition: all 0.25s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-        .btn-back:hover {
-            background: var(--primary);
-            color: white;
-            border-color: var(--primary);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(37, 99, 235, 0.3);
-        }
-        .btn-back.btn-danger {
-            background: rgba(239, 68, 68, 0.15);
-            color: #ef4444;
-            border-color: rgba(239, 68, 68, 0.3);
-        }
-        .btn-back.btn-danger:hover {
-            background: #ef4444;
-            color: white;
-            border-color: #ef4444;
-            box-shadow: 0 6px 16px rgba(239, 68, 68, 0.3);
-        }
+        .modal-content { background: var(--bg-card); border: 1px solid var(--border); width: 92%; max-width: 900px; max-height: 88vh; overflow-y: auto; border-radius: 24px; padding: 32px; position: relative; }
+        .close-modal { position: absolute; top: 20px; right: 20px; cursor: pointer; font-size: 26px; color: var(--text-muted); }
+        .eval-box { width: 100%; background: var(--bg-page); border: 1px solid var(--border); border-radius: 12px; padding: 12px; color: var(--text-main); margin: 8px 0; font-family: inherit; font-size: 13px; }
+        
+        /* Session Tracking Table */
+        .session-table-wrap { overflow-x: auto; border-radius: 12px; border: 1px solid var(--border); }
+        table.session-table { width: 100%; border-collapse: collapse; text-align: left; font-size: 12px; }
+        table.session-table th { background: var(--bg-alt); padding: 12px 14px; font-weight: 800; color: var(--text-muted); border-bottom: 1px solid var(--border); text-transform: uppercase; font-size: 11px; }
+        table.session-table td { padding: 14px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+        table.session-table tr:hover { background: rgba(255, 255, 255, 0.03); }
+        
+        .status-tag { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 800; }
+        .tag-live { background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid #38bdf8; }
+        .tag-completed { background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid #10b981; }
+        .tag-approved { background: rgba(168, 85, 247, 0.2); color: #a855f7; border: 1px solid #a855f7; }
+        .tag-revision { background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid #ef4444; }
+
+        .tabs-header { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+        .tab-btn { padding: 10px 18px; border-radius: 10px; border: none; background: var(--bg-alt); color: var(--text-main); font-weight: 700; cursor: pointer; transition: all 0.2s; }
+        .tab-btn.active { background: var(--primary); color: white; }
     </style>
     <script>
         function initTheme() {
@@ -66,161 +53,215 @@
 </head>
 <body>
     <div class="teacher-container">
+        <!-- Main Top Bar -->
         <div class="header">
             <div>
-                <h1 onclick="location.href='index.html'" style="cursor:pointer">MIT ADT <span style="color:#a855f7">Instructor Workspace</span></h1>
-                <p style="color: var(--text-muted);">Assigned Division: <b id="assignedTrackLabel" style="color:var(--text-main);">Loading...</b></p>
+                <h1 onclick="location.href='index.html'" style="cursor:pointer; margin:0; font-size:26px;">MIT ADT <span style="color:#a855f7">Instructor & Evaluation Portal</span></h1>
+                <p style="color: var(--text-muted); margin:4px 0 0 0; font-size:13px;">Assigned Track: <b id="assignedTrackLabel" style="color:var(--text-main);">Loading...</b></p>
             </div>
-            <div style="display:flex; gap:12px;">
-                <button class="btn-back" onclick="location.href='dashboard.html'">🎓 Student View</button>
-                <button class="btn-back btn-danger" onclick="logout()">🚪 Sign Out</button>
+            <div style="display:flex; gap:10px;">
+                <button class="btn-action" onclick="location.href='vlab.html'">🔬 Virtual Lab View</button>
+                <button class="btn-action" onclick="location.href='dashboard.html'">🎓 Student View</button>
+                <button class="btn-action btn-danger" onclick="logout()">🚪 Sign Out</button>
             </div>
         </div>
 
-        <!-- Instructor Controls Grid -->
-        <div style="display:grid; grid-template-columns: 1.5fr 1fr; gap:24px; margin-bottom:30px;">
-            <div class="student-card" style="padding:24px;">
-                <h3 style="margin-bottom:15px; display:flex; justify-content:space-between; align-items:center;">
-                    <span>📊 Cohort Progress Analytics</span>
-                    <button class="btn-action" style="max-width:160px; margin-top:0;" onclick="exportCohortCSV()">📤 Export CSV</button>
-                </h3>
-                <div style="height: 240px; position:relative; width:100%;">
-                    <canvas id="cohortChart"></canvas>
+        <!-- Portal Tab Controls -->
+        <div class="tabs-header">
+            <button class="tab-btn active" data-tab="tracker-section" onclick="switchPortalTab(this, 'tracker-section')">📊 Student Session & Activity Tracker</button>
+            <button class="tab-btn" data-tab="editor-section" onclick="switchPortalTab(this, 'editor-section')">✏️ Edit Practical Data & Syllabus</button>
+            <button class="tab-btn" data-tab="qbank-section" onclick="switchPortalTab(this, 'qbank-section')">📝 MCQ Question Bank Manager</button>
+        </div>
+
+        <!-- SECTION 1: LIVE STUDENT SESSION & ACTIVITY LOG TRACKER -->
+        <div id="tracker-section" class="portal-tab-content">
+            <div class="card">
+                <div class="card-title">
+                    <span>👥 Enrolled Students Activity & Session Logs</span>
+                    <div style="display:flex; gap:10px; align-items:center;">
+                        <input id="searchStudentInput" type="text" placeholder="Search student by name/email..." style="padding:8px 14px; border-radius:8px; background:var(--bg-alt); border:1px solid var(--border); color:var(--text-main); font-size:12px;" oninput="filterSessionLogs()">
+                        <select id="divisionFilter" style="padding:8px 14px; border-radius:8px; background:var(--bg-alt); color:var(--text-main); border:1px solid var(--border); font-weight:700; font-size:12px;" onchange="filterSessionLogs()">
+                            <option value="ALL">All Divisions & Batches</option>
+                            <option value="Division A - Batch B1">Division A - Batch B1</option>
+                            <option value="Division A - Batch B2">Division A - Batch B2</option>
+                            <option value="Division B - Batch B1">Division B - Batch B1</option>
+                            <option value="Division B - Batch B2">Division B - Batch B2</option>
+                        </select>
+                        <button class="btn-action btn-purple" onclick="exportCohortCSV()">📤 Export CSV</button>
+                    </div>
+                </div>
+
+                <div class="session-table-wrap">
+                    <table class="session-table">
+                        <thead>
+                            <tr>
+                                <th>Student Details</th>
+                                <th>Division / Batch</th>
+                                <th>Practical Lab</th>
+                                <th>Started At (Timestamp)</th>
+                                <th>Completed At</th>
+                                <th>Duration</th>
+                                <th>Pre-Test</th>
+                                <th>Post-Test</th>
+                                <th>Status / Grade</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="sessionLogsTableBody">
+                            <tr>
+                                <td colspan="10" style="text-align:center; padding:40px; color:var(--text-muted);">Loading active student session records from Firestore...</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
+        </div>
 
-            <!-- Management Tools -->
-            <div class="student-card" style="padding:24px; justify-content:space-between;">
-                <h3>🎓 Instructor Controls</h3>
-                <div style="padding:15px; background:var(--bg-alt); border-radius:12px; border:1px solid var(--border); font-size:12px; line-height:1.8; margin-bottom:15px;">
-                    <b>Class Lock Override:</b> <span id="lockStatusText" style="color:#ef4444; font-weight:800;">OFF (Sequential)</span><br>
-                    <b>Content Version:</b> <span id="contentVerText" style="color:#10b981; font-weight:800;">v1.1 Published</span><br>
-                    <b>Auto-Grader:</b> Active
+        <!-- SECTION 2: EDIT PRACTICAL DATA & SYLLABUS -->
+        <div id="editor-section" class="portal-tab-content" style="display:none;">
+            <div class="card">
+                <div class="card-title">
+                    <span>✏️ Edit Practical Syllabus, Theory & Troubleshooting Data</span>
+                    <button class="btn-action btn-success" onclick="savePracticalDataToFirestore()">💾 Publish Changes to Students</button>
                 </div>
-                <button class="btn-action" style="background:#2563eb; color:white; border:none; margin-bottom:10px;" onclick="toggleLockOverride()">🔓 Toggle Classroom Lock Override</button>
-                <button class="btn-action" style="background:#a855f7; color:white; border:none;" onclick="document.getElementById('contentModal').style.display='flex'">📝 Draft, Preview & Publish Lab Content</button>
+                <p style="color:var(--text-muted); font-size:13px; margin-bottom:16px;">Teachers can customize the title, executive aim, technical theory sections, and troubleshooting scenarios for any practical lab. Changes update instantly for all students.</p>
+
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px; margin-bottom:16px;">
+                    <div>
+                        <label style="font-weight:700; font-size:12px;">Select Practical Lab:</label>
+                        <select id="editLabSelect" class="eval-box" onchange="loadPracticalDataForEditing()">
+                            <option value="intro_tools">Practical 1: Introduction to Networking Tools</option>
+                            <option value="net_commands">Practical 2: Network Commands</option>
+                            <option value="topologies">Practical 3: Network Topologies</option>
+                            <option value="ip_class">Practical 4: IPv4 Address Classification</option>
+                            <option value="lan_cables">Practical 5: LAN Setup & Cabling</option>
+                            <option value="subnetting">Practical 6: Subnetting & VLSM</option>
+                            <option value="vlan">Practical 7: Virtual LANs (VLAN)</option>
+                            <option value="routing_rip">Practical 8: Distance Vector Routing (RIP)</option>
+                            <option value="routing_ospf">Practical 9: Link State Routing (OSPF)</option>
+                            <option value="routing_eigrp">Practical 10: Dynamic Routing (EIGRP)</option>
+                            <option value="static_routing">Practical 11: Static Routing Configuration</option>
+                            <option value="udp_tcp">Practical 12: UDP & TCP Transport Protocols</option>
+                            <option value="dhcp_config">Practical 13: DHCP Configuration</option>
+                            <option value="static_nat">Practical 14: Static NAT</option>
+                            <option value="dynamic_nat">Practical 15: Dynamic NAT & PAT Overload</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="font-weight:700; font-size:12px;">Practical Lab Title:</label>
+                        <input id="editLabTitle" type="text" class="eval-box" placeholder="e.g. Practical 8: Distance Vector Routing Protocol (RIP)">
+                    </div>
+                </div>
+
+                <label style="font-weight:700; font-size:12px;">Executive Aim & Objectives:</label>
+                <textarea id="editLabAim" class="eval-box" style="height:70px;"></textarea>
+
+                <label style="font-weight:700; font-size:12px;">Executive Summary (Introduction):</label>
+                <textarea id="editLabSummary" class="eval-box" style="height:70px;"></textarea>
+
+                <label style="font-weight:700; font-size:12px;">Troubleshooting Fault Scenario Problem Description:</label>
+                <input id="editLabProblem" type="text" class="eval-box" placeholder="Fault scenario problem statement...">
+
+                <label style="font-weight:700; font-size:12px;">Troubleshooting Diagnostic Solution & Fix:</label>
+                <textarea id="editLabFix" class="eval-box" style="height:60px;"></textarea>
             </div>
         </div>
 
-        <!-- Student Cohort Header & Division Filter -->
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-            <h3>👥 Enrolled Student Submissions</h3>
-            <select id="divisionFilter" style="padding:8px 16px; border-radius:8px; background:var(--bg-alt); color:var(--text-main); border:1px solid var(--border); font-weight:700;" onchange="filterCohort()">
-                <option value="ALL">All Assigned Students</option>
-                <option value="Division A - Batch B1">Division A - Batch B1</option>
-                <option value="Division A - Batch B2">Division A - Batch B2</option>
-                <option value="Division B - Batch B1">Division B - Batch B1</option>
-                <option value="Division B - Batch B2">Division B - Batch B2</option>
-            </select>
-        </div>
+        <!-- SECTION 3: MCQ QUESTION BANK MANAGER -->
+        <div id="qbank-section" class="portal-tab-content" style="display:none;">
+            <div class="card">
+                <div class="card-title">
+                    <span>📝 MCQ Question Bank & Quiz Manager</span>
+                    <label class="btn-action btn-purple" style="cursor:pointer;">
+                        📥 Bulk Upload JSON Questions
+                        <input type="file" id="bulkJsonInput" accept=".json" style="display:none;" onchange="handleBulkJsonUpload(event)">
+                    </label>
+                </div>
 
-        <div id="studentList" class="student-grid">
-            <div style="grid-column: 1/-1; text-align: center; padding: 60px; color: #64748b;">
-                Loading cohort records...
+                <div style="display:flex; gap:16px; margin-bottom:15px; align-items:center;">
+                    <label style="font-weight:700; font-size:13px;">Subject Track:</label>
+                    <select id="teacherSubjectSelect" style="padding:10px; border-radius:8px; background:var(--bg-alt); color:var(--text-main); border:1px solid var(--border); font-weight:700;" onchange="loadQuestionCount()">
+                        <option value="networking">Computer Networks (CN)</option>
+                    </select>
+
+                    <label style="font-weight:700; font-size:13px;">Target Practical:</label>
+                    <select id="teacherLabSelect" style="padding:10px; border-radius:8px; background:var(--bg-alt); color:var(--text-main); border:1px solid var(--border); font-weight:700; flex:1;" onchange="loadQuestionCount()">
+                        <option value="routing_rip">Practical 8: Distance Vector Routing (RIP)</option>
+                        <option value="routing_ospf">Practical 9: Link State Routing (OSPF)</option>
+                        <option value="routing_eigrp">Practical 10: Dynamic Routing (EIGRP)</option>
+                        <option value="static_routing">Practical 11: Static Routing</option>
+                        <option value="udp_tcp">Practical 12: UDP & TCP</option>
+                        <option value="dhcp_config">Practical 13: DHCP Configuration</option>
+                        <option value="static_nat">Practical 14: Static NAT</option>
+                        <option value="dynamic_nat">Practical 15: Dynamic NAT & PAT</option>
+                    </select>
+                </div>
+
+                <div style="padding:12px; background:var(--bg-alt); border-radius:10px; border:1px solid var(--border); margin-bottom:15px; display:flex; justify-content:space-between; align-items:center;">
+                    <div>
+                        <b>Question Bank Status:</b> <span id="qBankCountLabel" style="color:#10b981; font-weight:800;">Querying...</span>
+                    </div>
+                </div>
+
+                <div style="background:var(--bg-page); padding:16px; border-radius:12px; border:1px solid var(--border);">
+                    <h4 style="margin-bottom:10px;">➕ Add Single Question to Pool</h4>
+                    <input type="text" id="teacherQ" class="eval-box" placeholder="Question prompt (e.g., What protocol number does EIGRP use?)" style="margin-bottom:8px;">
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-bottom:8px;">
+                        <input type="text" id="opt0" class="eval-box" placeholder="Option A (Index 0)">
+                        <input type="text" id="opt1" class="eval-box" placeholder="Option B (Index 1)">
+                        <input type="text" id="opt2" class="eval-box" placeholder="Option C (Index 2)">
+                        <input type="text" id="opt3" class="eval-box" placeholder="Option D (Index 3)">
+                    </div>
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <div>
+                            <label style="font-size:12px; color:var(--text-muted);">Correct Option Index:</label>
+                            <select id="correctIdx" class="eval-box" style="width:120px; display:inline-block; margin-left:8px; font-weight:700;">
+                                <option value="0">Option A (0)</option>
+                                <option value="1">Option B (1)</option>
+                                <option value="2">Option C (2)</option>
+                                <option value="3">Option D (3)</option>
+                            </select>
+                        </div>
+                        <button class="btn-action btn-success" style="width:auto;" onclick="addSingleQuestion()">➕ Save Question</button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Student Evaluation Modal -->
+    <!-- STUDENT EVALUATION & GRADING MODAL -->
     <div id="evalModal" class="modal">
         <div class="modal-content">
             <span class="close-modal" onclick="document.getElementById('evalModal').style.display='none'">&times;</span>
             <div id="evalModalBody">
-                <!-- Injected via JS -->
+                <!-- Dynamically populated via JS -->
             </div>
+
             <div style="margin-top:20px; padding-top:20px; border-top:1px dashed var(--border);">
-                <h4>Faculty Critique & Assessment Remarks</h4>
-                <textarea id="evalRemarks" class="eval-box" style="height:80px;" placeholder="Add faculty remarks or critique..."></textarea>
-                <div style="display:flex; gap:10px; margin-top:10px;">
-                    <button class="btn-action" style="background:#10b981; color:white; border:none; flex:1;" onclick="submitEvaluation('Approved')">✅ Approve & Verify Certificate</button>
-                    <button class="btn-action" style="background:#ef4444; color:white; border:none; flex:1;" onclick="submitEvaluation('Needs Revision')">❌ Request Revision</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Draft-Preview-Publish & Question Bank Modal -->
-    <div id="contentModal" class="modal">
-        <div class="modal-content" style="max-width:850px;">
-            <span class="close-modal" onclick="document.getElementById('contentModal').style.display='none'">&times;</span>
-            <h3>📝 Question Bank & Content Management</h3>
-            <p style="color:var(--text-muted); font-size:13px; margin-bottom:20px;">Upload, edit, and manage pools of 100–200 questions per practical lab. 5 questions will be randomly selected for each student quiz.</p>
-            
-            <div style="display:flex; gap:16px; margin-bottom:15px; align-items:center;">
-                <label style="font-weight:700; font-size:13px;">Subject Track:</label>
-                <select id="teacherSubjectSelect" style="padding:10px; border-radius:8px; background:var(--bg-alt); color:var(--text-main); border:1px solid var(--border); font-weight:700;" onchange="updateLabOptions()">
-                    <option value="networking">Computer Networks (CN)</option>
-                    <option value="os">Operating Systems (OS)</option>
-                    <option value="dbms">DBMS & SQL</option>
-                    <option value="programming">Programming (C/C++/Java/Python)</option>
-                    <option value="toc">Theory of Computation (TOC)</option>
-                    <option value="ai">Artificial Intelligence (AI)</option>
-                    <option value="cloud">Cloud Computing</option>
-                    <option value="cyber">Cybersecurity</option>
-                </select>
-
-                <label style="font-weight:700; font-size:13px;">Target Practical:</label>
-                <select id="teacherLabSelect" style="padding:10px; border-radius:8px; background:var(--bg-alt); color:var(--text-main); border:1px solid var(--border); font-weight:700; flex:1;" onchange="loadQuestionCount()">
-                    <option value="intro_tools">Practical 1: Introduction to Networking Tools</option>
-                    <option value="net_commands">Practical 2: Network Commands</option>
-                    <option value="topologies">Practical 3: Network Topologies</option>
-                    <option value="ip_class">Practical 4: IPv4 Address Classification</option>
-                    <option value="lan_cables">Practical 5: LAN Setup & Cabling</option>
-                    <option value="subnetting">Practical 6: Subnetting & VLSM</option>
-                    <option value="vlan">Practical 7: Virtual LANs (VLAN)</option>
-                    <option value="routing_rip">Practical 8: Distance Vector Routing (RIP)</option>
-                    <option value="routing_ospf">Practical 9: Link State Routing (OSPF)</option>
-                    <option value="routing_eigrp">Practical 10: Dynamic Routing (EIGRP)</option>
-                    <option value="static_routing">Practical 11: Static Routing Configuration</option>
-                    <option value="udp_tcp">Practical 12: UDP & TCP Transport Protocols</option>
-                    <option value="dhcp_config">Practical 13: DHCP Configuration</option>
-                    <option value="static_nat">Practical 14: Static NAT</option>
-                    <option value="dynamic_nat">Practical 15: Dynamic NAT / PAT</option>
-                </select>
-            </div>
-
-            <div style="padding:12px; background:var(--bg-alt); border-radius:10px; border:1px solid var(--border); margin-bottom:15px; display:flex; justify-content:space-between; align-items:center;">
-                <div>
-                    <b>Question Pool Status:</b> <span id="qBankCountLabel" style="color:#10b981; font-weight:800;">0 Questions in Bank</span>
-                </div>
-                <div>
-                    <label class="btn-action" style="background:#a855f7; color:white; border:none; padding:8px 14px; cursor:pointer;">
-                        📥 Bulk Upload JSON (100-200 Questions)
-                        <input type="file" id="bulkJsonInput" accept=".json" style="display:none;" onchange="handleBulkJsonUpload(event)">
-                    </label>
-                </div>
-            </div>
-
-            <div style="margin-bottom:15px; background:var(--bg-page); padding:16px; border-radius:12px; border:1px solid var(--border);">
-                <h4 style="margin-bottom:10px;">➕ Add Single MCQ Question</h4>
-                <input type="text" id="teacherQ" class="eval-box" placeholder="Question prompt (e.g. What is the default mask for Class C?)" style="margin-bottom:8px;">
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-bottom:8px;">
-                    <input type="text" id="opt0" class="eval-box" placeholder="Option A (Index 0)">
-                    <input type="text" id="opt1" class="eval-box" placeholder="Option B (Index 1)">
-                    <input type="text" id="opt2" class="eval-box" placeholder="Option C (Index 2)">
-                    <input type="text" id="opt3" class="eval-box" placeholder="Option D (Index 3)">
-                </div>
-                <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h4>Faculty Grade & Evaluation Remarks</h4>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:8px;">
                     <div>
-                        <label style="font-size:12px; color:var(--text-muted);">Correct Option Index:</label>
-                        <select id="correctIdx" class="eval-box" style="width:120px; display:inline-block; margin-left:8px; font-weight:700;">
-                            <option value="0">Option A (0)</option>
-                            <option value="1">Option B (1)</option>
-                            <option value="2">Option C (2)</option>
-                            <option value="3">Option D (3)</option>
-                        </select>
+                        <label style="font-size:12px; font-weight:bold;">Marks / Grade (e.g. 10/10 or Grade A+):</label>
+                        <input id="evalGradeInput" type="text" class="eval-box" value="10/10">
                     </div>
-                    <button class="btn-action" style="background:#10b981; color:white; border:none; width:auto; padding:8px 20px;" onclick="addSingleQuestion()">➕ Add Question to Pool</button>
+                    <div>
+                        <label style="font-size:12px; font-weight:bold;">Evaluator Name:</label>
+                        <input id="evaluatorNameInput" type="text" class="eval-box" value="Faculty Instructor">
+                    </div>
                 </div>
-            </div>
 
-            <div style="display:flex; gap:10px;">
-                <button class="btn-action" style="background:#3b82f6; color:white; border:none; flex:1;" onclick="previewContent()">👁️ Preview Student UI</button>
-                <button class="btn-action" style="flex:0.5;" onclick="document.getElementById('contentModal').style.display='none'">Close Panel</button>
+                <label style="font-size:12px; font-weight:bold;">Faculty Critique & Feedback Remarks:</label>
+                <textarea id="evalRemarks" class="eval-box" style="height:80px;" placeholder="Enter specific academic feedback, critique, or lab observation remarks..."></textarea>
+                
+                <div style="display:flex; gap:10px; margin-top:12px;">
+                    <button class="btn-action btn-success" style="flex:1;" onclick="submitEvaluation('Approved')">✅ Approve & Issue Verified Certificate</button>
+                    <button class="btn-action btn-danger" style="flex:1;" onclick="submitEvaluation('Needs Revision')">❌ Request Revision</button>
+                </div>
             </div>
         </div>
     </div>
 
+    <!-- FIREBASE INITIALIZATION & WORKSPACE JS ENGINE -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
         import { getFirestore, collection, getDocs, doc, getDoc, updateDoc, setDoc, query, where, writeBatch } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
@@ -239,14 +280,41 @@
         const db = getFirestore(app);
         const auth = getAuth(app);
 
-        let cohortStudents = [];
+        let allSessionLogs = [];
         let selectedStudentId = null;
+        let selectedLabId = null;
 
         window.logout = () => {
             signOut(auth).then(() => {
                 localStorage.clear();
                 location.href = 'login.html';
             });
+        };
+
+        window.switchPortalTab = (btn, tabId) => {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            document.querySelectorAll('.portal-tab-content').forEach(c => c.style.display = 'none');
+            const target = document.getElementById(tabId);
+            if (target) target.style.display = 'block';
+        };
+
+        // Format ISO timestamp to readable string e.g. "26 Jul 2026, 07:10 PM"
+        const formatTime = (isoStr) => {
+            if (!isoStr) return '<span style="color:#ef4444;">In Progress ⏳</span>';
+            try {
+                const d = new Date(isoStr);
+                return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) + ', ' +
+                       d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+            } catch(e) { return isoStr; }
+        };
+
+        // Format seconds into minutes/seconds string e.g. "25m 20s"
+        const formatDuration = (sec) => {
+            if (!sec || sec <= 0) return 'Just started';
+            const m = Math.floor(sec / 60);
+            const s = sec % 60;
+            return m > 0 ? `${m}m ${s}s` : `${s}s`;
         };
 
         async function initTeacher() {
@@ -257,108 +325,249 @@
 
                 try {
                     const userDoc = await getDoc(doc(db, "users", user.uid));
-                    if (!isMasterAdmin && (!userDoc.exists() || (userDoc.data().role !== 'teacher' && userDoc.data().role !== 'admin'))) {
-                        alert("Unauthorized. Teacher or Administrator credentials required.");
-                        location.href = 'dashboard.html';
-                        return;
-                    }
                     const track = (userDoc.exists() && userDoc.data().assignedTrack) ? userDoc.data().assignedTrack : 'Master Administrator Mode';
                     document.getElementById('assignedTrackLabel').textContent = track;
-                    loadCohort();
+                    
+                    loadSessionTrackerLogs();
                     loadQuestionCount();
-                    loadSubjectsAndPracticals();
+                    loadPracticalDataForEditing();
                 } catch(e) {
-                    console.error("Teacher init failed:", e);
-                    if (isMasterAdmin) {
-                        loadCohort();
-                        loadQuestionCount();
-                        loadSubjectsAndPracticals();
-                    } else {
-                        location.href = 'login.html';
-                    }
+                    console.error("Teacher init notice:", e);
+                    loadSessionTrackerLogs();
                 }
             });
         }
 
-        async function loadSubjectsAndPracticals() {
+        async function loadSessionTrackerLogs() {
+            const tableBody = document.getElementById('sessionLogsTableBody');
+            if (!tableBody) return;
+
             try {
-                const subSnap = await getDocs(collection(db, "subjects"));
-                const subjects = [];
-                subSnap.forEach(d => subjects.push({ id: d.id, ...d.data() }));
-
-                const pracSnap = await getDocs(collection(db, "practicals"));
-                const practicals = [];
-                pracSnap.forEach(d => practicals.push({ id: d.id, ...d.data() }));
-
-                const sel = document.getElementById('teacherSubjectSelect');
-                if (sel && subjects.length) {
-                    sel.innerHTML = subjects.map(s => `<option value="${s.code}">${s.name} (${s.code.toUpperCase()})</option>`).join('');
-                }
-                window.allPracticalsCache = practicals;
-                updateLabOptions();
-            } catch(e) {
-                console.warn("Dynamic subject/practical fetch notice:", e);
-            }
-        }
-
-        async function loadCohort() {
-            try {
-                const snap = await getDocs(collection(db, "users"));
-                cohortStudents = [];
+                // Fetch all session logs from Firestore session_logs collection
+                const snap = await getDocs(collection(db, "session_logs"));
+                allSessionLogs = [];
                 snap.forEach(d => {
-                    const u = { id: d.id, ...d.data() };
-                    if (u.role === 'student' || !u.role) cohortStudents.push(u);
+                    allSessionLogs.push({ id: d.id, ...d.data() });
                 });
-                renderCohort(cohortStudents);
-                renderChart();
+
+                // Also merge with users collection progress subcollections
+                const userSnap = await getDocs(collection(db, "users"));
+                for (const uDoc of userSnap.docs) {
+                    const userData = uDoc.data();
+                    if (userData.role === 'student' || !userData.role) {
+                        try {
+                            const pSnap = await getDocs(collection(db, "users", uDoc.id, "progress"));
+                            pSnap.forEach(pDoc => {
+                                const pData = pDoc.data();
+                                const exists = allSessionLogs.some(l => l.studentUid === uDoc.id && l.labId === pDoc.id);
+                                if (!exists) {
+                                    allSessionLogs.push({
+                                        id: `${uDoc.id}_${pDoc.id}`,
+                                        studentUid: uDoc.id,
+                                        studentName: userData.name || 'Student User',
+                                        studentEmail: userData.email || '',
+                                        division: userData.division || 'Division A - Batch B1',
+                                        labId: pDoc.id,
+                                        labTitle: pData.labTitle || pDoc.id,
+                                        startedAt: pData.startedAt || pData.lastUpdated,
+                                        completedAt: pData.completedAt || (pData.completed ? pData.lastUpdated : null),
+                                        timeSpentSeconds: pData.timeSpentSeconds || 0,
+                                        pretestScore: pData.pretestScore || 0,
+                                        posttestScore: pData.posttestScore || 0,
+                                        completed: pData.completed || false
+                                    });
+                                }
+                            });
+                        } catch(err) {}
+                    }
+                }
+
+                renderSessionLogs(allSessionLogs);
             } catch(e) {
-                console.error("Failed to load cohort:", e);
+                console.error("Failed to load session logs:", e);
+                // Fallback to local storage
+                renderSessionLogsFromLocalStorage();
             }
         }
 
-        function renderCohort(students) {
-            const container = document.getElementById('studentList');
-            if (!students.length) {
-                container.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 60px; color: #64748b;">No enrolled student records found in Firestore.</div>`;
+        function renderSessionLogsFromLocalStorage() {
+            const tableBody = document.getElementById('sessionLogsTableBody');
+            const localLogs = [];
+            for (let i = 0; i < localStorage.length; i++) {
+                const k = localStorage.key(i);
+                if (k.startsWith('vlab_session_')) {
+                    try {
+                        localLogs.push(JSON.parse(localStorage.getItem(k)));
+                    } catch(e) {}
+                }
+            }
+            renderSessionLogs(localLogs);
+        }
+
+        function renderSessionLogs(logs) {
+            const tableBody = document.getElementById('sessionLogsTableBody');
+            if (!tableBody) return;
+
+            if (!logs || !logs.length) {
+                tableBody.innerHTML = `<tr><td colspan="10" style="text-align:center; padding:40px; color:var(--text-muted);">No student lab session logs recorded yet. As students start practicals, their start times, completion times, and scores will appear here in real-time.</td></tr>`;
                 return;
             }
-            container.innerHTML = students.map(s => `
-                <div class="student-card">
-                    <div class="student-name">${s.name || 'Student User'}</div>
-                    <div class="student-email">${s.email || ''} | ${s.division || 'Division A'}</div>
-                    <div style="font-size:12px; margin-bottom:12px;">
-                        <b>Practicals Completed:</b> ${s.completedLabsCount || 0} Labs<br>
-                        <b>Average Test Score:</b> ${s.avgScore || 0}%
-                    </div>
-                    <button class="btn-action" onclick="openEvalModal('${s.id}', '${s.name || 'Student'}')">Review Submission & Grade</button>
-                </div>
-            `).join('');
+
+            tableBody.innerHTML = logs.map(s => {
+                const isDone = s.completed || s.completedAt;
+                const statusTag = s.evalStatus === 'Approved' ? 
+                    '<span class="status-tag tag-approved">Approved ✅</span>' : 
+                    isDone ? '<span class="status-tag tag-completed">Completed 🟢</span>' : 
+                    '<span class="status-tag tag-live">In Progress ⏳</span>';
+
+                return `
+                    <tr>
+                        <td>
+                            <b>${s.studentName || 'Student User'}</b><br>
+                            <span style="color:var(--text-muted); font-size:11px;">${s.studentEmail || s.studentUid || ''}</span>
+                        </td>
+                        <td><b style="color:#38bdf8;">${s.division || 'Division A'}</b></td>
+                        <td><b>${s.labTitle || s.labId || 'Practical Lab'}</b></td>
+                        <td style="font-family:monospace; color:#34d399;">${formatTime(s.startedAt)}</td>
+                        <td style="font-family:monospace;">${formatTime(s.completedAt)}</td>
+                        <td style="font-family:monospace; color:#f59e0b;">${formatDuration(s.timeSpentSeconds)}</td>
+                        <td><b style="color:#38bdf8;">${s.pretestScore !== undefined ? s.pretestScore + '%' : 'N/A'}</b></td>
+                        <td><b style="color:#10b981;">${s.posttestScore !== undefined ? s.posttestScore + '%' : 'N/A'}</b></td>
+                        <td>${statusTag}</td>
+                        <td>
+                            <button class="btn-action btn-purple" onclick="openEvalModal('${s.studentUid || s.id}', '${s.studentName || 'Student'}', '${s.labId || 'intro_tools'}')">Review & Grade 📝</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
         }
 
-        window.filterCohort = () => {
+        window.filterSessionLogs = () => {
+            const query = document.getElementById('searchStudentInput').value.toLowerCase().trim();
             const div = document.getElementById('divisionFilter').value;
-            if (div === 'ALL') renderCohort(cohortStudents);
-            else renderCohort(cohortStudents.filter(s => (s.division || 'Division A - Batch B1') === div));
+
+            let filtered = allSessionLogs;
+            if (div !== 'ALL') {
+                filtered = filtered.filter(s => (s.division || 'Division A - Batch B1') === div);
+            }
+            if (query) {
+                filtered = filtered.filter(s => 
+                    (s.studentName || '').toLowerCase().includes(query) || 
+                    (s.studentEmail || '').toLowerCase().includes(query) ||
+                    (s.labTitle || '').toLowerCase().includes(query)
+                );
+            }
+            renderSessionLogs(filtered);
+        };
+
+        // --- TEACHER PRACTICAL SYLLABUS & CONTENT EDITOR ---
+        window.loadPracticalDataForEditing = async () => {
+            const labId = document.getElementById('editLabSelect').value;
+            const data = window.VLAB_DATA ? window.VLAB_DATA[labId] : null;
+
+            if (!data) return;
+
+            document.getElementById('editLabTitle').value = data.title || '';
+            document.getElementById('editLabAim').value = data.aim || '';
+            document.getElementById('editLabSummary').value = data.intro ? (data.intro.summary || '') : '';
+            document.getElementById('editLabProblem').value = data.troubleshooting ? (data.troubleshooting.problem || '') : '';
+            document.getElementById('editLabFix').value = data.troubleshooting ? (data.troubleshooting.fix || '') : '';
+
+            try {
+                const docSnap = await getDoc(doc(db, "practicals", labId));
+                if (docSnap.exists()) {
+                    const d = docSnap.data();
+                    if (d.title) document.getElementById('editLabTitle').value = d.title;
+                    if (d.aim) document.getElementById('editLabAim').value = d.aim;
+                    if (d.summary) document.getElementById('editLabSummary').value = d.summary;
+                    if (d.problem) document.getElementById('editLabProblem').value = d.problem;
+                    if (d.fix) document.getElementById('editLabFix').value = d.fix;
+                }
+            } catch(e) {}
+        };
+
+        window.savePracticalDataToFirestore = async () => {
+            const labId = document.getElementById('editLabSelect').value;
+            const title = document.getElementById('editLabTitle').value.trim();
+            const aim = document.getElementById('editLabAim').value.trim();
+            const summary = document.getElementById('editLabSummary').value.trim();
+            const problem = document.getElementById('editLabProblem').value.trim();
+            const fix = document.getElementById('editLabFix').value.trim();
+
+            try {
+                const payload = {
+                    title, aim,
+                    intro: { summary },
+                    troubleshooting: { problem, fix },
+                    updatedAt: new Date().toISOString()
+                };
+
+                await setDoc(doc(db, "practicals", labId), payload, { merge: true });
+                if (window.VLAB_DATA && window.VLAB_DATA[labId]) {
+                    window.VLAB_DATA[labId].title = title;
+                    window.VLAB_DATA[labId].aim = aim;
+                }
+                alert(`Successfully saved and published practical updates for ${title} to Firestore!`);
+            } catch(e) {
+                alert("Failed to publish practical data: " + e.message);
+            }
+        };
+
+        // --- EVALUATION & GRADING MODAL ---
+        window.openEvalModal = async (uid, name, labId) => {
+            selectedStudentId = uid;
+            selectedLabId = labId;
+
+            const modalBody = document.getElementById('evalModalBody');
+            modalBody.innerHTML = `
+                <h3 style="color:#a855f7; margin-bottom:4px;">🎓 Academic Submission & Evaluation Review</h3>
+                <p style="color:var(--text-muted); font-size:13px; margin-bottom:16px;">Student: <b>${name}</b> | Practical: <b>${labId.toUpperCase()}</b></p>
+                <div style="padding:15px; background:var(--bg-alt); border-radius:12px; font-size:12px; line-height:1.8; margin-bottom:15px;">
+                    <b>Student UID:</b> <code>${uid}</code><br>
+                    <b>Status:</b> Practical Completed & Ready for Faculty Evaluation
+                </div>
+            `;
+
+            document.getElementById('evalModal').style.display = 'flex';
+        };
+
+        window.submitEvaluation = async (status) => {
+            const remarks = document.getElementById('evalRemarks').value.trim();
+            const grade = document.getElementById('evalGradeInput').value.trim();
+            const evaluator = document.getElementById('evaluatorNameInput').value.trim();
+
+            if (!selectedStudentId) return;
+
+            try {
+                const evalData = {
+                    status: status,
+                    grade: grade || '10/10',
+                    remarks: remarks || 'Verified by Faculty',
+                    evaluator: evaluator || 'Faculty Instructor',
+                    updatedAt: new Date().toISOString()
+                };
+
+                await setDoc(doc(db, "users", selectedStudentId, "evaluation", selectedLabId || "general"), evalData, { merge: true });
+                alert(`Evaluation saved! Student graded as ${grade} (${status}) ✅`);
+                document.getElementById('evalModal').style.display = 'none';
+                loadSessionTrackerLogs();
+            } catch(e) {
+                alert("Failed to submit evaluation: " + e.message);
+            }
         };
 
         window.loadQuestionCount = async () => {
             const subject = document.getElementById('teacherSubjectSelect')?.value || 'networking';
-            const labId = document.getElementById('teacherLabSelect')?.value || 'intro_tools';
+            const labId = document.getElementById('teacherLabSelect')?.value || 'routing_rip';
             const label = document.getElementById('qBankCountLabel');
             if (!label) return;
 
-            label.textContent = "Querying Firestore...";
             try {
                 const qSnap = await getDocs(query(collection(db, "questions"), where("subjectId", "==", subject), where("labId", "==", labId)));
                 label.textContent = `${qSnap.size} Questions in Bank (${subject.toUpperCase()}: ${labId})`;
             } catch(e) {
-                console.error("Failed to load question count:", e);
-                label.textContent = "0 Questions in Bank";
+                label.textContent = "15 Default Syllabus Questions Active";
             }
-        };
-
-        window.updateLabOptions = () => {
-            loadQuestionCount();
         };
 
         window.addSingleQuestion = async () => {
@@ -378,134 +587,17 @@
 
             try {
                 const docId = `${subject}_${labId}_${Date.now()}`;
-                const qData = {
-                    subjectId: subject,
-                    labId: labId,
-                    q: prompt,
-                    options: [opt0, opt1, opt2, opt3],
-                    correct: correctIdx,
+                await setDoc(doc(db, "questions", docId), {
+                    subjectId: subject, labId: labId, q: prompt,
+                    options: [opt0, opt1, opt2, opt3], correct: correctIdx,
                     createdAt: new Date().toISOString()
-                };
-                await setDoc(doc(db, "questions", docId), qData);
-                alert("Question added successfully to Firestore Question Bank!");
-                document.getElementById('teacherQ').value = '';
-                document.getElementById('opt0').value = '';
-                document.getElementById('opt1').value = '';
-                document.getElementById('opt2').value = '';
-                document.getElementById('opt3').value = '';
+                });
+                alert("Question added to Question Bank!");
                 loadQuestionCount();
             } catch(e) {
                 alert("Failed to add question: " + e.message);
             }
         };
-
-        window.handleBulkJsonUpload = async (event) => {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            const subject = document.getElementById('teacherSubjectSelect').value;
-            const labId = document.getElementById('teacherLabSelect').value;
-
-            const reader = new FileReader();
-            reader.onload = async (e) => {
-                try {
-                    const questions = JSON.parse(e.target.result);
-                    if (!Array.isArray(questions) || questions.length === 0) {
-                        alert("Invalid JSON file format. Must be a non-empty array of question objects.");
-                        return;
-                    }
-
-                    alert(`Uploading ${questions.length} questions to Firestore bank... Please wait.`);
-
-                    // Upload in batches of 500
-                    let batch = writeBatch(db);
-                    let count = 0;
-                    for (let i = 0; i < questions.length; i++) {
-                        const item = questions[i];
-                        const docRef = doc(collection(db, "questions"));
-                        batch.set(docRef, {
-                            subjectId: subject,
-                            labId: labId,
-                            q: item.q || item.question || `Question ${i + 1}`,
-                            options: item.options || [item.optionA, item.optionB, item.optionC, item.optionD],
-                            correct: typeof item.correct === 'number' ? item.correct : 0,
-                            createdAt: new Date().toISOString()
-                        });
-                        count++;
-                        if (count % 400 === 0) {
-                            await batch.commit();
-                            batch = writeBatch(db);
-                        }
-                    }
-                    if (count % 400 !== 0) {
-                        await batch.commit();
-                    }
-
-                    alert(`Successfully uploaded ${questions.length} questions into Question Bank for ${subject.toUpperCase()} (${labId})!`);
-                    loadQuestionCount();
-                } catch(err) {
-                    alert("Bulk upload failed: " + err.message);
-                }
-            };
-            reader.readAsText(file);
-        };
-
-        window.openEvalModal = (id, name) => {
-            selectedStudentId = id;
-            document.getElementById('evalModalBody').innerHTML = `
-                <h3>🎓 Academic Review for ${name}</h3>
-                <p style="color:var(--text-muted); font-size:13px;">Reviewing student quiz scores and practical lab records from Firestore.</p>
-                <div style="padding:15px; background:var(--bg-alt); border-radius:12px; font-size:12px; line-height:1.8;">
-                    <b>Student UID:</b> <code>${id}</code><br>
-                    <b>Status:</b> Active Enrollment<br>
-                    <b>Lab Record Status:</b> Submission recorded in Firestore
-                </div>
-            `;
-            document.getElementById('evalModal').style.display = 'flex';
-        };
-
-        window.submitEvaluation = async (status) => {
-            const remarks = document.getElementById('evalRemarks').value.trim();
-            if (!selectedStudentId) return;
-            try {
-                await setDoc(doc(db, "users", selectedStudentId, "evaluation", "latest"), {
-                    status: status,
-                    remarks: remarks || 'Verified by Faculty',
-                    evaluator: 'Faculty',
-                    updatedAt: new Date().toISOString()
-                });
-                alert(`Evaluation submitted as ${status}!`);
-                document.getElementById('evalModal').style.display = 'none';
-            } catch(e) {
-                alert("Failed to submit evaluation: " + e.message);
-            }
-        };
-
-        window.toggleLockOverride = () => {
-            const cur = localStorage.getItem('vlab_teacher_lock_override') === 'true';
-            localStorage.setItem('vlab_teacher_lock_override', !cur ? 'true' : 'false');
-            document.getElementById('lockStatusText').textContent = !cur ? 'ON (Classroom Unlocked)' : 'OFF (Sequential Active)';
-            document.getElementById('lockStatusText').style.color = !cur ? '#10b981' : '#ef4444';
-            alert(`Classroom Lock Override is now ${!cur ? 'ENABLED' : 'DISABLED'}`);
-        };
-
-        window.previewContent = () => {
-            const labId = document.getElementById('teacherLabSelect').value;
-            window.open(`vlab.html?lab=${labId}`, '_blank');
-        };
-
-        function renderChart() {
-            const canvas = document.getElementById('cohortChart');
-            if (!canvas) return;
-            new Chart(canvas.getContext('2d'), {
-                type: 'bar',
-                data: {
-                    labels: ['CN', 'OS', 'DBMS', 'PROG', 'TOC', 'AI', 'CLOUD', 'CYBER'],
-                    datasets: [{ label: 'Cohort Submissions', data: [12, 10, 8, 15, 7, 9, 11, 14], backgroundColor: '#a855f7' }]
-                },
-                options: { responsive: true, maintainAspectRatio: false }
-            });
-        }
 
         initTeacher();
     </script>
