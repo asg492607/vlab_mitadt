@@ -1283,332 +1283,38 @@ window.VLAB_DATA = {
     },
     "tools": [
         {
-            "name": "Device Pair Cable Selector & Auto-MDIX Tester",
-            "layer": "Physical Layer 1",
-            "ports": "RJ-45 MDI/MDI-X",
-            "usage": "Tests cable type compatibility between PCs, Switches & Routers",
-            "statusLED": "Link LED Green/Red"
+                "name": "32-Bit Binary Octet Inspector",
+                "layer": "Layer 3 Tool",
+                "ports": "Bit-Weight Matrix",
+                "usage": "Live binary bit-flipping and octet summation",
+                "statusLED": "Bit Array Active",
+                "image": "<svg viewBox=\"0 0 400 160\" width=\"100%\" height=\"100%\" xmlns=\"http://www.w3.org/2000/svg\">\n  <rect width=\"400\" height=\"160\" fill=\"#0f172a\" rx=\"10\"/>\n  <text x=\"200\" y=\"30\" fill=\"#60a5fa\" font-size=\"12\" text-anchor=\"middle\" font-family=\"sans-serif\" font-weight=\"bold\">32-BIT BINARY OCTET INSPECTOR</text>\n  \n  <!-- 4 Octets Box -->\n  <g transform=\"translate(20, 45)\">\n    <!-- Octet 1 -->\n    <rect x=\"0\" y=\"0\" width=\"80\" height=\"40\" fill=\"#1e293b\" stroke=\"#10b981\" stroke-width=\"1.5\" rx=\"4\"/>\n    <text x=\"40\" y=\"20\" fill=\"#10b981\" font-size=\"12\" text-anchor=\"middle\" font-family=\"monospace\" font-weight=\"bold\">11000000</text>\n    <text x=\"40\" y=\"34\" fill=\"#94a3b8\" font-size=\"9\" text-anchor=\"middle\" font-family=\"monospace\">(192)</text>\n\n    <!-- Octet 2 -->\n    <rect x=\"90\" y=\"0\" width=\"80\" height=\"40\" fill=\"#1e293b\" stroke=\"#10b981\" stroke-width=\"1.5\" rx=\"4\"/>\n    <text x=\"130\" y=\"20\" fill=\"#10b981\" font-size=\"12\" text-anchor=\"middle\" font-family=\"monospace\" font-weight=\"bold\">10101000</text>\n    <text x=\"130\" y=\"34\" fill=\"#94a3b8\" font-size=\"9\" text-anchor=\"middle\" font-family=\"monospace\">(168)</text>\n\n    <!-- Octet 3 -->\n    <rect x=\"180\" y=\"0\" width=\"80\" height=\"40\" fill=\"#1e293b\" stroke=\"#10b981\" stroke-width=\"1.5\" rx=\"4\"/>\n    <text x=\"220\" y=\"20\" fill=\"#10b981\" font-size=\"12\" text-anchor=\"middle\" font-family=\"monospace\" font-weight=\"bold\">00001010</text>\n    <text x=\"220\" y=\"34\" fill=\"#94a3b8\" font-size=\"9\" text-anchor=\"middle\" font-family=\"monospace\">(10)</text>\n\n    <!-- Octet 4 -->\n    <rect x=\"270\" y=\"0\" width=\"80\" height=\"40\" fill=\"#1e293b\" stroke=\"#f97316\" stroke-width=\"1.5\" rx=\"4\"/>\n    <text x=\"310\" y=\"20\" fill=\"#f97316\" font-size=\"12\" text-anchor=\"middle\" font-family=\"monospace\" font-weight=\"bold\">00011001</text>\n    <text x=\"310\" y=\"34\" fill=\"#94a3b8\" font-size=\"9\" text-anchor=\"middle\" font-family=\"monospace\">(25)</text>\n  </g>\n\n  <!-- Bit Weights Bar -->\n  <rect x=\"50\" y=\"105\" width=\"300\" height=\"24\" rx=\"6\" fill=\"#1e293b\" stroke=\"#3b82f6\" stroke-width=\"1\"/>\n  <text x=\"200\" y=\"121\" fill=\"#38bdf8\" font-size=\"10\" text-anchor=\"middle\" font-family=\"monospace\" font-weight=\"bold\">128  64  32  16  8  4  2  1 = 255 MAX</text>\n</svg>"
         },
         {
-            "name": "T568A / T568B Color Wiring Crimp Engine",
-            "layer": "Physical Layer 1",
-            "ports": "8P8C Conductors",
-            "usage": "Arranges 8 twisted pair wires into T568A/B crimp sequences",
-            "statusLED": "Continuity 1-8 Sequence"
+                "name": "Subnet Mask Boundary Calculator",
+                "layer": "Layer 3 Tool",
+                "ports": "CIDR /8 to /30",
+                "usage": "Extracts Network ID & Host ID boundaries",
+                "statusLED": "Mask Boundary Set",
+                "image": "<svg viewBox=\"0 0 400 160\" width=\"100%\" height=\"100%\" xmlns=\"http://www.w3.org/2000/svg\">\n  <rect width=\"400\" height=\"160\" fill=\"#0f172a\" rx=\"10\"/>\n  <text x=\"200\" y=\"30\" fill=\"#38bdf8\" font-size=\"12\" text-anchor=\"middle\" font-family=\"sans-serif\" font-weight=\"bold\">SUBNET MASK BOUNDARY DIVISION (/24)</text>\n\n  <!-- Network vs Host Bar -->\n  <rect x=\"30\" y=\"45\" width=\"250\" height=\"35\" fill=\"rgba(16,185,129,0.2)\" stroke=\"#10b981\" stroke-width=\"2\" rx=\"4\"/>\n  <text x=\"155\" y=\"66\" fill=\"#10b981\" font-size=\"11\" text-anchor=\"middle\" font-family=\"sans-serif\" font-weight=\"bold\">NETWORK BITS (24 BITS)</text>\n\n  <rect x=\"285\" y=\"45\" width=\"85\" height=\"35\" fill=\"rgba(249,115,22,0.2)\" stroke=\"#f97316\" stroke-width=\"2\" rx=\"4\"/>\n  <text x=\"327\" y=\"66\" fill=\"#f97316\" font-size=\"11\" text-anchor=\"middle\" font-family=\"sans-serif\" font-weight=\"bold\">HOST BITS (8 BITS)</text>\n\n  <!-- Stats Grid -->\n  <rect x=\"30\" y=\"95\" width=\"165\" height=\"40\" fill=\"#1e293b\" rx=\"6\"/>\n  <text x=\"112\" y=\"112\" fill=\"#94a3b8\" font-size=\"9\" text-anchor=\"middle\" font-family=\"sans-serif\">NET ID: 192.168.10.0</text>\n  <text x=\"112\" y=\"126\" fill=\"#10b981\" font-size=\"9\" font-family=\"sans-serif\" font-weight=\"bold\">MASK: 255.255.255.0</text>\n\n  <rect x=\"205\" y=\"95\" width=\"165\" height=\"40\" fill=\"#1e293b\" rx=\"6\"/>\n  <text x=\"287\" y=\"112\" fill=\"#94a3b8\" font-size=\"9\" text-anchor=\"middle\" font-family=\"sans-serif\">BROADCAST: 192.168.10.255</text>\n  <text x=\"287\" y=\"126\" fill=\"#f97316\" font-size=\"9\" font-family=\"sans-serif\" font-weight=\"bold\">HOSTS: 254 USABLE</text>\n</svg>"
         },
         {
-            "name": "Layer 2 Ethernet Frame & Switch MAC Visualizer",
-            "layer": "Data Link Layer 2",
-            "ports": "ASIC Switch Ports",
-            "usage": "Animates frame forwarding and MAC table learning",
-            "statusLED": "Activity LED Blinking"
+                "name": "IPv6 Zero Compression Engine",
+                "layer": "Layer 3 Utility",
+                "ports": "128-Bit Hex Syntax",
+                "usage": "Applies leading-zero omission and double-colon compression",
+                "statusLED": "Hex Standardized",
+                "image": "<svg viewBox=\"0 0 400 160\" width=\"100%\" height=\"100%\" xmlns=\"http://www.w3.org/2000/svg\">\n  <rect width=\"400\" height=\"160\" fill=\"#0f172a\" rx=\"10\"/>\n  <text x=\"200\" y=\"30\" fill=\"#a78bfa\" font-size=\"12\" text-anchor=\"middle\" font-family=\"sans-serif\" font-weight=\"bold\">IPV6 128-BIT ZERO COMPRESSION (RFC 5952)</text>\n\n  <!-- Uncompressed -->\n  <rect x=\"30\" y=\"45\" width=\"340\" height=\"30\" fill=\"#1e293b\" stroke=\"#64748b\" stroke-width=\"1\" rx=\"6\"/>\n  <text x=\"200\" y=\"64\" fill=\"#94a3b8\" font-size=\"10\" text-anchor=\"middle\" font-family=\"monospace\">2001:0db8:0000:0000:0000:0000:1428:57ab</text>\n\n  <!-- Compression Arrow -->\n  <path d=\"M 200,80 L 200,92\" stroke=\"#a78bfa\" stroke-width=\"2\" marker-end=\"url(#arrow)\"/>\n\n  <!-- Compressed -->\n  <rect x=\"30\" y=\"98\" width=\"340\" height=\"35\" fill=\"rgba(139,92,246,0.2)\" stroke=\"#8b5cf6\" stroke-width=\"2\" rx=\"6\"/>\n  <text x=\"200\" y=\"120\" fill=\"#a78bfa\" font-size=\"13\" text-anchor=\"middle\" font-family=\"monospace\" font-weight=\"bold\">2001:db8::1428:57ab</text>\n</svg>"
         },
         {
-            "name": "Interactive Terminal Ping Diagnostic Console",
-            "layer": "Network Layer 3",
-            "ports": "ICMP Echo",
-            "usage": "Executes ping requests and reports ICMP latency and loss",
-            "statusLED": "ICMP Reply Active"
+                "name": "Packet Delivery & Gateway Router Sim",
+                "layer": "Layer 3 Topology",
+                "ports": "Switch / Router Hops",
+                "usage": "Simulates local vs remote subnet packet delivery",
+                "statusLED": "Route Verified",
+                "image": "<svg viewBox=\"0 0 400 160\" width=\"100%\" height=\"100%\" xmlns=\"http://www.w3.org/2000/svg\">\n  <rect width=\"400\" height=\"160\" fill=\"#0f172a\" rx=\"10\"/>\n  \n  <!-- Local Switch Hops -->\n  <rect x=\"30\" y=\"40\" width=\"150\" height=\"90\" rx=\"8\" fill=\"#1e293b\" stroke=\"#10b981\" stroke-width=\"1.5\"/>\n  <text x=\"105\" y=\"60\" fill=\"#10b981\" font-size=\"11\" text-anchor=\"middle\" font-family=\"sans-serif\" font-weight=\"bold\">SAME SUBNET</text>\n  <text x=\"105\" y=\"80\" fill=\"#cbd5e1\" font-size=\"9\" text-anchor=\"middle\" font-family=\"sans-serif\">PC A → L2 Switch → PC B</text>\n  <rect x=\"55\" y=\"95\" width=\"100\" height=\"20\" rx=\"4\" fill=\"rgba(16,185,129,0.2)\"/>\n  <text x=\"105\" y=\"109\" fill=\"#10b981\" font-size=\"9\" text-anchor=\"middle\" font-family=\"sans-serif\" font-weight=\"bold\">DIRECT L2 ARP</text>\n\n  <!-- Remote Gateway Router Hops -->\n  <rect x=\"220\" y=\"40\" width=\"150\" height=\"90\" rx=\"8\" fill=\"#1e293b\" stroke=\"#3b82f6\" stroke-width=\"1.5\"/>\n  <text x=\"295\" y=\"60\" fill=\"#60a5fa\" font-size=\"11\" text-anchor=\"middle\" font-family=\"sans-serif\" font-weight=\"bold\">REMOTE SUBNET</text>\n  <text x=\"295\" y=\"80\" fill=\"#cbd5e1\" font-size=\"9\" text-anchor=\"middle\" font-family=\"sans-serif\">PC A → L3 Router → PC B</text>\n  <rect x=\"245\" y=\"95\" width=\"100\" height=\"20\" rx=\"4\" fill=\"rgba(59,130,246,0.2)\"/>\n  <text x=\"295\" y=\"109\" fill=\"#60a5fa\" font-size=\"9\" text-anchor=\"middle\" font-family=\"sans-serif\" font-weight=\"bold\">GATEWAY HOPS</text>\n</svg>"
         }
-    ],
-    "procedure": [
-        "Launch the LAN Setup & Cabling Simulator in the Interactive Simulation tab.",
-        "Use Module 1 (Cable Selection) to select Device A and Device B, toggle Auto-MDIX ON/OFF, and test Straight-Through vs Crossover links.",
-        "Use Module 2 (T568A/B Pinout Builder) to drag/click 8 color-coded conductors in order and verify crimping sequence.",
-        "Use Module 3 (LAN Canvas Topology Builder) to connect PC1, PC2, and Switch, assigning IP addresses and subnet masks.",
-        "Observe Link (Green) and Activity (Blinking Yellow) LEDs on the simulated NICs and Switch ports.",
-        "Open Module 6 (Terminal Ping Console) and issue 'ping 192.168.1.20' to verify Layer 3 connectivity.",
-        "Execute Module 7 (Fault Injection Lab) to diagnose cable breaks, duplicate IPs, and disabled ports."
-    ],
-    "troubleshooting": {
-        "problem": "PC1 Link LED remains OFF when connected to PC2 using a standard Straight-Through cable (Auto-MDIX disabled).",
-        "hints": [
-            "Direct PC-to-PC connections require transmit pins of PC1 to connect to receive pins of PC2.",
-            "Without Auto-MDIX, a Straight-Through cable connects Tx to Tx and Rx to Rx, causing physical link failure."
-        ],
-        "fix": "Replace the Straight-Through cable with a Crossover cable (T568A on one end, T568B on the other) OR enable Auto-MDIX on the NICs."
-    },
-    "pretest": [
-        {
-            "q": "Which cable type is traditionally used to connect a PC directly to a Layer 2 Switch?",
-            "options": [
-                "Crossover Cable",
-                "Straight-Through Cable",
-                "Rollover Cable",
-                "Coaxial Cable"
-            ],
-            "correct": 1,
-            "explanation": "PC (MDI device) to Switch (MDI-X device) connects different OSI device types and requires a Straight-Through cable."
-        },
-        {
-            "q": "Which pins are used for Transmit (Tx) and Receive (Rx) in 10/100 Mbps Fast Ethernet?",
-            "options": [
-                "Pins 1, 2, 4, 5",
-                "Pins 1, 2, 3, 6",
-                "Pins 3, 4, 5, 6",
-                "Pins 5, 6, 7, 8"
-            ],
-            "correct": 1,
-            "explanation": "Fast Ethernet (10/100 Mbps) utilizes Pins 1 and 2 for Transmit (Tx) and Pins 3 and 6 for Receive (Rx)."
-        },
-        {
-            "q": "What is the wire color for Pin 1 in the T568B cabling standard?",
-            "options": [
-                "White-Green",
-                "White-Orange",
-                "Green",
-                "Orange"
-            ],
-            "correct": 1,
-            "explanation": "The T568B standard begins with White-Orange on Pin 1 and Orange on Pin 2."
-        },
-        {
-            "q": "What does Auto-MDI/MDIX do on modern network switches?",
-            "options": [
-                "Assigns IP addresses automatically via DHCP",
-                "Automatically detects and corrects transmit/receive cable pin swapping",
-                "Encrypts Layer 2 Ethernet frames",
-                "Boosts Wi-Fi signal strength"
-            ],
-            "correct": 1,
-            "explanation": "Auto-MDI/MDIX senses transmit/receive pin configurations and electronically swaps them internally if needed."
-        },
-        {
-            "q": "What is the maximum recommended segment length for CAT6 copper UTP cabling?",
-            "options": [
-                "50 meters",
-                "100 meters",
-                "250 meters",
-                "500 meters"
-            ],
-            "correct": 1,
-            "explanation": "The TIA/EIA standard specifies a maximum segment length of 100 meters (328 feet) for twisted pair copper."
-        }
-    ],
-    "posttest": [
-        {
-            "q": "Which cabling standard uses White-Green on Pin 1 and Green on Pin 2?",
-            "options": [
-                "T568A",
-                "T568B",
-                "USOC",
-                "IEEE 802.11"
-            ],
-            "correct": 0,
-            "explanation": "T568A starts with White-Green (Pin 1) and Green (Pin 2)."
-        },
-        {
-            "q": "Which pair of devices requires a Crossover cable when Auto-MDIX is disabled?",
-            "options": [
-                "PC to Switch",
-                "Switch to Router",
-                "PC to PC",
-                "Switch to Server"
-            ],
-            "correct": 2,
-            "explanation": "PC to PC connects similar MDI devices directly, requiring a Crossover cable to swap Tx and Rx pairs."
-        },
-        {
-            "q": "If you crimp T568A on End 1 and T568B on End 2 of a CAT6 cable, what type of cable have you created?",
-            "options": [
-                "Straight-Through Cable",
-                "Crossover Cable",
-                "Rollover Console Cable",
-                "Coaxial Ribbon Cable"
-            ],
-            "correct": 1,
-            "explanation": "Mixing T568A on one end and T568B on the other creates a Crossover cable."
-        },
-        {
-            "q": "What ICMP output indicates that physical cable connection is working but the target IP is on a different unreachable network?",
-            "options": [
-                "Reply from 192.168.1.20",
-                "Destination Host Unreachable",
-                "Request Timed Out",
-                "Hardware Error"
-            ],
-            "correct": 1,
-            "explanation": "'Destination Host Unreachable' means Layer 2 link is up, but no Layer 3 routing path exists to the destination subnet."
-        },
-        {
-            "q": "What physical indicator shows that an Ethernet link has been successfully established at Layer 1?",
-            "options": [
-                "Power LED turns red",
-                "Link LED turns solid Green",
-                "Activity LED blinks blue",
-                "DHCP LED turns yellow"
-            ],
-            "correct": 1,
-            "explanation": "A solid Green Link LED indicates physical signal detection and successful electrical link establishment."
-        },
-        {
-            "q": "Which pins are swapped between T568A and T568B to create a Crossover cable?",
-            "options": [
-                "Pins 1,2 swapped with Pins 3,6",
-                "Pins 4,5 swapped with Pins 7,8",
-                "Pins 1,8 swapped with Pins 2,7",
-                "Pins 3,4 swapped with Pins 5,6"
-            ],
-            "correct": 0,
-            "explanation": "A Crossover cable swaps pair 2 (Pins 1,2) with pair 3 (Pins 3,6)."
-        },
-        {
-            "q": "What layer of the OSI model does an Ethernet Switch operate on to forward frames using MAC addresses?",
-            "options": [
-                "Layer 1 (Physical)",
-                "Layer 2 (Data Link)",
-                "Layer 3 (Network)",
-                "Layer 4 (Transport)"
-            ],
-            "correct": 1,
-            "explanation": "Layer 2 Ethernet Switches inspect MAC addresses in frame headers to forward data to destination ports."
-        },
-        {
-            "q": "Why are conductors in an Ethernet cable twisted in pairs?",
-            "options": [
-                "To increase physical flexibility",
-                "To reduce electromagnetic interference (EMI) and crosstalk",
-                "To increase electrical resistance",
-                "To prevent water damage"
-            ],
-            "correct": 1,
-            "explanation": "Twisting pairs causes opposing electromagnetic fields to cancel out noise, reducing crosstalk."
-        },
-        {
-            "q": "What command in Windows or Linux command prompt is used to test round-trip latency to a remote IP?",
-            "options": [
-                "ipconfig",
-                "ping",
-                "tracert",
-                "netstat"
-            ],
-            "correct": 1,
-            "explanation": "The 'ping' command sends ICMP Echo Request packets to verify network connectivity and measure latency."
-        },
-        {
-            "q": "If PC1 (192.168.1.10/24) cannot ping PC2 (192.168.1.20/24) and Link LED is dark, what is the FIRST troubleshooting step?",
-            "options": [
-                "Reinstall the Windows operating system",
-                "Check physical cable connection and verify cable type",
-                "Change DNS server IP",
-                "Replace the router"
-            ],
-            "correct": 1,
-            "explanation": "Always start physical layer troubleshooting by checking physical cable connections, RJ-45 seating, and Link LED status."
-        }
-    ],
-    "viva": [
-        {
-            "q": "Explain the difference between T568A and T568B wiring standards.",
-            "a": "T568A and T568B are telecommunications wiring standards for RJ-45 connectors. T568A begins with White-Green/Green on Pins 1 & 2 and White-Orange/Orange on Pins 3 & 6. T568B swaps these two pairs, starting with White-Orange/Orange on Pins 1 & 2 and White-Green/Green on Pins 3 & 6."
-        },
-        {
-            "q": "How does Auto-MDI/MDIX eliminate the need for crossover cables?",
-            "a": "Auto-MDIX allows modern network interface cards and switch ports to automatically detect required transmit and receive signals. The hardware internally switches Tx and Rx channels if a Straight-Through cable is connected between similar devices."
-        },
-        {
-            "q": "Why does 1000BASE-T (Gigabit Ethernet) require all 8 conductors in a CAT6 cable?",
-            "a": "Unlike 10/100 Mbps Fast Ethernet which only uses 4 wires (2 pairs), Gigabit Ethernet (1000BASE-T) transmits and receives data simultaneously on all 4 twisted pairs (8 wires) using hybrid bidirectional signaling at 250 Mbps per pair."
-        },
-        {
-            "q": "Describe the steps a Layer 2 Switch performs when an Ethernet frame arrives on Port 1.",
-            "a": "1. Switch reads Source MAC address and records it in its MAC Address Table linked to Port 1.\n2. Switch reads Destination MAC address.\n3. If Destination MAC is in the table, switch forwards frame out ONLY to the matching egress port.\n4. If Destination MAC is unknown or broadcast, switch floods frame out to all ports except Port 1."
-        },
-        {
-            "q": "What does 'Request Timed Out' mean during a Ping test?",
-            "a": "'Request Timed Out' indicates that the source host sent an ICMP Echo Request, but did not receive an ICMP Echo Reply within the timeout window (usually 4 seconds). This is caused by broken physical cables, target host shutdown, or firewall dropping ICMP packets."
-        }
-    ],
-    "assignment": "1. Construct a reference diagram showing T568A and T568B RJ-45 pinout colors.\n2. Draw a topology connecting PC1, PC2, and Switch 1. Specify the correct cable type for each link when Auto-MDIX is disabled.\n3. Perform a virtual cabling lab ping diagnostic: set PC1 to 192.168.1.10/24 and PC2 to 192.168.1.20/24, execute ping, and record output.",
-    "references": [
-        {
-            "title": "ANSI/TIA-568.2-D Cabling Standard",
-            "link": "https://tiaonline.org"
-        },
-        {
-            "title": "IEEE 802.3 Ethernet Working Group Specifications",
-            "link": "https://ieee802.org/3"
-        },
-        {
-            "title": "Cisco Networking Academy - LAN Cabling & Ethernet Fundamentals",
-            "link": "https://www.cisco.com"
-        }
-    ],
-    "simType": "lan_cables"
-},
-    'subnetting': {
-        title: "Subnetting, VLSM & CIDR",
-        aim: "To divide network blocks using Variable Length Subnet Masking (VLSM) and Classless Inter-Domain Routing (CIDR) notation.",
-        intro: {
-            summary: "Subnetting divides large IP networks into smaller, manageable sub-networks to conserve IPv4 space and limit broadcast domains.",
-            importance: "VLSM is essential for efficient IP allocation in corporate networks, avoiding wasted IP addresses.",
-            applications: ["ISP IP Block Distribution", "Departmental Network Isolation", "Cloud VPC Subnetting"],
-            outcome: "Students will calculate subnet masks, CIDR prefixes, block sizes, and custom host ranges."
-        },
-        prerequisites: ["Practical 4: IPv4 Address Classification"],
-        outcomes: [
-            "Calculate CIDR prefixes (/24 to /30).",
-            "Perform VLSM allocation for varying departmental size requirements.",
-            "Determine Network ID, First Usable IP, Last Usable IP, and Broadcast ID."
-        ],
-        theory: {
-            intro: "Subnetting borrows host bits to create sub-networks, reducing broadcast domain sizes and preventing IPv4 address exhaustion.",
-            cards: [
-                { title: "VLSM Allocation", content: "Allocates custom subnet masks based on specific host count requirements per department." },
-                { title: "Block Size Rule", content: "Block Size = 256 - Subnet Octet Value. Next network ID = Previous Network ID + Block Size." }
-            ],
-            formulas: ["Subnet Count = 2^(Borrowed Bits)", "Usable Hosts = 2^(Remaining Host Bits) - 2"],
-            standards: ["RFC 1519 - Classless Inter-Domain Routing (CIDR)", "RFC 1878 - Variable Length Subnet Masks"]
-        },
-        tools: [
-            { name: "VLSM Matrix Calculator", layer: "Layer 3 Tool", ports: "Software Engine", usage: "Computes subnets based on host demands", statusLED: "Subnet Table Rendered" }
-        ],
-        procedure: [
-            "Enter base network address 192.168.1.0/24 in the Subnet Calculator.",
-            "Specify host requirements for Sales (50 hosts), HR (20 hosts), and IT (10 hosts).",
-            "Calculate custom subnet masks, network addresses, and usable host ranges.",
-            "Verify VLSM address assignment table."
-        ],
-        troubleshooting: {
-            problem: "Hosts in IT department (/28 mask) cannot ping Sales department (/26 mask).",
-            hints: ["Check if subnets overlap in host range allocation.", "Ensure router subinterfaces have correct gateway IPs."],
-            fix: "Adjust IT subnet starting IP to 192.168.1.64/28."
-        },
-        viva: [
-            { q: "What is the subnet mask for a /27 prefix?", a: "255.255.255.224." },
-            { q: "How many usable hosts does a /30 subnet provide?", a: "2 usable hosts (used for point-to-point router serial links)." }
-        ],
-        assignment: "Subnet 10.0.0.0/16 for 4 departments requiring 500, 200, 50, and 10 hosts using VLSM.",
-        references: [{ title: "RFC 1519 - CIDR Specification", link: "https://datatracker.ietf.org/doc/html/rfc1519" }],
-        simType: "interactive_calc"
-    },
-    'vlan': {
-        title: "Virtual LANs & IEEE 802.1Q Trunking",
-        aim: "To configure VLANs (VLAN 10, VLAN 20) on a Cisco switch and enable IEEE 802.1Q trunking links across switches.",
-        intro: {
-            summary: "VLANs partition a physical Layer-2 switch into multiple virtual broadcast domains, enhancing security and bandwidth management.",
-            importance: "VLANs isolate sensitive network traffic (e.g. Finance vs Student WiFi) without requiring separate physical switches.",
-            applications: ["Corporate Department Isolation", "VoIP Dedicated Voice VLANs", "Multi-Tenant Cloud Data Centers"],
-            outcome: "Students will create VLANs, assign access ports, and configure IEEE 802.1Q trunking ports."
-        },
-        prerequisites: ["Practical 1: Introduction to Networking Tools", "Practical 6: Subnetting"],
-        outcomes: [
-            "Create VLAN IDs and names on Cisco switches.",
-            "Assign switch ports to specific Access VLANs.",
-            "Configure 802.1Q Trunk links between switch interconnects."
-        ],
-        theory: {
-            intro: "VLANs logically segment a physical L2 switch into isolated broadcast domains. 802.1Q trunk ports append 4-byte VLAN tags to Ethernet frames sent across switch interconnects.",
-            cards: [
-                { title: "Access Port", content: "Carries traffic for a single assigned VLAN without frame tagging." },
-                { title: "Trunk Port (802.1Q)", content: "Carries traffic for multiple VLANs by inserting a 4-byte Tag Protocol ID (TPID 0x8100)." }
-            ],
-            formulas: ["Max VLAN ID Range = 1 to 4094", "IEEE 802.1Q Tag Size = 4 Bytes"],
-            standards: ["IEEE 802.1Q Virtual Bridged Local Area Networks", "IEEE 802.1p Traffic Class Expediting"]
-        },
-        tools: [
-            { name: "Cisco 2960 L2 Switch CLI", layer: "Layer 2 Switch", ports: "Ports 1-24 FE, 2x GE Trunk", usage: "VLAN creation & port tagging", statusLED: "Amber/Green Tag Status" }
-        ],
+],
         procedure: [
             "Open Switch CLI terminal and enter configuration mode (`enable`, `config t`).",
             "Create VLANs: `vlan 10` (name Sales), `vlan 20` (name HR).",
