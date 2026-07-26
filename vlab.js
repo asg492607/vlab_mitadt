@@ -61,7 +61,7 @@ window.showToast = (message, type = 'success') => {
     }
     const toast = document.createElement('div');
     toast.className = `toast ${type}`;
-    const icon = type === 'success' ? 'Î“Â£Ã ' : type === 'error' ? 'Î“Â¥Ã®' : 'Î“ÃœÃ¡âˆ©â••Ã…';
+    const icon = type === 'success' ? 'Γ£à' : type === 'error' ? 'Γ¥î' : 'ΓÜá∩╕Å';
     toast.innerHTML = `
         <div class="toast-icon">${icon}</div>
         <div class="toast-message">${message}</div>
@@ -1080,30 +1080,30 @@ class TopologySimulation {
             <div class="topology-workspace">
                 <aside class="topology-toolbox">
                     <div class="toolbox-tabs">
-                        <button class="tab-btn active" data-tab="devices" title="Network Devices">â‰¡Æ’Ã†â•—</button>
-                        <button class="tab-btn" data-tab="cables" title="Connections">Î“ÃœÃ­</button>
-                        <button class="tab-btn" data-tab="tools" title="Common Tools">â‰¡Æ’Â¢Ã¡âˆ©â••Ã…</button>
+                        <button class="tab-btn active" data-tab="devices" title="Network Devices">≡ƒÆ╗</button>
+                        <button class="tab-btn" data-tab="cables" title="Connections">ΓÜí</button>
+                        <button class="tab-btn" data-tab="tools" title="Common Tools">≡ƒ¢á∩╕Å</button>
                     </div>
                     <div class="toolbox-content">
                         <div class="tool-category active" id="cat-devices">
-                            <div class="tool-item" draggable="true" data-type="router" title="Router">â‰¡Æ’Ã®Ã‰</div>
-                            <div class="tool-item" draggable="true" data-type="switch" title="L2 Switch">â‰¡Æ’Ã´Æ’</div>
-                            <div class="tool-item" draggable="true" data-type="hub" title="Hub">â‰¡Æ’Âºâ–’</div>
-                            <div class="tool-item" draggable="true" data-type="pc" title="PC">â‰¡Æ’Ã»Ã‘âˆ©â••Ã…</div>
-                            <div class="tool-item" draggable="true" data-type="laptop" title="Laptop">â‰¡Æ’Ã†â•—</div>
-                            <div class="tool-item" draggable="true" data-type="server" title="Server">â‰¡Æ’Ã¹Ã¤âˆ©â••Ã…</div>
+                            <div class="tool-item" draggable="true" data-type="router" title="Router">≡ƒîÉ</div>
+                            <div class="tool-item" draggable="true" data-type="switch" title="L2 Switch">≡ƒôƒ</div>
+                            <div class="tool-item" draggable="true" data-type="hub" title="Hub">≡ƒº▒</div>
+                            <div class="tool-item" draggable="true" data-type="pc" title="PC">≡ƒûÑ∩╕Å</div>
+                            <div class="tool-item" draggable="true" data-type="laptop" title="Laptop">≡ƒÆ╗</div>
+                            <div class="tool-item" draggable="true" data-type="server" title="Server">≡ƒùä∩╕Å</div>
                         </div>
                         <div class="tool-category" id="cat-cables">
-                            <div class="tool-item cable-tool" data-cable="straight" title="Straight-Through">Î“â‚§Ã»</div>
-                            <div class="tool-item cable-tool" data-cable="cross" title="Cross-Over">Ï€Ã‡â–‘âˆ©â••Ã…</div>
-                            <div class="tool-item cable-tool" data-cable="fiber" title="Fiber Optic">Î“Â£Â¿</div>
+                            <div class="tool-item cable-tool" data-cable="straight" title="Straight-Through">Γ₧û</div>
+                            <div class="tool-item cable-tool" data-cable="cross" title="Cross-Over">πÇ░∩╕Å</div>
+                            <div class="tool-item cable-tool" data-cable="fiber" title="Fiber Optic">Γ£¿</div>
                         </div>
                         <div class="tool-category" id="cat-tools">
-                            <button id="btnSendPacket" class="btn-sim" style="width:100%; margin-bottom:8px; background:#eab308; color:#0b0f19; border:none; font-weight:700; cursor:pointer;">Î“Â£Ã«âˆ©â••Ã… Send Packet</button>
+                            <button id="btnSendPacket" class="btn-sim" style="width:100%; margin-bottom:8px; background:#eab308; color:#0b0f19; border:none; font-weight:700; cursor:pointer;">Γ£ë∩╕Å Send Packet</button>
                             <button id="btnSaveTopo" class="btn-sim" style="width:100%; margin-bottom:8px;">Save</button>
                             <button id="btnLoadTopo" class="btn-sim" style="width:100%; margin-bottom:8px;">Load</button>
-                            <button id="btnToggle3D" class="btn-sim" style="width:100%; margin-bottom:8px; background:#0d9488; color:white; border:none; cursor:pointer;">â‰¡Æ’Ã´Ã‰ View: 2D</button>
-                            <button id="btnCollabTopo" class="btn-sim" style="width:100%; margin-bottom:8px; background:#2563eb; color:white; border:none; cursor:pointer;">â‰¡Æ’Ã¦Ã‘ Collaborate</button>
+                            <button id="btnToggle3D" class="btn-sim" style="width:100%; margin-bottom:8px; background:#0d9488; color:white; border:none; cursor:pointer;">≡ƒôÉ View: 2D</button>
+                            <button id="btnCollabTopo" class="btn-sim" style="width:100%; margin-bottom:8px; background:#2563eb; color:white; border:none; cursor:pointer;">≡ƒæÑ Collaborate</button>
                             <button id="btnClearTopo" class="btn-sim" style="width:100%; border-color:var(--danger); color:var(--danger);">Clear</button>
                         </div>
                         <div id="topo-collab-bar" style="display:none; background:var(--bg-alt); padding:8px; border-radius:8px; border:1px solid var(--border); margin-top:8px; flex-direction:column; gap:6px;">
@@ -1123,13 +1123,13 @@ class TopologySimulation {
                         <div class="status-right" id="topo-last-event">Ready for design...</div>
                     </div>
                     <div id="device-props" class="device-props-panel" style="display:none;">
-                        <div class="props-header">Device Properties <button onclick="this.parentElement.parentElement.style.display='none'">â”œÃ¹</button></div>
+                        <div class="props-header">Device Properties <button onclick="this.parentElement.parentElement.style.display='none'">├ù</button></div>
                         <div id="props-body" class="props-body"></div>
                     </div>
                     <div id="pdu-list-panel" class="pdu-list-panel" style="display:flex; flex-direction:column; position:absolute; bottom:40px; right:20px; width:350px; max-height:200px; background:#1e293b; border:1px solid #475569; border-radius:8px; overflow-y:auto; box-shadow: 0 4px 15px rgba(0,0,0,0.5); z-index:1001; font-family:'JetBrains Mono', monospace; font-size:11px; color:#cbd5e1;">
                         <div style="position:sticky; top:0; background:#0f172a; padding:6px 12px; border-bottom:1px solid #475569; font-weight:bold; color:#fbbf24; display:flex; justify-content:space-between; align-items:center;">
                             Simulation PDU List
-                            <button onclick="document.getElementById('pdu-list-panel').style.display='none'" style="background:transparent; border:none; color:#ef4444; cursor:pointer;">Î“Â£Ã»</button>
+                            <button onclick="document.getElementById('pdu-list-panel').style.display='none'" style="background:transparent; border:none; color:#ef4444; cursor:pointer;">Γ£û</button>
                         </div>
                         <table id="pduTable" style="width:100%; border-collapse:collapse; text-align:left;">
                             <thead>
@@ -1182,12 +1182,12 @@ class TopologySimulation {
                     this.packetSourceNode = null;
                 }
                 if (this.isSendingPacket) {
-                    btnSendPacket.textContent = "Î“Â¥Ã® Cancel Send";
+                    btnSendPacket.textContent = "Γ¥î Cancel Send";
                     btnSendPacket.style.background = "#ef4444";
                     btnSendPacket.style.color = "white";
                     this.showHint("Packet Mode Active: Click Source Device...");
                 } else {
-                    btnSendPacket.textContent = "Î“Â£Ã«âˆ©â••Ã… Send Packet";
+                    btnSendPacket.textContent = "Γ£ë∩╕Å Send Packet";
                     btnSendPacket.style.background = "#eab308";
                     btnSendPacket.style.color = "#0b0f19";
                     this.showHint("Packet sending cancelled.");
@@ -1205,12 +1205,12 @@ class TopologySimulation {
                 if (canvasBox) {
                     if (this.is3DActive) {
                         canvasBox.classList.add('isometric-grid');
-                        toggle3D.textContent = 'â‰¡Æ’Ã´Ã‰ View: 3D';
+                        toggle3D.textContent = '≡ƒôÉ View: 3D';
                         toggle3D.style.background = '#8b5cf6';
                         this.updateStatus("Switched to Isometric 3D View");
                     } else {
                         canvasBox.classList.remove('isometric-grid');
-                        toggle3D.textContent = 'â‰¡Æ’Ã´Ã‰ View: 2D';
+                        toggle3D.textContent = '≡ƒôÉ View: 2D';
                         toggle3D.style.background = '#0d9488';
                         this.updateStatus("Switched to 2D Plain View");
                     }
@@ -1451,17 +1451,17 @@ class TopologySimulation {
 
     addNode(type, x, y, label = null, config = null) {
         const iconMap = {
-            'router': 'â‰¡Æ’Ã®Ã‰',
-            'switch': 'â‰¡Æ’Ã´Æ’',
-            'hub': 'â‰¡Æ’Âºâ–’',
-            'pc': 'â‰¡Æ’Ã»Ã‘âˆ©â••Ã…',
-            'laptop': 'â‰¡Æ’Ã†â•—',
-            'server': 'â‰¡Æ’Ã¹Ã¤âˆ©â••Ã…'
+            'router': '≡ƒîÉ',
+            'switch': '≡ƒôƒ',
+            'hub': '≡ƒº▒',
+            'pc': '≡ƒûÑ∩╕Å',
+            'laptop': '≡ƒÆ╗',
+            'server': '≡ƒùä∩╕Å'
         };
         const node = {
             id: Date.now(),
             type, x, y,
-            icon: iconMap[type] || 'â‰¡Æ’Ã´Æ’',
+            icon: iconMap[type] || '≡ƒôƒ',
             label: label || `${type.toUpperCase()}_${this.nodes.length + 1}`,
             config: config || { 
                 hostname: label || `${type.toUpperCase()}_${this.nodes.length + 1}`,
@@ -1514,7 +1514,7 @@ class TopologySimulation {
         div.style.userSelect = 'none';
         div.innerHTML = `<div class="d-icon">${node.icon}</div><div class="d-label">${window.escapeHtml(node.label)}</div>`;
 
-        // Tooltip handlers (single set Î“Ã‡Ã¶ see below for implementation)
+        // Tooltip handlers (single set ΓÇö see below for implementation)
 
         let moved = false;
         div.addEventListener('mousedown', (e) => {
@@ -1538,7 +1538,7 @@ class TopologySimulation {
                     
                     const btnSendPacket = document.getElementById('btnSendPacket');
                     if (btnSendPacket) {
-                        btnSendPacket.textContent = "Î“Â£Ã«âˆ©â••Ã… Send Packet";
+                        btnSendPacket.textContent = "Γ£ë∩╕Å Send Packet";
                         btnSendPacket.style.background = "#eab308";
                         btnSendPacket.style.color = "#0b0f19";
                     }
@@ -1877,7 +1877,7 @@ class TopologySimulation {
         configContent.innerHTML = `
             <div class="modal-header">
                 <h3 id="modalTitle">Device Configuration</h3>
-                <button class="btn-icon" onclick="document.getElementById('configModal').style.display='none'">Î“Â£Ã²</button>
+                <button class="btn-icon" onclick="document.getElementById('configModal').style.display='none'">Γ£ò</button>
             </div>
             <div class="terminal-area" id="terminalArea">
                 <div class="terminal-input-wrap">
@@ -1940,7 +1940,7 @@ class TopologySimulation {
             <div class="modal-header" style="background: #e2e8f0; border-bottom: 2px solid #cbd5e1; padding: 10px 16px; flex-direction: column; align-items: stretch; gap: 8px;">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
                     <h3 id="modalTitle" style="color: #1e293b; font-size: 14px; font-weight: 700; margin: 0;">${node.label} (${node.type.toUpperCase()})</h3>
-                    <button class="btn-icon" onclick="document.getElementById('configModal').style.display='none'" style="color: #64748b; background: transparent; border: none; font-size: 16px; cursor: pointer;">Î“Â£Ã²</button>
+                    <button class="btn-icon" onclick="document.getElementById('configModal').style.display='none'" style="color: #64748b; background: transparent; border: none; font-size: 16px; cursor: pointer;">Γ£ò</button>
                 </div>
                 <div class="desktop-tabs">
                     <button class="d-tab-btn" data-tab="physical">Physical</button>
@@ -1955,7 +1955,7 @@ class TopologySimulation {
                 <div class="d-tab-content" id="tab-physical" style="display: none; padding: 20px; color: #fff; overflow-y: auto; text-align: center;">
                     <h4 style="margin: 0 0 16px 0;">Device Physical View</h4>
                     <div style="background: #1e293b; border: 2px dashed #475569; border-radius: 8px; padding: 30px; display: inline-block;">
-                        <span style="font-size: 72px;">â‰¡Æ’Ã»Ã‘âˆ©â••Ã…</span>
+                        <span style="font-size: 72px;">≡ƒûÑ∩╕Å</span>
                         <div style="margin-top: 15px; font-size: 12px; color: #cbd5e1;">
                             Power Port: Connected (100Mbps Ethernet Link LinkUp)<br>
                             Link Speed: Auto | Duplex: Full
@@ -2009,47 +2009,47 @@ nf.bind_listener(on_packet_receive)</textarea>
                 <!-- Tab: Desktop (Grid of Icons) -->
                 <div class="d-tab-content active" id="tab-desktop" style="flex: 1; padding: 20px; display: grid; grid-template-columns: repeat(auto-fill, minmax(105px, 1fr)); gap: 14px; overflow-y: auto; align-content: start;">
                     <div class="app-icon" data-app="ipconfig" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; cursor: pointer; padding: 10px; border-radius: 6px; background: #62b1e6; border: 2px solid #1c6ba0; box-shadow: inset 0 0 10px rgba(255,255,255,0.4); width: 100px; height: 100px;">
-                        <span style="font-size: 28px;">â‰¡Æ’Ã®Ã‰</span>
+                        <span style="font-size: 28px;">≡ƒîÉ</span>
                         <span style="font-size: 10px; text-align: center; color: #0f172a; font-weight: 700; line-height: 1.1;">IP Configuration</span>
                     </div>
                     <div class="app-icon" data-app="dialup" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; cursor: pointer; padding: 10px; border-radius: 6px; background: #62b1e6; border: 2px solid #1c6ba0; box-shadow: inset 0 0 10px rgba(255,255,255,0.4); width: 100px; height: 100px;">
-                        <span style="font-size: 28px;">â‰¡Æ’Ã´â‚§</span>
+                        <span style="font-size: 28px;">≡ƒô₧</span>
                         <span style="font-size: 10px; text-align: center; color: #0f172a; font-weight: 700; line-height: 1.1;">Dial-up</span>
                     </div>
                     <div class="app-icon" data-app="cli_terminal" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; cursor: pointer; padding: 10px; border-radius: 6px; background: #62b1e6; border: 2px solid #1c6ba0; box-shadow: inset 0 0 10px rgba(255,255,255,0.4); width: 100px; height: 100px;">
-                        <span style="font-size: 28px;">â‰¡Æ’Ã†â•—</span>
+                        <span style="font-size: 28px;">≡ƒÆ╗</span>
                         <span style="font-size: 10px; text-align: center; color: #0f172a; font-weight: 700; line-height: 1.1;">Terminal</span>
                     </div>
                     <div class="app-icon" data-app="terminal" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; cursor: pointer; padding: 10px; border-radius: 6px; background: #62b1e6; border: 2px solid #1c6ba0; box-shadow: inset 0 0 10px rgba(255,255,255,0.4); width: 100px; height: 100px;">
-                        <span style="font-size: 28px;">Î“ÃœÃ–âˆ©â••Ã…</span>
+                        <span style="font-size: 28px;">ΓÜÖ∩╕Å</span>
                         <span style="font-size: 10px; text-align: center; color: #0f172a; font-weight: 700; line-height: 1.1;">Command Prompt</span>
                     </div>
                     <div class="app-icon" data-app="browser" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; cursor: pointer; padding: 10px; border-radius: 6px; background: #62b1e6; border: 2px solid #1c6ba0; box-shadow: inset 0 0 10px rgba(255,255,255,0.4); width: 100px; height: 100px;">
-                        <span style="font-size: 28px;">â‰¡Æ’ÂºÂ¡</span>
+                        <span style="font-size: 28px;">≡ƒº¡</span>
                         <span style="font-size: 10px; text-align: center; color: #0f172a; font-weight: 700; line-height: 1.1;">Web Browser</span>
                     </div>
                     <div class="app-icon" data-app="wireless" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; cursor: pointer; padding: 10px; border-radius: 6px; background: #62b1e6; border: 2px solid #1c6ba0; box-shadow: inset 0 0 10px rgba(255,255,255,0.4); width: 100px; height: 100px;">
-                        <span style="font-size: 28px;">â‰¡Æ’Ã´â•¢</span>
+                        <span style="font-size: 28px;">≡ƒô╢</span>
                         <span style="font-size: 10px; text-align: center; color: #0f172a; font-weight: 700; line-height: 1.1;">PC Wireless</span>
                     </div>
                     <div class="app-icon" data-app="vpn" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; cursor: pointer; padding: 10px; border-radius: 6px; background: #62b1e6; border: 2px solid #1c6ba0; box-shadow: inset 0 0 10px rgba(255,255,255,0.4); width: 100px; height: 100px;">
-                        <span style="font-size: 28px;">â‰¡Æ’Ã¶Ã†</span>
+                        <span style="font-size: 28px;">≡ƒöÆ</span>
                         <span style="font-size: 10px; text-align: center; color: #0f172a; font-weight: 700; line-height: 1.1;">VPN</span>
                     </div>
                     <div class="app-icon" data-app="traffic" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; cursor: pointer; padding: 10px; border-radius: 6px; background: #62b1e6; border: 2px solid #1c6ba0; box-shadow: inset 0 0 10px rgba(255,255,255,0.4); width: 100px; height: 100px;">
-                        <span style="font-size: 28px;">â‰¡Æ’Ã´Ã¨</span>
+                        <span style="font-size: 28px;">≡ƒôè</span>
                         <span style="font-size: 10px; text-align: center; color: #0f172a; font-weight: 700; line-height: 1.1;">Traffic Gen</span>
                     </div>
                     <div class="app-icon" data-app="email" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; cursor: pointer; padding: 10px; border-radius: 6px; background: #62b1e6; border: 2px solid #1c6ba0; box-shadow: inset 0 0 10px rgba(255,255,255,0.4); width: 100px; height: 100px;">
-                        <span style="font-size: 28px;">Î“Â£Ã«âˆ©â••Ã…</span>
+                        <span style="font-size: 28px;">Γ£ë∩╕Å</span>
                         <span style="font-size: 10px; text-align: center; color: #0f172a; font-weight: 700; line-height: 1.1;">Email</span>
                     </div>
                     <div class="app-icon" data-app="text_editor" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; cursor: pointer; padding: 10px; border-radius: 6px; background: #62b1e6; border: 2px solid #1c6ba0; box-shadow: inset 0 0 10px rgba(255,255,255,0.4); width: 100px; height: 100px;">
-                        <span style="font-size: 28px;">â‰¡Æ’Ã´Â¥</span>
+                        <span style="font-size: 28px;">≡ƒô¥</span>
                         <span style="font-size: 10px; text-align: center; color: #0f172a; font-weight: 700; line-height: 1.1;">Text Editor</span>
                     </div>
                     <div class="app-icon" data-app="firewall" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; cursor: pointer; padding: 10px; border-radius: 6px; background: #62b1e6; border: 2px solid #1c6ba0; box-shadow: inset 0 0 10px rgba(255,255,255,0.4); width: 100px; height: 100px;">
-                        <span style="font-size: 28px;">â‰¡Æ’Âºâ–’</span>
+                        <span style="font-size: 28px;">≡ƒº▒</span>
                         <span style="font-size: 10px; text-align: center; color: #0f172a; font-weight: 700; line-height: 1.1;">Firewall</span>
                     </div>
                 </div>
@@ -2175,7 +2175,7 @@ nf.bind_listener(on_packet_receive)</textarea>
                     <div id="browserContent" style="flex: 1; background: #fff; color: #334155; padding: 20px; overflow-y: auto; font-family: sans-serif; font-size: 14px;">
                         <!-- Simulated browser window content -->
                         <div style="color: #94a3b8; text-align: center; margin-top: 50px;">
-                            <span style="font-size: 48px; display: block; margin-bottom: 10px;">â‰¡Æ’ÂºÂ¡</span>
+                            <span style="font-size: 48px; display: block; margin-bottom: 10px;">≡ƒº¡</span>
                             Enter a URL or IP Address to browse the web.
                         </div>
                     </div>
@@ -4209,7 +4209,7 @@ class NetworkingSim {
                 return Math.sin(x * 0.2 + time * 10) * (30 + message * 20);
             });
             this.ctx.fillStyle = "rgba(16, 185, 129, 0.2)";
-            this.ctx.fillText("Sidebands: fc â”¬â–’ fm", 50, startY + spacing + 60);
+            this.ctx.fillText("Sidebands: fc ┬▒ fm", 50, startY + spacing + 60);
         } else if (cycle === 1) {
             title = "Frequency Modulation (FM)";
             this.drawWave(50, startY + spacing, title, color, (x) => {
@@ -4234,7 +4234,7 @@ class NetworkingSim {
             }
             this.ctx.stroke();
         } else {
-            title = "Î“ÃœÃ¡âˆ©â••Ã… ATTENUATION & THERMAL NOISE (SNR < 10dB)";
+            title = "ΓÜá∩╕Å ATTENUATION & THERMAL NOISE (SNR < 10dB)";
             color = "#ef4444";
             this.drawWave(50, startY + spacing, title, color, (x) => {
                 const noise = (Math.random() - 0.5) * 40;
@@ -4266,7 +4266,7 @@ class NetworkingSim {
         this.ctx.fillText(label, xStart, yCenter - 45);
     }
 
-    // destroy() is defined above at first occurrence Î“Ã‡Ã¶ this duplicate removed
+    // destroy() is defined above at first occurrence ΓÇö this duplicate removed
 
     drawWindow() {
         const x = this.senderPos.x - 100, y = this.senderPos.y + 80, size = 30;
@@ -4487,7 +4487,7 @@ class NetworkingSim {
             if (progress > 0.6) {
                 this.ctx.fillStyle = "#ef4444";
                 this.ctx.font = "bold 14px monospace";
-                this.ctx.fillText("Î“Â¥Ã® BLOCKED: VLAN MISMATCH", px, py - 20);
+                this.ctx.fillText("Γ¥î BLOCKED: VLAN MISMATCH", px, py - 20);
             }
             targetLabel = "Rejected (VLAN Isolation)";
         } else {
@@ -4632,7 +4632,7 @@ class NetworkingSim {
             this.ctx.font = "bold 10px monospace";
             this.ctx.fillText("LOCAL RIB: ROUTER A", 45, h - 152);
             this.ctx.fillText("Dest | Cost | Next", 45, h - 135);
-            this.ctx.fillText("Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡", 45, h - 127);
+            this.ctx.fillText("ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ", 45, h - 127);
             this.ctx.fillText("  B  |  10  |   B", 45, h - 112);
             this.ctx.fillText("  C  |   2  |   C", 45, h - 97);
             this.ctx.fillText("  D  |   7  |   C (Best)", 45, h - 82);
@@ -4655,8 +4655,8 @@ class NetworkingSim {
             this.ctx.fillStyle = "white";
             this.ctx.font = "bold 10px monospace";
             this.ctx.fillText("OSPF LSDB (Global View)", 45, h - 120);
-            this.ctx.fillText("Î“Ã‡Ã³ A-B (10) | A-C (2)", 45, h - 100);
-            this.ctx.fillText("Î“Ã‡Ã³ B-D (5)  | C-D (20)", 45, h - 85);
+            this.ctx.fillText("ΓÇó A-B (10) | A-C (2)", 45, h - 100);
+            this.ctx.fillText("ΓÇó B-D (5)  | C-D (20)", 45, h - 85);
             
             // Highlight shortest path A -> B -> D (Cost = 15)
             this.ctx.strokeStyle = "#10b981";
@@ -4775,7 +4775,7 @@ class NetworkingSim {
             if (progress > 0.4) {
                 color = "#ef4444";
                 this.ctx.fillStyle = "#ef4444";
-                this.ctx.fillText("Î“Â¥Ã® DROPPED BY FIREWALL", px, py - 30);
+                this.ctx.fillText("Γ¥î DROPPED BY FIREWALL", px, py - 30);
             }
         } else {
             // CONNECTION RESET
@@ -4943,7 +4943,7 @@ const localAIEvaluator = (code, query, lang) => {
     if (query.includes('explain') || query.includes('how does')) {
         return "AI Tutor: This code solves the exercise by taking standard inputs from stdin, processing values through the algorithm bounds, and printing values to stdout. To audit line-by-line, look at how values are read and updated in loops.";
     }
-    return "AI Tutor: Currently in Local Mode. Enter a Google Gemini API Key in the settings (Î“ÃœÃ–âˆ©â••Ã… icon) to activate advanced context-aware debugging and interactive chats. For now, you can compile code, run outputs, and submit for automated grading!";
+    return "AI Tutor: Currently in Local Mode. Enter a Google Gemini API Key in the settings (ΓÜÖ∩╕Å icon) to activate advanced context-aware debugging and interactive chats. For now, you can compile code, run outputs, and submit for automated grading!";
 };
 
 const runPistonCode = async (lang, version, code, stdin) => {
@@ -5438,9 +5438,9 @@ const runStaticCodeAnalysis = (code, lang) => {
         totalScore,
         grade,
         recommendations: [
-            commentRatio < 15 ? "â‰¡Æ’Ã†Ã­ Low comment density. Document your function arguments, loops, and conditions with inline comments." : null,
-            shortNames > 0 ? `â‰¡Æ’Ã†Ã­ Found ${shortNames} short variables. Rename them to descriptive names (e.g. 'index' instead of 'id').` : null,
-            cyclomaticComplexity > 12 ? "â‰¡Æ’Ã†Ã­ High Cyclomatic Complexity. Split complex nested loops/conditions into modular functions." : null,
+            commentRatio < 15 ? "≡ƒÆí Low comment density. Document your function arguments, loops, and conditions with inline comments." : null,
+            shortNames > 0 ? `≡ƒÆí Found ${shortNames} short variables. Rename them to descriptive names (e.g. 'index' instead of 'id').` : null,
+            cyclomaticComplexity > 12 ? "≡ƒÆí High Cyclomatic Complexity. Split complex nested loops/conditions into modular functions." : null,
             ...memoryIssues
         ].filter(r => r !== null)
     };
@@ -6017,16 +6017,16 @@ const initProgrammingLab = async (container, labId) => {
         <div style="display:flex; flex-direction:column; height:100%; gap:12px; padding:8px;">
             <div class="sim-toolbar" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
                 <div style="display:flex; gap:8px; align-items:center;">
-                    <button id="btnRunCode" class="btn-sim primary">Î“Ã»â•¢ Run Code</button>
-                    <button id="btnGradeCode" class="btn-sim" style="background:#10b981; color:white;">â‰¡Æ’Ã„Â» Submit Code</button>
+                    <button id="btnRunCode" class="btn-sim primary">Γû╢ Run Code</button>
+                    <button id="btnGradeCode" class="btn-sim" style="background:#10b981; color:white;">≡ƒÄ» Submit Code</button>
                     <button id="btnResetCode" class="btn-sim">Reset Template</button>
-                    <button id="btnToggleNotebook" class="btn-sim" style="background:#0284c7; color:white;">â‰¡Æ’Ã´Ã´ Notebook Mode</button>
-                    <button id="btnCheckQuality" class="btn-sim" style="background:#ea580c; color:white;">â‰¡Æ’Ã¶Ã¬ Check Quality</button>
+                    <button id="btnToggleNotebook" class="btn-sim" style="background:#0284c7; color:white;">≡ƒôô Notebook Mode</button>
+                    <button id="btnCheckQuality" class="btn-sim" style="background:#ea580c; color:white;">≡ƒöì Check Quality</button>
                 </div>
                 <div style="display:flex; gap:8px; align-items:center;">
-                    <button id="btnCollSession" class="btn-sim" style="background:#2563eb; color:white;">â‰¡Æ’Ã¦Ã‘ Live Collaboration</button>
-                    <button id="btnAiSettings" class="btn-sim" title="Gemini Configuration">Î“ÃœÃ–âˆ©â••Ã… AI Settings</button>
-                    <button id="btnToggleAiPanel" class="btn-sim primary" style="background:#a855f7; color:white;">Î“Â£Â¿ AI Tutor</button>
+                    <button id="btnCollSession" class="btn-sim" style="background:#2563eb; color:white;">≡ƒæÑ Live Collaboration</button>
+                    <button id="btnAiSettings" class="btn-sim" title="Gemini Configuration">ΓÜÖ∩╕Å AI Settings</button>
+                    <button id="btnToggleAiPanel" class="btn-sim primary" style="background:#a855f7; color:white;">Γ£¿ AI Tutor</button>
                 </div>
             </div>
             
@@ -6042,7 +6042,7 @@ const initProgrammingLab = async (container, labId) => {
                 <div id="normal-editor-view" style="display:flex; flex:1; gap:12px; height:100%; flex-wrap:wrap; width:100%;">
                     <div style="flex:1.4; display:flex; flex-direction:column; border:1px solid var(--border); border-radius:12px; overflow:hidden; min-width:320px;">
                         <div style="background:var(--bg-alt); padding:8px 16px; border-bottom:1px solid var(--border); font-weight:700; display:flex; justify-content:space-between; align-items:center;">
-                            <span>â‰¡Æ’Ã´Â¥ Code Editor (${data.lang.toUpperCase()})</span>
+                            <span>≡ƒô¥ Code Editor (${data.lang.toUpperCase()})</span>
                             <span id="editorStatus" style="font-size:12px; color:var(--text-muted);">Synced to cloud</span>
                         </div>
                         <div id="ace-editor" style="flex:1; width:100%;"></div>
@@ -6050,15 +6050,15 @@ const initProgrammingLab = async (container, labId) => {
                     
                     <div style="flex:1; display:flex; flex-direction:column; gap:12px; min-width:280px; height:100%;">
                         <div style="display:flex; flex-direction:column; border:1px solid var(--border); border-radius:12px; overflow:hidden; flex:0.4;">
-                            <div style="background:var(--bg-alt); padding:8px 16px; border-bottom:1px solid var(--border); font-weight:700;">â‰¡Æ’Ã´Ã‘ Standard Input (stdin)</div>
+                            <div style="background:var(--bg-alt); padding:8px 16px; border-bottom:1px solid var(--border); font-weight:700;">≡ƒôÑ Standard Input (stdin)</div>
                             <textarea id="stdin-area" placeholder="Type input values here..." style="flex:1; padding:12px; border:none; resize:none; font-family:monospace; background:var(--bg-page); color:var(--text-main); font-size:13px; outline:none;"></textarea>
                         </div>
                         
                         <div style="display:flex; flex-direction:column; border:1px solid var(--border); border-radius:12px; overflow:hidden; flex:1;">
                             <div style="background:var(--bg-alt); padding:8px 16px; border-bottom:1px solid var(--border); font-weight:700; display:flex; justify-content:space-between; align-items:center;">
                                 <div style="display:flex; gap:12px; font-size:13px;">
-                                    <span id="tabConsole" style="cursor:pointer; font-weight:700; border-bottom:2px solid var(--primary); padding-bottom:2px;">â‰¡Æ’Ã†â•— Console Terminal</span>
-                                    <span id="tabAuditor" style="cursor:pointer; font-weight:700; color:var(--text-muted); padding-bottom:2px;">â‰¡Æ’Ã¶Ã¬ Static Auditor</span>
+                                    <span id="tabConsole" style="cursor:pointer; font-weight:700; border-bottom:2px solid var(--primary); padding-bottom:2px;">≡ƒÆ╗ Console Terminal</span>
+                                    <span id="tabAuditor" style="cursor:pointer; font-weight:700; color:var(--text-muted); padding-bottom:2px;">≡ƒöì Static Auditor</span>
                                 </div>
                                 <button id="btnClearConsole" style="background:transparent; border:none; color:var(--text-muted); cursor:pointer; font-size:12px;">Clear</button>
                             </div>
@@ -6078,7 +6078,7 @@ const initProgrammingLab = async (container, labId) => {
                     <div class="notebook-toolbar" style="display:flex; gap:8px; background:var(--bg-alt); padding:8px 12px; border-radius:8px; border:1px solid var(--border); flex-wrap:wrap; align-items:center; margin-bottom:10px;">
                         <button id="btnNotebookAddCode" class="btn-sim" style="font-size:12px; padding:4px 8px;">+ Code Cell</button>
                         <button id="btnNotebookAddMarkdown" class="btn-sim" style="font-size:12px; padding:4px 8px;">+ Markdown Cell</button>
-                        <button id="btnNotebookRunAll" class="btn-sim primary" style="font-size:12px; padding:4px 8px; background:#10b981; border:none; color:white;">Î“Ã»â•¢ Run All</button>
+                        <button id="btnNotebookRunAll" class="btn-sim primary" style="font-size:12px; padding:4px 8px; background:#10b981; border:none; color:white;">Γû╢ Run All</button>
                         <button id="btnNotebookClearAll" class="btn-sim" style="font-size:12px; padding:4px 8px;">Clear Outputs</button>
                     </div>
                     <div id="notebook-cells-list" style="display:flex; flex-direction:column; gap:16px;">
@@ -6088,12 +6088,12 @@ const initProgrammingLab = async (container, labId) => {
 
                 <div id="ai-tutor-drawer" style="width:300px; display:none; flex-direction:column; border:1px solid var(--border); border-radius:12px; overflow:hidden; background:var(--container-bg); min-height:100%; position:absolute; right:0; top:0; z-index:10;">
                     <div style="background:#a855f71a; color:#a855f7; padding:12px 16px; border-bottom:1px solid var(--border); font-weight:800; display:flex; justify-content:space-between; align-items:center;">
-                        <span>Î“Â£Â¿ AI Tutor Assistant</span>
-                        <button id="btnCloseAiDrawer" style="background:transparent; border:none; color:#a855f7; font-weight:bold; cursor:pointer;">â”œÃ¹</button>
+                        <span>Γ£¿ AI Tutor Assistant</span>
+                        <button id="btnCloseAiDrawer" style="background:transparent; border:none; color:#a855f7; font-weight:bold; cursor:pointer;">├ù</button>
                     </div>
                     <div style="padding:10px; border-bottom:1px solid var(--border); background:var(--bg-alt); display:flex; flex-wrap:wrap; gap:6px;">
-                        <button id="btnAiAudit" style="flex:1; padding:6px; font-size:11px; border-radius:4px; border:1px solid var(--border); background:var(--bg-page); color:var(--text-main); cursor:pointer;">â‰¡Æ’Ã¶Ã¬ Audit Code</button>
-                        <button id="btnAiExplain" style="flex:1; padding:6px; font-size:11px; border-radius:4px; border:1px solid var(--border); background:var(--bg-page); color:var(--text-main); cursor:pointer;">â‰¡Æ’Ã´Ãœ Explain Code</button>
+                        <button id="btnAiAudit" style="flex:1; padding:6px; font-size:11px; border-radius:4px; border:1px solid var(--border); background:var(--bg-page); color:var(--text-main); cursor:pointer;">≡ƒöì Audit Code</button>
+                        <button id="btnAiExplain" style="flex:1; padding:6px; font-size:11px; border-radius:4px; border:1px solid var(--border); background:var(--bg-page); color:var(--text-main); cursor:pointer;">≡ƒôÜ Explain Code</button>
                     </div>
                     <div id="ai-chat-logs" style="flex:1; padding:12px; overflow-y:auto; display:flex; flex-direction:column; gap:10px; background:var(--bg-page);">
                         <div style="align-self:flex-start; background:var(--bg-alt); padding:8px 12px; border-radius:12px; max-width:85%; font-size:13px; color:var(--text-main); line-height:1.4;">
@@ -6203,13 +6203,13 @@ const initProgrammingLab = async (container, labId) => {
             </div>
         `).join('');
         if (!recsHtml) {
-            recsHtml = `<div style="color:#10b981; font-weight:700; font-size:12px;">â‰¡Æ’Ã„Ã« No issues found! Your code is high-quality and safe.</div>`;
+            recsHtml = `<div style="color:#10b981; font-weight:700; font-size:12px;">≡ƒÄë No issues found! Your code is high-quality and safe.</div>`;
         }
 
         auditorBox.innerHTML = `
             <div style="border:1px solid var(--border); border-radius:12px; padding:16px; background:var(--bg-alt); margin-bottom:12px;">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-                    <span style="font-weight:700; font-size:15px; color:var(--text-main);">â‰¡Æ’Ã¶Ã¬ Code Quality Audit</span>
+                    <span style="font-weight:700; font-size:15px; color:var(--text-main);">≡ƒöì Code Quality Audit</span>
                     <span style="background:${gradeColor}; color:white; font-size:18px; font-weight:800; padding:6px 12px; border-radius:8px;">${report.grade}</span>
                 </div>
                 <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:12px; text-align:center; font-size:12px; margin-bottom:15px;">
@@ -6232,7 +6232,7 @@ const initProgrammingLab = async (container, labId) => {
                 </div>
             </div>
             <h4 style="margin-bottom:10px; font-weight:700; font-size:13px; color:var(--text-main); display:flex; align-items:center; gap:6px;">
-                <span>â‰¡Æ’Ã†Ã­</span> Recommendations
+                <span>≡ƒÆí</span> Recommendations
             </h4>
             <div style="display:flex; flex-direction:column; gap:8px;">
                 ${recsHtml}
@@ -6249,7 +6249,7 @@ const initProgrammingLab = async (container, labId) => {
     }
     if (!notebookCells || notebookCells.length === 0) {
         notebookCells = [
-            { id: 'cell-1', type: 'markdown', content: `## â‰¡Æ’Ã´Ã´ Interactive Notebook: ${data.title || 'Laboratory Activity'}\nDouble-click this markdown cell to edit. Execute the code cell below independently. Custom imports and variables carry over within Python modules.` },
+            { id: 'cell-1', type: 'markdown', content: `## ≡ƒôô Interactive Notebook: ${data.title || 'Laboratory Activity'}\nDouble-click this markdown cell to edit. Execute the code cell below independently. Custom imports and variables carry over within Python modules.` },
             { id: 'cell-2', type: 'code', content: data.defaultCode || '', execCount: null, output: null }
         ];
     }
@@ -6275,8 +6275,8 @@ const initProgrammingLab = async (container, labId) => {
                         </div>
                         <div style="display:flex; justify-content:space-between; margin-top:10px; border-top:1px solid var(--border); padding-top:8px;">
                             <div style="display:flex; gap:6px;">
-                                <button id="btnMoveCellUp-${cell.id}" class="btn-sim" style="font-size:10px; padding:2px 6px;">Î“Ã»â–“ Up</button>
-                                <button id="btnMoveCellDown-${cell.id}" class="btn-sim" style="font-size:10px; padding:2px 6px;">Î“Ã»â• Down</button>
+                                <button id="btnMoveCellUp-${cell.id}" class="btn-sim" style="font-size:10px; padding:2px 6px;">Γû▓ Up</button>
+                                <button id="btnMoveCellDown-${cell.id}" class="btn-sim" style="font-size:10px; padding:2px 6px;">Γû╝ Down</button>
                             </div>
                             <button id="btnDeleteCell-${cell.id}" class="btn-sim" style="font-size:10px; padding:2px 6px; background:#ef4444; color:white; border:none; cursor:pointer;">Delete</button>
                         </div>
@@ -6292,8 +6292,8 @@ const initProgrammingLab = async (container, labId) => {
                         </div>
                         <div style="display:flex; justify-content:space-between; align-items:center;">
                             <div style="display:flex; gap:6px;">
-                                <button id="btnMoveCellUp-${cell.id}" class="btn-sim" style="font-size:10px; padding:2px 6px;">Î“Ã»â–“ Up</button>
-                                <button id="btnMoveCellDown-${cell.id}" class="btn-sim" style="font-size:10px; padding:2px 6px;">Î“Ã»â• Down</button>
+                                <button id="btnMoveCellUp-${cell.id}" class="btn-sim" style="font-size:10px; padding:2px 6px;">Γû▓ Up</button>
+                                <button id="btnMoveCellDown-${cell.id}" class="btn-sim" style="font-size:10px; padding:2px 6px;">Γû╝ Down</button>
                             </div>
                             <div style="display:flex; gap:6px;">
                                 <button id="btnRunCell-${cell.id}" class="btn-sim primary" style="font-size:11px; padding:4px 10px; background:#10b981; border:none; color:white; cursor:pointer;">Run Cell</button>
@@ -6398,7 +6398,7 @@ const initProgrammingLab = async (container, labId) => {
         const notebookView = document.getElementById('notebook-view');
 
         if (isNotebookActive) {
-            toggleBtn.textContent = 'â‰¡Æ’Ã´Â¥ Editor Mode';
+            toggleBtn.textContent = '≡ƒô¥ Editor Mode';
             toggleBtn.style.background = '#ea580c';
             normalView.style.display = 'none';
             notebookView.style.display = 'flex';
@@ -6410,7 +6410,7 @@ const initProgrammingLab = async (container, labId) => {
             }
             renderNotebook();
         } else {
-            toggleBtn.textContent = 'â‰¡Æ’Ã´Ã´ Notebook Mode';
+            toggleBtn.textContent = '≡ƒôô Notebook Mode';
             toggleBtn.style.background = '#0284c7';
             normalView.style.display = 'flex';
             notebookView.style.display = 'none';
@@ -6710,7 +6710,7 @@ const initSqlLab = async (container, labId) => {
         <div style="display:flex; flex-direction:column; height:100%; gap:12px; padding:8px;">
             <div class="sim-toolbar" style="display:flex; justify-content:space-between; align-items:center;">
                 <div style="display:flex; gap:8px;">
-                    <button id="btnRunSql" class="btn-sim primary">Î“Ã»â•¢ Run Query</button>
+                    <button id="btnRunSql" class="btn-sim primary">Γû╢ Run Query</button>
                     <button id="btnResetSql" class="btn-sim">Reset DB</button>
                 </div>
                 <div style="font-weight:800; color:var(--primary); font-size:16px;">SQL Sandbox Terminal</div>
@@ -6719,11 +6719,11 @@ const initSqlLab = async (container, labId) => {
             <div style="display:flex; flex:1; gap:12px; min-height:480px; flex-wrap:wrap;">
                 <div style="flex:1; display:flex; flex-direction:column; gap:12px; min-width:300px;">
                     <div style="display:flex; flex-direction:column; border:1px solid var(--border); border-radius:12px; overflow:hidden; flex:1;">
-                        <div style="background:var(--bg-alt); padding:8px 16px; border-bottom:1px solid var(--border); font-weight:700;">â‰¡Æ’Ã´Â¥ SQL Editor</div>
+                        <div style="background:var(--bg-alt); padding:8px 16px; border-bottom:1px solid var(--border); font-weight:700;">≡ƒô¥ SQL Editor</div>
                         <div id="sql-editor" style="flex:1; width:100%;"></div>
                     </div>
                     <div style="display:flex; flex-direction:column; border:1px solid var(--border); border-radius:12px; overflow:hidden; flex:1; background:var(--bg-alt); padding:12px; overflow-y:auto;">
-                        <h4 style="margin:0 0 8px 0; color:var(--primary);">â‰¡Æ’Ã´Ã¼ Database Schema Definition</h4>
+                        <h4 style="margin:0 0 8px 0; color:var(--primary);">≡ƒôü Database Schema Definition</h4>
                         <div style="display:flex; flex-direction:column; gap:8px; font-size:12px; font-family:monospace;">
                             <div><b>Students</b> (id INT PK, name VARCHAR, age INT, branch VARCHAR)</div>
                             <div><b>Courses</b> (course_id INT PK, title VARCHAR, credits INT)</div>
@@ -6735,8 +6735,8 @@ const initSqlLab = async (container, labId) => {
                 <div style="flex:1.2; display:flex; flex-direction:column; border:1px solid var(--border); border-radius:12px; overflow:hidden; min-width:320px; background:var(--bg-page);">
                     <div style="background:var(--bg-alt); padding:8px 16px; border-bottom:1px solid var(--border); font-weight:700; display:flex; justify-content:space-between; align-items:center;">
                         <div style="display:flex; gap:12px; font-size:13px;">
-                            <span id="tabSqlOutput" style="cursor:pointer; font-weight:700; border-bottom:2px solid var(--primary); padding-bottom:2px; color:var(--text-main);">â‰¡Æ’Ã†â•— Query Output</span>
-                            <span id="tabSqlPlan" style="cursor:pointer; font-weight:700; color:var(--text-muted); padding-bottom:2px;">â‰¡Æ’Ã´Ã¨ Execution Plan</span>
+                            <span id="tabSqlOutput" style="cursor:pointer; font-weight:700; border-bottom:2px solid var(--primary); padding-bottom:2px; color:var(--text-main);">≡ƒÆ╗ Query Output</span>
+                            <span id="tabSqlPlan" style="cursor:pointer; font-weight:700; color:var(--text-muted); padding-bottom:2px;">≡ƒôè Execution Plan</span>
                         </div>
                     </div>
                     <div id="sql-tab-content" style="flex:1; display:flex; flex-direction:column; position:relative; overflow:hidden; min-height:150px;">
@@ -6919,7 +6919,7 @@ const initTransactionsLab = (container, labId) => {
 
             <div style="display:flex; flex:1; gap:12px; min-height:450px; flex-wrap:wrap;">
                 <div style="flex:1.1; display:flex; flex-direction:column; border:1px solid var(--border); border-radius:12px; padding:16px; background:var(--bg-alt); min-width:300px;">
-                    <h3 style="margin-top:0; color:var(--primary);">â‰¡Æ’Ã…Âª Accounts Database State</h3>
+                    <h3 style="margin-top:0; color:var(--primary);">≡ƒÅª Accounts Database State</h3>
                     <table id="tx-db-table" style="width:100%; border-collapse:collapse; text-align:left; font-size:14px; margin-top:12px;">
                         <thead>
                             <tr style="border-bottom:2px solid var(--border);">
@@ -6938,7 +6938,7 @@ const initTransactionsLab = (container, labId) => {
                 </div>
 
                 <div style="flex:1.2; display:flex; flex-direction:column; border:1px solid var(--border); border-radius:12px; overflow:hidden; min-width:320px; background:var(--bg-page);">
-                    <div style="background:var(--bg-alt); padding:8px 16px; border-bottom:1px solid var(--border); font-weight:700;">â‰¡Æ’Â¬â•¡ Transaction Log & ACID Audits</div>
+                    <div style="background:var(--bg-alt); padding:8px 16px; border-bottom:1px solid var(--border); font-weight:700;">≡ƒ¬╡ Transaction Log & ACID Audits</div>
                     <div id="tx-log-box" style="flex:1; padding:16px; overflow-y:auto; font-family:'JetBrains Mono', monospace; font-size:13px; line-height:1.5;">
                         System ready. Click BEGIN TRANSACTION to start a block of transactions.
                     </div>
@@ -7034,19 +7034,19 @@ const initIndexingLab = (container, labId) => {
             <div class="sim-toolbar" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
                 <div style="display:flex; gap:8px; align-items:center;">
                     <input id="btree-insert-val" type="number" placeholder="Enter key (e.g. 15)" style="padding:6px 12px; border-radius:6px; border:1px solid var(--border); background:var(--bg-page); color:var(--text-main); font-family:monospace; width:140px;">
-                    <button id="btnBTreeInsert" class="btn-sim primary">â‰¡Æ’Ã´Ã‘ Insert Key</button>
+                    <button id="btnBTreeInsert" class="btn-sim primary">≡ƒôÑ Insert Key</button>
                     <button id="btnBTreeReset" class="btn-sim">Reset Index</button>
                 </div>
                 <div style="font-weight:800; color:var(--primary); font-size:16px;">B-Tree Indexing Visualizer</div>
             </div>
 
             <div style="display:flex; flex-direction:column; border:1px solid var(--border); border-radius:12px; overflow:hidden; background:var(--bg-page); flex:1; min-height:300px; position:relative;">
-                <div style="background:var(--bg-alt); padding:8px 16px; border-bottom:1px solid var(--border); font-weight:700;">â‰¡Æ’Ã®â”¤ B-Tree Structure (Order = 3, Max Keys = 2)</div>
+                <div style="background:var(--bg-alt); padding:8px 16px; border-bottom:1px solid var(--border); font-weight:700;">≡ƒî┤ B-Tree Structure (Order = 3, Max Keys = 2)</div>
                 <div id="btree-visual-panel" style="flex:1; display:flex; align-items:center; justify-content:center; padding:16px; overflow:auto;"></div>
             </div>
 
             <div style="display:flex; flex-direction:column; border:1px solid var(--border); border-radius:12px; overflow:hidden; background:var(--bg-alt); height:140px;">
-                <div style="background:var(--bg-page); padding:8px 16px; border-bottom:1px solid var(--border); font-weight:700;">â‰¡Æ’Â¬â•¡ Indexing Split Logs</div>
+                <div style="background:var(--bg-page); padding:8px 16px; border-bottom:1px solid var(--border); font-weight:700;">≡ƒ¬╡ Indexing Split Logs</div>
                 <div id="btree-log" style="flex:1; padding:12px; overflow-y:auto; font-family:monospace; font-size:12px; color:var(--text-muted);">
                     Enter integers and click Insert Key to build index tree. Order 3 splits occur when keys exceed 2 per node.
                 </div>
@@ -7386,7 +7386,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                                 <div style="font-size:12px; color:var(--text-muted); margin-top:3px;"><b>Ports:</b> ${t.ports}</div>
                                 <div style="font-size:12px; color:var(--text-muted); margin-top:3px; line-height:1.5;"><b>Usage:</b> ${t.usage}</div>
                             </div>
-                            <div style="font-size:12px; margin-top:10px; padding-top:10px; border-top:1px dashed #e2e8f0;"><span style="color:var(--success); font-weight:700;">â‰¡Æ’Æ’Ã³ LED Status: ${t.statusLED}</span></div>
+                            <div style="font-size:12px; margin-top:10px; padding-top:10px; border-top:1px dashed #e2e8f0;"><span style="color:var(--success); font-weight:700;">≡ƒƒó LED Status: ${t.statusLED}</span></div>
                         </div>
                     `;
                 });
@@ -7407,15 +7407,15 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (data.troubleshooting) {
                 let tbHtml = `
                     <div class="theory-card" style="border-left:4px solid var(--danger); margin-bottom:16px;">
-                        <h3 style="color:var(--danger); margin-bottom:8px;">Î“ÃœÃ¡âˆ©â••Ã… Fault Scenario</h3>
+                        <h3 style="color:var(--danger); margin-bottom:8px;">ΓÜá∩╕Å Fault Scenario</h3>
                         <p style="font-size:14px; font-weight:700;">${data.troubleshooting.problem}</p>
                     </div>
                     <div class="theory-card" style="margin-bottom:16px;">
-                        <h4 style="color:var(--warning); margin-bottom:10px;">â‰¡Æ’Ã¶Ã¬ Diagnostic Clues & Hints</h4>
+                        <h4 style="color:var(--warning); margin-bottom:10px;">≡ƒöì Diagnostic Clues & Hints</h4>
                         <ul style="padding-left:20px; line-height:1.8;">${(data.troubleshooting.hints || []).map(h => `<li style="margin-bottom:6px;">${h}</li>`).join('')}</ul>
                     </div>
                     <div class="theory-card" style="border-left:4px solid var(--success);">
-                        <h4 style="color:var(--success); margin-bottom:8px;">Î“Â£Ã  Corrective Solution</h4>
+                        <h4 style="color:var(--success); margin-bottom:8px;">Γ£à Corrective Solution</h4>
                         <p style="font-size:13px; line-height:1.6;">${data.troubleshooting.fix}</p>
                     </div>
                 `;
@@ -7429,7 +7429,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     vivaHtml += `
                         <div class="theory-card" style="margin:0;">
                             <div style="font-weight:800; font-size:14px; color:var(--primary); margin-bottom:8px;">Q${idx+1}: ${v.q}</div>
-                            <button class="btn-action" style="padding:6px 12px; font-size:12px;" onclick="const a=this.nextElementSibling; a.style.display=a.style.display==='none'?'block':'none';">Reveal Answer â‰¡Æ’Ã¦Ã¼âˆ©â••Ã…</button>
+                            <button class="btn-action" style="padding:6px 12px; font-size:12px;" onclick="const a=this.nextElementSibling; a.style.display=a.style.display==='none'?'block':'none';">Reveal Answer ≡ƒæü∩╕Å</button>
                             <div style="display:none; margin-top:10px; padding:10px; background:rgba(16,185,129,0.08); border-left:3px solid var(--success); border-radius:6px; font-size:13px;">
                                 <b>Answer:</b> ${v.a}
                             </div>
@@ -7444,13 +7444,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (data.assignment) {
                 let assignHtml = `
                     <div class="theory-card" style="margin-bottom:16px;">
-                        <h3 style="color:var(--primary); margin-bottom:8px;">â‰¡Æ’Ã´Â£ Practical Assignment Task</h3>
+                        <h3 style="color:var(--primary); margin-bottom:8px;">≡ƒô£ Practical Assignment Task</h3>
                         <p style="font-size:14px; line-height:1.6;">${data.assignment}</p>
                     </div>
                     <div class="theory-card">
                         <h4 style="margin-bottom:8px;">Document Observations & Results:</h4>
                         <textarea style="width:100%; height:120px; padding:10px; background:var(--bg-page); border:1px solid var(--border); border-radius:8px; color:var(--text-main); font-family:monospace;" placeholder="Type your CLI observation log and results here..."></textarea>
-                        <button class="btn-action" style="margin-top:10px; background:var(--primary); color:white; border:none; padding:8px 16px; cursor:pointer;" onclick="alert('Assignment submitted successfully!')">Submit Assignment â‰¡Æ’Ã´Ã±</button>
+                        <button class="btn-action" style="margin-top:10px; background:var(--primary); color:white; border:none; padding:8px 16px; cursor:pointer;" onclick="alert('Assignment submitted successfully!')">Submit Assignment ≡ƒôñ</button>
                     </div>
                 `;
                 setBody('section-assignment', assignHtml);
@@ -7498,7 +7498,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         if (!questions || !Array.isArray(questions) || questions.length === 0) {
             container.innerHTML = `<div class="theory-card" style="text-align:center; padding:30px; color:var(--text-muted);">
-                <div style="font-size:36px; margin-bottom:10px;">â‰¡Æ’Ã´Â¥</div>
+                <div style="font-size:36px; margin-bottom:10px;">≡ƒô¥</div>
                 <h3>Evaluation / Assessment</h3>
                 <p style="font-size:13px; margin-top:6px;">No multiple-choice questions configured for this module. You can attempt the <b>Troubleshooting Challenge</b>, <b>Viva Voce Questions</b>, or perform hands-on configuration in the <b>Cisco Packet Tracer Lab</b>.</p>
             </div>`;
@@ -7548,18 +7548,18 @@ document.addEventListener('DOMContentLoaded', async () => {
                         status.style.display = 'block';
                         if (selected && parseInt(selected.value) === targetAnswer) {
                             correctCount++;
-                            status.textContent = 'Correct Answer Î“Â£Ã´';
+                            status.textContent = 'Correct Answer Γ£ô';
                             status.style.color = 'var(--success)';
                         } else {
                             const correctText = q.options && q.options[targetAnswer] ? q.options[targetAnswer] : `Option ${targetAnswer + 1}`;
-                            status.textContent = `Incorrect Î“Â£Ã¹. Correct Answer: ${correctText}`;
+                            status.textContent = `Incorrect Γ£ù. Correct Answer: ${correctText}`;
                             status.style.color = 'var(--danger)';
                         }
                     }
                 });
                 const scorePercent = questions.length ? Math.round((correctCount / questions.length) * 100) : 100;
                 currentScore += scorePercent;
-                document.getElementById('scoreDisplay').innerHTML = `<span>â‰¡Æ’Ã…Ã¥</span> Score: ${currentScore}`;
+                document.getElementById('scoreDisplay').innerHTML = `<span>≡ƒÅå</span> Score: ${currentScore}`;
                 if (correctCount >= 0) {
                     // Save state to unlock next sections
                     if (prefix === 'pre') {
@@ -7568,7 +7568,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         const state = JSON.parse(localStorage.getItem(`vlab_state_${stateKey}`) || '{}');
                         state.pretest = true;
                         localStorage.setItem(`vlab_state_${stateKey}`, JSON.stringify(state));
-                        alert(`Pretest Submitted! Simulation and Experiment sections are now UNLOCKED for this lab. â‰¡Æ’ÃœÃ‡`);
+                        alert(`Pretest Submitted! Simulation and Experiment sections are now UNLOCKED for this lab. ≡ƒÜÇ`);
                         syncProgress(labId, { pretest: true, pretestScore: scorePercent });
                     }
 
@@ -7674,13 +7674,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const challenges = [
             { q: 'How many usable hosts are in a /24 network?', ans: ['254','254 hosts'], exp: '2^8 - 2 = 254. /24 leaves 8 host bits.' },
-            { q: 'What CIDR gives exactly 30 usable hosts per subnet?', ans: ['/27','27','255.255.255.224'], exp: '/27 Î“Ã¥Ã† 2^5 Î“ÃªÃ† 2 = 30 hosts.' },
+            { q: 'What CIDR gives exactly 30 usable hosts per subnet?', ans: ['/27','27','255.255.255.224'], exp: '/27 ΓåÆ 2^5 ΓêÆ 2 = 30 hosts.' },
             { q: 'What subnet mask corresponds to /28?', ans: ['255.255.255.240','/28'], exp: '11110000 in last octet = 255.255.255.240' },
-            { q: 'How many /26 subnets fit inside one /24?', ans: ['4','4 subnets'], exp: '/26 borrows 2 bits Î“Ã¥Ã† 2^2 = 4 subnets, 62 hosts each.' },
+            { q: 'How many /26 subnets fit inside one /24?', ans: ['4','4 subnets'], exp: '/26 borrows 2 bits ΓåÆ 2^2 = 4 subnets, 62 hosts each.' },
             { q: 'What class is 172.31.0.1?', ans: ['class b','b','class-b'], exp: '172.x.x.x (128-191) = Class B.' },
-            { q: 'What is the broadcast address of 192.168.10.0/27?', ans: ['192.168.10.31'], exp: 'Block size 32 Î“Ã¥Ã† network .0, broadcast .31.' },
-            { q: 'How many hosts can a /30 subnet support?', ans: ['2','2 hosts'], exp: '/30 Î“Ã¥Ã† 2^2 Î“ÃªÃ† 2 = 2. Used for P2P WAN links.' },
-            { q: 'What CIDR gives 510 hosts?', ans: ['/23','23'], exp: '/23 Î“Ã¥Ã† 2^9 Î“ÃªÃ† 2 = 510 hosts.' },
+            { q: 'What is the broadcast address of 192.168.10.0/27?', ans: ['192.168.10.31'], exp: 'Block size 32 ΓåÆ network .0, broadcast .31.' },
+            { q: 'How many hosts can a /30 subnet support?', ans: ['2','2 hosts'], exp: '/30 ΓåÆ 2^2 ΓêÆ 2 = 2. Used for P2P WAN links.' },
+            { q: 'What CIDR gives 510 hosts?', ans: ['/23','23'], exp: '/23 ΓåÆ 2^9 ΓêÆ 2 = 510 hosts.' },
         ];
         let cIdx = 0, challengeScore = 0;
 
@@ -7699,7 +7699,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                             <input type="range" id="cidrSlider" min="8" max="30" value="24" style="width:100%; accent-color:var(--primary);">
                             <div style="display:flex; justify-content:space-between; font-size:10px; color:var(--text-muted); margin-top:4px;"><span>/8 Class A</span><span>/16 Class B</span><span>/24 Class C</span><span>/30 P2P</span></div>
                         </div>
-                        <button id="btnCalc" class="btn-sim primary" style="width:100%;">Analyze Network Î“Ã»â•¢</button>
+                        <button id="btnCalc" class="btn-sim primary" style="width:100%;">Analyze Network Γû╢</button>
                         <div id="calcResult" style="margin-top:20px; display:none;">
                             <div style="background:rgba(37,99,235,0.05); border:1px solid var(--primary); border-radius:12px; padding:15px;">
                                 <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; font-family:'JetBrains Mono', monospace; font-size:12px;">
@@ -7711,7 +7711,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                                 </div>
                             </div>
                             <div style="margin-top:12px; background:#f8fafc; border-radius:12px; padding:15px; font-family:'JetBrains Mono', monospace; font-size:11px; line-height:2;">
-                                <div style="color:#64748b; font-size:10px; font-weight:800; margin-bottom:6px;">Î“Ã»â•• BINARY REPRESENTATION (Network=<span style='color:#10b981'>Î“Ã»Ã¡</span> Host=<span style='color:#ef4444'>Î“Ã»Ã¡</span>)</div>
+                                <div style="color:#64748b; font-size:10px; font-weight:800; margin-bottom:6px;">Γû╕ BINARY REPRESENTATION (Network=<span style='color:#10b981'>Γûá</span> Host=<span style='color:#ef4444'>Γûá</span>)</div>
                                 <div id="binaryBreakdown" style="word-break:break-all; line-height:1.8;"></div>
                             </div>
                             <div style="margin-top:10px; display:flex; gap:10px; flex-wrap:wrap;">
@@ -7723,7 +7723,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     </div>
                     <div class="theory-card" style="flex:1; min-width:250px; margin:0; display:flex; flex-direction:column; gap:12px;">
                         <div style="display:flex; justify-content:space-between; align-items:center;">
-                            <h3 style="margin:0; color:var(--success);">Challenge Mode â‰¡Æ’Ã„Â»</h3>
+                            <h3 style="margin:0; color:var(--success);">Challenge Mode ≡ƒÄ»</h3>
                             <div style="font-size:22px; font-weight:800; color:var(--primary);">Score: <span id="challengeScore">0</span></div>
                         </div>
                         <div style="font-size:11px; color:var(--text-muted);">Question <span id="challengeNum">1</span> of ${challenges.length}</div>
@@ -7736,7 +7736,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                             <button id="btnCheckChallenge" class="btn-sim success">Submit</button>
                         </div>
                         <div id="challengeFeedback" style="font-weight:700; font-size:12px; min-height:18px;"></div>
-                        <button id="btnNextChallenge" class="btn-sim primary" style="display:none;">Next Question Î“Ã¥Ã†</button>
+                        <button id="btnNextChallenge" class="btn-sim primary" style="display:none;">Next Question ΓåÆ</button>
                     </div>
                 </div>
             </div>
@@ -7750,7 +7750,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const mask = parseInt(cidrSlider.value);
             if (!/^\d+\.\d+\.\d+\.\d+$/.test(ip)) { alert('Invalid IP address. Use dotted decimal: e.g. 192.168.1.0'); return; }
             const parts = ip.split('.').map(Number);
-            if (parts.some(p => p < 0 || p > 255)) { alert('Each octet must be 0Î“Ã‡Ã´255'); return; }
+            if (parts.some(p => p < 0 || p > 255)) { alert('Each octet must be 0ΓÇô255'); return; }
             const ipUint = ipToUint(ip);
             const maskUint = ((0xffffffff << (32 - mask)) >>> 0);
             const netUint = (ipUint & maskUint) >>> 0;
@@ -7800,8 +7800,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             const c = challenges[cIdx % challenges.length];
             const ok = c.ans.some(a => a.toLowerCase() === ans);
             const fb = document.getElementById('challengeFeedback');
-            if (ok) { challengeScore += 10; document.getElementById('challengeScore').textContent = challengeScore; fb.style.color = 'var(--success)'; fb.textContent = `Î“Â£Ã  ${c.exp}`; }
-            else { fb.style.color = 'var(--danger)'; fb.textContent = `Î“Â¥Ã® ${c.exp} (Answer: ${c.ans[0]})`; }
+            if (ok) { challengeScore += 10; document.getElementById('challengeScore').textContent = challengeScore; fb.style.color = 'var(--success)'; fb.textContent = `Γ£à ${c.exp}`; }
+            else { fb.style.color = 'var(--danger)'; fb.textContent = `Γ¥î ${c.exp} (Answer: ${c.ans[0]})`; }
             document.getElementById('btnNextChallenge').style.display = 'block';
         };
         document.getElementById('btnNextChallenge').onclick = () => { cIdx++; loadChallenge(); };
@@ -7818,16 +7818,16 @@ document.addEventListener('DOMContentLoaded', async () => {
             { ip: '127.0.0.1',   cls: 'A', type: 'Loopback' },
             { ip: '224.0.0.1',   cls: 'D', type: 'Multicast' },
         ];
-        const classLabels = { A:'1Î“Ã‡Ã´126', B:'128Î“Ã‡Ã´191', C:'192Î“Ã‡Ã´223', D:'224Î“Ã‡Ã´239' };
+        const classLabels = { A:'1ΓÇô126', B:'128ΓÇô191', C:'192ΓÇô223', D:'224ΓÇô239' };
         container.innerHTML = `
-            <div class="sim-toolbar"><div class="section-title" style="font-size:22px; margin:0; color:var(--primary);">IPv4 Address Classification Lab â‰¡Æ’Ã…â•–âˆ©â••Ã…</div></div>
+            <div class="sim-toolbar"><div class="section-title" style="font-size:22px; margin:0; color:var(--primary);">IPv4 Address Classification Lab ≡ƒÅ╖∩╕Å</div></div>
             <div class="sim-workspace" style="flex-direction:column; align-items:center; padding:25px; overflow-y:auto; gap:20px;">
                 <p style="color:var(--text-muted); margin:0;">Drag each IP address into its correct IPv4 Class bucket. Binary (first octet) shown as tooltip.</p>
                 <div id="ip-pool" style="display:flex; gap:10px; flex-wrap:wrap; justify-content:center;">
                     ${ipPool.map(item => `
                         <div class="btn-sim" draggable="true" data-ip="${item.ip}" style="cursor:grab; font-family:'JetBrains Mono', monospace;" title="First octet binary: ${parseInt(item.ip.split('.')[0]).toString(2).padStart(8,'0')}">
                             <div>${item.ip}</div>
-                            <div style="font-size:9px; opacity:0.5; font-family:'JetBrains Mono', monospace;">${parseInt(item.ip.split('.')[0]).toString(2).padStart(8,'0')}Î“Ã‡Âª</div>
+                            <div style="font-size:9px; opacity:0.5; font-family:'JetBrains Mono', monospace;">${parseInt(item.ip.split('.')[0]).toString(2).padStart(8,'0')}ΓÇª</div>
                         </div>`).join('')}
                 </div>
                 <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:15px; width:100%; max-width:960px;">
@@ -7839,8 +7839,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                         </div>`).join('')}
                 </div>
                 <div style="display:flex; gap:15px; align-items:center; flex-wrap:wrap; justify-content:center;">
-                    <button class="btn-sim primary" id="btnCheckSorter">Check Answers Î“Â£Ã´</button>
-                    <button class="btn-sim" id="btnResetSorter">Reset Î“Ã¥â•‘</button>
+                    <button class="btn-sim primary" id="btnCheckSorter">Check Answers Γ£ô</button>
+                    <button class="btn-sim" id="btnResetSorter">Reset Γå║</button>
                     <div style="font-size:20px; font-weight:800; color:var(--primary);">Score: <span id="sorterScore">0</span>/${ipPool.length * 10}</div>
                 </div>
                 <div id="sorterResult" style="width:100%; max-width:960px; display:none;">
@@ -7892,7 +7892,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     if (ok) { correct++; item.style.color='var(--success)'; item.style.borderColor='var(--success)'; } else { item.style.color='var(--danger)'; item.style.borderColor='var(--danger)'; }
                     const pd = ipPool.find(p => p.ip === ip);
                     tbody.innerHTML += `<tr style="border-bottom:1px solid var(--border);">
-                        <td style="padding:8px; font-weight:bold; color:${ok ? 'var(--success)' : 'var(--danger)'}">${ip} ${ok ? 'Î“Â£Ã´' : 'Î“Â£Ã¹'}</td>
+                        <td style="padding:8px; font-weight:bold; color:${ok ? 'var(--success)' : 'var(--danger)'}">${ip} ${ok ? 'Γ£ô' : 'Γ£ù'}</td>
                         <td style="padding:8px;">Class ${actual}</td>
                         <td style="padding:8px; color:${pd?.type==='Private'?'var(--warning)':'var(--primary)'}">${pd?.type||'Public'}</td>
                         <td style="padding:8px;">${first.toString(2).padStart(8,'0')}</td>
@@ -7929,7 +7929,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         container.innerHTML = `
             <div class="sim-toolbar">
-                <div class="section-title" style="font-size:22px; margin:0; color:var(--primary);">Network Commands Challenge â‰¡Æ’Ã»Ã‘âˆ©â••Ã…</div>
+                <div class="section-title" style="font-size:22px; margin:0; color:var(--primary);">Network Commands Challenge ≡ƒûÑ∩╕Å</div>
             </div>
             <div class="sim-workspace" style="padding:20px; gap:20px; flex-direction:column; overflow-y:auto;">
                 <div style="display:flex; gap:20px; flex-wrap:wrap; width:100%;">
@@ -7945,7 +7945,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                             </div>
                         </div>
                         <div style="padding:14px; background:rgba(245,158,11,0.07); border:1px solid rgba(245,158,11,0.3); border-radius:12px; margin-bottom:15px;">
-                            <div style="font-size:10px; color:var(--warning); font-weight:800; margin-bottom:6px;">â‰¡Æ’Ã´Ã¯ CURRENT TASK</div>
+                            <div style="font-size:10px; color:var(--warning); font-weight:800; margin-bottom:6px;">≡ƒôï CURRENT TASK</div>
                             <div id="cmdTask" style="font-size:14px; font-weight:600; line-height:1.5;"></div>
                         </div>
                         <div style="background:#f8fafc; border-radius:12px; border:1px solid var(--border); overflow:hidden;">
@@ -7961,7 +7961,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         </div>
                     </div>
                     <div class="theory-card" style="flex:1; min-width:220px; margin:0; display:flex; flex-direction:column; gap:10px;">
-                        <h3 style="color:var(--primary); margin:0;">Quick Reference â‰¡Æ’Ã´Ãœ</h3>
+                        <h3 style="color:var(--primary); margin:0;">Quick Reference ≡ƒôÜ</h3>
                         <div style="display:flex; flex-direction:column; gap:8px; flex:1; overflow-y:auto;">
                             ${[['ping &lt;IP&gt;','Test host reachability'],['ipconfig','Show IP config (Windows)'],['ifconfig','Show interfaces (Linux)'],['nslookup &lt;host&gt;','DNS lookup'],['tracert &lt;host&gt;','Trace route (Windows)'],['netstat -an','Show all connections'],['route print','Display routing table'],['arp -a','Display ARP cache']].map(([cmd,desc])=>`
                             <div style="padding:8px 12px; background:var(--bg-page); border:1px solid var(--border); border-radius:8px; cursor:pointer;" onclick="document.getElementById('cmdChallengeInput').value='${cmd.replace(/&lt;/g,'<').replace(/&gt;/g,'>')}'; document.getElementById('cmdChallengeInput').focus();">
@@ -7969,7 +7969,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                                 <div style="font-size:10px; color:var(--text-muted); margin-top:2px;">${desc}</div>
                             </div>`).join('')}
                         </div>
-                        <button id="cmdHintBtn" class="btn-sim" style="margin-top:4px;">â‰¡Æ’Ã†Ã­ Show Hint (Î“ÃªÃ†5 pts)</button>
+                        <button id="cmdHintBtn" class="btn-sim" style="margin-top:4px;">≡ƒÆí Show Hint (ΓêÆ5 pts)</button>
                         <div id="cmdWinBanner" style="display:none; padding:12px; background:rgba(16,185,129,0.1); border:1px solid var(--success); border-radius:10px; text-align:center; font-weight:800; color:var(--success); font-size:13px;"></div>
                     </div>
                 </div>
@@ -7980,7 +7980,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const lv = levels[idx];
             document.getElementById('cmdLvlNum').textContent = idx + 1;
             document.getElementById('cmdTask').textContent = lv.task;
-            document.getElementById('cmdOutput').textContent = `MIT ADT VLab Terminal v2.0\n${'Î“Ã¶Ã‡'.repeat(38)}\nLevel ${idx + 1} of ${levels.length}: ${lv.task}\n\nC:\\Users\\Student> `;
+            document.getElementById('cmdOutput').textContent = `MIT ADT VLab Terminal v2.0\n${'ΓöÇ'.repeat(38)}\nLevel ${idx + 1} of ${levels.length}: ${lv.task}\n\nC:\\Users\\Student> `;
             clearInterval(timerInterval);
             timeLeft = 60;
             const timerEl = document.getElementById('cmdTimer');
@@ -7992,7 +7992,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (timeLeft <= 10) timerEl.style.color = '#ef4444';
                 if (timeLeft <= 0) {
                     clearInterval(timerInterval);
-                    document.getElementById('cmdOutput').textContent += `\n\nÎ“Ã…â–‘ TIME'S UP! Correct answer was: ${lv.cmd}\n\nC:\\Users\\Student> `;
+                    document.getElementById('cmdOutput').textContent += `\n\nΓÅ░ TIME'S UP! Correct answer was: ${lv.cmd}\n\nC:\\Users\\Student> `;
                     setTimeout(() => { if (lvl < levels.length - 1) { lvl++; loadLevel(lvl); } }, 2000);
                 }
             }, 1000);
@@ -8006,7 +8006,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const target = parts[1] || '8.8.8.8';
 
             if (base === 'clear' || base === 'cls') {
-                document.getElementById('cmdOutput').textContent = `MIT ADT VLab Terminal v2.0\n${'Î“Ã¶Ã‡'.repeat(38)}\nC:\\Users\\Student> `;
+                document.getElementById('cmdOutput').textContent = `MIT ADT VLab Terminal v2.0\n${'ΓöÇ'.repeat(38)}\nC:\\Users\\Student> `;
                 return null;
             }
             if (base === 'help') {
@@ -8152,7 +8152,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const pts = Math.max(10, timeLeft);
                 score += pts;
                 document.getElementById('cmdScore').textContent = score;
-                output.textContent += `\n${resultOutput}\n\nÎ“Â£Ã  CORRECT TASK COMMAND! +${pts} points (${timeLeft}s remaining)\n\nC:\\Users\\Student> `;
+                output.textContent += `\n${resultOutput}\n\nΓ£à CORRECT TASK COMMAND! +${pts} points (${timeLeft}s remaining)\n\nC:\\Users\\Student> `;
                 output.scrollTop = output.scrollHeight;
                 setTimeout(() => {
                     if (lvl < levels.length - 1) { lvl++; loadLevel(lvl); }
@@ -8161,7 +8161,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         const banner = document.getElementById('cmdWinBanner');
                         if (banner) {
                             banner.style.display = 'block';
-                            banner.textContent = `â‰¡Æ’Ã…Ã¥ Challenge Complete! Final Score: ${score}/${levels.length * 60}`;
+                            banner.textContent = `≡ƒÅå Challenge Complete! Final Score: ${score}/${levels.length * 60}`;
                         }
                     }
                 }, 2000);
@@ -8175,19 +8175,19 @@ document.addEventListener('DOMContentLoaded', async () => {
             score = Math.max(0, score - 5);
             document.getElementById('cmdScore').textContent = score;
             const out = document.getElementById('cmdOutput');
-            out.textContent += `\nâ‰¡Æ’Ã†Ã­ HINT: ${levels[lvl].hint}\n\nC:\\Users\\Student> `;
+            out.textContent += `\n≡ƒÆí HINT: ${levels[lvl].hint}\n\nC:\\Users\\Student> `;
             out.scrollTop = out.scrollHeight;
         };
     };
 
     const initMediaStudy = (container) => {
         const media = [
-            { name:'UTP Cat6', color:'#3b82f6', icon:'â‰¡Æ’Ã¶â•¡', speed:'10 Gbps', dist:'100m', freq:'250 MHz', imp:'100â•¬âŒ', pro:'Affordable, easy to install, widely used in LAN', con:'Susceptible to EMI, limited distance' },
-            { name:'STP Cat7', color:'#8b5cf6', icon:'â‰¡Æ’Æ’Ãº', speed:'10 Gbps', dist:'100m', freq:'600 MHz', imp:'100â•¬âŒ', pro:'Better shielding than UTP, lower crosstalk', con:'More expensive, thicker and harder to route' },
-            { name:'Coaxial', color:'#f59e0b', icon:'â‰¡Æ’Æ’Ã­', speed:'10 Mbps', dist:'500m', freq:'~1 GHz', imp:'50/75â•¬âŒ', pro:'Long distance, good noise immunity, used in cable TV', con:'Bulky, difficult termination, replaced by fiber' },
-            { name:'Fiber (SMF)', color:'#10b981', icon:'â‰¡Æ’Æ’Ã³', speed:'100+ Gbps', dist:'80km+', freq:'200+ THz', imp:'N/A', pro:'Highest bandwidth, immune to EMI, long distances', con:'Expensive splicing, fragile, costly equipment' },
-            { name:'Fiber (MMF)', color:'#06b6d4', icon:'â‰¡Æ’Ã¶â•–', speed:'10 Gbps', dist:'550m', freq:'200+ THz', imp:'N/A', pro:'Cheaper than SMF, easier to connect', con:'Modal dispersion limits bandwidth over distance' },
-            { name:'Wi-Fi 6 (Radio)', color:'#ec4899', icon:'â‰¡Æ’Ã´Ã­', speed:'9.6 Gbps', dist:'~150m', freq:'2.4/5/6 GHz', imp:'N/A', pro:'No cables, mobile, covers large areas', con:'Interference, security concerns, shared medium' },
+            { name:'UTP Cat6', color:'#3b82f6', icon:'≡ƒö╡', speed:'10 Gbps', dist:'100m', freq:'250 MHz', imp:'100╬⌐', pro:'Affordable, easy to install, widely used in LAN', con:'Susceptible to EMI, limited distance' },
+            { name:'STP Cat7', color:'#8b5cf6', icon:'≡ƒƒú', speed:'10 Gbps', dist:'100m', freq:'600 MHz', imp:'100╬⌐', pro:'Better shielding than UTP, lower crosstalk', con:'More expensive, thicker and harder to route' },
+            { name:'Coaxial', color:'#f59e0b', icon:'≡ƒƒí', speed:'10 Mbps', dist:'500m', freq:'~1 GHz', imp:'50/75╬⌐', pro:'Long distance, good noise immunity, used in cable TV', con:'Bulky, difficult termination, replaced by fiber' },
+            { name:'Fiber (SMF)', color:'#10b981', icon:'≡ƒƒó', speed:'100+ Gbps', dist:'80km+', freq:'200+ THz', imp:'N/A', pro:'Highest bandwidth, immune to EMI, long distances', con:'Expensive splicing, fragile, costly equipment' },
+            { name:'Fiber (MMF)', color:'#06b6d4', icon:'≡ƒö╖', speed:'10 Gbps', dist:'550m', freq:'200+ THz', imp:'N/A', pro:'Cheaper than SMF, easier to connect', con:'Modal dispersion limits bandwidth over distance' },
+            { name:'Wi-Fi 6 (Radio)', color:'#ec4899', icon:'≡ƒôí', speed:'9.6 Gbps', dist:'~150m', freq:'2.4/5/6 GHz', imp:'N/A', pro:'No cables, mobile, covers large areas', con:'Interference, security concerns, shared medium' },
         ];
         let selectedIdx = 0;
         const wiring = [
@@ -8209,8 +8209,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <div style="padding:10px; background:var(--bg-page); border-radius:8px; border-left:3px solid ${m.color};"><div style="color:var(--text-muted); font-weight:800; font-size:10px;">BANDWIDTH / FREQ</div><div style="font-weight:800; color:${m.color}; margin-top:4px;">${m.freq}</div></div>
                     <div style="padding:10px; background:var(--bg-page); border-radius:8px; border-left:3px solid ${m.color};"><div style="color:var(--text-muted); font-weight:800; font-size:10px;">IMPEDANCE</div><div style="font-weight:800; color:${m.color}; margin-top:4px;">${m.imp}</div></div>
                 </div>
-                <div style="padding:10px; background:rgba(16,185,129,0.05); border-radius:8px; font-size:12px; margin-bottom:8px;"><b style="color:var(--success);">Î“Â£Ã  Pros:</b> ${m.pro}</div>
-                <div style="padding:10px; background:rgba(239,68,68,0.05); border-radius:8px; font-size:12px;"><b style="color:var(--danger);">Î“Â¥Ã® Cons:</b> ${m.con}</div>
+                <div style="padding:10px; background:rgba(16,185,129,0.05); border-radius:8px; font-size:12px; margin-bottom:8px;"><b style="color:var(--success);">Γ£à Pros:</b> ${m.pro}</div>
+                <div style="padding:10px; background:rgba(239,68,68,0.05); border-radius:8px; font-size:12px;"><b style="color:var(--danger);">Γ¥î Cons:</b> ${m.con}</div>
             `;
         };
 
@@ -8222,7 +8222,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         <h3 style="color:var(--primary); margin-bottom:15px;">Select Medium</h3>
                         <div style="display:flex; flex-direction:column; gap:8px;" id="mediaList">
                             ${media.map((m,i)=>`<div onclick="document.getElementById('mediaList').querySelectorAll('.media-item').forEach(el=>el.style.borderColor='var(--border)'); this.style.borderColor='${m.color}'; document.querySelector('[data-render-media]').dataset.renderMedia='${i}';" class="media-item" style="padding:12px; background:var(--bg-page); border:1px solid var(--border); border-radius:10px; cursor:pointer; display:flex; align-items:center; gap:10px; transition:border-color 0.2s;"
-                                ><span style="font-size:20px;">${m.icon}</span><div><div style="font-weight:800; font-size:13px;">${m.name}</div><div style="font-size:10px; color:var(--text-muted);">${m.speed} â”¬â•– ${m.dist}</div></div></div>`).join('')}
+                                ><span style="font-size:20px;">${m.icon}</span><div><div style="font-weight:800; font-size:13px;">${m.name}</div><div style="font-size:10px; color:var(--text-muted);">${m.speed} ┬╖ ${m.dist}</div></div></div>`).join('')}
                         </div>
                     </div>
                     <div class="theory-card" style="flex:2; min-width:300px; margin:0;" id="mediaDetail" data-render-media="0">
@@ -8243,19 +8243,19 @@ document.addEventListener('DOMContentLoaded', async () => {
                         </div>`).join('<div style="padding:10px; display:flex; align-items:center; font-weight:800; color:var(--text-muted);">VS</div>')}
                     </div>
                     <div style="margin-top:15px; padding:12px; background:rgba(37,99,235,0.05); border-radius:10px; font-size:12px; line-height:1.6;">
-                        <b style="color:var(--primary);">Straight-Through:</b> Both ends use same standard (T568BÎ“Ã¥Ã¶T568B). Used: PCÎ“Ã¥Ã†Switch, SwitchÎ“Ã¥Ã†Router.<br>
-                        <b style="color:var(--warning);">Crossover:</b> One end T568A, other T568B. Used: PCÎ“Ã¥Ã¶PC, SwitchÎ“Ã¥Ã¶Switch, RouterÎ“Ã¥Ã¶Router (same device type).<br>
+                        <b style="color:var(--primary);">Straight-Through:</b> Both ends use same standard (T568BΓåöT568B). Used: PCΓåÆSwitch, SwitchΓåÆRouter.<br>
+                        <b style="color:var(--warning);">Crossover:</b> One end T568A, other T568B. Used: PCΓåöPC, SwitchΓåöSwitch, RouterΓåöRouter (same device type).<br>
                         <b style="color:var(--success);">Modern Note:</b> Auto-MDI/MDIX ports on modern switches detect and swap automatically.
                     </div>
                 </div>
                 <div class="theory-card" style="width:100%; margin:0;">
-                    <h3 style="color:var(--primary); margin-bottom:12px;">Cable Type Quick Quiz â‰¡Æ’Ã„Â»</h3>
+                    <h3 style="color:var(--primary); margin-bottom:12px;">Cable Type Quick Quiz ≡ƒÄ»</h3>
                     <div style="display:flex; gap:10px; flex-wrap:wrap;" id="cableQuiz">
                         ${[
-                            { q:'PC Î“Ã¥Ã† Switch', correct:'Straight-Through', opts:['Straight-Through','Crossover','Rollover'] },
-                            { q:'Router Î“Ã¥Ã† Router', correct:'Crossover', opts:['Straight-Through','Crossover','Rollover'] },
-                            { q:'PC Î“Ã¥Ã† Router (Console)', correct:'Rollover', opts:['Straight-Through','Crossover','Rollover'] },
-                            { q:'Switch Î“Ã¥Ã† Switch', correct:'Crossover', opts:['Straight-Through','Crossover','Rollover'] },
+                            { q:'PC ΓåÆ Switch', correct:'Straight-Through', opts:['Straight-Through','Crossover','Rollover'] },
+                            { q:'Router ΓåÆ Router', correct:'Crossover', opts:['Straight-Through','Crossover','Rollover'] },
+                            { q:'PC ΓåÆ Router (Console)', correct:'Rollover', opts:['Straight-Through','Crossover','Rollover'] },
+                            { q:'Switch ΓåÆ Switch', correct:'Crossover', opts:['Straight-Through','Crossover','Rollover'] },
                         ].map((q,qi)=>`<div class="theory-card" style="flex:1; min-width:180px; margin:0; padding:12px;">
                             <div style="font-size:12px; font-weight:800; color:var(--primary); margin-bottom:10px;">${q.q}</div>
                             ${q.opts.map(o=>`<button class="btn-sim" style="display:block; width:100%; margin-bottom:5px; font-size:11px; text-align:left; padding:6px 10px;" onclick="(function(btn,correct,container){
@@ -8281,8 +8281,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             mediaItems.forEach((el, i) => el.style.borderColor = i === idx ? media[i].color : 'var(--border)');
         });
         obs.observe(mediaDetail, { attributes: true, attributeFilter: ['data-render-media'] });
-    };
-
     // --- TOPOLOGY SIMULATOR (PRACTICAL 3) ---
     const initTopologySim = (container) => {
         let activeTopo = 'bus';
@@ -8290,20 +8288,20 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const topoConfigs = {
             bus: {
-                name: "Bus Topology â‰¡Æ’ÃœÃ®",
+                name: "Bus Topology ≡ƒÜî",
                 desc: "All nodes connect to a single central backbone cable via T-connectors with 50-ohm terminators at both ends.",
-                formula: (n) => ({ links: 1, dropLines: n, portsPerNode: 1, collisionRisk: "High (CSMA/CD Shared Medium)", redundancy: "Î“Â¡Ã‰ (Poor - 1 Cut Downs All)" }),
+                formula: (n) => ({ links: 1, dropLines: n, portsPerNode: 1, collisionRisk: "High (CSMA/CD Shared Medium)", redundancy: "Γ¡É (Poor - 1 Cut Downs All)" }),
                 diagram: `
                  [ PC1 ]      [ PC2 ]      [ PC3 ]      [ PC4 ]
                     |            |            |            |
- [50â•¬âŒ Term] =======+============+============+============+======= [50â•¬âŒ Term]
+ [50╬⌐ Term] =======+============+============+============+======= [50╬⌐ Term]
                                Backbone Cable
                 `
             },
             star: {
-                name: "Star Topology Î“Â¡Ã‰âˆ©â••Ã…",
+                name: "Star Topology Γ¡É∩╕Å",
                 desc: "Every node connects via a dedicated point-to-point cable to a central Layer-2 Ethernet switch.",
-                formula: (n) => ({ links: n, dropLines: n, portsPerNode: 1, collisionRisk: "0% (Full-Duplex Switch Ports)", redundancy: "Î“Â¡Ã‰Î“Â¡Ã‰Î“Â¡Ã‰ (Good - Node Isolated on Cut)" }),
+                formula: (n) => ({ links: n, dropLines: n, portsPerNode: 1, collisionRisk: "0% (Full-Duplex Switch Ports)", redundancy: "Γ¡ÉΓ¡ÉΓ¡É (Good - Node Isolated on Cut)" }),
                 diagram: `
                               [ PC1 ]
                                  |
@@ -8313,9 +8311,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 `
             },
             ring: {
-                name: "Ring Topology Î“Â¡Ã²âˆ©â••Ã…",
+                name: "Ring Topology Γ¡ò∩╕Å",
                 desc: "Nodes form a closed unidirectional loop. A 3-byte Token circulates continuously to control transmission.",
-                formula: (n) => ({ links: n, dropLines: 0, portsPerNode: 2, collisionRisk: "0% (Token Passing Protocol)", redundancy: "Î“Â¡Ã‰Î“Â¡Ã‰ (Medium - Loop Cut Breaks Ring)" }),
+                formula: (n) => ({ links: n, dropLines: 0, portsPerNode: 2, collisionRisk: "0% (Token Passing Protocol)", redundancy: "Γ¡ÉΓ¡É (Medium - Loop Cut Breaks Ring)" }),
                 diagram: `
                              [ PC1 ] ----> [ PC2 ]
                                 ^             |
@@ -8324,9 +8322,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 `
             },
             mesh_full: {
-                name: "Full Mesh Topology â‰¡Æ’Ã²â••âˆ©â••Ã…",
+                name: "Full Mesh Topology ≡ƒò╕∩╕Å",
                 desc: "Every node is directly connected to every other node, providing maximum redundancy and bandwidth.",
-                formula: (n) => ({ links: Math.round(n * (n - 1) / 2), dropLines: 0, portsPerNode: n - 1, collisionRisk: "0% (Dedicated Direct Links)", redundancy: "Î“Â¡Ã‰Î“Â¡Ã‰Î“Â¡Ã‰Î“Â¡Ã‰Î“Â¡Ã‰ (Excellent - Multi-Path Failover)" }),
+                formula: (n) => ({ links: Math.round(n * (n - 1) / 2), dropLines: 0, portsPerNode: n - 1, collisionRisk: "0% (Dedicated Direct Links)", redundancy: "Γ¡ÉΓ¡ÉΓ¡ÉΓ¡ÉΓ¡É (Excellent - Multi-Path Failover)" }),
                 diagram: `
                              [ PC1 ] ======== [ PC2 ]
                               |  \\          /  |
@@ -8337,9 +8335,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 `
             },
             tree: {
-                name: "Tree Topology â‰¡Æ’Ã®â”‚",
+                name: "Tree Topology ≡ƒî│",
                 desc: "Hierarchical structure combining Star topologies in Core, Distribution, and Access tiers.",
-                formula: (n) => ({ links: n + 2, dropLines: n, portsPerNode: 1, collisionRisk: "Low (Subtree Isolated)", redundancy: "Î“Â¡Ã‰Î“Â¡Ã‰Î“Â¡Ã‰Î“Â¡Ã‰ (High - Hierarchical Structure)" }),
+                formula: (n) => ({ links: n + 2, dropLines: n, portsPerNode: 1, collisionRisk: "Low (Subtree Isolated)", redundancy: "Γ¡ÉΓ¡ÉΓ¡ÉΓ¡É (High - Hierarchical Structure)" }),
                 diagram: `
                               [ Core Switch ]
                                /           \\
@@ -8349,9 +8347,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 `
             },
             hybrid: {
-                name: "Hybrid Topology â‰¡Æ’Ã¶Ã‡",
+                name: "Hybrid Topology ≡ƒöÇ",
                 desc: "Integrates multiple distinct topologies (Star-Bus / Star-Ring / Mesh-Tree) into an enterprise network.",
-                formula: (n) => ({ links: n + 4, dropLines: n, portsPerNode: 2, collisionRisk: "0% (Isolated Domains)", redundancy: "Î“Â¡Ã‰Î“Â¡Ã‰Î“Â¡Ã‰Î“Â¡Ã‰Î“Â¡Ã‰ (Maximum Custom Enterprise)" }),
+                formula: (n) => ({ links: n + 4, dropLines: n, portsPerNode: 2, collisionRisk: "0% (Isolated Domains)", redundancy: "Γ¡ÉΓ¡ÉΓ¡ÉΓ¡ÉΓ¡É (Maximum Custom Enterprise)" }),
                 diagram: `
                    [ Star LAN 1 ] <==== Backbone ====> [ Ring LAN 2 ]
                      (4 Hosts)                          (4 Hosts)
@@ -8365,7 +8363,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             container.innerHTML = `
                 <div class="sim-toolbar" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
-                    <div class="section-title" style="font-size:22px; margin:0; color:var(--primary);">Interactive Topologies Simulator â‰¡Æ’Ã²â••âˆ©â••Ã…</div>
+                    <div class="section-title" style="font-size:22px; margin:0; color:var(--primary);">Interactive Topologies Simulator ≡ƒò╕∩╕Å</div>
                     <div style="display:flex; gap:6px; flex-wrap:wrap;">
                         ${Object.keys(topoConfigs).map(key => `
                             <button class="btn-sim ${key === activeTopo ? 'primary' : ''}" onclick="window.switchTopo('${key}')">${topoConfigs[key].name.split(' ')[0]} ${topoConfigs[key].name.split(' ')[1]}</button>
@@ -8389,19 +8387,19 @@ ${cfg.diagram}
                             </div>
 
                             <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:15px;">
-                                <button class="btn-sim primary" id="btnSimTx">Simulate Frame Flow Î“Ã»â•¢</button>
-                                <button class="btn-sim danger" id="btnCutLink">Simulate Cable Cut Î“Â£Ã©âˆ©â••Ã…</button>
-                                <button class="btn-sim warning" id="btnCrashNode">Crash Central Node â‰¡Æ’Ã†Ã‘</button>
-                                <button class="btn-sim" id="btnResetTopo">Reset Topology Î“Ã¥â•‘</button>
+                                <button class="btn-sim primary" id="btnSimTx">Simulate Frame Flow Γû╢</button>
+                                <button class="btn-sim danger" id="btnCutLink">Simulate Cable Cut Γ£é∩╕Å</button>
+                                <button class="btn-sim warning" id="btnCrashNode">Crash Central Node ≡ƒÆÑ</button>
+                                <button class="btn-sim" id="btnResetTopo">Reset Topology Γå║</button>
                             </div>
 
                             <div id="topoStatusLog" style="padding:12px; background:rgba(37,99,235,0.06); border:1px solid var(--border); border-radius:8px; font-size:12px; line-height:1.6; min-height:48px; color:var(--text-main);">
-                                â‰¡Æ’Ã†Ã­ Select an action above to simulate data packet flow or failure scenarios.
+                                ≡ƒÆí Select an action above to simulate data packet flow or failure scenarios.
                             </div>
                         </div>
 
                         <div class="theory-card" style="flex:1; min-width:260px; margin:0; display:flex; flex-direction:column; gap:14px;">
-                            <h3 style="color:var(--primary); margin:0;">Formula Metrics & Audit â‰¡Æ’Ã´Ã¨</h3>
+                            <h3 style="color:var(--primary); margin:0;">Formula Metrics & Audit ≡ƒôè</h3>
                             
                             <div style="display:flex; flex-direction:column; gap:10px;">
                                 <div style="padding:10px 14px; background:var(--bg-page); border:1px solid var(--border); border-radius:8px;">
@@ -8431,15 +8429,15 @@ ${cfg.diagram}
             document.getElementById('btnSimTx').onclick = () => {
                 const log = document.getElementById('topoStatusLog');
                 if (activeTopo === 'bus') {
-                    log.innerHTML = `<span style="color:var(--primary); font-weight:bold;">[CSMA/CD Broadcast]</span> PC1 transmits frame onto 50â•¬âŒ backbone... <br>PC2, PC3, PC4 receive frame simultaneously. PC3 accepts frame (MAC Match), PC2/PC4 drop frame. Signal absorbed by 50â•¬âŒ terminators.`;
+                    log.innerHTML = `<span style="color:var(--primary); font-weight:bold;">[CSMA/CD Broadcast]</span> PC1 transmits frame onto 50╬⌐ backbone... <br>PC2, PC3, PC4 receive frame simultaneously. PC3 accepts frame (MAC Match), PC2/PC4 drop frame. Signal absorbed by 50╬⌐ terminators.`;
                 } else if (activeTopo === 'star') {
                     log.innerHTML = `<span style="color:var(--success); font-weight:bold;">[Switch Micro-Segmented Flow]</span> PC1 sends unicast frame to Switch Port 1.<br>Switch checks MAC table: Target PC3 on Port 3. Frame forwarded exclusively to PC3 with zero collision!`;
                 } else if (activeTopo === 'ring') {
-                    log.innerHTML = `<span style="color:var(--warning); font-weight:bold;">[Token Passing Loop]</span> Token frame captured by PC1.<br>PC1 appends data frame and forwards to PC2 Î“Ã¥Ã† PC3. PC3 copies data & sets ACK bit Î“Ã¥Ã† forwards back to PC1 Î“Ã¥Ã† PC1 releases Token!`;
+                    log.innerHTML = `<span style="color:var(--warning); font-weight:bold;">[Token Passing Loop]</span> Token frame captured by PC1.<br>PC1 appends data frame and forwards to PC2 ΓåÆ PC3. PC3 copies data & sets ACK bit ΓåÆ forwards back to PC1 ΓåÆ PC1 releases Token!`;
                 } else if (activeTopo === 'mesh_full') {
-                    log.innerHTML = `<span style="color:var(--success); font-weight:bold;">[Direct Dedicated Link]</span> PC1 sends frame via direct link PC1Î“Ã¥Ã¶PC3.<br>Zero intermediary hops, max bandwidth (100 Gbps), zero collision!`;
+                    log.innerHTML = `<span style="color:var(--success); font-weight:bold;">[Direct Dedicated Link]</span> PC1 sends frame via direct link PC1ΓåöPC3.<br>Zero intermediary hops, max bandwidth (100 Gbps), zero collision!`;
                 } else if (activeTopo === 'tree') {
-                    log.innerHTML = `<span style="color:var(--primary); font-weight:bold;">[Hierarchical Routing]</span> PC1 (Access Switch 1) sends frame to Distribution Switch 1 Î“Ã¥Ã† Core Switch Î“Ã¥Ã† Distribution Switch 2 Î“Ã¥Ã† PC3 (Access Switch 2).`;
+                    log.innerHTML = `<span style="color:var(--primary); font-weight:bold;">[Hierarchical Routing]</span> PC1 (Access Switch 1) sends frame to Distribution Switch 1 ΓåÆ Core Switch ΓåÆ Distribution Switch 2 ΓåÆ PC3 (Access Switch 2).`;
                 } else {
                     log.innerHTML = `<span style="color:var(--primary); font-weight:bold;">[Hybrid Gateway Rerouting]</span> Frame routed from Star LAN 1 over backbone link to Ring LAN 2 seamlessly.`;
                 }
@@ -8448,28 +8446,28 @@ ${cfg.diagram}
             document.getElementById('btnCutLink').onclick = () => {
                 const log = document.getElementById('topoStatusLog');
                 if (activeTopo === 'bus') {
-                    log.innerHTML = `<span style="color:var(--danger); font-weight:bold;">Î“Â¥Ã® BACKBONE CABLE CUT!</span><br>Signal reflection occurs at break point. <b>Entire Bus network collapses (100% outage for all hosts).</b>`;
+                    log.innerHTML = `<span style="color:var(--danger); font-weight:bold;">Γ¥î BACKBONE CABLE CUT!</span><br>Signal reflection occurs at break point. <b>Entire Bus network collapses (100% outage for all hosts).</b>`;
                 } else if (activeTopo === 'star') {
-                    log.innerHTML = `<span style="color:var(--warning); font-weight:bold;">Î“ÃœÃ¡âˆ©â••Ã… WORKSTATION CABLE CUT (PC2)!</span><br>PC2 loses connectivity. <b>PC1, PC3, and PC4 continue communicating via central switch without disruption!</b>`;
+                    log.innerHTML = `<span style="color:var(--warning); font-weight:bold;">ΓÜá∩╕Å WORKSTATION CABLE CUT (PC2)!</span><br>PC2 loses connectivity. <b>PC1, PC3, and PC4 continue communicating via central switch without disruption!</b>`;
                 } else if (activeTopo === 'ring') {
-                    log.innerHTML = `<span style="color:var(--danger); font-weight:bold;">Î“Â¥Ã® RING LOOP BROKEN (Link PC2-PC3 Cut)!</span><br>Token circulation halts. <b>Entire ring network downs unless Dual Ring (FDDI) wraps around.</b>`;
+                    log.innerHTML = `<span style="color:var(--danger); font-weight:bold;">Γ¥î RING LOOP BROKEN (Link PC2-PC3 Cut)!</span><br>Token circulation halts. <b>Entire ring network downs unless Dual Ring (FDDI) wraps around.</b>`;
                 } else if (activeTopo === 'mesh_full') {
-                    log.innerHTML = `<span style="color:var(--success); font-weight:bold;">â‰¡Æ’Â¢Ã­âˆ©â••Ã… MESH LINK PC1Î“Ã¥Ã¶PC3 CUT!</span><br>Spanning Tree / OSPF detects failure instantly: <b>Traffic automatically reroutes via PC1 Î“Ã¥Ã† PC2 Î“Ã¥Ã† PC3. Zero downtime!</b>`;
+                    log.innerHTML = `<span style="color:var(--success); font-weight:bold;">≡ƒ¢í∩╕Å MESH LINK PC1ΓåöPC3 CUT!</span><br>Spanning Tree / OSPF detects failure instantly: <b>Traffic automatically reroutes via PC1 ΓåÆ PC2 ΓåÆ PC3. Zero downtime!</b>`;
                 } else if (activeTopo === 'tree') {
-                    log.innerHTML = `<span style="color:var(--danger); font-weight:bold;">Î“ÃœÃ¡âˆ©â••Ã… DISTRIBUTION LINK CUT!</span><br>Subtree PCs (PC1 & PC2) disconnected from Core. Remaining network operates normally.`;
+                    log.innerHTML = `<span style="color:var(--danger); font-weight:bold;">ΓÜá∩╕Å DISTRIBUTION LINK CUT!</span><br>Subtree PCs (PC1 & PC2) disconnected from Core. Remaining network operates normally.`;
                 } else {
-                    log.innerHTML = `<span style="color:var(--warning); font-weight:bold;">Î“ÃœÃ¡âˆ©â••Ã… HYBRID LINK SEVERED!</span><br>Redundant gateway link activated to maintain cross-topology data flow.`;
+                    log.innerHTML = `<span style="color:var(--warning); font-weight:bold;">ΓÜá∩╕Å HYBRID LINK SEVERED!</span><br>Redundant gateway link activated to maintain cross-topology data flow.`;
                 }
             };
 
             document.getElementById('btnCrashNode').onclick = () => {
                 const log = document.getElementById('topoStatusLog');
                 if (activeTopo === 'star') {
-                    log.innerHTML = `<span style="color:var(--danger); font-weight:bold;">â‰¡Æ’Ã†Ã‘ CENTRAL SWITCH CRASHED!</span><br>Single point of failure triggered: <b>All connected devices (PC1, PC2, PC3, PC4) lose connectivity completely.</b>`;
+                    log.innerHTML = `<span style="color:var(--danger); font-weight:bold;">≡ƒÆÑ CENTRAL SWITCH CRASHED!</span><br>Single point of failure triggered: <b>All connected devices (PC1, PC2, PC3, PC4) lose connectivity completely.</b>`;
                 } else if (activeTopo === 'mesh_full') {
-                    log.innerHTML = `<span style="color:var(--success); font-weight:bold;">â‰¡Æ’Â¢Ã­âˆ©â••Ã… CORE NODE CRASHED!</span><br>Mesh redundancy activates: <b>Surviving nodes automatically re-mesh around the dead node.</b>`;
+                    log.innerHTML = `<span style="color:var(--success); font-weight:bold;">≡ƒ¢í∩╕Å CORE NODE CRASHED!</span><br>Mesh redundancy activates: <b>Surviving nodes automatically re-mesh around the dead node.</b>`;
                 } else {
-                    log.innerHTML = `<span style="color:var(--danger); font-weight:bold;">â‰¡Æ’Ã†Ã‘ ROOT / CORE NODE FAILURE!</span><br>Hierarchical backbone affected. Backup standby router takes over active role.`;
+                    log.innerHTML = `<span style="color:var(--danger); font-weight:bold;">≡ƒÆÑ ROOT / CORE NODE FAILURE!</span><br>Hierarchical backbone affected. Backup standby router takes over active role.`;
                 }
             };
 
@@ -8506,7 +8504,7 @@ ${cfg.diagram}
                                     <th style="padding:8px;">Arrival (AT)</th>
                                     <th style="padding:8px;">Burst (BT)</th>
                                     <th style="padding:8px; display:none;" id="priorityHeader">Priority</th>
-                                    <th style="padding:8px;">Î“Â£Ã²</th>
+                                    <th style="padding:8px;">Γ£ò</th>
                                 </tr>
                             </thead>
                             <tbody id="cpuProcessRows">
@@ -8515,27 +8513,27 @@ ${cfg.diagram}
                                     <td style="padding:8px;"><input type="number" class="sim-select" style="width:70px;" value="0" min="0" id="at-P1"></td>
                                     <td style="padding:8px;"><input type="number" class="sim-select" style="width:70px;" value="4" min="1" id="bt-P1"></td>
                                     <td style="padding:8px; display:none;" class="priority-col"><input type="number" class="sim-select" style="width:60px;" value="2" min="1" id="pr-P1"></td>
-                                    <td style="padding:8px;"><button class="btn-sim" style="padding:3px 8px; font-size:11px;" onclick="this.closest('tr').remove();">Î“Â£Ã²</button></td>
+                                    <td style="padding:8px;"><button class="btn-sim" style="padding:3px 8px; font-size:11px;" onclick="this.closest('tr').remove();">Γ£ò</button></td>
                                 </tr>
                                 <tr style="border-bottom:1px solid var(--border);">
                                     <td style="padding:8px; font-weight:bold; color:#10b981;">P2</td>
                                     <td style="padding:8px;"><input type="number" class="sim-select" style="width:70px;" value="1" min="0" id="at-P2"></td>
                                     <td style="padding:8px;"><input type="number" class="sim-select" style="width:70px;" value="3" min="1" id="bt-P2"></td>
                                     <td style="padding:8px; display:none;" class="priority-col"><input type="number" class="sim-select" style="width:60px;" value="1" min="1" id="pr-P2"></td>
-                                    <td style="padding:8px;"><button class="btn-sim" style="padding:3px 8px; font-size:11px;" onclick="this.closest('tr').remove();">Î“Â£Ã²</button></td>
+                                    <td style="padding:8px;"><button class="btn-sim" style="padding:3px 8px; font-size:11px;" onclick="this.closest('tr').remove();">Γ£ò</button></td>
                                 </tr>
                                 <tr style="border-bottom:1px solid var(--border);">
                                     <td style="padding:8px; font-weight:bold; color:#f59e0b;">P3</td>
                                     <td style="padding:8px;"><input type="number" class="sim-select" style="width:70px;" value="2" min="0" id="at-P3"></td>
                                     <td style="padding:8px;"><input type="number" class="sim-select" style="width:70px;" value="1" min="1" id="bt-P3"></td>
                                     <td style="padding:8px; display:none;" class="priority-col"><input type="number" class="sim-select" style="width:60px;" value="3" min="1" id="pr-P3"></td>
-                                    <td style="padding:8px;"><button class="btn-sim" style="padding:3px 8px; font-size:11px;" onclick="this.closest('tr').remove();">Î“Â£Ã²</button></td>
+                                    <td style="padding:8px;"><button class="btn-sim" style="padding:3px 8px; font-size:11px;" onclick="this.closest('tr').remove();">Γ£ò</button></td>
                                 </tr>
                             </tbody>
                         </table>
                         <div style="display:flex; gap:10px;">
                             <button id="btnAddProcess" class="btn-sim" style="flex:1;">+ Add Process</button>
-                            <button id="btnRunCpuSim" class="btn-sim primary" style="flex:1;">Î“Ã»â•¢ Run Scheduler</button>
+                            <button id="btnRunCpuSim" class="btn-sim primary" style="flex:1;">Γû╢ Run Scheduler</button>
                         </div>
                     </div>
                     <div class="theory-card" style="flex:1; min-width:250px; margin:0;">
@@ -8544,10 +8542,10 @@ ${cfg.diagram}
                             <label style="display:block; margin-bottom:5px; font-size:12px; font-weight:800;">Scheduling Algorithm:</label>
                             <select id="cpuAlgoSelect" class="sim-select" style="width:100%;">
                                 <option value="fcfs">First-Come, First-Served (FCFS)</option>
-                                <option value="sjf">Shortest Job First (SJF) Î“Ã‡Ã¶ Non-Preemptive</option>
-                                <option value="srtf">Shortest Remaining Time (SRTF) Î“Ã‡Ã¶ Preemptive</option>
-                                <option value="rr">Round Robin (RR) Î“Ã‡Ã¶ Preemptive</option>
-                                <option value="priority">Priority Scheduling Î“Ã‡Ã¶ Non-Preemptive</option>
+                                <option value="sjf">Shortest Job First (SJF) ΓÇö Non-Preemptive</option>
+                                <option value="srtf">Shortest Remaining Time (SRTF) ΓÇö Preemptive</option>
+                                <option value="rr">Round Robin (RR) ΓÇö Preemptive</option>
+                                <option value="priority">Priority Scheduling ΓÇö Non-Preemptive</option>
                             </select>
                         </div>
                         <div style="margin-bottom:15px; display:none;" id="quantumContainer">
@@ -8621,7 +8619,7 @@ ${cfg.diagram}
                 <td style="padding:8px;"><input type="number" class="sim-select" style="width:70px;" value="0" min="0" id="at-P${procCounter}"></td>
                 <td style="padding:8px;"><input type="number" class="sim-select" style="width:70px;" value="3" min="1" id="bt-P${procCounter}"></td>
                 <td style="padding:8px; display:${showP ? '' : 'none'};" class="priority-col"><input type="number" class="sim-select" style="width:60px;" value="1" min="1" id="pr-P${procCounter}"></td>
-                <td style="padding:8px;"><button class="btn-sim" style="padding:3px 8px; font-size:11px;" onclick="this.closest('tr').remove();">Î“Â£Ã²</button></td>
+                <td style="padding:8px;"><button class="btn-sim" style="padding:3px 8px; font-size:11px;" onclick="this.closest('tr').remove();">Γ£ò</button></td>
             `;
             cpuProcessRows.appendChild(row);
         });
@@ -8714,8 +8712,8 @@ ${cfg.diagram}
                 const pct = Math.max(((block.end - block.start) / t) * 100, 1.5);
                 const div = document.createElement('div');
                 div.style.cssText = `width:${pct}%; height:100%; background:${block.color}; color:#fff; display:flex; flex-direction:column; align-items:center; justify-content:center; border-radius:4px; flex-shrink:0; transition:transform 0.2s; cursor:default;`;
-                div.title = `${block.pid}: t=${block.start}Î“Ã¥Ã†${block.end} (â•¬Ã¶=${block.end - block.start})`;
-                div.innerHTML = `<span style="font-weight:800; font-size:12px; white-space:nowrap; overflow:hidden; max-width:95%;">${block.pid}</span><span style="font-size:9px; opacity:0.8;">${block.start}Î“Ã¥Ã†${block.end}</span>`;
+                div.title = `${block.pid}: t=${block.start}ΓåÆ${block.end} (╬ö=${block.end - block.start})`;
+                div.innerHTML = `<span style="font-weight:800; font-size:12px; white-space:nowrap; overflow:hidden; max-width:95%;">${block.pid}</span><span style="font-size:9px; opacity:0.8;">${block.start}ΓåÆ${block.end}</span>`;
                 div.onmouseenter = () => div.style.transform = 'scaleY(1.08)';
                 div.onmouseleave = () => div.style.transform = '';
                 ganttBox.appendChild(div);
@@ -8794,9 +8792,9 @@ ${cfg.diagram}
                                 </div>
                             </div>
                             <div style="padding:12px; background:rgba(16,185,129,0.05); border:1px solid var(--border); border-radius:10px; font-size:12px; line-height:1.4;">
-                                Î“Ã‡Ã³ <b>empty</b> blocks producer when buffer is full (0).<br>
-                                Î“Ã‡Ã³ <b>full</b> blocks consumer when buffer is empty (0).<br>
-                                Î“Ã‡Ã³ <b>mutex</b> ensures critical section exclusivity.
+                                ΓÇó <b>empty</b> blocks producer when buffer is full (0).<br>
+                                ΓÇó <b>full</b> blocks consumer when buffer is empty (0).<br>
+                                ΓÇó <b>mutex</b> ensures critical section exclusivity.
                             </div>
                         </div>
                     </div>
@@ -8837,13 +8835,13 @@ ${cfg.diagram}
                     `;
                     if (buffer[i]) {
                         slot.style.boxShadow = '0 0 15px rgba(168,85,247,0.2)';
-                        slot.innerHTML = 'â‰¡Æ’Ã´Âª';
+                        slot.innerHTML = '≡ƒôª';
                         const idx = document.createElement('span');
                         idx.textContent = `Item ${buffer[i]}`;
                         idx.style.cssText = 'font-size:9px; position:absolute; bottom:2px; color:var(--text-muted);';
                         slot.appendChild(idx);
                     } else {
-                        slot.innerHTML = 'Î“ÃœÃ–âˆ©â••Ã…';
+                        slot.innerHTML = 'ΓÜÖ∩╕Å';
                         slot.style.opacity = '0.4';
                     }
                     bufferSlots.appendChild(slot);
@@ -8927,7 +8925,7 @@ ${cfg.diagram}
                             <h3 style="color:var(--primary); margin-bottom:20px;">Database Resource Status</h3>
                             <div style="display:flex; justify-content:center; gap:20px; margin-bottom:20px;">
                                 <div id="dbResourceState" style="width:140px; height:140px; border-radius:50%; border:4px solid var(--border); display:flex; flex-direction:column; align-items:center; justify-content:center; background:var(--container-bg); transition:all 0.3s ease; box-shadow:0 0 15px rgba(0,0,0,0.1);">
-                                    <span id="dbStateIcon" style="font-size:42px;">â‰¡Æ’Æ’Ã³</span>
+                                    <span id="dbStateIcon" style="font-size:42px;">≡ƒƒó</span>
                                     <span id="dbStateText" style="font-weight:800; font-size:12px; margin-top:5px; text-transform:uppercase; color:var(--success);">Idle / Free</span>
                                 </div>
                             </div>
@@ -8962,9 +8960,9 @@ ${cfg.diagram}
                                 </div>
                             </div>
                             <div style="padding:12px; background:rgba(168,85,247,0.05); border:1px solid var(--border); border-radius:10px; font-size:12px; line-height:1.4;">
-                                Î“Ã‡Ã³ Multiple <b>Readers</b> can access the resource simultaneously if <code>wrt</code> is free.<br>
-                                Î“Ã‡Ã³ First Reader locks <code>wrt</code> (wrt=0). Last Reader releases it (wrt=1).<br>
-                                Î“Ã‡Ã³ <b>Writers</b> require exclusive lock on <code>wrt</code> and block both readers and other writers.
+                                ΓÇó Multiple <b>Readers</b> can access the resource simultaneously if <code>wrt</code> is free.<br>
+                                ΓÇó First Reader locks <code>wrt</code> (wrt=0). Last Reader releases it (wrt=1).<br>
+                                ΓÇó <b>Writers</b> require exclusive lock on <code>wrt</code> and block both readers and other writers.
                             </div>
                         </div>
                     </div>
@@ -9014,17 +9012,17 @@ ${cfg.diagram}
                 
                 if (activeWriter) {
                     dbResourceState.style.borderColor = 'var(--warning)';
-                    dbStateIcon.textContent = 'â‰¡Æ’Ã´Â¥';
+                    dbStateIcon.textContent = '≡ƒô¥';
                     dbStateText.textContent = `Writer ${activeWriter} active`;
                     dbStateText.style.color = 'var(--warning)';
                 } else if (readcount > 0) {
                     dbResourceState.style.borderColor = 'var(--primary)';
-                    dbStateIcon.textContent = 'â‰¡Æ’Ã´Ã»';
+                    dbStateIcon.textContent = '≡ƒôû';
                     dbStateText.textContent = `${readcount} Reader(s) active`;
                     dbStateText.style.color = 'var(--primary)';
                 } else {
                     dbResourceState.style.borderColor = 'var(--success)';
-                    dbStateIcon.textContent = 'â‰¡Æ’Æ’Ã³';
+                    dbStateIcon.textContent = '≡ƒƒó';
                     dbStateText.textContent = 'Idle / Free';
                     dbStateText.style.color = 'var(--success)';
                 }
@@ -9155,7 +9153,7 @@ ${cfg.diagram}
                                 <!-- Chopstick Semaphores generated dynamically -->
                             </div>
                             <div style="margin-top:15px; padding:12px; background:rgba(16,185,129,0.05); border:1px solid var(--border); border-radius:10px; font-size:11px; line-height:1.4;">
-                                Î“Ã‡Ã³ <b>Asymmetric rule</b> implemented: Odd philosophers pick Left first, then Right; Even philosophers pick Right first, then Left. This breaks the circular wait condition and prevents deadlocks!
+                                ΓÇó <b>Asymmetric rule</b> implemented: Odd philosophers pick Left first, then Right; Even philosophers pick Right first, then Left. This breaks the circular wait condition and prevents deadlocks!
                             </div>
                         </div>
                     </div>
@@ -9950,7 +9948,7 @@ ${cfg.diagram}
             }
             document.getElementById('statDiskSeek').textContent = movement;
 
-            // Draw seek trace on Canvas Î“Ã‡Ã¶ use OS purple if OS subject, blue for networking
+            // Draw seek trace on Canvas ΓÇö use OS purple if OS subject, blue for networking
             const diskSubject = localStorage.getItem('vlab_current_subject') || 'networking';
             drawGrid();
             ctx.lineWidth = 2;
@@ -10038,8 +10036,8 @@ ${cfg.diagram}
                         <div style="display:flex; flex-direction:column; gap:8px;">
                             <button id="btnVlanBc1" class="btn-sim primary">Broadcast from PC-1</button>
                             <button id="btnVlanBc3" class="btn-sim primary">Broadcast from PC-3</button>
-                            <button id="btnVlanPing12" class="btn-sim">Ping PC-1 Î“â‚§Ã¶ PC-2</button>
-                            <button id="btnVlanPing13" class="btn-sim">Ping PC-1 Î“â‚§Ã¶ PC-3</button>
+                            <button id="btnVlanPing12" class="btn-sim">Ping PC-1 Γ₧ö PC-2</button>
+                            <button id="btnVlanPing13" class="btn-sim">Ping PC-1 Γ₧ö PC-3</button>
                         </div>
                         <div id="vlanConsole" style="background:#f8fafc; border-radius:8px; padding:10px; font-family:'JetBrains Mono', monospace; font-size:11px; color:#10b981; height:120px; overflow-y:auto; margin-top:15px; border:1px solid var(--border);">
                             > VLAN Simulator Initialized
@@ -10252,7 +10250,7 @@ ${cfg.diagram}
             const sw1 = getPos('sw1'), sw2 = getPos('sw2');
             
             document.querySelectorAll('button, select').forEach(b => b.disabled = true);
-            log(`Ping: ${src.toUpperCase()} (VLAN ${pcVlans[src]}) Î“â‚§Ã¶ ${dest.toUpperCase()} (VLAN ${pcVlans[dest]})...`, '#fff');
+            log(`Ping: ${src.toUpperCase()} (VLAN ${pcVlans[src]}) Γ₧ö ${dest.toUpperCase()} (VLAN ${pcVlans[dest]})...`, '#fff');
             
             animatePacket([srcPos, sw1], getVlanColor(pcVlans[src]), null, () => {
                 if (pcVlans[src] !== pcVlans[dest]) {
@@ -10316,30 +10314,30 @@ ${cfg.diagram}
                         <canvas id="dnsCanvas" style="position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none;"></canvas>
                         
                         <div style="position:absolute; top:85%; left:15%; transform:translate(-50%,-50%); background:var(--bg-card); border:2px solid #3b82f6; padding:10px; border-radius:8px; text-align:center; z-index:2;" id="dnsClient">
-                            <div style="font-size:24px;">â‰¡Æ’Ã†â•—</div>
+                            <div style="font-size:24px;">≡ƒÆ╗</div>
                             <div style="font-weight:800; font-size:11px;">Client</div>
                         </div>
                         
                         <div style="position:absolute; top:85%; left:50%; transform:translate(-50%,-50%); background:var(--bg-card); border:2px solid #f59e0b; padding:10px; border-radius:8px; text-align:center; z-index:2;" id="dnsResolver">
-                            <div style="font-size:24px;">â‰¡Æ’Ã®Ã‰</div>
+                            <div style="font-size:24px;">≡ƒîÉ</div>
                             <div style="font-weight:800; font-size:11px;">Local Resolver</div>
                             <div style="font-size:9px; color:var(--text-muted);">ISP</div>
                         </div>
                         
                         <div style="position:absolute; top:15%; left:85%; transform:translate(-50%,-50%); background:var(--bg-card); border:2px solid #ef4444; padding:10px; border-radius:8px; text-align:center; z-index:2;" id="dnsRoot">
-                            <div style="font-size:24px;">â‰¡Æ’Ã¹Ã¤âˆ©â••Ã…</div>
+                            <div style="font-size:24px;">≡ƒùä∩╕Å</div>
                             <div style="font-weight:800; font-size:11px;">Root Server</div>
                             <div style="font-size:9px; color:var(--text-muted);">.</div>
                         </div>
                         
                         <div style="position:absolute; top:50%; left:85%; transform:translate(-50%,-50%); background:var(--bg-card); border:2px solid #10b981; padding:10px; border-radius:8px; text-align:center; z-index:2;" id="dnsTld">
-                            <div style="font-size:24px;">â‰¡Æ’Ã¹Ã¤âˆ©â••Ã…</div>
+                            <div style="font-size:24px;">≡ƒùä∩╕Å</div>
                             <div style="font-weight:800; font-size:11px;">TLD Server</div>
                             <div id="dnsTldLabel" style="font-size:9px; color:var(--text-muted);">.com</div>
                         </div>
                         
                         <div style="position:absolute; top:85%; left:85%; transform:translate(-50%,-50%); background:var(--bg-card); border:2px solid #8b5cf6; padding:10px; border-radius:8px; text-align:center; z-index:2;" id="dnsAuth">
-                            <div style="font-size:24px;">â‰¡Æ’Ã¹Ã¤âˆ©â••Ã…</div>
+                            <div style="font-size:24px;">≡ƒùä∩╕Å</div>
                             <div style="font-weight:800; font-size:11px;">Auth Server</div>
                             <div id="dnsAuthLabel" style="font-size:9px; color:var(--text-muted);">example.com</div>
                         </div>
@@ -10690,7 +10688,7 @@ ${cfg.diagram}
             tbody.innerHTML = '';
             nodes.forEach(n => {
                 if(n==='A') return;
-                const r = data[n] || {cost: 'Î“Ãªâ‚§', hop: '-'};
+                const r = data[n] || {cost: 'Γê₧', hop: '-'};
                 tbody.innerHTML += `
                     <tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
                         <td style="padding:6px; color:#fff;">${n}</td>
@@ -10758,7 +10756,7 @@ ${cfg.diagram}
                     let table = {};
                     ['B', 'C', 'D', 'E'].forEach(n => {
                         if (dist[n] === Infinity) {
-                            table[n] = {cost: 'Î“Ãªâ‚§', hop: '-'};
+                            table[n] = {cost: 'Γê₧', hop: '-'};
                         } else {
                             let curr = n;
                             let hop = '-';
@@ -10805,7 +10803,7 @@ ${cfg.diagram}
                     let table = {};
                     ['B', 'C', 'D', 'E'].forEach(n => {
                         if (dist[n] === Infinity) {
-                            table[n] = {cost: 'Î“Ãªâ‚§', hop: '-'};
+                            table[n] = {cost: 'Γê₧', hop: '-'};
                         } else {
                             let curr = n;
                             let hop = '-';
@@ -10828,10 +10826,10 @@ ${cfg.diagram}
             calculateSteps(document.getElementById('routeAlgoSelect').value);
             drawTopology();
             renderTableA({
-                B: {cost: 'Î“Ãªâ‚§', hop: '-'},
-                C: {cost: 'Î“Ãªâ‚§', hop: '-'},
-                D: {cost: 'Î“Ãªâ‚§', hop: '-'},
-                E: {cost: 'Î“Ãªâ‚§', hop: '-'}
+                B: {cost: 'Γê₧', hop: '-'},
+                C: {cost: 'Γê₧', hop: '-'},
+                D: {cost: 'Γê₧', hop: '-'},
+                E: {cost: 'Γê₧', hop: '-'}
             });
             const btn = document.getElementById('btnRouteStep');
             if (btn) {
@@ -10912,13 +10910,13 @@ ${cfg.diagram}
                         <canvas id="transCanvas" style="position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none;"></canvas>
                         
                         <div style="position:absolute; top:50%; left:20%; transform:translate(-50%,-50%); background:var(--bg-card); border:2px solid #3b82f6; padding:15px; border-radius:12px; text-align:center; z-index:2; min-width:100px;" id="transClient">
-                            <div style="font-size:32px;">â‰¡Æ’Ã†â•—</div>
+                            <div style="font-size:32px;">≡ƒÆ╗</div>
                             <div style="font-weight:800; font-size:14px; margin-top:5px;">Host A</div>
                             <div id="tcpStateA" style="font-size:10px; color:#f59e0b; margin-top:5px; font-family:'JetBrains Mono', monospace; font-weight:bold;">CLOSED</div>
                         </div>
                         
                         <div style="position:absolute; top:50%; left:80%; transform:translate(-50%,-50%); background:var(--bg-card); border:2px solid #10b981; padding:15px; border-radius:12px; text-align:center; z-index:2; min-width:100px;" id="transServer">
-                            <div style="font-size:32px;">â‰¡Æ’Ã¹Ã¤âˆ©â••Ã…</div>
+                            <div style="font-size:32px;">≡ƒùä∩╕Å</div>
                             <div style="font-weight:800; font-size:14px; margin-top:5px;">Host B</div>
                             <div id="tcpStateB" style="font-size:10px; color:#f59e0b; margin-top:5px; font-family:'JetBrains Mono', monospace; font-weight:bold;">LISTEN</div>
                         </div>
@@ -11030,7 +11028,7 @@ ${cfg.diagram}
                     const dropY = p.from.y + (p.to.y - p.from.y) * 0.5 + p.yOffset;
                     ctx.fillStyle = '#ef4444';
                     ctx.font = 'bold 12px sans-serif';
-                    ctx.fillText('Î“ÃœÃ­ LOST', dropX - 20, dropY - 10);
+                    ctx.fillText('ΓÜí LOST', dropX - 20, dropY - 10);
                     if (p.onDropTriggered) {
                         p.onDropTriggered();
                         p.onDropTriggered = null; // trigger once
@@ -11089,15 +11087,15 @@ ${cfg.diagram}
             if(protocol === 'tcp') {
                 log('Initiating TCP 3-Way Handshake...', '#fff');
                 setTcpState('A', 'SYN-SENT', '#f59e0b');
-                log('Host A Î“â‚§Ã¶ Host B: [SYN] Seq=0', '#3b82f6');
+                log('Host A Γ₧ö Host B: [SYN] Seq=0', '#3b82f6');
                 
                 pushPacket('transClient', 'transServer', '#3b82f6', 'SYN', 1200, 0, false, () => {
                     setTcpState('B', 'SYN-RCVD', '#f59e0b');
-                    log('Host B Î“â‚§Ã¶ Host A: Received SYN. Sending [SYN, ACK] Seq=0, Ack=1', '#10b981');
+                    log('Host B Γ₧ö Host A: Received SYN. Sending [SYN, ACK] Seq=0, Ack=1', '#10b981');
                     
                     pushPacket('transServer', 'transClient', '#10b981', 'S-A', 1200, 0, false, () => {
                         setTcpState('A', 'ESTABLISHED', '#10b981');
-                        log('Host A Î“â‚§Ã¶ Host B: Received SYN-ACK. Sending [ACK] Seq=1, Ack=1', '#3b82f6');
+                        log('Host A Γ₧ö Host B: Received SYN-ACK. Sending [ACK] Seq=1, Ack=1', '#3b82f6');
                         
                         pushPacket('transClient', 'transServer', '#3b82f6', 'ACK', 1200, 0, false, () => {
                             setTcpState('B', 'ESTABLISHED', '#10b981');
@@ -11241,19 +11239,19 @@ ${cfg.diagram}
                         <div style="position:absolute; top:50%; left:10%; right:10%; height:8px; background:#1e293b; border-radius:4px; z-index:0; border:1px solid #334155;"></div>
                         
                         <div style="position:absolute; top:20%; left:25%; transform:translate(-50%,-50%); background:var(--bg-card); border:2px solid #3b82f6; padding:10px; border-radius:8px; text-align:center; z-index:2;" id="macNode1">
-                            <div style="font-size:24px;">â‰¡Æ’Ã†â•—</div>
+                            <div style="font-size:24px;">≡ƒÆ╗</div>
                             <div style="font-weight:800; font-size:11px;">Node 1</div>
                             <div style="font-size:9px; color:#64748b; font-family:'JetBrains Mono', monospace; font-weight:800;" id="stateN1">IDLE</div>
                         </div>
                         
                         <div style="position:absolute; top:80%; left:50%; transform:translate(-50%,-50%); background:var(--bg-card); border:2px solid #10b981; padding:10px; border-radius:8px; text-align:center; z-index:2;" id="macNode2">
-                            <div style="font-size:24px;">â‰¡Æ’Ã†â•—</div>
+                            <div style="font-size:24px;">≡ƒÆ╗</div>
                             <div style="font-weight:800; font-size:11px;">Node 2 (AP/Receiver)</div>
                             <div style="font-size:9px; color:#64748b; font-family:'JetBrains Mono', monospace; font-weight:800;" id="stateN2">IDLE</div>
                         </div>
                         
                         <div style="position:absolute; top:20%; left:75%; transform:translate(-50%,-50%); background:var(--bg-card); border:2px solid #f59e0b; padding:10px; border-radius:8px; text-align:center; z-index:2;" id="macNode3">
-                            <div style="font-size:24px;">â‰¡Æ’Ã†â•—</div>
+                            <div style="font-size:24px;">≡ƒÆ╗</div>
                             <div style="font-weight:800; font-size:11px;">Node 3</div>
                             <div style="font-size:9px; color:#64748b; font-family:'JetBrains Mono', monospace; font-weight:800;" id="stateN3">IDLE</div>
                         </div>
@@ -11436,7 +11434,7 @@ ${cfg.diagram}
                 
                 setTimeout(() => {
                     if (node1Active && node3Active) {
-                        // Both transmit simultaneously Î“â‚§Ã¶ Collision!
+                        // Both transmit simultaneously Γ₧ö Collision!
                         log('Both Node 1 and Node 3 detect IDLE bus and transmit!', '#3b82f6');
                         setState('stateN1', 'TRANSMITTING', '#3b82f6');
                         setState('stateN3', 'TRANSMITTING', '#3b82f6');
@@ -11504,7 +11502,7 @@ ${cfg.diagram}
                             }, 1000);
                         }, 1000);
                     } else {
-                        // Single node active Î“â‚§Ã¶ Success!
+                        // Single node active Γ₧ö Success!
                         const activeNode = node1Active ? 'stateN1' : 'stateN3';
                         const activePos = node1Active ? 'macNode1' : 'macNode3';
                         log(`Bus is IDLE. ${node1Active?'Node 1':'Node 3'} transmits...`, '#10b981');
@@ -11554,7 +11552,7 @@ ${cfg.diagram}
                             });
                         });
                     } else {
-                        // RTS/CTS disabled Î“â‚§Ã¶ check hidden node collision
+                        // RTS/CTS disabled Γ₧ö check hidden node collision
                         if (node1Active && node3Active) {
                             log('RTS/CTS disabled. Both Node 1 and Node 3 transmit directly!', '#ef4444');
                             setState('stateN1', 'TRANSMITTING', '#3b82f6');
@@ -11713,7 +11711,7 @@ ${cfg.diagram}
                         font-size: 12px;
                         color: var(--primary);
                     `;
-                    arrow.textContent = 'Î“Ã»â–“';
+                    arrow.textContent = 'Γû▓';
                     charEl.appendChild(arrow);
                 }
                 containerTape.appendChild(charEl);
@@ -11790,7 +11788,7 @@ ${cfg.diagram}
             
             highlightState(currentState);
             updateTape();
-            addLog(`Read '${symbol}' from ${oldState} Î“Ã¥Ã† transitioned to ${currentState}`, '#3b82f6');
+            addLog(`Read '${symbol}' from ${oldState} ΓåÆ transitioned to ${currentState}`, '#3b82f6');
             
             if (activeIdx === inputStr.length - 1) {
                 setTimeout(() => {
@@ -11843,35 +11841,35 @@ ${cfg.diagram}
                                     <th style="padding:8px;">State</th>
                                     <th style="padding:8px;">on 0</th>
                                     <th style="padding:8px;">on 1</th>
-                                    <th style="padding:8px;">on â•¬â•¡</th>
+                                    <th style="padding:8px;">on ╬╡</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
-                                    <td style="padding:8px; font-weight:800; color:var(--primary);">Î“Ã¥Ã† A</td>
+                                    <td style="padding:8px; font-weight:800; color:var(--primary);">ΓåÆ A</td>
                                     <td style="padding:8px;">{A, B}</td>
                                     <td style="padding:8px;">{A}</td>
-                                    <td style="padding:8px;">Î“ÃªÃ </td>
+                                    <td style="padding:8px;">Γêà</td>
                                 </tr>
                                 <tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
                                     <td style="padding:8px; font-weight:800;">B</td>
-                                    <td style="padding:8px;">Î“ÃªÃ </td>
+                                    <td style="padding:8px;">Γêà</td>
                                     <td style="padding:8px;">{C}</td>
                                     <td style="padding:8px; color:var(--accent); font-weight:bold;">{C}</td>
                                 </tr>
                                 <tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
                                     <td style="padding:8px; font-weight:800; color:var(--success);">* C (Accept)</td>
-                                    <td style="padding:8px;">Î“ÃªÃ </td>
-                                    <td style="padding:8px;">Î“ÃªÃ </td>
-                                    <td style="padding:8px;">Î“ÃªÃ </td>
+                                    <td style="padding:8px;">Γêà</td>
+                                    <td style="padding:8px;">Γêà</td>
+                                    <td style="padding:8px;">Γêà</td>
                                 </tr>
                             </tbody>
                         </table>
                         <div style="font-size:12px; color:var(--text-muted); line-height:1.5;">
                             <b>Epsilon closures:</b><br>
-                            Î“Ã‡Ã³ e-closure(A) = {A}<br>
-                            Î“Ã‡Ã³ e-closure(B) = {B, C}<br>
-                            Î“Ã‡Ã³ e-closure(C) = {C}
+                            ΓÇó e-closure(A) = {A}<br>
+                            ΓÇó e-closure(B) = {B, C}<br>
+                            ΓÇó e-closure(C) = {C}
                         </div>
                         <div style="display:flex; gap:10px; margin-top:10px;">
                             <button id="btnNfaReset" class="btn-sim" style="flex:1;">Reset</button>
@@ -11898,7 +11896,7 @@ ${cfg.diagram}
                             </tbody>
                         </table>
                         <div id="nfaCompletedPill" style="display:none; text-align:center; padding:10px; background:rgba(16,185,129,0.15); border:1px solid var(--success); border-radius:8px; color:var(--success); font-weight:800; font-size:14px;">
-                            Î“Â£Ã´ Powerset Construction Complete!
+                            Γ£ô Powerset Construction Complete!
                         </div>
                     </div>
                 </div>
@@ -11912,7 +11910,7 @@ ${cfg.diagram}
                 on0: "{A, B, C}",
                 on1: "{A}",
                 accept: "No",
-                log: "Initialize DFA start state q0 = e-closure(A) = {A}. Compute transition on 0: closure(â•¬â”¤(A,0)) = closure({A,B}) = {A,B,C}. Compute transition on 1: closure(â•¬â”¤(A,1)) = {A}."
+                log: "Initialize DFA start state q0 = e-closure(A) = {A}. Compute transition on 0: closure(╬┤(A,0)) = closure({A,B}) = {A,B,C}. Compute transition on 1: closure(╬┤(A,1)) = {A}."
             },
             {
                 state: "q1",
@@ -11920,7 +11918,7 @@ ${cfg.diagram}
                 on0: "{A, B, C}",
                 on1: "{A, C}",
                 accept: "Yes (contains C)",
-                log: "Process queue subset {A,B,C} (q1). Transition on 0: â•¬â”¤(A,0)={A,B}, â•¬â”¤(B,0)=Î“ÃªÃ , â•¬â”¤(C,0)=Î“ÃªÃ . closure({A,B}) = {A,B,C} = q1. Transition on 1: â•¬â”¤(A,1)={A}, â•¬â”¤(B,1)={C}, â•¬â”¤(C,1)=Î“ÃªÃ . closure({A,C}) = {A,C} = new state q2."
+                log: "Process queue subset {A,B,C} (q1). Transition on 0: ╬┤(A,0)={A,B}, ╬┤(B,0)=Γêà, ╬┤(C,0)=Γêà. closure({A,B}) = {A,B,C} = q1. Transition on 1: ╬┤(A,1)={A}, ╬┤(B,1)={C}, ╬┤(C,1)=Γêà. closure({A,C}) = {A,C} = new state q2."
             },
             {
                 state: "q2",
@@ -11928,7 +11926,7 @@ ${cfg.diagram}
                 on0: "{A, B, C}",
                 on1: "{A}",
                 accept: "Yes (contains C)",
-                log: "Process queue subset {A,C} (q2). Transition on 0: â•¬â”¤(A,0)={A,B}, â•¬â”¤(C,0)=Î“ÃªÃ . closure({A,B}) = {A,B,C} = q1. Transition on 1: â•¬â”¤(A,1)={A}, â•¬â”¤(C,1)=Î“ÃªÃ . closure({A}) = {A} = q0. Queue is now empty!"
+                log: "Process queue subset {A,C} (q2). Transition on 0: ╬┤(A,0)={A,B}, ╬┤(C,0)=Γêà. closure({A,B}) = {A,B,C} = q1. Transition on 1: ╬┤(A,1)={A}, ╬┤(C,1)=Γêà. closure({A}) = {A} = q0. Queue is now empty!"
             }
         ];
         let currentStepIdx = 0;
@@ -11977,7 +11975,7 @@ ${cfg.diagram}
                 updateTable();
                 addLog(`[Step ${currentStepIdx}] ${s.log}`, 'var(--primary)');
                 if (currentStepIdx === steps.length) {
-                    addLog("Î“Â£Ã´ All reachable subsets processed. Construction completed.", "var(--success)");
+                    addLog("Γ£ô All reachable subsets processed. Construction completed.", "var(--success)");
                     document.getElementById('nfaCompletedPill').style.display = 'block';
                     document.getElementById('btnNfaStep').disabled = true;
                 }
@@ -12003,8 +12001,8 @@ ${cfg.diagram}
                             <select id="regexChoice" class="sim-select" style="width:100%;">
                                 <option value="union">a | b (Alternation)</option>
                                 <option value="star">a* (Kleene Star)</option>
-                                <option value="concat">a â”¬â•– b (Concatenation)</option>
-                                <option value="star_concat">a* â”¬â•– b (Combination)</option>
+                                <option value="concat">a ┬╖ b (Concatenation)</option>
+                                <option value="star_concat">a* ┬╖ b (Combination)</option>
                                 <option value="custom">-- Custom Free-Form Regex --</option>
                             </select>
                         </div>
@@ -12109,10 +12107,10 @@ ${cfg.diagram}
                     let s0 = nextState();
                     let s1 = nextState();
                     let transitions = [
-                        { from: s0, to: frag.start, label: 'â•¬â•¡' },
-                        { from: s0, to: s1, label: 'â•¬â•¡' },
-                        { from: frag.accept, to: frag.start, label: 'â•¬â•¡' },
-                        { from: frag.accept, to: s1, label: 'â•¬â•¡' },
+                        { from: s0, to: frag.start, label: '╬╡' },
+                        { from: s0, to: s1, label: '╬╡' },
+                        { from: frag.accept, to: frag.start, label: '╬╡' },
+                        { from: frag.accept, to: s1, label: '╬╡' },
                         ...frag.transitions
                     ];
                     stack.push({ start: s0, accept: s1, transitions });
@@ -12121,7 +12119,7 @@ ${cfg.diagram}
                     let frag2 = stack.pop();
                     let frag1 = stack.pop();
                     let transitions = [
-                        { from: frag1.accept, to: frag2.start, label: 'â•¬â•¡' },
+                        { from: frag1.accept, to: frag2.start, label: '╬╡' },
                         ...frag1.transitions,
                         ...frag2.transitions
                     ];
@@ -12133,10 +12131,10 @@ ${cfg.diagram}
                     let s0 = nextState();
                     let s1 = nextState();
                     let transitions = [
-                        { from: s0, to: frag1.start, label: 'â•¬â•¡' },
-                        { from: s0, to: frag2.start, label: 'â•¬â•¡' },
-                        { from: frag1.accept, to: s1, label: 'â•¬â•¡' },
-                        { from: frag2.accept, to: s1, label: 'â•¬â•¡' },
+                        { from: s0, to: frag1.start, label: '╬╡' },
+                        { from: s0, to: frag2.start, label: '╬╡' },
+                        { from: frag1.accept, to: s1, label: '╬╡' },
+                        { from: frag2.accept, to: s1, label: '╬╡' },
                         ...frag1.transitions,
                         ...frag2.transitions
                     ];
@@ -12224,8 +12222,8 @@ ${cfg.diagram}
                 }
                 
                 svg.innerHTML += `
-                    <path d="${dPath}" stroke="${t.label === 'â•¬â•¡' ? '#64748b' : 'var(--primary)'}" stroke-width="1.5" stroke-dasharray="${t.label === 'â•¬â•¡' ? '4,4' : 'none'}" fill="none" marker-end="url(#arrow)" />
-                    <text x="${(fromPos.x + toPos.x)/2}" y="${(fromPos.y + toPos.y)/2 - 8}" fill="${t.label === 'â•¬â•¡' ? '#94a3b8' : 'var(--primary)'}" font-family="monospace" font-size="10" text-anchor="middle" font-weight="bold">${t.label}</text>
+                    <path d="${dPath}" stroke="${t.label === '╬╡' ? '#64748b' : 'var(--primary)'}" stroke-width="1.5" stroke-dasharray="${t.label === '╬╡' ? '4,4' : 'none'}" fill="none" marker-end="url(#arrow)" />
+                    <text x="${(fromPos.x + toPos.x)/2}" y="${(fromPos.y + toPos.y)/2 - 8}" fill="${t.label === '╬╡' ? '#94a3b8' : 'var(--primary)'}" font-family="monospace" font-size="10" text-anchor="middle" font-weight="bold">${t.label}</text>
                 `;
             });
             
@@ -12284,16 +12282,16 @@ ${cfg.diagram}
                         <text x="350" y="114" fill="#fff" font-size="11" text-anchor="middle">q5</text>
                         
                         <path d="M 66,106 L 134,76" stroke="#64748b" stroke-width="1.5" stroke-dasharray="4,4" marker-end="url(#arrow)"/>
-                        <text x="95" y="80" fill="#94a3b8" font-size="10">â•¬â•¡</text>
+                        <text x="95" y="80" fill="#94a3b8" font-size="10">╬╡</text>
                         
                         <path d="M 66,114 L 134,144" stroke="#64748b" stroke-width="1.5" stroke-dasharray="4,4" marker-end="url(#arrow)"/>
-                        <text x="95" y="144" fill="#94a3b8" font-size="10">â•¬â•¡</text>
+                        <text x="95" y="144" fill="#94a3b8" font-size="10">╬╡</text>
                         
                         <path d="M 266,76 L 334,106" stroke="#64748b" stroke-width="1.5" stroke-dasharray="4,4" marker-end="url(#arrow)"/>
-                        <text x="305" y="80" fill="#94a3b8" font-size="10">â•¬â•¡</text>
+                        <text x="305" y="80" fill="#94a3b8" font-size="10">╬╡</text>
                         
                         <path d="M 266,144 L 334,114" stroke="#64748b" stroke-width="1.5" stroke-dasharray="4,4" marker-end="url(#arrow)"/>
-                        <text x="305" y="144" fill="#94a3b8" font-size="10">â•¬â•¡</text>
+                        <text x="305" y="144" fill="#94a3b8" font-size="10">╬╡</text>
                     `;
                 }
             } else if (selectedRegex === "star") {
@@ -12317,16 +12315,16 @@ ${cfg.diagram}
                         <text x="400" y="114" fill="#fff" font-size="11" text-anchor="middle">q3</text>
                         
                         <path d="M 116,110 L 184,110" stroke="#64748b" stroke-width="1.5" stroke-dasharray="4,4" marker-end="url(#arrow)"/>
-                        <text x="150" y="102" fill="#94a3b8" font-size="10">â•¬â•¡</text>
+                        <text x="150" y="102" fill="#94a3b8" font-size="10">╬╡</text>
                         
                         <path d="M 316,110 L 384,110" stroke="#64748b" stroke-width="1.5" stroke-dasharray="4,4" marker-end="url(#arrow)"/>
-                        <text x="350" y="102" fill="#94a3b8" font-size="10">â•¬â•¡</text>
+                        <text x="350" y="102" fill="#94a3b8" font-size="10">╬╡</text>
                         
                         <path d="M 300,94 C 300,50, 200,50, 200,94" stroke="#64748b" stroke-width="1.5" stroke-dasharray="4,4" marker-end="url(#arrow)"/>
-                        <text x="250" y="62" fill="#94a3b8" font-size="10">â•¬â•¡</text>
+                        <text x="250" y="62" fill="#94a3b8" font-size="10">╬╡</text>
                         
                         <path d="M 100,126 C 100,180, 400,180, 400,126" stroke="#64748b" stroke-width="1.5" stroke-dasharray="4,4" marker-end="url(#arrow)"/>
-                        <text x="250" y="172" fill="#94a3b8" font-size="10">â•¬â•¡</text>
+                        <text x="250" y="172" fill="#94a3b8" font-size="10">╬╡</text>
                     `;
                 }
             } else if (selectedRegex === "concat") {
@@ -12367,9 +12365,9 @@ ${cfg.diagram}
                         <path d="M 256,110 L 314,110" stroke="#64748b" stroke-width="1.5" stroke-dasharray="4,4" marker-end="url(#arrow)"/>
                         
                         <path d="M 240,94 C 240,50, 150,50, 150,94" stroke="#64748b" stroke-width="1.5" stroke-dasharray="4,4" marker-end="url(#arrow)"/>
-                        <text x="195" y="62" fill="#94a3b8" font-size="10">â•¬â•¡</text>
+                        <text x="195" y="62" fill="#94a3b8" font-size="10">╬╡</text>
                         <path d="M 60,126 C 60,175, 330,175, 330,126" stroke="#64748b" stroke-width="1.5" stroke-dasharray="4,4" marker-end="url(#arrow)"/>
-                        <text x="195" y="165" fill="#94a3b8" font-size="10">â•¬â•¡</text>
+                        <text x="195" y="165" fill="#94a3b8" font-size="10">╬╡</text>
                     `;
                 }
                 if (currentStep >= 2) {
@@ -12425,32 +12423,32 @@ ${cfg.diagram}
             renderGraph();
             if (selectedRegex === "union") {
                 if (currentStep === 1) {
-                    addLog("Step 1: Construct NFA sub-graph for base symbol 'a' (states q1 Î“Ã¥Ã† q2).", "var(--primary)");
+                    addLog("Step 1: Construct NFA sub-graph for base symbol 'a' (states q1 ΓåÆ q2).", "var(--primary)");
                 } else if (currentStep === 2) {
-                    addLog("Step 2: Construct NFA sub-graph for base symbol 'b' (states q3 Î“Ã¥Ã† q4).", "var(--primary)");
+                    addLog("Step 2: Construct NFA sub-graph for base symbol 'b' (states q3 ΓåÆ q4).", "var(--primary)");
                 } else if (currentStep === 3) {
-                    addLog("Step 3: Combine using Alternation rule (|). Add new start q0 pointing to both subgraphs via â•¬â•¡, and link their accepts to new accept state q5 via â•¬â•¡.", "var(--success)");
+                    addLog("Step 3: Combine using Alternation rule (|). Add new start q0 pointing to both subgraphs via ╬╡, and link their accepts to new accept state q5 via ╬╡.", "var(--success)");
                     document.getElementById('btnRegexStep').disabled = true;
                 }
             } else if (selectedRegex === "star") {
                 if (currentStep === 1) {
-                    addLog("Step 1: Construct NFA sub-graph for base symbol 'a' (states q1 Î“Ã¥Ã† q2).", "var(--primary)");
+                    addLog("Step 1: Construct NFA sub-graph for base symbol 'a' (states q1 ΓåÆ q2).", "var(--primary)");
                 } else if (currentStep === 2) {
-                    addLog("Step 2: Apply Kleene Star (*). Add new start q0, accept q3, â•¬â•¡-loopback (q2 Î“Ã¥Ã† q1) and â•¬â•¡-bypass (q0 Î“Ã¥Ã† q3).", "var(--success)");
+                    addLog("Step 2: Apply Kleene Star (*). Add new start q0, accept q3, ╬╡-loopback (q2 ΓåÆ q1) and ╬╡-bypass (q0 ΓåÆ q3).", "var(--success)");
                     document.getElementById('btnRegexStep').disabled = true;
                 }
             } else if (selectedRegex === "concat") {
                 if (currentStep === 1) {
-                    addLog("Step 1: Construct first NFA symbol 'a' (states q0 Î“Ã¥Ã† q1).", "var(--primary)");
+                    addLog("Step 1: Construct first NFA symbol 'a' (states q0 ΓåÆ q1).", "var(--primary)");
                 } else if (currentStep === 2) {
-                    addLog("Step 2: Concatenate with 'b' (states q1 Î“Ã¥Ã† q2). Accept of 'a' merges with start of 'b'.", "var(--success)");
+                    addLog("Step 2: Concatenate with 'b' (states q1 ΓåÆ q2). Accept of 'a' merges with start of 'b'.", "var(--success)");
                     document.getElementById('btnRegexStep').disabled = true;
                 }
             } else if (selectedRegex === "star_concat") {
                 if (currentStep === 1) {
-                    addLog("Step 1: Construct Kleene Star graph for 'a*' (states q0 Î“Ã¥Ã† q3).", "var(--primary)");
+                    addLog("Step 1: Construct Kleene Star graph for 'a*' (states q0 ΓåÆ q3).", "var(--primary)");
                 } else if (currentStep === 2) {
-                    addLog("Step 2: Concatenate the NFA of 'b' (states q3 Î“Ã¥Ã† q4) to the accept state of 'a*'.", "var(--success)");
+                    addLog("Step 2: Concatenate the NFA of 'b' (states q3 ΓåÆ q4) to the accept state of 'a*'.", "var(--success)");
                     document.getElementById('btnRegexStep').disabled = true;
                 }
             }
@@ -12474,8 +12472,8 @@ ${cfg.diagram}
                         <div>
                             <label style="display:block; font-size:12px; font-weight:800; margin-bottom:5px; color:var(--text-muted);">Grammar Rules:</label>
                             <select id="cfgGrammar" class="sim-select" style="width:100%;">
-                                <option value="anbn">S Î“Ã¥Ã† aSb | â•¬â•¡  (Equal number of a and b)</option>
-                                <option value="paren">S Î“Ã¥Ã† (S) | â•¬â•¡  (Nested Parentheses)</option>
+                                <option value="anbn">S ΓåÆ aSb | ╬╡  (Equal number of a and b)</option>
+                                <option value="paren">S ΓåÆ (S) | ╬╡  (Nested Parentheses)</option>
                             </select>
                         </div>
                         <div>
@@ -12557,7 +12555,7 @@ ${cfg.diagram}
                         svg.innerHTML += `
                             <line x1="250" y1="${py + 14}" x2="250" y2="${cy - 12}" stroke="#64748b" stroke-width="1.5"/>
                             <circle cx="250" cy="${cy}" r="12" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.5"/>
-                            <text x="250" y="${cy + 4}" fill="#94a3b8" font-size="12" font-weight="bold" text-anchor="middle">â•¬â•¡</text>
+                            <text x="250" y="${cy + 4}" fill="#94a3b8" font-size="12" font-weight="bold" text-anchor="middle">╬╡</text>
                         `;
                     }
                 }
@@ -12594,7 +12592,7 @@ ${cfg.diagram}
                         svg.innerHTML += `
                             <line x1="250" y1="${py + 14}" x2="250" y2="${cy - 12}" stroke="#64748b" stroke-width="1.5"/>
                             <circle cx="250" cy="${cy}" r="12" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.5"/>
-                            <text x="250" y="${cy + 4}" fill="#94a3b8" font-size="12" font-weight="bold" text-anchor="middle">â•¬â•¡</text>
+                            <text x="250" y="${cy + 4}" fill="#94a3b8" font-size="12" font-weight="bold" text-anchor="middle">╬╡</text>
                         `;
                     }
                 }
@@ -12631,12 +12629,12 @@ ${cfg.diagram}
                 const count = Math.min(3, inputVal.length / 2);
                 if (currentLevel <= count) {
                     if (grammarType === "anbn") {
-                        addLog(`[Step ${currentLevel}] Expand leftmost variable: S Î“Ã§Ã† aSb`, "var(--primary)");
+                        addLog(`[Step ${currentLevel}] Expand leftmost variable: S ΓçÆ aSb`, "var(--primary)");
                     } else {
-                        addLog(`[Step ${currentLevel}] Expand leftmost variable: S Î“Ã§Ã† (S)`, "var(--primary)");
+                        addLog(`[Step ${currentLevel}] Expand leftmost variable: S ΓçÆ (S)`, "var(--primary)");
                     }
                 } else {
-                    addLog(`[Step ${currentLevel}] Base condition reached. Replace final S with â•¬â•¡. Derivation complete!`, "var(--success)");
+                    addLog(`[Step ${currentLevel}] Base condition reached. Replace final S with ╬╡. Derivation complete!`, "var(--success)");
                     document.getElementById('btnCfgStep').disabled = true;
                 }
             }
@@ -12745,9 +12743,9 @@ ${cfg.diagram}
                 if (stack.length === 1 && stack[0] === 'Z0' && pdaState === 'q1') {
                     pdaState = "q2";
                     document.getElementById('pdaState').textContent = "q2";
-                    addLog("Î“Â£Ã´ Input complete. Stack contains Z0. State transitioned to accepting state q2. String ACCEPTED!", "var(--success)");
+                    addLog("Γ£ô Input complete. Stack contains Z0. State transitioned to accepting state q2. String ACCEPTED!", "var(--success)");
                 } else {
-                    addLog("Î“Â£Ã¹ Finished parsing but stack is not empty or is in invalid state. String REJECTED!", "#ef4444");
+                    addLog("Γ£ù Finished parsing but stack is not empty or is in invalid state. String REJECTED!", "#ef4444");
                 }
                 document.getElementById('btnPdaStep').disabled = true;
                 return;
@@ -12761,7 +12759,7 @@ ${cfg.diagram}
                 if (char === 'a') {
                     stack.push('A');
                     updateStackUI();
-                    addLog(`Read 'a' in q0: Push 'A' to stack. Transition: â•¬â”¤(q0, a, Z0/A) Î“Ã¥Ã† (q0, Push A)`, 'var(--primary)');
+                    addLog(`Read 'a' in q0: Push 'A' to stack. Transition: ╬┤(q0, a, Z0/A) ΓåÆ (q0, Push A)`, 'var(--primary)');
                 } else if (char === 'b') {
                     if (stack.length > 1) {
                         stack.pop();
@@ -12770,13 +12768,13 @@ ${cfg.diagram}
                         document.getElementById('pdaState').textContent = "q1";
                         addLog(`Read 'b' in q0: Pop 'A' from stack. Transition state to q1.`, 'var(--accent)');
                     } else {
-                        addLog("Î“Â£Ã¹ Stack underflow! Read 'b' but no 'A' left to pop. REJECTED!", "#ef4444");
+                        addLog("Γ£ù Stack underflow! Read 'b' but no 'A' left to pop. REJECTED!", "#ef4444");
                         document.getElementById('btnPdaStep').disabled = true;
                     }
                 }
             } else if (pdaState === 'q1') {
                 if (char === 'a') {
-                    addLog("Î“Â£Ã¹ Non-regular format error: Read 'a' after 'b' was already read. REJECTED!", "#ef4444");
+                    addLog("Γ£ù Non-regular format error: Read 'a' after 'b' was already read. REJECTED!", "#ef4444");
                     document.getElementById('btnPdaStep').disabled = true;
                 } else if (char === 'b') {
                     if (stack.length > 1) {
@@ -12784,7 +12782,7 @@ ${cfg.diagram}
                         updateStackUI();
                         addLog(`Read 'b' in q1: Pop 'A' from stack.`, 'var(--accent)');
                     } else {
-                        addLog("Î“Â£Ã¹ Stack underflow! Read 'b' but stack only contains Z0. REJECTED!", "#ef4444");
+                        addLog("Γ£ù Stack underflow! Read 'b' but stack only contains Z0. REJECTED!", "#ef4444");
                         document.getElementById('btnPdaStep').disabled = true;
                     }
                 }
@@ -12859,7 +12857,7 @@ ${cfg.diagram}
                     font-family: monospace;
                     position: relative;
                 `;
-                cell.textContent = tape[i] === 'B' ? 'Î“Ã‰Ãº' : tape[i];
+                cell.textContent = tape[i] === 'B' ? 'ΓÉú' : tape[i];
                 if (isHead) {
                     const arrow = document.createElement('div');
                     arrow.style.cssText = `
@@ -12868,7 +12866,7 @@ ${cfg.diagram}
                         color: var(--primary);
                         font-size: 11px;
                     `;
-                    arrow.textContent = 'Î“Ã»â–“';
+                    arrow.textContent = 'Γû▓';
                     cell.appendChild(arrow);
                 }
                 wrapper.appendChild(cell);
@@ -12923,7 +12921,7 @@ ${cfg.diagram}
                 } else if (symbol === 'B') {
                     headPos--;
                     tmState = "q1_carry";
-                    addLog(`[State: q0] Read 'Î“Ã‰Ãº'. End found. Action: Write 'Î“Ã‰Ãº', Move Left. Transition state to q1_carry.`, 'var(--accent)');
+                    addLog(`[State: q0] Read 'ΓÉú'. End found. Action: Write 'ΓÉú', Move Left. Transition state to q1_carry.`, 'var(--accent)');
                 }
             } else if (tmState === 'q1_carry') {
                 if (symbol === '1') {
@@ -12934,7 +12932,7 @@ ${cfg.diagram}
                     tape[headPos] = '1';
                     headPos++;
                     tmState = "q_halt";
-                    addLog(`[State: q1] Read '${symbol === 'B' ? 'Î“Ã‰Ãº' : '0'}'. Action: Write '1' (No Carry), Move Right. Transition to q_halt.`, 'var(--success)');
+                    addLog(`[State: q1] Read '${symbol === 'B' ? 'ΓÉú' : '0'}'. Action: Write '1' (No Carry), Move Right. Transition to q_halt.`, 'var(--success)');
                 }
             }
 
@@ -12945,7 +12943,7 @@ ${cfg.diagram}
             if (tmState === 'q_halt') {
                 setTimeout(() => {
                     const result = tape.slice(2, -2).join('').replace(/B/g, ' ').trim();
-                    addLog(`Î“Â£Ã´ Halt state reached successfully! Final Tape Output: ${result}`, 'var(--success)');
+                    addLog(`Γ£ô Halt state reached successfully! Final Tape Output: ${result}`, 'var(--success)');
                 }, 400);
             }
         };
@@ -12976,7 +12974,7 @@ ${cfg.diagram}
                             <div style="color:#64748b;">[System] Click Next Step to start state pair distinguishability checking.</div>
                         </div>
                         <div id="minResultPill" style="display:none; text-align:center; padding:10px; background:rgba(16,185,129,0.15); border:1px solid var(--success); border-radius:8px; color:var(--success); font-weight:800; font-size:13px;">
-                            Î“Â£Ã´ Equivalences Found: B Î“Ã«Ã­ C. Merging them yields 4-state minimized DFA.
+                            Γ£ô Equivalences Found: B Γëí C. Merging them yields 4-state minimized DFA.
                         </div>
                     </div>
                     
@@ -13081,11 +13079,11 @@ ${cfg.diagram}
             } else if (currentStep === 4) {
                 const el = document.getElementById('cell-CB');
                 if (el) {
-                    el.textContent = 'Î“Ã«Ã­';
+                    el.textContent = 'Γëí';
                     el.style.background = 'rgba(16, 185, 129, 0.15)';
                     el.style.color = '#10b981';
                 }
-                addLog("[Step 4: Completion] No more pairs can be marked! Unmarked cells are equivalent. State B and C are equivalent (B Î“Ã«Ã­ C) and can be merged.", "var(--success)");
+                addLog("[Step 4: Completion] No more pairs can be marked! Unmarked cells are equivalent. State B and C are equivalent (B Γëí C) and can be merged.", "var(--success)");
                 document.getElementById('minResultPill').style.display = 'block';
                 document.getElementById('btnMinStep').disabled = true;
             }
@@ -13099,7 +13097,7 @@ ${cfg.diagram}
 
 
     // ============================================================
-    // AI TRACK Î“Ã‡Ã¶ 12 Simulation Functions
+    // AI TRACK ΓÇö 12 Simulation Functions
     // ============================================================
 
     const initAiSearchSim = (container) => {
@@ -13121,8 +13119,8 @@ ${cfg.diagram}
                     <option value="dfs">DFS (Depth-First)</option>
                     <option value="astar">A* Search</option>
                 </select>
-                <button id="ai-search-run" style="padding:8px 20px;border-radius:8px;background:${AC};color:#fff;border:none;font-weight:700;cursor:pointer;">Î“Ã»â•¢ Run</button>
-                <button id="ai-search-reset" style="padding:8px 16px;border-radius:8px;background:transparent;color:${AC};border:1px solid ${AC};font-weight:700;cursor:pointer;">Î“Ã¥â•‘ Reset</button>
+                <button id="ai-search-run" style="padding:8px 20px;border-radius:8px;background:${AC};color:#fff;border:none;font-weight:700;cursor:pointer;">Γû╢ Run</button>
+                <button id="ai-search-reset" style="padding:8px 16px;border-radius:8px;background:transparent;color:${AC};border:1px solid ${AC};font-weight:700;cursor:pointer;">Γå║ Reset</button>
                 <div id="ai-search-info" style="margin-left:auto;font-weight:700;color:${AC};font-size:13px;"></div>
             </div>
             <div style="display:flex;gap:16px;">
@@ -13150,8 +13148,8 @@ ${cfg.diagram}
             edges.forEach(e => {
                 const a=nd(e.f),b=nd(e.t);
                 ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y);
-                ctx.strokeStyle=state.path.includes(e.f+'Î“Ã¥Ã†'+e.t)||state.path.includes(e.t+'Î“Ã¥Ã†'+e.f)?'#22c55e':'var(--border)';
-                ctx.lineWidth=state.path.includes(e.f+'Î“Ã¥Ã†'+e.t)||state.path.includes(e.t+'Î“Ã¥Ã†'+e.f)?3:1.5;
+                ctx.strokeStyle=state.path.includes(e.f+'ΓåÆ'+e.t)||state.path.includes(e.t+'ΓåÆ'+e.f)?'#22c55e':'var(--border)';
+                ctx.lineWidth=state.path.includes(e.f+'ΓåÆ'+e.t)||state.path.includes(e.t+'ΓåÆ'+e.f)?3:1.5;
                 ctx.stroke();
                 const mx=(a.x+b.x)/2,my=(a.y+b.y)/2;
                 ctx.fillStyle='var(--text-muted)'; ctx.font='11px monospace';
@@ -13183,8 +13181,8 @@ ${cfg.diagram}
                     const cur = algo==='bfs'?queue.shift():queue.pop();
                     if(vis.has(cur))continue; vis.add(cur);
                     state.visited=[...vis]; order.push(cur);
-                    document.getElementById('ai-search-order').innerHTML=order.join(' Î“Ã¥Ã† ');
-                    if(cur==='G'){found=true; let n=cur; const p=[]; while(n){p.unshift(n);n=parent[n];} for(let i=0;i<p.length-1;i++)state.path.push(p[i]+'Î“Ã¥Ã†'+p[i+1]); break;}
+                    document.getElementById('ai-search-order').innerHTML=order.join(' ΓåÆ ');
+                    if(cur==='G'){found=true; let n=cur; const p=[]; while(n){p.unshift(n);n=parent[n];} for(let i=0;i<p.length-1;i++)state.path.push(p[i]+'ΓåÆ'+p[i+1]); break;}
                     adj(cur).forEach(nb=>{if(!vis.has(nb.id)){parent[nb.id]=cur;queue.push(nb.id);state.frontier=queue.slice();}});
                     drawGraph(); await sleep(600);
                 }
@@ -13194,15 +13192,15 @@ ${cfg.diagram}
                     pq.sort((a,b)=>a.f-b.f); const cur=pq.shift();
                     if(vis[cur.id])continue; vis[cur.id]=cur;
                     state.visited=Object.keys(vis); order.push(cur.id+'(f='+cur.f+')');
-                    document.getElementById('ai-search-order').innerHTML=order.join(' Î“Ã¥Ã† ');
-                    if(cur.id==='G'){found=true; let n=cur; const p=[]; while(n){p.unshift(n.id);n=vis[n.parent];}; for(let i=0;i<p.length-1;i++)state.path.push(p[i]+'Î“Ã¥Ã†'+p[i+1]); break;}
+                    document.getElementById('ai-search-order').innerHTML=order.join(' ΓåÆ ');
+                    if(cur.id==='G'){found=true; let n=cur; const p=[]; while(n){p.unshift(n.id);n=vis[n.parent];}; for(let i=0;i<p.length-1;i++)state.path.push(p[i]+'ΓåÆ'+p[i+1]); break;}
                     adj(cur.id).forEach(nb=>{if(!vis[nb.id]){const g=cur.g+nb.w; pq.push({id:nb.id,g,f:g+nd(nb.id).h,parent:cur.id}); state.frontier=pq.map(x=>x.id);}});
                     drawGraph(); await sleep(700);
                 }
             }
             state.exploring=false; drawGraph();
-            document.getElementById('ai-search-info').textContent = found?`Î“Â£Ã  Path found! Nodes explored: ${state.visited.length}`:'Î“Â¥Ã® No path found';
-            document.getElementById('ai-search-stats').innerHTML=`<div style="font-size:12px;font-weight:700;color:#22c55e;">Path: SÎ“Ã¥Ã†...Î“Ã¥Ã†G</div>`;
+            document.getElementById('ai-search-info').textContent = found?`Γ£à Path found! Nodes explored: ${state.visited.length}`:'Γ¥î No path found';
+            document.getElementById('ai-search-stats').innerHTML=`<div style="font-size:12px;font-weight:700;color:#22c55e;">Path: SΓåÆ...ΓåÆG</div>`;
         };
         document.getElementById('ai-search-run').addEventListener('click', runSearch);
         document.getElementById('ai-search-reset').addEventListener('click', ()=>{ state={visited:[],frontier:[],path:[],exploring:false}; document.getElementById('ai-search-order').innerHTML=''; document.getElementById('ai-search-info').textContent=''; drawGraph(); });
@@ -13217,8 +13215,8 @@ ${cfg.diagram}
                 <select id="ai-h-algo" style="padding:8px 12px;border-radius:8px;border:1px solid ${AC};background:var(--bg-card);color:var(--text-main);font-weight:700;">
                     <option value="greedy">Greedy Best-First</option><option value="astar">A* Search</option>
                 </select>
-                <button id="ai-h-run" style="padding:8px 20px;border-radius:8px;background:${AC};color:#fff;border:none;font-weight:700;cursor:pointer;">Î“Ã»â•¢ Run</button>
-                <button id="ai-h-reset" style="padding:8px 16px;border-radius:8px;background:transparent;color:${AC};border:1px solid ${AC};cursor:pointer;font-weight:700;">Î“Ã¥â•‘ Reset</button>
+                <button id="ai-h-run" style="padding:8px 20px;border-radius:8px;background:${AC};color:#fff;border:none;font-weight:700;cursor:pointer;">Γû╢ Run</button>
+                <button id="ai-h-reset" style="padding:8px 16px;border-radius:8px;background:transparent;color:${AC};border:1px solid ${AC};cursor:pointer;font-weight:700;">Γå║ Reset</button>
                 <span id="ai-h-result" style="font-weight:700;color:${AC};margin-left:auto;"></span>
             </div>
             <div style="display:flex;gap:16px;">
@@ -13254,7 +13252,7 @@ ${cfg.diagram}
                 log.push(`Expand ${cur.id} (f=${cur.g+nd(cur.id).h})`);
                 document.getElementById('ai-h-log').innerHTML=log.slice(-8).join('<br>');
                 draw(); await sleep(700);
-                if(cur.id==='G'){pathEdges=[];for(let i=0;i<cur.path.length-1;i++)pathEdges.push(cur.path[i]+cur.path[i+1]); draw(); document.getElementById('ai-h-result').textContent=`Î“Â£Ã  Cost: ${cur.g} | Nodes: ${vis.size}`; break;}
+                if(cur.id==='G'){pathEdges=[];for(let i=0;i<cur.path.length-1;i++)pathEdges.push(cur.path[i]+cur.path[i+1]); draw(); document.getElementById('ai-h-result').textContent=`Γ£à Cost: ${cur.g} | Nodes: ${vis.size}`; break;}
                 adj(cur.id).forEach(nb=>{if(!vis.has(nb.id))pq.push({id:nb.id,g:cur.g+nb.w,path:[...cur.path,nb.id]});});
             }
         };
@@ -13269,8 +13267,8 @@ ${cfg.diagram}
         <div style="padding:20px;font-family:var(--font-sans);">
             <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:16px;">
                 <label style="font-weight:700;">N (Board Size): <input id="ai-csp-n" type="range" min="4" max="8" value="6" style="width:100px;accent-color:${AC};"> <span id="ai-csp-nval">6</span></label>
-                <button id="ai-csp-solve" style="padding:8px 20px;border-radius:8px;background:${AC};color:#fff;border:none;font-weight:700;cursor:pointer;">Î“Ã–Â¢ Solve</button>
-                <button id="ai-csp-reset" style="padding:8px 16px;border-radius:8px;background:transparent;color:${AC};border:1px solid ${AC};cursor:pointer;font-weight:700;">Î“Ã¥â•‘ Reset</button>
+                <button id="ai-csp-solve" style="padding:8px 20px;border-radius:8px;background:${AC};color:#fff;border:none;font-weight:700;cursor:pointer;">ΓÖ¢ Solve</button>
+                <button id="ai-csp-reset" style="padding:8px 16px;border-radius:8px;background:transparent;color:${AC};border:1px solid ${AC};cursor:pointer;font-weight:700;">Γå║ Reset</button>
                 <span id="ai-csp-info" style="margin-left:auto;font-weight:700;color:${AC};"></span>
             </div>
             <div style="display:flex;gap:16px;">
@@ -13291,7 +13289,7 @@ ${cfg.diagram}
             ctx.clearRect(0,0,canvas.width,canvas.height);
             for(let r=0;r<n;r++)for(let c=0;c<n;c++){ctx.fillStyle=(r+c)%2===0?'#1e293b':'#0f172a'; ctx.fillRect(off+c*cell,off+r*cell,cell,cell);}
             qs.forEach((col,row)=>{if(col===-1)return; const x=off+col*cell+cell/2,y=off+row*cell+cell/2; const isConflict=conflict.includes(row);
-            ctx.fillStyle=isConflict?'#ef4444':AC; ctx.font=`bold ${Math.round(cell*0.6)}px sans-serif`; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText('Î“Ã–Â¢',x,y);});
+            ctx.fillStyle=isConflict?'#ef4444':AC; ctx.font=`bold ${Math.round(cell*0.6)}px sans-serif`; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText('ΓÖ¢',x,y);});
         };
         const isValid=(qs,row,col)=>{for(let r=0;r<row;r++){const c=qs[r]; if(c===col||Math.abs(c-col)===Math.abs(r-row))return false;} return true;};
         const sleep=ms=>new Promise(r=>setTimeout(r,ms));
@@ -13301,7 +13299,7 @@ ${cfg.diagram}
                 if(!solving)return false;
                 qs[row]=col;
                 if(isValid(qs,row,col)){
-                    log.push(`Col ${col} Î“Â£Ã´ @ row ${row}`);
+                    log.push(`Col ${col} Γ£ô @ row ${row}`);
                     document.getElementById('ai-csp-log').innerHTML=log.slice(-10).join('<br>');
                     draw(n,qs);await sleep(120);
                     if(await solve(n,qs,row+1,log))return true;
@@ -13315,7 +13313,7 @@ ${cfg.diagram}
             document.getElementById('ai-csp-info').textContent='Solving...';
             const log=[]; const ok=await solve(n,queens,0,log);
             solving=false; draw(n,queens);
-            document.getElementById('ai-csp-info').textContent=ok?`Î“Â£Ã  Solved! Backtracks: ${backtracks}`:'Î“Â¥Ã® No solution';
+            document.getElementById('ai-csp-info').textContent=ok?`Γ£à Solved! Backtracks: ${backtracks}`:'Γ¥î No solution';
             document.getElementById('ai-csp-stats').innerHTML=`<div style="font-size:12px;font-weight:700;color:#22c55e;">Total backtracks: ${backtracks}</div>`;
         });
         document.getElementById('ai-csp-reset').addEventListener('click',()=>{solving=false;queens=[];document.getElementById('ai-csp-log').innerHTML='';document.getElementById('ai-csp-info').textContent='';document.getElementById('ai-csp-stats').innerHTML='';ctx.clearRect(0,0,canvas.width,canvas.height);const n=parseInt(nInp.value);draw(n,new Array(n).fill(-1));});
@@ -13329,9 +13327,9 @@ ${cfg.diagram}
         container.innerHTML=`
         <div style="padding:20px;font-family:var(--font-sans);">
             <div style="display:flex;gap:12px;align-items:center;margin-bottom:16px;flex-wrap:wrap;">
-                <button id="ai-mm-minimax" style="padding:8px 20px;border-radius:8px;background:${AC};color:#fff;border:none;font-weight:700;cursor:pointer;">Î“Ã»â•¢ Run Minimax</button>
-                <button id="ai-mm-ab" style="padding:8px 20px;border-radius:8px;background:#6366f1;color:#fff;border:none;font-weight:700;cursor:pointer;">Î“Â£Ã© Alpha-Beta</button>
-                <button id="ai-mm-reset" style="padding:8px 16px;border-radius:8px;background:transparent;color:${AC};border:1px solid ${AC};cursor:pointer;font-weight:700;">Î“Ã¥â•‘ Reset</button>
+                <button id="ai-mm-minimax" style="padding:8px 20px;border-radius:8px;background:${AC};color:#fff;border:none;font-weight:700;cursor:pointer;">Γû╢ Run Minimax</button>
+                <button id="ai-mm-ab" style="padding:8px 20px;border-radius:8px;background:#6366f1;color:#fff;border:none;font-weight:700;cursor:pointer;">Γ£é Alpha-Beta</button>
+                <button id="ai-mm-reset" style="padding:8px 16px;border-radius:8px;background:transparent;color:${AC};border:1px solid ${AC};cursor:pointer;font-weight:700;">Γå║ Reset</button>
                 <span id="ai-mm-info" style="margin-left:auto;font-weight:700;color:${AC};font-size:13px;"></span>
             </div>
             <div style="display:flex;gap:16px;">
@@ -13380,8 +13378,8 @@ ${cfg.diagram}
             }
             node.val=val;draw();return val;};
         doReset();
-        document.getElementById('ai-mm-minimax').addEventListener('click',async()=>{doReset();await minimax(tree,0,true);document.getElementById('ai-mm-info').textContent=`Î“Â£Ã  Root value: ${tree.val} | Nodes evaluated: ${evaluated.length}`;});
-        document.getElementById('ai-mm-ab').addEventListener('click',async()=>{doReset();await alphabeta(tree,0,true,-Infinity,Infinity);document.getElementById('ai-mm-info').textContent=`Î“Â£Ã  Root: ${tree.val} | Evaluated: ${evaluated.length} | Pruned: ${pruned.length}`;});
+        document.getElementById('ai-mm-minimax').addEventListener('click',async()=>{doReset();await minimax(tree,0,true);document.getElementById('ai-mm-info').textContent=`Γ£à Root value: ${tree.val} | Nodes evaluated: ${evaluated.length}`;});
+        document.getElementById('ai-mm-ab').addEventListener('click',async()=>{doReset();await alphabeta(tree,0,true,-Infinity,Infinity);document.getElementById('ai-mm-info').textContent=`Γ£à Root: ${tree.val} | Evaluated: ${evaluated.length} | Pruned: ${pruned.length}`;});
         document.getElementById('ai-mm-reset').addEventListener('click',doReset);
     };
 
@@ -13420,7 +13418,7 @@ ${cfg.diagram}
                         <label style="font-weight:700;">Humidity: <select id="ai-nb-humidity" style="margin-left:8px;padding:6px;border-radius:6px;border:1px solid ${AC};background:var(--bg-card);color:var(--text-main);"><option>high</option><option>normal</option></select></label>
                         <label style="font-weight:700;">Windy: <select id="ai-nb-windy" style="margin-left:8px;padding:6px;border-radius:6px;border:1px solid ${AC};background:var(--bg-card);color:var(--text-main);"><option value="false">No</option><option value="true">Yes</option></select></label>
                     </div>
-                    <button id="ai-nb-classify" style="padding:10px 24px;border-radius:8px;background:${AC};color:#fff;border:none;font-weight:700;cursor:pointer;width:100%;">â‰¡Æ’ÂºÂ« Classify</button>
+                    <button id="ai-nb-classify" style="padding:10px 24px;border-radius:8px;background:${AC};color:#fff;border:none;font-weight:700;cursor:pointer;width:100%;">≡ƒº« Classify</button>
                     <div id="ai-nb-result" style="margin-top:16px;"></div>
                 </div>
             </div>
@@ -13444,13 +13442,13 @@ ${cfg.diagram}
                 <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:14px;font-size:12px;">
                     <div style="font-weight:800;margin-bottom:10px;color:${AC};">Computation Steps</div>
                     <div style="font-family:var(--font-mono);line-height:1.9;">
-                        P(Yes)=${pYes.toFixed(3)} â”œÃ¹ P(O|Y)=${pyO.toFixed(3)} â”œÃ¹ P(H|Y)=${pyH.toFixed(3)} â”œÃ¹ P(W|Y)=${pyW.toFixed(3)}<br>
-                        Î“Ã¥Ã† Score(Yes) = <b>${scoreYes.toFixed(5)}</b><br><br>
-                        P(No)=${pNo.toFixed(3)} â”œÃ¹ P(O|N)=${pnO.toFixed(3)} â”œÃ¹ P(H|N)=${pnH.toFixed(3)} â”œÃ¹ P(W|N)=${pnW.toFixed(3)}<br>
-                        Î“Ã¥Ã† Score(No) = <b>${scoreNo.toFixed(5)}</b>
+                        P(Yes)=${pYes.toFixed(3)} ├ù P(O|Y)=${pyO.toFixed(3)} ├ù P(H|Y)=${pyH.toFixed(3)} ├ù P(W|Y)=${pyW.toFixed(3)}<br>
+                        ΓåÆ Score(Yes) = <b>${scoreYes.toFixed(5)}</b><br><br>
+                        P(No)=${pNo.toFixed(3)} ├ù P(O|N)=${pnO.toFixed(3)} ├ù P(H|N)=${pnH.toFixed(3)} ├ù P(W|N)=${pnW.toFixed(3)}<br>
+                        ΓåÆ Score(No) = <b>${scoreNo.toFixed(5)}</b>
                     </div>
                     <div style="margin-top:12px;font-size:16px;font-weight:800;color:${pred?'#22c55e':'#ef4444'};">
-                        Prediction: ${pred?'Î“Â£Ã  PLAY':'Î“Â¥Ã® DON\'T PLAY'} (${pred?pYesFinal:pNoFinal}% confidence)
+                        Prediction: ${pred?'Γ£à PLAY':'Γ¥î DON\'T PLAY'} (${pred?pYesFinal:pNoFinal}% confidence)
                     </div>
                     <div style="display:flex;gap:8px;margin-top:10px;">
                         <div style="flex:${pYesFinal};height:10px;background:#22c55e;border-radius:5px;"></div>
@@ -13466,7 +13464,7 @@ ${cfg.diagram}
         <div style="padding:20px;font-family:var(--font-sans);">
             <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:16px;">
                 <label style="font-weight:700;">K = <input id="ai-knn-k" type="range" min="1" max="11" step="2" value="3" style="width:100px;accent-color:${AC};"> <span id="ai-knn-kval">3</span></label>
-                <button id="ai-knn-gen" style="padding:8px 16px;border-radius:8px;background:${AC};color:#fff;border:none;font-weight:700;cursor:pointer;">â‰¡Æ’Ã¶Ã¤ New Dataset</button>
+                <button id="ai-knn-gen" style="padding:8px 16px;border-radius:8px;background:${AC};color:#fff;border:none;font-weight:700;cursor:pointer;">≡ƒöä New Dataset</button>
                 <span style="font-size:12px;color:var(--text-muted);">Click canvas to classify a point</span>
                 <span id="ai-knn-result" style="margin-left:auto;font-weight:700;font-size:14px;"></span>
             </div>
@@ -13500,7 +13498,7 @@ ${cfg.diagram}
             const votes=[0,0]; knn.forEach(p=>votes[p.c]++);
             const pred=votes[0]>=votes[1]?0:1;
             draw(knn,pred);
-            document.getElementById('ai-knn-result').innerHTML=`K=${K} Î“Ã¥Ã† Class: <b style="color:${pred===0?'#3b82f6':'#ef4444'}">${pred===0?'Blue':'Red'}</b> (${votes[pred]}/${K} votes)`;
+            document.getElementById('ai-knn-result').innerHTML=`K=${K} ΓåÆ Class: <b style="color:${pred===0?'#3b82f6':'#ef4444'}">${pred===0?'Blue':'Red'}</b> (${votes[pred]}/${K} votes)`;
         });
         document.getElementById('ai-knn-gen').addEventListener('click',genData);
         genData();
@@ -13512,10 +13510,10 @@ ${cfg.diagram}
         <div style="padding:20px;font-family:var(--font-sans);">
             <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:16px;">
                 <label style="font-weight:700;">K = <input id="ai-km-k" type="range" min="2" max="5" value="3" style="width:80px;accent-color:${AC};"> <span id="ai-km-kval">3</span></label>
-                <button id="ai-km-gen" style="padding:8px 14px;border-radius:8px;background:${AC};color:#fff;border:none;font-weight:700;cursor:pointer;">â‰¡Æ’Ã¶Ã¤ Generate</button>
-                <button id="ai-km-init" style="padding:8px 14px;border-radius:8px;background:#6366f1;color:#fff;border:none;font-weight:700;cursor:pointer;">â‰¡Æ’Ã´Ã¬ Init Centroids</button>
-                <button id="ai-km-step" style="padding:8px 14px;border-radius:8px;background:transparent;color:${AC};border:1px solid ${AC};font-weight:700;cursor:pointer;">Î“Ã…Â¡ Step</button>
-                <button id="ai-km-run" style="padding:8px 14px;border-radius:8px;background:#22c55e;color:#fff;border:none;font-weight:700;cursor:pointer;">Î“Ã»â•¢Î“Ã»â•¢ Converge</button>
+                <button id="ai-km-gen" style="padding:8px 14px;border-radius:8px;background:${AC};color:#fff;border:none;font-weight:700;cursor:pointer;">≡ƒöä Generate</button>
+                <button id="ai-km-init" style="padding:8px 14px;border-radius:8px;background:#6366f1;color:#fff;border:none;font-weight:700;cursor:pointer;">≡ƒôì Init Centroids</button>
+                <button id="ai-km-step" style="padding:8px 14px;border-radius:8px;background:transparent;color:${AC};border:1px solid ${AC};font-weight:700;cursor:pointer;">ΓÅ¡ Step</button>
+                <button id="ai-km-run" style="padding:8px 14px;border-radius:8px;background:#22c55e;color:#fff;border:none;font-weight:700;cursor:pointer;">Γû╢Γû╢ Converge</button>
                 <span id="ai-km-info" style="margin-left:auto;font-weight:700;font-size:13px;color:${AC};"></span>
             </div>
             <canvas id="ai-km-canvas" width="580" height="420" style="border-radius:12px;background:var(--bg-card);border:1px solid var(--border);"></canvas>
@@ -13531,7 +13529,7 @@ ${cfg.diagram}
             centroids.forEach((c,k)=>{ctx.beginPath();ctx.arc(c.x,c.y,12,0,Math.PI*2);ctx.fillStyle=COLORS[k];ctx.fill();ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.stroke();ctx.fillStyle='#fff';ctx.font='bold 11px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(k+1,c.x,c.y);});};
         const assign=()=>{assignments=pts.map(p=>centroids.reduce((bi,c,k)=>dist(p,c)<dist(p,centroids[bi])?k:bi,0));};
         const update=()=>{const K=parseInt(kInp.value); return centroids.map((c,k)=>{const mem=pts.filter((_,i)=>assignments[i]===k);if(!mem.length)return c;return{x:mem.reduce((s,p)=>s+p.x,0)/mem.length,y:mem.reduce((s,p)=>s+p.y,0)/mem.length};});};
-        const step=()=>{if(!centroids.length)return;assign();const nc=update();const moved=nc.some((c,k)=>dist(c,centroids[k])>0.5);centroids=nc;draw();document.getElementById('ai-km-info').textContent=moved?'Centroids updated...':'Î“Â£Ã  Converged!';return moved;};
+        const step=()=>{if(!centroids.length)return;assign();const nc=update();const moved=nc.some((c,k)=>dist(c,centroids[k])>0.5);centroids=nc;draw();document.getElementById('ai-km-info').textContent=moved?'Centroids updated...':'Γ£à Converged!';return moved;};
         const initCentroids=()=>{const K=parseInt(kInp.value);centroids=[];for(let k=0;k<K;k++)centroids.push({...pts[Math.floor(Math.random()*pts.length)]});assign();draw();};
         document.getElementById('ai-km-gen').addEventListener('click',gen);
         document.getElementById('ai-km-init').addEventListener('click',initCentroids);
@@ -13548,8 +13546,8 @@ ${cfg.diagram}
             <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:16px;">
                 <select id="ai-ann-data" style="padding:8px;border-radius:8px;border:1px solid ${AC};background:var(--bg-card);color:var(--text-main);font-weight:700;"><option value="AND">AND Gate</option><option value="OR">OR Gate</option><option value="XOR">XOR (No solution)</option></select>
                 <label style="font-weight:700;">LR: <input id="ai-ann-lr" type="range" min="0.01" max="1" step="0.01" value="0.1" style="width:80px;accent-color:${AC};"> <span id="ai-ann-lrval">0.1</span></label>
-                <button id="ai-ann-train" style="padding:8px 16px;border-radius:8px;background:${AC};color:#fff;border:none;font-weight:700;cursor:pointer;">Î“Ã»â•¢ Train Epoch</button>
-                <button id="ai-ann-reset" style="padding:8px 14px;border-radius:8px;background:transparent;color:${AC};border:1px solid ${AC};cursor:pointer;font-weight:700;">Î“Ã¥â•‘ Reset</button>
+                <button id="ai-ann-train" style="padding:8px 16px;border-radius:8px;background:${AC};color:#fff;border:none;font-weight:700;cursor:pointer;">Γû╢ Train Epoch</button>
+                <button id="ai-ann-reset" style="padding:8px 14px;border-radius:8px;background:transparent;color:${AC};border:1px solid ${AC};cursor:pointer;font-weight:700;">Γå║ Reset</button>
                 <span id="ai-ann-epoch" style="margin-left:auto;font-weight:700;color:${AC};"></span>
             </div>
             <div style="display:flex;gap:16px;">
@@ -13582,7 +13580,7 @@ ${cfg.diagram}
             ctx.beginPath();ctx.strokeStyle=AC;ctx.lineWidth=2;
             lossHist.forEach((v,i)=>{const x=(i/(lossHist.length-1))*250+5,y=110-(v/max)*100;if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);});ctx.stroke();
         };
-        const updateWeightDisplay=()=>{document.getElementById('ai-ann-weights').innerHTML=`wÎ“Ã©Ã¼ = <b style="color:${AC}">${w[0].toFixed(4)}</b><br>wÎ“Ã©Ã© = <b style="color:${AC}">${w[1].toFixed(4)}</b><br>b  = <b style="color:${AC}">${b.toFixed(4)}</b>`;};
+        const updateWeightDisplay=()=>{document.getElementById('ai-ann-weights').innerHTML=`wΓéü = <b style="color:${AC}">${w[0].toFixed(4)}</b><br>wΓéé = <b style="color:${AC}">${w[1].toFixed(4)}</b><br>b  = <b style="color:${AC}">${b.toFixed(4)}</b>`;};
         const trainEpoch=()=>{
             const ds=datasets[document.getElementById('ai-ann-data').value]; const lr=parseFloat(lrInp.value);
             let errors=0;
@@ -13590,7 +13588,7 @@ ${cfg.diagram}
             epoch++; lossHist.push(errors/ds.pts.length); if(lossHist.length>50)lossHist.shift();
             document.getElementById('ai-ann-epoch').textContent=`Epoch: ${epoch} | Errors: ${errors}`;
             const isXOR=document.getElementById('ai-ann-data').value==='XOR';
-            document.getElementById('ai-ann-status').innerHTML=errors===0?'<span style="color:#22c55e;">Î“Â£Ã  Converged!</span>':isXOR?'<span style="color:#ef4444;">Î“ÃœÃ¡ XOR is not linearly separable Î“Ã‡Ã¶ will never converge</span>':'<span style="color:#fbbf24;">Î“Ã…â”‚ Training...</span>';
+            document.getElementById('ai-ann-status').innerHTML=errors===0?'<span style="color:#22c55e;">Γ£à Converged!</span>':isXOR?'<span style="color:#ef4444;">ΓÜá XOR is not linearly separable ΓÇö will never converge</span>':'<span style="color:#fbbf24;">ΓÅ│ Training...</span>';
             updateWeightDisplay(); drawBoundary(); drawLoss();
         };
         const reset=()=>{w=[Math.random()-0.5,Math.random()-0.5];b=Math.random()-0.5;epoch=0;lossHist=[];updateWeightDisplay();drawBoundary();drawLoss();document.getElementById('ai-ann-epoch').textContent='';document.getElementById('ai-ann-status').textContent='';};
@@ -13604,16 +13602,16 @@ ${cfg.diagram}
         const AC='#f97316';
         container.innerHTML=`
         <div style="padding:20px;font-family:var(--font-sans);">
-            <h3 style="color:${AC};margin-bottom:16px;">2Î“Ã¥Ã†3Î“Ã¥Ã†1 MLP Backpropagation Visualizer</h3>
+            <h3 style="color:${AC};margin-bottom:16px;">2ΓåÆ3ΓåÆ1 MLP Backpropagation Visualizer</h3>
             <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:16px;">
-                <label style="font-weight:700;">Input xÎ“Ã©Ã¼: <input id="ai-bp-x1" type="number" value="0.5" step="0.1" style="width:70px;padding:6px;border-radius:6px;border:1px solid ${AC};background:var(--bg-card);color:var(--text-main);"></label>
-                <label style="font-weight:700;">Input xÎ“Ã©Ã©: <input id="ai-bp-x2" type="number" value="0.3" step="0.1" style="width:70px;padding:6px;border-radius:6px;border:1px solid ${AC};background:var(--bg-card);color:var(--text-main);"></label>
+                <label style="font-weight:700;">Input xΓéü: <input id="ai-bp-x1" type="number" value="0.5" step="0.1" style="width:70px;padding:6px;border-radius:6px;border:1px solid ${AC};background:var(--bg-card);color:var(--text-main);"></label>
+                <label style="font-weight:700;">Input xΓéé: <input id="ai-bp-x2" type="number" value="0.3" step="0.1" style="width:70px;padding:6px;border-radius:6px;border:1px solid ${AC};background:var(--bg-card);color:var(--text-main);"></label>
                 <label style="font-weight:700;">Target y: <input id="ai-bp-y" type="number" value="1" step="1" min="0" max="1" style="width:60px;padding:6px;border-radius:6px;border:1px solid ${AC};background:var(--bg-card);color:var(--text-main);"></label>
                 <label style="font-weight:700;">LR: <input id="ai-bp-lr" type="number" value="0.1" step="0.05" style="width:60px;padding:6px;border-radius:6px;border:1px solid ${AC};background:var(--bg-card);color:var(--text-main);"></label>
-                <button id="ai-bp-fwd" style="padding:8px 16px;border-radius:8px;background:#6366f1;color:#fff;border:none;font-weight:700;cursor:pointer;">Î“Ã§Ã† Forward</button>
-                <button id="ai-bp-back" style="padding:8px 16px;border-radius:8px;background:#ef4444;color:#fff;border:none;font-weight:700;cursor:pointer;">Î“Ã§Ã‰ Backprop</button>
-                <button id="ai-bp-update" style="padding:8px 16px;border-radius:8px;background:#22c55e;color:#fff;border:none;font-weight:700;cursor:pointer;">Î“Ã¥Ã¦ Update W</button>
-                <button id="ai-bp-auto" style="padding:8px 14px;border-radius:8px;background:${AC};color:#fff;border:none;font-weight:700;cursor:pointer;">Î“Ã»â•¢Î“Ã»â•¢ 100 Epochs</button>
+                <button id="ai-bp-fwd" style="padding:8px 16px;border-radius:8px;background:#6366f1;color:#fff;border:none;font-weight:700;cursor:pointer;">ΓçÆ Forward</button>
+                <button id="ai-bp-back" style="padding:8px 16px;border-radius:8px;background:#ef4444;color:#fff;border:none;font-weight:700;cursor:pointer;">ΓçÉ Backprop</button>
+                <button id="ai-bp-update" style="padding:8px 16px;border-radius:8px;background:#22c55e;color:#fff;border:none;font-weight:700;cursor:pointer;">Γåæ Update W</button>
+                <button id="ai-bp-auto" style="padding:8px 14px;border-radius:8px;background:${AC};color:#fff;border:none;font-weight:700;cursor:pointer;">Γû╢Γû╢ 100 Epochs</button>
             </div>
             <div style="display:flex;gap:16px;">
                 <canvas id="ai-bp-canvas" width="440" height="320" style="border-radius:12px;background:var(--bg-card);border:1px solid var(--border);"></canvas>
@@ -13664,7 +13662,7 @@ ${cfg.diagram}
             const y=parseFloat(document.getElementById('ai-bp-y').value);
             const dL_da2=a2-y; const da2_dz2=sigD(a2); const delta2=dL_da2*da2_dz2;
             const delta1=a1.map((a,i)=>W2[i]*delta2*sigD(a));
-            document.getElementById('ai-bp-log').innerHTML+=`Backprop: â•¬â”¤Î“Ã©Ã©=${delta2.toFixed(4)} â•¬â”¤Î“Ã©Ã¼=[${delta1.map(v=>v.toFixed(3)).join(', ')}]<br>`;
+            document.getElementById('ai-bp-log').innerHTML+=`Backprop: ╬┤Γéé=${delta2.toFixed(4)} ╬┤Γéü=[${delta1.map(v=>v.toFixed(3)).join(', ')}]<br>`;
             drawNet([[],[],[]],[],delta1);
             window._delta1=delta1; window._delta2=delta2;
         };
@@ -13691,10 +13689,10 @@ ${cfg.diagram}
         const AC='#f97316';
         container.innerHTML=`
         <div style="padding:20px;font-family:var(--font-sans);">
-            <h3 style="color:${AC};margin-bottom:16px;">Mamdani Fuzzy Inference System Î“Ã‡Ã¶ Temperature Î“Ã¥Ã† Fan Speed</h3>
+            <h3 style="color:${AC};margin-bottom:16px;">Mamdani Fuzzy Inference System ΓÇö Temperature ΓåÆ Fan Speed</h3>
             <div style="display:flex;gap:20px;flex-wrap:wrap;align-items:flex-start;">
                 <div style="flex:1;min-width:280px;">
-                    <label style="font-weight:700;display:block;margin-bottom:8px;">Temperature (â”¬â–‘C): <span id="ai-fz-tempval" style="color:${AC};">25</span>â”¬â–‘C</label>
+                    <label style="font-weight:700;display:block;margin-bottom:8px;">Temperature (┬░C): <span id="ai-fz-tempval" style="color:${AC};">25</span>┬░C</label>
                     <input id="ai-fz-temp" type="range" min="0" max="50" value="25" style="width:100%;accent-color:${AC};">
                     <div style="margin-top:20px;">
                         <div style="font-weight:800;margin-bottom:8px;">Input Membership (Temperature)</div>
@@ -13708,15 +13706,15 @@ ${cfg.diagram}
                 <div style="width:220px;">
                     <div style="font-weight:800;color:${AC};margin-bottom:8px;">Fuzzy Rules</div>
                     <div style="font-size:12px;line-height:2;border:1px solid var(--border);padding:10px;border-radius:8px;background:var(--bg-card);">
-                        <div>IF temp is <b>Cold</b> Î“Ã¥Ã† fan <b>Slow</b></div>
-                        <div>IF temp is <b>Warm</b> Î“Ã¥Ã† fan <b>Medium</b></div>
-                        <div>IF temp is <b>Hot</b> Î“Ã¥Ã† fan <b>Fast</b></div>
+                        <div>IF temp is <b>Cold</b> ΓåÆ fan <b>Slow</b></div>
+                        <div>IF temp is <b>Warm</b> ΓåÆ fan <b>Medium</b></div>
+                        <div>IF temp is <b>Hot</b> ΓåÆ fan <b>Fast</b></div>
                     </div>
                     <div style="margin-top:16px;font-weight:800;color:${AC};">Fuzzification</div>
                     <div id="ai-fz-memb" style="font-family:var(--font-mono);font-size:12px;line-height:2;margin-top:6px;"></div>
                     <div style="margin-top:12px;padding:14px;background:${AC}22;border:1px solid ${AC};border-radius:10px;">
                         <div style="font-weight:800;margin-bottom:4px;">Crisp Output</div>
-                        <div id="ai-fz-crisp" style="font-size:26px;font-weight:800;color:${AC};">Î“Ã‡Ã¶ %</div>
+                        <div id="ai-fz-crisp" style="font-size:26px;font-weight:800;color:${AC};">ΓÇö %</div>
                         <div style="font-size:11px;color:var(--text-muted);">Fan Speed</div>
                     </div>
                 </div>
@@ -13756,15 +13754,15 @@ ${cfg.diagram}
         const AC='#f97316';
         container.innerHTML=`
         <div style="padding:20px;font-family:var(--font-sans);">
-            <h3 style="color:${AC};margin-bottom:4px;">Genetic Algorithm Î“Ã‡Ã¶ Maximize f(x) = xâ”¬â•–sin(10â•§Ã‡x) + 2</h3>
-            <div style="font-size:12px;color:var(--text-muted);margin-bottom:16px;">x Î“ÃªÃª [0, 1], binary chromosome (16 bits)</div>
+            <h3 style="color:${AC};margin-bottom:4px;">Genetic Algorithm ΓÇö Maximize f(x) = x┬╖sin(10╧Çx) + 2</h3>
+            <div style="font-size:12px;color:var(--text-muted);margin-bottom:16px;">x Γêê [0, 1], binary chromosome (16 bits)</div>
             <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:16px;">
                 <label style="font-weight:700;">Pop: <input id="ai-ga-pop" type="number" value="20" min="10" max="50" step="5" style="width:55px;padding:5px;border-radius:6px;border:1px solid ${AC};background:var(--bg-card);color:var(--text-main);"></label>
                 <label style="font-weight:700;">Pc: <input id="ai-ga-pc" type="number" value="0.8" min="0.1" max="1" step="0.1" style="width:55px;padding:5px;border-radius:6px;border:1px solid ${AC};background:var(--bg-card);color:var(--text-main);"></label>
                 <label style="font-weight:700;">Pm: <input id="ai-ga-pm" type="number" value="0.01" min="0.001" max="0.1" step="0.005" style="width:65px;padding:5px;border-radius:6px;border:1px solid ${AC};background:var(--bg-card);color:var(--text-main);"></label>
-                <button id="ai-ga-init" style="padding:8px 14px;border-radius:8px;background:${AC};color:#fff;border:none;font-weight:700;cursor:pointer;">â‰¡Æ’Ã®â–’ Initialize</button>
-                <button id="ai-ga-step" style="padding:8px 14px;border-radius:8px;background:#6366f1;color:#fff;border:none;font-weight:700;cursor:pointer;">Î“Ã…Â¡ Evolve</button>
-                <button id="ai-ga-run" style="padding:8px 14px;border-radius:8px;background:#22c55e;color:#fff;border:none;font-weight:700;cursor:pointer;">Î“Ã»â•¢Î“Ã»â•¢ 50 Gen</button>
+                <button id="ai-ga-init" style="padding:8px 14px;border-radius:8px;background:${AC};color:#fff;border:none;font-weight:700;cursor:pointer;">≡ƒî▒ Initialize</button>
+                <button id="ai-ga-step" style="padding:8px 14px;border-radius:8px;background:#6366f1;color:#fff;border:none;font-weight:700;cursor:pointer;">ΓÅ¡ Evolve</button>
+                <button id="ai-ga-run" style="padding:8px 14px;border-radius:8px;background:#22c55e;color:#fff;border:none;font-weight:700;cursor:pointer;">Γû╢Γû╢ 50 Gen</button>
                 <span id="ai-ga-info" style="margin-left:auto;font-weight:700;color:${AC};"></span>
             </div>
             <div style="display:flex;gap:16px;">
@@ -13808,25 +13806,25 @@ ${cfg.diagram}
     const initAiExpertSim = (container) => {
         const AC='#f97316';
         const KB=[
-            {id:'R1',if:['fever','cough','sore_throat'],then:'flu',desc:'IF fever AND cough AND sore_throat Î“Ã¥Ã† Flu'},
-            {id:'R2',if:['fever','rash'],then:'measles',desc:'IF fever AND rash Î“Ã¥Ã† Measles'},
-            {id:'R3',if:['cough','chest_pain','shortness_breath'],then:'pneumonia',desc:'IF cough AND chest_pain AND shortness_breath Î“Ã¥Ã† Pneumonia'},
-            {id:'R4',if:['headache','stiff_neck','fever'],then:'meningitis',desc:'IF headache AND stiff_neck AND fever Î“Ã¥Ã† Meningitis'},
-            {id:'R5',if:['fatigue','weight_loss','night_sweats'],then:'tuberculosis',desc:'IF fatigue AND weight_loss AND night_sweats Î“Ã¥Ã† Tuberculosis'},
-            {id:'R6',if:['flu'],then:'influenza_confirmed',desc:'IF flu Î“Ã¥Ã† Influenza Confirmed'},
+            {id:'R1',if:['fever','cough','sore_throat'],then:'flu',desc:'IF fever AND cough AND sore_throat ΓåÆ Flu'},
+            {id:'R2',if:['fever','rash'],then:'measles',desc:'IF fever AND rash ΓåÆ Measles'},
+            {id:'R3',if:['cough','chest_pain','shortness_breath'],then:'pneumonia',desc:'IF cough AND chest_pain AND shortness_breath ΓåÆ Pneumonia'},
+            {id:'R4',if:['headache','stiff_neck','fever'],then:'meningitis',desc:'IF headache AND stiff_neck AND fever ΓåÆ Meningitis'},
+            {id:'R5',if:['fatigue','weight_loss','night_sweats'],then:'tuberculosis',desc:'IF fatigue AND weight_loss AND night_sweats ΓåÆ Tuberculosis'},
+            {id:'R6',if:['flu'],then:'influenza_confirmed',desc:'IF flu ΓåÆ Influenza Confirmed'},
         ];
         const symptoms=['fever','cough','sore_throat','rash','chest_pain','shortness_breath','headache','stiff_neck','fatigue','weight_loss','night_sweats'];
         container.innerHTML=`
         <div style="padding:20px;font-family:var(--font-sans);">
-            <h3 style="color:${AC};margin-bottom:16px;">Medical Expert System Î“Ã‡Ã¶ Forward Chaining</h3>
+            <h3 style="color:${AC};margin-bottom:16px;">Medical Expert System ΓÇö Forward Chaining</h3>
             <div style="display:flex;gap:20px;flex-wrap:wrap;">
                 <div style="width:240px;">
                     <div style="font-weight:800;margin-bottom:10px;">Patient Symptoms</div>
                     <div style="display:flex;flex-direction:column;gap:6px;">
                         ${symptoms.map(s=>`<label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;"><input type="checkbox" id="ai-es-${s}" style="accent-color:${AC};width:15px;height:15px;"> ${s.replace(/_/g,' ')}</label>`).join('')}
                     </div>
-                    <button id="ai-es-run" style="width:100%;margin-top:14px;padding:10px;border-radius:8px;background:${AC};color:#fff;border:none;font-weight:700;cursor:pointer;">Î“ÃœÃ² Run Inference</button>
-                    <button id="ai-es-reset" style="width:100%;margin-top:8px;padding:8px;border-radius:8px;background:transparent;color:${AC};border:1px solid ${AC};cursor:pointer;font-weight:700;">Î“Ã¥â•‘ Reset</button>
+                    <button id="ai-es-run" style="width:100%;margin-top:14px;padding:10px;border-radius:8px;background:${AC};color:#fff;border:none;font-weight:700;cursor:pointer;">ΓÜò Run Inference</button>
+                    <button id="ai-es-reset" style="width:100%;margin-top:8px;padding:8px;border-radius:8px;background:transparent;color:${AC};border:1px solid ${AC};cursor:pointer;font-weight:700;">Γå║ Reset</button>
                 </div>
                 <div style="flex:1;min-width:280px;">
                     <div style="font-weight:800;color:${AC};margin-bottom:8px;">Knowledge Base</div>
@@ -13841,7 +13839,7 @@ ${cfg.diagram}
         </div>`;
         document.getElementById('ai-es-run').addEventListener('click',async()=>{
             let wm=new Set(symptoms.filter(s=>document.getElementById(`ai-es-${s}`)&&document.getElementById(`ai-es-${s}`).checked));
-            const log=[`â‰¡Æ’Ã´Ã¯ Initial facts: [${[...wm].join(', ')||'none'}]`];
+            const log=[`≡ƒôï Initial facts: [${[...wm].join(', ')||'none'}]`];
             document.getElementById('ai-es-log').innerHTML=log.join('<br>');
             let fired=true; const diagnoses=[];
             while(fired){fired=false;
@@ -13851,7 +13849,7 @@ ${cfg.diagram}
                         const el=document.getElementById('ai-es-rule-'+rule.id);
                         if(el)el.style.background=AC+'33';
                         wm.add(rule.then); fired=true;
-                        log.push(`â‰¡Æ’Ã¶Ã‘ Fire ${rule.id}: derived <b style="color:${AC}">${rule.then}</b>`);
+                        log.push(`≡ƒöÑ Fire ${rule.id}: derived <b style="color:${AC}">${rule.then}</b>`);
                         diagnoses.push(rule.then);
                         document.getElementById('ai-es-log').innerHTML=log.join('<br>');
                         await new Promise(r=>setTimeout(r,600));
@@ -13860,7 +13858,7 @@ ${cfg.diagram}
             }
             const final=diagnoses.filter(d=>!['flu','measles','pneumonia','meningitis','tuberculosis'].includes(d)||d==='influenza_confirmed'?false:true);
             const diags=diagnoses.filter(d=>!['influenza_confirmed'].includes(d));
-            document.getElementById('ai-es-diagnosis').innerHTML=diags.length?`<div style="padding:14px;background:#22c55e22;border:1px solid #22c55e;border-radius:10px;"><div style="font-weight:800;font-size:14px;color:#22c55e;">Î“Â£Ã  Diagnosis: ${diags.join(', ')}</div><div style="font-size:12px;margin-top:4px;color:var(--text-muted);">Based on ${log.length} inference steps</div></div>`:`<div style="padding:14px;background:#ef444422;border:1px solid #ef4444;border-radius:10px;font-weight:700;color:#ef4444;">Î“Â¥Ã® No diagnosis derived from given symptoms.</div>`;
+            document.getElementById('ai-es-diagnosis').innerHTML=diags.length?`<div style="padding:14px;background:#22c55e22;border:1px solid #22c55e;border-radius:10px;"><div style="font-weight:800;font-size:14px;color:#22c55e;">Γ£à Diagnosis: ${diags.join(', ')}</div><div style="font-size:12px;margin-top:4px;color:var(--text-muted);">Based on ${log.length} inference steps</div></div>`:`<div style="padding:14px;background:#ef444422;border:1px solid #ef4444;border-radius:10px;font-weight:700;color:#ef4444;">Γ¥î No diagnosis derived from given symptoms.</div>`;
         });
         document.getElementById('ai-es-reset').addEventListener('click',()=>{symptoms.forEach(s=>{const el=document.getElementById('ai-es-'+s);if(el)el.checked=false;});document.getElementById('ai-es-log').innerHTML='';document.getElementById('ai-es-diagnosis').innerHTML='';KB.forEach(r=>{const el=document.getElementById('ai-es-rule-'+r.id);if(el)el.style.background='';});});
     };
@@ -13875,10 +13873,10 @@ ${cfg.diagram}
         </div>`;
     };
 
-    // Î“Ã¶Ã‡Î“Ã¶Ã‡ CLOUD COMPUTING SIMULATIONS Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡
+    // ΓöÇΓöÇ CLOUD COMPUTING SIMULATIONS ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
     const initCloudVirtualizationSim = (container) => {
         const AC = '#0ea5e9';
-        container.innerHTML = buildSimHeader('VM Lifecycle Manager', 'Provision and manage virtual instances', 'â‰¡Æ’Ã»Ã‘âˆ©â••Ã…', AC) + `
+        container.innerHTML = buildSimHeader('VM Lifecycle Manager', 'Provision and manage virtual instances', '≡ƒûÑ∩╕Å', AC) + `
         <div style="padding:15px;font-family:var(--font-sans);font-size:13px;display:grid;grid-template-columns:1fr 1fr;gap:15px;">
             <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;">
                 <h4 style="margin:0 0 10px;color:${AC}">Provision VM</h4>
@@ -13906,9 +13904,9 @@ ${cfg.diagram}
                         <span style="font-size:10px;color:${vm.status==='Running'?'#22c55e':vm.status==='Paused'?'#fbbf24':'#ef4444'}">${vm.status}</span>
                     </div>
                     <div style="display:flex;gap:4px;">
-                        <button class="cv-act-run" data-id="${vm.id}" style="padding:4px;border:none;border-radius:4px;background:#22c55e22;color:#22c55e;cursor:pointer;">Î“Ã»â•¢</button>
-                        <button class="cv-act-pause" data-id="${vm.id}" style="padding:4px;border:none;border-radius:4px;background:#fbbf2422;color:#fbbf24;cursor:pointer;">Î“Ã…â••</button>
-                        <button class="cv-act-delete" data-id="${vm.id}" style="padding:4px;border:none;border-radius:4px;background:#ef444422;color:#ef4444;cursor:pointer;">â‰¡Æ’Ã¹Ã¦</button>
+                        <button class="cv-act-run" data-id="${vm.id}" style="padding:4px;border:none;border-radius:4px;background:#22c55e22;color:#22c55e;cursor:pointer;">Γû╢</button>
+                        <button class="cv-act-pause" data-id="${vm.id}" style="padding:4px;border:none;border-radius:4px;background:#fbbf2422;color:#fbbf24;cursor:pointer;">ΓÅ╕</button>
+                        <button class="cv-act-delete" data-id="${vm.id}" style="padding:4px;border:none;border-radius:4px;background:#ef444422;color:#ef4444;cursor:pointer;">≡ƒùæ</button>
                     </div>
                 </div>
             `).join('');
@@ -13934,7 +13932,7 @@ ${cfg.diagram}
 
     const initCloudDockerSim = (container) => {
         const AC = '#0ea5e9';
-        container.innerHTML = buildSimHeader('Docker Container Manager', 'Build images and spin up containerized services', 'â‰¡Æ’Ã‰â”‚', AC) + `
+        container.innerHTML = buildSimHeader('Docker Container Manager', 'Build images and spin up containerized services', '≡ƒÉ│', AC) + `
         <div style="padding:15px;font-family:var(--font-sans);font-size:13px;display:grid;grid-template-columns:1.2fr 1fr;gap:15px;">
             <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;">
                 <h4 style="margin:0 0 8px;color:${AC}">Dockerfile</h4>
@@ -13956,7 +13954,7 @@ ${cfg.diagram}
             list.innerHTML = containers.map(c => `
                 <div style="border:1px solid var(--border);border-radius:6px;padding:8px;background:var(--bg-card);font-family:monospace;font-size:11px;">
                     <b>ID:</b> ${c.id} | <b>Port:</b> ${c.port}<br>
-                    <span style="color:#22c55e">Î“Ã¹Ã… Up ${c.uptime}s</span>
+                    <span style="color:#22c55e">ΓùÅ Up ${c.uptime}s</span>
                 </div>
             `).join('');
         };
@@ -13974,7 +13972,7 @@ ${cfg.diagram}
 
     const initCloudLoadBalancerSim = (container) => {
         const AC = '#0ea5e9';
-        container.innerHTML = buildSimHeader('Load Balancer Router', 'Distribute client traffic to servers', 'Î“ÃœÃ»âˆ©â••Ã…', AC) + `
+        container.innerHTML = buildSimHeader('Load Balancer Router', 'Distribute client traffic to servers', 'ΓÜû∩╕Å', AC) + `
         <div style="padding:15px;font-family:var(--font-sans);font-size:13px;display:grid;grid-template-columns:1.2fr 1fr;gap:15px;">
             <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;">
                 <h4 style="margin:0 0 10px;color:${AC}">Controls</h4>
@@ -14015,7 +14013,7 @@ ${cfg.diagram}
 
     const initCloudAutoScalingSim = (container) => {
         const AC = '#0ea5e9';
-        container.innerHTML = buildSimHeader('Auto-Scaling Engine', 'Dynamic resource provisioning based on CPU load', 'â‰¡Æ’Ã´Ãª', AC) + `
+        container.innerHTML = buildSimHeader('Auto-Scaling Engine', 'Dynamic resource provisioning based on CPU load', '≡ƒôê', AC) + `
         <div style="padding:15px;font-family:var(--font-sans);font-size:13px;display:grid;grid-template-columns:1fr 1.2fr;gap:15px;">
             <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;">
                 <h4 style="margin:0 0 10px;color:${AC}">Scale Controller</h4>
@@ -14023,8 +14021,8 @@ ${cfg.diagram}
                 <input id="cas-load" type="range" min="10" max="100" value="30" style="width:100%;accent-color:${AC};">
                 <div style="margin-top:10px;font-size:11px;color:var(--text-muted);">
                     Thresholds:<br>
-                    Î“Ã¹Ã… CPU > 75% -> Scale Out (+1 Node)<br>
-                    Î“Ã¹Ã… CPU < 25% -> Scale In (-1 Node, Min: 1)
+                    ΓùÅ CPU > 75% -> Scale Out (+1 Node)<br>
+                    ΓùÅ CPU < 25% -> Scale In (-1 Node, Min: 1)
                 </div>
             </div>
             <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;">
@@ -14038,7 +14036,7 @@ ${cfg.diagram}
             if(!containerNodes) return;
             containerNodes.innerHTML = Array(nodes).fill(0).map((_,i) => `
                 <div style="border:1.5px solid ${AC};border-radius:8px;padding:12px;background:var(--bg-card);text-align:center;width:60px;">
-                    <div style="font-size:20px;">â‰¡Æ’Ã»Ã‘âˆ©â••Ã…</div>
+                    <div style="font-size:20px;">≡ƒûÑ∩╕Å</div>
                     <span style="font-size:10px;font-weight:700;color:${AC}">Node-${i+1}</span>
                 </div>
             `).join('');
@@ -14059,7 +14057,7 @@ ${cfg.diagram}
 
     const initCloudStorageSim = (container) => {
         const AC = '#0ea5e9';
-        container.innerHTML = buildSimHeader('Distributed Object Storage', 'Upload objects and replicate data across Availability Zones', 'â‰¡Æ’Ã´Âª', AC) + `
+        container.innerHTML = buildSimHeader('Distributed Object Storage', 'Upload objects and replicate data across Availability Zones', '≡ƒôª', AC) + `
         <div style="padding:15px;font-family:var(--font-sans);font-size:13px;display:grid;grid-template-columns:1fr 1.2fr;gap:15px;">
             <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;">
                 <h4 style="margin:0 0 10px;color:${AC}">Upload Object</h4>
@@ -14091,7 +14089,7 @@ ${cfg.diagram}
 
     const initCloudCdnSim = (container) => {
         const AC = '#0ea5e9';
-        container.innerHTML = buildSimHeader('CDN Cache Manager', 'Cache static assets on global edge servers', 'â‰¡Æ’Ã®Ã‰', AC) + `
+        container.innerHTML = buildSimHeader('CDN Cache Manager', 'Cache static assets on global edge servers', '≡ƒîÉ', AC) + `
         <div style="padding:15px;font-family:var(--font-sans);font-size:13px;display:grid;grid-template-columns:1fr 1fr;gap:15px;">
             <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center;">
                 <h4 style="margin:0 0 10px;color:${AC}">Global Clients</h4>
@@ -14112,10 +14110,10 @@ ${cfg.diagram}
                 const city = btn.getAttribute('data-city');
                 const log = document.getElementById('cdn-log');
                 if (cache[city]) {
-                    log.innerHTML += `<div style="color:#22c55e">Î“Ã¹Ã… Cache HIT at ${city} Edge (12ms)</div>`;
+                    log.innerHTML += `<div style="color:#22c55e">ΓùÅ Cache HIT at ${city} Edge (12ms)</div>`;
                 } else {
                     cache[city] = true;
-                    log.innerHTML += `<div style="color:#ef4444">Î“Ã¹Ã¯ Cache MISS at ${city} Edge -> Origin Fetch (240ms)</div>`;
+                    log.innerHTML += `<div style="color:#ef4444">Γùï Cache MISS at ${city} Edge -> Origin Fetch (240ms)</div>`;
                 }
                 log.scrollTop = log.scrollHeight;
             };
@@ -14124,7 +14122,7 @@ ${cfg.diagram}
 
     const initCloudIamSim = (container) => {
         const AC = '#0ea5e9';
-        container.innerHTML = buildSimHeader('IAM Identity Broker', 'Define users, policies, and test access control', 'â‰¡Æ’Ã¶Ã¦', AC) + `
+        container.innerHTML = buildSimHeader('IAM Identity Broker', 'Define users, policies, and test access control', '≡ƒöæ', AC) + `
         <div style="padding:15px;font-family:var(--font-sans);font-size:13px;display:grid;grid-template-columns:1fr 1fr;gap:15px;">
             <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;">
                 <h4 style="margin:0 0 8px;color:${AC}">IAM Policy</h4>
@@ -14149,7 +14147,7 @@ ${cfg.diagram}
                 <button id="iam-test" style="background:${AC};color:#fff;border:none;padding:8px 12px;border-radius:6px;font-weight:700;cursor:pointer;width:100%;">Test Authorization</button>
             </div>
             <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;">
-                <div id="iam-result-icon" style="font-size:48px;">â‰¡Æ’Ã¶Ã†</div>
+                <div id="iam-result-icon" style="font-size:48px;">≡ƒöÆ</div>
                 <div id="iam-result-text" style="font-weight:700;margin-top:10px;">Configure and test access rules</div>
             </div>
         </div>`;
@@ -14160,10 +14158,10 @@ ${cfg.diagram}
             const rIcon = document.getElementById('iam-result-icon');
             const rText = document.getElementById('iam-result-text');
             if (user === 'admin' || (user === 'readOnly' && act === 'read')) {
-                rIcon.textContent = 'â‰¡Æ’Ã¶Ã´';
+                rIcon.textContent = '≡ƒöô';
                 rText.innerHTML = '<span style="color:#22c55e">Access ALLOWED</span>';
             } else {
-                rIcon.textContent = 'Î“Â¥Ã®';
+                rIcon.textContent = 'Γ¥î';
                 rText.innerHTML = '<span style="color:#ef4444">Access DENIED</span><br><span style="font-size:11px;color:var(--text-muted);">Missing permission policy</span>';
             }
         };
@@ -14171,7 +14169,7 @@ ${cfg.diagram}
 
     const initCloudServerlessSim = (container) => {
         const AC = '#0ea5e9';
-        container.innerHTML = buildSimHeader('Serverless FaaS Sandbox', 'Deploy event-driven functions and monitor cold starts', 'Î“ÃœÃ­', AC) + `
+        container.innerHTML = buildSimHeader('Serverless FaaS Sandbox', 'Deploy event-driven functions and monitor cold starts', 'ΓÜí', AC) + `
         <div style="padding:15px;font-family:var(--font-sans);font-size:13px;display:grid;grid-template-columns:1.2fr 1fr;gap:15px;">
             <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;">
                 <h4 style="margin:0 0 8px;color:${AC}">Handler Code (Node.js)</h4>
@@ -14193,7 +14191,7 @@ ${cfg.diagram}
             const latency = cold ? Math.floor(Math.random()*250+150) + 'ms (Cold Start)' : Math.floor(Math.random()*15+3) + 'ms (Warm)';
             cold = false;
             mEl.innerHTML = `
-                Status: <span style="color:#22c55e">Î“Ã¹Ã… Success (200)</span><br>
+                Status: <span style="color:#22c55e">ΓùÅ Success (200)</span><br>
                 Latency: <span style="color:${cold?'#fbbf24':'#22c55e'}">${latency}</span><br>
                 Response: <span style="color:#0ea5e9">{ "greeting": "Hello, World!" }</span>
             `;
@@ -14203,7 +14201,7 @@ ${cfg.diagram}
 
     const initCloudSlaSim = (container) => {
         const AC = '#0ea5e9';
-        container.innerHTML = buildSimHeader('SLA Monitoring Dashboard', 'Simulate system load and measure reliability thresholds', 'â‰¡Æ’Ã´Ã¨', AC) + `
+        container.innerHTML = buildSimHeader('SLA Monitoring Dashboard', 'Simulate system load and measure reliability thresholds', '≡ƒôè', AC) + `
         <div style="padding:15px;font-family:var(--font-sans);font-size:13px;display:grid;grid-template-columns:1fr 1.2fr;gap:15px;">
             <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;">
                 <h4 style="margin:0 0 10px;color:${AC}">SLA Metric Options</h4>
@@ -14237,7 +14235,7 @@ ${cfg.diagram}
 
     const initCloudMapReduceSim = (container) => {
         const AC = '#0ea5e9';
-        container.innerHTML = buildSimHeader('MapReduce Cluster Console', 'Distribute computation tasks to Map/Reduce worker nodes', 'â‰¡Æ’Ã¶Ã‡', AC) + `
+        container.innerHTML = buildSimHeader('MapReduce Cluster Console', 'Distribute computation tasks to Map/Reduce worker nodes', '≡ƒöÇ', AC) + `
         <div style="padding:15px;font-family:var(--font-sans);font-size:13px;display:grid;grid-template-columns:1fr 1fr;gap:15px;">
             <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;">
                 <h4 style="margin:0 0 8px;color:${AC}">Dataset Input</h4>
@@ -14267,7 +14265,7 @@ ${cfg.diagram}
 
     const initCloudKubernetesSim = (container) => {
         const AC = '#0ea5e9';
-        container.innerHTML = buildSimHeader('K8s Cluster Scheduler', 'Assign application pods to worker nodes based on CPU limits', 'Î“Ã¿â••âˆ©â••Ã…', AC) + `
+        container.innerHTML = buildSimHeader('K8s Cluster Scheduler', 'Assign application pods to worker nodes based on CPU limits', 'Γÿ╕∩╕Å', AC) + `
         <div style="padding:15px;font-family:var(--font-sans);font-size:13px;display:grid;grid-template-columns:1fr 1.2fr;gap:15px;">
             <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;">
                 <h4 style="margin:0 0 10px;color:${AC}">Schedule Pod</h4>
@@ -14309,10 +14307,10 @@ ${cfg.diagram}
         };
     };
 
-    // Î“Ã¶Ã‡Î“Ã¶Ã‡ CYBERSECURITY SIMULATIONS Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡
+    // ΓöÇΓöÇ CYBERSECURITY SIMULATIONS ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
     const initCyberCaesarSim = (container) => {
         const AC = '#ef4444';
-        container.innerHTML = buildSimHeader('Caesar & ROT13 Encryption', 'Shift characters along the alphabet ring', 'â‰¡Æ’Ã¶Ã‰', AC) + `
+        container.innerHTML = buildSimHeader('Caesar & ROT13 Encryption', 'Shift characters along the alphabet ring', '≡ƒöÉ', AC) + `
         <div style="padding:15px;font-family:var(--font-sans);font-size:13px;display:grid;grid-template-columns:1fr 1.2fr;gap:15px;">
             <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;">
                 <h4 style="margin:0 0 8px;color:${AC}">Config</h4>
@@ -14345,7 +14343,7 @@ ${cfg.diagram}
 
     const initCyberVigenereSim = (container) => {
         const AC = '#ef4444';
-        container.innerHTML = buildSimHeader('Vigenâ”œÂ¿re Polyalphabetic Cipher', 'Encrypt data using a repeating string key matrix', 'â‰¡Æ’Ã¶Ã‰', AC) + `
+        container.innerHTML = buildSimHeader('Vigen├¿re Polyalphabetic Cipher', 'Encrypt data using a repeating string key matrix', '≡ƒöÉ', AC) + `
         <div style="padding:15px;font-family:var(--font-sans);font-size:13px;display:grid;grid-template-columns:1fr 1.2fr;gap:15px;">
             <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;">
                 <h4 style="margin:0 0 8px;color:${AC}">Input Parameters</h4>
@@ -14378,7 +14376,7 @@ ${cfg.diagram}
 
     const initCyberRsaSim = (container) => {
         const AC = '#ef4444';
-        container.innerHTML = buildSimHeader('RSA Asymmetric Cipher', 'Simulate key pair derivation and encrypt messages', 'â‰¡Æ’Ã¶Ã‰', AC) + `
+        container.innerHTML = buildSimHeader('RSA Asymmetric Cipher', 'Simulate key pair derivation and encrypt messages', '≡ƒöÉ', AC) + `
         <div style="padding:15px;font-family:var(--font-sans);font-size:13px;display:grid;grid-template-columns:1fr 1fr;gap:15px;">
             <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;">
                 <h4 style="margin:0 0 8px;color:${AC}">Key Generation</h4>
@@ -14415,7 +14413,7 @@ ${cfg.diagram}
 
     const initCyberAesSim = (container) => {
         const AC = '#ef4444';
-        container.innerHTML = buildSimHeader('AES Symmetric Round Block', 'Observe diffusion and confusion block operations', 'â‰¡Æ’Ã¶Ã‰', AC) + `
+        container.innerHTML = buildSimHeader('AES Symmetric Round Block', 'Observe diffusion and confusion block operations', '≡ƒöÉ', AC) + `
         <div style="padding:15px;font-family:var(--font-sans);font-size:13px;display:grid;grid-template-columns:1.2fr 1fr;gap:15px;">
             <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;">
                 <h4 style="margin:0 0 10px;color:${AC}">Round 1 Substitution State</h4>
@@ -14453,7 +14451,7 @@ ${cfg.diagram}
 
     const initCyberHashingSim = (container) => {
         const AC = '#ef4444';
-        container.innerHTML = buildSimHeader('Integrity Hashes & Avalanche Effect', 'Produce cryptographic signatures of data', 'â‰¡Æ’Ã¶Ã‰', AC) + `
+        container.innerHTML = buildSimHeader('Integrity Hashes & Avalanche Effect', 'Produce cryptographic signatures of data', '≡ƒöÉ', AC) + `
         <div style="padding:15px;font-family:var(--font-sans);font-size:13px;display:grid;grid-template-columns:1.2fr 1fr;gap:15px;">
             <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;">
                 <h4 style="margin:0 0 10px;color:${AC}">Input Message</h4>
@@ -14483,7 +14481,7 @@ ${cfg.diagram}
 
     const initCyberFirewallSim = (container) => {
         const AC = '#ef4444';
-        container.innerHTML = buildSimHeader('Firewall Inspection Engine', 'Apply access control rules to filter packets', 'â‰¡Æ’Â¢Ã­âˆ©â••Ã…', AC) + `
+        container.innerHTML = buildSimHeader('Firewall Inspection Engine', 'Apply access control rules to filter packets', '≡ƒ¢í∩╕Å', AC) + `
         <div style="padding:15px;font-family:var(--font-sans);font-size:13px;display:grid;grid-template-columns:1fr 1fr;gap:15px;">
             <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;">
                 <h4 style="margin:0 0 10px;color:${AC}">Active Policy</h4>
@@ -14498,7 +14496,7 @@ ${cfg.diagram}
                 <button id="cfw-test" style="background:${AC};color:#fff;border:none;padding:8px;border-radius:6px;font-weight:700;margin-top:8px;cursor:pointer;width:100%;">Inject Packet</button>
             </div>
             <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;">
-                <div id="cfw-res-icon" style="font-size:42px;">â‰¡Æ’Æ’Ã³</div>
+                <div id="cfw-res-icon" style="font-size:42px;">≡ƒƒó</div>
                 <div id="cfw-res-txt" style="font-weight:700;margin-top:10px;">Packet status logs</div>
             </div>
         </div>`;
@@ -14507,10 +14505,10 @@ ${cfg.diagram}
             const icon = document.getElementById('cfw-res-icon');
             const txt = document.getElementById('cfw-res-txt');
             if (port === 80 || port === 443 || port === 53) {
-                icon.textContent = 'â‰¡Æ’Æ’Ã³';
+                icon.textContent = '≡ƒƒó';
                 txt.innerHTML = `<span style="color:#22c55e;font-weight:700;">PASS</span><br><span style="font-size:11px;color:var(--text-muted)">Matched port rule allowed</span>`;
             } else {
-                icon.textContent = 'â‰¡Æ’Ã¶â”¤';
+                icon.textContent = '≡ƒö┤';
                 txt.innerHTML = `<span style="color:#ef4444;font-weight:700;">BLOCKED & DROPPED</span><br><span style="font-size:11px;color:var(--text-muted)">Default deny rule hit</span>`;
             }
         };
@@ -14518,7 +14516,7 @@ ${cfg.diagram}
 
     const initCyberIdsSim = (container) => {
         const AC = '#ef4444';
-        container.innerHTML = buildSimHeader('IDS Pattern Alerts', 'Monitor raw socket streams for attack patterns', 'â‰¡Æ’ÃœÂ¿', AC) + `
+        container.innerHTML = buildSimHeader('IDS Pattern Alerts', 'Monitor raw socket streams for attack patterns', '≡ƒÜ¿', AC) + `
         <div style="padding:15px;font-family:var(--font-sans);font-size:13px;display:grid;grid-template-columns:1fr 1fr;gap:15px;">
             <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center;">
                 <h4 style="margin:0 0 10px;color:${AC}">Trigger Signatures</h4>
@@ -14549,7 +14547,7 @@ ${cfg.diagram}
 
     const initCyberSqlInjectSim = (container) => {
         const AC = '#ef4444';
-        container.innerHTML = buildSimHeader('SQL Injection Attack Sandbox', 'Bypass authentication checks using SQL payloads', 'â‰¡Æ’Ã¶Ã‰', AC) + `
+        container.innerHTML = buildSimHeader('SQL Injection Attack Sandbox', 'Bypass authentication checks using SQL payloads', '≡ƒöÉ', AC) + `
         <div style="padding:15px;font-family:var(--font-sans);font-size:13px;display:grid;grid-template-columns:1fr 1fr;gap:15px;">
             <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:8px;">
                 <h4 style="margin:0 0 4px;color:${AC}">Admin Login Portal</h4>
@@ -14611,7 +14609,7 @@ ${cfg.diagram}
 
     const initCyberXssSim = (container) => {
         const AC = '#ef4444';
-        container.innerHTML = buildSimHeader('Cross-Site Scripting (XSS)', 'Observe script injection and output sanitization', 'â‰¡Æ’Ã¶Ã‰', AC) + `
+        container.innerHTML = buildSimHeader('Cross-Site Scripting (XSS)', 'Observe script injection and output sanitization', '≡ƒöÉ', AC) + `
         <div style="padding:15px;font-family:var(--font-sans);font-size:13px;display:grid;grid-template-columns:1fr 1fr;gap:15px;">
             <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:8px;">
                 <h4 style="margin:0 0 4px;color:${AC}">Post Message Workspace</h4>
@@ -14631,7 +14629,7 @@ ${cfg.diagram}
                     <div id="xss-render" style="border:1px solid var(--border);border-radius:6px;padding:10px;min-height:70px;background:var(--bg-page);"></div>
                 </div>
                 <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;flex:1;display:flex;flex-direction:column;">
-                    <h4 style="margin:0 0 8px;color:#fbbf24;font-family:var(--font-sans);">â‰¡Æ’ÃœÂ¿ Hacker Cookie Logging Terminal</h4>
+                    <h4 style="margin:0 0 8px;color:#fbbf24;font-family:var(--font-sans);">≡ƒÜ¿ Hacker Cookie Logging Terminal</h4>
                     <div id="hacker-logs" style="flex:1;background:#0f172a;color:#10b981;font-family:monospace;font-size:11px;padding:10px;border-radius:6px;min-height:80px;overflow-y:auto;">
                         [SYSTEM] Logger server listening on port 80...
                     </div>
@@ -14673,7 +14671,7 @@ ${cfg.diagram}
 
     const initCyberMitmSim = (container) => {
         const AC = '#ef4444';
-        container.innerHTML = buildSimHeader('Man-in-the-Middle Network Flow', 'Simulate ARP poisoning redirecting client packets', 'â‰¡Æ’Ã¶Ã‰', AC) + `
+        container.innerHTML = buildSimHeader('Man-in-the-Middle Network Flow', 'Simulate ARP poisoning redirecting client packets', '≡ƒöÉ', AC) + `
         <div style="padding:15px;font-family:var(--font-sans);font-size:13px;display:grid;grid-template-columns:1fr 1fr;gap:15px;">
             <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;">
                 <h4 style="margin:0 0 10px;color:${AC}">Flow Toggle</h4>
@@ -14710,7 +14708,7 @@ ${cfg.diagram}
 
     const initCyberSteganographySim = (container) => {
         const AC = '#ef4444';
-        container.innerHTML = buildSimHeader('LSB Steganography Data Hiding', 'Embed text payloads into Least Significant Bits of pixels', 'â‰¡Æ’Ã»â•âˆ©â••Ã…', AC) + `
+        container.innerHTML = buildSimHeader('LSB Steganography Data Hiding', 'Embed text payloads into Least Significant Bits of pixels', '≡ƒû╝∩╕Å', AC) + `
         <div style="padding:15px;font-family:var(--font-sans);font-size:13px;display:grid;grid-template-columns:1fr 1.2fr;gap:15px;">
             <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;">
                 <h4 style="margin:0 0 8px;color:${AC}">Secret Payload</h4>
@@ -14733,7 +14731,7 @@ ${cfg.diagram}
 
     const initCyberNetworkScanSim = (container) => {
         const AC = '#ef4444';
-        container.innerHTML = buildSimHeader('Port Scanner Reconnaissance', 'Map open server socket ports and identify vulnerabilities', 'â‰¡Æ’Ã¶Ã¬', AC) + `
+        container.innerHTML = buildSimHeader('Port Scanner Reconnaissance', 'Map open server socket ports and identify vulnerabilities', '≡ƒöì', AC) + `
         <div style="padding:15px;font-family:var(--font-sans);font-size:13px;display:grid;grid-template-columns:1fr 1.2fr;gap:15px;">
             <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;">
                 <h4 style="margin:0 0 10px;color:${AC}">Scan Options</h4>
@@ -14749,9 +14747,9 @@ ${cfg.diagram}
             const ip = document.getElementById('cns-ip').value;
             const log = document.getElementById('cns-log');
             log.innerHTML = `Starting Nmap TCP-SYN scan on \${ip}...<br>`;
-            setTimeout(() => { log.innerHTML += `Î“Ã¹Ã… Port 22 (SSH) - <span style="color:#22c55e">OPEN</span><br>`; }, 300);
-            setTimeout(() => { log.innerHTML += `Î“Ã¹Ã… Port 80 (HTTP) - <span style="color:#22c55e">OPEN</span> (Nginx 1.18)<br>`; }, 600);
-            setTimeout(() => { log.innerHTML += `Î“Ã¹Ã… Port 3306 (MySQL) - <span style="color:#ef4444">FILTERED</span><br>`; }, 900);
+            setTimeout(() => { log.innerHTML += `ΓùÅ Port 22 (SSH) - <span style="color:#22c55e">OPEN</span><br>`; }, 300);
+            setTimeout(() => { log.innerHTML += `ΓùÅ Port 80 (HTTP) - <span style="color:#22c55e">OPEN</span> (Nginx 1.18)<br>`; }, 600);
+            setTimeout(() => { log.innerHTML += `ΓùÅ Port 3306 (MySQL) - <span style="color:#ef4444">FILTERED</span><br>`; }, 900);
             setTimeout(() => { log.innerHTML += `<b style="color:#ef4444">Scan Complete: 2 open ports found.</b>`; }, 1200);
         };
     };
@@ -14775,7 +14773,7 @@ ${cfg.diagram}
         if (!data) {
             container.innerHTML = `
                 <div class="sim-placeholder" style="text-align:center; padding:100px; color:var(--text-muted);">
-                    <div style="font-size:48px; margin-bottom:20px;">â‰¡Æ’Â¢Ã­âˆ©â••Ã…</div>
+                    <div style="font-size:48px; margin-bottom:20px;">≡ƒ¢í∩╕Å</div>
                     <h2>Standard Simulation Unavailable</h2>
                     <p>This is a free-form Practice Lab. Switch to the <b>Experiment</b> tab to build your network.</p>
                 </div>
@@ -15224,7 +15222,7 @@ student@mitadt-os:~$ </div>
         if (toggleEl.querySelector('.sun')) {
             // Already has complex inner structure (like in landing/dashboard)
         } else {
-            toggleEl.innerHTML = target === 'dark' ? 'â‰¡Æ’Ã®Ã–' : 'Î“Ã¿Ã‡âˆ©â••Ã…';
+            toggleEl.innerHTML = target === 'dark' ? '≡ƒîÖ' : 'ΓÿÇ∩╕Å';
         }
     });
 
@@ -15310,9 +15308,9 @@ student@mitadt-os:~$ </div>
             optionsHtml = `
                 <option value="ai_search">1. BFS / DFS / A* Search</option>
                 <option value="ai_heuristic">2. Heuristic & Informed Search</option>
-                <option value="ai_csp">3. CSP Î“Ã‡Ã¶ N-Queens</option>
+                <option value="ai_csp">3. CSP ΓÇö N-Queens</option>
                 <option value="ai_minimax">4. Minimax & Alpha-Beta</option>
-                <option value="ai_naive_bayes">5. Naâ”œÂ»ve Bayes Classifier</option>
+                <option value="ai_naive_bayes">5. Na├»ve Bayes Classifier</option>
                 <option value="ai_knn">6. K-Nearest Neighbors</option>
                 <option value="ai_kmeans">7. K-Means Clustering</option>
                 <option value="ai_ann">8. Perceptron (ANN)</option>
@@ -15354,7 +15352,7 @@ student@mitadt-os:~$ </div>
         } else if (currentSubject === 'cyber') {
             optionsHtml = `
                 <option value="cyber_caesar">1. Caesar Cipher & ROT13</option>
-                <option value="cyber_vigenere">2. Vigenâ”œÂ¿re Cipher</option>
+                <option value="cyber_vigenere">2. Vigen├¿re Cipher</option>
                 <option value="cyber_rsa">3. RSA Public-Key Encryption</option>
                 <option value="cyber_aes">4. AES Block Cipher</option>
                 <option value="cyber_hashing">5. Hashing Algorithms</option>
@@ -15477,7 +15475,7 @@ student@mitadt-os:~$ </div>
         const floatingHome = document.createElement('a');
         floatingHome.href = 'dashboard.html';
         floatingHome.className = 'floating-back-btn';
-        floatingHome.innerHTML = 'â‰¡Æ’Ã…Ã¡';
+        floatingHome.innerHTML = '≡ƒÅá';
         floatingHome.title = 'Back to Dashboard';
         document.body.appendChild(floatingHome);
 
@@ -15675,7 +15673,7 @@ student@mitadt-os:~$ </div>
         if (toggleSpeak) {
             toggleSpeak.addEventListener('click', () => {
                 speechEnabled = !speechEnabled;
-                toggleSpeak.textContent = speechEnabled ? "â‰¡Æ’Ã¶Ã¨ Read: On" : "â‰¡Æ’Ã¶Ã¨ Read: Off";
+                toggleSpeak.textContent = speechEnabled ? "≡ƒöè Read: On" : "≡ƒöè Read: Off";
                 toggleSpeak.style.borderColor = speechEnabled ? "var(--primary)" : "var(--border)";
                 if (!speechEnabled && window.speechSynthesis) {
                     window.speechSynthesis.cancel();
@@ -15702,17 +15700,17 @@ student@mitadt-os:~$ </div>
                 recognition.lang = 'en-US';
                 
                 recognition.onstart = () => {
-                    btnVoice.textContent = "â‰¡Æ’Ã¶â”¤";
+                    btnVoice.textContent = "≡ƒö┤";
                     btnVoice.style.background = "#ef4444";
                 };
                 
                 recognition.onend = () => {
-                    btnVoice.textContent = "â‰¡Æ’Ã„Ã–âˆ©â••Ã…";
+                    btnVoice.textContent = "≡ƒÄÖ∩╕Å";
                     btnVoice.style.background = "#4b5563";
                 };
                 
                 recognition.onerror = () => {
-                    btnVoice.textContent = "â‰¡Æ’Ã„Ã–âˆ©â••Ã…";
+                    btnVoice.textContent = "≡ƒÄÖ∩╕Å";
                     btnVoice.style.background = "#4b5563";
                 };
                 
@@ -15826,7 +15824,7 @@ Academic Rules:
                         }
                     } else if (subject === 'cyber') {
                         if (queryLower.includes('cipher') || queryLower.includes('caesar') || queryLower.includes('vigenere')) {
-                            subjectHelp = "AI Tutor: Classical cryptography relies on substitution and transposition. Caesar cipher is a simple monoalphabetic shift. Vigenâ”œÂ¿re uses a polyalphabetic key word to vary the shifts dynamically, resisting frequency analysis.";
+                            subjectHelp = "AI Tutor: Classical cryptography relies on substitution and transposition. Caesar cipher is a simple monoalphabetic shift. Vigen├¿re uses a polyalphabetic key word to vary the shifts dynamically, resisting frequency analysis.";
                         } else if (queryLower.includes('rsa') || queryLower.includes('aes') || queryLower.includes('encrypt')) {
                             subjectHelp = "AI Tutor: RSA is public-key (asymmetric) cryptography based on the mathematical difficulty of factoring large prime products. AES is symmetric block cipher using substitution-permutation networks for secure data transmission.";
                         } else if (queryLower.includes('injection') || queryLower.includes('sql') || queryLower.includes('xss')) {
@@ -15836,7 +15834,7 @@ Academic Rules:
                         }
                     }
                     if (subjectHelp) {
-                        responseText = subjectHelp + "\n\n(Tip: Save a Gemini API Key in the programming settings (Î“ÃœÃ–âˆ©â••Ã…) to unlock premium live conversational queries across all labs!)";
+                        responseText = subjectHelp + "\n\n(Tip: Save a Gemini API Key in the programming settings (ΓÜÖ∩╕Å) to unlock premium live conversational queries across all labs!)";
                     }
                 }
             }
@@ -15882,15 +15880,18 @@ Academic Rules:
             }
         });
     }
+});
+
+
 
     function initPktTracerSim(container) {
         if (!container) return;
 
         const NODES_POOL = [
-            { label:'PC1',    sub:'192.168.1.10',  mac:'00:1A:2B:3C:4D:01', em:'â‰¡Æ’Ã†â•—' },
-            { label:'PC2',    sub:'192.168.1.11',  mac:'00:1A:2B:3C:4D:02', em:'â‰¡Æ’Ã»Ã‘âˆ©â••Ã…' },
-            { label:'PC3',    sub:'192.168.1.12',  mac:'00:1A:2B:3C:4D:03', em:'â‰¡Æ’Ã»Ã‘âˆ©â••Ã…' },
-            { label:'PC4',    sub:'192.168.1.13',  mac:'00:1A:2B:3C:4D:04', em:'â‰¡Æ’Ã†â•—' },
+            { label:'PC1',    sub:'192.168.1.10',  mac:'00:1A:2B:3C:4D:01', em:'≡ƒÆ╗' },
+            { label:'PC2',    sub:'192.168.1.11',  mac:'00:1A:2B:3C:4D:02', em:'≡ƒûÑ∩╕Å' },
+            { label:'PC3',    sub:'192.168.1.12',  mac:'00:1A:2B:3C:4D:03', em:'≡ƒûÑ∩╕Å' },
+            { label:'PC4',    sub:'192.168.1.13',  mac:'00:1A:2B:3C:4D:04', em:'≡ƒÆ╗' },
         ];
 
         const DEVICES = [
@@ -15898,9 +15899,9 @@ Academic Rules:
                 id: 'hub',
                 label: 'Ethernet Hub',
                 sub: 'Layer 1 - Broadcasts to ALL ports',
-                em: 'â‰¡Æ’Ã´â•—',
+                em: '≡ƒô╗',
                 col: '#d97706',
-                desc: 'A Hub repeats every signal to ALL connected ports. There is NO filtering Î“Ã‡Ã¶ every device receives every packet, creating collisions and shared bandwidth.',
+                desc: 'A Hub repeats every signal to ALL connected ports. There is NO filtering ΓÇö every device receives every packet, creating collisions and shared bandwidth.',
                 subtypes: [
                     { id: 'hub_active', label: 'Active Hub (Signal Regenerator)', desc: 'Regenerates electrical pulses, cleans jitter, and broadcasts to all ports.' },
                     { id: 'hub_passive', label: 'Passive Hub (Wiring Splitter)', desc: 'Pure electrical splitting without amplification; signal degrades over distance.' },
@@ -15911,7 +15912,7 @@ Academic Rules:
                 id: 'switch',
                 label: 'Ethernet Switch',
                 sub: 'Layer 2 - Unicast forwarding via MAC Table',
-                em: 'â‰¡Æ’Ã¶Ã‡',
+                em: '≡ƒöÇ',
                 col: '#2563eb',
                 desc: 'A Switch learns MAC addresses and forwards frames ONLY to the correct destination port. Eliminates collisions with full-duplex dedicated bandwidth.',
                 subtypes: [
@@ -15925,7 +15926,7 @@ Academic Rules:
                 id: 'router',
                 label: 'Network Router',
                 sub: 'Layer 3 - Routes packets between subnets',
-                em: 'â‰¡Æ’Ã®Ã‰',
+                em: '≡ƒîÉ',
                 col: '#7c3aed',
                 desc: 'A Router connects different IP networks. It inspects IP headers, decrements TTL, runs routing protocols (RIP/OSPF/EIGRP), and forwards to next-hop.',
                 subtypes: [
@@ -15938,7 +15939,7 @@ Academic Rules:
                 id: 'firewall',
                 label: 'Security Firewall',
                 sub: 'Layer 3-7 - Stateful packet inspection & ACLs',
-                em: 'â‰¡Æ’Âºâ–’',
+                em: '≡ƒº▒',
                 col: '#dc2626',
                 desc: 'A Firewall inspects each packet against security rules. Permitted traffic creates stateful sessions. Blocked traffic gets TCP-Reset or ICMP-Unreachable.',
                 subtypes: [
@@ -15951,7 +15952,7 @@ Academic Rules:
                 id: 'wap',
                 label: 'Wireless Access Point',
                 sub: 'IEEE 802.11ax - Wireless bridge to wired LAN',
-                em: 'â‰¡Æ’Ã´Ã­',
+                em: '≡ƒôí',
                 col: '#16a34a',
                 desc: 'A WAP bridges wireless clients to the wired Ethernet LAN. Data travels over RF channels (2.4/5GHz), de-encapsulated from 802.11 to 802.3 Ethernet.',
                 subtypes: [
@@ -15963,12 +15964,12 @@ Academic Rules:
                 id: 'media',
                 label: 'Transmission Media Bridge',
                 sub: 'Layer 1 - Signal & Fiber Optic Converters',
-                em: 'Î“ÃœÃ­',
+                em: 'ΓÜí',
                 col: '#0284c7',
                 desc: 'Converts electrical pulses into light signals or translates between media formats (Single-Mode Fiber, Multi-Mode Fiber, Copper UTP).',
                 subtypes: [
-                    { id: 'media_smf', label: 'Single-Mode Fiber Converter (1310nm Laser)', desc: 'Converts 802.3 electrical pulses to 1310nm laser pulses over 9â”¬â•¡m single-mode glass core (up to 40km).' },
-                    { id: 'media_mmf', label: 'Multi-Mode Fiber Converter (850nm LED)', desc: 'Converts 802.3 electrical pulses to 850nm LED light pulses over 50â”¬â•¡m multi-mode glass core (up to 550m).' },
+                    { id: 'media_smf', label: 'Single-Mode Fiber Converter (1310nm Laser)', desc: 'Converts 802.3 electrical pulses to 1310nm laser pulses over 9┬╡m single-mode glass core (up to 40km).' },
+                    { id: 'media_mmf', label: 'Multi-Mode Fiber Converter (850nm LED)', desc: 'Converts 802.3 electrical pulses to 850nm LED light pulses over 50┬╡m multi-mode glass core (up to 550m).' },
                     { id: 'media_patch', label: 'Structured Cabling Patch Panel', desc: 'Pass-through TIA-568B punch-down interconnect block for Cat6A gigabit distribution.' }
                 ]
             }
@@ -16018,19 +16019,19 @@ Academic Rules:
                     <select id="ns-snd"><option value="0">PC1 (192.168.1.10)</option><option value="1">PC2 (192.168.1.11)</option><option value="2">PC3 (192.168.1.12)</option><option value="3">PC4 (192.168.1.13)</option></select></div>
                 <div class="nc" id="ns-tw"><label>Receiver</label>
                     <select id="ns-rcv"><option value="1">PC2</option><option value="0">PC1</option><option value="2">PC3</option><option value="3">PC4</option><option value="all">ALL (Broadcast)</option></select></div>
-                <button class="nsbtn" onclick="window._nsSend()">Î“Ã»â•¢&nbsp;Simulate</button>
+                <button class="nsbtn" onclick="window._nsSend()">Γû╢&nbsp;Simulate</button>
             </div>
             <div class="nscvb">
                 <div class="nscvt">
                     <span id="ns-cl">NETWORK TOPOLOGY - PACKET FLOW VISUALIZATION</span>
-                    <span id="ns-st" style="font-size:11px;font-family:monospace;color:#64748b;">Î“Ã¹Ã… IDLE</span>
+                    <span id="ns-st" style="font-size:11px;font-family:monospace;color:#64748b;">ΓùÅ IDLE</span>
                 </div>
                 <canvas class="nscv" id="ns-cv" height="430"></canvas>
             </div>
             <div class="nslb">
                 <div class="nslh">
-                    <span>Î“Ã»â•¢ Protocol Console Log</span>
-                    <span id="ns-lb" style="color:#16a34a;">Î“Ã¹Ã… READY</span>
+                    <span>Γû╢ Protocol Console Log</span>
+                    <span id="ns-lb" style="color:#16a34a;">ΓùÅ READY</span>
                 </div>
                 <div class="nsl" id="ns-log"><div style="color:#64748b;">Select a device tab then click Simulate.</div></div>
             </div>
@@ -16079,8 +16080,8 @@ Academic Rules:
                 if (tab) tab.classList.add('act');
                 const d = DEVICES.find(x => x.id === id);
                 document.getElementById('ns-ie').textContent = d.em;
-                document.getElementById('ns-ih').textContent = d.label + ' Î“Ã‡Ã¶ ' + d.sub;
-                document.getElementById('ns-cl').textContent = d.label.toUpperCase() + ' Î“Ã‡Ã¶ PACKET FLOW VISUALIZATION';
+                document.getElementById('ns-ih').textContent = d.label + ' ΓÇö ' + d.sub;
+                document.getElementById('ns-cl').textContent = d.label.toUpperCase() + ' ΓÇö PACKET FLOW VISUALIZATION';
                 document.getElementById('ns-tw').style.opacity = id === 'hub' ? '0.4' : '1';
                 updateSubtypeDropdown(d);
                 parts = []; draw();
@@ -16171,7 +16172,7 @@ Academic Rules:
                     ctx.fillText(n.sub, n.x, n.y + 57);
                     ctx.fillText(n.mac, n.x, n.y + 68);
                     if (role !== 'peer') {
-                        const tag = { sender:'Î“Ã»â•¢ TX', target:'Î“Ã»â•¢ RX', bcast:'Î“Ã»â•¢ BC' }[role];
+                        const tag = { sender:'Γû╢ TX', target:'Γû╢ RX', bcast:'Γû╢ BC' }[role];
                         ctx.font = 'bold 10px monospace'; ctx.fillStyle = nc;
                         ctx.fillText(tag, n.x, n.y + 80);
                     }
@@ -16232,7 +16233,7 @@ Academic Rules:
                 var sN = nodes[si] || nodes[0];
                 var tN = isBc ? null : nodes[parseInt(tv)];
                 document.getElementById('ns-log').innerHTML = '';
-                stat('Î“Ã¹Ã… TX ACTIVE', d.col); badge('Î“Ã¹Ã… TRANSMITTING', d.col);
+                stat('ΓùÅ TX ACTIVE', d.col); badge('ΓùÅ TRANSMITTING', d.col);
 
                 if (curDev === 'hub') {
                     if (subId === 'hub_active') {
@@ -16252,8 +16253,8 @@ Academic Rules:
                     window.setTimeout(function() {
                         log('[HUB] Repeated to ALL ' + (nodes.length-1) + ' connected ports (single shared collision domain)', '#d97706');
                         log('[ALL] Every PC receives the electrical pulse. NIC checks DstMAC to accept or discard.', '#64748b');
-                        stat('Î“Ã¹Ã… DONE', '#16a34a'); badge('Î“Ã¹Ã… DONE', '#16a34a');
-                        window.setTimeout(function(){ stat('Î“Ã¹Ã… IDLE','#64748b'); badge('Î“Ã¹Ã… IDLE','#64748b'); }, 2000);
+                        stat('ΓùÅ DONE', '#16a34a'); badge('ΓùÅ DONE', '#16a34a');
+                        window.setTimeout(function(){ stat('ΓùÅ IDLE','#64748b'); badge('ΓùÅ IDLE','#64748b'); }, 2000);
                     }, 1900);
 
                 } else if (curDev === 'switch') {
@@ -16294,8 +16295,8 @@ Academic Rules:
                             spawn(cx, cy, sN.x, sN.y, '#d97706', 'ACK', 900);
                             log('[ACK] ' + tN.label + ' -> ' + sN.label + ' RTT ~0.4ms OK', '#d97706');
                         }
-                        stat('Î“Ã¹Ã… DONE', '#16a34a'); badge('Î“Ã¹Ã… DONE', '#16a34a');
-                        window.setTimeout(function(){ stat('Î“Ã¹Ã… IDLE','#64748b'); badge('Î“Ã¹Ã… IDLE','#64748b'); }, 2500);
+                        stat('ΓùÅ DONE', '#16a34a'); badge('ΓùÅ DONE', '#16a34a');
+                        window.setTimeout(function(){ stat('ΓùÅ IDLE','#64748b'); badge('ΓùÅ IDLE','#64748b'); }, 2500);
                     }, 4800);
 
                 } else if (curDev === 'router') {
@@ -16320,8 +16321,8 @@ Academic Rules:
                             spawn(tN.x, tN.y, cx, cy, '#d97706', 'ACK', 0);
                             spawn(cx, cy, sN.x, sN.y, '#d97706', 'ACK', 900);
                         }
-                        stat('Î“Ã¹Ã… DONE', '#16a34a'); badge('Î“Ã¹Ã… DONE', '#16a34a');
-                        window.setTimeout(function(){ stat('Î“Ã¹Ã… IDLE','#64748b'); badge('Î“Ã¹Ã… IDLE','#64748b'); }, 2000);
+                        stat('ΓùÅ DONE', '#16a34a'); badge('ΓùÅ DONE', '#16a34a');
+                        window.setTimeout(function(){ stat('ΓùÅ IDLE','#64748b'); badge('ΓùÅ IDLE','#64748b'); }, 2000);
                     }, 2800);
 
                 } else if (curDev === 'firewall') {
@@ -16342,8 +16343,8 @@ Academic Rules:
                     window.setTimeout(function() {
                         log('[RETURN] Stateful Return Traffic MATCHED in Session Table -> Forwarding ACK', '#d97706');
                         if (tN) { spawn(tN.x, tN.y, cx, cy, '#d97706', 'ACK', 0); spawn(cx, cy, sN.x, sN.y, '#d97706', 'ACK', 900); }
-                        stat('Î“Ã¹Ã… DONE', '#16a34a'); badge('Î“Ã¹Ã… DONE', '#16a34a');
-                        window.setTimeout(function(){ stat('Î“Ã¹Ã… IDLE','#64748b'); badge('Î“Ã¹Ã… IDLE','#64748b'); }, 2000);
+                        stat('ΓùÅ DONE', '#16a34a'); badge('ΓùÅ DONE', '#16a34a');
+                        window.setTimeout(function(){ stat('ΓùÅ IDLE','#64748b'); badge('ΓùÅ IDLE','#64748b'); }, 2000);
                     }, 2600);
 
                 } else if (curDev === 'wap') {
@@ -16367,17 +16368,17 @@ Academic Rules:
                     window.setTimeout(function() {
                         if (tN) { spawn(tN.x, tN.y, cx, cy, '#d97706', 'ACK', 0); spawn(cx, cy, sN.x, sN.y, '#16a34a', 'RF', 900); }
                         log('[OK] Wi-Fi 6 Transmission Complete RTT ~2ms', '#16a34a');
-                        stat('Î“Ã¹Ã… DONE', '#16a34a'); badge('Î“Ã¹Ã… DONE', '#16a34a');
-                        window.setTimeout(function(){ stat('Î“Ã¹Ã… IDLE','#64748b'); badge('Î“Ã¹Ã… IDLE','#64748b'); }, 2000);
+                        stat('ΓùÅ DONE', '#16a34a'); badge('ΓùÅ DONE', '#16a34a');
+                        window.setTimeout(function(){ stat('ΓùÅ IDLE','#64748b'); badge('ΓùÅ IDLE','#64748b'); }, 2000);
                     }, 2500);
 
                 } else if (curDev === 'media') {
                     if (subId === 'media_smf') {
                         log('[SMF CONVERTER] Translating 802.3 Electrical Signal -> 1310nm Laser Pulse', '#0284c7');
-                        log('[OPTICAL LINK] Single-Mode 9â”¬â•¡m Glass Core (Zero dispersion up to 40km)', '#0284c7');
+                        log('[OPTICAL LINK] Single-Mode 9┬╡m Glass Core (Zero dispersion up to 40km)', '#0284c7');
                     } else if (subId === 'media_mmf') {
                         log('[MMF CONVERTER] Translating 802.3 Electrical Signal -> 850nm VCSEL Light Pulse', '#0284c7');
-                        log('[OPTICAL LINK] Multi-Mode 50â”¬â•¡m Glass Core (Modal dispersion up to 550m)', '#0284c7');
+                        log('[OPTICAL LINK] Multi-Mode 50┬╡m Glass Core (Modal dispersion up to 550m)', '#0284c7');
                     } else {
                         log('[PATCH PANEL] TIA-568B Structured Copper Interconnect Pass-Through', '#0284c7');
                         log('[COPPER] Cat6A 10Gbps Shielded Twisted Pair (S/FTP) continuity verified', '#0284c7');
@@ -16394,8 +16395,8 @@ Academic Rules:
                     window.setTimeout(function() {
                         if (tN) { spawn(tN.x, tN.y, cx, cy, '#d97706', 'ACK', 0); spawn(cx, cy, sN.x, sN.y, '#0284c7', 'ACK', 900); }
                         log('[OK] Transmission Media Converter Pass Complete (Loss < 0.2dB)', '#16a34a');
-                        stat('Î“Ã¹Ã… DONE', '#16a34a'); badge('Î“Ã¹Ã… DONE', '#16a34a');
-                        window.setTimeout(function(){ stat('Î“Ã¹Ã… IDLE','#64748b'); badge('Î“Ã¹Ã… IDLE','#64748b'); }, 2000);
+                        stat('ΓùÅ DONE', '#16a34a'); badge('ΓùÅ DONE', '#16a34a');
+                        window.setTimeout(function(){ stat('ΓùÅ IDLE','#64748b'); badge('ΓùÅ IDLE','#64748b'); }, 2000);
                     }, 2500);
                 }
             };
@@ -16411,5 +16412,3 @@ Academic Rules:
         })();
     }
 
-
-});
