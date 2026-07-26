@@ -3645,276 +3645,323 @@ window.VLAB_DATA = {
         "simType": "eigrp_sim"
     },
     "static_routing": {
-    "title": "Practical 11: Static Routing Configuration",
-    "aim": "To understand the fundamental principles of Layer 3 packet forwarding, examine routing table structures, manually configure static and default routes using Cisco IOS CLI commands, observe hop-by-hop next-hop forwarding decisions, and troubleshoot missing return routes.",
-    "intro": {
-        "summary": "In computer networks, communication between devices located on different subnets requires a router. To make forwarding decisions, every router maintains a Routing Table. Static Routing is the foundational method where network administrators manually define explicit paths for destination subnets, offering complete control, high security, and low CPU overhead.",
-        "importance": "Static routing introduces core IP forwarding concepts before dynamic routing protocols are explored. It is essential for configuring default gateways (Gateway of Last Resort), connecting branch offices, securing stub networks, and providing floating backup routes.",
-        "applications": [
-            "Branch Office Internet Access (Default Routes)",
-            "Stub Network Point-to-Point Interconnects",
-            "High-Security Network Backbones (Zero Route Advertisements)",
-            "Floating Backup Paths for Enterprise WAN Links"
-        ],
-        "outcome": "After completing this practical, students will be able to configure static routes using Cisco ip route syntax, set up Default Routes (0.0.0.0/0), verify packet forwarding using show ip route and traceroute, and resolve asymmetric routing faults."
-    },
-    "prerequisites": [
-        "Practical 4: IPv4 & IPv6 Address Classification",
-        "Practical 6: Subnetting, VLSM & CIDR"
-    ],
-    "outcomes": [
-        "Explain how routers evaluate destination IP addresses and make forwarding decisions.",
-        "Differentiate between Static Routing and Dynamic Routing protocols.",
-        "Read and interpret Cisco IOS Routing Table entries ('C' for Connected, 'S' for Static).",
-        "Configure Static Routes using next-hop IP addresses and exit interfaces.",
-        "Configure Default Routes (0.0.0.0 0.0.0.0) as the Gateway of Last Resort.",
-        "Trace hop-by-hop packet forwarding across multi-router topologies.",
-        "Troubleshoot common static routing errors (missing return routes, wrong next-hop IPs)."
-    ],
-    "theory": {
-        "intro": "Routing is the process of selecting paths in a network along which to send network traffic. Static routing requires administrators to manually enter every destination subnet into the router's routing table, serving as the foundation of IP network engineering.",
-        "sections": [
-            {
-                "heading": "1. Introduction to Static Routing",
-                "content": "Every device connected to an IP network relies on routers to reach remote subnets beyond its local broadcast domain. Routers consult an internal data structure called a Routing Table to forward packets toward their destination. In Static Routing, network administrators explicitly program destination networks, subnet masks, and next-hop router addresses. Because static routes do not generate routing protocol traffic, they conserve link bandwidth and system resources."
-            },
-            {
-                "heading": "2. Learning Objectives",
-                "content": "By completing this practical, students will master:\n• Layer 3 IP packet forwarding mechanics.\n• Constructing and reading Routing Tables.\n• Configuring static routes using ip route <prefix> <mask;> <next-hop>.\n• Setting Default Routes (ip route 0.0.0.0 0.0.0.0 <next-hop>).\n• Differentiating Directly Connected ('C') and Static ('S') routes.\n• Using show ip route, ping, and traceroute for verification."
-            },
-            {
-                "heading": "3. What is Routing?",
-                "content": "Routing is the Layer 3 process of examining an incoming IP packet's destination address, looking up a matching network entry in the routing table, and forwarding the packet out the appropriate egress interface toward the next-hop router or end host."
-            },
-            {
-                "heading": "4. Why Routing is Required",
-                "content": "Host computers on distinct subnets (e.g. PC1 on 192.168.1.0/24 and PC2 on 192.168.2.0/24) cannot communicate directly via Layer 2 switch broadcasts. Routers act as Layer 3 gateways that interconnect these subnets and forward traffic across network boundaries."
-            },
-            {
-                "heading": "5. What is Static Routing?",
-                "content": "Static Routing is a non-dynamic routing method where every route is manually configured into the router by an administrator. Unlike RIP, OSPF, or EIGRP, static routes never expire, do not flood neighbor advertisements, and remain fixed until manually altered."
-            },
-            {
-                "heading": "6. Characteristics of Static Routing",
-                "content": "• Manual Configuration: Administrators define every path explicitly.\n• Predictable Behavior: Traffic always follows the exact specified path.\n• Resource Efficiency: Zero CPU usage for route calculations and zero bandwidth overhead for updates.\n• Security: No route advertisements are broadcast over the wire."
-            },
-            {
-                "heading": "7. Structure of a Routing Table",
-                "content": "An IP Routing Table entry contains:\n1. Route Source Code: 'C' (Connected), 'S' (Static), 'S*' (Default Static).\n2. Destination Subnet & Prefix Mask.\n3. Administrative Distance (AD = 1 for Static) and Metric (0).\n4. Next-Hop IP Address.\n5. Outgoing Egress Interface (e.g. GigabitEthernet0/0)."
-            },
-            {
-                "heading": "8. Directly Connected Networks ('C')",
-                "content": "When a router interface is assigned an IP address and brought up (no shutdown), the router automatically adds the connected subnet to its routing table with code 'C'. No static route is required for directly connected networks."
-            },
-            {
-                "heading": "9. Next-Hop Address",
-                "content": "The Next-Hop Address is the IP address of the adjacent router's ingress interface on the shared link. When a router matches a static route, it rewrites the Layer 2 MAC header and transmits the packet to the Next-Hop IP."
-            },
-            {
-                "heading": "10. Default Route (Gateway of Last Resort)",
-                "content": "A Default Route uses destination 0.0.0.0 and mask 0.0.0.0 (quad-zero). It matches ALL IP packets that do not have a specific match in the routing table, acting as the Gateway of Last Resort for Internet traffic."
-            },
-            {
-                "heading": "11. Cisco IOS Configuration Commands",
-                "content": "Configuring a Static Route:\nRouter(config)# ip route 192.168.2.0 255.255.255.0 10.0.0.2\n\nConfiguring a Default Route:\nRouter(config)# ip route 0.0.0.0 0.0.0.0 10.0.0.2"
-            },
-            {
-                "heading": "12. Verification Commands",
-                "content": "• show ip route - Displays full IP routing table.\n• show running-config - Verifies static route configuration lines.\n• show ip interface brief - Verifies interface status (Up/Up).\n• ping <target-ip> - Tests end-to-end IP reachability.\n• traceroute <target-ip> - Traces hop-by-hop router path."
-            },
-            {
-                "heading": "13. Packet Forwarding Process Step-by-Step",
-                "content": "1. PC1 encapsulates data with Source IP 192.168.1.10 and Dest IP 192.168.2.10, sending it to Default Gateway Router A.\n2. Router A receives packet on Gi0/0, inspects Dest IP 192.168.2.10, and finds static route 192.168.2.0/24 via 10.0.0.2.\n3. Router A forwards packet out Gi0/1 to Router B (10.0.0.2).\n4. Router B inspects Dest IP, matches directly connected network 192.168.2.0/24 Gi0/0, and delivers packet to PC2.\n5. CRITICAL: Router B MUST have a return static route to 192.168.1.0/24 via Router A, or return traffic will be dropped!"
-            },
-            {
-                "heading": "14. Static Routing vs Dynamic Routing Comparison",
-                "content": "• Configuration: Static is manual per router; Dynamic is automatic.\n• Maintenance: Static requires manual updates when topology changes; Dynamic adapts automatically.\n• Resource Overhead: Static has zero CPU/RAM/bandwidth load; Dynamic requires CPU for SPF/Bellman-Ford and network updates.\n• Security: Static is higher (no wire advertisements); Dynamic requires protocol authentication.\n• Scalability: Static is best for small/stub networks; Dynamic scales to large enterprise networks."
-            },
-            {
-                "heading": "15. Advantages of Static Routing",
-                "content": "• Minimal router CPU and memory consumption.\n• Zero network bandwidth overhead (no update broadcasts).\n• Complete control over traffic paths.\n• Enhanced security."
-            },
-            {
-                "heading": "16. Limitations of Static Routing",
-                "content": "• High administrative burden as network size grows.\n• Human configuration errors are common.\n• Cannot automatically re-route around link or router failures."
-            },
-            {
-                "heading": "17. Real-World Applications",
-                "content": "Used for connecting branch offices to central corporate headquarters, default routes facing ISPs, stub networks, and floating backup WAN links."
-            },
-            {
-                "heading": "18. Best Practices",
-                "content": "1. Always configure matching RETURN routes on remote routers to prevent asymmetric black-holing.\n2. Document static routes in network diagrams.\n3. Use Default Routes (0.0.0.0/0) on stub branch routers facing single edge connections."
-            },
-            {
-                "heading": "19. Common Configuration Errors",
-                "content": "• Missing return route on destination router.\n• Typographical error in next-hop IP address.\n• Inverted subnet mask (e.g., using wildcard mask instead of netmask).\n• Next-hop interface administratively down."
-            },
-            {
-                "heading": "20. Summary",
-                "content": "Static routing establishes predictable, manual paths across network routers using the ip route command, serving as an indispensable foundation for default gateways and enterprise WAN connectivity."
-            }
-        ]
-    },
-    "hardware_inspector": [
-        {
-            "id": "cisco_2911_static_router",
-            "name": "Cisco 2911 ISR Static Forwarding Router",
-            "category": "Layer 3 Manual Forwarding Engine",
-            "description": "Enterprise Layer 3 router executing manual static route lookups and forwarding packets out GigabitEthernet interfaces without protocol overhead.",
-            "svg": `<svg viewBox="0 0 400 240" xmlns="http://www.w3.org/2000/svg">
-                <rect x="20" y="40" width="360" height="160" rx="10" fill="#0f172a" stroke="#38bdf8" stroke-width="3"/>
-                <rect x="35" y="55" width="330" height="40" rx="5" fill="#1e293b"/>
-                <text x="50" y="80" fill="#38bdf8" font-size="15" font-weight="bold" font-family="monospace">CISCO 2911 ISR [STATIC ROUTE ENGINE]</text>
-                <circle cx="340" cy="75" r="7" fill="#38bdf8"/>
-                <g transform="translate(40, 110)">
-                    <rect x="0" y="0" width="65" height="40" rx="4" fill="#334155" stroke="#10b981" stroke-width="2"/>
-                    <text x="32" y="25" fill="#ffffff" font-size="10" font-weight="bold" text-anchor="middle">Gi0/0 (C)</text>
-                </g>
-                <g transform="translate(120, 110)">
-                    <rect x="0" y="0" width="65" height="40" rx="4" fill="#334155" stroke="#38bdf8" stroke-width="2"/>
-                    <text x="32" y="25" fill="#ffffff" font-size="10" font-weight="bold" text-anchor="middle">Gi0/1 (S)</text>
-                </g>
-                <g transform="translate(200, 110)">
-                    <rect x="0" y="0" width="65" height="40" rx="4" fill="#334155" stroke="#f59e0b" stroke-width="2"/>
-                    <text x="32" y="25" fill="#f59e0b" font-size="10" font-weight="bold" text-anchor="middle">Gi0/2 (S*)</text>
-                </g>
-                <g transform="translate(280, 110)">
-                    <rect x="0" y="0" width="65" height="40" rx="4" fill="#334155" stroke="#64748b" stroke-width="2"/>
-                    <text x="32" y="25" fill="#cbd5e1" font-size="10" font-weight="bold" text-anchor="middle">Serial0/0</text>
-                </g>
-                <text x="200" y="185" fill="#cbd5e1" font-size="11" text-anchor="middle">Static Routing Table (AD = 1, Metric = 0)</text>
-            </svg>`
-        },
-        {
-            "id": "routing_table_lookup_diagram",
-            "name": "Routing Table Lookup & Next-Hop Forwarding Engine",
-            "category": "Layer 3 Routing Table Lookup",
-            "description": "Visual breakdown of a static route entry matching a destination IP and resolving the egress next-hop router interface.",
-            "svg": `<svg viewBox="0 0 400 240" xmlns="http://www.w3.org/2000/svg">
-                <rect x="20" y="20" width="360" height="200" rx="8" fill="#0b0f19" stroke="#38bdf8" stroke-width="2"/>
-                <text x="200" y="45" fill="#38bdf8" font-size="14" font-weight="bold" text-anchor="middle">IP ROUTING TABLE LOOKUP ENGINE [AD = 1]</text>
-                <line x1="30" y1="55" x2="370" y2="55" stroke="#334155" stroke-width="2"/>
-
-                <rect x="40" y="70" width="320" height="35" rx="5" fill="#1e293b" stroke="#10b981" stroke-width="1.5"/>
-                <text x="50" y="92" fill="#34d399" font-size="11" font-weight="bold" font-family="monospace">C 192.168.1.0/24 is directly connected, Gi0/0</text>
-
-                <rect x="40" y="115" width="320" height="35" rx="5" fill="#1e293b" stroke="#38bdf8" stroke-width="2"/>
-                <text x="50" y="137" fill="#38bdf8" font-size="11" font-weight="bold" font-family="monospace">S 192.168.2.0/24 [1/0] via 10.0.0.2, Gi0/1</text>
-
-                <rect x="40" y="160" width="320" height="35" rx="5" fill="#1e293b" stroke="#f59e0b" stroke-width="1.5"/>
-                <text x="50" y="182" fill="#fbbf24" font-size="11" font-weight="bold" font-family="monospace">S* 0.0.0.0/0 [1/0] via 203.0.113.1 (Default)</text>
-            </svg>`
-        }
-    ],
-    "troubleshooting": {
-        "problem": "Static Route Configured but End-to-End Ping Fails (Asymmetric Routing / Missing Return Route)",
-        "hints": [
-            "Verify if the local router has a static route to the destination network.",
-            "Check if the REMOTE destination router has a RETURN static route back to the source network.",
-            "Verify if the next-hop IP address is directly reachable and on the same subnet as the local interface.",
-            "Check if the egress interface is administratively down (shutdown)."
-        ],
-        "fix": "Execute 'show ip route' on BOTH local and remote routers to ensure bidirectional static routes exist. Fix any mistyped next-hop IP addresses and issue 'no shutdown' on interconnecting interfaces."
-    },
-    "viva": [
-        {
-            "q": "What is Static Routing and how does it differ from Dynamic Routing?",
-            "a": "Static Routing requires network administrators to manually enter route entries into the routing table. Unlike dynamic protocols (RIP, OSPF, EIGRP), static routes generate zero network advertisement traffic, consume minimal CPU/RAM, but require manual updates when network topology changes."
-        },
-        {
-            "q": "What is the Administrative Distance (AD) of a Static Route and a Directly Connected route in Cisco IOS?",
-            "a": "Directly Connected routes ('C') have an Administrative Distance of 0. Static routes ('S') have a default Administrative Distance of 1."
-        },
-        {
-            "q": "What is a Default Route (Gateway of Last Resort) and what is its prefix representation?",
-            "a": "A Default Route matches all destination IP addresses that do not have a specific match in the routing table. It uses the quad-zero destination prefix and subnet mask 0.0.0.0 0.0.0.0."
-        },
-        {
-            "q": "Why is a return route mandatory when configuring static routes between two routers?",
-            "a": "IP communication is bidirectional. Even if Router A correctly forwards a packet to Router B, Router B must have a routing table entry to send the return packet back to Router A's source subnet. Without a return route, return traffic is dropped."
-        },
-        {
-            "q": "What is a Floating Static Route?",
-            "a": "A Floating Static Route is a backup static route configured with a higher Administrative Distance (e.g. ip route 192.168.2.0 255.255.255.0 10.0.0.2 130). It remains inactive in topology memory until the primary route fails."
-        }
-    ],
-    "assignment": "1. Configure static routes between Router A and Router B (192.168.1.0/24 ⇹ 10.0.0.0/30 ⇹ 192.168.2.0/24).\n2. Execute ip route 192.168.2.0 255.255.255.0 10.0.0.2 on Router A and return route ip route 192.168.1.0 255.255.255.0 10.0.0.1 on Router B.\n3. Verify bidirectional ping from PC1 (192.168.1.10) to PC2 (192.168.2.10).\n4. Remove Router B's return route (no ip route ...) and observe ping failure due to missing return path.",
-    "references": [
-        {
-            "title": "Cisco IP Routing: Static Routes Configuration Guide",
-            "link": "https://www.cisco.com"
-        },
-        {
-            "title": "RFC 1812 - Requirements for IPv4 Routers",
-            "link": "https://datatracker.ietf.org/doc/html/rfc1812"
-        }
-    ],
-    "simType": "static_routing_sim"
-},
-    "udp_tcp": {
-        "title": "UDP & TCP Transport Protocols",
-        "aim": "To analyze 3-way handshake (SYN, SYN-ACK, ACK), TCP windowing, sequence numbers, and UDP connectionless header frames.",
+        "title": "Practical 11: Static Routing Configuration",
+        "aim": "To understand the fundamental principles of Layer 3 packet forwarding, examine routing table structures, manually configure static and default routes using Cisco IOS CLI commands, observe hop-by-hop next-hop forwarding decisions, and troubleshoot missing return routes.",
         "intro": {
-            "summary": "The Transport Layer (OSI Layer 4) manages end-to-end communication sessions using TCP (reliable) and UDP (connectionless).",
-            "importance": "Understanding TCP handshakes, windowing, and UDP port multiplexing is key to optimizing web and real-time streaming traffic.",
+            "summary": "In computer networks, communication between devices located on different subnets requires a router. To make forwarding decisions, every router maintains a Routing Table. Static Routing is the foundational method where network administrators manually define explicit paths for destination subnets, offering complete control, high security, and low CPU overhead.",
+            "importance": "Static routing introduces core IP forwarding concepts before dynamic routing protocols are explored. It is essential for configuring default gateways (Gateway of Last Resort), connecting branch offices, securing stub networks, and providing floating backup routes.",
             "applications": [
-                "HTTP/HTTPS Web Traffic (TCP)",
-                "VoIP & Video Streaming (UDP)",
-                "DNS Lookups (UDP/53)"
+                "Branch Office Internet Access (Default Routes)",
+                "Stub Network Point-to-Point Interconnects",
+                "High-Security Network Backbones (Zero Route Advertisements)",
+                "Floating Backup Paths for Enterprise WAN Links"
             ],
-            "outcome": "Students will analyze TCP 3-Way Handshake packets and compare TCP vs UDP frame headers in a Wireshark-style analyzer."
+            "outcome": "After completing this practical, students will be able to configure static routes using Cisco ip route syntax, set up Default Routes (0.0.0.0/0), verify packet forwarding using show ip route and traceroute, and resolve asymmetric routing faults."
         },
         "prerequisites": [
-            "Practical 2: Network Commands & Utilities"
+            "Practical 4: IPv4 & IPv6 Address Classification",
+            "Practical 6: Subnetting, VLSM & CIDR"
         ],
         "outcomes": [
-            "Capture and decode TCP SYN, SYN-ACK, and ACK packets.",
-            "Compare 20-byte TCP header vs 8-byte UDP header.",
-            "Understand Sequence/Acknowledgement numbers and Flow Control."
+            "Explain how routers evaluate destination IP addresses and make forwarding decisions.",
+            "Differentiate between Static Routing and Dynamic Routing protocols.",
+            "Read and interpret Cisco IOS Routing Table entries ('C' for Connected, 'S' for Static).",
+            "Configure Static Routes using next-hop IP addresses and exit interfaces.",
+            "Configure Default Routes (0.0.0.0 0.0.0.0) as the Gateway of Last Resort.",
+            "Trace hop-by-hop packet forwarding across multi-router topologies.",
+            "Troubleshoot common static routing errors (missing return routes, wrong next-hop IPs)."
         ],
         "theory": {
-            "intro": "TCP is a reliable, connection-oriented Transport Layer protocol providing flow control and error recovery. UDP is a fast, connectionless protocol with 8-byte minimal header size.",
-            "cards": [
+            "intro": "Routing is the process of selecting paths in a network along which to send network traffic. Static routing requires administrators to manually enter every destination subnet into the router's routing table, serving as the foundation of IP network engineering.",
+            "sections": [
                 {
-                    "title": "3-Way Handshake",
-                    "content": "Establishes reliable virtual circuit: 1. SYN -> 2. SYN-ACK -> 3. ACK."
+                    "heading": "1. Introduction to Static Routing",
+                    "content": "Every device connected to an IP network relies on routers to reach remote subnets beyond its local broadcast domain. Routers consult an internal data structure called a Routing Table to forward packets toward their destination. In Static Routing, network administrators explicitly program destination networks, subnet masks, and next-hop router addresses. Because static routes do not generate routing protocol traffic, they conserve link bandwidth and system resources."
                 },
                 {
-                    "title": "TCP Windowing",
-                    "content": "Controls how many bytes can be transmitted before receiving an acknowledgement."
+                    "heading": "2. Learning Objectives",
+                    "content": "By completing this practical, students will master:\n• Layer 3 IP packet forwarding mechanics.\n• Constructing and reading Routing Tables.\n• Configuring static routes using ip route <prefix> <mask;> <next-hop>.\n• Setting Default Routes (ip route 0.0.0.0 0.0.0.0 <next-hop>).\n• Differentiating Directly Connected ('C') and Static ('S') routes.\n• Using show ip route, ping, and traceroute for verification."
+                },
+                {
+                    "heading": "3. What is Routing?",
+                    "content": "Routing is the Layer 3 process of examining an incoming IP packet's destination address, looking up a matching network entry in the routing table, and forwarding the packet out the appropriate egress interface toward the next-hop router or end host."
+                },
+                {
+                    "heading": "4. Why Routing is Required",
+                    "content": "Host computers on distinct subnets (e.g. PC1 on 192.168.1.0/24 and PC2 on 192.168.2.0/24) cannot communicate directly via Layer 2 switch broadcasts. Routers act as Layer 3 gateways that interconnect these subnets and forward traffic across network boundaries."
+                },
+                {
+                    "heading": "5. What is Static Routing?",
+                    "content": "Static Routing is a non-dynamic routing method where every route is manually configured into the router by an administrator. Unlike RIP, OSPF, or EIGRP, static routes never expire, do not flood neighbor advertisements, and remain fixed until manually altered."
+                },
+                {
+                    "heading": "6. Characteristics of Static Routing",
+                    "content": "• Manual Configuration: Administrators define every path explicitly.\n• Predictable Behavior: Traffic always follows the exact specified path.\n• Resource Efficiency: Zero CPU usage for route calculations and zero bandwidth overhead for updates.\n• Security: No route advertisements are broadcast over the wire."
+                },
+                {
+                    "heading": "7. Structure of a Routing Table",
+                    "content": "An IP Routing Table entry contains:\n1. Route Source Code: 'C' (Connected), 'S' (Static), 'S*' (Default Static).\n2. Destination Subnet & Prefix Mask.\n3. Administrative Distance (AD = 1 for Static) and Metric (0).\n4. Next-Hop IP Address.\n5. Outgoing Egress Interface (e.g. GigabitEthernet0/0)."
+                },
+                {
+                    "heading": "8. Directly Connected Networks ('C')",
+                    "content": "When a router interface is assigned an IP address and brought up (no shutdown), the router automatically adds the connected subnet to its routing table with code 'C'. No static route is required for directly connected networks."
+                },
+                {
+                    "heading": "9. Next-Hop Address",
+                    "content": "The Next-Hop Address is the IP address of the adjacent router's ingress interface on the shared link. When a router matches a static route, it rewrites the Layer 2 MAC header and transmits the packet to the Next-Hop IP."
+                },
+                {
+                    "heading": "10. Default Route (Gateway of Last Resort)",
+                    "content": "A Default Route uses destination 0.0.0.0 and mask 0.0.0.0 (quad-zero). It matches ALL IP packets that do not have a specific match in the routing table, acting as the Gateway of Last Resort for Internet traffic."
+                },
+                {
+                    "heading": "11. Cisco IOS Configuration Commands",
+                    "content": "Configuring a Static Route:\nRouter(config)# ip route 192.168.2.0 255.255.255.0 10.0.0.2\n\nConfiguring a Default Route:\nRouter(config)# ip route 0.0.0.0 0.0.0.0 10.0.0.2"
+                },
+                {
+                    "heading": "12. Verification Commands",
+                    "content": "• show ip route - Displays full IP routing table.\n• show running-config - Verifies static route configuration lines.\n• show ip interface brief - Verifies interface status (Up/Up).\n• ping <target-ip> - Tests end-to-end IP reachability.\n• traceroute <target-ip> - Traces hop-by-hop router path."
+                },
+                {
+                    "heading": "13. Packet Forwarding Process Step-by-Step",
+                    "content": "1. PC1 encapsulates data with Source IP 192.168.1.10 and Dest IP 192.168.2.10, sending it to Default Gateway Router A.\n2. Router A receives packet on Gi0/0, inspects Dest IP 192.168.2.10, and finds static route 192.168.2.0/24 via 10.0.0.2.\n3. Router A forwards packet out Gi0/1 to Router B (10.0.0.2).\n4. Router B inspects Dest IP, matches directly connected network 192.168.2.0/24 Gi0/0, and delivers packet to PC2.\n5. CRITICAL: Router B MUST have a return static route to 192.168.1.0/24 via Router A, or return traffic will be dropped!"
+                },
+                {
+                    "heading": "14. Static Routing vs Dynamic Routing Comparison",
+                    "content": "• Configuration: Static is manual per router; Dynamic is automatic.\n• Maintenance: Static requires manual updates when topology changes; Dynamic adapts automatically.\n• Resource Overhead: Static has zero CPU/RAM/bandwidth load; Dynamic requires CPU for SPF/Bellman-Ford and network updates.\n• Security: Static is higher (no wire advertisements); Dynamic requires protocol authentication.\n• Scalability: Static is best for small/stub networks; Dynamic scales to large enterprise networks."
+                },
+                {
+                    "heading": "15. Advantages of Static Routing",
+                    "content": "• Minimal router CPU and memory consumption.\n• Zero network bandwidth overhead (no update broadcasts).\n• Complete control over traffic paths.\n• Enhanced security."
+                },
+                {
+                    "heading": "16. Limitations of Static Routing",
+                    "content": "• High administrative burden as network size grows.\n• Human configuration errors are common.\n• Cannot automatically re-route around link or router failures."
+                },
+                {
+                    "heading": "17. Real-World Applications",
+                    "content": "Used for connecting branch offices to central corporate headquarters, default routes facing ISPs, stub networks, and floating backup WAN links."
+                },
+                {
+                    "heading": "18. Best Practices",
+                    "content": "1. Always configure matching RETURN routes on remote routers to prevent asymmetric black-holing.\n2. Document static routes in network diagrams.\n3. Use Default Routes (0.0.0.0/0) on stub branch routers facing single edge connections."
+                },
+                {
+                    "heading": "19. Common Configuration Errors",
+                    "content": "• Missing return route on destination router.\n• Typographical error in next-hop IP address.\n• Inverted subnet mask (e.g., using wildcard mask instead of netmask).\n• Next-hop interface administratively down."
+                },
+                {
+                    "heading": "20. Summary",
+                    "content": "Static routing establishes predictable, manual paths across network routers using the ip route command, serving as an indispensable foundation for default gateways and enterprise WAN connectivity."
                 }
-            ],
-            "formulas": [
-                "TCP Header Size = 20 Bytes Minimum",
-                "UDP Header Size = 8 Bytes Fixed"
-            ],
-            "standards": [
-                "RFC 793 - Transmission Control Protocol (TCP)",
-                "RFC 768 - User Datagram Protocol (UDP)"
             ]
         },
-        "tools": [
+        "hardware_inspector": [
             {
-                "name": "Wireshark Packet Inspector",
-                "layer": "Layer 4 Protocol Analyzer",
-                "ports": "Virtual Sniffer",
-                "usage": "Frame header decoding & TCP stream analysis",
-                "statusLED": "Packet Capture Active"
+                "id": "cisco_2911_static_router",
+                "name": "Cisco 2911 ISR Static Forwarding Router",
+                "category": "Layer 3 Manual Forwarding Engine",
+                "description": "Enterprise Layer 3 router executing manual static route lookups and forwarding packets out GigabitEthernet interfaces without protocol overhead.",
+                "svg": "<svg viewBox=\"0 0 400 240\" xmlns=\"http://www.w3.org/2000/svg\">\n                <rect x=\"20\" y=\"40\" width=\"360\" height=\"160\" rx=\"10\" fill=\"#0f172a\" stroke=\"#38bdf8\" stroke-width=\"3\"/>\n                <rect x=\"35\" y=\"55\" width=\"330\" height=\"40\" rx=\"5\" fill=\"#1e293b\"/>\n                <text x=\"50\" y=\"80\" fill=\"#38bdf8\" font-size=\"15\" font-weight=\"bold\" font-family=\"monospace\">CISCO 2911 ISR [STATIC ROUTE ENGINE]</text>\n                <circle cx=\"340\" cy=\"75\" r=\"7\" fill=\"#38bdf8\"/>\n                <g transform=\"translate(40, 110)\">\n                    <rect x=\"0\" y=\"0\" width=\"65\" height=\"40\" rx=\"4\" fill=\"#334155\" stroke=\"#10b981\" stroke-width=\"2\"/>\n                    <text x=\"32\" y=\"25\" fill=\"#ffffff\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">Gi0/0 (C)</text>\n                </g>\n                <g transform=\"translate(120, 110)\">\n                    <rect x=\"0\" y=\"0\" width=\"65\" height=\"40\" rx=\"4\" fill=\"#334155\" stroke=\"#38bdf8\" stroke-width=\"2\"/>\n                    <text x=\"32\" y=\"25\" fill=\"#ffffff\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">Gi0/1 (S)</text>\n                </g>\n                <g transform=\"translate(200, 110)\">\n                    <rect x=\"0\" y=\"0\" width=\"65\" height=\"40\" rx=\"4\" fill=\"#334155\" stroke=\"#f59e0b\" stroke-width=\"2\"/>\n                    <text x=\"32\" y=\"25\" fill=\"#f59e0b\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">Gi0/2 (S*)</text>\n                </g>\n                <g transform=\"translate(280, 110)\">\n                    <rect x=\"0\" y=\"0\" width=\"65\" height=\"40\" rx=\"4\" fill=\"#334155\" stroke=\"#64748b\" stroke-width=\"2\"/>\n                    <text x=\"32\" y=\"25\" fill=\"#cbd5e1\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">Serial0/0</text>\n                </g>\n                <text x=\"200\" y=\"185\" fill=\"#cbd5e1\" font-size=\"11\" text-anchor=\"middle\">Static Routing Table (AD = 1, Metric = 0)</text>\n            </svg>"
+            },
+            {
+                "id": "routing_table_lookup_diagram",
+                "name": "Routing Table Lookup & Next-Hop Forwarding Engine",
+                "category": "Layer 3 Routing Table Lookup",
+                "description": "Visual breakdown of a static route entry matching a destination IP and resolving the egress next-hop router interface.",
+                "svg": "<svg viewBox=\"0 0 400 240\" xmlns=\"http://www.w3.org/2000/svg\">\n                <rect x=\"20\" y=\"20\" width=\"360\" height=\"200\" rx=\"8\" fill=\"#0b0f19\" stroke=\"#38bdf8\" stroke-width=\"2\"/>\n                <text x=\"200\" y=\"45\" fill=\"#38bdf8\" font-size=\"14\" font-weight=\"bold\" text-anchor=\"middle\">IP ROUTING TABLE LOOKUP ENGINE [AD = 1]</text>\n                <line x1=\"30\" y1=\"55\" x2=\"370\" y2=\"55\" stroke=\"#334155\" stroke-width=\"2\"/>\n\n                <rect x=\"40\" y=\"70\" width=\"320\" height=\"35\" rx=\"5\" fill=\"#1e293b\" stroke=\"#10b981\" stroke-width=\"1.5\"/>\n                <text x=\"50\" y=\"92\" fill=\"#34d399\" font-size=\"11\" font-weight=\"bold\" font-family=\"monospace\">C 192.168.1.0/24 is directly connected, Gi0/0</text>\n\n                <rect x=\"40\" y=\"115\" width=\"320\" height=\"35\" rx=\"5\" fill=\"#1e293b\" stroke=\"#38bdf8\" stroke-width=\"2\"/>\n                <text x=\"50\" y=\"137\" fill=\"#38bdf8\" font-size=\"11\" font-weight=\"bold\" font-family=\"monospace\">S 192.168.2.0/24 [1/0] via 10.0.0.2, Gi0/1</text>\n\n                <rect x=\"40\" y=\"160\" width=\"320\" height=\"35\" rx=\"5\" fill=\"#1e293b\" stroke=\"#f59e0b\" stroke-width=\"1.5\"/>\n                <text x=\"50\" y=\"182\" fill=\"#fbbf24\" font-size=\"11\" font-weight=\"bold\" font-family=\"monospace\">S* 0.0.0.0/0 [1/0] via 203.0.113.1 (Default)</text>\n            </svg>"
             }
         ],
-        "procedure": [
-            "Launch Wireshark / Transport Packet Analyzer in simulator.",
-            "Initiate HTTP TCP session from PC1 to Server1.",
-            "Inspect SYN, SYN-ACK, and ACK frame headers.",
-            "Compare TCP 20-byte header with UDP 8-byte header structure."
+        "troubleshooting": {
+            "problem": "Static Route Configured but End-to-End Ping Fails (Asymmetric Routing / Missing Return Route)",
+            "hints": [
+                "Verify if the local router has a static route to the destination network.",
+                "Check if the REMOTE destination router has a RETURN static route back to the source network.",
+                "Verify if the next-hop IP address is directly reachable and on the same subnet as the local interface.",
+                "Check if the egress interface is administratively down (shutdown)."
+            ],
+            "fix": "Execute 'show ip route' on BOTH local and remote routers to ensure bidirectional static routes exist. Fix any mistyped next-hop IP addresses and issue 'no shutdown' on interconnecting interfaces."
+        },
+        "viva": [
+            {
+                "q": "What is Static Routing and how does it differ from Dynamic Routing?",
+                "a": "Static Routing requires network administrators to manually enter route entries into the routing table. Unlike dynamic protocols (RIP, OSPF, EIGRP), static routes generate zero network advertisement traffic, consume minimal CPU/RAM, but require manual updates when network topology changes."
+            },
+            {
+                "q": "What is the Administrative Distance (AD) of a Static Route and a Directly Connected route in Cisco IOS?",
+                "a": "Directly Connected routes ('C') have an Administrative Distance of 0. Static routes ('S') have a default Administrative Distance of 1."
+            },
+            {
+                "q": "What is a Default Route (Gateway of Last Resort) and what is its prefix representation?",
+                "a": "A Default Route matches all destination IP addresses that do not have a specific match in the routing table. It uses the quad-zero destination prefix and subnet mask 0.0.0.0 0.0.0.0."
+            },
+            {
+                "q": "Why is a return route mandatory when configuring static routes between two routers?",
+                "a": "IP communication is bidirectional. Even if Router A correctly forwards a packet to Router B, Router B must have a routing table entry to send the return packet back to Router A's source subnet. Without a return route, return traffic is dropped."
+            },
+            {
+                "q": "What is a Floating Static Route?",
+                "a": "A Floating Static Route is a backup static route configured with a higher Administrative Distance (e.g. ip route 192.168.2.0 255.255.255.0 10.0.0.2 130). It remains inactive in topology memory until the primary route fails."
+            }
+        ],
+        "assignment": "1. Configure static routes between Router A and Router B (192.168.1.0/24 ⇹ 10.0.0.0/30 ⇹ 192.168.2.0/24).\n2. Execute ip route 192.168.2.0 255.255.255.0 10.0.0.2 on Router A and return route ip route 192.168.1.0 255.255.255.0 10.0.0.1 on Router B.\n3. Verify bidirectional ping from PC1 (192.168.1.10) to PC2 (192.168.2.10).\n4. Remove Router B's return route (no ip route ...) and observe ping failure due to missing return path.",
+        "references": [
+            {
+                "title": "Cisco IP Routing: Static Routes Configuration Guide",
+                "link": "https://www.cisco.com"
+            },
+            {
+                "title": "RFC 1812 - Requirements for IPv4 Routers",
+                "link": "https://datatracker.ietf.org/doc/html/rfc1812"
+            }
+        ],
+        "simType": "static_routing_sim"
+    },
+    "udp_tcp": {
+        "title": "Practical 12: UDP & TCP Transport Protocols",
+        "aim": "To examine end-to-end transport layer communication, analyze process-to-process port addressing, compare connection-oriented TCP (3-way handshake, flow control, sliding window, retransmission) vs connectionless UDP (best-effort, low overhead), and select appropriate transport protocols for network applications.",
+        "intro": {
+            "summary": "The Transport Layer (Layer 4) manages process-to-process communication between host applications. TCP provides connection-oriented, reliable, ordered delivery with error recovery and sliding-window flow control. UDP provides connectionless, lightweight, low-latency transmission for real-time applications like DNS, video streaming, and VoIP.",
+            "importance": "Understanding Layer 4 protocol selection is fundamental to network engineering. Students learn why web browsing (HTTP/HTTPS), email (SMTP), and file transfer (FTP) rely on TCP reliability, whereas VoIP, live streaming, and gaming prioritize UDP speed.",
+            "applications": [
+                "Web Browsing & E-Commerce (TCP 80/443)",
+                "Real-Time Video Conferencing & Streaming (UDP)",
+                "Domain Name Resolution (DNS UDP 53)",
+                "Secure Administrative Shell Access (SSH TCP 22)"
+            ],
+            "outcome": "Students will be able to visualize the TCP 3-Way Handshake, explain sliding window flow control, analyze port numbers and socket pairs, and diagnose packet loss retransmissions."
+        },
+        "prerequisites": [
+            "Practical 4: IPv4 & IPv6 Address Classification",
+            "Practical 11: Static Routing Configuration"
+        ],
+        "outcomes": [
+            "Differentiate between TCP (connection-oriented) and UDP (connectionless).",
+            "Explain the TCP 3-Way Handshake (SYN, SYN-ACK, ACK) and 4-Way Connection Termination (FIN, ACK).",
+            "Describe sequence numbers, acknowledgements, and sliding window flow control.",
+            "Identify well-known port numbers (HTTP 80, HTTPS 443, SSH 22, DNS 53, DHCP 67/68).",
+            "Analyze socket pairs (Source IP:Port ⇹ Destination IP:Port).",
+            "Select appropriate transport protocols based on application performance requirements."
+        ],
+        "theory": {
+            "intro": "Layer 4 ensures process-to-process data delivery between endpoints. TCP provides reliability through connection management and error recovery, while UDP provides fast, unacknowledged datagram transport.",
+            "sections": [
+                {
+                    "heading": "1. Introduction to Transport Protocols",
+                    "content": "The Transport Layer bridges application processes with the underlying IP network. It performs segmentation, flow control, and port multiplexing to run multiple network applications simultaneously on a single device."
+                },
+                {
+                    "heading": "2. Learning Objectives",
+                    "content": "Master Layer 4 concepts:\\n• TCP 3-Way Handshake.\\n• Sliding window flow control.\\n• Error detection & ARQ retransmissions.\\n• UDP connectionless datagram delivery.\\n• Port number classification and socket pairing."
+                },
+                {
+                    "heading": "3. What is the Transport Layer?",
+                    "content": "Layer 4 of the OSI model. Responsible for end-to-end communication, segmenting data, managing ports, enforcing reliability, and controlling transmission rates."
+                },
+                {
+                    "heading": "4. Why Transport Protocols are Required",
+                    "content": "An IP address delivers packets to a computer, but multiple applications (browser, email, video) run concurrently. Transport layer port numbers ensure incoming packets reach the correct receiving application process."
+                },
+                {
+                    "heading": "5. What is TCP?",
+                    "content": "Transmission Control Protocol (TCP) is a reliable, connection-oriented protocol (RFC 793). It guarantees ordered packet delivery, error recovery, flow control, and congestion control."
+                },
+                {
+                    "heading": "6. What is UDP?",
+                    "content": "User Datagram Protocol (UDP) is a connectionless, best-effort protocol (RFC 768). It transmits datagrams without handshake overhead, acknowledgements, or retransmissions, minimizing latency."
+                },
+                {
+                    "heading": "7. Detailed TCP vs UDP Comparison",
+                    "content": "• Connection: TCP is Connection-Oriented; UDP is Connectionless.\\n• Reliability: TCP guarantees delivery via ACKs; UDP provides Best-Effort.\\n• Ordering: TCP maintains sequence numbers; UDP segments may arrive out of order.\\n• Header Size: TCP is 20 Bytes minimum; UDP is 8 Bytes.\\n• Speed: UDP is faster with lower overhead."
+                },
+                {
+                    "heading": "8. Connection-Oriented Communication",
+                    "content": "TCP establishes a logical stateful connection across 3 phases: Connection Setup (Handshake), Data Transfer, and Connection Teardown."
+                },
+                {
+                    "heading": "9. Connectionless Communication",
+                    "content": "UDP transmits datagrams immediately without setup packets. Ideal for real-time applications where dropping a frame is preferable to delaying speech or video."
+                },
+                {
+                    "heading": "10. TCP Three-Way Handshake",
+                    "content": "1. Client sends SYN (Seq=X).\\n2. Server responds with SYN-ACK (Seq=Y, Ack=X+1).\\n3. Client responds with ACK (Ack=Y+1). Connection transitions to ESTABLISHED."
+                },
+                {
+                    "heading": "11. TCP Data Transfer & ARQ",
+                    "content": "Data is split into segments with sequence numbers. Positive Acknowledgement with Retransmission (PAR) resends lost segments if timer expires."
+                },
+                {
+                    "heading": "12. Sequence Numbers & Ordering",
+                    "content": "Sequence numbers allow the receiver to reassemble out-of-order segments into the exact original byte stream."
+                },
+                {
+                    "heading": "13. Acknowledgements (ACK)",
+                    "content": "Receivers send ACK numbers indicating the NEXT expected byte sequence number."
+                },
+                {
+                    "heading": "14. Sliding Window Protocol",
+                    "content": "Sliding window allows sending multiple unacknowledged segments up to the advertised Window Size, maximizing bandwidth utilization."
+                },
+                {
+                    "heading": "15. Flow Control & Window Sizing",
+                    "content": "Receivers advertise Window Size based on buffer capacity. If buffer fills, Window Size drops to zero, pausing the sender."
+                },
+                {
+                    "heading": "16. Error Detection & Retransmission",
+                    "content": "Checksums detect bit corruption. Retransmission timers (RTO) trigger resending missing segments."
+                },
+                {
+                    "heading": "17. Connection Termination (4-Way Handshake)",
+                    "content": "Closing connection uses FIN ➔ ACK ➔ FIN ➔ ACK sequence."
+                },
+                {
+                    "heading": "18. Port Numbers & Classification",
+                    "content": "• Well-Known Ports: 0-1023 (HTTP 80, HTTPS 443, SSH 22, DNS 53).\\n• Registered Ports: 1024-49151.\\n• Dynamic/Private Ports: 49152-65535."
+                },
+                {
+                    "heading": "19. Socket Communication",
+                    "content": "A socket pair uniquely identifies a connection: (Source IP : Source Port ⇹ Dest IP : Dest Port, Protocol)."
+                },
+                {
+                    "heading": "20. Applications of TCP",
+                    "content": "Web (HTTP/HTTPS), File Transfer (FTP), Email (SMTP/IMAP), Remote Access (SSH)."
+                },
+                {
+                    "heading": "21. Applications of UDP",
+                    "content": "DNS, VoIP (SIP/RTP), Video Streaming, Online Gaming, DHCP, SNMP."
+                },
+                {
+                    "heading": "22. Advantages & Limitations",
+                    "content": "TCP ensures zero data loss but adds overhead. UDP provides ultra-low latency but offers no loss recovery."
+                },
+                {
+                    "heading": "23. Best Practices",
+                    "content": "Use TCP for financial, web, and file data. Use UDP for time-sensitive voice, video, and DNS lookups."
+                },
+                {
+                    "heading": "24. Summary",
+                    "content": "TCP and UDP provide essential end-to-end transport services, balancing reliability vs speed across modern IP networks."
+                }
+            ]
+        },
+        "hardware_inspector": [
+            {
+                "id": "tcp_handshake_engine",
+                "name": "TCP 3-Way Handshake & State Engine",
+                "category": "Layer 4 Stateful Connection Engine",
+                "description": "Visualizes TCP state transitions (CLOSED ➔ SYN_SENT ➔ SYN_RCVD ➔ ESTABLISHED) during 3-way handshake.",
+                "svg": "<svg viewBox=\"0 0 400 220\" xmlns=\"http://www.w3.org/2000/svg\">\n                <rect x=\"20\" y=\"20\" width=\"360\" height=\"180\" rx=\"8\" fill=\"#0f172a\" stroke=\"#ec4899\" stroke-width=\"2\"/>\n                <text x=\"200\" y=\"45\" fill=\"#ec4899\" font-size=\"14\" font-weight=\"bold\" text-anchor=\"middle\">TCP 3-WAY HANDSHAKE STATE ENGINE</text>\n                <text x=\"60\" y=\"80\" fill=\"#38bdf8\" font-size=\"12\" font-weight=\"bold\">Client (SYN_SENT)</text>\n                <text x=\"340\" y=\"80\" fill=\"#10b981\" font-size=\"12\" font-weight=\"bold\" text-anchor=\"end\">Server (LISTEN)</text>\n                <line x1=\"70\" y1=\"95\" x2=\"330\" y2=\"115\" stroke=\"#ec4899\" stroke-width=\"2.5\" stroke-dasharray=\"4,4\"/>\n                <text x=\"200\" y=\"100\" fill=\"#ec4899\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">1. SYN (Seq=100)</text>\n                <line x1=\"330\" y1=\"125\" x2=\"70\" y2=\"145\" stroke=\"#38bdf8\" stroke-width=\"2.5\" stroke-dasharray=\"4,4\"/>\n                <text x=\"200\" y=\"130\" fill=\"#38bdf8\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">2. SYN-ACK (Seq=300, Ack=101)</text>\n                <line x1=\"70\" y1=\"155\" x2=\"330\" y2=\"175\" stroke=\"#10b981\" stroke-width=\"2.5\" stroke-dasharray=\"4,4\"/>\n                <text x=\"200\" y=\"160\" fill=\"#10b981\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">3. ACK (Ack=301) [ESTABLISHED]</text>\n            </svg>"
+            }
         ],
         "troubleshooting": {
-            "problem": "TCP connection establishment hangs on SYN-SENT state.",
+            "problem": "TCP Connection Timeout / Dropped Handshake (SYN Sent but No SYN-ACK Received)",
             "hints": [
-                "Check if firewall is blocking TCP Port 80/443 on target server."
+                "Verify if the destination IP address is reachable via ICMP ping.",
+                "Check if a firewall or Access Control List (ACL) is blocking the target TCP port (e.g., port 80/443).",
+                "Verify if the target server service is active and listening on the specified port.",
+                "Inspect TCP SYN retransmission timeouts."
             ],
-            "fix": "Allow incoming TCP port 80 traffic on server firewall."
+            "fix": "Ensure destination firewall permits incoming TCP SYN packets on target port. Verify server service status (e.g., systemctl status nginx) and check port binding using netstat -an."
         },
         "viva": [
             {
@@ -3926,14 +3973,6 @@ window.VLAB_DATA = {
                 "a": "UDP has low overhead (8-byte header) and no retransmission delays, prioritizing real-time latency over packet loss recovery."
             }
         ],
-        "assignment": "Capture a TCP handshake and calculate Sequence Number progression across 3 packet exchanges.",
-        "references": [
-            {
-                "title": "RFC 793 - TCP Specification",
-                "link": "https://datatracker.ietf.org/doc/html/rfc793"
-            }
-        ],
-        "simType": "packet_analyzer",
         "evaluations": [
             {
                 "type": "pre",
@@ -4115,73 +4154,144 @@ window.VLAB_DATA = {
                 "answer": "Low latency is critical and missing audio packets are preferable to delayed retransmissions",
                 "explanation": "Real-time audio demands low latency; retransmitting old audio packets causes speech distortion."
             }
-        ]
+        ],
+        "simType": "udp_tcp_sim"
     },
     "dhcp_config": {
-        "title": "DHCP Configuration & IP Pools",
-        "aim": "To configure a Cisco Router as a DHCP Server issuing IP addresses, default gateways, and DNS server IPs to LAN clients.",
+        "title": "Practical 13: DHCP Configuration & IP Pools",
+        "aim": "To examine automatic IP address allocation via Dynamic Host Configuration Protocol (DHCP), master the 4-step DORA process (Discover, Offer, Request, ACK), configure DHCP pools, excluded IP ranges, default routers, and DNS servers on Cisco IOS routers, configure DHCP Relay Agents (ip helper-address) across multi-subnet networks, and verify leases.",
         "intro": {
-            "summary": "DHCP (Dynamic Host Configuration Protocol) automates network IP address assignment, reducing manual configuration errors.",
-            "importance": "DHCP enables scalable device onboarding across enterprise LANs, Wi-Fi networks, and VPN tunnels.",
+            "summary": "Dynamic Host Configuration Protocol (DHCP) automates IP address, subnet mask, default gateway, and DNS configuration for network clients. Operating via the 4-step DORA handshake (Discover, Offer, Request, ACK), DHCP eliminates manual configuration errors, manages address leases, and scales client management in enterprise LANs.",
+            "importance": "DHCP is the primary automated addressing protocol used in campus, enterprise, data center, and home networks. Network engineers must know how to configure DHCP pools, exclude gateway IPs, configure lease renewal timers, and set up DHCP Relay Agents to forward client broadcasts across routed VLAN boundaries.",
             "applications": [
-                "Corporate Wi-Fi Hotspots",
-                "Enterprise Workstation Provisioning",
-                "ISP Broadband Modems"
+                "Enterprise Campus & Student Wi-Fi LANs",
+                "Corporate Desktop & Mobile IP Allocation",
+                "DHCP Relay Across Multi-VLAN Routers (ip helper-address)",
+                "Automated Voice over IP (VoIP) Phone Provisioning"
             ],
-            "outcome": "Students will configure DHCP pools, exclude static IP ranges, and verify DORA lease processes."
+            "outcome": "Students will be able to trace the DORA process, configure Cisco IOS DHCP pools and excluded address ranges, set up DHCP Relay on router interfaces, and verify active bindings using `show ip dhcp binding`."
         },
         "prerequisites": [
-            "Practical 4: IPv4 Address Classification",
-            "Practical 11: Static Routing Configuration"
+            "Practical 4: IPv4 & IPv6 Address Classification",
+            "Practical 6: Subnetting, VLSM & CIDR",
+            "Practical 7: Virtual LANs (VLAN) & Trunking"
         ],
         "outcomes": [
-            "Configure DHCP Server pools on Cisco routers.",
-            "Reserve static IP ranges using `ip dhcp excluded-address`.",
-            "Analyze DORA process: Discover, Offer, Request, Acknowledge."
+            "Explain the purpose and advantages of DHCP over Static IP addressing.",
+            "Describe the 4-step DORA process (Discover, Offer, Request, ACK).",
+            "Configure Cisco IOS DHCP Pools (`ip dhcp pool`), subnet networks, default routers, and DNS servers.",
+            "Configure Excluded IP Addresses (`ip dhcp excluded-address`) for gateways and servers.",
+            "Explain DHCP Lease duration, renewal timers (T1 at 50%), and MAC reservations.",
+            "Configure DHCP Relay Agent (`ip helper-address`) to forward broadcasts across routers.",
+            "Verify DHCP operation using `show ip dhcp binding` and `ipconfig /renew`."
         ],
         "theory": {
-            "intro": "Dynamic Host Configuration Protocol (DHCP) automates IP address assignment using DORA process: Discover (Broadcast), Offer (Unicast), Request (Broadcast), Acknowledge (Unicast).",
-            "cards": [
+            "intro": "DHCP automates network configuration by assigning dynamic IP addresses from a managed pool, reducing network administrative effort and eliminating duplicate IP conflicts.",
+            "sections": [
                 {
-                    "title": "DORA Process",
-                    "content": "1. Discover (UDP 67) -> 2. Offer (UDP 68) -> 3. Request -> 4. Acknowledge."
+                    "heading": "1. Introduction to DHCP",
+                    "content": "Manual IP configuration on hundreds of workstations is inefficient and prone to duplicate address conflicts. DHCP automates IP allocation, providing subnet masks, default gateways, and DNS server addresses dynamically when devices connect."
                 },
                 {
-                    "title": "DHCP Pool Options",
-                    "content": "Defines Default Gateway (Option 3), DNS Servers (Option 6), and Domain Name (Option 15)."
+                    "heading": "2. Learning Objectives",
+                    "content": "Master DHCP concepts:\\n• The DORA 4-step client-server exchange.\\n• Configuring Cisco IOS DHCP pools and excluded ranges.\\n• Lease duration and T1/T2 renewal timers.\\n• DHCP Relay Agent (ip helper-address).\\n• Verifying bindings with show ip dhcp binding."
+                },
+                {
+                    "heading": "3. Why DHCP is Required",
+                    "content": "In networks with hundreds or thousands of mobile devices, manual static IP entry is impossible. DHCP centralizes IP pool management, automatically recycling unused addresses."
+                },
+                {
+                    "heading": "4. What is DHCP?",
+                    "content": "Dynamic Host Configuration Protocol (DHCP) is an application layer protocol operating over UDP ports 67 (Server) and 68 (Client) defined in RFC 2131."
+                },
+                {
+                    "heading": "5. Static IP vs Dynamic IP Comparison",
+                    "content": "• Static: Manual entry; suitable for Servers/Routers; zero protocol load.\\n• Dynamic: Automatic allocation; suitable for PCs/Laptops/Phones; managed via central pools."
+                },
+                {
+                    "heading": "6. DHCP Architecture Components",
+                    "content": "• DHCP Client: Device requesting network settings.\\n• DHCP Server: Central router or server issuing IP leases.\\n• DHCP Relay Agent: Router forwarding client broadcasts across subnets."
+                },
+                {
+                    "heading": "7. DHCP IP Address Pools",
+                    "content": "An IP Pool defines the range of contiguous IP addresses available for dynamic allocation to requesting clients (e.g. 192.168.10.10 to 192.168.10.200)."
+                },
+                {
+                    "heading": "8. The 4-Step DORA Process",
+                    "content": "1. DISCOVER: Client broadcasts DHCP Discover (255.255.255.255).\\n2. OFFER: Server unicasts/broadcasts DHCP Offer with proposed IP.\\n3. REQUEST: Client broadcasts DHCP Request accepting offered IP.\\n4. ACK: Server sends DHCP ACK confirming lease."
+                },
+                {
+                    "heading": "9. DHCP Lease Mechanism",
+                    "content": "IP addresses are leased temporarily. Information includes IP address, subnet mask, gateway, DNS, lease time, and renewal deadlines."
+                },
+                {
+                    "heading": "10. Lease Renewal Process (T1 & T2 Timers)",
+                    "content": "At 50% of lease duration (T1 timer), client unicasts a DHCP Request to renew its lease. At 87.5% (T2 timer), if original server fails to respond, client broadcasts to any available DHCP server."
+                },
+                {
+                    "heading": "11. DHCP MAC Address Reservation",
+                    "content": "Maps a client's static MAC address to a fixed reserved IP address within the DHCP server database."
+                },
+                {
+                    "heading": "12. DHCP Relay Agent (ip helper-address)",
+                    "content": "Routers drop Layer 2 broadcasts by default. A DHCP Relay Agent intercepts client Discover broadcasts on an interface and forwards them as unicast packets to a remote DHCP server."
+                },
+                {
+                    "heading": "13. DHCP Message Types",
+                    "content": "Discover, Offer, Request, ACK, NAK (Negative Ack), Release (Client releases IP), Decline (Client detects IP collision), Inform."
+                },
+                {
+                    "heading": "14. Cisco IOS Configuration Commands",
+                    "content": "• Exclude IPs: `ip dhcp excluded-address 192.168.10.1 192.168.10.20`\\n• Create Pool: `ip dhcp pool LAN_POOL`\\n• Specify Subnet: `network 192.168.10.0 255.255.255.0`\\n• Gateway: `default-router 192.168.10.1`\\n• DNS: `dns-server 8.8.8.8`\\n• Relay: `interface Gi0/0 -> ip helper-address 10.0.0.5`"
+                },
+                {
+                    "heading": "15. Verification Commands",
+                    "content": "• `show ip dhcp binding` - Lists active leased IP/MAC mappings.\\n• `show ip dhcp pool` - Displays pool utilization and statistics.\\n• `ipconfig /all` or `ipconfig /renew` - Verifies client settings."
+                },
+                {
+                    "heading": "16. Common DHCP Problems",
+                    "content": "Exhausted IP pool, missing ip helper-address on router, excluded gateway ranges missing, rogue DHCP servers."
+                },
+                {
+                    "heading": "17. Advantages of DHCP",
+                    "content": "Automated configuration, zero IP conflict risk, centralized management, mobile device support."
+                },
+                {
+                    "heading": "18. Limitations of DHCP",
+                    "content": "Single point of failure if server goes offline without redundancy; broadcast traffic per subnet."
+                },
+                {
+                    "heading": "19. Real-World Enterprise Applications",
+                    "content": "Universities, corporate LANs, airport Wi-Fi, ISP broadband gateways, data centers."
+                },
+                {
+                    "heading": "20. Best Practices",
+                    "content": "1. Always exclude gateway and static server IPs before creating pools.\\n2. Configure redundant DHCP servers.\\n3. Enable DHCP Snooping on switches for security."
+                },
+                {
+                    "heading": "21. Summary",
+                    "content": "DHCP automates IP parameter management via the DORA process and Relay Agents, serving as a core enterprise network service."
                 }
-            ],
-            "formulas": [
-                "DHCP Server Port = UDP 67",
-                "DHCP Client Port = UDP 68"
-            ],
-            "standards": [
-                "RFC 2131 - Dynamic Host Configuration Protocol",
-                "RFC 2132 - DHCP Options"
             ]
         },
-        "tools": [
+        "hardware_inspector": [
             {
-                "name": "Cisco Router CLI (DHCP Server)",
-                "layer": "Application/Layer 3",
-                "ports": "LAN FastEthernet Port",
-                "usage": "Leases IP pools to clients",
-                "statusLED": "Active DHCP Leases Granted"
+                "id": "dhcp_dora_engine",
+                "name": "DHCP DORA Process & Lease Inspector",
+                "category": "Layer 7 Automated Configuration Engine",
+                "description": "Visualizes the 4-step DORA packet exchange between DHCP Client (UDP 68) and DHCP Server (UDP 67).",
+                "svg": "<svg viewBox=\"0 0 400 220\" xmlns=\"http://www.w3.org/2000/svg\">\n                <rect x=\"20\" y=\"20\" width=\"360\" height=\"180\" rx=\"8\" fill=\"#0f172a\" stroke=\"#10b981\" stroke-width=\"2\"/>\n                <text x=\"200\" y=\"45\" fill=\"#10b981\" font-size=\"14\" font-weight=\"bold\" text-anchor=\"middle\">DHCP 4-STEP DORA PROCESS ENGINE</text>\n                <text x=\"60\" y=\"80\" fill=\"#ffffff\" font-size=\"12\" font-weight=\"bold\">Client (UDP 68)</text>\n                <text x=\"340\" y=\"80\" fill=\"#38bdf8\" font-size=\"12\" font-weight=\"bold\" text-anchor=\"end\">DHCP Server (UDP 67)</text>\n                <line x1=\"70\" y1=\"95\" x2=\"330\" y2=\"115\" stroke=\"#ef4444\" stroke-width=\"2.5\"/>\n                <text x=\"200\" y=\"100\" fill=\"#ef4444\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">1. DISCOVER (Broadcast 255.255.255.255)</text>\n                <line x1=\"330\" y1=\"125\" x2=\"70\" y2=\"145\" stroke=\"#f59e0b\" stroke-width=\"2.5\"/>\n                <text x=\"200\" y=\"130\" fill=\"#f59e0b\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">2. OFFER (Offer 192.168.10.50)</text>\n                <line x1=\"70\" y1=\"155\" x2=\"330\" y2=\"175\" stroke=\"#38bdf8\" stroke-width=\"2.5\"/>\n                <text x=\"200\" y=\"160\" fill=\"#38bdf8\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">3. REQUEST (Accept Offer)</text>\n                <line x1=\"330\" y1=\"185\" x2=\"70\" y2=\"200\" stroke=\"#10b981\" stroke-width=\"2.5\"/>\n                <text x=\"200\" y=\"190\" fill=\"#10b981\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">4. ACK (Lease Granted 8 hrs)</text>\n            </svg>"
             }
         ],
-        "procedure": [
-            "Exclude gateway address: `ip dhcp excluded-address 192.168.1.1 192.168.1.10`.",
-            "Create pool: `ip dhcp pool LAN_POOL`.",
-            "Specify network: `network 192.168.1.0 255.255.255.0`.",
-            "Set default gateway: `default-router 192.168.1.1`."
-        ],
         "troubleshooting": {
-            "problem": "Client PC receives APIPA address (169.254.x.x) instead of DHCP IP.",
+            "problem": "Client Receives APIPA Address (169.254.x.x) / DHCP Discover Fails Across Router Subnet",
             "hints": [
-                "Check if router interface in LAN is UP/UP.",
-                "Verify `ip dhcp pool` subnet matches LAN."
+                "Check if the client is receiving an APIPA self-assigned address (169.254.0.0/16), indicating zero DHCP responses.",
+                "If the DHCP server is on a different VLAN/subnet, check if 'ip helper-address <server-ip>' is configured on the router interface.",
+                "Verify if the DHCP pool has available unallocated IP addresses in 'show ip dhcp pool'.",
+                "Check if gateway IP was incorrectly included in pool range without being excluded."
             ],
-            "fix": "Execute `ip dhcp pool LAN_POOL` and set `network 192.168.1.0 255.255.255.0`."
+            "fix": "Configure 'ip helper-address <dhcp-server-ip>' on the client-facing router interface to relay broadcasts. Exclude gateway IPs using 'ip dhcp excluded-address'."
         },
         "viva": [
             {
@@ -4193,14 +4303,6 @@ window.VLAB_DATA = {
                 "a": "To prevent the DHCP server from assigning statically configured IP addresses (like router gateways or servers), avoiding IP conflicts."
             }
         ],
-        "assignment": "Configure a Cisco router with 2 DHCP pools for VLAN 10 and VLAN 20. Verify client IP leases.",
-        "references": [
-            {
-                "title": "RFC 2131 - DHCP Specification",
-                "link": "https://datatracker.ietf.org/doc/html/rfc2131"
-            }
-        ],
-        "simType": "cli",
         "evaluations": [
             {
                 "type": "pre",
@@ -4382,70 +4484,135 @@ window.VLAB_DATA = {
                 "answer": "DHCP Snooping",
                 "explanation": "DHCP Snooping filters untrusted ports to block unauthorized rogue DHCP servers."
             }
-        ]
+        ],
+        "simType": "dhcp_config_sim"
     },
     "static_nat": {
-        "title": "Static NAT 1:1 Mapping",
-        "aim": "To configure Static Network Address Translation (Static NAT) mapping a private IP 1:1 to a public IP address.",
+        "title": "Practical 14: Static Network Address Translation (Static NAT)",
+        "aim": "To examine Network Address Translation (NAT) principles, understand private RFC 1918 vs public IPv4 address spaces, configure 1-to-1 Static NAT mappings on Cisco IOS routers for publishing internal web/mail servers, observe IP packet header translations (Inside Local ⇹ Inside Global), and verify translation tables.",
         "intro": {
-            "summary": "Static NAT maps an internal private IPv4 address to an external public IPv4 address on a 1-to-1 permanent basis.",
-            "importance": "Static NAT allows external internet users to access internal servers while keeping internal topologies protected behind a gateway.",
+            "summary": "Static Network Address Translation (Static NAT) establishes a permanent 1-to-1 mapping between an internal private RFC 1918 IP address (Inside Local) and an external public IP address (Inside Global). Static NAT enables external Internet users to initiate inbound connections to internal servers while shielding the rest of the internal network behind the NAT gateway.",
+            "importance": "Static NAT is mandatory for enterprise server publishing. Web servers, mail servers, and VPN gateways located inside private subnets require static public IP mappings to be accessible via public DNS host records while preserving internal network architecture.",
             "applications": [
-                "Hosting Internal Web Servers",
-                "Public DMZ Server Publishing",
-                "Secure Partner B2B Links"
+                "Public Web Server Publishing (Port 80/443)",
+                "Enterprise Mail Server Inbound MX Routing",
+                "CCTV Surveillance & Remote Gateway Access",
+                "DMZ Server Perimeter Protection"
             ],
-            "outcome": "Students will define inside/outside interfaces, configure 1:1 Static NAT rules, and inspect translation tables."
+            "outcome": "Students will be able to define Inside Local, Inside Global, Outside Local, and Outside Global addresses, configure Cisco IOS static NAT (`ip nat inside source static`), assign NAT inside/outside interfaces, and verify translations using `show ip nat translations`."
         },
         "prerequisites": [
-            "Practical 4: IPv4 Address Classification",
+            "Practical 4: IPv4 & IPv6 Address Classification",
             "Practical 11: Static Routing Configuration"
         ],
         "outcomes": [
-            "Define Inside and Outside NAT router interfaces.",
-            "Configure 1:1 Static NAT mapping (`ip nat inside source static`).",
-            "Inspect translation tables (`show ip nat translations`)."
+            "Explain why NAT is required due to IPv4 address depletion.",
+            "Differentiate private non-routable RFC 1918 addresses from public routable IP addresses.",
+            "Define the 4 NAT address terms: Inside Local, Inside Global, Outside Local, Outside Global.",
+            "Configure Cisco IOS Static NAT (`ip nat inside source static <local-ip> <global-ip>`).",
+            "Assign `ip nat inside` and `ip nat outside` on router interfaces.",
+            "Verify translation entries using `show ip nat translations` and `show ip nat statistics`.",
+            "Troubleshoot misconfigured inside/outside NAT interfaces and ACL blocks."
         ],
         "theory": {
-            "intro": "Static NAT translates a single private IP address to a single public IP address, allowing external internet hosts to access internal web/mail servers behind a firewall.",
-            "cards": [
+            "intro": "Static NAT maps a specific private IP address to a specific public IP address permanently, allowing external hosts to connect inbound to internal servers.",
+            "sections": [
                 {
-                    "title": "Inside Local",
-                    "content": "The private IP address assigned to an internal host."
+                    "heading": "1. Introduction to Static NAT",
+                    "content": "IPv4 address space depletion necessitated Network Address Translation (NAT). Static NAT provides fixed 1-to-1 translation between an internal private IP address and an external public IP address."
                 },
                 {
-                    "title": "Inside Global",
-                    "content": "The registered public IP address assigned by ISP for external routing."
+                    "heading": "2. Learning Objectives",
+                    "content": "Master Static NAT concepts:\\n• Private RFC 1918 vs public IP addressing.\\n• Inside Local, Inside Global, Outside Local, Outside Global definitions.\\n• Configuring `ip nat inside source static`.\\n• Assigning inside/outside NAT interfaces.\\n• Verifying NAT tables with `show ip nat translations`."
+                },
+                {
+                    "heading": "3. Why NAT is Required",
+                    "content": "With ~4.3 billion IPv4 addresses and tens of billions of devices, NAT enables private subnets (10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16) to communicate over the Internet using public IPs."
+                },
+                {
+                    "heading": "4. What is NAT?",
+                    "content": "Network Address Translation (NAT) modifies IP address headers in transit across a Layer 3 boundary router separating private and public networks."
+                },
+                {
+                    "heading": "5. Private vs Public IP Address Space",
+                    "content": "• Private (RFC 1918): Non-routable on global Internet (10.x.x.x, 172.16-31.x.x, 192.168.x.x).\\n• Public: Globally unique, ISP-assigned routable addresses."
+                },
+                {
+                    "heading": "6. Types of NAT Overview",
+                    "content": "Static NAT (1-to-1 fixed), Dynamic NAT (1-to-1 pool-based), PAT / NAT Overload (Many-to-1 port multiplexed)."
+                },
+                {
+                    "heading": "7. What is Static NAT?",
+                    "content": "Static NAT creates a permanent 1-to-1 mapping between one private IP and one public IP."
+                },
+                {
+                    "heading": "8. One-to-One Address Mapping",
+                    "content": "Example: Private Server `192.168.1.10` is permanently mapped to Public IP `203.0.113.10`. Outbound and inbound traffic always translate symmetrically."
+                },
+                {
+                    "heading": "9. Essential NAT Terminology",
+                    "content": "• Inside Local: Private IP assigned to internal device (e.g., 192.168.1.10).\\n• Inside Global: Public IP representing internal device to the Internet (e.g., 203.0.113.10).\\n• Outside Global: Public IP of external destination server (e.g., 8.8.8.8).\\n• Outside Local: IP of external host as seen from internal network."
+                },
+                {
+                    "heading": "10. How Static NAT Operates",
+                    "content": "When an external client requests `http://203.0.113.10`, the NAT router rewrites destination IP to `192.168.1.10`. On return, router rewrites source IP `192.168.1.10` to `203.0.113.10`."
+                },
+                {
+                    "heading": "11. Packet Translation Steps",
+                    "content": "Outbound: Source IP rewritten from Inside Local to Inside Global.\\nInbound: Destination IP rewritten from Inside Global to Inside Local."
+                },
+                {
+                    "heading": "12. Cisco IOS Configuration Commands",
+                    "content": "1. Specify Inside Interface: `interface Gi0/0 -> ip nat inside`\\n2. Specify Outside Interface: `interface Gi0/1 -> ip nat outside`\\n3. Configure Static Mapping: `ip nat inside source static 192.168.1.10 203.0.113.10`"
+                },
+                {
+                    "heading": "13. Verification Commands",
+                    "content": "• `show ip nat translations` - Displays active 1-to-1 static NAT table.\\n• `show ip nat statistics` - Displays total translations, hits, misses, and interface roles."
+                },
+                {
+                    "heading": "14. Advantages of Static NAT",
+                    "content": "Fixed public IP mapping, inbound accessibility for servers, transparent header conversion."
+                },
+                {
+                    "heading": "15. Limitations of Static NAT",
+                    "content": "Requires 1 public IP for every 1 internal server; does not conserve public IPv4 addresses for general workstation pools."
+                },
+                {
+                    "heading": "16. Real-World Applications",
+                    "content": "Web servers, mail servers, FTP, CCTV gateways, VPN concentrators."
+                },
+                {
+                    "heading": "17. Best Practices",
+                    "content": "1. Restrict Static NAT to servers requiring inbound access.\\n2. Protect translated servers with firewall ACLs."
+                },
+                {
+                    "heading": "18. Common Configuration Errors",
+                    "content": "Inverted inside/outside interface commands, mistyped IP addresses, firewall blocking return packets."
+                },
+                {
+                    "heading": "19. Summary",
+                    "content": "Static NAT provides fixed 1-to-1 private-to-public address translation, making internal enterprise servers securely accessible from the public Internet."
                 }
-            ],
-            "formulas": [
-                "Static NAT Ratio = 1 Private IP : 1 Public IP"
-            ],
-            "standards": [
-                "RFC 3022 - Traditional IP Network Address Translator (NAT)"
             ]
         },
-        "tools": [
+        "hardware_inspector": [
             {
-                "name": "Cisco NAT Gateway Router",
-                "layer": "Layer 3 Router",
-                "ports": "Inside & Outside WAN Ports",
-                "usage": "1:1 IP Address Translation",
-                "statusLED": "NAT Active Translation"
+                "id": "static_nat_engine",
+                "name": "Static NAT 1-to-1 Translation Engine",
+                "category": "Layer 3 Address Rewrite Engine",
+                "description": "Visualizes symmetric 1-to-1 header translation between Inside Local (192.168.1.10) and Inside Global (203.0.113.10).",
+                "svg": "<svg viewBox=\"0 0 400 220\" xmlns=\"http://www.w3.org/2000/svg\">\n                <rect x=\"20\" y=\"20\" width=\"360\" height=\"180\" rx=\"8\" fill=\"#0f172a\" stroke=\"#f59e0b\" stroke-width=\"2\"/>\n                <text x=\"200\" y=\"45\" fill=\"#f59e0b\" font-size=\"14\" font-weight=\"bold\" text-anchor=\"middle\">STATIC NAT 1-TO-1 TRANSLATION TABLE</text>\n                <rect x=\"40\" y=\"70\" width=\"320\" height=\"35\" rx=\"5\" fill=\"#1e293b\" stroke=\"#38bdf8\" stroke-width=\"1.5\"/>\n                <text x=\"50\" y=\"92\" fill=\"#38bdf8\" font-size=\"11\" font-weight=\"bold\" font-family=\"monospace\">Inside Local: 192.168.1.10 (Private Server)</text>\n                <text x=\"200\" y=\"125\" fill=\"#10b981\" font-size=\"16\" font-weight=\"bold\" text-anchor=\"middle\">⇳ PERMANENT 1-TO-1 MAPPING ⇳</text>\n                <rect x=\"40\" y=\"140\" width=\"320\" height=\"35\" rx=\"5\" fill=\"#1e293b\" stroke=\"#f59e0b\" stroke-width=\"1.5\"/>\n                <text x=\"50\" y=\"162\" fill=\"#fbbf24\" font-size=\"11\" font-weight=\"bold\" font-family=\"monospace\">Inside Global: 203.0.113.10 (Public IP)</text>\n            </svg>"
             }
         ],
-        "procedure": [
-            "Identify inside/outside interfaces: `interface FastEthernet0/0`, `ip nat inside`.",
-            "Set outside interface: `interface Serial0/0`, `ip nat outside`.",
-            "Create static mapping: `ip nat inside source static 192.168.1.10 203.0.113.10`.",
-            "Verify NAT translation table: `show ip nat translations`."
-        ],
         "troubleshooting": {
-            "problem": "External users cannot ping static NAT public IP 203.0.113.10.",
+            "problem": "External Clients Cannot Connect to Internal Web Server (Inbound NAT Translation Fails)",
             "hints": [
-                "Verify if `ip nat inside` and `ip nat outside` are configured on correct interfaces."
+                "Verify if 'ip nat inside' is applied to private LAN interface and 'ip nat outside' on WAN interface.",
+                "Check if the static NAT mapping 'ip nat inside source static 192.168.1.10 203.0.113.10' is present in 'show running-config'.",
+                "Verify if the router has a valid default route pointing to the ISP gateway.",
+                "Check if an inbound access-list on the outside interface is dropping TCP port 80/443."
             ],
-            "fix": "Execute `ip nat inside` on LAN interface Fa0/0."
+            "fix": "Correct inside/outside interface roles, verify static NAT command syntax, and ensure WAN ACL permits inbound traffic to Inside Global IP 203.0.113.10."
         },
         "viva": [
             {
@@ -4457,14 +4624,6 @@ window.VLAB_DATA = {
                 "a": "No, Static NAT requires 100 public IPs for 100 private PCs. PAT / Dynamic NAT Overload is required instead."
             }
         ],
-        "assignment": "Configure Static NAT for an internal Web Server (192.168.1.100 -> 203.0.113.50). Test HTTP access from external client.",
-        "references": [
-            {
-                "title": "RFC 3022 - Traditional NAT Specification",
-                "link": "https://datatracker.ietf.org/doc/html/rfc3022"
-            }
-        ],
-        "simType": "cli",
         "evaluations": [
             {
                 "type": "pre",
@@ -4646,70 +4805,139 @@ window.VLAB_DATA = {
                 "answer": "show ip nat statistics",
                 "explanation": "`show ip nat statistics` displays total active translations, inside/outside interfaces, and hit/miss counters."
             }
-        ]
+        ],
+        "simType": "static_nat_sim"
     },
     "dynamic_nat": {
-        "title": "Dynamic NAT & PAT Overload",
-        "aim": "To implement Port Address Translation (PAT / NAT Overload) translating multiple internal hosts onto a single public IP address.",
+        "title": "Practical 15: Dynamic NAT & PAT (NAT Overload)",
+        "aim": "To master advanced Network Address Translation techniques, examine Dynamic NAT (pool-based 1-to-1 allocation) vs Port Address Translation (PAT / NAT Overload), configure NAT pools, access control lists (ACLs), and port multiplexing on Cisco IOS gateways, observe how thousands of private LAN hosts share a single public IP via unique source port numbers, and complete the VLAB Capstone Integration Challenge.",
         "intro": {
-            "summary": "PAT (Port Address Translation) multiplexes thousands of private IP addresses onto a single public IP address using unique TCP/UDP port numbers.",
-            "importance": "PAT is the primary technology enabling internet connectivity for homes and enterprises worldwide despite IPv4 address depletion.",
+            "summary": "Dynamic NAT allocates public IP addresses from a pool to private hosts on a first-come, first-served basis. Port Address Translation (PAT / NAT Overload) extends NAT by multiplexing multiple private IP addresses over a single public IP address using unique Layer 4 source port numbers. PAT is the universal standard used in home Wi-Fi routers and enterprise edge gateways worldwide.",
+            "importance": "PAT (NAT Overload) is the cornerstone of modern Internet connectivity, enabling millions of private devices to browse the Internet concurrently over limited public IPv4 allocations. As the capstone practical of the VLAB suite, students synthesize IP addressing, subnetting, routing, transport ports, and NAT into a unified enterprise network deployment.",
             "applications": [
-                "Home Wi-Fi Routers",
-                "Enterprise Internet Egress",
-                "Mobile Cellular Carrier NAT (CGNAT)"
+                "Home Wi-Fi Broadband Routers (Single Public IP PAT)",
+                "Enterprise Edge Gateways (Thousands of LAN Hosts via PAT)",
+                "Dynamic ISP Address Pool Translation",
+                "Enterprise WAN Internet Perimeter Defense"
             ],
-            "outcome": "Students will configure Access Control Lists (ACLs), NAT Overload rules, and inspect port multiplexing entries."
+            "outcome": "Students will be able to configure Cisco IOS PAT (`ip nat inside source list 1 interface Gi0/1 overload`), set up pool-based Dynamic NAT, inspect port-multiplexed NAT translation tables using `show ip nat translations`, and solve end-to-end multi-subnet enterprise network challenges."
         },
         "prerequisites": [
-            "Practical 14: Static NAT 1:1 Mapping",
-            "Practical 12: UDP & TCP Transport Protocols"
+            "Practical 4: IPv4 & IPv6 Address Classification",
+            "Practical 7: Virtual LANs (VLAN) & Trunking",
+            "Practical 11: Static Routing Configuration",
+            "Practical 12: UDP & TCP Transport Protocols",
+            "Practical 13: DHCP Configuration & IP Pools",
+            "Practical 14: Static Network Address Translation (Static NAT)"
         ],
         "outcomes": [
-            "Configure Standard ACLs to select LAN subnets for NAT.",
-            "Configure PAT Overload (`ip nat inside source list 1 interface Serial0/0 overload`).",
-            "Inspect active port translation mappings (`show ip nat translations`)."
+            "Differentiate Static NAT, Dynamic NAT, and Port Address Translation (PAT / NAT Overload).",
+            "Explain how PAT uses 16-bit Layer 4 port numbers (~65,535 sockets) to multiplex LAN hosts onto one public IP.",
+            "Configure Dynamic NAT Pools (`ip nat pool`) and binding ACLs (`access-list 1 permit`).",
+            "Configure PAT (NAT Overload) using router exit interface (`ip nat inside source list 1 interface Gi0/1 overload`).",
+            "Read and interpret multiplexed NAT translation tables in `show ip nat translations`.",
+            "Troubleshoot pool exhaustion, ACL subnet mismatches, and idle connection timeouts.",
+            "Synthesize end-to-end networking concepts in the Capstone VLAB Enterprise Challenge."
         ],
         "theory": {
-            "intro": "PAT (NAT Overload) assigns unique high-numbered source port numbers to distinguish concurrent internal host connections sharing a single public IP address.",
-            "cards": [
+            "intro": "Dynamic NAT and PAT enable scalable Internet access for private networks by mapping dynamic LAN hosts to public IP pools or multiplexing them over a single public IP address using unique port numbers.",
+            "sections": [
                 {
-                    "title": "NAT Pool",
-                    "content": "Defines range of available public IP addresses provided by ISP."
+                    "heading": "1. Introduction to Dynamic NAT & PAT",
+                    "content": "While Static NAT provides 1-to-1 server publishing, enterprise networks require thousands of workstations to access the Internet simultaneously. Dynamic NAT uses a pool of public IPs, while PAT (NAT Overload) multiplexes thousands of private hosts over a single public IP address using unique source port numbers."
                 },
                 {
-                    "title": "Overload Keyword",
-                    "content": "Enables port multiplexing so hundreds of internal hosts share one public IP."
+                    "heading": "2. Learning Objectives",
+                    "content": "Master Dynamic NAT & PAT concepts:\\n• Dynamic NAT pool allocation.\\n• PAT / NAT Overload port multiplexing mechanics.\\n• Configuring `ip nat pool` and matching ACLs.\\n• Configuring `ip nat inside source list <acl> interface <if> overload`.\\n• Reading `show ip nat translations`."
+                },
+                {
+                    "heading": "3. Why Dynamic NAT & PAT are Required",
+                    "content": "Public IPv4 address scarcity makes assigning public IPs to every client host cost-prohibitive. PAT allows an entire organization (or home) to share a single public IP address."
+                },
+                {
+                    "heading": "4. What is Dynamic NAT?",
+                    "content": "Dynamic NAT maps internal private IP addresses to available public IP addresses from a configured pool on a first-come, first-served basis. When a host stops communicating, its public IP is returned to the pool."
+                },
+                {
+                    "heading": "5. What is Port Address Translation (PAT / NAT Overload)?",
+                    "content": "PAT maps multiple private IP addresses to a single public IP address by tracking unique Layer 4 source port numbers (e.g. 192.168.1.10:50001 and 192.168.1.11:50002 both translate to public IP 203.0.113.1 with distinct ports)."
+                },
+                {
+                    "heading": "6. How PAT Multiplexing Operates",
+                    "content": "With 16-bit port numbers, PAT can theoretically support up to ~65,535 simultaneous TCP/UDP socket connections per public IP address."
+                },
+                {
+                    "heading": "7. Comparison of NAT Types",
+                    "content": "• Static NAT: 1 Private IP ⇹ 1 Public IP (Fixed, Inbound Server Access).\\n• Dynamic NAT: 1 Private IP ⇹ 1 Public IP from Pool (Temporary).\\n• PAT (Overload): Many Private IPs ⇹ 1 Public IP + Unique Ports (Outbound Access)."
+                },
+                {
+                    "heading": "8. Defining Inside Match ACLs",
+                    "content": "A Standard Access Control List (ACL) identifies which internal private subnets are permitted to undergo NAT translation (e.g., `access-list 1 permit 192.168.1.0 0.0.0.255`)."
+                },
+                {
+                    "heading": "9. Cisco IOS Dynamic NAT Pool Commands",
+                    "content": "1. Create Pool: `ip nat pool MY_POOL 203.0.113.1 203.0.113.10 netmask 255.255.255.240`\\n2. Match ACL: `access-list 1 permit 192.168.1.0 0.0.0.255`\\n3. Enable Dynamic NAT: `ip nat inside source list 1 pool MY_POOL`"
+                },
+                {
+                    "heading": "10. Cisco IOS PAT (NAT Overload) Commands",
+                    "content": "1. Match ACL: `access-list 1 permit 192.168.1.0 0.0.0.255`\\n2. Enable PAT on Exit Interface: `ip nat inside source list 1 interface GigabitEthernet0/1 overload`\\n3. Apply `ip nat inside` on LAN interface and `ip nat outside` on WAN interface."
+                },
+                {
+                    "heading": "11. Multiplexed Translation Table Example",
+                    "content": "Pro Inside Local           Inside Global          Outside Global\\ntcp 192.168.1.10:50001     203.0.113.1:50001      142.250.183.206:80\\ntcp 192.168.1.11:50002     203.0.113.1:50002      142.250.183.206:80"
+                },
+                {
+                    "heading": "12. Verification & Diagnostic Commands",
+                    "content": "• `show ip nat translations` - Lists multiplexed socket translations.\\n• `show ip nat statistics` - Displays total active translations, pool utilization, hits, and misses.\\n• `clear ip nat translation *` - Flushes dynamic translation cache."
+                },
+                {
+                    "heading": "13. Advantages of PAT",
+                    "content": "Maximum public IPv4 conservation, high security (blocks unsolicited external inbound probes), cost-effective single public IP deployment."
+                },
+                {
+                    "heading": "14. Limitations of PAT",
+                    "content": "Does not support inbound connections directly without static port forwarding entries; CPU overhead for tracking thousands of translation sockets."
+                },
+                {
+                    "heading": "15. Real-World Applications",
+                    "content": "Home Wi-Fi routers, enterprise campus internet access, ISP CGNAT (Carrier-Grade NAT)."
+                },
+                {
+                    "heading": "16. Best Practices",
+                    "content": "1. Always append `overload` when sharing a single public IP or pool.\\n2. Restrict matching ACLs to active internal subnets only."
+                },
+                {
+                    "heading": "17. Common Configuration Errors",
+                    "content": "Forgetting the `overload` keyword (causing pool exhaustion after 1-to-1 assignments fill up), incorrect ACL wildcard mask."
+                },
+                {
+                    "heading": "18. Capstone VLAB Integration Overview",
+                    "content": "Combines IP subnets, VLAN trunks, OSPF/EIGRP routing, DHCP automatic addressing, and PAT NAT Overload into an integrated enterprise solution."
+                },
+                {
+                    "heading": "19. Summary",
+                    "content": "PAT (NAT Overload) is the essential technology powering global IPv4 internet connectivity, multiplexing private subnets over public IP gateways."
                 }
-            ],
-            "formulas": [
-                "Max PAT Concurrent Ports = 65,535 per Public IP"
-            ],
-            "standards": [
-                "RFC 3022 - Traditional IP Network Address Translator (NAT / PAT)"
             ]
         },
-        "tools": [
+        "hardware_inspector": [
             {
-                "name": "Cisco PAT Edge Router",
-                "layer": "Layer 3 Router",
-                "ports": "Inside LAN & Outside WAN",
-                "usage": "Port Address Translation",
-                "statusLED": "PAT Multiplex Active"
+                "id": "pat_multiplex_engine",
+                "name": "PAT / NAT Overload Port Multiplexing Engine",
+                "category": "Layer 4 Port-Multiplexed Gateway",
+                "description": "Visualizes multiple internal private hosts sharing 1 public IP via unique source port numbers.",
+                "svg": "<svg viewBox=\"0 0 400 220\" xmlns=\"http://www.w3.org/2000/svg\">\n                <rect x=\"20\" y=\"20\" width=\"360\" height=\"180\" rx=\"8\" fill=\"#0f172a\" stroke=\"#10b981\" stroke-width=\"2\"/>\n                <text x=\"200\" y=\"45\" fill=\"#10b981\" font-size=\"14\" font-weight=\"bold\" text-anchor=\"middle\">PAT / NAT OVERLOAD PORT MULTIPLEXING</text>\n                <text x=\"50\" y=\"80\" fill=\"#38bdf8\" font-size=\"10\" font-family=\"monospace\">Host 1: 192.168.1.10:50001 ──┐</text>\n                <text x=\"50\" y=\"110\" fill=\"#38bdf8\" font-size=\"10\" font-family=\"monospace\">Host 2: 192.168.1.11:50002 ──┼──> PAT Gateway (203.0.113.1) ──> Internet</text>\n                <text x=\"50\" y=\"140\" fill=\"#38bdf8\" font-size=\"10\" font-family=\"monospace\">Host 3: 192.168.1.12:50003 ──┘</text>\n                <rect x=\"40\" y=\"160\" width=\"320\" height=\"30\" rx=\"4\" fill=\"#1e293b\" stroke=\"#10b981\"/>\n                <text x=\"200\" y=\"180\" fill=\"#10b981\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">Single Public IP (203.0.113.1) with Unique Port Sockets</text>\n            </svg>"
             }
         ],
-        "procedure": [
-            "Create Access List matching internal LAN: `access-list 1 permit 192.168.1.0 0.0.0.255`.",
-            "Configure PAT Overload: `ip nat inside source list 1 interface Serial0/0 overload`.",
-            "Simulate simultaneous web requests from PC1, PC2, and PC3.",
-            "Inspect translated port numbers in `show ip nat translations`."
-        ],
         "troubleshooting": {
-            "problem": "Only the first PC can access internet; other PCs fail.",
+            "problem": "LAN Hosts Cannot Access Internet / PAT Overload Fails (Pool Exhaustion or Missing 'overload' Keyword)",
             "hints": [
-                "Check if the `overload` keyword was omitted from `ip nat inside source` command."
+                "Check if the 'overload' keyword was omitted from 'ip nat inside source list 1 interface Gi0/1 overload'. Without 'overload', NAT acts as dynamic 1-to-1 and drops traffic after 1 host connects!",
+                "Verify if Access List 1 permits the correct internal subnet and wildcard mask.",
+                "Check if 'ip nat inside' and 'ip nat outside' are applied to the correct router interfaces.",
+                "Verify default route pointing to the ISP gateway."
             ],
-            "fix": "Append `overload` to the end of the `ip nat inside source list 1 interface Serial0/0 overload` command."
+            "fix": "Append 'overload' to the 'ip nat inside source list' command. Ensure ACL permits LAN subnets and verify WAN default route."
         },
         "viva": [
             {
@@ -4721,14 +4949,6 @@ window.VLAB_DATA = {
                 "a": "Approximately 65,535 concurrent connections (based on 16-bit port numbers)."
             }
         ],
-        "assignment": "Configure PAT Overload for LAN subnet 192.168.10.0/24 sharing public IP 203.0.113.1. Verify concurrent pings.",
-        "references": [
-            {
-                "title": "RFC 3022 - NAT/PAT Specification",
-                "link": "https://datatracker.ietf.org/doc/html/rfc3022"
-            }
-        ],
-        "simType": "cli",
         "evaluations": [
             {
                 "type": "pre",
@@ -4910,7 +5130,8 @@ window.VLAB_DATA = {
                 "answer": "undebug ip nat (or no debug ip nat)",
                 "explanation": "`undebug ip nat` stops real-time NAT debug logging."
             }
-        ]
+        ],
+        "simType": "dynamic_nat_sim"
     },
     "cables_devices": {
         "title": "Practical 1: Introduction to Computer Networking Tools, Devices & Transmission Media",
@@ -11419,6 +11640,179 @@ window.VLAB_DATA = {
             "fix": "Ensure both routers use 'router eigrp 100' with identical AS numbers. Issue 'no passive-interface <interface>' on interconnecting links and execute 'no auto-summary' under EIGRP configuration mode."
         },
         "simType": "eigrp_sim"
+    },
+    "static_routing_sim": {
+        "title": "Practical 11: Static Routing Configuration",
+        "aim": "To understand the fundamental principles of Layer 3 packet forwarding, examine routing table structures, manually configure static and default routes using Cisco IOS CLI commands, observe hop-by-hop next-hop forwarding decisions, and troubleshoot missing return routes.",
+        "intro": {
+            "summary": "In computer networks, communication between devices located on different subnets requires a router. To make forwarding decisions, every router maintains a Routing Table. Static Routing is the foundational method where network administrators manually define explicit paths for destination subnets, offering complete control, high security, and low CPU overhead.",
+            "importance": "Static routing introduces core IP forwarding concepts before dynamic routing protocols are explored. It is essential for configuring default gateways (Gateway of Last Resort), connecting branch offices, securing stub networks, and providing floating backup routes.",
+            "applications": [
+                "Branch Office Internet Access (Default Routes)",
+                "Stub Network Point-to-Point Interconnects",
+                "High-Security Network Backbones (Zero Route Advertisements)",
+                "Floating Backup Paths for Enterprise WAN Links"
+            ],
+            "outcome": "After completing this practical, students will be able to configure static routes using Cisco ip route syntax, set up Default Routes (0.0.0.0/0), verify packet forwarding using show ip route and traceroute, and resolve asymmetric routing faults."
+        },
+        "prerequisites": [
+            "Practical 4: IPv4 & IPv6 Address Classification",
+            "Practical 6: Subnetting, VLSM & CIDR"
+        ],
+        "outcomes": [
+            "Explain how routers evaluate destination IP addresses and make forwarding decisions.",
+            "Differentiate between Static Routing and Dynamic Routing protocols.",
+            "Read and interpret Cisco IOS Routing Table entries ('C' for Connected, 'S' for Static).",
+            "Configure Static Routes using next-hop IP addresses and exit interfaces.",
+            "Configure Default Routes (0.0.0.0 0.0.0.0) as the Gateway of Last Resort.",
+            "Trace hop-by-hop packet forwarding across multi-router topologies.",
+            "Troubleshoot common static routing errors (missing return routes, wrong next-hop IPs)."
+        ],
+        "theory": {
+            "intro": "Routing is the process of selecting paths in a network along which to send network traffic. Static routing requires administrators to manually enter every destination subnet into the router's routing table, serving as the foundation of IP network engineering.",
+            "sections": [
+                {
+                    "heading": "1. Introduction to Static Routing",
+                    "content": "Every device connected to an IP network relies on routers to reach remote subnets beyond its local broadcast domain. Routers consult an internal data structure called a Routing Table to forward packets toward their destination. In Static Routing, network administrators explicitly program destination networks, subnet masks, and next-hop router addresses. Because static routes do not generate routing protocol traffic, they conserve link bandwidth and system resources."
+                },
+                {
+                    "heading": "2. Learning Objectives",
+                    "content": "By completing this practical, students will master:\n• Layer 3 IP packet forwarding mechanics.\n• Constructing and reading Routing Tables.\n• Configuring static routes using ip route <prefix> <mask;> <next-hop>.\n• Setting Default Routes (ip route 0.0.0.0 0.0.0.0 <next-hop>).\n• Differentiating Directly Connected ('C') and Static ('S') routes.\n• Using show ip route, ping, and traceroute for verification."
+                },
+                {
+                    "heading": "3. What is Routing?",
+                    "content": "Routing is the Layer 3 process of examining an incoming IP packet's destination address, looking up a matching network entry in the routing table, and forwarding the packet out the appropriate egress interface toward the next-hop router or end host."
+                },
+                {
+                    "heading": "4. Why Routing is Required",
+                    "content": "Host computers on distinct subnets (e.g. PC1 on 192.168.1.0/24 and PC2 on 192.168.2.0/24) cannot communicate directly via Layer 2 switch broadcasts. Routers act as Layer 3 gateways that interconnect these subnets and forward traffic across network boundaries."
+                },
+                {
+                    "heading": "5. What is Static Routing?",
+                    "content": "Static Routing is a non-dynamic routing method where every route is manually configured into the router by an administrator. Unlike RIP, OSPF, or EIGRP, static routes never expire, do not flood neighbor advertisements, and remain fixed until manually altered."
+                },
+                {
+                    "heading": "6. Characteristics of Static Routing",
+                    "content": "• Manual Configuration: Administrators define every path explicitly.\n• Predictable Behavior: Traffic always follows the exact specified path.\n• Resource Efficiency: Zero CPU usage for route calculations and zero bandwidth overhead for updates.\n• Security: No route advertisements are broadcast over the wire."
+                },
+                {
+                    "heading": "7. Structure of a Routing Table",
+                    "content": "An IP Routing Table entry contains:\n1. Route Source Code: 'C' (Connected), 'S' (Static), 'S*' (Default Static).\n2. Destination Subnet & Prefix Mask.\n3. Administrative Distance (AD = 1 for Static) and Metric (0).\n4. Next-Hop IP Address.\n5. Outgoing Egress Interface (e.g. GigabitEthernet0/0)."
+                },
+                {
+                    "heading": "8. Directly Connected Networks ('C')",
+                    "content": "When a router interface is assigned an IP address and brought up (no shutdown), the router automatically adds the connected subnet to its routing table with code 'C'. No static route is required for directly connected networks."
+                },
+                {
+                    "heading": "9. Next-Hop Address",
+                    "content": "The Next-Hop Address is the IP address of the adjacent router's ingress interface on the shared link. When a router matches a static route, it rewrites the Layer 2 MAC header and transmits the packet to the Next-Hop IP."
+                },
+                {
+                    "heading": "10. Default Route (Gateway of Last Resort)",
+                    "content": "A Default Route uses destination 0.0.0.0 and mask 0.0.0.0 (quad-zero). It matches ALL IP packets that do not have a specific match in the routing table, acting as the Gateway of Last Resort for Internet traffic."
+                },
+                {
+                    "heading": "11. Cisco IOS Configuration Commands",
+                    "content": "Configuring a Static Route:\nRouter(config)# ip route 192.168.2.0 255.255.255.0 10.0.0.2\n\nConfiguring a Default Route:\nRouter(config)# ip route 0.0.0.0 0.0.0.0 10.0.0.2"
+                },
+                {
+                    "heading": "12. Verification Commands",
+                    "content": "• show ip route - Displays full IP routing table.\n• show running-config - Verifies static route configuration lines.\n• show ip interface brief - Verifies interface status (Up/Up).\n• ping <target-ip> - Tests end-to-end IP reachability.\n• traceroute <target-ip> - Traces hop-by-hop router path."
+                },
+                {
+                    "heading": "13. Packet Forwarding Process Step-by-Step",
+                    "content": "1. PC1 encapsulates data with Source IP 192.168.1.10 and Dest IP 192.168.2.10, sending it to Default Gateway Router A.\n2. Router A receives packet on Gi0/0, inspects Dest IP 192.168.2.10, and finds static route 192.168.2.0/24 via 10.0.0.2.\n3. Router A forwards packet out Gi0/1 to Router B (10.0.0.2).\n4. Router B inspects Dest IP, matches directly connected network 192.168.2.0/24 Gi0/0, and delivers packet to PC2.\n5. CRITICAL: Router B MUST have a return static route to 192.168.1.0/24 via Router A, or return traffic will be dropped!"
+                },
+                {
+                    "heading": "14. Static Routing vs Dynamic Routing Comparison",
+                    "content": "• Configuration: Static is manual per router; Dynamic is automatic.\n• Maintenance: Static requires manual updates when topology changes; Dynamic adapts automatically.\n• Resource Overhead: Static has zero CPU/RAM/bandwidth load; Dynamic requires CPU for SPF/Bellman-Ford and network updates.\n• Security: Static is higher (no wire advertisements); Dynamic requires protocol authentication.\n• Scalability: Static is best for small/stub networks; Dynamic scales to large enterprise networks."
+                },
+                {
+                    "heading": "15. Advantages of Static Routing",
+                    "content": "• Minimal router CPU and memory consumption.\n• Zero network bandwidth overhead (no update broadcasts).\n• Complete control over traffic paths.\n• Enhanced security."
+                },
+                {
+                    "heading": "16. Limitations of Static Routing",
+                    "content": "• High administrative burden as network size grows.\n• Human configuration errors are common.\n• Cannot automatically re-route around link or router failures."
+                },
+                {
+                    "heading": "17. Real-World Applications",
+                    "content": "Used for connecting branch offices to central corporate headquarters, default routes facing ISPs, stub networks, and floating backup WAN links."
+                },
+                {
+                    "heading": "18. Best Practices",
+                    "content": "1. Always configure matching RETURN routes on remote routers to prevent asymmetric black-holing.\n2. Document static routes in network diagrams.\n3. Use Default Routes (0.0.0.0/0) on stub branch routers facing single edge connections."
+                },
+                {
+                    "heading": "19. Common Configuration Errors",
+                    "content": "• Missing return route on destination router.\n• Typographical error in next-hop IP address.\n• Inverted subnet mask (e.g., using wildcard mask instead of netmask).\n• Next-hop interface administratively down."
+                },
+                {
+                    "heading": "20. Summary",
+                    "content": "Static routing establishes predictable, manual paths across network routers using the ip route command, serving as an indispensable foundation for default gateways and enterprise WAN connectivity."
+                }
+            ]
+        },
+        "hardware_inspector": [
+            {
+                "id": "cisco_2911_static_router",
+                "name": "Cisco 2911 ISR Static Forwarding Router",
+                "category": "Layer 3 Manual Forwarding Engine",
+                "description": "Enterprise Layer 3 router executing manual static route lookups and forwarding packets out GigabitEthernet interfaces without protocol overhead.",
+                "svg": "<svg viewBox=\"0 0 400 240\" xmlns=\"http://www.w3.org/2000/svg\">\n                <rect x=\"20\" y=\"40\" width=\"360\" height=\"160\" rx=\"10\" fill=\"#0f172a\" stroke=\"#38bdf8\" stroke-width=\"3\"/>\n                <rect x=\"35\" y=\"55\" width=\"330\" height=\"40\" rx=\"5\" fill=\"#1e293b\"/>\n                <text x=\"50\" y=\"80\" fill=\"#38bdf8\" font-size=\"15\" font-weight=\"bold\" font-family=\"monospace\">CISCO 2911 ISR [STATIC ROUTE ENGINE]</text>\n                <circle cx=\"340\" cy=\"75\" r=\"7\" fill=\"#38bdf8\"/>\n                <g transform=\"translate(40, 110)\">\n                    <rect x=\"0\" y=\"0\" width=\"65\" height=\"40\" rx=\"4\" fill=\"#334155\" stroke=\"#10b981\" stroke-width=\"2\"/>\n                    <text x=\"32\" y=\"25\" fill=\"#ffffff\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">Gi0/0 (C)</text>\n                </g>\n                <g transform=\"translate(120, 110)\">\n                    <rect x=\"0\" y=\"0\" width=\"65\" height=\"40\" rx=\"4\" fill=\"#334155\" stroke=\"#38bdf8\" stroke-width=\"2\"/>\n                    <text x=\"32\" y=\"25\" fill=\"#ffffff\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">Gi0/1 (S)</text>\n                </g>\n                <g transform=\"translate(200, 110)\">\n                    <rect x=\"0\" y=\"0\" width=\"65\" height=\"40\" rx=\"4\" fill=\"#334155\" stroke=\"#f59e0b\" stroke-width=\"2\"/>\n                    <text x=\"32\" y=\"25\" fill=\"#f59e0b\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">Gi0/2 (S*)</text>\n                </g>\n                <g transform=\"translate(280, 110)\">\n                    <rect x=\"0\" y=\"0\" width=\"65\" height=\"40\" rx=\"4\" fill=\"#334155\" stroke=\"#64748b\" stroke-width=\"2\"/>\n                    <text x=\"32\" y=\"25\" fill=\"#cbd5e1\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">Serial0/0</text>\n                </g>\n                <text x=\"200\" y=\"185\" fill=\"#cbd5e1\" font-size=\"11\" text-anchor=\"middle\">Static Routing Table (AD = 1, Metric = 0)</text>\n            </svg>"
+            },
+            {
+                "id": "routing_table_lookup_diagram",
+                "name": "Routing Table Lookup & Next-Hop Forwarding Engine",
+                "category": "Layer 3 Routing Table Lookup",
+                "description": "Visual breakdown of a static route entry matching a destination IP and resolving the egress next-hop router interface.",
+                "svg": "<svg viewBox=\"0 0 400 240\" xmlns=\"http://www.w3.org/2000/svg\">\n                <rect x=\"20\" y=\"20\" width=\"360\" height=\"200\" rx=\"8\" fill=\"#0b0f19\" stroke=\"#38bdf8\" stroke-width=\"2\"/>\n                <text x=\"200\" y=\"45\" fill=\"#38bdf8\" font-size=\"14\" font-weight=\"bold\" text-anchor=\"middle\">IP ROUTING TABLE LOOKUP ENGINE [AD = 1]</text>\n                <line x1=\"30\" y1=\"55\" x2=\"370\" y2=\"55\" stroke=\"#334155\" stroke-width=\"2\"/>\n\n                <rect x=\"40\" y=\"70\" width=\"320\" height=\"35\" rx=\"5\" fill=\"#1e293b\" stroke=\"#10b981\" stroke-width=\"1.5\"/>\n                <text x=\"50\" y=\"92\" fill=\"#34d399\" font-size=\"11\" font-weight=\"bold\" font-family=\"monospace\">C 192.168.1.0/24 is directly connected, Gi0/0</text>\n\n                <rect x=\"40\" y=\"115\" width=\"320\" height=\"35\" rx=\"5\" fill=\"#1e293b\" stroke=\"#38bdf8\" stroke-width=\"2\"/>\n                <text x=\"50\" y=\"137\" fill=\"#38bdf8\" font-size=\"11\" font-weight=\"bold\" font-family=\"monospace\">S 192.168.2.0/24 [1/0] via 10.0.0.2, Gi0/1</text>\n\n                <rect x=\"40\" y=\"160\" width=\"320\" height=\"35\" rx=\"5\" fill=\"#1e293b\" stroke=\"#f59e0b\" stroke-width=\"1.5\"/>\n                <text x=\"50\" y=\"182\" fill=\"#fbbf24\" font-size=\"11\" font-weight=\"bold\" font-family=\"monospace\">S* 0.0.0.0/0 [1/0] via 203.0.113.1 (Default)</text>\n            </svg>"
+            }
+        ],
+        "troubleshooting": {
+            "problem": "Static Route Configured but End-to-End Ping Fails (Asymmetric Routing / Missing Return Route)",
+            "hints": [
+                "Verify if the local router has a static route to the destination network.",
+                "Check if the REMOTE destination router has a RETURN static route back to the source network.",
+                "Verify if the next-hop IP address is directly reachable and on the same subnet as the local interface.",
+                "Check if the egress interface is administratively down (shutdown)."
+            ],
+            "fix": "Execute 'show ip route' on BOTH local and remote routers to ensure bidirectional static routes exist. Fix any mistyped next-hop IP addresses and issue 'no shutdown' on interconnecting interfaces."
+        },
+        "viva": [
+            {
+                "q": "What is Static Routing and how does it differ from Dynamic Routing?",
+                "a": "Static Routing requires network administrators to manually enter route entries into the routing table. Unlike dynamic protocols (RIP, OSPF, EIGRP), static routes generate zero network advertisement traffic, consume minimal CPU/RAM, but require manual updates when network topology changes."
+            },
+            {
+                "q": "What is the Administrative Distance (AD) of a Static Route and a Directly Connected route in Cisco IOS?",
+                "a": "Directly Connected routes ('C') have an Administrative Distance of 0. Static routes ('S') have a default Administrative Distance of 1."
+            },
+            {
+                "q": "What is a Default Route (Gateway of Last Resort) and what is its prefix representation?",
+                "a": "A Default Route matches all destination IP addresses that do not have a specific match in the routing table. It uses the quad-zero destination prefix and subnet mask 0.0.0.0 0.0.0.0."
+            },
+            {
+                "q": "Why is a return route mandatory when configuring static routes between two routers?",
+                "a": "IP communication is bidirectional. Even if Router A correctly forwards a packet to Router B, Router B must have a routing table entry to send the return packet back to Router A's source subnet. Without a return route, return traffic is dropped."
+            },
+            {
+                "q": "What is a Floating Static Route?",
+                "a": "A Floating Static Route is a backup static route configured with a higher Administrative Distance (e.g. ip route 192.168.2.0 255.255.255.0 10.0.0.2 130). It remains inactive in topology memory until the primary route fails."
+            }
+        ],
+        "assignment": "1. Configure static routes between Router A and Router B (192.168.1.0/24 ⇹ 10.0.0.0/30 ⇹ 192.168.2.0/24).\n2. Execute ip route 192.168.2.0 255.255.255.0 10.0.0.2 on Router A and return route ip route 192.168.1.0 255.255.255.0 10.0.0.1 on Router B.\n3. Verify bidirectional ping from PC1 (192.168.1.10) to PC2 (192.168.2.10).\n4. Remove Router B's return route (no ip route ...) and observe ping failure due to missing return path.",
+        "references": [
+            {
+                "title": "Cisco IP Routing: Static Routes Configuration Guide",
+                "link": "https://www.cisco.com"
+            },
+            {
+                "title": "RFC 1812 - Requirements for IPv4 Routers",
+                "link": "https://datatracker.ietf.org/doc/html/rfc1812"
+            }
+        ],
+        "simType": "static_routing_sim"
     }
 };
 
@@ -11442,3 +11836,7 @@ window.VLAB_DATA['ospf'] = window.VLAB_DATA['routing_ospf'];
 window.VLAB_DATA['eigrp_sim'] = window.VLAB_DATA['routing_eigrp'];
 window.VLAB_DATA['eigrp'] = window.VLAB_DATA['routing_eigrp'];
 window.VLAB_DATA['static_routing_sim'] = window.VLAB_DATA['static_routing'];
+window.VLAB_DATA['udp_tcp_sim'] = window.VLAB_DATA['udp_tcp'];
+window.VLAB_DATA['dhcp_config_sim'] = window.VLAB_DATA['dhcp_config'];
+window.VLAB_DATA['static_nat_sim'] = window.VLAB_DATA['static_nat'];
+window.VLAB_DATA['dynamic_nat_sim'] = window.VLAB_DATA['dynamic_nat'];

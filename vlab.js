@@ -14276,6 +14276,475 @@ const initStaticRoutingSim = (container) => {
 };
 
 
+        // --- PRACTICALS 12-15 INTERACTIVE SIMULATORS ---
+// --- PRACTICAL 12: UDP & TCP TRANSPORT PROTOCOLS SIMULATOR ---
+const initUdpTcpSim = (container) => {
+    const AC = '#ec4899'; // Vibrant pink/magenta
+    container.innerHTML = `
+        <div style="padding:15px; font-family:var(--font-sans); color:var(--text-main); height:100%; display:flex; flex-direction:column; gap:12px; box-sizing:border-box;">
+            <div style="background:linear-gradient(135deg, rgba(236,72,153,0.15) 0%, rgba(15,23,42,0.6) 100%); border:1px solid ${AC}; border-radius:12px; padding:12px 18px; display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                    <h3 style="margin:0; color:${AC}; font-size:17px; font-weight:800; display:flex; align-items:center; gap:8px;">
+                        <span>🔌</span> Layer 4 Transport Protocols: TCP vs UDP Simulator
+                    </h3>
+                    <p style="margin:4px 0 0 0; font-size:12px; color:var(--text-muted);">
+                        3-Way Handshake • Sliding Window Flow Control • TCP vs UDP Race • Port Multiplexing (Sockets)
+                    </p>
+                </div>
+            </div>
+
+            <div style="display:grid; grid-template-columns: 1fr 340px; gap:16px; flex:1;">
+                <!-- Left: Interactive Handshake & Race Animation -->
+                <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:14px; display:flex; flex-direction:column; gap:12px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <h4 style="margin:0; color:${AC}; font-size:14px;">TCP 3-Way Handshake (SYN ➔ SYN-ACK ➔ ACK)</h4>
+                        <button id="btn-start-tcp-handshake" style="background:${AC}; color:#fff; border:none; padding:6px 14px; border-radius:6px; font-weight:800; font-size:12px; cursor:pointer;">
+                            🚀 Initiate TCP Handshake
+                        </button>
+                    </div>
+
+                    <div style="position:relative; width:100%; height:240px; background:#0b0f19; border:1px solid #1e293b; border-radius:10px; overflow:hidden;">
+                        <svg width="100%" height="100%" viewBox="0 0 480 220">
+                            <!-- Host Icons -->
+                            <rect x="30" y="85" width="70" height="50" rx="6" fill="#1e293b" stroke="#38bdf8" stroke-width="2"/>
+                            <text x="65" y="110" fill="#38bdf8" font-size="11" font-weight="bold" text-anchor="middle">Client Host</text>
+                            <text x="65" y="125" fill="#cbd5e1" font-size="9" text-anchor="middle">Port: 54321</text>
+
+                            <rect x="380" y="85" width="70" height="50" rx="6" fill="#1e293b" stroke="#10b981" stroke-width="2"/>
+                            <text x="415" y="110" fill="#10b981" font-size="11" font-weight="bold" text-anchor="middle">Web Server</text>
+                            <text x="415" y="125" fill="#cbd5e1" font-size="9" text-anchor="middle">Port: 80 (HTTP)</text>
+
+                            <!-- Lines -->
+                            <line x1="100" y1="95" x2="380" y2="95" stroke="#ec4899" stroke-width="2" stroke-dasharray="4,4"/>
+                            <text x="240" y="88" fill="#f472b6" font-size="9" font-weight="bold" text-anchor="middle">1. SYN (Seq=100)</text>
+
+                            <line x1="380" y1="110" x2="100" y2="110" stroke="#38bdf8" stroke-width="2" stroke-dasharray="4,4"/>
+                            <text x="240" y="105" fill="#38bdf8" font-size="9" font-weight="bold" text-anchor="middle">2. SYN-ACK (Seq=300, Ack=101)</text>
+
+                            <line x1="100" y1="125" x2="380" y2="125" stroke="#10b981" stroke-width="2" stroke-dasharray="4,4"/>
+                            <text x="240" y="120" fill="#34d399" font-size="9" font-weight="bold" text-anchor="middle">3. ACK (Ack=301)</text>
+
+                            <circle id="handshake-pkt" cx="100" cy="95" r="6" fill="#ec4899" style="display:none; transition: all 0.5s ease-in-out;"/>
+                        </svg>
+                    </div>
+
+                    <div id="tcp-handshake-status" style="background:rgba(236,72,153,0.1); border:1px solid ${AC}; border-radius:8px; padding:10px; font-size:12px; color:#f472b6;">
+                        <b>Connection Status: CLOSED</b>. Click 'Initiate TCP Handshake' to execute the 3-way exchange.
+                    </div>
+                </div>
+
+                <!-- Right: TCP vs UDP Comparison & Socket Pair -->
+                <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:14px; display:flex; flex-direction:column; gap:12px;">
+                    <h4 style="margin:0; color:${AC}; font-size:14px;">Socket Pair Definition</h4>
+                    <div style="background:#0b0f19; border:1px solid #334155; border-radius:8px; padding:12px; font-family:monospace; font-size:11px; color:#38bdf8; line-height:1.6;">
+                        <b style="color:#f472b6;">Active Socket Tuple:</b><br>
+                        Src IP: 192.168.1.10 : 54321<br>
+                        Dst IP: 93.184.216.34 : 80<br>
+                        Protocol: TCP (Stream)
+                    </div>
+
+                    <h4 style="margin:0; color:${AC}; font-size:14px;">TCP vs UDP Trade-Offs</h4>
+                    <div style="font-size:11px; line-height:1.6; color:var(--text-muted);">
+                        • <b>TCP (Reliable Stream):</b> Web (80/443), Email (25), File Transfer (21). Zero packet loss, higher latency.<br>
+                        • <b>UDP (Datagram Speed):</b> DNS (53), Video Streaming, Voice over IP (VoIP), Online Gaming. Ultra-low latency, no ACKs.
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    const handshakeBtn = container.querySelector('#btn-start-tcp-handshake');
+    const pkt = container.querySelector('#handshake-pkt');
+    const statusEl = container.querySelector('#tcp-handshake-status');
+
+    if (handshakeBtn && pkt && statusEl) {
+        handshakeBtn.onclick = () => {
+            pkt.style.display = 'block';
+            statusEl.innerHTML = '<b style="color:#ec4899;">Step 1: Sending SYN (Seq=100)... [SYN_SENT]</b>';
+            pkt.setAttribute('cx', '100'); pkt.setAttribute('cy', '95');
+
+            setTimeout(() => {
+                pkt.setAttribute('cx', '380'); pkt.setAttribute('cy', '95');
+            }, 100);
+
+            setTimeout(() => {
+                statusEl.innerHTML = '<b style="color:#38bdf8;">Step 2: Server responds with SYN-ACK (Seq=300, Ack=101)... [SYN_RCVD]</b>';
+                pkt.setAttribute('cx', '380'); pkt.setAttribute('cy', '110');
+            }, 700);
+
+            setTimeout(() => {
+                pkt.setAttribute('cx', '100'); pkt.setAttribute('cy', '110');
+            }, 800);
+
+            setTimeout(() => {
+                statusEl.innerHTML = '<b style="color:#10b981;">Step 3: Sending ACK (Ack=301)... [ESTABLISHED] 🟢</b>';
+                pkt.setAttribute('cx', '100'); pkt.setAttribute('cy', '125');
+            }, 1400);
+
+            setTimeout(() => {
+                pkt.setAttribute('cx', '380'); pkt.setAttribute('cy', '125');
+            }, 1500);
+
+            setTimeout(() => {
+                statusEl.innerHTML = '<b style="color:#10b981;">Connection State: ESTABLISHED!</b> Socket is active and data transfer can begin reliably.';
+                pkt.style.display = 'none';
+            }, 2100);
+        };
+    }
+};
+
+// --- PRACTICAL 13: DHCP CONFIGURATION & IP POOLS SIMULATOR ---
+const initDhcpSim = (container) => {
+    const AC = '#10b981'; // Emerald green for DHCP
+    container.innerHTML = `
+        <div style="padding:15px; font-family:var(--font-sans); color:var(--text-main); height:100%; display:flex; flex-direction:column; gap:12px; box-sizing:border-box;">
+            <div style="background:linear-gradient(135deg, rgba(16,185,129,0.15) 0%, rgba(15,23,42,0.6) 100%); border:1px solid ${AC}; border-radius:12px; padding:12px 18px; display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                    <h3 style="margin:0; color:${AC}; font-size:17px; font-weight:800; display:flex; align-items:center; gap:8px;">
+                        <span>📬</span> Dynamic Host Configuration Protocol (DHCP) Simulator
+                    </h3>
+                    <p style="margin:4px 0 0 0; font-size:12px; color:var(--text-muted);">
+                        DORA 4-Step Handshake • IP Pools & Lease Management • DHCP Relay (ip helper-address) • Cisco CLI
+                    </p>
+                </div>
+            </div>
+
+            <div style="display:grid; grid-template-columns: 1fr 340px; gap:16px; flex:1;">
+                <!-- Left: DORA Handshake Visualizer -->
+                <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:14px; display:flex; flex-direction:column; gap:12px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <h4 style="margin:0; color:${AC}; font-size:14px;">DORA 4-Step Process (UDP 67 / 68)</h4>
+                        <button id="btn-request-dhcp-lease" style="background:${AC}; color:#fff; border:none; padding:6px 14px; border-radius:6px; font-weight:800; font-size:12px; cursor:pointer;">
+                            🚀 Request IP Lease (DORA)
+                        </button>
+                    </div>
+
+                    <div style="position:relative; width:100%; height:240px; background:#0b0f19; border:1px solid #1e293b; border-radius:10px; overflow:hidden;">
+                        <svg width="100%" height="100%" viewBox="0 0 480 220">
+                            <!-- Client -->
+                            <rect x="30" y="85" width="80" height="50" rx="6" fill="#1e293b" stroke="#38bdf8" stroke-width="2"/>
+                            <text x="70" y="108" fill="#38bdf8" font-size="11" font-weight="bold" text-anchor="middle">DHCP Client</text>
+                            <text id="client-ip-text" x="70" y="125" fill="#ef4444" font-size="9" font-weight="bold" text-anchor="middle">IP: 0.0.0.0</text>
+
+                            <!-- Server -->
+                            <rect x="370" y="85" width="80" height="50" rx="6" fill="#1e293b" stroke="#10b981" stroke-width="2"/>
+                            <text x="410" y="108" fill="#10b981" font-size="11" font-weight="bold" text-anchor="middle">DHCP Server</text>
+                            <text x="410" y="125" fill="#cbd5e1" font-size="9" text-anchor="middle">192.168.10.1</text>
+
+                            <!-- Flow Arrows -->
+                            <line x1="110" y1="90" x2="370" y2="90" stroke="#ef4444" stroke-width="2" stroke-dasharray="4,4"/>
+                            <text x="240" y="84" fill="#ef4444" font-size="9" font-weight="bold" text-anchor="middle">1. DISCOVER (Broadcast)</text>
+
+                            <line x1="370" y1="105" x2="110" y2="105" stroke="#f59e0b" stroke-width="2" stroke-dasharray="4,4"/>
+                            <text x="240" y="100" fill="#fbbf24" font-size="9" font-weight="bold" text-anchor="middle">2. OFFER (192.168.10.50)</text>
+
+                            <line x1="110" y1="120" x2="370" y2="120" stroke="#38bdf8" stroke-width="2" stroke-dasharray="4,4"/>
+                            <text x="240" y="115" fill="#38bdf8" font-size="9" font-weight="bold" text-anchor="middle">3. REQUEST (Accept IP)</text>
+
+                            <line x1="370" y1="135" x2="110" y2="135" stroke="#10b981" stroke-width="2" stroke-dasharray="4,4"/>
+                            <text x="240" y="130" fill="#34d399" font-size="9" font-weight="bold" text-anchor="middle">4. ACK (Lease Granted)</text>
+
+                            <circle id="dora-pkt" cx="110" cy="90" r="6" fill="#ef4444" style="display:none; transition: all 0.5s ease-in-out;"/>
+                        </svg>
+                    </div>
+
+                    <div id="dhcp-dora-status" style="background:rgba(16,185,129,0.1); border:1px solid ${AC}; border-radius:8px; padding:10px; font-size:12px; color:#34d399;">
+                        <b>Client Status: Unconfigured (0.0.0.0)</b>. Click 'Request IP Lease' to trigger DORA allocation.
+                    </div>
+                </div>
+
+                <!-- Right: Active IP Pool & Leases -->
+                <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:14px; display:flex; flex-direction:column; gap:12px;">
+                    <h4 style="margin:0; color:${AC}; font-size:14px;">Active DHCP Bindings (show ip dhcp binding)</h4>
+                    <div style="background:#0b0f19; border:1px solid #334155; border-radius:8px; padding:10px; font-family:monospace; font-size:11px; color:#34d399; line-height:1.6;">
+                        IP Address      Client Hardware Address    Lease Expiration<br>
+                        192.168.10.50   001A.2B3C.4D5E              24 Hours (Active)
+                    </div>
+
+                    <h4 style="margin:0; color:${AC}; font-size:14px;">Excluded Addresses</h4>
+                    <div style="background:var(--bg-page); border:1px solid var(--border); border-radius:6px; padding:8px; font-size:11px; color:var(--text-muted);">
+                        <code>ip dhcp excluded-address 192.168.10.1 192.168.10.10</code><br>
+                        (Reserves .1 to .10 for router default gateway & static servers).
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    const leaseBtn = container.querySelector('#btn-request-dhcp-lease');
+    const pkt = container.querySelector('#dora-pkt');
+    const statusEl = container.querySelector('#dhcp-dora-status');
+    const clientIpText = container.querySelector('#client-ip-text');
+
+    if (leaseBtn && pkt && statusEl && clientIpText) {
+        leaseBtn.onclick = () => {
+            pkt.style.display = 'block';
+            statusEl.innerHTML = '<b style="color:#ef4444;">1. DISCOVER: Broadcasting DHCP Discover on 255.255.255.255...</b>';
+            pkt.setAttribute('cx', '110'); pkt.setAttribute('cy', '90'); pkt.setAttribute('fill', '#ef4444');
+
+            setTimeout(() => { pkt.setAttribute('cx', '370'); pkt.setAttribute('cy', '90'); }, 100);
+
+            setTimeout(() => {
+                statusEl.innerHTML = '<b style="color:#f59e0b;">2. OFFER: Server offers IP 192.168.10.50 (Subnet: /24, GW: 192.168.10.1)...</b>';
+                pkt.setAttribute('cx', '370'); pkt.setAttribute('cy', '105'); pkt.setAttribute('fill', '#f59e0b');
+            }, 700);
+
+            setTimeout(() => { pkt.setAttribute('cx', '110'); pkt.setAttribute('cy', '105'); }, 800);
+
+            setTimeout(() => {
+                statusEl.innerHTML = '<b style="color:#38bdf8;">3. REQUEST: Client requests lease for offered IP 192.168.10.50...</b>';
+                pkt.setAttribute('cx', '110'); pkt.setAttribute('cy', '120'); pkt.setAttribute('fill', '#38bdf8');
+            }, 1400);
+
+            setTimeout(() => { pkt.setAttribute('cx', '370'); pkt.setAttribute('cy', '120'); }, 1500);
+
+            setTimeout(() => {
+                statusEl.innerHTML = '<b style="color:#10b981;">4. ACK: Server confirms lease! Client IP configured: 192.168.10.50 🟢</b>';
+                pkt.setAttribute('cx', '370'); pkt.setAttribute('cy', '135'); pkt.setAttribute('fill', '#10b981');
+            }, 2100);
+
+            setTimeout(() => { pkt.setAttribute('cx', '110'); pkt.setAttribute('cy', '135'); }, 2200);
+
+            setTimeout(() => {
+                clientIpText.textContent = 'IP: 192.168.10.50';
+                clientIpText.setAttribute('fill', '#10b981');
+                pkt.style.display = 'none';
+            }, 2700);
+        };
+    }
+};
+
+// --- PRACTICAL 14: STATIC NAT SIMULATOR ---
+const initStaticNatSim = (container) => {
+    const AC = '#f59e0b'; // Amber/orange for Static NAT
+    container.innerHTML = `
+        <div style="padding:15px; font-family:var(--font-sans); color:var(--text-main); height:100%; display:flex; flex-direction:column; gap:12px; box-sizing:border-box;">
+            <div style="background:linear-gradient(135deg, rgba(245,158,11,0.15) 0%, rgba(15,23,42,0.6) 100%); border:1px solid ${AC}; border-radius:12px; padding:12px 18px; display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                    <h3 style="margin:0; color:${AC}; font-size:17px; font-weight:800; display:flex; align-items:center; gap:8px;">
+                        <span>🔄</span> Static NAT (1-to-1 Address Translation) Simulator
+                    </h3>
+                    <p style="margin:4px 0 0 0; font-size:12px; color:var(--text-muted);">
+                        Inside Local (192.168.1.10) ⇹ Inside Global (203.0.113.10) • Inbound Web Server Publishing • Cisco NAT CLI
+                    </p>
+                </div>
+            </div>
+
+            <div style="display:grid; grid-template-columns: 1fr 340px; gap:16px; flex:1;">
+                <!-- Left: Header Rewrite Animation -->
+                <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:14px; display:flex; flex-direction:column; gap:12px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <h4 style="margin:0; color:${AC}; font-size:14px;">Static 1-to-1 NAT Header Translation Process</h4>
+                        <button id="btn-send-static-nat-pkt" style="background:${AC}; color:#0f172a; border:none; padding:6px 14px; border-radius:6px; font-weight:800; font-size:12px; cursor:pointer;">
+                            🚀 Send HTTP Request from Internet
+                        </button>
+                    </div>
+
+                    <div style="position:relative; width:100%; height:240px; background:#0b0f19; border:1px solid #1e293b; border-radius:10px; overflow:hidden;">
+                        <svg width="100%" height="100%" viewBox="0 0 480 220">
+                            <!-- Internal Web Server -->
+                            <rect x="30" y="85" width="90" height="50" rx="6" fill="#1e293b" stroke="#38bdf8" stroke-width="2"/>
+                            <text x="75" y="108" fill="#38bdf8" font-size="11" font-weight="bold" text-anchor="middle">Web Server</text>
+                            <text x="75" y="125" fill="#cbd5e1" font-size="9" text-anchor="middle">192.168.1.10 (Local)</text>
+
+                            <!-- NAT Router -->
+                            <circle cx="240" cy="110" r="24" fill="#1e293b" stroke="#f59e0b" stroke-width="3"/>
+                            <text x="240" y="114" fill="#fbbf24" font-size="11" font-weight="bold" text-anchor="middle">NAT-GW</text>
+
+                            <!-- Internet Client -->
+                            <rect x="360" y="85" width="90" height="50" rx="6" fill="#1e293b" stroke="#10b981" stroke-width="2"/>
+                            <text x="405" y="108" fill="#10b981" font-size="11" font-weight="bold" text-anchor="middle">Internet User</text>
+                            <text x="405" y="125" fill="#cbd5e1" font-size="9" text-anchor="middle">8.8.8.8 (Public)</text>
+
+                            <!-- Lines -->
+                            <line x1="120" y1="110" x2="216" y2="110" stroke="#38bdf8" stroke-width="3"/>
+                            <line x1="264" y1="110" x2="360" y2="110" stroke="#f59e0b" stroke-width="3"/>
+
+                            <circle id="snat-pkt" cx="360" cy="110" r="7" fill="#10b981" style="display:none; transition: all 0.5s ease-in-out;"/>
+                        </svg>
+                    </div>
+
+                    <div id="snat-status" style="background:rgba(245,158,11,0.1); border:1px solid ${AC}; border-radius:8px; padding:10px; font-size:12px; color:#fbbf24;">
+                        <b>Static Mapping: 192.168.1.10 ⇹ 203.0.113.10</b>. Click 'Send HTTP Request' to watch header translation.
+                    </div>
+                </div>
+
+                <!-- Right: NAT Table Inspector -->
+                <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:14px; display:flex; flex-direction:column; gap:12px;">
+                    <h4 style="margin:0; color:${AC}; font-size:14px;">Active NAT Translations (show ip nat translations)</h4>
+                    <div style="background:#0b0f19; border:1px solid #334155; border-radius:8px; padding:10px; font-family:monospace; font-size:11px; color:#fbbf24; line-height:1.6;">
+                        Pro Inside Global     Inside Local      Outside Local    Outside Global<br>
+                        --- 203.0.113.10      192.168.1.10      ---              ---
+                    </div>
+
+                    <div style="background:var(--bg-page); border:1px solid var(--border); border-radius:6px; padding:8px; font-size:11px; color:var(--text-muted);">
+                        <b>Cisco Command:</b><br>
+                        <code>ip nat inside source static 192.168.1.10 203.0.113.10</code>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    const btn = container.querySelector('#btn-send-static-nat-pkt');
+    const pkt = container.querySelector('#snat-pkt');
+    const statusEl = container.querySelector('#snat-status');
+
+    if (btn && pkt && statusEl) {
+        btn.onclick = () => {
+            pkt.style.display = 'block';
+            statusEl.innerHTML = '<b style="color:#10b981;">1. Internet user requests http://203.0.113.10 (Dest IP: 203.0.113.10)...</b>';
+            pkt.setAttribute('cx', '360'); pkt.setAttribute('cy', '110');
+
+            setTimeout(() => { pkt.setAttribute('cx', '240'); pkt.setAttribute('cy', '110'); }, 100);
+
+            setTimeout(() => {
+                statusEl.innerHTML = '<b style="color:#f59e0b;">2. NAT Router translates Dest IP 203.0.113.10 ➔ Inside Local 192.168.1.10!</b>';
+            }, 700);
+
+            setTimeout(() => {
+                pkt.setAttribute('cx', '120'); pkt.setAttribute('cy', '110');
+            }, 900);
+
+            setTimeout(() => {
+                statusEl.innerHTML = '<b style="color:#38bdf8;">3. Web Server receives HTTP request on private IP 192.168.1.10 and responds! 🟢</b>';
+            }, 1500);
+
+            setTimeout(() => {
+                pkt.style.display = 'none';
+            }, 2100);
+        };
+    }
+};
+
+// --- PRACTICAL 15: DYNAMIC NAT & PAT (NAT OVERLOAD CAPSTONE) SIMULATOR ---
+const initDynamicNatSim = (container) => {
+    const AC = '#38bdf8'; // Sky blue for PAT Capstone
+    container.innerHTML = `
+        <div style="padding:15px; font-family:var(--font-sans); color:var(--text-main); height:100%; display:flex; flex-direction:column; gap:12px; box-sizing:border-box;">
+            <div style="background:linear-gradient(135deg, rgba(56,189,248,0.15) 0%, rgba(15,23,42,0.6) 100%); border:1px solid ${AC}; border-radius:12px; padding:12px 18px; display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                    <h3 style="margin:0; color:${AC}; font-size:17px; font-weight:800; display:flex; align-items:center; gap:8px;">
+                        <span>🏆</span> Practical 15: PAT (NAT Overload) & Capstone Simulator
+                    </h3>
+                    <p style="margin:4px 0 0 0; font-size:12px; color:var(--text-muted);">
+                        Many-to-1 Port Multiplexing (203.0.113.1:50001 / 50002) • End-to-End Enterprise Synthesis
+                    </p>
+                </div>
+            </div>
+
+            <div style="display:grid; grid-template-columns: 1fr 340px; gap:16px; flex:1;">
+                <!-- Left: PAT Multiplexing Animation -->
+                <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:14px; display:flex; flex-direction:column; gap:12px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <h4 style="margin:0; color:${AC}; font-size:14px;">PAT / NAT Overload Multiplexing Engine</h4>
+                        <button id="btn-simulate-pat" style="background:${AC}; color:#0f172a; border:none; padding:6px 14px; border-radius:6px; font-weight:800; font-size:12px; cursor:pointer;">
+                            🚀 Transmit 3 Host Requests Simultaneously
+                        </button>
+                    </div>
+
+                    <div style="position:relative; width:100%; height:240px; background:#0b0f19; border:1px solid #1e293b; border-radius:10px; overflow:hidden;">
+                        <svg width="100%" height="100%" viewBox="0 0 480 220">
+                            <!-- Host 1 -->
+                            <rect x="20" y="30" width="70" height="35" rx="4" fill="#1e293b" stroke="#38bdf8"/>
+                            <text x="55" y="52" fill="#38bdf8" font-size="9" font-weight="bold" text-anchor="middle">PC1: .10:50001</text>
+
+                            <!-- Host 2 -->
+                            <rect x="20" y="90" width="70" height="35" rx="4" fill="#1e293b" stroke="#10b981"/>
+                            <text x="55" y="112" fill="#10b981" font-size="9" font-weight="bold" text-anchor="middle">PC2: .11:50002</text>
+
+                            <!-- Host 3 -->
+                            <rect x="20" y="150" width="70" height="35" rx="4" fill="#1e293b" stroke="#ec4899"/>
+                            <text x="55" y="172" fill="#ec4899" font-size="9" font-weight="bold" text-anchor="middle">PC3: .12:50003</text>
+
+                            <!-- PAT Router -->
+                            <circle cx="240" cy="110" r="24" fill="#1e293b" stroke="#38bdf8" stroke-width="3"/>
+                            <text x="240" y="114" fill="#38bdf8" font-size="11" font-weight="bold" text-anchor="middle">PAT-GW</text>
+
+                            <!-- Internet -->
+                            <rect x="370" y="85" width="80" height="50" rx="6" fill="#1e293b" stroke="#f59e0b" stroke-width="2"/>
+                            <text x="410" y="114" fill="#fbbf24" font-size="11" font-weight="bold" text-anchor="middle">Internet</text>
+
+                            <!-- Lines -->
+                            <line x1="90" y1="47" x2="216" y2="110" stroke="#38bdf8" stroke-width="2"/>
+                            <line x1="90" y1="107" x2="216" y2="110" stroke="#10b981" stroke-width="2"/>
+                            <line x1="90" y1="167" x2="216" y2="110" stroke="#ec4899" stroke-width="2"/>
+                            <line x1="264" y1="110" x2="370" y2="110" stroke="#f59e0b" stroke-width="4"/>
+
+                            <circle id="pat-pkt1" cx="90" cy="47" r="5" fill="#38bdf8" style="display:none; transition: all 0.5s ease-in-out;"/>
+                            <circle id="pat-pkt2" cx="90" cy="107" r="5" fill="#10b981" style="display:none; transition: all 0.5s ease-in-out;"/>
+                            <circle id="pat-pkt3" cx="90" cy="167" r="5" fill="#ec4899" style="display:none; transition: all 0.5s ease-in-out;"/>
+                        </svg>
+                    </div>
+
+                    <div id="pat-status" style="background:rgba(56,189,248,0.1); border:1px solid ${AC}; border-radius:8px; padding:10px; font-size:12px; color:#38bdf8;">
+                        <b>PAT Mode Active: Single Public IP 203.0.113.1</b>. Click 'Transmit 3 Host Requests' to see port multiplexing.
+                    </div>
+                </div>
+
+                <!-- Right: Translation Table Inspector -->
+                <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:14px; display:flex; flex-direction:column; gap:12px;">
+                    <h4 style="margin:0; color:${AC}; font-size:14px;">Multiplexed Translation Table</h4>
+                    <div style="background:#0b0f19; border:1px solid #334155; border-radius:8px; padding:10px; font-family:monospace; font-size:10px; color:#34d399; line-height:1.6; overflow-x:auto;">
+                        Pro Inside Local           Inside Global<br>
+                        tcp 192.168.1.10:50001     203.0.113.1:50001<br>
+                        tcp 192.168.1.11:50002     203.0.113.1:50002<br>
+                        tcp 192.168.1.12:50003     203.0.113.1:50003
+                    </div>
+
+                    <div style="background:var(--bg-page); border:1px solid var(--border); border-radius:6px; padding:8px; font-size:11px; color:var(--text-muted);">
+                        <b>Cisco Command:</b><br>
+                        <code>access-list 1 permit 192.168.1.0 0.0.0.255</code><br>
+                        <code>ip nat inside source list 1 interface Gi0/1 overload</code>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    const btn = container.querySelector('#btn-simulate-pat');
+    const p1 = container.querySelector('#pat-pkt1');
+    const p2 = container.querySelector('#pat-pkt2');
+    const p3 = container.querySelector('#pat-pkt3');
+    const statusEl = container.querySelector('#pat-status');
+
+    if (btn && p1 && p2 && p3 && statusEl) {
+        btn.onclick = () => {
+            p1.style.display = 'block'; p2.style.display = 'block'; p3.style.display = 'block';
+            statusEl.innerHTML = '<b style="color:#38bdf8;">1. PC1 (.10:50001), PC2 (.11:50002), and PC3 (.12:50003) send outbound web requests...</b>';
+
+            p1.setAttribute('cx', '90'); p1.setAttribute('cy', '47');
+            p2.setAttribute('cx', '90'); p2.setAttribute('cy', '107');
+            p3.setAttribute('cx', '90'); p3.setAttribute('cy', '167');
+
+            setTimeout(() => {
+                p1.setAttribute('cx', '240'); p1.setAttribute('cy', '110');
+                p2.setAttribute('cx', '240'); p2.setAttribute('cy', '110');
+                p3.setAttribute('cx', '240'); p3.setAttribute('cy', '110');
+            }, 100);
+
+            setTimeout(() => {
+                statusEl.innerHTML = '<b style="color:#f59e0b;">2. PAT Gateway rewrites all 3 source IPs to single Public IP 203.0.113.1 with unique port sockets!</b>';
+            }, 700);
+
+            setTimeout(() => {
+                p1.setAttribute('cx', '370'); p1.setAttribute('cy', '110');
+                p2.setAttribute('cx', '370'); p2.setAttribute('cy', '110');
+                p3.setAttribute('cx', '370'); p3.setAttribute('cy', '110');
+            }, 900);
+
+            setTimeout(() => {
+                statusEl.innerHTML = '<b style="color:#10b981;">3. Packets reach Internet! All 3 LAN hosts share 1 public IP seamlessly via PAT Overload 🟢</b>';
+            }, 1500);
+
+            setTimeout(() => {
+                p1.style.display = 'none'; p2.style.display = 'none'; p3.style.display = 'none';
+            }, 2100);
+        };
+    }
+};
+
+
 const initRipSim = (container) => {
     let currentTab = 'hop_sim'; // 'hop_sim', 'tables', 'infinity', 'cli', 'timers'
 
@@ -19250,6 +19719,10 @@ const initRipSim = (container) => {
             `;
                 return;
             }
+            if (id === 'udp_tcp' || id === 'udp_tcp_sim' || (data && (data.simType === 'udp_tcp_sim' || data.simType === 'udp_tcp'))) { initUdpTcpSim(container); return; }
+            if (id === 'dhcp_config' || id === 'dhcp_config_sim' || (data && (data.simType === 'dhcp_config_sim' || data.simType === 'dhcp_config'))) { initDhcpSim(container); return; }
+            if (id === 'static_nat' || id === 'static_nat_sim' || (data && (data.simType === 'static_nat_sim' || data.simType === 'static_nat'))) { initStaticNatSim(container); return; }
+            if (id === 'dynamic_nat' || id === 'dynamic_nat_sim' || (data && (data.simType === 'dynamic_nat_sim' || data.simType === 'dynamic_nat'))) { initDynamicNatSim(container); return; }
             if (id === 'static_routing' || id === 'static_routing_sim' || (data && (data.simType === 'static_routing_sim' || data.simType === 'static_routing'))) { initStaticRoutingSim(container); return; }
             if (id === 'routing_eigrp' || id === 'eigrp_sim' || (data && (data.simType === 'eigrp_sim' || data.simType === 'routing_eigrp'))) { initEigrpSim(container); return; }
             if (id === 'routing_ospf' || id === 'ospf_sim' || (data && (data.simType === 'ospf_sim' || data.simType === 'routing_ospf'))) { initOspfSim(container); return; }
