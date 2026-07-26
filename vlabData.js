@@ -680,50 +680,188 @@ window.VLAB_DATA = {
         simType: "cli"
     },
     'topologies': {
-        title: "Network Topologies: Bus, Star, Ring, Mesh, Tree",
-        aim: "To build and simulate physical and logical topologies (Bus, Star, Ring, Mesh, Tree) and evaluate fault tolerance.",
+        title: "Practical 3: Network Topologies (Bus, Star, Ring, Mesh, Tree & Hybrid)",
+        aim: "To understand, construct, analyze, and compare physical and logical network topologies (Bus, Star, Ring, Full/Partial Mesh, Tree, and Hybrid) and evaluate failure scenarios and fault tolerance.",
         intro: {
-            summary: "Physical topology determines the layout of inter-device links, while logical topology defines data frame propagation.",
-            importance: "Topology choice impacts network installation cost, scalability, cabling complexity, and fault tolerance.",
-            applications: ["Data Center Spine-Leaf", "CAN Campus Networks", "Industrial Token Ring"],
-            outcome: "Students will construct Bus, Star, Ring, Mesh, and Tree topologies and test single-point-of-failure scenarios."
+            summary: "A network topology defines the physical and logical arrangement of computing devices, switches, routers, and transmission links. Choosing the correct topology dictates network performance, cabling cost, fault tolerance, maintenance complexity, and scalability.",
+            importance: "Topology choice directly impacts network latency, single points of failure, administrative cost, and traffic collision domains in both enterprise LANs and global ISP backbones.",
+            applications: ["Enterprise Office LANs (Star Topology)", "ISP Core Backbones (Mesh Topology)", "Campus Infrastructure (Tree Architecture)", "Industrial Control Loops (Ring Topology)", "Multi-Cloud Enterprises (Hybrid Topology)"],
+            outcome: "Students will master physical vs logical topologies, compare 6 major topologies with exact link formulas, construct topologies in the interactive simulator, and conduct failure analysis tests."
         },
-        prerequisites: ["Practical 1: Introduction to Networking Tools"],
+        prerequisites: [
+            "Practical 1: Introduction to Computer Networking Tools, Devices & Transmission Media",
+            "Practical 2: Network Commands & CLI Utilities",
+            "Basic understanding of Ethernet switches, routers, MAC addresses, and transmission media"
+        ],
         outcomes: [
-            "Build Star, Bus, Ring, Mesh, and Hybrid topologies.",
-            "Calculate total required cable links: N(N-1)/2 for full mesh.",
-            "Analyze single-point-of-failure impact across topologies."
+            "Understand physical vs logical network topologies.",
+            "Analyze structure, working principles, advantages, disadvantages, and applications of Bus, Star, Ring, Mesh (Full/Partial), Tree, and Hybrid topologies.",
+            "Calculate link requirements: Full Mesh = N(N-1)/2, Star = N, Ring = N, Bus = 1 backbone + N drop lines.",
+            "Construct topologies using the interactive topology simulator.",
+            "Perform failure analysis (link cut, switch crash, backbone break, ring disconnect) and observe traffic rerouting.",
+            "Select optimal network topologies for schools, enterprises, ISPs, and banks."
         ],
         theory: {
-            intro: "Topology defines physical layout and logical data flow path between nodes. Star topology utilizes a central switch, Bus uses a backbone cable, Ring forms a closed loop, and Mesh provides redundant links.",
+            intro: "Network topology is the physical cabling arrangement and logical data path traversal of a computer network. Topologies are categorized into Physical (hardware cables & switches) and Logical (frame forwarding & token passing protocols).",
             cards: [
-                { title: "Star Topology", content: "Central node failure collapses network, but individual link failure affects single node." },
-                { title: "Full Mesh", content: "Provides maximum redundancy with N(N-1)/2 physical links for high fault tolerance." }
+                {
+                    title: "1. Physical vs Logical Topology",
+                    content: "• Physical Topology: Represents the actual geometric arrangement of physical cables, patch panels, switches, and routers.\n• Logical Topology: Defines how data frames physically or virtually travel across the medium from source to destination.\nExample: A legacy Ethernet hub network is physically wired as a Star, but logically functions as a shared Bus where frames broadcast to all ports."
+                },
+                {
+                    title: "2. Factors Affecting Topology Selection",
+                    content: "1. Node Density & Count: Total workstations and servers requiring interconnections.\n2. Installation & Cable Cost: Medium budget (UTP vs Fiber Optic vs Redundant links).\n3. Fault Tolerance & Reliability: Ability to maintain connectivity during cable or switch failures.\n4. Scalability: Ease of expanding the network without disrupting existing users.\n5. Maintenance Complexity: Overhead required to diagnose and isolate faulty cables."
+                },
+                {
+                    title: "3. Bus Topology (Shared Backbone Cable)",
+                    content: "Structure:\nPC1 -----+\n          |\nPC2 -----+========== Backbone Cable (50Ω Terminators) =========+\n          |\nPC3 -----+\n\nWorking Principle: All devices connect to a single central coaxial backbone cable via BNC T-connectors. 50-ohm terminators at both ends absorb signals to prevent reflection.\nAdvantages: Simple design, minimal cable length, low initial installation cost.\nDisadvantages: Single point of failure (backbone break Downs entire network), high collision probability under heavy traffic, difficult fault isolation."
+                },
+                {
+                    title: "4. Star Topology (Central Switch Node)",
+                    content: "Structure:\n          PC1\n           |\nPC2 ---- Switch ---- PC3\n           |\n          PC4\n\nWorking Principle: Every end-host has a dedicated point-to-point cable connected to a central Layer-2 switch. The switch inspects destination MAC addresses and forwards frames only to the target port.\nAdvantages: High fault tolerance (individual cable failure only isolates 1 PC), zero collision in full-duplex mode, easy to add/remove nodes, simple maintenance.\nDisadvantages: Central switch failure downs all connected nodes, higher cabling requirement than Bus."
+                },
+                {
+                    title: "5. Ring Topology (Token Passing Loop)",
+                    content: "Structure:\nPC1 ----> PC2\n ^         |\n |         v\nPC4 <---- PC3\n\nWorking Principle: Nodes connect in a closed circular loop. A 3-byte Token frame circulates continuously. Only the host holding the token is permitted to transmit data, eliminating packet collisions.\nAdvantages: Deterministic transmission delay, equal network access for all nodes, zero packet collisions.\nDisadvantages: A single cable cut or node crash breaks the token loop (unless Dual Ring FDDI is used), difficult troubleshooting."
+                },
+                {
+                    title: "6. Mesh Topology (Full & Partial Redundancy)",
+                    content: "Structure (Full Mesh - 4 Nodes, 6 Links):\nPC1 -------- PC2\n |\\          /|\n | \\        / |\n |  \\      /  |\n |   \\    /   |\n |    \\  /    |\n |     \\/     |\nPC3 -------- PC4\n\nWorking Principle: Full Mesh connects every node directly to every other node with a dedicated link. Partial Mesh interconnects only mission-critical core nodes.\nFull Mesh Link Formula: L = N * (N - 1) / 2\nPorts per Node: P = N - 1\nAdvantages: Ultimate fault tolerance, maximum bandwidth, instant automatic failover rerouting.\nDisadvantages: Exponential cabling cost, extreme port density requirements, complex setup."
+                },
+                {
+                    title: "7. Tree Topology (Hierarchical 3-Tier)",
+                    content: "Structure:\n                    Core Switch (Root)\n                     /             \\\n             Distribution Switch   Distribution Switch\n               /           \\         /           \\\n            Access PC1   Access PC2 Access PC3   Access PC4\n\nWorking Principle: Combines Star topologies into a multi-level hierarchy (Core, Distribution, Access tiers).\nAdvantages: Highly scalable, structured management, isolates faults within specific subtrees.\nDisadvantages: Failure of a distribution or core switch affects all dependent access nodes."
+                },
+                {
+                    title: "8. Hybrid Topology (Multi-Topology Integration)",
+                    content: "Structure: Combines two or more distinct topologies (e.g., Star-Bus, Star-Ring, Mesh-Tree).\nApplications: Multinational corporate WANs, university campuses, enterprise banking networks.\nAdvantages: Highly flexible, tailored to specific departmental requirements, maximum scalability.\nDisadvantages: Complex design, costly maintenance, requires specialized network administrators."
+                }
             ],
-            formulas: ["Full Mesh Links = N * (N - 1) / 2", "Star Topology Links = N"],
-            standards: ["IEEE 802.3 Star Ethernet", "IEEE 802.5 Token Ring"]
+            formulas: [
+                "Full Mesh Physical Links: L = N * (N - 1) / 2",
+                "Full Mesh Ports Required per Device: P = N - 1",
+                "Star Topology Cable Links: L = N",
+                "Ring Topology Cable Links: L = N",
+                "Bus Topology Cable Links: L = 1 Backbone + N Drop Cables",
+                "Tree Topology Links: L = (Number of Switches - 1) + N Host Links"
+            ],
+            standards: [
+                "IEEE 802.3 Standard for Ethernet CSMA/CD (Star & Bus Topologies)",
+                "IEEE 802.5 Standard for Token Ring Architecture",
+                "ANSI X3T9.5 / ISO 9314 Fiber Distributed Data Interface (FDDI Dual Ring)",
+                "IEEE 802.1D Spanning Tree Protocol (STP) for Redundant Loop Protection in Mesh/Tree"
+            ]
         },
         tools: [
-            { name: "24-Port L2 Switch", layer: "Layer 2", ports: "24x FE Ports", usage: "Star topology hub/switch node", statusLED: "Green (Link Active)" }
+            { name: "50-Ohm BNC Bus Terminator", layer: "Layer 1 Physical", ports: "BNC Male Connector", usage: "Absorbs RF signal reflections at coaxial backbone ends", statusLED: "Passive Resistance 50Ω" },
+            { name: "Cisco Catalyst 2960 24-Port L2 Star Switch", layer: "Layer 2 Switching", ports: "24x 10/100 Mbps + 2x GbE Uplinks", usage: "Central node for Star Topology LANs", statusLED: "Green (Link UP / Active)" },
+            { name: "Token-Ring Multistation Access Unit (MAU)", layer: "Layer 2 Data Link", ports: "8x Ring Ports + Ring-In/Ring-Out", usage: "Relays token passing loop in Ring Topologies", statusLED: "Relay Active LED" },
+            { name: "Cisco ASR 9000 Mesh Core Router Matrix", layer: "Layer 3 Routing", ports: "100 GbE / 400 GbE Dense Linecards", usage: "High-availability ISP Full Mesh backbone router", statusLED: "Redundant Power / Active" },
+            { name: "3-Tier Hierarchical Switch Stack", layer: "Layer 2 / Layer 3", ports: "Core, Distribution, Access Stack", usage: "Enterprise Tree Topology distribution tier", statusLED: "Stack Master Green" },
+            { name: "Hybrid Enterprise WAN Gateway", layer: "Layer 3 Multi-Protocol", ports: "Fiber, Serial, Ethernet Multi-FX", usage: "Interconnects Star LANs to ISP Mesh WAN", statusLED: "WAN Link Active" }
         ],
         procedure: [
-            "Select Star Topology mode in the simulator workspace.",
-            "Connect 4 PCs to a central 24-Port Layer-2 Switch.",
-            "Assign IP addresses 10.0.0.1 through 10.0.0.4 to the PCs.",
-            "Simulate frame transmission from PC1 to PC3 and monitor ARP broadcast."
+            "Open the Interactive Network Topologies Simulator tab.",
+            "Select a topology type from the toolbar: Bus, Star, Ring, Full Mesh, Partial Mesh, Tree, or Hybrid.",
+            "Adjust the Node Count slider (N = 4 to 8 nodes) and inspect the automatically calculated link requirements (L = N(N-1)/2 for Mesh, L = N for Star/Ring).",
+            "Click 'Simulate Transmission' to observe packet flow from Source (PC1) to Destination (PC3).",
+            "Perform Failure Analysis: Click any cable link or central switch to sever the connection.",
+            "Observe the impact of the cut link on data packet traversal and record fault tolerance behavior."
         ],
         troubleshooting: {
-            problem: "Bus topology network drops all packets.",
-            hints: ["Check if cable terminators are connected at both ends of backbone."],
-            fix: "Attach 50-ohm BNC terminators to both ends of the bus cable."
+            problem: "Bus topology drops all packets and shows 100% signal collision.",
+            hints: ["Check if 50-ohm BNC cable terminators are missing at either end of the backbone cable."],
+            fix: "Attach 50-ohm BNC terminators to both ends of the coaxial backbone cable to prevent signal bounce."
         },
-        viva: [
-            { q: "How many links are required to connect 6 nodes in a Full Mesh topology?", a: "6 * (6 - 1) / 2 = 15 links." },
-            { q: "What is the main advantage of a Star topology over a Bus topology?", a: "A cable failure in a Star topology only disconnects one computer, whereas in a Bus topology it downs the entire network." }
+        questions: [
+            {
+                q: "How many physical transmission links are required to build a Full Mesh network connecting 6 computers?",
+                options: [
+                    "6 links",
+                    "12 links",
+                    "15 links",
+                    "30 links"
+                ],
+                correct: 2,
+                answer: 2,
+                explanation: "Using the Full Mesh link formula L = N(N - 1) / 2: for N = 6, L = 6 * (6 - 1) / 2 = 6 * 5 / 2 = 15 physical links."
+            },
+            {
+                q: "Which network topology suffers from a total network outage if a single central networking device fails?",
+                options: [
+                    "Full Mesh Topology",
+                    "Star Topology",
+                    "Bus Topology",
+                    "Dual Ring Topology"
+                ],
+                correct: 1,
+                answer: 1,
+                explanation: "In a Star Topology, all end-hosts connect to a single central switch or hub. If the central switch fails, all communication between connected nodes collapses."
+            },
+            {
+                q: "What mechanism is used in Ring Topology to prevent packet collisions on the shared transmission loop?",
+                options: [
+                    "CSMA/CD Backoff Timer",
+                    "Token Passing Mechanism",
+                    "Spanning Tree Protocol (STP)",
+                    "Wavelength Division Multiplexing"
+                ],
+                correct: 1,
+                answer: 1,
+                explanation: "Ring networks (such as IEEE 802.5 Token Ring) use a 3-byte Token frame that circulates around the loop. Only the host currently holding the token is allowed to transmit, guaranteeing zero collisions."
+            },
+            {
+                q: "What component must be attached to both ends of a Bus Topology backbone cable to prevent signal reflection?",
+                options: [
+                    "RJ-45 Keystone Jack",
+                    "50-Ohm BNC Cable Terminator",
+                    "SFP Transceiver Module",
+                    "Fiber Optic Splice Protector"
+                ],
+                correct: 1,
+                answer: 1,
+                explanation: "In Bus Topology, 50-ohm BNC terminators are installed at both ends of the coaxial cable to absorb electrical signals and prevent signal bounce/reflection."
+            },
+            {
+                q: "Which hierarchical topology organizes networking devices into Core, Distribution, and Access tiers?",
+                options: [
+                    "Tree Topology",
+                    "Ring Topology",
+                    "Bus Topology",
+                    "Single Mesh Topology"
+                ],
+                correct: 0,
+                answer: 0,
+                explanation: "Tree Topology (also called Hierarchical Topology) organizes switches into a root Core tier, intermediate Distribution tier, and end-host Access tier."
+            },
+            {
+                q: "Which topology provides the maximum fault tolerance and highest redundancy for mission-critical ISP backbones?",
+                options: [
+                    "Bus Topology",
+                    "Star Topology",
+                    "Full Mesh Topology",
+                    "Simple Ring Topology"
+                ],
+                correct: 2,
+                answer: 2,
+                explanation: "Full Mesh Topology provides direct dedicated links between all nodes. If any single cable breaks, traffic instantly reroutes through alternative redundant paths."
+            }
         ],
-        assignment: "Calculate the total link count for 10 nodes in Full Mesh vs Star topology. Draw both layouts.",
-        references: [{ title: "Cisco Campus Network Design Guide", link: "https://www.cisco.com" }],
-        simType: "pkt_tracer"
+        viva: [
+            { q: "What is the key difference between Physical Topology and Logical Topology?", a: "Physical topology is the actual geometric arrangement of physical cables and hardware devices. Logical topology is the path data frames take to travel across the network." },
+            { q: "How many network ports does each computer require in a Full Mesh network of N nodes?", a: "Each computer requires P = N - 1 network interface ports." },
+            { q: "What happens if one workstation cable breaks in a Star Topology?", a: "Only that specific workstation loses network connectivity. All other workstations connected to the switch continue communicating normally." },
+            { q: "What happens if the backbone cable breaks in a Bus Topology?", a: "The entire network fails completely because signal reflection occurs at the break point and the bus becomes un-terminated." },
+            { q: "Why do ISPs and Data Centers use Mesh Topology despite its high cost?", a: "Because Mesh Topology provides redundant communication paths. If a fiber cable is cut, traffic automatically fails over to alternate paths without any service downtime." },
+            { q: "What is a Hybrid Topology? Give an example.", a: "A Hybrid Topology combines two or more different topologies (e.g. Star-Bus, Star-Ring, Mesh-Tree). An example is a university campus using Star topology in computer labs connected via a Tree structure to a Mesh data center." }
+        ],
+        assignment: "Calculate the total link count and port requirement for 8 nodes in Full Mesh vs Star topology. Draw the structural diagrams for both and analyze the impact of severing 1 link in each.",
+        references: [
+            { title: "IEEE 802.3 Ethernet Standards Overview", link: "https://standards.ieee.org" },
+            { title: "Cisco Campus Network Architecture & Topology Design Guide", link: "https://www.cisco.com" },
+            { title: "RFC 791 - Internet Protocol Specification", link: "https://datatracker.ietf.org/doc/html/rfc791" }
+        ],
+        simType: "topologies"
     },
     'ip_class': {
         title: "IPv4 & IPv6 Address Classification",

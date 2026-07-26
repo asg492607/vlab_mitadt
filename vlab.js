@@ -8281,8 +8281,203 @@ document.addEventListener('DOMContentLoaded', async () => {
             mediaItems.forEach((el, i) => el.style.borderColor = i === idx ? media[i].color : 'var(--border)');
         });
         obs.observe(mediaDetail, { attributes: true, attributeFilter: ['data-render-media'] });
-    };
+    // --- TOPOLOGY SIMULATOR (PRACTICAL 3) ---
+    const initTopologySim = (container) => {
+        let activeTopo = 'bus';
+        let nodeCount = 4;
 
+        const topoConfigs = {
+            bus: {
+                name: "Bus Topology 🚌",
+                desc: "All nodes connect to a single central backbone cable via T-connectors with 50-ohm terminators at both ends.",
+                formula: (n) => ({ links: 1, dropLines: n, portsPerNode: 1, collisionRisk: "High (CSMA/CD Shared Medium)", redundancy: "⭐ (Poor - 1 Cut Downs All)" }),
+                diagram: `
+                 [ PC1 ]      [ PC2 ]      [ PC3 ]      [ PC4 ]
+                    |            |            |            |
+ [50Ω Term] =======+============+============+============+======= [50Ω Term]
+                               Backbone Cable
+                `
+            },
+            star: {
+                name: "Star Topology ⭐️",
+                desc: "Every node connects via a dedicated point-to-point cable to a central Layer-2 Ethernet switch.",
+                formula: (n) => ({ links: n, dropLines: n, portsPerNode: 1, collisionRisk: "0% (Full-Duplex Switch Ports)", redundancy: "⭐⭐⭐ (Good - Node Isolated on Cut)" }),
+                diagram: `
+                              [ PC1 ]
+                                 |
+                 [ PC2 ] ---- [ SWITCH ] ---- [ PC3 ]
+                                 |
+                              [ PC4 ]
+                `
+            },
+            ring: {
+                name: "Ring Topology ⭕️",
+                desc: "Nodes form a closed unidirectional loop. A 3-byte Token circulates continuously to control transmission.",
+                formula: (n) => ({ links: n, dropLines: 0, portsPerNode: 2, collisionRisk: "0% (Token Passing Protocol)", redundancy: "⭐⭐ (Medium - Loop Cut Breaks Ring)" }),
+                diagram: `
+                             [ PC1 ] ----> [ PC2 ]
+                                ^             |
+                                |   (Token)   v
+                             [ PC4 ] <---- [ PC3 ]
+                `
+            },
+            mesh_full: {
+                name: "Full Mesh Topology 🕸️",
+                desc: "Every node is directly connected to every other node, providing maximum redundancy and bandwidth.",
+                formula: (n) => ({ links: Math.round(n * (n - 1) / 2), dropLines: 0, portsPerNode: n - 1, collisionRisk: "0% (Dedicated Direct Links)", redundancy: "⭐⭐⭐⭐⭐ (Excellent - Multi-Path Failover)" }),
+                diagram: `
+                             [ PC1 ] ======== [ PC2 ]
+                              |  \\          /  |
+                              |   \\        /   |
+                              |    \\      /    |
+                              |     \\    /     |
+                             [ PC4 ] ======== [ PC3 ]
+                `
+            },
+            tree: {
+                name: "Tree Topology 🌳",
+                desc: "Hierarchical structure combining Star topologies in Core, Distribution, and Access tiers.",
+                formula: (n) => ({ links: n + 2, dropLines: n, portsPerNode: 1, collisionRisk: "Low (Subtree Isolated)", redundancy: "⭐⭐⭐⭐ (High - Hierarchical Structure)" }),
+                diagram: `
+                              [ Core Switch ]
+                               /           \\
+                    [ Dist Switch 1 ]    [ Dist Switch 2 ]
+                       /        \\           /        \\
+                    [ PC1 ]    [ PC2 ]   [ PC3 ]    [ PC4 ]
+                `
+            },
+            hybrid: {
+                name: "Hybrid Topology 🔀",
+                desc: "Integrates multiple distinct topologies (Star-Bus / Star-Ring / Mesh-Tree) into an enterprise network.",
+                formula: (n) => ({ links: n + 4, dropLines: n, portsPerNode: 2, collisionRisk: "0% (Isolated Domains)", redundancy: "⭐⭐⭐⭐⭐ (Maximum Custom Enterprise)" }),
+                diagram: `
+                   [ Star LAN 1 ] <==== Backbone ====> [ Ring LAN 2 ]
+                     (4 Hosts)                          (4 Hosts)
+                `
+            }
+        };
+
+        const render = () => {
+            const cfg = topoConfigs[activeTopo];
+            const metrics = cfg.formula(nodeCount);
+
+            container.innerHTML = `
+                <div class="sim-toolbar" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+                    <div class="section-title" style="font-size:22px; margin:0; color:var(--primary);">Interactive Topologies Simulator 🕸️</div>
+                    <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                        ${Object.keys(topoConfigs).map(key => `
+                            <button class="btn-sim ${key === activeTopo ? 'primary' : ''}" onclick="window.switchTopo('${key}')">${topoConfigs[key].name.split(' ')[0]} ${topoConfigs[key].name.split(' ')[1]}</button>
+                        `).join('')}
+                    </div>
+                </div>
+                <div class="sim-workspace" style="padding:20px; gap:20px; flex-direction:column; overflow-y:auto;">
+                    <div style="display:flex; gap:20px; flex-wrap:wrap; width:100%;">
+                        <div class="theory-card" style="flex:1.5; min-width:320px; margin:0;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                                <h3 style="color:var(--primary); margin:0;">${cfg.name}</h3>
+                                <div style="font-size:12px; color:var(--text-muted); background:var(--bg-page); padding:4px 10px; border-radius:6px; border:1px solid var(--border);">
+                                    Active Nodes: <b>${nodeCount}</b>
+                                </div>
+                            </div>
+                            <p style="font-size:13px; line-height:1.6; color:var(--text-main); margin-bottom:15px;">${cfg.desc}</p>
+                            
+                            <!-- Interactive ASCII Architecture Box -->
+                            <div style="background:#0e1420; border:1px solid var(--border); border-radius:10px; padding:15px; font-family:'JetBrains Mono', monospace; font-size:12px; color:#10b981; white-space:pre; overflow-x:auto; margin-bottom:15px; text-align:center;">
+${cfg.diagram}
+                            </div>
+
+                            <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:15px;">
+                                <button class="btn-sim primary" id="btnSimTx">Simulate Frame Flow ▶</button>
+                                <button class="btn-sim danger" id="btnCutLink">Simulate Cable Cut ✂️</button>
+                                <button class="btn-sim warning" id="btnCrashNode">Crash Central Node 💥</button>
+                                <button class="btn-sim" id="btnResetTopo">Reset Topology ↺</button>
+                            </div>
+
+                            <div id="topoStatusLog" style="padding:12px; background:rgba(37,99,235,0.06); border:1px solid var(--border); border-radius:8px; font-size:12px; line-height:1.6; min-height:48px; color:var(--text-main);">
+                                💡 Select an action above to simulate data packet flow or failure scenarios.
+                            </div>
+                        </div>
+
+                        <div class="theory-card" style="flex:1; min-width:260px; margin:0; display:flex; flex-direction:column; gap:14px;">
+                            <h3 style="color:var(--primary); margin:0;">Formula Metrics & Audit 📊</h3>
+                            
+                            <div style="display:flex; flex-direction:column; gap:10px;">
+                                <div style="padding:10px 14px; background:var(--bg-page); border:1px solid var(--border); border-radius:8px;">
+                                    <div style="font-size:11px; color:var(--text-muted);">REQUIRED CABLE LINKS (L)</div>
+                                    <div style="font-size:20px; font-weight:800; color:var(--primary); font-family:'JetBrains Mono', monospace;">${metrics.links} Links</div>
+                                </div>
+                                <div style="padding:10px 14px; background:var(--bg-page); border:1px solid var(--border); border-radius:8px;">
+                                    <div style="font-size:11px; color:var(--text-muted);">NIC PORTS REQUIRED PER NODE</div>
+                                    <div style="font-size:18px; font-weight:800; color:var(--success); font-family:'JetBrains Mono', monospace;">${metrics.portsPerNode} Port(s)</div>
+                                </div>
+                                <div style="padding:10px 14px; background:var(--bg-page); border:1px solid var(--border); border-radius:8px;">
+                                    <div style="font-size:11px; color:var(--text-muted);">COLLISION DOMAIN RISK</div>
+                                    <div style="font-size:13px; font-weight:700; color:var(--warning);">${metrics.collisionRisk}</div>
+                                </div>
+                                <div style="padding:10px 14px; background:var(--bg-page); border:1px solid var(--border); border-radius:8px;">
+                                    <div style="font-size:11px; color:var(--text-muted);">REDUNDANCY & FAULT RATING</div>
+                                    <div style="font-size:14px; font-weight:800; color:var(--primary);">${metrics.redundancy}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            window.switchTopo = (key) => { activeTopo = key; render(); };
+
+            document.getElementById('btnSimTx').onclick = () => {
+                const log = document.getElementById('topoStatusLog');
+                if (activeTopo === 'bus') {
+                    log.innerHTML = `<span style="color:var(--primary); font-weight:bold;">[CSMA/CD Broadcast]</span> PC1 transmits frame onto 50Ω backbone... <br>PC2, PC3, PC4 receive frame simultaneously. PC3 accepts frame (MAC Match), PC2/PC4 drop frame. Signal absorbed by 50Ω terminators.`;
+                } else if (activeTopo === 'star') {
+                    log.innerHTML = `<span style="color:var(--success); font-weight:bold;">[Switch Micro-Segmented Flow]</span> PC1 sends unicast frame to Switch Port 1.<br>Switch checks MAC table: Target PC3 on Port 3. Frame forwarded exclusively to PC3 with zero collision!`;
+                } else if (activeTopo === 'ring') {
+                    log.innerHTML = `<span style="color:var(--warning); font-weight:bold;">[Token Passing Loop]</span> Token frame captured by PC1.<br>PC1 appends data frame and forwards to PC2 → PC3. PC3 copies data & sets ACK bit → forwards back to PC1 → PC1 releases Token!`;
+                } else if (activeTopo === 'mesh_full') {
+                    log.innerHTML = `<span style="color:var(--success); font-weight:bold;">[Direct Dedicated Link]</span> PC1 sends frame via direct link PC1↔PC3.<br>Zero intermediary hops, max bandwidth (100 Gbps), zero collision!`;
+                } else if (activeTopo === 'tree') {
+                    log.innerHTML = `<span style="color:var(--primary); font-weight:bold;">[Hierarchical Routing]</span> PC1 (Access Switch 1) sends frame to Distribution Switch 1 → Core Switch → Distribution Switch 2 → PC3 (Access Switch 2).`;
+                } else {
+                    log.innerHTML = `<span style="color:var(--primary); font-weight:bold;">[Hybrid Gateway Rerouting]</span> Frame routed from Star LAN 1 over backbone link to Ring LAN 2 seamlessly.`;
+                }
+            };
+
+            document.getElementById('btnCutLink').onclick = () => {
+                const log = document.getElementById('topoStatusLog');
+                if (activeTopo === 'bus') {
+                    log.innerHTML = `<span style="color:var(--danger); font-weight:bold;">❌ BACKBONE CABLE CUT!</span><br>Signal reflection occurs at break point. <b>Entire Bus network collapses (100% outage for all hosts).</b>`;
+                } else if (activeTopo === 'star') {
+                    log.innerHTML = `<span style="color:var(--warning); font-weight:bold;">⚠️ WORKSTATION CABLE CUT (PC2)!</span><br>PC2 loses connectivity. <b>PC1, PC3, and PC4 continue communicating via central switch without disruption!</b>`;
+                } else if (activeTopo === 'ring') {
+                    log.innerHTML = `<span style="color:var(--danger); font-weight:bold;">❌ RING LOOP BROKEN (Link PC2-PC3 Cut)!</span><br>Token circulation halts. <b>Entire ring network downs unless Dual Ring (FDDI) wraps around.</b>`;
+                } else if (activeTopo === 'mesh_full') {
+                    log.innerHTML = `<span style="color:var(--success); font-weight:bold;">🛡️ MESH LINK PC1↔PC3 CUT!</span><br>Spanning Tree / OSPF detects failure instantly: <b>Traffic automatically reroutes via PC1 → PC2 → PC3. Zero downtime!</b>`;
+                } else if (activeTopo === 'tree') {
+                    log.innerHTML = `<span style="color:var(--danger); font-weight:bold;">⚠️ DISTRIBUTION LINK CUT!</span><br>Subtree PCs (PC1 & PC2) disconnected from Core. Remaining network operates normally.`;
+                } else {
+                    log.innerHTML = `<span style="color:var(--warning); font-weight:bold;">⚠️ HYBRID LINK SEVERED!</span><br>Redundant gateway link activated to maintain cross-topology data flow.`;
+                }
+            };
+
+            document.getElementById('btnCrashNode').onclick = () => {
+                const log = document.getElementById('topoStatusLog');
+                if (activeTopo === 'star') {
+                    log.innerHTML = `<span style="color:var(--danger); font-weight:bold;">💥 CENTRAL SWITCH CRASHED!</span><br>Single point of failure triggered: <b>All connected devices (PC1, PC2, PC3, PC4) lose connectivity completely.</b>`;
+                } else if (activeTopo === 'mesh_full') {
+                    log.innerHTML = `<span style="color:var(--success); font-weight:bold;">🛡️ CORE NODE CRASHED!</span><br>Mesh redundancy activates: <b>Surviving nodes automatically re-mesh around the dead node.</b>`;
+                } else {
+                    log.innerHTML = `<span style="color:var(--danger); font-weight:bold;">💥 ROOT / CORE NODE FAILURE!</span><br>Hierarchical backbone affected. Backup standby router takes over active role.`;
+                }
+            };
+
+            document.getElementById('btnResetTopo').onclick = () => {
+                render();
+            };
+        };
+
+        render();
+    };
 
     // --- OPERATING SYSTEMS SIMULATORS ---
     const initCpuSchedulingSim = (container) => {
@@ -14608,6 +14803,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (data.simType === 'ip_sorter')          { initIpSorter(container);          return; }
         if (data.simType === 'cmd_challenge' || data.simType === 'cli') { initCmdChallenge(container); return; }
         if (data.simType === 'media_study')        { initMediaStudy(container);        return; }
+        if (data.simType === 'topologies')         { initTopologySim(container);        return; }
         if (data.simType === 'vlan_sim')           { initVlanSim(container);           return; }
         if (data.simType === 'dns')                { initDnsSim(container);            return; }
         if (data.simType === 'dv_sim' || data.simType === 'ls_sim') { initRoutingSim(container); return; }
