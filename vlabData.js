@@ -13346,119 +13346,136 @@ window.VLAB_DATA = {
     "osi_tcpip": {
         "title": "Practical 2: Network Communication Models (OSI & TCP/IP)",
         "theme": "From Bits to Browser – Understanding How Data Travels Across a Network",
-        "aim": "To examine the foundational Open Systems Interconnection (OSI) 7-layer model and 4-layer TCP/IP protocol suite, analyze end-to-end data transmission, observe header encapsulation and decapsulation from Physical bits to Application browser data, map network protocols and hardware devices to their respective layers, and diagnose multi-layer network communication faults.",
+        "aim": "To master the foundational 7-layer Open Systems Interconnection (OSI) reference model and 4-layer TCP/IP Internet protocol suite, examine Layer 1 to Layer 7 protocols, PDUs, and hardware devices, observe protocol encapsulation and decapsulation during end-to-end network transmission, and diagnose network faults using layer-wise isolation.",
         "intro": {
-            "summary": "Computer networks connect billions of devices globally. To standardize communication between heterogeneous devices and software, networking follows layered architectures: the 7-layer OSI conceptual reference model and the 4-layer TCP/IP Internet protocol suite. Every network packet travels through systematic encapsulation at the sender and decapsulation at the receiver.",
-            "importance": "This practical forms the conceptual backbone of the entire Virtual Lab (VLAB). Every subsequent experiment—including VLANs, Subnetting, RIP/OSPF/EIGRP Routing, TCP/UDP Transport, DHCP, and NAT—directly builds upon the layer-wise understanding gained here.",
+            "summary": "Computer networks connect billions of devices worldwide. To enable seamless communication between devices manufactured by different vendors, networking follows structured communication models. The 7-layer OSI Model developed by ISO provides a conceptual framework, while the 4-layer TCP/IP Model represents the practical protocol suite powering the modern Internet.",
+            "importance": "This practical serves as the foundational backbone of the entire Virtual Lab (VLAB). Every subsequent experiment—including VLANs, Subnetting, RIP/OSPF/EIGRP Routing, TCP/UDP Transport, DHCP, and NAT—directly builds upon the layer-wise understanding gained here.",
             "applications": [
-                "Web Browsing & E-Commerce (HTTP/HTTPS over TCP/IP)",
-                "Enterprise Network Architecture & Router/Switch Placement",
-                "Packet Inspection & Wireshark Protocol Analysis",
-                "Layer-wise Network Fault Troubleshooting"
+                "Global Internet & Web Browsing (HTTP/HTTPS over TCP/IP)",
+                "Cloud Computing & Distributed Data Center Networks",
+                "Enterprise WAN/LAN Infrastructure & Switch/Router Placement",
+                "Cybersecurity Perimeter Defense & Layer-wise Packet Auditing"
             ],
-            "outcome": "Students will be able to trace end-to-end data flow from 'https://www.google.com' through all 7 OSI layers, explain PDU transformations (Data ➔ Segment ➔ Packet ➔ Frame ➔ Bits), differentiate OSI vs TCP/IP models, and identify affected layers during network outages."
+            "outcome": "Students will be able to trace end-to-end data transmission from 'https://www.google.com' through all 7 OSI layers, explain PDU transformations (Data ➔ Segment ➔ Packet ➔ Frame ➔ Bits), differentiate OSI vs TCP/IP architectures, and troubleshoot network outages using layer-based thinking."
         },
         "prerequisites": [
-            "Practical 1: Introduction to Networking Tools & Utilities"
+            "Practical 1: Introduction to Networking Tools, Devices & Media"
         ],
         "outcomes": [
-            "Explain why layered communication models are required in computer networking.",
-            "Describe the specific functions and Protocol Data Units (PDUs) of all seven OSI layers.",
+            "Explain why standardized communication models are required in computer networking.",
+            "Describe the purpose, responsibilities, protocols, devices, and PDUs of all seven OSI layers.",
             "Describe the four layers of the TCP/IP protocol suite and map them to OSI layers.",
+            "Compare the conceptual OSI model with the practical TCP/IP Internet model.",
             "Visualize and explain protocol encapsulation (header addition) and decapsulation (header stripping).",
-            "Identify key protocols (HTTP, TLS, TCP, UDP, IP, ARP, Ethernet) operating at each layer.",
-            "Identify hardware networking devices (Hubs, Switches, Routers, Firewalls) associated with each layer.",
-            "Analyze end-to-end packet transmission across local switches, routers, and global Internet gateways.",
-            "Troubleshoot network communication failures by isolating the affected layer."
+            "Identify key protocols (HTTP, FTP, DNS, DHCP, TCP, UDP, IP, ICMP, ARP, Ethernet, Wi-Fi) operating at each layer.",
+            "Identify hardware devices (Hubs, Switches, Routers, Firewalls, Gateways) associated with each layer.",
+            "Visualize end-to-end communication from browser client to remote server.",
+            "Isolate and troubleshoot network communication failures using layer-wise diagnostic logic."
         ],
         "theory": {
-            "intro": "Layered models decompose complex communication into modular, manageable steps, enabling interoperability across diverse vendor hardware and software.",
+            "intro": "Communication models divide network transmission into logical, standardized layers. Each layer handles a specific aspect of data delivery, ensuring vendor interoperability, modular design, and streamlined troubleshooting.",
             "sections": [
                 {
                     "heading": "1. Introduction",
-                    "content": "Computer networks connect billions of devices worldwide. Although communication appears instantaneous, data undergoes systematic processing across logical layers before reaching its destination. The OSI model (ISO 7498) and TCP/IP suite (RFC 1122) provide the architecture for modern network engineering."
+                    "content": "Computer networks connect billions of devices worldwide, enabling seamless data transfer between computers, smartphones, servers, and IoT devices. Although communication appears instantaneous, every message travels through multiple processing stages before reaching its destination.\\n\\nTo standardize communication between heterogeneous devices, networking relies on structured models. The 7-Layer Open Systems Interconnection (OSI) Model, developed by ISO, defines conceptual communication layers, while the 4-Layer TCP/IP Model represents the practical protocol suite used on the Internet."
                 },
                 {
                     "heading": "2. Learning Objectives",
-                    "content": "Master core concepts:\\n• Requirements for layered communication architectures.\\n• The 7 OSI layers and 4 TCP/IP layers.\\n• Header encapsulation and decapsulation.\\n• Protocols, PDUs, and hardware devices by layer.\\n• End-to-end Digital Twin packet flow."
+                    "content": "After completing this practical, students will be able to:\\n• Explain why layered communication models are required.\\n• Describe the responsibilities of each OSI layer.\\n• Describe the TCP/IP protocol suite.\\n• Compare the OSI and TCP/IP models.\\n• Explain encapsulation and decapsulation.\\n• Identify protocols operating at each layer.\\n• Identify networking devices associated with each layer.\\n• Visualize end-to-end communication.\\n• Troubleshoot communication using layer-based thinking."
                 },
                 {
                     "heading": "3. Why Communication Models are Required",
-                    "content": "Layering offers modularity, vendor independence, standardized interfaces, simplified troubleshooting, and flexible protocol development without affecting adjacent layers."
+                    "content": "Before standardized models, networking hardware and software were proprietary—devices from one vendor could not communicate with those from another. Communication models address this by providing:\\n\\n• Vendor Independence: Standard protocols allow equipment from Cisco, Juniper, Apple, and Microsoft to interoperate.\\n• Common Standards: Universal rules for addressing, framing, and signaling.\\n• Interoperability: Ensures heterogeneous systems communicate seamlessly.\\n• Modular Design: Changes in one layer (e.g., swapping Wi-Fi for Ethernet) do not affect higher layers.\\n• Easier Troubleshooting: Engineers isolate faults to specific layers (e.g., checking cable link at Layer 1 before diagnosing IP at Layer 3).\\n• Scalability: Supports network growth from small LANs to global Internet infrastructure."
                 },
                 {
-                    "heading": "4. Evolution of Network Communication",
-                    "content": "From early proprietary protocols (SNA, AppleTalk) to ARPANET's TCP/IP development in the 1970s and ISO's 7-Layer OSI reference standard in 1984."
+                    "heading": "4. What is the OSI Model?",
+                    "content": "The Open Systems Interconnection (OSI) Model was introduced by the International Organization for Standardization (ISO) in 1984 as a conceptual reference framework.\\n\\nIt divides network communication into seven distinct layers, stacked from top to bottom:\\n\\nLayer 7: Application Layer\\nLayer 6: Presentation Layer\\nLayer 5: Session Layer\\nLayer 4: Transport Layer\\nLayer 3: Network Layer\\nLayer 2: Data Link Layer\\nLayer 1: Physical Layer\\n\\nPurpose: To provide a universal theoretical model for understanding how hardware and software components interact during network transmission."
                 },
                 {
-                    "heading": "5. What is the OSI Model?",
-                    "content": "The Open Systems Interconnection model divides communication into 7 distinct layers: 7-Application, 6-Presentation, 5-Session, 4-Transport, 3-Network, 2-Data Link, and 1-Physical."
+                    "heading": "5. Detailed OSI Layer Breakdown",
+                    "content": "• PHYSICAL LAYER (Layer 1):\\n  - Purpose: Transmits raw unformatted bit streams over physical/wireless media.\\n  - Responsibilities: Bit synchronization, signal timing, voltage levels, data rates, physical connectors.\\n  - Devices: Hubs, Repeaters, Network Cables (UTP, STP, Fiber Optic), Transceivers.\\n  - Protocols: Ethernet Physical (10BASE-T, 1000BASE-T), DSL, IEEE 802.11 Wi-Fi Physical.\\n  - PDU: Bits.\\n  - Real-World Example: Transmitting electrical pulses over a Cat6 Ethernet cable.\\n\\n• DATA LINK LAYER (Layer 2):\\n  - Purpose: Provides reliable node-to-node frame delivery across a shared physical medium.\\n  - Responsibilities: Physical MAC addressing, framing, flow control, error detection (CRC).\\n  - Devices: Layer 2 Switches, Bridges, Network Interface Cards (NICs).\\n  - Protocols: Ethernet (IEEE 802.3), PPP, HDLC, Wi-Fi MAC (802.11), 802.1Q VLAN Tagging.\\n  - PDU: Frame.\\n  - Real-World Example: A switch forwarding an Ethernet frame to a target PC based on its 48-bit MAC address.\\n\\n• NETWORK LAYER (Layer 3):\\n  - Purpose: Manages logical addressing and routes packets across different interconnected networks.\\n  - Responsibilities: Logical IP addressing, packet forwarding, best-path routing determination, fragmentation.\\n  - Devices: Routers, Layer 3 Switches.\\n  - Protocols: IPv4, IPv6, ICMP, ARP, OSPF, RIP, EIGRP, BGP.\\n  - PDU: Packet.\\n  - Real-World Example: A router selecting the shortest path to forward an IP packet to a web server.\\n\\n• TRANSPORT LAYER (Layer 4):\\n  - Purpose: Guarantees process-to-process communication between host applications.\\n  - Responsibilities: Segmentation, port multiplexing, error recovery, flow control, connection management.\\n  - Devices: Stateful Firewalls, Load Balancers.\\n  - Protocols: TCP (connection-oriented), UDP (connectionless).\\n  - PDU: Segment (TCP) / Datagram (UDP).\\n  - Real-World Example: TCP managing the 3-way handshake to establish a reliable browser connection.\\n\\n• SESSION LAYER (Layer 5):\\n  - Purpose: Establishes, maintains, synchronizes, and terminates communication sessions between software applications.\\n  - Responsibilities: Session checkpointing, recovery, authentication, dialogue control.\\n  - Devices: Workstations, Application Servers.\\n  - Protocols: NetBIOS, PPTP, RPC, SOCKS.\\n  - PDU: Data.\\n  - Real-World Example: Maintaining a secure online banking session while navigating multiple pages.\\n\\n• PRESENTATION LAYER (Layer 6):\\n  - Purpose: Translates data formats between the application layer and network, ensuring syntax compatibility.\\n  - Responsibilities: Data formatting, MIME encoding, SSL/TLS encryption/decryption, data compression.\\n  - Devices: Workstations, Security Gateways.\\n  - Protocols: SSL/TLS, ASCII, UTF-8, JPEG, PNG, GIF, MP3, MPEG.\\n  - PDU: Data.\\n  - Real-World Example: Encrypting credit card details using TLS 1.3 before transmission.\\n\\n• APPLICATION LAYER (Layer 7):\\n  - Purpose: Serves as the direct interface between user software applications and network services.\\n  - Responsibilities: Providing network services for web, email, file transfer, and domain resolution.\\n  - Devices: PCs, Laptops, Mobile Devices, Web Servers.\\n  - Protocols: HTTP, HTTPS, FTP, SFTP, DNS, DHCP, SMTP, POP3, IMAP, SSH, SNMP.\\n  - PDU: Data.\\n  - Real-World Example: A web browser issuing an HTTP GET request for www.google.com."
                 },
                 {
-                    "heading": "6. Detailed Study of All Seven Layers",
-                    "content": "• Layer 7 (Application): Interface for user software (HTTP, FTP, DNS, SMTP).\\n• Layer 6 (Presentation): Formatting, MIME, SSL/TLS Encryption, Compression (JPEG, ASCII).\\n• Layer 5 (Session): Session establishment, maintenance, and teardown (RPC, NetBIOS).\\n• Layer 4 (Transport): End-to-end connection control, segmentation, flow control, port addressing (TCP, UDP).\\n• Layer 3 (Network): Logical IP addressing, routing across networks (IPv4, IPv6, ICMP, Routers).\\n• Layer 2 (Data Link): Physical MAC addressing, framing, error detection, switch bridging (Ethernet, Switches, NICs).\\n• Layer 1 (Physical): Bit transmission over physical/wireless media, signaling, cables (UTP, Fiber, Wireless, Hubs)."
+                    "heading": "6. OSI Layer Summary Table",
+                    "content": "Layer | Name | PDU | Hardware Device | Example Protocols\\n7 | Application | Data | PC / Mobile | HTTP, HTTPS, DNS, DHCP\\n6 | Presentation | Data | PC / Host | SSL/TLS, JPEG, UTF-8\\n5 | Session | Data | PC / Server | NetBIOS, RPC, SOCKS\\n4 | Transport | Segment | Firewall / Load Balancer | TCP, UDP\\n3 | Network | Packet | Router / L3 Switch | IPv4, IPv6, ICMP, OSPF\\n2 | Data Link | Frame | L2 Switch / NIC | Ethernet, Wi-Fi MAC, ARP\\n1 | Physical | Bits | Hub / Cable / Transceiver | UTP, Fiber, 802.11 PHY"
                 },
                 {
                     "heading": "7. What is the TCP/IP Model?",
-                    "content": "The practical Internet model consisting of 4 layers: 4-Application, 3-Transport, 2-Internet, 1-Network Access."
+                    "content": "The TCP/IP Model (also known as the DoD Model) was developed by the US Department of Defense and ARPANET in the 1970s. Unlike the theoretical OSI model, TCP/IP is the practical architecture implemented on the commercial Internet.\\n\\nIt consists of 4 functional layers:\\n\\nLayer 4: Application Layer (combines OSI Layers 5, 6, 7)\\nLayer 3: Transport Layer (corresponds to OSI Layer 4)\\nLayer 2: Internet Layer (corresponds to OSI Layer 3)\\nLayer 1: Network Access Layer (combines OSI Layers 1, 2)"
                 },
                 {
-                    "heading": "8. OSI vs TCP/IP Comparison",
-                    "content": "OSI is a 7-layer theoretical reference model. TCP/IP is a 4-layer practical implementation standard powering the modern Internet."
+                    "heading": "8. TCP/IP Layer Details",
+                    "content": "• Application Layer: Handles high-level protocol services, data formatting, encryption, and user interfaces (HTTP, HTTPS, DNS, SSH, FTP).\\n• Transport Layer: Provides process-to-process data stream delivery and error control (TCP, UDP).\\n• Internet Layer: Defines packet formatting, logical IP addressing, and inter-network routing (IP, ICMP, ARP).\\n• Network Access Layer: Manages physical hardware interfaces, MAC addressing, framing, and bit transmission (Ethernet, Wi-Fi)."
                 },
                 {
-                    "heading": "9. Encapsulation & Decapsulation",
-                    "content": "• Encapsulation: As data moves down the stack (7 ➔ 1), each layer prepends its control header, producing PDUs: Data ➔ Segment (L4) ➔ Packet (L3) ➔ Frame (L2) ➔ Bits (L1).\\n• Decapsulation: As bits arrive at destination (1 ➔ 7), each layer strips its header and passes payload up."
+                    "heading": "9. OSI vs TCP/IP Comparison",
+                    "content": "Feature | OSI Model | TCP/IP Model\\nNumber of Layers | 7 Layers | 4 Layers\\nType | Theoretical Reference Model | Practical Implementation Suite\\nDeveloper | ISO (International Org for Standard) | DARPA / DoD (Department of Defense)\\nSession & Presentation | Dedicated separate Layers 5 & 6 | Merged into Application Layer\\nPhysical & Data Link | Dedicated separate Layers 1 & 2 | Merged into Network Access Layer\\nDominance | Academic reference standard | Worldwide Internet standard"
                 },
                 {
-                    "heading": "10. End-to-End Communication",
-                    "content": "Tracing data flow from Client Laptop ➔ Switch ➔ Router ➔ Cloud ➔ Destination Server."
+                    "heading": "10. Protocols at Every Layer",
+                    "content": "Protocol | OSI Layer | Primary Purpose\\nHTTP / HTTPS | Application (L7) | Web page transfer & secure browsing\\nDNS | Application (L7) | Domain name to IP address resolution\\nDHCP | Application (L7) | Automated dynamic IP assignment\\nFTP / SFTP | Application (L7) | File upload and download\\nTCP | Transport (L4) | Reliable, ordered connection delivery\\nUDP | Transport (L4) | Fast, connectionless low-latency delivery\\nIPv4 / IPv6 | Network (L3) | Logical IP addressing & global routing\\nICMP | Network (L3) | Diagnostics & error reporting (ping, traceroute)\\nARP | Data Link (L2) | Resolves Layer 3 IP address to Layer 2 MAC address\\nEthernet | Data Link (L2) | Local Area Network framing (IEEE 802.3)\\nWi-Fi | Physical/Data Link (L1/L2) | Wireless local area networking (IEEE 802.11)"
                 },
                 {
-                    "heading": "11. Layer-wise Interactive Simulations",
-                    "content": "Exploring individual layer functions through interactive protocol inspectors."
+                    "heading": "11. Devices at Every Layer",
+                    "content": "Device | Layer | Primary Function\\nHub / Repeater | Layer 1 (Physical) | Regenerates & broadcasts raw bits to all ports\\nSwitch (L2) | Layer 2 (Data Link) | Forwards frames based on MAC address table\\nRouter | Layer 3 (Network) | Routes packets across networks via IP routing table\\nFirewall | Layer 3/4 (Network/Transport) | Filters traffic based on IP, ports, and state\\nGateway / Proxy | Layer 7 (Application) | Translates application protocols & payloads"
                 },
                 {
-                    "heading": "12. Complete Communication Simulator",
-                    "content": "Full digital twin simulation of browser requests ('https://www.google.com')."
+                    "heading": "12. Protocol Data Units (PDUs)",
+                    "content": "A Protocol Data Unit (PDU) represents data at a specific layer of the communication stack:\\n\\nApplication Layer ➔ Data\\nPresentation Layer ➔ Data\\nSession Layer ➔ Data\\nTransport Layer ➔ Segment (TCP) or Datagram (UDP)\\nNetwork Layer ➔ Packet\\nData Link Layer ➔ Frame\\nPhysical Layer ➔ Bits\\n\\nFlow: Data ➔ Segment ➔ Packet ➔ Frame ➔ Bits"
                 },
                 {
-                    "heading": "13. Guided Experiment",
-                    "content": "Step-by-step walkthrough of packet header assembly."
+                    "heading": "13. Encapsulation",
+                    "content": "Encapsulation is the process where each layer prepends its control header to the data payload received from the layer above before passing it down.\\n\\n1. Application creates Data payload.\\n2. Transport adds TCP Header (Src/Dst Ports) ➔ Segment.\\n3. Network adds IP Header (Src/Dst IPs) ➔ Packet.\\n4. Data Link adds Ethernet Header & CRC Trailer (Src/Dst MACs) ➔ Frame.\\n5. Physical converts Frame into electrical/optical Signals ➔ Bits."
                 },
                 {
-                    "heading": "14. Practice Lab",
-                    "content": "Interactive drag-and-drop layer mapping challenges."
+                    "heading": "14. Decapsulation",
+                    "content": "Decapsulation is the reverse process performed by the receiving host:\\n\\n1. Physical receives raw Bits and passes Frame to Data Link.\\n2. Data Link strips Ethernet Header & checks CRC trailer; passes Packet to Network.\\n3. Network strips IP Header; passes Segment to Transport.\\n4. Transport strips TCP Header; reassembles payload and passes Data to Application.\\n5. Application displays content to user."
                 },
                 {
-                    "heading": "15. Assessment",
-                    "content": "Pre-test and Post-test evaluations measuring layer conceptual mastery."
+                    "heading": "15. End-to-End Communication Example (www.google.com)",
+                    "content": "When a student types www.google.com in a web browser:\\n\\n1. Application: Browser generates HTTP GET request.\\n2. DNS Resolution: DNS queries resolve www.google.com to IP 142.250.183.206.\\n3. Transport: TCP executes 3-Way Handshake (SYN, SYN-ACK, ACK) on port 443.\\n4. Network: IP adds source IP (192.168.1.10) and destination IP (142.250.183.206).\\n5. Data Link: Ethernet adds local MAC addresses (Client MAC ➔ Switch MAC).\\n6. Physical: Transmits bits over network cable.\\n7. Network Switches: Forward frame via Layer 2 MAC table.\\n8. Edge Routers: Route packet across WAN via Layer 3 IP routing table.\\n9. Web Server: Decapsulates headers and processes HTTP request.\\n10. Response: Server returns HTML response through the same reverse layered flow."
                 },
                 {
-                    "heading": "16. Report & Certificate",
-                    "content": "Generating verified academic lab report upon completion."
+                    "heading": "16. Advantages of Layered Communication Models",
+                    "content": "• Standardization: Global consensus on protocol specifications.\\n• Simplified Learning: Breaks complex networking into 7 easy-to-understand concepts.\\n• Modular Flexibility: Upgrading Wi-Fi to 5G at Layer 1 does not break HTTP at Layer 7.\\n• Efficient Troubleshooting: Engineers isolate errors to specific layers systematically.\\n• Vendor Independence: Hardware from Cisco, HP, Dell, and Apple interoperate seamlessly."
+                },
+                {
+                    "heading": "17. Limitations of Communication Models",
+                    "content": "• OSI model is theoretical: No commercial network uses pure 7-layer OSI protocols.\\n• TCP/IP merges layers: Session, Presentation, and Application are combined into one layer.\\n• Overhead: Each layer adds header bytes, slightly increasing packet size."
+                },
+                {
+                    "heading": "18. Real-World Applications",
+                    "content": "• Global Internet: Powered by TCP/IP protocol suite.\\n• Cloud Computing & Virtualization: Virtual switches and routers operate across Layers 2-4.\\n• Enterprise Data Centers: Core/Distribution routing and VLAN switching.\\n• Cybersecurity: Firewalls and IDS/IPS inspect Layer 3-7 headers for threat prevention.\\n• Internet of Things (IoT): Lightweight Layer 7 protocols (MQTT, CoAP) over UDP."
+                },
+                {
+                    "heading": "19. Best Practices for Network Engineering",
+                    "content": "1. Always troubleshoot bottom-up (Layer 1 Physical ➔ Layer 7 Application).\\n2. Verify physical cable link (L1) before diagnosing IP configuration (L3).\\n3. Learn protocol headers and port numbers before configuring routers/firewalls.\\n4. Relate every new technology (VLANs, Subnetting, OSPF, NAT) to its corresponding layer."
+                },
+                {
+                    "heading": "20. Practical Summary",
+                    "content": "Communication models divide complex network transmission into structured, modular layers. The 7-Layer OSI Model provides a theoretical reference standard, while the 4-Layer TCP/IP Model powers the global Internet. Understanding layer responsibilities, PDUs, protocols, hardware devices, encapsulation, and decapsulation provides the essential foundation for all subsequent practicals including IP addressing, Subnetting, VLANs, Routing, TCP/UDP, DHCP, and NAT."
                 }
             ]
         },
         "hardware_inspector": [
             {
                 "id": "osi_stack_inspector",
-                "name": "7-Layer OSI & TCP/IP Architecture Inspector",
+                "name": "7-Layer OSI & TCP/IP Digital Twin Inspector",
                 "category": "Architectural Digital Twin",
-                "description": "Interactive visualizer of the 7 OSI layers, 4 TCP/IP layers, headers, and PDUs.",
-                "svg": "<svg viewBox=\"0 0 400 240\" xmlns=\"http://www.w3.org/2000/svg\">\n                <rect x=\"15\" y=\"15\" width=\"370\" height=\"210\" rx=\"10\" fill=\"#0f172a\" stroke=\"#38bdf8\" stroke-width=\"2\"/>\n                <text x=\"200\" y=\"38\" fill=\"#38bdf8\" font-size=\"13\" font-weight=\"bold\" text-anchor=\"middle\">OSI 7-LAYER ⇹ TCP/IP 4-LAYER DIGITAL TWIN</text>\n                \n                <!-- OSI Stack -->\n                <rect x=\"30\" y=\"50\" width=\"160\" height=\"20\" fill=\"#ec4899\" rx=\"3\"/><text x=\"110\" y=\"64\" fill=\"#fff\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">7. Application (Data)</text>\n                <rect x=\"30\" y=\"73\" width=\"160\" height=\"20\" fill=\"#a855f7\" rx=\"3\"/><text x=\"110\" y=\"87\" fill=\"#fff\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">6. Presentation (Data)</text>\n                <rect x=\"30\" y=\"96\" width=\"160\" height=\"20\" fill=\"#8b5cf6\" rx=\"3\"/><text x=\"110\" y=\"110\" fill=\"#fff\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">5. Session (Data)</text>\n                <rect x=\"30\" y=\"119\" width=\"160\" height=\"20\" fill=\"#3b82f6\" rx=\"3\"/><text x=\"110\" y=\"133\" fill=\"#fff\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">4. Transport (Segment)</text>\n                <rect x=\"30\" y=\"142\" width=\"160\" height=\"20\" fill=\"#10b981\" rx=\"3\"/><text x=\"110\" y=\"156\" fill=\"#fff\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">3. Network (Packet)</text>\n                <rect x=\"30\" y=\"165\" width=\"160\" height=\"20\" fill=\"#f59e0b\" rx=\"3\"/><text x=\"110\" y=\"179\" fill=\"#fff\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">2. Data Link (Frame)</text>\n                <rect x=\"30\" y=\"188\" width=\"160\" height=\"20\" fill=\"#ef4444\" rx=\"3\"/><text x=\"110\" y=\"202\" fill=\"#fff\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">1. Physical (Bits)</text>\n\n                <!-- TCP/IP Stack -->\n                <rect x=\"210\" y=\"50\" width=\"160\" height=\"66\" fill=\"#a855f7\" rx=\"4\" stroke=\"#fff\" stroke-width=\"1\"/>\n                <text x=\"290\" y=\"88\" fill=\"#fff\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">1. Application</text>\n                \n                <rect x=\"210\" y=\"119\" width=\"160\" height=\"20\" fill=\"#3b82f6\" rx=\"4\" stroke=\"#fff\" stroke-width=\"1\"/>\n                <text x=\"290\" y=\"133\" fill=\"#fff\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">2. Transport</text>\n                \n                <rect x=\"210\" y=\"142\" width=\"160\" height=\"20\" fill=\"#10b981\" rx=\"4\" stroke=\"#fff\" stroke-width=\"1\"/>\n                <text x=\"290\" y=\"156\" fill=\"#fff\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">3. Internet</text>\n                \n                <rect x=\"210\" y=\"165\" width=\"160\" height=\"43\" fill=\"#f59e0b\" rx=\"4\" stroke=\"#fff\" stroke-width=\"1\"/>\n                <text x=\"290\" y=\"190\" fill=\"#fff\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">4. Network Access</text>\n            </svg>"
+                "description": "Visualizes 7 OSI layers, 4 TCP/IP layers, headers, PDUs, and hardware devices.",
+                "svg": "<svg viewBox=\"0 0 400 240\" xmlns=\"http://www.w3.org/2000/svg\">\n                <rect x=\"15\" y=\"15\" width=\"370\" height=\"210\" rx=\"10\" fill=\"#0f172a\" stroke=\"#38bdf8\" stroke-width=\"2\"/>\n                <text x=\"200\" y=\"38\" fill=\"#38bdf8\" font-size=\"13\" font-weight=\"bold\" text-anchor=\"middle\">OSI 7-LAYER ⇹ TCP/IP 4-LAYER DIGITAL TWIN</text>\n\n                <rect x=\"30\" y=\"50\" width=\"160\" height=\"20\" fill=\"#ec4899\" rx=\"3\"/><text x=\"110\" y=\"64\" fill=\"#fff\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">7. Application (Data)</text>\n                <rect x=\"30\" y=\"73\" width=\"160\" height=\"20\" fill=\"#a855f7\" rx=\"3\"/><text x=\"110\" y=\"87\" fill=\"#fff\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">6. Presentation (Data)</text>\n                <rect x=\"30\" y=\"96\" width=\"160\" height=\"20\" fill=\"#8b5cf6\" rx=\"3\"/><text x=\"110\" y=\"110\" fill=\"#fff\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">5. Session (Data)</text>\n                <rect x=\"30\" y=\"119\" width=\"160\" height=\"20\" fill=\"#3b82f6\" rx=\"3\"/><text x=\"110\" y=\"133\" fill=\"#fff\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">4. Transport (Segment)</text>\n                <rect x=\"30\" y=\"142\" width=\"160\" height=\"20\" fill=\"#10b981\" rx=\"3\"/><text x=\"110\" y=\"156\" fill=\"#fff\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">3. Network (Packet)</text>\n                <rect x=\"30\" y=\"165\" width=\"160\" height=\"20\" fill=\"#f59e0b\" rx=\"3\"/><text x=\"110\" y=\"179\" fill=\"#fff\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">2. Data Link (Frame)</text>\n                <rect x=\"30\" y=\"188\" width=\"160\" height=\"20\" fill=\"#ef4444\" rx=\"3\"/><text x=\"110\" y=\"202\" fill=\"#fff\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">1. Physical (Bits)</text>\n\n                <rect x=\"210\" y=\"50\" width=\"160\" height=\"66\" fill=\"#a855f7\" rx=\"4\" stroke=\"#fff\" stroke-width=\"1\"/>\n                <text x=\"290\" y=\"88\" fill=\"#fff\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">1. Application</text>\n                \n                <rect x=\"210\" y=\"119\" width=\"160\" height=\"20\" fill=\"#3b82f6\" rx=\"4\" stroke=\"#fff\" stroke-width=\"1\"/>\n                <text x=\"290\" y=\"133\" fill=\"#fff\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">2. Transport</text>\n                \n                <rect x=\"210\" y=\"142\" width=\"160\" height=\"20\" fill=\"#10b981\" rx=\"4\" stroke=\"#fff\" stroke-width=\"1\"/>\n                <text x=\"290\" y=\"156\" fill=\"#fff\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">3. Internet</text>\n                \n                <rect x=\"210\" y=\"165\" width=\"160\" height=\"43\" fill=\"#f59e0b\" rx=\"4\" stroke=\"#fff\" stroke-width=\"1\"/>\n                <text x=\"290\" y=\"190\" fill=\"#fff\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">4. Network Access</text>\n            </svg>"
             }
         ],
         "troubleshooting": {
             "problem": "Multi-Layer Network Communication Failure (Diagnose Affected Layer)",
             "hints": [
-                "Check if physical Ethernet cable is unplugged or Wi-Fi radio is disabled (Layer 1 Physical).",
-                "Check if MAC address table is unpopulated or ARP resolution failed (Layer 2 Data Link).",
-                "Check if device has an invalid IP address or gateway router is unreachable (Layer 3 Network).",
-                "Check if firewall is blocking TCP port 80/443 (Layer 4 Transport).",
-                "Check if DNS domain resolution fails for www.google.com (Layer 7 Application)."
+                "Check if physical Ethernet cable is unplugged or link light is off (Layer 1 Physical).",
+                "Check if ARP resolution failed or MAC address table is unpopulated (Layer 2 Data Link).",
+                "Check if IP address is misconfigured or default gateway is unreachable (Layer 3 Network).",
+                "Check if stateful firewall is blocking TCP port 80/443 (Layer 4 Transport).",
+                "Check if DNS resolution fails for domain www.google.com (Layer 7 Application)."
             ],
-            "fix": "Isolate fault using layer-by-layer troubleshooting: Verify Physical cable link ➔ Check Link-Layer MAC/ARP ➔ Verify Network Layer IP ping ➔ Verify Transport Layer port socket ➔ Test Application Layer DNS & HTTP."
+            "fix": "Isolate fault using bottom-up troubleshooting: Verify Physical cable link ➔ Check Link-Layer MAC/ARP ➔ Verify Network Layer IP ping ➔ Verify Transport Layer port socket ➔ Test Application Layer DNS & HTTP."
         },
         "evaluations": {
             "pretest": [
@@ -13471,7 +13488,7 @@ window.VLAB_DATA = {
                         "Layer 7 - Application"
                     ],
                     "answer": 1,
-                    "explanation": "Layer 3 (Network) handles logical IP addressing and routing."
+                    "explanation": "Layer 3 (Network) manages logical IP addressing and inter-network routing."
                 },
                 {
                     "q": "What is the Protocol Data Unit (PDU) of the Data Link Layer (Layer 2)?",
@@ -13482,7 +13499,7 @@ window.VLAB_DATA = {
                         "Segment"
                     ],
                     "answer": 1,
-                    "explanation": "Layer 2 packages data into Frames containing MAC addresses."
+                    "explanation": "Layer 2 packages data into Frames containing MAC headers."
                 },
                 {
                     "q": "Which layer performs SSL/TLS encryption, compression, and character encoding?",
@@ -13493,10 +13510,10 @@ window.VLAB_DATA = {
                         "Application Layer (Layer 7)"
                     ],
                     "answer": 0,
-                    "explanation": "Layer 6 (Presentation) formats, compresses, and encrypts data."
+                    "explanation": "Layer 6 (Presentation) formats, compresses, and encrypts payloads."
                 },
                 {
-                    "q": "Which device operates primarily at Layer 2 of the OSI model?",
+                    "q": "Which hardware device operates primarily at Layer 2 of the OSI model?",
                     "options": [
                         "Hub",
                         "Layer 2 Switch",
@@ -13504,7 +13521,7 @@ window.VLAB_DATA = {
                         "Application Gateway"
                     ],
                     "answer": 1,
-                    "explanation": "Switches forward Ethernet frames using Layer 2 MAC address tables."
+                    "explanation": "Switches forward Ethernet frames using MAC address tables at Layer 2."
                 },
                 {
                     "q": "What is the process of adding headers as data moves down the OSI stack?",
@@ -13515,7 +13532,7 @@ window.VLAB_DATA = {
                         "Segmentation"
                     ],
                     "answer": 1,
-                    "explanation": "Encapsulation adds headers at each layer from top to bottom."
+                    "explanation": "Encapsulation prepends headers at each layer from top to bottom."
                 }
             ],
             "posttest": [
@@ -13528,7 +13545,7 @@ window.VLAB_DATA = {
                         "5 OSI, 4 TCP/IP"
                     ],
                     "answer": 0,
-                    "explanation": "OSI defines 7 layers; TCP/IP defines 4 layers."
+                    "explanation": "OSI defines 7 conceptual layers; TCP/IP defines 4 practical layers."
                 },
                 {
                     "q": "Which TCP/IP layer corresponds to OSI Layers 5, 6, and 7 combined?",
@@ -13539,7 +13556,7 @@ window.VLAB_DATA = {
                         "Application Layer"
                     ],
                     "answer": 3,
-                    "explanation": "TCP/IP Application Layer encompasses Session, Presentation, and Application functions."
+                    "explanation": "TCP/IP Application Layer merges Session, Presentation, and Application services."
                 },
                 {
                     "q": "What happens during Decapsulation at the receiving host?",
@@ -13550,7 +13567,7 @@ window.VLAB_DATA = {
                         "IP addresses are rewritten"
                     ],
                     "answer": 1,
-                    "explanation": "Decapsulation strips headers at each layer as payload moves up to Layer 7."
+                    "explanation": "Decapsulation strips control headers as data moves up to Layer 7."
                 },
                 {
                     "q": "Which protocols operate at Layer 4 (Transport Layer)?",
@@ -13572,7 +13589,7 @@ window.VLAB_DATA = {
                         "Layer 7 Application"
                     ],
                     "answer": 2,
-                    "explanation": "IP address and gateway misconfigurations occur at Layer 3 Network."
+                    "explanation": "IP address and default gateway routing occur at Layer 3 Network."
                 },
                 {
                     "q": "What is the PDU at Layer 4 (Transport Layer) for TCP?",
@@ -13583,7 +13600,7 @@ window.VLAB_DATA = {
                         "Segment"
                     ],
                     "answer": 3,
-                    "explanation": "Layer 4 divides data streams into TCP Segments."
+                    "explanation": "Layer 4 divides byte streams into TCP Segments."
                 },
                 {
                     "q": "Which layer uses 48-bit hardware MAC addresses for node-to-node delivery?",
@@ -13594,7 +13611,7 @@ window.VLAB_DATA = {
                         "Layer 4"
                     ],
                     "answer": 1,
-                    "explanation": "Layer 2 (Data Link) uses MAC addresses inside Ethernet frame headers."
+                    "explanation": "Layer 2 (Data Link) uses 48-bit MAC addresses inside Ethernet frames."
                 },
                 {
                     "q": "Which layer establishes, manages, and terminates session dialogues between applications?",
@@ -13616,7 +13633,7 @@ window.VLAB_DATA = {
                         "Layer 4 Transport"
                     ],
                     "answer": 0,
-                    "explanation": "Hubs, cables, and connectors operate at Layer 1 Physical."
+                    "explanation": "Hubs, repeaters, and cables operate at Layer 1 Physical."
                 },
                 {
                     "q": "What protocol resolves a Layer 3 IP address to a Layer 2 MAC address?",
@@ -13627,26 +13644,26 @@ window.VLAB_DATA = {
                         "ICMP"
                     ],
                     "answer": 2,
-                    "explanation": "Address Resolution Protocol (ARP) bridges Layer 3 IP to Layer 2 MAC."
+                    "explanation": "Address Resolution Protocol (ARP) maps Layer 3 IP to Layer 2 MAC."
                 }
             ]
         },
         "viva": [
             {
                 "q": "Why is the OSI model referred to as a reference model while TCP/IP is an implementation protocol suite?",
-                "a": "The OSI model was developed by ISO as a theoretical architecture standard. TCP/IP was developed empirically by ARPANET and became the actual protocol suite used on the commercial Internet."
+                "a": "The OSI model was created by ISO as a conceptual standard. TCP/IP was developed empirically by ARPANET/DARPA and became the actual protocol suite used on the Internet."
             },
             {
                 "q": "Explain the concept of Encapsulation with an example.",
-                "a": "Encapsulation is the process where each layer prepends a control header to the data payload from above. For example, an HTTP GET request (L7) gets a TCP header (L4, Segment), then an IP header (L3, Packet), then an Ethernet header (L2, Frame), before being transmitted as bits (L1)."
+                "a": "Encapsulation is where each layer prepends a header to payload data. For example, an HTTP request (L7) gets a TCP header (L4 Segment), an IP header (L3 Packet), and an Ethernet header/trailer (L2 Frame) before being sent as bits (L1)."
             },
             {
                 "q": "What is the difference between Layer 2 MAC addressing and Layer 3 IP addressing?",
-                "a": "Layer 2 MAC addresses are 48-bit hardware addresses permanently burned into network interface cards for local node-to-node delivery. Layer 3 IP addresses are 32-bit (IPv4) or 128-bit (IPv6) logical addresses assigned dynamically for global inter-network routing."
+                "a": "Layer 2 MAC addresses are 48-bit permanent hardware addresses for local node-to-node delivery. Layer 3 IP addresses are 32-bit (IPv4) or 128-bit (IPv6) logical addresses assigned for global inter-network routing."
             },
             {
                 "q": "What is a Protocol Data Unit (PDU)?",
-                "a": "A PDU is the specific format of data payload plus headers at a given layer: L7/6/5 = Data, L4 = Segment (TCP) / Datagram (UDP), L3 = Packet, L2 = Frame, L1 = Bits."
+                "a": "A PDU is the specific format of data payload plus headers at a layer: L7/6/5 = Data, L4 = Segment (TCP) / Datagram (UDP), L3 = Packet, L2 = Frame, L1 = Bits."
             }
         ],
         "simType": "osi_tcpip_sim"
@@ -13654,119 +13671,136 @@ window.VLAB_DATA = {
     "communication_models": {
         "title": "Practical 2: Network Communication Models (OSI & TCP/IP)",
         "theme": "From Bits to Browser – Understanding How Data Travels Across a Network",
-        "aim": "To examine the foundational Open Systems Interconnection (OSI) 7-layer model and 4-layer TCP/IP protocol suite, analyze end-to-end data transmission, observe header encapsulation and decapsulation from Physical bits to Application browser data, map network protocols and hardware devices to their respective layers, and diagnose multi-layer network communication faults.",
+        "aim": "To master the foundational 7-layer Open Systems Interconnection (OSI) reference model and 4-layer TCP/IP Internet protocol suite, examine Layer 1 to Layer 7 protocols, PDUs, and hardware devices, observe protocol encapsulation and decapsulation during end-to-end network transmission, and diagnose network faults using layer-wise isolation.",
         "intro": {
-            "summary": "Computer networks connect billions of devices globally. To standardize communication between heterogeneous devices and software, networking follows layered architectures: the 7-layer OSI conceptual reference model and the 4-layer TCP/IP Internet protocol suite. Every network packet travels through systematic encapsulation at the sender and decapsulation at the receiver.",
-            "importance": "This practical forms the conceptual backbone of the entire Virtual Lab (VLAB). Every subsequent experiment—including VLANs, Subnetting, RIP/OSPF/EIGRP Routing, TCP/UDP Transport, DHCP, and NAT—directly builds upon the layer-wise understanding gained here.",
+            "summary": "Computer networks connect billions of devices worldwide. To enable seamless communication between devices manufactured by different vendors, networking follows structured communication models. The 7-layer OSI Model developed by ISO provides a conceptual framework, while the 4-layer TCP/IP Model represents the practical protocol suite powering the modern Internet.",
+            "importance": "This practical serves as the foundational backbone of the entire Virtual Lab (VLAB). Every subsequent experiment—including VLANs, Subnetting, RIP/OSPF/EIGRP Routing, TCP/UDP Transport, DHCP, and NAT—directly builds upon the layer-wise understanding gained here.",
             "applications": [
-                "Web Browsing & E-Commerce (HTTP/HTTPS over TCP/IP)",
-                "Enterprise Network Architecture & Router/Switch Placement",
-                "Packet Inspection & Wireshark Protocol Analysis",
-                "Layer-wise Network Fault Troubleshooting"
+                "Global Internet & Web Browsing (HTTP/HTTPS over TCP/IP)",
+                "Cloud Computing & Distributed Data Center Networks",
+                "Enterprise WAN/LAN Infrastructure & Switch/Router Placement",
+                "Cybersecurity Perimeter Defense & Layer-wise Packet Auditing"
             ],
-            "outcome": "Students will be able to trace end-to-end data flow from 'https://www.google.com' through all 7 OSI layers, explain PDU transformations (Data ➔ Segment ➔ Packet ➔ Frame ➔ Bits), differentiate OSI vs TCP/IP models, and identify affected layers during network outages."
+            "outcome": "Students will be able to trace end-to-end data transmission from 'https://www.google.com' through all 7 OSI layers, explain PDU transformations (Data ➔ Segment ➔ Packet ➔ Frame ➔ Bits), differentiate OSI vs TCP/IP architectures, and troubleshoot network outages using layer-based thinking."
         },
         "prerequisites": [
-            "Practical 1: Introduction to Networking Tools & Utilities"
+            "Practical 1: Introduction to Networking Tools, Devices & Media"
         ],
         "outcomes": [
-            "Explain why layered communication models are required in computer networking.",
-            "Describe the specific functions and Protocol Data Units (PDUs) of all seven OSI layers.",
+            "Explain why standardized communication models are required in computer networking.",
+            "Describe the purpose, responsibilities, protocols, devices, and PDUs of all seven OSI layers.",
             "Describe the four layers of the TCP/IP protocol suite and map them to OSI layers.",
+            "Compare the conceptual OSI model with the practical TCP/IP Internet model.",
             "Visualize and explain protocol encapsulation (header addition) and decapsulation (header stripping).",
-            "Identify key protocols (HTTP, TLS, TCP, UDP, IP, ARP, Ethernet) operating at each layer.",
-            "Identify hardware networking devices (Hubs, Switches, Routers, Firewalls) associated with each layer.",
-            "Analyze end-to-end packet transmission across local switches, routers, and global Internet gateways.",
-            "Troubleshoot network communication failures by isolating the affected layer."
+            "Identify key protocols (HTTP, FTP, DNS, DHCP, TCP, UDP, IP, ICMP, ARP, Ethernet, Wi-Fi) operating at each layer.",
+            "Identify hardware devices (Hubs, Switches, Routers, Firewalls, Gateways) associated with each layer.",
+            "Visualize end-to-end communication from browser client to remote server.",
+            "Isolate and troubleshoot network communication failures using layer-wise diagnostic logic."
         ],
         "theory": {
-            "intro": "Layered models decompose complex communication into modular, manageable steps, enabling interoperability across diverse vendor hardware and software.",
+            "intro": "Communication models divide network transmission into logical, standardized layers. Each layer handles a specific aspect of data delivery, ensuring vendor interoperability, modular design, and streamlined troubleshooting.",
             "sections": [
                 {
                     "heading": "1. Introduction",
-                    "content": "Computer networks connect billions of devices worldwide. Although communication appears instantaneous, data undergoes systematic processing across logical layers before reaching its destination. The OSI model (ISO 7498) and TCP/IP suite (RFC 1122) provide the architecture for modern network engineering."
+                    "content": "Computer networks connect billions of devices worldwide, enabling seamless data transfer between computers, smartphones, servers, and IoT devices. Although communication appears instantaneous, every message travels through multiple processing stages before reaching its destination.\\n\\nTo standardize communication between heterogeneous devices, networking relies on structured models. The 7-Layer Open Systems Interconnection (OSI) Model, developed by ISO, defines conceptual communication layers, while the 4-Layer TCP/IP Model represents the practical protocol suite used on the Internet."
                 },
                 {
                     "heading": "2. Learning Objectives",
-                    "content": "Master core concepts:\\n• Requirements for layered communication architectures.\\n• The 7 OSI layers and 4 TCP/IP layers.\\n• Header encapsulation and decapsulation.\\n• Protocols, PDUs, and hardware devices by layer.\\n• End-to-end Digital Twin packet flow."
+                    "content": "After completing this practical, students will be able to:\\n• Explain why layered communication models are required.\\n• Describe the responsibilities of each OSI layer.\\n• Describe the TCP/IP protocol suite.\\n• Compare the OSI and TCP/IP models.\\n• Explain encapsulation and decapsulation.\\n• Identify protocols operating at each layer.\\n• Identify networking devices associated with each layer.\\n• Visualize end-to-end communication.\\n• Troubleshoot communication using layer-based thinking."
                 },
                 {
                     "heading": "3. Why Communication Models are Required",
-                    "content": "Layering offers modularity, vendor independence, standardized interfaces, simplified troubleshooting, and flexible protocol development without affecting adjacent layers."
+                    "content": "Before standardized models, networking hardware and software were proprietary—devices from one vendor could not communicate with those from another. Communication models address this by providing:\\n\\n• Vendor Independence: Standard protocols allow equipment from Cisco, Juniper, Apple, and Microsoft to interoperate.\\n• Common Standards: Universal rules for addressing, framing, and signaling.\\n• Interoperability: Ensures heterogeneous systems communicate seamlessly.\\n• Modular Design: Changes in one layer (e.g., swapping Wi-Fi for Ethernet) do not affect higher layers.\\n• Easier Troubleshooting: Engineers isolate faults to specific layers (e.g., checking cable link at Layer 1 before diagnosing IP at Layer 3).\\n• Scalability: Supports network growth from small LANs to global Internet infrastructure."
                 },
                 {
-                    "heading": "4. Evolution of Network Communication",
-                    "content": "From early proprietary protocols (SNA, AppleTalk) to ARPANET's TCP/IP development in the 1970s and ISO's 7-Layer OSI reference standard in 1984."
+                    "heading": "4. What is the OSI Model?",
+                    "content": "The Open Systems Interconnection (OSI) Model was introduced by the International Organization for Standardization (ISO) in 1984 as a conceptual reference framework.\\n\\nIt divides network communication into seven distinct layers, stacked from top to bottom:\\n\\nLayer 7: Application Layer\\nLayer 6: Presentation Layer\\nLayer 5: Session Layer\\nLayer 4: Transport Layer\\nLayer 3: Network Layer\\nLayer 2: Data Link Layer\\nLayer 1: Physical Layer\\n\\nPurpose: To provide a universal theoretical model for understanding how hardware and software components interact during network transmission."
                 },
                 {
-                    "heading": "5. What is the OSI Model?",
-                    "content": "The Open Systems Interconnection model divides communication into 7 distinct layers: 7-Application, 6-Presentation, 5-Session, 4-Transport, 3-Network, 2-Data Link, and 1-Physical."
+                    "heading": "5. Detailed OSI Layer Breakdown",
+                    "content": "• PHYSICAL LAYER (Layer 1):\\n  - Purpose: Transmits raw unformatted bit streams over physical/wireless media.\\n  - Responsibilities: Bit synchronization, signal timing, voltage levels, data rates, physical connectors.\\n  - Devices: Hubs, Repeaters, Network Cables (UTP, STP, Fiber Optic), Transceivers.\\n  - Protocols: Ethernet Physical (10BASE-T, 1000BASE-T), DSL, IEEE 802.11 Wi-Fi Physical.\\n  - PDU: Bits.\\n  - Real-World Example: Transmitting electrical pulses over a Cat6 Ethernet cable.\\n\\n• DATA LINK LAYER (Layer 2):\\n  - Purpose: Provides reliable node-to-node frame delivery across a shared physical medium.\\n  - Responsibilities: Physical MAC addressing, framing, flow control, error detection (CRC).\\n  - Devices: Layer 2 Switches, Bridges, Network Interface Cards (NICs).\\n  - Protocols: Ethernet (IEEE 802.3), PPP, HDLC, Wi-Fi MAC (802.11), 802.1Q VLAN Tagging.\\n  - PDU: Frame.\\n  - Real-World Example: A switch forwarding an Ethernet frame to a target PC based on its 48-bit MAC address.\\n\\n• NETWORK LAYER (Layer 3):\\n  - Purpose: Manages logical addressing and routes packets across different interconnected networks.\\n  - Responsibilities: Logical IP addressing, packet forwarding, best-path routing determination, fragmentation.\\n  - Devices: Routers, Layer 3 Switches.\\n  - Protocols: IPv4, IPv6, ICMP, ARP, OSPF, RIP, EIGRP, BGP.\\n  - PDU: Packet.\\n  - Real-World Example: A router selecting the shortest path to forward an IP packet to a web server.\\n\\n• TRANSPORT LAYER (Layer 4):\\n  - Purpose: Guarantees process-to-process communication between host applications.\\n  - Responsibilities: Segmentation, port multiplexing, error recovery, flow control, connection management.\\n  - Devices: Stateful Firewalls, Load Balancers.\\n  - Protocols: TCP (connection-oriented), UDP (connectionless).\\n  - PDU: Segment (TCP) / Datagram (UDP).\\n  - Real-World Example: TCP managing the 3-way handshake to establish a reliable browser connection.\\n\\n• SESSION LAYER (Layer 5):\\n  - Purpose: Establishes, maintains, synchronizes, and terminates communication sessions between software applications.\\n  - Responsibilities: Session checkpointing, recovery, authentication, dialogue control.\\n  - Devices: Workstations, Application Servers.\\n  - Protocols: NetBIOS, PPTP, RPC, SOCKS.\\n  - PDU: Data.\\n  - Real-World Example: Maintaining a secure online banking session while navigating multiple pages.\\n\\n• PRESENTATION LAYER (Layer 6):\\n  - Purpose: Translates data formats between the application layer and network, ensuring syntax compatibility.\\n  - Responsibilities: Data formatting, MIME encoding, SSL/TLS encryption/decryption, data compression.\\n  - Devices: Workstations, Security Gateways.\\n  - Protocols: SSL/TLS, ASCII, UTF-8, JPEG, PNG, GIF, MP3, MPEG.\\n  - PDU: Data.\\n  - Real-World Example: Encrypting credit card details using TLS 1.3 before transmission.\\n\\n• APPLICATION LAYER (Layer 7):\\n  - Purpose: Serves as the direct interface between user software applications and network services.\\n  - Responsibilities: Providing network services for web, email, file transfer, and domain resolution.\\n  - Devices: PCs, Laptops, Mobile Devices, Web Servers.\\n  - Protocols: HTTP, HTTPS, FTP, SFTP, DNS, DHCP, SMTP, POP3, IMAP, SSH, SNMP.\\n  - PDU: Data.\\n  - Real-World Example: A web browser issuing an HTTP GET request for www.google.com."
                 },
                 {
-                    "heading": "6. Detailed Study of All Seven Layers",
-                    "content": "• Layer 7 (Application): Interface for user software (HTTP, FTP, DNS, SMTP).\\n• Layer 6 (Presentation): Formatting, MIME, SSL/TLS Encryption, Compression (JPEG, ASCII).\\n• Layer 5 (Session): Session establishment, maintenance, and teardown (RPC, NetBIOS).\\n• Layer 4 (Transport): End-to-end connection control, segmentation, flow control, port addressing (TCP, UDP).\\n• Layer 3 (Network): Logical IP addressing, routing across networks (IPv4, IPv6, ICMP, Routers).\\n• Layer 2 (Data Link): Physical MAC addressing, framing, error detection, switch bridging (Ethernet, Switches, NICs).\\n• Layer 1 (Physical): Bit transmission over physical/wireless media, signaling, cables (UTP, Fiber, Wireless, Hubs)."
+                    "heading": "6. OSI Layer Summary Table",
+                    "content": "Layer | Name | PDU | Hardware Device | Example Protocols\\n7 | Application | Data | PC / Mobile | HTTP, HTTPS, DNS, DHCP\\n6 | Presentation | Data | PC / Host | SSL/TLS, JPEG, UTF-8\\n5 | Session | Data | PC / Server | NetBIOS, RPC, SOCKS\\n4 | Transport | Segment | Firewall / Load Balancer | TCP, UDP\\n3 | Network | Packet | Router / L3 Switch | IPv4, IPv6, ICMP, OSPF\\n2 | Data Link | Frame | L2 Switch / NIC | Ethernet, Wi-Fi MAC, ARP\\n1 | Physical | Bits | Hub / Cable / Transceiver | UTP, Fiber, 802.11 PHY"
                 },
                 {
                     "heading": "7. What is the TCP/IP Model?",
-                    "content": "The practical Internet model consisting of 4 layers: 4-Application, 3-Transport, 2-Internet, 1-Network Access."
+                    "content": "The TCP/IP Model (also known as the DoD Model) was developed by the US Department of Defense and ARPANET in the 1970s. Unlike the theoretical OSI model, TCP/IP is the practical architecture implemented on the commercial Internet.\\n\\nIt consists of 4 functional layers:\\n\\nLayer 4: Application Layer (combines OSI Layers 5, 6, 7)\\nLayer 3: Transport Layer (corresponds to OSI Layer 4)\\nLayer 2: Internet Layer (corresponds to OSI Layer 3)\\nLayer 1: Network Access Layer (combines OSI Layers 1, 2)"
                 },
                 {
-                    "heading": "8. OSI vs TCP/IP Comparison",
-                    "content": "OSI is a 7-layer theoretical reference model. TCP/IP is a 4-layer practical implementation standard powering the modern Internet."
+                    "heading": "8. TCP/IP Layer Details",
+                    "content": "• Application Layer: Handles high-level protocol services, data formatting, encryption, and user interfaces (HTTP, HTTPS, DNS, SSH, FTP).\\n• Transport Layer: Provides process-to-process data stream delivery and error control (TCP, UDP).\\n• Internet Layer: Defines packet formatting, logical IP addressing, and inter-network routing (IP, ICMP, ARP).\\n• Network Access Layer: Manages physical hardware interfaces, MAC addressing, framing, and bit transmission (Ethernet, Wi-Fi)."
                 },
                 {
-                    "heading": "9. Encapsulation & Decapsulation",
-                    "content": "• Encapsulation: As data moves down the stack (7 ➔ 1), each layer prepends its control header, producing PDUs: Data ➔ Segment (L4) ➔ Packet (L3) ➔ Frame (L2) ➔ Bits (L1).\\n• Decapsulation: As bits arrive at destination (1 ➔ 7), each layer strips its header and passes payload up."
+                    "heading": "9. OSI vs TCP/IP Comparison",
+                    "content": "Feature | OSI Model | TCP/IP Model\\nNumber of Layers | 7 Layers | 4 Layers\\nType | Theoretical Reference Model | Practical Implementation Suite\\nDeveloper | ISO (International Org for Standard) | DARPA / DoD (Department of Defense)\\nSession & Presentation | Dedicated separate Layers 5 & 6 | Merged into Application Layer\\nPhysical & Data Link | Dedicated separate Layers 1 & 2 | Merged into Network Access Layer\\nDominance | Academic reference standard | Worldwide Internet standard"
                 },
                 {
-                    "heading": "10. End-to-End Communication",
-                    "content": "Tracing data flow from Client Laptop ➔ Switch ➔ Router ➔ Cloud ➔ Destination Server."
+                    "heading": "10. Protocols at Every Layer",
+                    "content": "Protocol | OSI Layer | Primary Purpose\\nHTTP / HTTPS | Application (L7) | Web page transfer & secure browsing\\nDNS | Application (L7) | Domain name to IP address resolution\\nDHCP | Application (L7) | Automated dynamic IP assignment\\nFTP / SFTP | Application (L7) | File upload and download\\nTCP | Transport (L4) | Reliable, ordered connection delivery\\nUDP | Transport (L4) | Fast, connectionless low-latency delivery\\nIPv4 / IPv6 | Network (L3) | Logical IP addressing & global routing\\nICMP | Network (L3) | Diagnostics & error reporting (ping, traceroute)\\nARP | Data Link (L2) | Resolves Layer 3 IP address to Layer 2 MAC address\\nEthernet | Data Link (L2) | Local Area Network framing (IEEE 802.3)\\nWi-Fi | Physical/Data Link (L1/L2) | Wireless local area networking (IEEE 802.11)"
                 },
                 {
-                    "heading": "11. Layer-wise Interactive Simulations",
-                    "content": "Exploring individual layer functions through interactive protocol inspectors."
+                    "heading": "11. Devices at Every Layer",
+                    "content": "Device | Layer | Primary Function\\nHub / Repeater | Layer 1 (Physical) | Regenerates & broadcasts raw bits to all ports\\nSwitch (L2) | Layer 2 (Data Link) | Forwards frames based on MAC address table\\nRouter | Layer 3 (Network) | Routes packets across networks via IP routing table\\nFirewall | Layer 3/4 (Network/Transport) | Filters traffic based on IP, ports, and state\\nGateway / Proxy | Layer 7 (Application) | Translates application protocols & payloads"
                 },
                 {
-                    "heading": "12. Complete Communication Simulator",
-                    "content": "Full digital twin simulation of browser requests ('https://www.google.com')."
+                    "heading": "12. Protocol Data Units (PDUs)",
+                    "content": "A Protocol Data Unit (PDU) represents data at a specific layer of the communication stack:\\n\\nApplication Layer ➔ Data\\nPresentation Layer ➔ Data\\nSession Layer ➔ Data\\nTransport Layer ➔ Segment (TCP) or Datagram (UDP)\\nNetwork Layer ➔ Packet\\nData Link Layer ➔ Frame\\nPhysical Layer ➔ Bits\\n\\nFlow: Data ➔ Segment ➔ Packet ➔ Frame ➔ Bits"
                 },
                 {
-                    "heading": "13. Guided Experiment",
-                    "content": "Step-by-step walkthrough of packet header assembly."
+                    "heading": "13. Encapsulation",
+                    "content": "Encapsulation is the process where each layer prepends its control header to the data payload received from the layer above before passing it down.\\n\\n1. Application creates Data payload.\\n2. Transport adds TCP Header (Src/Dst Ports) ➔ Segment.\\n3. Network adds IP Header (Src/Dst IPs) ➔ Packet.\\n4. Data Link adds Ethernet Header & CRC Trailer (Src/Dst MACs) ➔ Frame.\\n5. Physical converts Frame into electrical/optical Signals ➔ Bits."
                 },
                 {
-                    "heading": "14. Practice Lab",
-                    "content": "Interactive drag-and-drop layer mapping challenges."
+                    "heading": "14. Decapsulation",
+                    "content": "Decapsulation is the reverse process performed by the receiving host:\\n\\n1. Physical receives raw Bits and passes Frame to Data Link.\\n2. Data Link strips Ethernet Header & checks CRC trailer; passes Packet to Network.\\n3. Network strips IP Header; passes Segment to Transport.\\n4. Transport strips TCP Header; reassembles payload and passes Data to Application.\\n5. Application displays content to user."
                 },
                 {
-                    "heading": "15. Assessment",
-                    "content": "Pre-test and Post-test evaluations measuring layer conceptual mastery."
+                    "heading": "15. End-to-End Communication Example (www.google.com)",
+                    "content": "When a student types www.google.com in a web browser:\\n\\n1. Application: Browser generates HTTP GET request.\\n2. DNS Resolution: DNS queries resolve www.google.com to IP 142.250.183.206.\\n3. Transport: TCP executes 3-Way Handshake (SYN, SYN-ACK, ACK) on port 443.\\n4. Network: IP adds source IP (192.168.1.10) and destination IP (142.250.183.206).\\n5. Data Link: Ethernet adds local MAC addresses (Client MAC ➔ Switch MAC).\\n6. Physical: Transmits bits over network cable.\\n7. Network Switches: Forward frame via Layer 2 MAC table.\\n8. Edge Routers: Route packet across WAN via Layer 3 IP routing table.\\n9. Web Server: Decapsulates headers and processes HTTP request.\\n10. Response: Server returns HTML response through the same reverse layered flow."
                 },
                 {
-                    "heading": "16. Report & Certificate",
-                    "content": "Generating verified academic lab report upon completion."
+                    "heading": "16. Advantages of Layered Communication Models",
+                    "content": "• Standardization: Global consensus on protocol specifications.\\n• Simplified Learning: Breaks complex networking into 7 easy-to-understand concepts.\\n• Modular Flexibility: Upgrading Wi-Fi to 5G at Layer 1 does not break HTTP at Layer 7.\\n• Efficient Troubleshooting: Engineers isolate errors to specific layers systematically.\\n• Vendor Independence: Hardware from Cisco, HP, Dell, and Apple interoperate seamlessly."
+                },
+                {
+                    "heading": "17. Limitations of Communication Models",
+                    "content": "• OSI model is theoretical: No commercial network uses pure 7-layer OSI protocols.\\n• TCP/IP merges layers: Session, Presentation, and Application are combined into one layer.\\n• Overhead: Each layer adds header bytes, slightly increasing packet size."
+                },
+                {
+                    "heading": "18. Real-World Applications",
+                    "content": "• Global Internet: Powered by TCP/IP protocol suite.\\n• Cloud Computing & Virtualization: Virtual switches and routers operate across Layers 2-4.\\n• Enterprise Data Centers: Core/Distribution routing and VLAN switching.\\n• Cybersecurity: Firewalls and IDS/IPS inspect Layer 3-7 headers for threat prevention.\\n• Internet of Things (IoT): Lightweight Layer 7 protocols (MQTT, CoAP) over UDP."
+                },
+                {
+                    "heading": "19. Best Practices for Network Engineering",
+                    "content": "1. Always troubleshoot bottom-up (Layer 1 Physical ➔ Layer 7 Application).\\n2. Verify physical cable link (L1) before diagnosing IP configuration (L3).\\n3. Learn protocol headers and port numbers before configuring routers/firewalls.\\n4. Relate every new technology (VLANs, Subnetting, OSPF, NAT) to its corresponding layer."
+                },
+                {
+                    "heading": "20. Practical Summary",
+                    "content": "Communication models divide complex network transmission into structured, modular layers. The 7-Layer OSI Model provides a theoretical reference standard, while the 4-Layer TCP/IP Model powers the global Internet. Understanding layer responsibilities, PDUs, protocols, hardware devices, encapsulation, and decapsulation provides the essential foundation for all subsequent practicals including IP addressing, Subnetting, VLANs, Routing, TCP/UDP, DHCP, and NAT."
                 }
             ]
         },
         "hardware_inspector": [
             {
                 "id": "osi_stack_inspector",
-                "name": "7-Layer OSI & TCP/IP Architecture Inspector",
+                "name": "7-Layer OSI & TCP/IP Digital Twin Inspector",
                 "category": "Architectural Digital Twin",
-                "description": "Interactive visualizer of the 7 OSI layers, 4 TCP/IP layers, headers, and PDUs.",
-                "svg": "<svg viewBox=\"0 0 400 240\" xmlns=\"http://www.w3.org/2000/svg\">\n                <rect x=\"15\" y=\"15\" width=\"370\" height=\"210\" rx=\"10\" fill=\"#0f172a\" stroke=\"#38bdf8\" stroke-width=\"2\"/>\n                <text x=\"200\" y=\"38\" fill=\"#38bdf8\" font-size=\"13\" font-weight=\"bold\" text-anchor=\"middle\">OSI 7-LAYER ⇹ TCP/IP 4-LAYER DIGITAL TWIN</text>\n                \n                <!-- OSI Stack -->\n                <rect x=\"30\" y=\"50\" width=\"160\" height=\"20\" fill=\"#ec4899\" rx=\"3\"/><text x=\"110\" y=\"64\" fill=\"#fff\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">7. Application (Data)</text>\n                <rect x=\"30\" y=\"73\" width=\"160\" height=\"20\" fill=\"#a855f7\" rx=\"3\"/><text x=\"110\" y=\"87\" fill=\"#fff\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">6. Presentation (Data)</text>\n                <rect x=\"30\" y=\"96\" width=\"160\" height=\"20\" fill=\"#8b5cf6\" rx=\"3\"/><text x=\"110\" y=\"110\" fill=\"#fff\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">5. Session (Data)</text>\n                <rect x=\"30\" y=\"119\" width=\"160\" height=\"20\" fill=\"#3b82f6\" rx=\"3\"/><text x=\"110\" y=\"133\" fill=\"#fff\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">4. Transport (Segment)</text>\n                <rect x=\"30\" y=\"142\" width=\"160\" height=\"20\" fill=\"#10b981\" rx=\"3\"/><text x=\"110\" y=\"156\" fill=\"#fff\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">3. Network (Packet)</text>\n                <rect x=\"30\" y=\"165\" width=\"160\" height=\"20\" fill=\"#f59e0b\" rx=\"3\"/><text x=\"110\" y=\"179\" fill=\"#fff\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">2. Data Link (Frame)</text>\n                <rect x=\"30\" y=\"188\" width=\"160\" height=\"20\" fill=\"#ef4444\" rx=\"3\"/><text x=\"110\" y=\"202\" fill=\"#fff\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">1. Physical (Bits)</text>\n\n                <!-- TCP/IP Stack -->\n                <rect x=\"210\" y=\"50\" width=\"160\" height=\"66\" fill=\"#a855f7\" rx=\"4\" stroke=\"#fff\" stroke-width=\"1\"/>\n                <text x=\"290\" y=\"88\" fill=\"#fff\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">1. Application</text>\n                \n                <rect x=\"210\" y=\"119\" width=\"160\" height=\"20\" fill=\"#3b82f6\" rx=\"4\" stroke=\"#fff\" stroke-width=\"1\"/>\n                <text x=\"290\" y=\"133\" fill=\"#fff\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">2. Transport</text>\n                \n                <rect x=\"210\" y=\"142\" width=\"160\" height=\"20\" fill=\"#10b981\" rx=\"4\" stroke=\"#fff\" stroke-width=\"1\"/>\n                <text x=\"290\" y=\"156\" fill=\"#fff\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">3. Internet</text>\n                \n                <rect x=\"210\" y=\"165\" width=\"160\" height=\"43\" fill=\"#f59e0b\" rx=\"4\" stroke=\"#fff\" stroke-width=\"1\"/>\n                <text x=\"290\" y=\"190\" fill=\"#fff\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">4. Network Access</text>\n            </svg>"
+                "description": "Visualizes 7 OSI layers, 4 TCP/IP layers, headers, PDUs, and hardware devices.",
+                "svg": "<svg viewBox=\"0 0 400 240\" xmlns=\"http://www.w3.org/2000/svg\">\n                <rect x=\"15\" y=\"15\" width=\"370\" height=\"210\" rx=\"10\" fill=\"#0f172a\" stroke=\"#38bdf8\" stroke-width=\"2\"/>\n                <text x=\"200\" y=\"38\" fill=\"#38bdf8\" font-size=\"13\" font-weight=\"bold\" text-anchor=\"middle\">OSI 7-LAYER ⇹ TCP/IP 4-LAYER DIGITAL TWIN</text>\n\n                <rect x=\"30\" y=\"50\" width=\"160\" height=\"20\" fill=\"#ec4899\" rx=\"3\"/><text x=\"110\" y=\"64\" fill=\"#fff\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">7. Application (Data)</text>\n                <rect x=\"30\" y=\"73\" width=\"160\" height=\"20\" fill=\"#a855f7\" rx=\"3\"/><text x=\"110\" y=\"87\" fill=\"#fff\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">6. Presentation (Data)</text>\n                <rect x=\"30\" y=\"96\" width=\"160\" height=\"20\" fill=\"#8b5cf6\" rx=\"3\"/><text x=\"110\" y=\"110\" fill=\"#fff\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">5. Session (Data)</text>\n                <rect x=\"30\" y=\"119\" width=\"160\" height=\"20\" fill=\"#3b82f6\" rx=\"3\"/><text x=\"110\" y=\"133\" fill=\"#fff\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">4. Transport (Segment)</text>\n                <rect x=\"30\" y=\"142\" width=\"160\" height=\"20\" fill=\"#10b981\" rx=\"3\"/><text x=\"110\" y=\"156\" fill=\"#fff\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">3. Network (Packet)</text>\n                <rect x=\"30\" y=\"165\" width=\"160\" height=\"20\" fill=\"#f59e0b\" rx=\"3\"/><text x=\"110\" y=\"179\" fill=\"#fff\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">2. Data Link (Frame)</text>\n                <rect x=\"30\" y=\"188\" width=\"160\" height=\"20\" fill=\"#ef4444\" rx=\"3\"/><text x=\"110\" y=\"202\" fill=\"#fff\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">1. Physical (Bits)</text>\n\n                <rect x=\"210\" y=\"50\" width=\"160\" height=\"66\" fill=\"#a855f7\" rx=\"4\" stroke=\"#fff\" stroke-width=\"1\"/>\n                <text x=\"290\" y=\"88\" fill=\"#fff\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">1. Application</text>\n                \n                <rect x=\"210\" y=\"119\" width=\"160\" height=\"20\" fill=\"#3b82f6\" rx=\"4\" stroke=\"#fff\" stroke-width=\"1\"/>\n                <text x=\"290\" y=\"133\" fill=\"#fff\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">2. Transport</text>\n                \n                <rect x=\"210\" y=\"142\" width=\"160\" height=\"20\" fill=\"#10b981\" rx=\"4\" stroke=\"#fff\" stroke-width=\"1\"/>\n                <text x=\"290\" y=\"156\" fill=\"#fff\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">3. Internet</text>\n                \n                <rect x=\"210\" y=\"165\" width=\"160\" height=\"43\" fill=\"#f59e0b\" rx=\"4\" stroke=\"#fff\" stroke-width=\"1\"/>\n                <text x=\"290\" y=\"190\" fill=\"#fff\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">4. Network Access</text>\n            </svg>"
             }
         ],
         "troubleshooting": {
             "problem": "Multi-Layer Network Communication Failure (Diagnose Affected Layer)",
             "hints": [
-                "Check if physical Ethernet cable is unplugged or Wi-Fi radio is disabled (Layer 1 Physical).",
-                "Check if MAC address table is unpopulated or ARP resolution failed (Layer 2 Data Link).",
-                "Check if device has an invalid IP address or gateway router is unreachable (Layer 3 Network).",
-                "Check if firewall is blocking TCP port 80/443 (Layer 4 Transport).",
-                "Check if DNS domain resolution fails for www.google.com (Layer 7 Application)."
+                "Check if physical Ethernet cable is unplugged or link light is off (Layer 1 Physical).",
+                "Check if ARP resolution failed or MAC address table is unpopulated (Layer 2 Data Link).",
+                "Check if IP address is misconfigured or default gateway is unreachable (Layer 3 Network).",
+                "Check if stateful firewall is blocking TCP port 80/443 (Layer 4 Transport).",
+                "Check if DNS resolution fails for domain www.google.com (Layer 7 Application)."
             ],
-            "fix": "Isolate fault using layer-by-layer troubleshooting: Verify Physical cable link ➔ Check Link-Layer MAC/ARP ➔ Verify Network Layer IP ping ➔ Verify Transport Layer port socket ➔ Test Application Layer DNS & HTTP."
+            "fix": "Isolate fault using bottom-up troubleshooting: Verify Physical cable link ➔ Check Link-Layer MAC/ARP ➔ Verify Network Layer IP ping ➔ Verify Transport Layer port socket ➔ Test Application Layer DNS & HTTP."
         },
         "evaluations": {
             "pretest": [
@@ -13779,7 +13813,7 @@ window.VLAB_DATA = {
                         "Layer 7 - Application"
                     ],
                     "answer": 1,
-                    "explanation": "Layer 3 (Network) handles logical IP addressing and routing."
+                    "explanation": "Layer 3 (Network) manages logical IP addressing and inter-network routing."
                 },
                 {
                     "q": "What is the Protocol Data Unit (PDU) of the Data Link Layer (Layer 2)?",
@@ -13790,7 +13824,7 @@ window.VLAB_DATA = {
                         "Segment"
                     ],
                     "answer": 1,
-                    "explanation": "Layer 2 packages data into Frames containing MAC addresses."
+                    "explanation": "Layer 2 packages data into Frames containing MAC headers."
                 },
                 {
                     "q": "Which layer performs SSL/TLS encryption, compression, and character encoding?",
@@ -13801,10 +13835,10 @@ window.VLAB_DATA = {
                         "Application Layer (Layer 7)"
                     ],
                     "answer": 0,
-                    "explanation": "Layer 6 (Presentation) formats, compresses, and encrypts data."
+                    "explanation": "Layer 6 (Presentation) formats, compresses, and encrypts payloads."
                 },
                 {
-                    "q": "Which device operates primarily at Layer 2 of the OSI model?",
+                    "q": "Which hardware device operates primarily at Layer 2 of the OSI model?",
                     "options": [
                         "Hub",
                         "Layer 2 Switch",
@@ -13812,7 +13846,7 @@ window.VLAB_DATA = {
                         "Application Gateway"
                     ],
                     "answer": 1,
-                    "explanation": "Switches forward Ethernet frames using Layer 2 MAC address tables."
+                    "explanation": "Switches forward Ethernet frames using MAC address tables at Layer 2."
                 },
                 {
                     "q": "What is the process of adding headers as data moves down the OSI stack?",
@@ -13823,7 +13857,7 @@ window.VLAB_DATA = {
                         "Segmentation"
                     ],
                     "answer": 1,
-                    "explanation": "Encapsulation adds headers at each layer from top to bottom."
+                    "explanation": "Encapsulation prepends headers at each layer from top to bottom."
                 }
             ],
             "posttest": [
@@ -13836,7 +13870,7 @@ window.VLAB_DATA = {
                         "5 OSI, 4 TCP/IP"
                     ],
                     "answer": 0,
-                    "explanation": "OSI defines 7 layers; TCP/IP defines 4 layers."
+                    "explanation": "OSI defines 7 conceptual layers; TCP/IP defines 4 practical layers."
                 },
                 {
                     "q": "Which TCP/IP layer corresponds to OSI Layers 5, 6, and 7 combined?",
@@ -13847,7 +13881,7 @@ window.VLAB_DATA = {
                         "Application Layer"
                     ],
                     "answer": 3,
-                    "explanation": "TCP/IP Application Layer encompasses Session, Presentation, and Application functions."
+                    "explanation": "TCP/IP Application Layer merges Session, Presentation, and Application services."
                 },
                 {
                     "q": "What happens during Decapsulation at the receiving host?",
@@ -13858,7 +13892,7 @@ window.VLAB_DATA = {
                         "IP addresses are rewritten"
                     ],
                     "answer": 1,
-                    "explanation": "Decapsulation strips headers at each layer as payload moves up to Layer 7."
+                    "explanation": "Decapsulation strips control headers as data moves up to Layer 7."
                 },
                 {
                     "q": "Which protocols operate at Layer 4 (Transport Layer)?",
@@ -13880,7 +13914,7 @@ window.VLAB_DATA = {
                         "Layer 7 Application"
                     ],
                     "answer": 2,
-                    "explanation": "IP address and gateway misconfigurations occur at Layer 3 Network."
+                    "explanation": "IP address and default gateway routing occur at Layer 3 Network."
                 },
                 {
                     "q": "What is the PDU at Layer 4 (Transport Layer) for TCP?",
@@ -13891,7 +13925,7 @@ window.VLAB_DATA = {
                         "Segment"
                     ],
                     "answer": 3,
-                    "explanation": "Layer 4 divides data streams into TCP Segments."
+                    "explanation": "Layer 4 divides byte streams into TCP Segments."
                 },
                 {
                     "q": "Which layer uses 48-bit hardware MAC addresses for node-to-node delivery?",
@@ -13902,7 +13936,7 @@ window.VLAB_DATA = {
                         "Layer 4"
                     ],
                     "answer": 1,
-                    "explanation": "Layer 2 (Data Link) uses MAC addresses inside Ethernet frame headers."
+                    "explanation": "Layer 2 (Data Link) uses 48-bit MAC addresses inside Ethernet frames."
                 },
                 {
                     "q": "Which layer establishes, manages, and terminates session dialogues between applications?",
@@ -13924,7 +13958,7 @@ window.VLAB_DATA = {
                         "Layer 4 Transport"
                     ],
                     "answer": 0,
-                    "explanation": "Hubs, cables, and connectors operate at Layer 1 Physical."
+                    "explanation": "Hubs, repeaters, and cables operate at Layer 1 Physical."
                 },
                 {
                     "q": "What protocol resolves a Layer 3 IP address to a Layer 2 MAC address?",
@@ -13935,26 +13969,26 @@ window.VLAB_DATA = {
                         "ICMP"
                     ],
                     "answer": 2,
-                    "explanation": "Address Resolution Protocol (ARP) bridges Layer 3 IP to Layer 2 MAC."
+                    "explanation": "Address Resolution Protocol (ARP) maps Layer 3 IP to Layer 2 MAC."
                 }
             ]
         },
         "viva": [
             {
                 "q": "Why is the OSI model referred to as a reference model while TCP/IP is an implementation protocol suite?",
-                "a": "The OSI model was developed by ISO as a theoretical architecture standard. TCP/IP was developed empirically by ARPANET and became the actual protocol suite used on the commercial Internet."
+                "a": "The OSI model was created by ISO as a conceptual standard. TCP/IP was developed empirically by ARPANET/DARPA and became the actual protocol suite used on the Internet."
             },
             {
                 "q": "Explain the concept of Encapsulation with an example.",
-                "a": "Encapsulation is the process where each layer prepends a control header to the data payload from above. For example, an HTTP GET request (L7) gets a TCP header (L4, Segment), then an IP header (L3, Packet), then an Ethernet header (L2, Frame), before being transmitted as bits (L1)."
+                "a": "Encapsulation is where each layer prepends a header to payload data. For example, an HTTP request (L7) gets a TCP header (L4 Segment), an IP header (L3 Packet), and an Ethernet header/trailer (L2 Frame) before being sent as bits (L1)."
             },
             {
                 "q": "What is the difference between Layer 2 MAC addressing and Layer 3 IP addressing?",
-                "a": "Layer 2 MAC addresses are 48-bit hardware addresses permanently burned into network interface cards for local node-to-node delivery. Layer 3 IP addresses are 32-bit (IPv4) or 128-bit (IPv6) logical addresses assigned dynamically for global inter-network routing."
+                "a": "Layer 2 MAC addresses are 48-bit permanent hardware addresses for local node-to-node delivery. Layer 3 IP addresses are 32-bit (IPv4) or 128-bit (IPv6) logical addresses assigned for global inter-network routing."
             },
             {
                 "q": "What is a Protocol Data Unit (PDU)?",
-                "a": "A PDU is the specific format of data payload plus headers at a given layer: L7/6/5 = Data, L4 = Segment (TCP) / Datagram (UDP), L3 = Packet, L2 = Frame, L1 = Bits."
+                "a": "A PDU is the specific format of data payload plus headers at a layer: L7/6/5 = Data, L4 = Segment (TCP) / Datagram (UDP), L3 = Packet, L2 = Frame, L1 = Bits."
             }
         ],
         "simType": "osi_tcpip_sim"
@@ -13962,119 +13996,136 @@ window.VLAB_DATA = {
     "osi_tcpip_sim": {
         "title": "Practical 2: Network Communication Models (OSI & TCP/IP)",
         "theme": "From Bits to Browser – Understanding How Data Travels Across a Network",
-        "aim": "To examine the foundational Open Systems Interconnection (OSI) 7-layer model and 4-layer TCP/IP protocol suite, analyze end-to-end data transmission, observe header encapsulation and decapsulation from Physical bits to Application browser data, map network protocols and hardware devices to their respective layers, and diagnose multi-layer network communication faults.",
+        "aim": "To master the foundational 7-layer Open Systems Interconnection (OSI) reference model and 4-layer TCP/IP Internet protocol suite, examine Layer 1 to Layer 7 protocols, PDUs, and hardware devices, observe protocol encapsulation and decapsulation during end-to-end network transmission, and diagnose network faults using layer-wise isolation.",
         "intro": {
-            "summary": "Computer networks connect billions of devices globally. To standardize communication between heterogeneous devices and software, networking follows layered architectures: the 7-layer OSI conceptual reference model and the 4-layer TCP/IP Internet protocol suite. Every network packet travels through systematic encapsulation at the sender and decapsulation at the receiver.",
-            "importance": "This practical forms the conceptual backbone of the entire Virtual Lab (VLAB). Every subsequent experiment—including VLANs, Subnetting, RIP/OSPF/EIGRP Routing, TCP/UDP Transport, DHCP, and NAT—directly builds upon the layer-wise understanding gained here.",
+            "summary": "Computer networks connect billions of devices worldwide. To enable seamless communication between devices manufactured by different vendors, networking follows structured communication models. The 7-layer OSI Model developed by ISO provides a conceptual framework, while the 4-layer TCP/IP Model represents the practical protocol suite powering the modern Internet.",
+            "importance": "This practical serves as the foundational backbone of the entire Virtual Lab (VLAB). Every subsequent experiment—including VLANs, Subnetting, RIP/OSPF/EIGRP Routing, TCP/UDP Transport, DHCP, and NAT—directly builds upon the layer-wise understanding gained here.",
             "applications": [
-                "Web Browsing & E-Commerce (HTTP/HTTPS over TCP/IP)",
-                "Enterprise Network Architecture & Router/Switch Placement",
-                "Packet Inspection & Wireshark Protocol Analysis",
-                "Layer-wise Network Fault Troubleshooting"
+                "Global Internet & Web Browsing (HTTP/HTTPS over TCP/IP)",
+                "Cloud Computing & Distributed Data Center Networks",
+                "Enterprise WAN/LAN Infrastructure & Switch/Router Placement",
+                "Cybersecurity Perimeter Defense & Layer-wise Packet Auditing"
             ],
-            "outcome": "Students will be able to trace end-to-end data flow from 'https://www.google.com' through all 7 OSI layers, explain PDU transformations (Data ➔ Segment ➔ Packet ➔ Frame ➔ Bits), differentiate OSI vs TCP/IP models, and identify affected layers during network outages."
+            "outcome": "Students will be able to trace end-to-end data transmission from 'https://www.google.com' through all 7 OSI layers, explain PDU transformations (Data ➔ Segment ➔ Packet ➔ Frame ➔ Bits), differentiate OSI vs TCP/IP architectures, and troubleshoot network outages using layer-based thinking."
         },
         "prerequisites": [
-            "Practical 1: Introduction to Networking Tools & Utilities"
+            "Practical 1: Introduction to Networking Tools, Devices & Media"
         ],
         "outcomes": [
-            "Explain why layered communication models are required in computer networking.",
-            "Describe the specific functions and Protocol Data Units (PDUs) of all seven OSI layers.",
+            "Explain why standardized communication models are required in computer networking.",
+            "Describe the purpose, responsibilities, protocols, devices, and PDUs of all seven OSI layers.",
             "Describe the four layers of the TCP/IP protocol suite and map them to OSI layers.",
+            "Compare the conceptual OSI model with the practical TCP/IP Internet model.",
             "Visualize and explain protocol encapsulation (header addition) and decapsulation (header stripping).",
-            "Identify key protocols (HTTP, TLS, TCP, UDP, IP, ARP, Ethernet) operating at each layer.",
-            "Identify hardware networking devices (Hubs, Switches, Routers, Firewalls) associated with each layer.",
-            "Analyze end-to-end packet transmission across local switches, routers, and global Internet gateways.",
-            "Troubleshoot network communication failures by isolating the affected layer."
+            "Identify key protocols (HTTP, FTP, DNS, DHCP, TCP, UDP, IP, ICMP, ARP, Ethernet, Wi-Fi) operating at each layer.",
+            "Identify hardware devices (Hubs, Switches, Routers, Firewalls, Gateways) associated with each layer.",
+            "Visualize end-to-end communication from browser client to remote server.",
+            "Isolate and troubleshoot network communication failures using layer-wise diagnostic logic."
         ],
         "theory": {
-            "intro": "Layered models decompose complex communication into modular, manageable steps, enabling interoperability across diverse vendor hardware and software.",
+            "intro": "Communication models divide network transmission into logical, standardized layers. Each layer handles a specific aspect of data delivery, ensuring vendor interoperability, modular design, and streamlined troubleshooting.",
             "sections": [
                 {
                     "heading": "1. Introduction",
-                    "content": "Computer networks connect billions of devices worldwide. Although communication appears instantaneous, data undergoes systematic processing across logical layers before reaching its destination. The OSI model (ISO 7498) and TCP/IP suite (RFC 1122) provide the architecture for modern network engineering."
+                    "content": "Computer networks connect billions of devices worldwide, enabling seamless data transfer between computers, smartphones, servers, and IoT devices. Although communication appears instantaneous, every message travels through multiple processing stages before reaching its destination.\\n\\nTo standardize communication between heterogeneous devices, networking relies on structured models. The 7-Layer Open Systems Interconnection (OSI) Model, developed by ISO, defines conceptual communication layers, while the 4-Layer TCP/IP Model represents the practical protocol suite used on the Internet."
                 },
                 {
                     "heading": "2. Learning Objectives",
-                    "content": "Master core concepts:\\n• Requirements for layered communication architectures.\\n• The 7 OSI layers and 4 TCP/IP layers.\\n• Header encapsulation and decapsulation.\\n• Protocols, PDUs, and hardware devices by layer.\\n• End-to-end Digital Twin packet flow."
+                    "content": "After completing this practical, students will be able to:\\n• Explain why layered communication models are required.\\n• Describe the responsibilities of each OSI layer.\\n• Describe the TCP/IP protocol suite.\\n• Compare the OSI and TCP/IP models.\\n• Explain encapsulation and decapsulation.\\n• Identify protocols operating at each layer.\\n• Identify networking devices associated with each layer.\\n• Visualize end-to-end communication.\\n• Troubleshoot communication using layer-based thinking."
                 },
                 {
                     "heading": "3. Why Communication Models are Required",
-                    "content": "Layering offers modularity, vendor independence, standardized interfaces, simplified troubleshooting, and flexible protocol development without affecting adjacent layers."
+                    "content": "Before standardized models, networking hardware and software were proprietary—devices from one vendor could not communicate with those from another. Communication models address this by providing:\\n\\n• Vendor Independence: Standard protocols allow equipment from Cisco, Juniper, Apple, and Microsoft to interoperate.\\n• Common Standards: Universal rules for addressing, framing, and signaling.\\n• Interoperability: Ensures heterogeneous systems communicate seamlessly.\\n• Modular Design: Changes in one layer (e.g., swapping Wi-Fi for Ethernet) do not affect higher layers.\\n• Easier Troubleshooting: Engineers isolate faults to specific layers (e.g., checking cable link at Layer 1 before diagnosing IP at Layer 3).\\n• Scalability: Supports network growth from small LANs to global Internet infrastructure."
                 },
                 {
-                    "heading": "4. Evolution of Network Communication",
-                    "content": "From early proprietary protocols (SNA, AppleTalk) to ARPANET's TCP/IP development in the 1970s and ISO's 7-Layer OSI reference standard in 1984."
+                    "heading": "4. What is the OSI Model?",
+                    "content": "The Open Systems Interconnection (OSI) Model was introduced by the International Organization for Standardization (ISO) in 1984 as a conceptual reference framework.\\n\\nIt divides network communication into seven distinct layers, stacked from top to bottom:\\n\\nLayer 7: Application Layer\\nLayer 6: Presentation Layer\\nLayer 5: Session Layer\\nLayer 4: Transport Layer\\nLayer 3: Network Layer\\nLayer 2: Data Link Layer\\nLayer 1: Physical Layer\\n\\nPurpose: To provide a universal theoretical model for understanding how hardware and software components interact during network transmission."
                 },
                 {
-                    "heading": "5. What is the OSI Model?",
-                    "content": "The Open Systems Interconnection model divides communication into 7 distinct layers: 7-Application, 6-Presentation, 5-Session, 4-Transport, 3-Network, 2-Data Link, and 1-Physical."
+                    "heading": "5. Detailed OSI Layer Breakdown",
+                    "content": "• PHYSICAL LAYER (Layer 1):\\n  - Purpose: Transmits raw unformatted bit streams over physical/wireless media.\\n  - Responsibilities: Bit synchronization, signal timing, voltage levels, data rates, physical connectors.\\n  - Devices: Hubs, Repeaters, Network Cables (UTP, STP, Fiber Optic), Transceivers.\\n  - Protocols: Ethernet Physical (10BASE-T, 1000BASE-T), DSL, IEEE 802.11 Wi-Fi Physical.\\n  - PDU: Bits.\\n  - Real-World Example: Transmitting electrical pulses over a Cat6 Ethernet cable.\\n\\n• DATA LINK LAYER (Layer 2):\\n  - Purpose: Provides reliable node-to-node frame delivery across a shared physical medium.\\n  - Responsibilities: Physical MAC addressing, framing, flow control, error detection (CRC).\\n  - Devices: Layer 2 Switches, Bridges, Network Interface Cards (NICs).\\n  - Protocols: Ethernet (IEEE 802.3), PPP, HDLC, Wi-Fi MAC (802.11), 802.1Q VLAN Tagging.\\n  - PDU: Frame.\\n  - Real-World Example: A switch forwarding an Ethernet frame to a target PC based on its 48-bit MAC address.\\n\\n• NETWORK LAYER (Layer 3):\\n  - Purpose: Manages logical addressing and routes packets across different interconnected networks.\\n  - Responsibilities: Logical IP addressing, packet forwarding, best-path routing determination, fragmentation.\\n  - Devices: Routers, Layer 3 Switches.\\n  - Protocols: IPv4, IPv6, ICMP, ARP, OSPF, RIP, EIGRP, BGP.\\n  - PDU: Packet.\\n  - Real-World Example: A router selecting the shortest path to forward an IP packet to a web server.\\n\\n• TRANSPORT LAYER (Layer 4):\\n  - Purpose: Guarantees process-to-process communication between host applications.\\n  - Responsibilities: Segmentation, port multiplexing, error recovery, flow control, connection management.\\n  - Devices: Stateful Firewalls, Load Balancers.\\n  - Protocols: TCP (connection-oriented), UDP (connectionless).\\n  - PDU: Segment (TCP) / Datagram (UDP).\\n  - Real-World Example: TCP managing the 3-way handshake to establish a reliable browser connection.\\n\\n• SESSION LAYER (Layer 5):\\n  - Purpose: Establishes, maintains, synchronizes, and terminates communication sessions between software applications.\\n  - Responsibilities: Session checkpointing, recovery, authentication, dialogue control.\\n  - Devices: Workstations, Application Servers.\\n  - Protocols: NetBIOS, PPTP, RPC, SOCKS.\\n  - PDU: Data.\\n  - Real-World Example: Maintaining a secure online banking session while navigating multiple pages.\\n\\n• PRESENTATION LAYER (Layer 6):\\n  - Purpose: Translates data formats between the application layer and network, ensuring syntax compatibility.\\n  - Responsibilities: Data formatting, MIME encoding, SSL/TLS encryption/decryption, data compression.\\n  - Devices: Workstations, Security Gateways.\\n  - Protocols: SSL/TLS, ASCII, UTF-8, JPEG, PNG, GIF, MP3, MPEG.\\n  - PDU: Data.\\n  - Real-World Example: Encrypting credit card details using TLS 1.3 before transmission.\\n\\n• APPLICATION LAYER (Layer 7):\\n  - Purpose: Serves as the direct interface between user software applications and network services.\\n  - Responsibilities: Providing network services for web, email, file transfer, and domain resolution.\\n  - Devices: PCs, Laptops, Mobile Devices, Web Servers.\\n  - Protocols: HTTP, HTTPS, FTP, SFTP, DNS, DHCP, SMTP, POP3, IMAP, SSH, SNMP.\\n  - PDU: Data.\\n  - Real-World Example: A web browser issuing an HTTP GET request for www.google.com."
                 },
                 {
-                    "heading": "6. Detailed Study of All Seven Layers",
-                    "content": "• Layer 7 (Application): Interface for user software (HTTP, FTP, DNS, SMTP).\\n• Layer 6 (Presentation): Formatting, MIME, SSL/TLS Encryption, Compression (JPEG, ASCII).\\n• Layer 5 (Session): Session establishment, maintenance, and teardown (RPC, NetBIOS).\\n• Layer 4 (Transport): End-to-end connection control, segmentation, flow control, port addressing (TCP, UDP).\\n• Layer 3 (Network): Logical IP addressing, routing across networks (IPv4, IPv6, ICMP, Routers).\\n• Layer 2 (Data Link): Physical MAC addressing, framing, error detection, switch bridging (Ethernet, Switches, NICs).\\n• Layer 1 (Physical): Bit transmission over physical/wireless media, signaling, cables (UTP, Fiber, Wireless, Hubs)."
+                    "heading": "6. OSI Layer Summary Table",
+                    "content": "Layer | Name | PDU | Hardware Device | Example Protocols\\n7 | Application | Data | PC / Mobile | HTTP, HTTPS, DNS, DHCP\\n6 | Presentation | Data | PC / Host | SSL/TLS, JPEG, UTF-8\\n5 | Session | Data | PC / Server | NetBIOS, RPC, SOCKS\\n4 | Transport | Segment | Firewall / Load Balancer | TCP, UDP\\n3 | Network | Packet | Router / L3 Switch | IPv4, IPv6, ICMP, OSPF\\n2 | Data Link | Frame | L2 Switch / NIC | Ethernet, Wi-Fi MAC, ARP\\n1 | Physical | Bits | Hub / Cable / Transceiver | UTP, Fiber, 802.11 PHY"
                 },
                 {
                     "heading": "7. What is the TCP/IP Model?",
-                    "content": "The practical Internet model consisting of 4 layers: 4-Application, 3-Transport, 2-Internet, 1-Network Access."
+                    "content": "The TCP/IP Model (also known as the DoD Model) was developed by the US Department of Defense and ARPANET in the 1970s. Unlike the theoretical OSI model, TCP/IP is the practical architecture implemented on the commercial Internet.\\n\\nIt consists of 4 functional layers:\\n\\nLayer 4: Application Layer (combines OSI Layers 5, 6, 7)\\nLayer 3: Transport Layer (corresponds to OSI Layer 4)\\nLayer 2: Internet Layer (corresponds to OSI Layer 3)\\nLayer 1: Network Access Layer (combines OSI Layers 1, 2)"
                 },
                 {
-                    "heading": "8. OSI vs TCP/IP Comparison",
-                    "content": "OSI is a 7-layer theoretical reference model. TCP/IP is a 4-layer practical implementation standard powering the modern Internet."
+                    "heading": "8. TCP/IP Layer Details",
+                    "content": "• Application Layer: Handles high-level protocol services, data formatting, encryption, and user interfaces (HTTP, HTTPS, DNS, SSH, FTP).\\n• Transport Layer: Provides process-to-process data stream delivery and error control (TCP, UDP).\\n• Internet Layer: Defines packet formatting, logical IP addressing, and inter-network routing (IP, ICMP, ARP).\\n• Network Access Layer: Manages physical hardware interfaces, MAC addressing, framing, and bit transmission (Ethernet, Wi-Fi)."
                 },
                 {
-                    "heading": "9. Encapsulation & Decapsulation",
-                    "content": "• Encapsulation: As data moves down the stack (7 ➔ 1), each layer prepends its control header, producing PDUs: Data ➔ Segment (L4) ➔ Packet (L3) ➔ Frame (L2) ➔ Bits (L1).\\n• Decapsulation: As bits arrive at destination (1 ➔ 7), each layer strips its header and passes payload up."
+                    "heading": "9. OSI vs TCP/IP Comparison",
+                    "content": "Feature | OSI Model | TCP/IP Model\\nNumber of Layers | 7 Layers | 4 Layers\\nType | Theoretical Reference Model | Practical Implementation Suite\\nDeveloper | ISO (International Org for Standard) | DARPA / DoD (Department of Defense)\\nSession & Presentation | Dedicated separate Layers 5 & 6 | Merged into Application Layer\\nPhysical & Data Link | Dedicated separate Layers 1 & 2 | Merged into Network Access Layer\\nDominance | Academic reference standard | Worldwide Internet standard"
                 },
                 {
-                    "heading": "10. End-to-End Communication",
-                    "content": "Tracing data flow from Client Laptop ➔ Switch ➔ Router ➔ Cloud ➔ Destination Server."
+                    "heading": "10. Protocols at Every Layer",
+                    "content": "Protocol | OSI Layer | Primary Purpose\\nHTTP / HTTPS | Application (L7) | Web page transfer & secure browsing\\nDNS | Application (L7) | Domain name to IP address resolution\\nDHCP | Application (L7) | Automated dynamic IP assignment\\nFTP / SFTP | Application (L7) | File upload and download\\nTCP | Transport (L4) | Reliable, ordered connection delivery\\nUDP | Transport (L4) | Fast, connectionless low-latency delivery\\nIPv4 / IPv6 | Network (L3) | Logical IP addressing & global routing\\nICMP | Network (L3) | Diagnostics & error reporting (ping, traceroute)\\nARP | Data Link (L2) | Resolves Layer 3 IP address to Layer 2 MAC address\\nEthernet | Data Link (L2) | Local Area Network framing (IEEE 802.3)\\nWi-Fi | Physical/Data Link (L1/L2) | Wireless local area networking (IEEE 802.11)"
                 },
                 {
-                    "heading": "11. Layer-wise Interactive Simulations",
-                    "content": "Exploring individual layer functions through interactive protocol inspectors."
+                    "heading": "11. Devices at Every Layer",
+                    "content": "Device | Layer | Primary Function\\nHub / Repeater | Layer 1 (Physical) | Regenerates & broadcasts raw bits to all ports\\nSwitch (L2) | Layer 2 (Data Link) | Forwards frames based on MAC address table\\nRouter | Layer 3 (Network) | Routes packets across networks via IP routing table\\nFirewall | Layer 3/4 (Network/Transport) | Filters traffic based on IP, ports, and state\\nGateway / Proxy | Layer 7 (Application) | Translates application protocols & payloads"
                 },
                 {
-                    "heading": "12. Complete Communication Simulator",
-                    "content": "Full digital twin simulation of browser requests ('https://www.google.com')."
+                    "heading": "12. Protocol Data Units (PDUs)",
+                    "content": "A Protocol Data Unit (PDU) represents data at a specific layer of the communication stack:\\n\\nApplication Layer ➔ Data\\nPresentation Layer ➔ Data\\nSession Layer ➔ Data\\nTransport Layer ➔ Segment (TCP) or Datagram (UDP)\\nNetwork Layer ➔ Packet\\nData Link Layer ➔ Frame\\nPhysical Layer ➔ Bits\\n\\nFlow: Data ➔ Segment ➔ Packet ➔ Frame ➔ Bits"
                 },
                 {
-                    "heading": "13. Guided Experiment",
-                    "content": "Step-by-step walkthrough of packet header assembly."
+                    "heading": "13. Encapsulation",
+                    "content": "Encapsulation is the process where each layer prepends its control header to the data payload received from the layer above before passing it down.\\n\\n1. Application creates Data payload.\\n2. Transport adds TCP Header (Src/Dst Ports) ➔ Segment.\\n3. Network adds IP Header (Src/Dst IPs) ➔ Packet.\\n4. Data Link adds Ethernet Header & CRC Trailer (Src/Dst MACs) ➔ Frame.\\n5. Physical converts Frame into electrical/optical Signals ➔ Bits."
                 },
                 {
-                    "heading": "14. Practice Lab",
-                    "content": "Interactive drag-and-drop layer mapping challenges."
+                    "heading": "14. Decapsulation",
+                    "content": "Decapsulation is the reverse process performed by the receiving host:\\n\\n1. Physical receives raw Bits and passes Frame to Data Link.\\n2. Data Link strips Ethernet Header & checks CRC trailer; passes Packet to Network.\\n3. Network strips IP Header; passes Segment to Transport.\\n4. Transport strips TCP Header; reassembles payload and passes Data to Application.\\n5. Application displays content to user."
                 },
                 {
-                    "heading": "15. Assessment",
-                    "content": "Pre-test and Post-test evaluations measuring layer conceptual mastery."
+                    "heading": "15. End-to-End Communication Example (www.google.com)",
+                    "content": "When a student types www.google.com in a web browser:\\n\\n1. Application: Browser generates HTTP GET request.\\n2. DNS Resolution: DNS queries resolve www.google.com to IP 142.250.183.206.\\n3. Transport: TCP executes 3-Way Handshake (SYN, SYN-ACK, ACK) on port 443.\\n4. Network: IP adds source IP (192.168.1.10) and destination IP (142.250.183.206).\\n5. Data Link: Ethernet adds local MAC addresses (Client MAC ➔ Switch MAC).\\n6. Physical: Transmits bits over network cable.\\n7. Network Switches: Forward frame via Layer 2 MAC table.\\n8. Edge Routers: Route packet across WAN via Layer 3 IP routing table.\\n9. Web Server: Decapsulates headers and processes HTTP request.\\n10. Response: Server returns HTML response through the same reverse layered flow."
                 },
                 {
-                    "heading": "16. Report & Certificate",
-                    "content": "Generating verified academic lab report upon completion."
+                    "heading": "16. Advantages of Layered Communication Models",
+                    "content": "• Standardization: Global consensus on protocol specifications.\\n• Simplified Learning: Breaks complex networking into 7 easy-to-understand concepts.\\n• Modular Flexibility: Upgrading Wi-Fi to 5G at Layer 1 does not break HTTP at Layer 7.\\n• Efficient Troubleshooting: Engineers isolate errors to specific layers systematically.\\n• Vendor Independence: Hardware from Cisco, HP, Dell, and Apple interoperate seamlessly."
+                },
+                {
+                    "heading": "17. Limitations of Communication Models",
+                    "content": "• OSI model is theoretical: No commercial network uses pure 7-layer OSI protocols.\\n• TCP/IP merges layers: Session, Presentation, and Application are combined into one layer.\\n• Overhead: Each layer adds header bytes, slightly increasing packet size."
+                },
+                {
+                    "heading": "18. Real-World Applications",
+                    "content": "• Global Internet: Powered by TCP/IP protocol suite.\\n• Cloud Computing & Virtualization: Virtual switches and routers operate across Layers 2-4.\\n• Enterprise Data Centers: Core/Distribution routing and VLAN switching.\\n• Cybersecurity: Firewalls and IDS/IPS inspect Layer 3-7 headers for threat prevention.\\n• Internet of Things (IoT): Lightweight Layer 7 protocols (MQTT, CoAP) over UDP."
+                },
+                {
+                    "heading": "19. Best Practices for Network Engineering",
+                    "content": "1. Always troubleshoot bottom-up (Layer 1 Physical ➔ Layer 7 Application).\\n2. Verify physical cable link (L1) before diagnosing IP configuration (L3).\\n3. Learn protocol headers and port numbers before configuring routers/firewalls.\\n4. Relate every new technology (VLANs, Subnetting, OSPF, NAT) to its corresponding layer."
+                },
+                {
+                    "heading": "20. Practical Summary",
+                    "content": "Communication models divide complex network transmission into structured, modular layers. The 7-Layer OSI Model provides a theoretical reference standard, while the 4-Layer TCP/IP Model powers the global Internet. Understanding layer responsibilities, PDUs, protocols, hardware devices, encapsulation, and decapsulation provides the essential foundation for all subsequent practicals including IP addressing, Subnetting, VLANs, Routing, TCP/UDP, DHCP, and NAT."
                 }
             ]
         },
         "hardware_inspector": [
             {
                 "id": "osi_stack_inspector",
-                "name": "7-Layer OSI & TCP/IP Architecture Inspector",
+                "name": "7-Layer OSI & TCP/IP Digital Twin Inspector",
                 "category": "Architectural Digital Twin",
-                "description": "Interactive visualizer of the 7 OSI layers, 4 TCP/IP layers, headers, and PDUs.",
-                "svg": "<svg viewBox=\"0 0 400 240\" xmlns=\"http://www.w3.org/2000/svg\">\n                <rect x=\"15\" y=\"15\" width=\"370\" height=\"210\" rx=\"10\" fill=\"#0f172a\" stroke=\"#38bdf8\" stroke-width=\"2\"/>\n                <text x=\"200\" y=\"38\" fill=\"#38bdf8\" font-size=\"13\" font-weight=\"bold\" text-anchor=\"middle\">OSI 7-LAYER ⇹ TCP/IP 4-LAYER DIGITAL TWIN</text>\n                \n                <!-- OSI Stack -->\n                <rect x=\"30\" y=\"50\" width=\"160\" height=\"20\" fill=\"#ec4899\" rx=\"3\"/><text x=\"110\" y=\"64\" fill=\"#fff\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">7. Application (Data)</text>\n                <rect x=\"30\" y=\"73\" width=\"160\" height=\"20\" fill=\"#a855f7\" rx=\"3\"/><text x=\"110\" y=\"87\" fill=\"#fff\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">6. Presentation (Data)</text>\n                <rect x=\"30\" y=\"96\" width=\"160\" height=\"20\" fill=\"#8b5cf6\" rx=\"3\"/><text x=\"110\" y=\"110\" fill=\"#fff\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">5. Session (Data)</text>\n                <rect x=\"30\" y=\"119\" width=\"160\" height=\"20\" fill=\"#3b82f6\" rx=\"3\"/><text x=\"110\" y=\"133\" fill=\"#fff\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">4. Transport (Segment)</text>\n                <rect x=\"30\" y=\"142\" width=\"160\" height=\"20\" fill=\"#10b981\" rx=\"3\"/><text x=\"110\" y=\"156\" fill=\"#fff\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">3. Network (Packet)</text>\n                <rect x=\"30\" y=\"165\" width=\"160\" height=\"20\" fill=\"#f59e0b\" rx=\"3\"/><text x=\"110\" y=\"179\" fill=\"#fff\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">2. Data Link (Frame)</text>\n                <rect x=\"30\" y=\"188\" width=\"160\" height=\"20\" fill=\"#ef4444\" rx=\"3\"/><text x=\"110\" y=\"202\" fill=\"#fff\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">1. Physical (Bits)</text>\n\n                <!-- TCP/IP Stack -->\n                <rect x=\"210\" y=\"50\" width=\"160\" height=\"66\" fill=\"#a855f7\" rx=\"4\" stroke=\"#fff\" stroke-width=\"1\"/>\n                <text x=\"290\" y=\"88\" fill=\"#fff\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">1. Application</text>\n                \n                <rect x=\"210\" y=\"119\" width=\"160\" height=\"20\" fill=\"#3b82f6\" rx=\"4\" stroke=\"#fff\" stroke-width=\"1\"/>\n                <text x=\"290\" y=\"133\" fill=\"#fff\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">2. Transport</text>\n                \n                <rect x=\"210\" y=\"142\" width=\"160\" height=\"20\" fill=\"#10b981\" rx=\"4\" stroke=\"#fff\" stroke-width=\"1\"/>\n                <text x=\"290\" y=\"156\" fill=\"#fff\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">3. Internet</text>\n                \n                <rect x=\"210\" y=\"165\" width=\"160\" height=\"43\" fill=\"#f59e0b\" rx=\"4\" stroke=\"#fff\" stroke-width=\"1\"/>\n                <text x=\"290\" y=\"190\" fill=\"#fff\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">4. Network Access</text>\n            </svg>"
+                "description": "Visualizes 7 OSI layers, 4 TCP/IP layers, headers, PDUs, and hardware devices.",
+                "svg": "<svg viewBox=\"0 0 400 240\" xmlns=\"http://www.w3.org/2000/svg\">\n                <rect x=\"15\" y=\"15\" width=\"370\" height=\"210\" rx=\"10\" fill=\"#0f172a\" stroke=\"#38bdf8\" stroke-width=\"2\"/>\n                <text x=\"200\" y=\"38\" fill=\"#38bdf8\" font-size=\"13\" font-weight=\"bold\" text-anchor=\"middle\">OSI 7-LAYER ⇹ TCP/IP 4-LAYER DIGITAL TWIN</text>\n\n                <rect x=\"30\" y=\"50\" width=\"160\" height=\"20\" fill=\"#ec4899\" rx=\"3\"/><text x=\"110\" y=\"64\" fill=\"#fff\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">7. Application (Data)</text>\n                <rect x=\"30\" y=\"73\" width=\"160\" height=\"20\" fill=\"#a855f7\" rx=\"3\"/><text x=\"110\" y=\"87\" fill=\"#fff\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">6. Presentation (Data)</text>\n                <rect x=\"30\" y=\"96\" width=\"160\" height=\"20\" fill=\"#8b5cf6\" rx=\"3\"/><text x=\"110\" y=\"110\" fill=\"#fff\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">5. Session (Data)</text>\n                <rect x=\"30\" y=\"119\" width=\"160\" height=\"20\" fill=\"#3b82f6\" rx=\"3\"/><text x=\"110\" y=\"133\" fill=\"#fff\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">4. Transport (Segment)</text>\n                <rect x=\"30\" y=\"142\" width=\"160\" height=\"20\" fill=\"#10b981\" rx=\"3\"/><text x=\"110\" y=\"156\" fill=\"#fff\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">3. Network (Packet)</text>\n                <rect x=\"30\" y=\"165\" width=\"160\" height=\"20\" fill=\"#f59e0b\" rx=\"3\"/><text x=\"110\" y=\"179\" fill=\"#fff\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">2. Data Link (Frame)</text>\n                <rect x=\"30\" y=\"188\" width=\"160\" height=\"20\" fill=\"#ef4444\" rx=\"3\"/><text x=\"110\" y=\"202\" fill=\"#fff\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">1. Physical (Bits)</text>\n\n                <rect x=\"210\" y=\"50\" width=\"160\" height=\"66\" fill=\"#a855f7\" rx=\"4\" stroke=\"#fff\" stroke-width=\"1\"/>\n                <text x=\"290\" y=\"88\" fill=\"#fff\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">1. Application</text>\n                \n                <rect x=\"210\" y=\"119\" width=\"160\" height=\"20\" fill=\"#3b82f6\" rx=\"4\" stroke=\"#fff\" stroke-width=\"1\"/>\n                <text x=\"290\" y=\"133\" fill=\"#fff\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">2. Transport</text>\n                \n                <rect x=\"210\" y=\"142\" width=\"160\" height=\"20\" fill=\"#10b981\" rx=\"4\" stroke=\"#fff\" stroke-width=\"1\"/>\n                <text x=\"290\" y=\"156\" fill=\"#fff\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">3. Internet</text>\n                \n                <rect x=\"210\" y=\"165\" width=\"160\" height=\"43\" fill=\"#f59e0b\" rx=\"4\" stroke=\"#fff\" stroke-width=\"1\"/>\n                <text x=\"290\" y=\"190\" fill=\"#fff\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">4. Network Access</text>\n            </svg>"
             }
         ],
         "troubleshooting": {
             "problem": "Multi-Layer Network Communication Failure (Diagnose Affected Layer)",
             "hints": [
-                "Check if physical Ethernet cable is unplugged or Wi-Fi radio is disabled (Layer 1 Physical).",
-                "Check if MAC address table is unpopulated or ARP resolution failed (Layer 2 Data Link).",
-                "Check if device has an invalid IP address or gateway router is unreachable (Layer 3 Network).",
-                "Check if firewall is blocking TCP port 80/443 (Layer 4 Transport).",
-                "Check if DNS domain resolution fails for www.google.com (Layer 7 Application)."
+                "Check if physical Ethernet cable is unplugged or link light is off (Layer 1 Physical).",
+                "Check if ARP resolution failed or MAC address table is unpopulated (Layer 2 Data Link).",
+                "Check if IP address is misconfigured or default gateway is unreachable (Layer 3 Network).",
+                "Check if stateful firewall is blocking TCP port 80/443 (Layer 4 Transport).",
+                "Check if DNS resolution fails for domain www.google.com (Layer 7 Application)."
             ],
-            "fix": "Isolate fault using layer-by-layer troubleshooting: Verify Physical cable link ➔ Check Link-Layer MAC/ARP ➔ Verify Network Layer IP ping ➔ Verify Transport Layer port socket ➔ Test Application Layer DNS & HTTP."
+            "fix": "Isolate fault using bottom-up troubleshooting: Verify Physical cable link ➔ Check Link-Layer MAC/ARP ➔ Verify Network Layer IP ping ➔ Verify Transport Layer port socket ➔ Test Application Layer DNS & HTTP."
         },
         "evaluations": {
             "pretest": [
@@ -14087,7 +14138,7 @@ window.VLAB_DATA = {
                         "Layer 7 - Application"
                     ],
                     "answer": 1,
-                    "explanation": "Layer 3 (Network) handles logical IP addressing and routing."
+                    "explanation": "Layer 3 (Network) manages logical IP addressing and inter-network routing."
                 },
                 {
                     "q": "What is the Protocol Data Unit (PDU) of the Data Link Layer (Layer 2)?",
@@ -14098,7 +14149,7 @@ window.VLAB_DATA = {
                         "Segment"
                     ],
                     "answer": 1,
-                    "explanation": "Layer 2 packages data into Frames containing MAC addresses."
+                    "explanation": "Layer 2 packages data into Frames containing MAC headers."
                 },
                 {
                     "q": "Which layer performs SSL/TLS encryption, compression, and character encoding?",
@@ -14109,10 +14160,10 @@ window.VLAB_DATA = {
                         "Application Layer (Layer 7)"
                     ],
                     "answer": 0,
-                    "explanation": "Layer 6 (Presentation) formats, compresses, and encrypts data."
+                    "explanation": "Layer 6 (Presentation) formats, compresses, and encrypts payloads."
                 },
                 {
-                    "q": "Which device operates primarily at Layer 2 of the OSI model?",
+                    "q": "Which hardware device operates primarily at Layer 2 of the OSI model?",
                     "options": [
                         "Hub",
                         "Layer 2 Switch",
@@ -14120,7 +14171,7 @@ window.VLAB_DATA = {
                         "Application Gateway"
                     ],
                     "answer": 1,
-                    "explanation": "Switches forward Ethernet frames using Layer 2 MAC address tables."
+                    "explanation": "Switches forward Ethernet frames using MAC address tables at Layer 2."
                 },
                 {
                     "q": "What is the process of adding headers as data moves down the OSI stack?",
@@ -14131,7 +14182,7 @@ window.VLAB_DATA = {
                         "Segmentation"
                     ],
                     "answer": 1,
-                    "explanation": "Encapsulation adds headers at each layer from top to bottom."
+                    "explanation": "Encapsulation prepends headers at each layer from top to bottom."
                 }
             ],
             "posttest": [
@@ -14144,7 +14195,7 @@ window.VLAB_DATA = {
                         "5 OSI, 4 TCP/IP"
                     ],
                     "answer": 0,
-                    "explanation": "OSI defines 7 layers; TCP/IP defines 4 layers."
+                    "explanation": "OSI defines 7 conceptual layers; TCP/IP defines 4 practical layers."
                 },
                 {
                     "q": "Which TCP/IP layer corresponds to OSI Layers 5, 6, and 7 combined?",
@@ -14155,7 +14206,7 @@ window.VLAB_DATA = {
                         "Application Layer"
                     ],
                     "answer": 3,
-                    "explanation": "TCP/IP Application Layer encompasses Session, Presentation, and Application functions."
+                    "explanation": "TCP/IP Application Layer merges Session, Presentation, and Application services."
                 },
                 {
                     "q": "What happens during Decapsulation at the receiving host?",
@@ -14166,7 +14217,7 @@ window.VLAB_DATA = {
                         "IP addresses are rewritten"
                     ],
                     "answer": 1,
-                    "explanation": "Decapsulation strips headers at each layer as payload moves up to Layer 7."
+                    "explanation": "Decapsulation strips control headers as data moves up to Layer 7."
                 },
                 {
                     "q": "Which protocols operate at Layer 4 (Transport Layer)?",
@@ -14188,7 +14239,7 @@ window.VLAB_DATA = {
                         "Layer 7 Application"
                     ],
                     "answer": 2,
-                    "explanation": "IP address and gateway misconfigurations occur at Layer 3 Network."
+                    "explanation": "IP address and default gateway routing occur at Layer 3 Network."
                 },
                 {
                     "q": "What is the PDU at Layer 4 (Transport Layer) for TCP?",
@@ -14199,7 +14250,7 @@ window.VLAB_DATA = {
                         "Segment"
                     ],
                     "answer": 3,
-                    "explanation": "Layer 4 divides data streams into TCP Segments."
+                    "explanation": "Layer 4 divides byte streams into TCP Segments."
                 },
                 {
                     "q": "Which layer uses 48-bit hardware MAC addresses for node-to-node delivery?",
@@ -14210,7 +14261,7 @@ window.VLAB_DATA = {
                         "Layer 4"
                     ],
                     "answer": 1,
-                    "explanation": "Layer 2 (Data Link) uses MAC addresses inside Ethernet frame headers."
+                    "explanation": "Layer 2 (Data Link) uses 48-bit MAC addresses inside Ethernet frames."
                 },
                 {
                     "q": "Which layer establishes, manages, and terminates session dialogues between applications?",
@@ -14232,7 +14283,7 @@ window.VLAB_DATA = {
                         "Layer 4 Transport"
                     ],
                     "answer": 0,
-                    "explanation": "Hubs, cables, and connectors operate at Layer 1 Physical."
+                    "explanation": "Hubs, repeaters, and cables operate at Layer 1 Physical."
                 },
                 {
                     "q": "What protocol resolves a Layer 3 IP address to a Layer 2 MAC address?",
@@ -14243,26 +14294,26 @@ window.VLAB_DATA = {
                         "ICMP"
                     ],
                     "answer": 2,
-                    "explanation": "Address Resolution Protocol (ARP) bridges Layer 3 IP to Layer 2 MAC."
+                    "explanation": "Address Resolution Protocol (ARP) maps Layer 3 IP to Layer 2 MAC."
                 }
             ]
         },
         "viva": [
             {
                 "q": "Why is the OSI model referred to as a reference model while TCP/IP is an implementation protocol suite?",
-                "a": "The OSI model was developed by ISO as a theoretical architecture standard. TCP/IP was developed empirically by ARPANET and became the actual protocol suite used on the commercial Internet."
+                "a": "The OSI model was created by ISO as a conceptual standard. TCP/IP was developed empirically by ARPANET/DARPA and became the actual protocol suite used on the Internet."
             },
             {
                 "q": "Explain the concept of Encapsulation with an example.",
-                "a": "Encapsulation is the process where each layer prepends a control header to the data payload from above. For example, an HTTP GET request (L7) gets a TCP header (L4, Segment), then an IP header (L3, Packet), then an Ethernet header (L2, Frame), before being transmitted as bits (L1)."
+                "a": "Encapsulation is where each layer prepends a header to payload data. For example, an HTTP request (L7) gets a TCP header (L4 Segment), an IP header (L3 Packet), and an Ethernet header/trailer (L2 Frame) before being sent as bits (L1)."
             },
             {
                 "q": "What is the difference between Layer 2 MAC addressing and Layer 3 IP addressing?",
-                "a": "Layer 2 MAC addresses are 48-bit hardware addresses permanently burned into network interface cards for local node-to-node delivery. Layer 3 IP addresses are 32-bit (IPv4) or 128-bit (IPv6) logical addresses assigned dynamically for global inter-network routing."
+                "a": "Layer 2 MAC addresses are 48-bit permanent hardware addresses for local node-to-node delivery. Layer 3 IP addresses are 32-bit (IPv4) or 128-bit (IPv6) logical addresses assigned for global inter-network routing."
             },
             {
                 "q": "What is a Protocol Data Unit (PDU)?",
-                "a": "A PDU is the specific format of data payload plus headers at a given layer: L7/6/5 = Data, L4 = Segment (TCP) / Datagram (UDP), L3 = Packet, L2 = Frame, L1 = Bits."
+                "a": "A PDU is the specific format of data payload plus headers at a layer: L7/6/5 = Data, L4 = Segment (TCP) / Datagram (UDP), L3 = Packet, L2 = Frame, L1 = Bits."
             }
         ],
         "simType": "osi_tcpip_sim"
@@ -14271,26 +14322,3 @@ window.VLAB_DATA = {
 
 window.VLAB_DATA['communication_models'] = window.VLAB_DATA['osi_tcpip'];
 window.VLAB_DATA['osi_tcpip_sim'] = window.VLAB_DATA['osi_tcpip'];
-window.VLAB_DATA['cables_devices'] = window.VLAB_DATA['intro_tools'];
-window.VLAB_DATA['modulation'] = window.VLAB_DATA['lan_cables'];
-window.VLAB_DATA['csma'] = window.VLAB_DATA['topologies'];
-window.VLAB_DATA['csma_ca'] = window.VLAB_DATA['topologies'];
-window.VLAB_DATA['subnet'] = window.VLAB_DATA['subnetting'];
-window.VLAB_DATA['routing_protocols'] = window.VLAB_DATA['routing_ospf'];
-window.VLAB_DATA['routing_dv'] = window.VLAB_DATA['routing_rip'];
-window.VLAB_DATA['routing_ls'] = window.VLAB_DATA['routing_eigrp'];
-window.VLAB_DATA['udp'] = window.VLAB_DATA['udp_tcp'];
-window.VLAB_DATA['tcp'] = window.VLAB_DATA['udp_tcp'];
-window.VLAB_DATA['dns'] = window.VLAB_DATA['dhcp_config'];
-window.VLAB_DATA['vlan_sim'] = window.VLAB_DATA['vlan'];
-window.VLAB_DATA['rip_sim'] = window.VLAB_DATA['routing_rip'];
-window.VLAB_DATA['rip'] = window.VLAB_DATA['routing_rip'];
-window.VLAB_DATA['ospf_sim'] = window.VLAB_DATA['routing_ospf'];
-window.VLAB_DATA['ospf'] = window.VLAB_DATA['routing_ospf'];
-window.VLAB_DATA['eigrp_sim'] = window.VLAB_DATA['routing_eigrp'];
-window.VLAB_DATA['eigrp'] = window.VLAB_DATA['routing_eigrp'];
-window.VLAB_DATA['static_routing_sim'] = window.VLAB_DATA['static_routing'];
-window.VLAB_DATA['udp_tcp_sim'] = window.VLAB_DATA['udp_tcp'];
-window.VLAB_DATA['dhcp_config_sim'] = window.VLAB_DATA['dhcp_config'];
-window.VLAB_DATA['static_nat_sim'] = window.VLAB_DATA['static_nat'];
-window.VLAB_DATA['dynamic_nat_sim'] = window.VLAB_DATA['dynamic_nat'];

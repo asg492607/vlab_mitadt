@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mit-vlab-cache-v67';
+const CACHE_NAME = 'mit-vlab-cache-v68';
 
 const ASSETS_TO_CACHE = [
     '/',
