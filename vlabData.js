@@ -2387,6 +2387,15 @@ window.VLAB_DATA = {
             "link": "https://www.cisco.com"
         }
     ],
+    "troubleshooting": {
+        "problem": "RIP Routing Loop & Count-to-Infinity (Metrics reaching 16 / Destination Unreachable)",
+        "hints": [
+                "Check if Split Horizon or Poison Reverse is disabled on connected router interfaces.",
+                "Verify if subnets belong to classful boundaries when 'auto-summary' is enabled.",
+                "Check if periodic update packets (UDP port 520 / Multicast 224.0.0.9) are blocked by firewall rules or passive-interface commands."
+        ],
+        "fix": "Enable 'version 2' and 'no auto-summary' under 'router rip'. Ensure Split Horizon is enabled on broadcast links, and verify UDP port 520 update traffic is allowed across all routers."
+},
     "simType": "rip_sim"
 },
     'routing_ospf': {
@@ -2822,6 +2831,16 @@ window.VLAB_DATA = {
             "link": "https://www.cisco.com"
         }
     ],
+    "troubleshooting": {
+        "problem": "OSPF Neighbor State Stuck in INIT or TWO-WAY (Adjacency fails to reach FULL state)",
+        "hints": [
+                "Verify matching Hello (10s) and Dead (40s) intervals between adjacent routers.",
+                "Check if Area IDs match on both sides of the link (e.g. both interfaces must belong to Area 0).",
+                "Verify primary subnet masks and MTU values match on connecting interfaces.",
+                "Check if multicast traffic to 224.0.0.5 is blocked by network filters."
+        ],
+        "fix": "Issue 'show ip ospf interface' to verify Hello/Dead timers and Area ID alignment. Set identical subnet masks and MTUs. Ensure OSPF interface priority is > 0 for DR/BDR election."
+},
     "simType": "ospf_sim"
 },
     'routing_eigrp': {
@@ -3255,6 +3274,16 @@ window.VLAB_DATA = {
             "link": "https://www.cisco.com"
         }
     ],
+    "troubleshooting": {
+        "problem": "EIGRP Neighbor Adjacency Fails to Form (No neighbors listed in 'show ip eigrp neighbors')",
+        "hints": [
+                "Check if Autonomous System (AS) numbers match on both routers (e.g. 'router eigrp 100').",
+                "Verify K-values (K1 through K5 metric weights) match across peers.",
+                "Check if Hello packets on IPv4 multicast 224.0.0.10 are suppressed by a 'passive-interface' command.",
+                "Verify primary subnets belong to the same IP network range."
+        ],
+        "fix": "Ensure both routers use 'router eigrp 100' with identical AS numbers. Issue 'no passive-interface <interface>' on interconnecting links and execute 'no auto-summary' under EIGRP configuration mode."
+},
     "simType": "eigrp_sim"
 },
     'static_routing': {

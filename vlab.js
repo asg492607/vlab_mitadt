@@ -7424,23 +7424,30 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
 
             // 8. Troubleshooting
-            if (data.troubleshooting) {
-                let tbHtml = `
-                    <div class="theory-card" style="border-left:4px solid var(--danger); margin-bottom:16px;">
-                        <h3 style="color:var(--danger); margin-bottom:8px;">⚠️ Fault Scenario</h3>
-                        <p style="font-size:14px; font-weight:700;">${data.troubleshooting.problem}</p>
-                    </div>
-                    <div class="theory-card" style="margin-bottom:16px;">
-                        <h4 style="color:var(--warning); margin-bottom:10px;">🔍 Diagnostic Clues & Hints</h4>
-                        <ul style="padding-left:20px; line-height:1.8;">${(data.troubleshooting.hints || []).map(h => `<li style="margin-bottom:6px;">${h}</li>`).join('')}</ul>
-                    </div>
-                    <div class="theory-card" style="border-left:4px solid var(--success);">
-                        <h4 style="color:var(--success); margin-bottom:8px;">✅ Corrective Solution</h4>
-                        <p style="font-size:13px; line-height:1.6;">${data.troubleshooting.fix}</p>
-                    </div>
-                `;
-                setBody('section-troubleshooting', tbHtml);
-            }
+            const tbData = data.troubleshooting || {
+                problem: "Routing Adjacency & Packet Delivery Fault Scenario",
+                hints: [
+                    "Inspect interface IP addresses and subnet masks.",
+                    "Verify layer 3 routing protocol status using show commands.",
+                    "Check for missing default gateways or incorrect network statements."
+                ],
+                fix: "Verify physical cabling, ensure matching protocol parameters (AS / Area / Subnet mask), and check routing table using show ip route."
+            };
+            let tbHtml = `
+                <div class="theory-card" style="border-left:4px solid var(--danger); margin-bottom:16px;">
+                    <h3 style="color:var(--danger); margin-bottom:8px;">⚠️ Fault Scenario</h3>
+                    <p style="font-size:14px; font-weight:700;">${tbData.problem}</p>
+                </div>
+                <div class="theory-card" style="margin-bottom:16px;">
+                    <h4 style="color:var(--warning); margin-bottom:10px;">🔍 Diagnostic Clues & Hints</h4>
+                    <ul style="padding-left:20px; line-height:1.8;">${(tbData.hints || []).map(h => `<li style="margin-bottom:6px;">${h}</li>`).join('')}</ul>
+                </div>
+                <div class="theory-card" style="border-left:4px solid var(--success);">
+                    <h4 style="color:var(--success); margin-bottom:8px;">✅ Corrective Solution</h4>
+                    <p style="font-size:13px; line-height:1.6;">${tbData.fix}</p>
+                </div>
+            `;
+            setBody('section-troubleshooting', tbHtml);
 
             // 9. Viva Voce
             if (data.viva && Array.isArray(data.viva)) {
