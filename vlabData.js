@@ -821,3 +821,17 @@ window.VLAB_DATA = {
         simType: "cli"
     }
 };
+
+// Legacy key alias mappings for 100% backwards compatibility with old bookmarks / localStorage keys
+window.VLAB_DATA['cables_devices'] = window.VLAB_DATA['intro_tools'];
+window.VLAB_DATA['modulation'] = window.VLAB_DATA['lan_cables'];
+window.VLAB_DATA['csma'] = window.VLAB_DATA['topologies'];
+window.VLAB_DATA['csma_ca'] = window.VLAB_DATA['topologies'];
+window.VLAB_DATA['subnet'] = window.VLAB_DATA['subnetting'];
+window.VLAB_DATA['routing_protocols'] = window.VLAB_DATA['routing_ospf'];
+window.VLAB_DATA['routing_dv'] = window.VLAB_DATA['routing_rip'];
+window.VLAB_DATA['routing_ls'] = window.VLAB_DATA['routing_eigrp'];
+window.VLAB_DATA['udp'] = window.VLAB_DATA['udp_tcp'];
+window.VLAB_DATA['tcp'] = window.VLAB_DATA['udp_tcp'];
+window.VLAB_DATA['dns'] = window.VLAB_DATA['dhcp_config'];
+

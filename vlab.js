@@ -15144,19 +15144,6 @@ student@mitadt-os:~$ </div>
             document.title = "MIT ADT VLAB - Cybersecurity";
         } else {
             optionsHtml = `
-                <option value="cables_devices">1. Cables, Connectors and Networking Devices</option>
-                <option value="modulation">2. Modulation Techniques (AM, FM, PCM)</option>
-                <option value="net_commands">3. Networking Commands & Utilities</option>
-                <option value="ip_class">4. IPv4 Address Classification</option>
-                <option value="csma">5. CSMA/CD Simulation</option>
-                <option value="csma_ca">6. CSMA/CA Simulation</option>
-                <option value="subnet">7. Subnetting & Network Design</option>
-                <option value="vlan">8. VLAN (Virtual LAN) Configuration</option>
-                <option value="routing_protocols">9. Dynamic Routing (OSPF & BGP)</option>
-                <option value="routing_dv">10. Distance Vector Routing Algorithm</option>
-                <option value="routing_ls">11. Link State Routing Algorithm</option>
-                <option value="udp">12. Chat Application using UDP</option>
-                <option value="tcp">13. File Transfer using TCP</option>
                 <option value="dns">14. Domain Name System (DNS)</option>
                 <option value="practice" style="display:none;">Practice Lab</option>
             `;
