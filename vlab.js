@@ -9037,6 +9037,498 @@ const initTopologySim = (container) => {
     render();
 };
 
+        // --- PRACTICAL 4: IPV4 & IPV6 CLASSIFICATION SIMULATOR ---
+// Interactive Practical 4 IP Classification & Subnetting Simulator
+const initIpClassSim = (container) => {
+    let currentTab = 'builder'; // 'builder', 'game', 'ipv6', 'routing', 'errors'
+    
+    // State for Module 1 & 2 (IP Builder & Subnet Visualizer)
+    let octets = [192, 168, 10, 25];
+    let cidrMask = 24;
+
+    // State for Module 3 (Class Classifier Game)
+    let quizIp = '172.20.15.5';
+    let quizScore = 0;
+    let quizFeedback = '';
+
+    // State for Module 4 (IPv6 Compressor)
+    let rawIpv6 = '2001:0db8:0000:0000:0000:0000:1428:57ab';
+
+    // State for Module 7 (Routing Sim)
+    let pcA_ip = '192.168.1.10';
+    let pcB_ip = '192.168.1.20';
+    let router_ip = '192.168.1.1';
+    let pcMask = 24;
+
+    const render = () => {
+        const ipStr = octets.join('.');
+        const firstOctet = octets[0];
+
+        // Class & Type determination
+        let ipClass = 'Class A';
+        let defaultMask = '255.0.0.0';
+        let classColor = '#3b82f6';
+        let isPrivate = false;
+
+        if (firstOctet >= 1 && firstOctet <= 126) {
+            ipClass = 'Class A'; defaultMask = '255.0.0.0'; classColor = '#3b82f6';
+            if (firstOctet === 10) isPrivate = true;
+        } else if (firstOctet === 127) {
+            ipClass = 'Special (Loopback)'; defaultMask = '255.0.0.0'; classColor = '#f59e0b';
+        } else if (firstOctet >= 128 && firstOctet <= 191) {
+            ipClass = 'Class B'; defaultMask = '255.255.0.0'; classColor = '#8b5cf6';
+            if (firstOctet === 172 && octets[1] >= 16 && octets[1] <= 31) isPrivate = true;
+        } else if (firstOctet >= 192 && firstOctet <= 223) {
+            ipClass = 'Class C'; defaultMask = '255.255.255.0'; classColor = '#10b981';
+            if (firstOctet === 192 && octets[1] === 168) isPrivate = true;
+        } else if (firstOctet >= 224 && firstOctet <= 239) {
+            ipClass = 'Class D (Multicast)'; defaultMask = 'N/A'; classColor = '#ec4899';
+        } else if (firstOctet >= 240 && firstOctet <= 255) {
+            ipClass = 'Class E (Experimental)'; defaultMask = 'N/A'; classColor = '#ef4444';
+        }
+
+        if (firstOctet === 169 && octets[1] === 254) {
+            ipClass = 'Special (APIPA)'; classColor = '#f97316';
+        }
+
+        // Subnet math calculations
+        const ipUint = ((octets[0] << 24) >>> 0) + ((octets[1] << 16) >>> 0) + ((octets[2] << 8) >>> 0) + (octets[3] >>> 0);
+        const maskUint = cidrMask === 0 ? 0 : ((0xffffffff << (32 - cidrMask)) >>> 0);
+        const netUint = (ipUint & maskUint) >>> 0;
+        const broadUint = (netUint | (~maskUint >>> 0)) >>> 0;
+        const usableHosts = Math.max(0, Math.pow(2, 32 - cidrMask) - 2);
+
+        const uintToIp = (u) => [ (u >>> 24) & 255, (u >>> 16) & 255, (u >>> 8) & 255, u & 255 ].join('.');
+        const toBin8 = (n) => n.toString(2).padStart(8, '0');
+
+        const netIpStr = uintToIp(netUint);
+        const broadIpStr = uintToIp(broadUint);
+        const firstUsable = usableHosts > 0 ? uintToIp(netUint + 1) : 'N/A';
+        const lastUsable = usableHosts > 0 ? uintToIp(broadUint - 1) : 'N/A';
+        const maskIpStr = uintToIp(maskUint);
+
+        // Binary bit array (32 bits)
+        const fullBits = octets.map(toBin8).join('');
+        const maskBits = toBin8((maskUint >>> 24) & 255) + toBin8((maskUint >>> 16) & 255) + toBin8((maskUint >>> 8) & 255) + toBin8(maskUint & 255);
+
+        container.innerHTML = `
+        <div class="sim-toolbar" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; padding:12px 16px; background:var(--bg-card); border-bottom:1px solid var(--border);">
+            <div style="font-size:20px; font-weight:800; color:var(--primary); display:flex; align-items:center; gap:8px;">
+                <span>IPv4 & IPv6 Classification Engine 🌐</span>
+            </div>
+            <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                <button class="btn-sim ${currentTab === 'builder' ? 'primary' : ''}" id="tabBuilder" style="font-size:12px; padding:6px 12px;">Bit Flipper & Subnet Visualizer 🧮</button>
+                <button class="btn-sim ${currentTab === 'game' ? 'primary' : ''}" id="tabGame" style="font-size:12px; padding:6px 12px;">Class Identifier Game 🎮</button>
+                <button class="btn-sim ${currentTab === 'ipv6' ? 'primary' : ''}" id="tabIpv6" style="font-size:12px; padding:6px 12px;">IPv6 Zero Compressor ⚡</button>
+                <button class="btn-sim ${currentTab === 'routing' ? 'primary' : ''}" id="tabRouting" style="font-size:12px; padding:6px 12px;">Packet Routing Sim 📨</button>
+                <button class="btn-sim ${currentTab === 'errors' ? 'primary' : ''}" id="tabErrors" style="font-size:12px; padding:6px 12px;">IP Error Detector 🔍</button>
+            </div>
+        </div>
+
+        <div class="sim-workspace" style="padding:16px; display:flex; flex-direction:column; gap:16px; background:var(--bg-page);">
+            ${currentTab === 'builder' ? `
+                <div style="display:flex; gap:16px; flex-wrap:wrap; width:100%;">
+                    
+                    <!-- Octet & Bit Flipper Card -->
+                    <div class="theory-card" style="flex:2; min-width:340px; margin:0; display:flex; flex-direction:column; gap:16px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+                            <h3 style="color:var(--primary); margin:0; font-size:17px;">Interactive 32-Bit Octet Bit-Flipper & Boundary Visualizer</h3>
+                            <span style="font-size:11px; font-weight:800; padding:4px 10px; border-radius:6px; background:${classColor}22; color:${classColor}; border:1px solid ${classColor};">${ipClass}</span>
+                        </div>
+
+                        <!-- Decimal Inputs -->
+                        <div style="display:flex; align-items:center; gap:8px; justify-content:center; padding:12px; background:var(--bg-page); border:1px solid var(--border); border-radius:10px;">
+                            <span style="font-size:12px; font-weight:800; color:var(--text-muted);">DECIMAL IP:</span>
+                            <input type="number" id="oct0" min="0" max="255" value="${octets[0]}" style="width:60px; text-align:center; font-weight:800; font-family:'JetBrains Mono', monospace;" class="sim-select"> .
+                            <input type="number" id="oct1" min="0" max="255" value="${octets[1]}" style="width:60px; text-align:center; font-weight:800; font-family:'JetBrains Mono', monospace;" class="sim-select"> .
+                            <input type="number" id="oct2" min="0" max="255" value="${octets[2]}" style="width:60px; text-align:center; font-weight:800; font-family:'JetBrains Mono', monospace;" class="sim-select"> .
+                            <input type="number" id="oct3" min="0" max="255" value="${octets[3]}" style="width:60px; text-align:center; font-weight:800; font-family:'JetBrains Mono', monospace;" class="sim-select">
+                            <span style="font-size:16px; font-weight:800; color:var(--primary); margin-left:8px;">/${cidrMask}</span>
+                        </div>
+
+                        <!-- 32-Bit Clickable Bit Matrix -->
+                        <div>
+                            <div style="display:flex; justify-content:space-between; margin-bottom:6px; font-size:11px; font-weight:700; color:var(--text-muted);">
+                                <span>32-BIT BINARY ARRAY (Click any bit to flip 0 ↔ 1)</span>
+                                <span><span style="color:#10b981;">■ Network Bits (${cidrMask})</span> | <span style="color:#f97316;">■ Host Bits (${32 - cidrMask})</span></span>
+                            </div>
+                            <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:10px; background:#0b0f19; padding:12px; border-radius:10px; border:1px solid var(--border);">
+                                ${octets.map((oct, oIdx) => `
+                                    <div style="display:flex; flex-direction:column; gap:4px; align-items:center;">
+                                        <div style="font-size:10px; font-weight:800; color:#64748b;">OCTET ${oIdx + 1} (${oct})</div>
+                                        <div style="display:grid; grid-template-columns:repeat(8, 1fr); gap:3px; width:100%;">
+                                            ${toBin8(oct).split('').map((bit, bIdx) => {
+                                                const globalBitIdx = oIdx * 8 + bIdx;
+                                                const isNetBit = globalBitIdx < cidrMask;
+                                                const bg = isNetBit ? (bit === '1' ? '#10b981' : '#064e3b') : (bit === '1' ? '#f97316' : '#7c2d12');
+                                                return `
+                                                    <button class="bit-btn" data-bitidx="${globalBitIdx}" style="background:${bg}; color:#fff; border:1px solid rgba(255,255,255,0.2); border-radius:4px; padding:6px 0; font-size:11px; font-weight:800; font-family:'JetBrains Mono', monospace; cursor:pointer;" title="Bit weight: ${Math.pow(2, 7 - bIdx)}">${bit}</button>
+                                                `;
+                                            }).join('')}
+                                        </div>
+                                        <div style="display:grid; grid-template-columns:repeat(8, 1fr); gap:3px; width:100%; font-size:7px; color:#475569; text-align:center; font-family:'JetBrains Mono', monospace;">
+                                            <span>128</span><span>64</span><span>32</span><span>16</span><span>8</span><span>4</span><span>2</span><span>1</span>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+
+                        <!-- CIDR Subnet Slider -->
+                        <div style="padding:12px; background:var(--bg-page); border:1px solid var(--border); border-radius:10px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                                <label style="font-size:12px; font-weight:800; color:var(--text-main);">Subnet Mask Prefix (CIDR): /${cidrMask}</label>
+                                <span style="font-size:11px; font-family:'JetBrains Mono', monospace; color:var(--primary); font-weight:800;">${maskIpStr}</span>
+                            </div>
+                            <input type="range" id="sliderCidr" min="8" max="30" value="${cidrMask}" style="width:100%; accent-color:var(--primary); cursor:pointer;">
+                        </div>
+
+                        <!-- Live Calculation Summary Grid -->
+                        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:10px; font-family:'JetBrains Mono', monospace; font-size:11px;">
+                            <div style="padding:10px; background:rgba(16,185,129,0.08); border:1px solid rgba(16,185,129,0.2); border-radius:8px;">
+                                <div style="font-size:9px; color:var(--text-muted); font-weight:800;">NETWORK ADDRESS (ID)</div>
+                                <div style="font-size:14px; font-weight:800; color:#10b981; margin-top:2px;">${netIpStr}</div>
+                            </div>
+                            <div style="padding:10px; background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.2); border-radius:8px;">
+                                <div style="font-size:9px; color:var(--text-muted); font-weight:800;">DIRECT BROADCAST ID</div>
+                                <div style="font-size:14px; font-weight:800; color:#ef4444; margin-top:2px;">${broadIpStr}</div>
+                            </div>
+                            <div style="padding:10px; background:rgba(37,99,235,0.08); border:1px solid rgba(37,99,235,0.2); border-radius:8px;">
+                                <div style="font-size:9px; color:var(--text-muted); font-weight:800;">USABLE HOST RANGE</div>
+                                <div style="font-size:11px; font-weight:800; color:#3b82f6; margin-top:2px;">${firstUsable} → ${lastUsable}</div>
+                            </div>
+                            <div style="padding:10px; background:rgba(245,158,11,0.08); border:1px solid rgba(245,158,11,0.2); border-radius:8px;">
+                                <div style="font-size:9px; color:var(--text-muted); font-weight:800;">TOTAL USABLE HOSTS</div>
+                                <div style="font-size:14px; font-weight:800; color:#f59e0b; margin-top:2px;">${usableHosts.toLocaleString()} Hosts</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Classification & Specs Sidebar -->
+                    <div class="theory-card" style="flex:1; min-width:260px; margin:0; display:flex; flex-direction:column; gap:12px;">
+                        <h3 style="color:var(--primary); margin:0; font-size:16px;">IP Address Specification 📋</h3>
+                        
+                        <div style="line-height:1.8; font-size:12px; display:flex; flex-direction:column; gap:8px;">
+                            <div style="padding:8px 12px; background:var(--bg-page); border:1px solid var(--border); border-radius:6px;">
+                                <b>Address Class:</b> <span style="font-weight:800; color:${classColor};">${ipClass}</span>
+                            </div>
+                            <div style="padding:8px 12px; background:var(--bg-page); border:1px solid var(--border); border-radius:6px;">
+                                <b>First Octet Decimal:</b> <code>${firstOctet}</code> (Binary: <code>${toBin8(firstOctet)}</code>)
+                            </div>
+                            <div style="padding:8px 12px; background:var(--bg-page); border:1px solid var(--border); border-radius:6px;">
+                                <b>Default Class Mask:</b> <code>${defaultMask}</code>
+                            </div>
+                            <div style="padding:8px 12px; background:var(--bg-page); border:1px solid var(--border); border-radius:6px;">
+                                <b>Address Type:</b> <span style="font-weight:800; color:${isPrivate ? '#10b981' : '#3b82f6'};">${isPrivate ? '🔒 Private (RFC 1918)' : '🌐 Public Internet'}</span>
+                            </div>
+                        </div>
+
+                        <div style="padding:10px; background:rgba(37,99,235,0.06); border:1px solid var(--border); border-radius:8px; font-size:11px; line-height:1.5;">
+                            <b>Binary Prefix Rules:</b><br>
+                            • Class A: High bit <code>0...</code> (1 to 126)<br>
+                            • Class B: High bits <code>10...</code> (128 to 191)<br>
+                            • Class C: High bits <code>110...</code> (192 to 223)<br>
+                            • Class D: High bits <code>1110...</code> (224 to 239)<br>
+                            • Class E: High bits <code>1111...</code> (240 to 255)
+                        </div>
+                    </div>
+                </div>
+            ` : ''}
+
+            ${currentTab === 'game' ? `
+                <!-- Module 3: Class Identifier Game -->
+                <div class="theory-card" style="margin:0; display:flex; flex-direction:column; gap:16px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap;">
+                        <h3 style="color:var(--primary); margin:0;">Class Identifier Challenge 🎮</h3>
+                        <div style="font-size:18px; font-weight:800; color:var(--primary);">Score: <span id="gameScoreVal">${quizScore}</span> Pts</div>
+                    </div>
+
+                    <div style="text-align:center; padding:30px; background:#0b0f19; border:1px solid var(--border); border-radius:12px;">
+                        <div style="font-size:11px; color:#64748b; font-weight:800; margin-bottom:6px;">CLASSIFY THIS IP ADDRESS</div>
+                        <div style="font-size:36px; font-weight:800; font-family:'JetBrains Mono', monospace; color:#38bdf8;">${quizIp}</div>
+                    </div>
+
+                    <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:center;">
+                        <button class="btn-sim btn-quiz" data-answer="Class A" style="flex:1; min-width:110px; padding:12px; font-weight:700;">Class A</button>
+                        <button class="btn-sim btn-quiz" data-answer="Class B" style="flex:1; min-width:110px; padding:12px; font-weight:700;">Class B</button>
+                        <button class="btn-sim btn-quiz" data-answer="Class C" style="flex:1; min-width:110px; padding:12px; font-weight:700;">Class C</button>
+                        <button class="btn-sim btn-quiz" data-answer="Class D" style="flex:1; min-width:110px; padding:12px; font-weight:700;">Class D (Multicast)</button>
+                        <button class="btn-sim btn-quiz" data-answer="Class E" style="flex:1; min-width:110px; padding:12px; font-weight:700;">Class E (Exp)</button>
+                        <button class="btn-sim btn-quiz" data-answer="Private" style="flex:1; min-width:110px; padding:12px; font-weight:700;">RFC 1918 Private</button>
+                        <button class="btn-sim btn-quiz" data-answer="Loopback" style="flex:1; min-width:110px; padding:12px; font-weight:700;">Loopback / Special</button>
+                    </div>
+
+                    <div id="quizFeedbackBox" style="padding:12px; background:var(--bg-page); border:1px solid var(--border); border-radius:8px; font-size:13px; min-height:45px; text-align:center;">
+                        ${quizFeedback || '💡 Click the button corresponding to the correct IPv4 category for the IP displayed above.'}
+                    </div>
+
+                    <div style="text-align:center;">
+                        <button id="btnNextQuiz" class="btn-sim primary" style="padding:8px 24px; font-weight:700;">Next Random IP 🎲</button>
+                    </div>
+                </div>
+            ` : ''}
+
+            ${currentTab === 'ipv6' ? `
+                <!-- Module 4: IPv6 Zero Compression Visualizer -->
+                <div class="theory-card" style="margin:0; display:flex; flex-direction:column; gap:16px;">
+                    <h3 style="color:var(--primary); margin:0;">IPv6 128-Bit Zero Compression & Expansion Visualizer ⚡</h3>
+                    <p style="font-size:13px; color:var(--text-main); margin:0; line-height:1.6;">
+                        IPv6 addresses consist of 128 bits divided into 8 hexadecimal blocks (hextets) of 16 bits each. Apply RFC 5952 zero-compression rules interactively below.
+                    </p>
+
+                    <div style="display:flex; flex-direction:column; gap:10px;">
+                        <label style="font-size:12px; font-weight:800;">ENTER FULL 8-HEXTET UNCOMPRESSED IPV6 ADDRESS:</label>
+                        <div style="display:flex; gap:10px;">
+                            <input type="text" id="inputIpv6" value="${rawIpv6}" class="sim-select" style="flex:1; font-family:'JetBrains Mono', monospace; font-size:13px; padding:8px;">
+                            <button id="btnCompressIpv6" class="btn-sim primary" style="font-weight:700;">Compress IPv6 ⚡</button>
+                        </div>
+                    </div>
+
+                    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); gap:14px;">
+                        <div style="padding:14px; background:var(--bg-page); border:1px solid var(--border); border-radius:10px; line-height:1.8;">
+                            <div style="font-size:11px; font-weight:800; color:var(--text-muted); margin-bottom:6px;">RULE 1: OMIT LEADING ZEROS IN EACH HEXTET</div>
+                            <div id="ipv6Rule1Out" style="font-family:'JetBrains Mono', monospace; font-size:13px; color:#3b82f6; word-break:break-all;"></div>
+                        </div>
+
+                        <div style="padding:14px; background:rgba(16,185,129,0.08); border:1px solid rgba(16,185,129,0.3); border-radius:10px; line-height:1.8;">
+                            <div style="font-size:11px; font-weight:800; color:#10b981; margin-bottom:6px;">RULE 2: COMPRESS LONGEST ALL-ZERO GROUP WITH '::'</div>
+                            <div id="ipv6Rule2Out" style="font-family:'JetBrains Mono', monospace; font-size:15px; font-weight:800; color:#10b981; word-break:break-all;"></div>
+                        </div>
+                    </div>
+                </div>
+            ` : ''}
+
+            ${currentTab === 'routing' ? `
+                <!-- Module 7: Packet Routing & Gateway Simulator -->
+                <div class="theory-card" style="margin:0; display:flex; flex-direction:column; gap:16px;">
+                    <h3 style="color:var(--primary); margin:0;">Packet Delivery & Subnet Boundary Router Simulator 📨</h3>
+                    <p style="font-size:13px; color:var(--text-main); margin:0; line-height:1.6;">
+                        If Host A and Host B are on the <b>same subnet</b>, data frames travel directly via Layer 2 Switch. If on <b>different subnets</b>, traffic must pass through the Default Gateway Router!
+                    </p>
+
+                    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:12px; background:var(--bg-page); padding:14px; border:1px solid var(--border); border-radius:10px;">
+                        <div>
+                            <label style="font-size:11px; font-weight:800;">PC A IP ADDRESS:</label>
+                            <input type="text" id="rtPcA" value="${pcA_ip}" class="sim-select" style="width:100%; font-family:monospace; margin-top:4px;">
+                        </div>
+                        <div>
+                            <label style="font-size:11px; font-weight:800;">PC B IP ADDRESS:</label>
+                            <input type="text" id="rtPcB" value="${pcB_ip}" class="sim-select" style="width:100%; font-family:monospace; margin-top:4px;">
+                        </div>
+                        <div>
+                            <label style="font-size:11px; font-weight:800;">SUBNET MASK PREFIX:</label>
+                            <select id="rtMask" class="sim-select" style="width:100%; margin-top:4px;">
+                                <option value="24" ${pcMask === 24 ? 'selected' : ''}>255.255.255.0 (/24)</option>
+                                <option value="16" ${pcMask === 16 ? 'selected' : ''}>255.255.0.0 (/16)</option>
+                                <option value="8" ${pcMask === 8 ? 'selected' : ''}>255.0.0.0 (/8)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div style="text-align:center;">
+                        <button id="btnRunRoutingSim" class="btn-sim primary" style="padding:10px 24px; font-weight:700;">Simulate Packet Route ▶</button>
+                    </div>
+
+                    <div id="routingLogOut" style="padding:14px; background:#0b0f19; border:1px solid var(--border); border-radius:10px; font-family:'JetBrains Mono', monospace; font-size:12px; color:#10b981; min-height:80px; line-height:1.8;">
+                        💡 Click <b>Simulate Packet Route ▶</b> to test L2 Direct Delivery vs L3 Gateway Router hops.
+                    </div>
+                </div>
+            ` : ''}
+
+            ${currentTab === 'errors' ? `
+                <!-- Module 8: IP Configuration Error Detector Challenge -->
+                <div class="theory-card" style="margin:0; display:flex; flex-direction:column; gap:16px;">
+                    <h3 style="color:var(--primary); margin:0;">IP Configuration Error Detector & Diagnostic Challenge 🔍</h3>
+                    <p style="font-size:13px; color:var(--text-main); margin:0; line-height:1.6;">
+                        Enter network parameters for 2 hosts and test for real-world network misconfigurations (Duplicate IP, Invalid Host ID, Subnet Mismatch).
+                    </p>
+
+                    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:12px; background:var(--bg-page); padding:14px; border:1px solid var(--border); border-radius:10px;">
+                        <div>
+                            <label style="font-size:11px; font-weight:800;">Host 1 IP:</label>
+                            <input type="text" id="errIp1" value="192.168.1.10" class="sim-select" style="width:100%; font-family:monospace; margin-top:4px;">
+                        </div>
+                        <div>
+                            <label style="font-size:11px; font-weight:800;">Host 2 IP:</label>
+                            <input type="text" id="errIp2" value="192.168.1.10" class="sim-select" style="width:100%; font-family:monospace; margin-top:4px;">
+                        </div>
+                        <div>
+                            <label style="font-size:11px; font-weight:800;">Subnet Mask:</label>
+                            <input type="text" id="errMask" value="255.255.255.0" class="sim-select" style="width:100%; font-family:monospace; margin-top:4px;">
+                        </div>
+                    </div>
+
+                    <div style="text-align:center;">
+                        <button id="btnCheckErrors" class="btn-sim danger" style="padding:10px 24px; font-weight:700;">Audit Configuration 🔍</button>
+                    </div>
+
+                    <div id="errorAuditOut" style="padding:14px; background:var(--bg-page); border:1px solid var(--border); border-radius:10px; font-size:13px; min-height:60px; line-height:1.6;">
+                        💡 Click <b>Audit Configuration 🔍</b> to test for network misconfiguration errors.
+                    </div>
+                </div>
+            ` : ''}
+        </div>
+        `;
+
+        // Tab Switching Event Handlers
+        document.getElementById('tabBuilder').onclick = () => { currentTab = 'builder'; render(); };
+        document.getElementById('tabGame').onclick = () => { currentTab = 'game'; render(); };
+        document.getElementById('tabIpv6').onclick = () => { currentTab = 'ipv6'; render(); };
+        document.getElementById('tabRouting').onclick = () => { currentTab = 'routing'; render(); };
+        document.getElementById('tabErrors').onclick = () => { currentTab = 'errors'; render(); };
+
+        // Module 1 & 2 Event Listeners
+        if (currentTab === 'builder') {
+            ['oct0', 'oct1', 'oct2', 'oct3'].forEach((id, idx) => {
+                const el = document.getElementById(id);
+                if (el) el.onchange = (e) => {
+                    let val = parseInt(e.target.value) || 0;
+                    val = Math.max(0, Math.min(255, val));
+                    octets[idx] = val;
+                    render();
+                };
+            });
+
+            const slider = document.getElementById('sliderCidr');
+            if (slider) slider.oninput = (e) => {
+                cidrMask = parseInt(e.target.value);
+                render();
+            };
+
+            // Bit-Flipper Button Handler
+            document.querySelectorAll('.bit-btn').forEach(btn => {
+                btn.onclick = () => {
+                    const globalIdx = parseInt(btn.getAttribute('data-bitidx'));
+                    const oIdx = Math.floor(globalIdx / 8);
+                    const bIdx = globalIdx % 8;
+                    const bitWeight = Math.pow(2, 7 - bIdx);
+                    const currentOctet = octets[oIdx];
+                    const bitVal = (currentOctet & bitWeight) ? 1 : 0;
+
+                    if (bitVal === 1) {
+                        octets[oIdx] = currentOctet - bitWeight;
+                    } else {
+                        octets[oIdx] = currentOctet + bitWeight;
+                    }
+                    render();
+                };
+            });
+        }
+
+        // Module 3: Class Identifier Game Event Handlers
+        if (currentTab === 'game') {
+            document.querySelectorAll('.btn-quiz').forEach(btn => {
+                btn.onclick = () => {
+                    const ans = btn.getAttribute('data-answer');
+                    const qFirst = parseInt(quizIp.split('.')[0]);
+                    const qSec = parseInt(quizIp.split('.')[1]);
+
+                    let correctAns = 'Class A';
+                    if (qFirst >= 128 && qFirst <= 191) correctAns = 'Class B';
+                    else if (qFirst >= 192 && qFirst <= 223) correctAns = 'Class C';
+                    else if (qFirst >= 224 && qFirst <= 239) correctAns = 'Class D';
+                    else if (qFirst >= 240) correctAns = 'Class E';
+
+                    if (qFirst === 127 || (qFirst === 169 && qSec === 254)) correctAns = 'Loopback';
+                    if (qFirst === 10 || (qFirst === 172 && qSec >= 16 && qSec <= 31) || (qFirst === 192 && qSec === 168)) {
+                        if (ans === 'Private') correctAns = 'Private';
+                    }
+
+                    if (ans === correctAns) {
+                        quizScore += 10;
+                        quizFeedback = `<span style="color:#10b981; font-weight:800;">✅ EXCELLENT! ${quizIp} is indeed ${correctAns}! (+10 Pts)</span>`;
+                    } else {
+                        quizFeedback = `<span style="color:#ef4444; font-weight:800;">❌ INCORRECT! ${quizIp} belongs to ${correctAns}. Try another IP below!</span>`;
+                    }
+                    render();
+                };
+            });
+
+            const btnNext = document.getElementById('btnNextQuiz');
+            if (btnNext) btnNext.onclick = () => {
+                const sampleIps = ['10.50.1.100', '172.20.15.5', '192.168.1.50', '8.8.8.8', '224.0.0.1', '127.0.0.1', '169.254.10.20', '240.5.5.5', '192.0.2.1', '172.31.255.1'];
+                quizIp = sampleIps[Math.floor(Math.random() * sampleIps.length)];
+                quizFeedback = '';
+                render();
+            };
+        }
+
+        // Module 4: IPv6 Zero Compression Handlers
+        if (currentTab === 'ipv6') {
+            const updateIpv6Compression = () => {
+                const val = document.getElementById('inputIpv6').value.trim();
+                rawIpv6 = val;
+                const hextets = val.split(':');
+
+                // Rule 1: Leading Zeros
+                const r1Hextets = hextets.map(h => {
+                    const trimmed = h.replace(/^0+/, '');
+                    return trimmed === '' ? '0' : trimmed;
+                });
+                const r1Str = r1Hextets.join(':');
+                document.getElementById('ipv6Rule1Out').textContent = r1Str;
+
+                // Rule 2: Double Colon Compression
+                let r2Str = r1Str.replace(/(^|:)(0:)+0($|:)/, '::');
+                // Clean up triple colons if any
+                r2Str = r2Str.replace(/:::/g, '::');
+                document.getElementById('ipv6Rule2Out').textContent = r2Str;
+            };
+
+            const btnComp = document.getElementById('btnCompressIpv6');
+            if (btnComp) btnComp.onclick = updateIpv6Compression;
+            updateIpv6Compression();
+        }
+
+        // Module 7: Routing Simulator Handlers
+        if (currentTab === 'routing') {
+            const btnRoute = document.getElementById('btnRunRoutingSim');
+            if (btnRoute) btnRoute.onclick = () => {
+                const ipA = document.getElementById('rtPcA').value.trim();
+                const ipB = document.getElementById('rtPcB').value.trim();
+                const mask = parseInt(document.getElementById('rtMask').value);
+                const log = document.getElementById('routingLogOut');
+
+                const ipToUint = (ip) => ip.split('.').map(Number).reduce((acc, octet) => ((acc << 8) + octet) >>> 0, 0);
+                const maskUint = ((0xffffffff << (32 - mask)) >>> 0);
+
+                const netA = (ipToUint(ipA) & maskUint) >>> 0;
+                const netB = (ipToUint(ipB) & maskUint) >>> 0;
+
+                const uintToIp = (u) => [ (u >>> 24) & 255, (u >>> 16) & 255, (u >>> 8) & 255, u & 255 ].join('.');
+
+                if (netA === netB) {
+                    log.innerHTML = `<span style="color:#10b981; font-weight:800;">✅ SAME SUBNET (Direct L2 Transmission):</span><br>PC A Network ID (${uintToIp(netA)}) === PC B Network ID (${uintToIp(netB)}).<br>PC A uses ARP to resolve PC B MAC and sends Ethernet Frame <b>directly via Layer-2 Switch!</b> (No Router needed).`;
+                } else {
+                    log.innerHTML = `<span style="color:#3b82f6; font-weight:800;">🌐 DIFFERENT SUBNET (L3 Gateway Router Hops):</span><br>PC A Network ID (${uintToIp(netA)}) !== PC B Network ID (${uintToIp(netB)}).<br>PC A forwards IP Datagram to <b>Default Gateway Router (192.168.1.1)</b>. Router inspects routing table and forwards across WAN to PC B subnet!`;
+                }
+            };
+        }
+
+        // Module 8: Error Audit Handler
+        if (currentTab === 'errors') {
+            const btnAudit = document.getElementById('btnCheckErrors');
+            if (btnAudit) btnAudit.onclick = () => {
+                const ip1 = document.getElementById('errIp1').value.trim();
+                const ip2 = document.getElementById('errIp2').value.trim();
+                const maskStr = document.getElementById('errMask').value.trim();
+                const out = document.getElementById('errorAuditOut');
+
+                if (ip1 === ip2) {
+                    out.innerHTML = `<span style="color:#ef4444; font-weight:800;">🚨 CRITICAL ERROR: DUPLICATE IP ADDRESS DETECTED!</span><br>Both Host 1 and Host 2 are assigned <code>${ip1}</code>. Causes ARP conflict, packet drops, and OS IP Conflict warning alert!`;
+                } else if (ip1.endsWith('.0') || ip1.endsWith('.255')) {
+                    out.innerHTML = `<span style="color:#ef4444; font-weight:800;">🚨 INVALID HOST IP: RESERVED SUBNET ADDRESS!</span><br>IP <code>${ip1}</code> is a Network ID (.0) or Broadcast ID (.255). It cannot be assigned to a host interface!`;
+                } else {
+                    out.innerHTML = `<span style="color:#10b981; font-weight:800;">✅ CONFIGURATION VALID:</span> Host 1 (${ip1}) and Host 2 (${ip2}) are uniquely addressed with valid host bit assignments!`;
+                }
+            };
+        }
+    };
+
+    render();
+};
+
+
         // --- OPERATING SYSTEMS SIMULATORS ---
         const initCpuSchedulingSim = (container) => {
             const COLORS = ['#2563eb', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4', '#ec4899', '#84cc16'];
@@ -15382,6 +15874,7 @@ const initTopologySim = (container) => {
             if (data.simType === 'ip_sorter') { initIpSorter(container); return; }
             if (data.simType === 'cmd_challenge' || data.simType === 'cli') { initCmdChallenge(container); return; }
             if (data.simType === 'media_study') { initMediaStudy(container); return; }
+            if (data.simType === 'ip_class' || id === 'ip_class') { initIpClassSim(container); return; }
             if (data.simType === 'topologies') { initTopologySim(container); return; }
             if (data.simType === 'vlan_sim') { initVlanSim(container); return; }
             if (data.simType === 'dns') { initDnsSim(container); return; }

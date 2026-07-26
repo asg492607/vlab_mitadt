@@ -864,51 +864,344 @@ window.VLAB_DATA = {
         simType: "topologies"
     },
     'ip_class': {
-        title: "IPv4 & IPv6 Address Classification",
-        aim: "To analyze IPv4 address classes (A, B, C, D, E), network/host boundary bits, loopback ranges, and IPv6 128-bit hex notation.",
-        intro: {
-            summary: "IP addressing provides logical identification for network layer routing. IPv4 uses 32-bit addresses while IPv6 expands to 128 bits.",
-            importance: "Proper IP classification is fundamental to designing subnets, routing tables, and firewall rules.",
-            applications: ["Global Internet Routing", "Private Corporate Intranets", "IoT IPv6 Deployment"],
-            outcome: "Students will classify IPv4 addresses, extract Network/Host IDs, and format IPv6 hexadecimal blocks."
-        },
-        prerequisites: ["Binary to Decimal conversion basics"],
-        outcomes: [
-            "Identify Class A, B, C, D, E from the first octet.",
-            "Separate Network Portion and Host Portion bits.",
-            "Recognize Private RFC 1918 address ranges."
+    "title": "Practical 4: IPv4 & IPv6 Address Classification",
+    "aim": "To study, analyze, and classify IPv4 address classes (A, B, C, D, E), determine Network ID and Host ID boundary divisions, calculate subnet masks, evaluate RFC 1918 private vs public ranges, examine special IP addresses, and master IPv6 128-bit hexadecimal notation and zero-compression rules.",
+    "intro": {
+        "summary": "Every device connected to a computer network requires a unique address to communicate with other devices. Just as every house has a unique postal address for receiving mail, every computer, smartphone, server, printer, router, and IoT device requires a unique network address called an Internet Protocol (IP) Address. An IP address identifies a device and enables data packets to be delivered to the correct destination across local networks and the global Internet.",
+        "importance": "Without IP addressing, communication between devices on local or global networks would be impossible. Understanding IP addressing, subnet masking, and address classification is essential for network engineering, router configuration, firewall policy definition, and transition to modern IPv6 infrastructure.",
+        "applications": [
+            "Global Internet Routing & ISP Address Allocation",
+            "Local Area Network (LAN) Device Addressing & DHCP Pools",
+            "Network Address Translation (NAT) & Private RFC 1918 Intranets",
+            "Next-Generation IPv6 Deployment for IoT & Mobile Core Networks",
+            "Firewall Rules, Access Control Lists (ACLs), and Subnet Security Masking"
         ],
-        theory: {
-            intro: "IPv4 uses 32-bit addresses divided into Class A (1-126), Class B (128-191), Class C (192-223), Class D Multicast (224-239), and Class E (240-254). IPv6 uses 128-bit hex notation.",
-            cards: [
-                { title: "Classful Subnetting", content: "Class A defaults to /8, Class B defaults to /16, and Class C defaults to /24." },
-                { title: "Private IP Ranges (RFC 1918)", content: "10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16 are non-routable on public internet." }
-            ],
-            formulas: ["Usable IPv4 Hosts = 2^(Host Bits) - 2", "Total IPv4 Space = 2^32 = 4,294,967,296"],
-            standards: ["RFC 791 - Internet Protocol Specification", "RFC 1918 - Address Allocation for Private Internets"]
-        },
-        tools: [
-            { name: "IP Classifier & Subnet Calculator", layer: "Layer 3 Utility", ports: "Software Tool", usage: "Binary conversion & Octet extraction", statusLED: "Calculated Output" }
-        ],
-        procedure: [
-            "Enter target IP address into the IPv4 Classifier module.",
-            "Determine First Octet value and identify Class type (A, B, C, D, E).",
-            "Calculate Default Subnet Mask, Network ID, and Broadcast ID.",
-            "Convert IPv4 address to 32-bit binary representation."
-        ],
-        troubleshooting: {
-            problem: "IP 127.0.0.1 cannot be assigned to an Ethernet host card.",
-            hints: ["127.0.0.0/8 is reserved for internal loopback testing."],
-            fix: "Use a valid host address like 192.168.1.50."
-        },
-        viva: [
-            { q: "Why are 2 addresses subtracted when calculating usable hosts?", a: "One address is reserved for the Network ID and one for the Direct Broadcast Address." },
-            { q: "What is the range of Class C first octet in decimal?", a: "192 to 223." }
-        ],
-        assignment: "Classify 172.20.15.5, 10.50.1.100, 192.168.5.1, and 224.0.0.1 into Class, Subnet Mask, and Private/Public status.",
-        references: [{ title: "RFC 791 - IPv4 Specification", link: "https://datatracker.ietf.org/doc/html/rfc791" }],
-        simType: "interactive_calc"
+        "outcome": "Students will be able to convert between decimal and binary octets, classify IPv4 addresses into Classes A–E, extract Network ID and Host ID using subnet masks, differentiate public and private IP ranges, identify special addresses (Loopback, APIPA, Broadcast), and compress/expand 128-bit IPv6 hexadecimal addresses."
     },
+    "prerequisites": [
+        "Basic understanding of computer networks and OSI Layer 3 (Network Layer)",
+        "Binary number system (Bits, Bytes, Octets, Powers of 2 up to 2^128)",
+        "Concept of source and destination addressing in packet switching"
+    ],
+    "outcomes": [
+        "Understand the core purpose and structure of IP addresses in packet-switched networks.",
+        "Differentiate between IPv4 (32-bit) and IPv6 (128-bit) specifications.",
+        "Identify the five IPv4 address classes (Class A, B, C, D, E) from first-octet binary prefixes.",
+        "Determine Network ID and Host ID boundaries using default and custom subnet masks.",
+        "Differentiate public IP addresses from RFC 1918 private address ranges.",
+        "Identify special addresses including Loopback (127.0.0.1), APIPA (169.254.x.x), Limited Broadcast (255.255.255.255), and Unspecified (0.0.0.0).",
+        "Master IPv6 8-hextet colon-hexadecimal notation and apply zero compression rules.",
+        "Diagnose IP configuration errors such as duplicate IPs, subnet mismatches, and invalid gateway settings."
+    ],
+    "theory": {
+        "intro": "Internet Protocol (IP) is the principal communications protocol in the Internet protocol suite for relaying datagrams across network boundaries. Its routing function enables internetworking and essentially establishes the Internet.",
+        "cards": [
+            {
+                "title": "1. What is an IP Address & Why is it Required?",
+                "content": "An Internet Protocol (IP) address is a unique numerical identifier assigned to every device on a network. Its primary functions are: Device Identification, Location Identification, and Packet Routing.\n\nAnalogy: Just as sending a physical postal letter requires a Source Postal Address and a Destination Postal Address, every network packet contains a 32-bit Source IP and Destination IP in its Layer 3 header. Without IP addresses, routers cannot forward packets across subnets."
+            },
+            {
+                "title": "2. Structure of IPv4 Address & Binary System",
+                "content": "IPv4 uses a 32-bit binary address space divided into 4 octets (8 bits per octet), separated by dots (dotted-decimal format).\n\nExample: 192.168.10.25\nBinary: 11000000.10101000.00001010.00011001\n\nEach octet ranges from 0 to 255 (since 2^8 = 256 possible values per octet). Total IPv4 address space = 2^32 = 4,294,967,296 addresses."
+            },
+            {
+                "title": "3. Network ID vs Host ID",
+                "content": "Every IPv4 address contains two logical parts:\n1. Network ID: Identifies the specific network segment (like a street name).\n2. Host ID: Identifies the specific device on that network segment (like a house number).\n\nThe Subnet Mask determines where the Network ID ends and the Host ID begins. Bits set to 1 in the mask represent Network bits; bits set to 0 represent Host bits."
+            },
+            {
+                "title": "4. Classful IPv4 Addressing Scheme (Classes A–E)",
+                "content": "Classful addressing divides the 32-bit address space into 5 distinct classes based on the high-order bits of the first octet:\n\n• Class A (1.0.0.0 to 126.255.255.255 | Prefix: 0 | Mask: 255.0.0.0 /8): Used for massive networks. Supports 126 networks and 16,777,214 hosts per network.\n• Class B (128.0.0.0 to 191.255.255.255 | Prefix: 10 | Mask: 255.255.0.0 /16): Used for medium-large networks. Supports 16,384 networks and 65,534 hosts per network.\n• Class C (192.0.0.0 to 223.255.255.255 | Prefix: 110 | Mask: 255.255.255.0 /24): Used for small LANs. Supports 2,097,152 networks and 254 hosts per network.\n• Class D (224.0.0.0 to 239.255.255.255 | Prefix: 1110): Reserved for Multicast group communication (OSPF, EIGRP, IPTV).\n• Class E (240.0.0.0 to 255.255.255.255 | Prefix: 1111): Reserved for Experimental and Research purposes."
+            },
+            {
+                "title": "5. Private IP Addresses (RFC 1918) vs Public IP Addresses",
+                "content": "Public IP Addresses: Globally unique addresses assigned by IANA/RIs/ISPs. Routable across the global public Internet.\n\nPrivate IP Addresses (RFC 1918): Reserved non-routable address space for internal LANs (homes, offices, schools). Routers drop private IPs on public links. Requires Network Address Translation (NAT) to access the Internet.\n\nRFC 1918 Private Ranges:\n• Class A: 10.0.0.0 – 10.255.255.255 (10.0.0.0/8)\n• Class B: 172.16.0.0 – 172.31.255.255 (172.16.0.0/12)\n• Class C: 192.168.0.0 – 192.168.255.255 (192.168.0.0/16)"
+            },
+            {
+                "title": "6. Special Reserved IPv4 Addresses",
+                "content": "• Loopback Address (127.0.0.0/8): 127.0.0.1 is used by host OS to test internal TCP/IP protocol stack without network card hardware.\n• APIPA (Automatic Private IP Addressing | 169.254.0.0/16): Windows/DHCP fallback address assigned automatically when DHCP server fails.\n• Limited Broadcast (255.255.255.255): Sends data to all hosts on the local subnet.\n• Default Route / Unspecified (0.0.0.0): Represents any network or unknown route.\n• Network Address (Host bits all 0s): Identifies the network itself (e.g. 192.168.1.0/24). Cannot be assigned to a host.\n• Direct Broadcast Address (Host bits all 1s): Used to broadcast to all hosts on a specific subnet (e.g. 192.168.1.255/24). Cannot be assigned to a host."
+            },
+            {
+                "title": "7. IPv6 Structure, Hex Notation & Zero Compression",
+                "content": "IPv6 was developed to replace IPv4 due to address exhaustion (4.3B IPv4 vs 3.4×10^38 IPv6 addresses).\n\nIPv6 Structure:\n• 128-bit total length, divided into 8 hextets (16 bits each).\n• Written in Hexadecimal separated by colons (:).\nExample: 2001:0db8:85a3:0000:0000:8a2e:0370:7334\n\nCompression Rules:\n1. Rule 1 (Leading Zero Omission): Omit leading zeros in any hextet (0db8 → db8, 0000 → 0).\n2. Rule 2 (Double Colon Compression): Replace single contiguous sequence of all-zero hextets with '::'. Allowed ONLY ONCE per address to prevent ambiguity!\n\nCompressed IPv6: 2001:db8:85a3::8a2e:370:7334"
+            },
+            {
+                "title": "8. IPv6 Address Types & Comparison Matrix",
+                "content": "IPv6 Categories:\n• Global Unicast Address (2000::/3): Globally routable public IPv6 address.\n• Link-Local Address (fe80::/10): Automatically configured on all interfaces for local link communication.\n• Unique Local Address (fc00::/7): Private IPv6 equivalent of RFC 1918.\n• Multicast Address (ff00::/8): Replaces IPv4 broadcast.\n• Loopback Address (::1/128): Equivalent to IPv4 127.0.0.1."
+            }
+        ],
+        "formulas": [
+            "Total IPv4 Hosts = 2^(Host Bits)",
+            "Usable IPv4 Hosts = 2^(32 - Prefix Length) - 2",
+            "Network Address = IP AND Subnet Mask",
+            "Broadcast Address = Network Address OR (NOT Subnet Mask)",
+            "IPv6 Address Space = 2^128 = 340,282,366,920,938,463,463,374,607,431,768,211,456"
+        ],
+        "standards": [
+            "RFC 791 - Internet Protocol Version 4 Specification",
+            "RFC 1918 - Address Allocation for Private Internets",
+            "RFC 4291 - IP Version 6 Addressing Architecture",
+            "RFC 5952 - Recommendation for IPv6 Address Text Representation"
+        ]
+    },
+    "tools": [
+        {
+            "name": "32-Bit Binary Octet Inspector",
+            "layer": "Layer 3 Tool",
+            "ports": "Bit-Weight Matrix",
+            "usage": "Live binary bit-flipping and octet summation",
+            "statusLED": "Bit Array Active"
+        },
+        {
+            "name": "Subnet Mask Boundary Calculator",
+            "layer": "Layer 3 Tool",
+            "ports": "CIDR /8 to /30",
+            "usage": "Extracts Network ID & Host ID boundaries",
+            "statusLED": "Mask Boundary Set"
+        },
+        {
+            "name": "IPv6 Zero Compression Engine",
+            "layer": "Layer 3 Utility",
+            "ports": "128-Bit Hex Syntax",
+            "usage": "Applies leading-zero omission and double-colon compression",
+            "statusLED": "Hex Standardized"
+        },
+        {
+            "name": "Packet Delivery & Gateway Router Sim",
+            "layer": "Layer 3 Topology",
+            "ports": "Switch / Router Hops",
+            "usage": "Simulates local vs remote subnet packet delivery",
+            "statusLED": "Route Verified"
+        }
+    ],
+    "procedure": [
+        "Launch the Interactive IP Classifier & Bit Converter in the Simulation tab.",
+        "Use the 32-bit Bit-Flipper to toggle individual binary bits and observe live decimal octet updates.",
+        "Adjust the Subnet Mask slider from /8 to /30 to visualize Network bits (Green) vs Host bits (Orange).",
+        "Enter test IPv4 addresses into the Class Identifier Game to classify A, B, C, D, E, Private, and Special IPs.",
+        "Test IPv6 address expansion and double-colon (::) compression rules in the IPv6 Visualizer.",
+        "Execute Packet Delivery Simulation to observe direct L2 delivery vs L3 Gateway Router hops."
+    ],
+    "troubleshooting": {
+        "problem": "PC A cannot communicate with PC B even though both are connected to the same switch.",
+        "hints": [
+            "Check if both PCs have IP addresses in the same Network ID.",
+            "Verify that neither PC is using a Network ID (host bits all 0s) or Broadcast Address (host bits all 1s).",
+            "Ensure subnet masks match on both devices."
+        ],
+        "fix": "Assign IP 192.168.1.10/24 to PC A and 192.168.1.20/24 to PC B."
+    },
+    "pretest": [
+        {
+            "q": "How many bits are in an IPv4 address?",
+            "options": [
+                "16 bits",
+                "32 bits",
+                "64 bits",
+                "128 bits"
+            ],
+            "correct": 1,
+            "explanation": "IPv4 uses a 32-bit binary addressing scheme divided into 4 octets of 8 bits each."
+        },
+        {
+            "q": "What is the default subnet mask for a Class B IPv4 address?",
+            "options": [
+                "255.0.0.0",
+                "255.255.0.0",
+                "255.255.255.0",
+                "255.255.255.255"
+            ],
+            "correct": 1,
+            "explanation": "Class B uses 16 network bits, giving a default mask of 255.255.0.0 (/16)."
+        },
+        {
+            "q": "Which of the following is an RFC 1918 private IPv4 address?",
+            "options": [
+                "8.8.8.8",
+                "172.20.5.10",
+                "200.100.50.1",
+                "127.0.0.1"
+            ],
+            "correct": 1,
+            "explanation": "172.20.5.10 falls within the Class B private range (172.16.0.0 to 172.31.255.255)."
+        },
+        {
+            "q": "What is the purpose of the loopback IP address 127.0.0.1?",
+            "options": [
+                "To assign an IP to the router default gateway",
+                "To test local TCP/IP stack without sending packets over physical NIC",
+                "To broadcast to all hosts on local LAN",
+                "To assign automatic IP when DHCP fails"
+            ],
+            "correct": 1,
+            "explanation": "127.0.0.1 loops traffic back internally inside the operating system to test protocol software."
+        },
+        {
+            "q": "How many bits are in an IPv6 address?",
+            "options": [
+                "32 bits",
+                "64 bits",
+                "128 bits",
+                "256 bits"
+            ],
+            "correct": 2,
+            "explanation": "IPv6 uses a 128-bit address space represented as 8 hexadecimal blocks of 16 bits each."
+        }
+    ],
+    "posttest": [
+        {
+            "q": "A host has IP address 192.168.10.50 with mask 255.255.255.0. What is its Network ID?",
+            "options": [
+                "192.0.0.0",
+                "192.168.0.0",
+                "192.168.10.0",
+                "192.168.10.255"
+            ],
+            "correct": 2,
+            "explanation": "With a /24 mask (255.255.255.0), the first 3 octets form the Network ID: 192.168.10.0."
+        },
+        {
+            "q": "Why are 2 host addresses subtracted when calculating usable hosts per subnet?",
+            "options": [
+                "One for DHCP and one for DNS",
+                "One for Network ID and one for Direct Broadcast Address",
+                "One for Loopback and one for Default Gateway",
+                "One for MAC address and one for IPv6 bridge"
+            ],
+            "correct": 1,
+            "explanation": "The address with all host bits set to 0 is the Network ID, and all host bits set to 1 is the Broadcast Address. Neither can be assigned to a host."
+        },
+        {
+            "q": "What is the decimal first octet range for Class C IPv4 addresses?",
+            "options": [
+                "1 – 126",
+                "128 – 191",
+                "192 – 223",
+                "224 – 239"
+            ],
+            "correct": 2,
+            "explanation": "Class C first octet ranges from 192 to 223 (binary prefix 110)."
+        },
+        {
+            "q": "Which special IP address is assigned by APIPA when DHCP fails?",
+            "options": [
+                "127.0.0.1",
+                "169.254.x.x",
+                "192.168.1.1",
+                "0.0.0.0"
+            ],
+            "correct": 1,
+            "explanation": "APIPA (Automatic Private IP Addressing) uses the 169.254.0.0/16 range when no DHCP server responds."
+        },
+        {
+            "q": "Compress the following IPv6 address correctly: 2001:0db8:0000:0000:0000:0000:1428:57ab",
+            "options": [
+                "2001:db8::1428:57ab",
+                "2001:db8:0:1428:57ab",
+                "2001:db8:::1428:57ab",
+                "2001:db8:0000::1428:57ab"
+            ],
+            "correct": 0,
+            "explanation": "Leading zero in 0db8 is removed (db8), and the 4 consecutive all-zero hextets are replaced by double colon '::'."
+        },
+        {
+            "q": "Can the double-colon '::' be used multiple times in a single IPv6 address?",
+            "options": [
+                "Yes, up to 2 times",
+                "Yes, as many times as needed",
+                "No, allowed ONLY ONCE per IPv6 address",
+                "Only in Link-Local addresses"
+            ],
+            "correct": 2,
+            "explanation": "Using '::' more than once creates ambiguity because a parser cannot determine how many zero blocks belong to each '::'."
+        },
+        {
+            "q": "What class of IPv4 address is 225.10.1.5?",
+            "options": [
+                "Class A",
+                "Class B",
+                "Class C",
+                "Class D (Multicast)"
+            ],
+            "correct": 3,
+            "explanation": "Addresses from 224.0.0.0 to 239.255.255.255 belong to Class D, reserved for Multicasting."
+        },
+        {
+            "q": "What is the maximum number of usable hosts on a Class C default subnet (/24)?",
+            "options": [
+                "128",
+                "254",
+                "256",
+                "65,534"
+            ],
+            "correct": 1,
+            "explanation": "Class C has 8 host bits. 2^8 - 2 = 256 - 2 = 254 usable host addresses."
+        },
+        {
+            "q": "Which IPv6 address type is equivalent to the IPv4 private RFC 1918 range?",
+            "options": [
+                "Global Unicast (2000::/3)",
+                "Link-Local (fe80::/10)",
+                "Unique Local Address (fc00::/7)",
+                "Multicast (ff00::/8)"
+            ],
+            "correct": 2,
+            "explanation": "Unique Local Addresses (ULA) starting with fc00::/7 are non-routable private IPv6 addresses."
+        },
+        {
+            "q": "If PC A (192.168.1.10/24) sends a packet to PC B (192.168.2.20/24), where must PC A send the packet first?",
+            "options": [
+                "Directly to PC B via L2 Switch",
+                "To the Default Gateway (Router)",
+                "To the Loopback 127.0.0.1 address",
+                "To the Limited Broadcast 255.255.255.255"
+            ],
+            "correct": 1,
+            "explanation": "Since PC B is on a different subnet (192.168.2.0/24 != 192.168.1.0/24), PC A must forward the packet to its Default Gateway router."
+        }
+    ],
+    "viva": [
+        {
+            "q": "What is the difference between Classful and Classless (CIDR) addressing?",
+            "a": "Classful addressing assigns fixed default masks (/8, /16, /24) based on strict address classes (A, B, C). Classless Inter-Domain Routing (CIDR) allows variable length subnet masks (VLSM) to prevent IP address wastage."
+        },
+        {
+            "q": "Why can't 192.168.1.0 and 192.168.1.255 be assigned to host computers on a /24 subnet?",
+            "a": "192.168.1.0 is the Network Address (identifies the subnet), and 192.168.1.255 is the Direct Broadcast Address (reaches all hosts on the subnet). Assigning either to a host breaks routing."
+        },
+        {
+            "q": "Explain how Network Address Translation (NAT) saves IPv4 address space.",
+            "a": "NAT allows multiple devices on a private LAN (using RFC 1918 IPs like 192.168.x.x) to share a single public IP address assigned to the router when accessing the Internet."
+        },
+        {
+            "q": "What is an APIPA address and when is it generated?",
+            "a": "APIPA (169.254.0.0/16) is a self-assigned link-local IPv4 address generated automatically by an OS when DHCP server fails to respond."
+        },
+        {
+            "q": "How does IPv6 simplify router header processing compared to IPv4?",
+            "a": "IPv6 features a fixed 40-byte header length, removes checksum calculation at each hop, and eliminates broadcast packets (using multicast instead)."
+        }
+    ],
+    "assignment": "1. Convert IP 172.16.50.12 into 32-bit binary and identify its Class, Default Subnet Mask, Network ID, and Private/Public status.\n2. Expand the compressed IPv6 address 'fe80::1' into its full 8-hextet 128-bit colon-hexadecimal notation.\n3. Explain why PC A (10.0.1.5/16) can ping PC B (10.0.50.10/16) without a router, but PC C (10.1.1.5/24) requires a router to reach PC C.",
+    "references": [
+        {
+            "title": "RFC 791 - IPv4 Protocol Specification",
+            "link": "https://datatracker.ietf.org/doc/html/rfc791"
+        },
+        {
+            "title": "RFC 1918 - Private IP Addressing Standards",
+            "link": "https://datatracker.ietf.org/doc/html/rfc1918"
+        },
+        {
+            "title": "RFC 4291 - IPv6 Addressing Architecture",
+            "link": "https://datatracker.ietf.org/doc/html/rfc4291"
+        },
+        {
+            "title": "RFC 5952 - IPv6 Text Representation Rules",
+            "link": "https://datatracker.ietf.org/doc/html/rfc5952"
+        }
+    ],
+    "simType": "ip_class"
+},
     'lan_cables': {
         title: "LAN Setup & Cabling",
         aim: "To construct EIA/TIA 568A and 568B RJ-45 twisted pair cabling standards (Straight-Through vs Crossover) for LAN connections.",
