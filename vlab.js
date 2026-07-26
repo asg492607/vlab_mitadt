@@ -7741,29 +7741,81 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const pData = window.VLAB_DATA[labId];
                 const pSection = document.getElementById('section-practice_tasks');
                 if (pSection && pData) {
+                    const miniTasks = pData.mini_tasks || [
+                        { title: "Task 1: Protocol & Layer Mapping", desc: "Identify the primary layer and PDU for HTTP, TCP, IP, Ethernet, and Bits." },
+                        { title: "Task 2: Encapsulation Trace", desc: "Trace how headers are appended down the sender stack from L7 Data to L1 Bits." },
+                        { title: "Task 3: Simulator Protocol Capture", desc: "Run the interactive 2D canvas simulator and observe packet traversal across switches and routers." },
+                        { title: "Task 4: Bottom-Up Troubleshooting", desc: "Diagnose a Layer 1 physical cable disconnect versus a Layer 7 DNS resolution failure." }
+                    ];
+
+                    const commands = pData.practice_commands || [
+                        "ping 192.168.1.1 (Verify Layer 3 Network Connectivity)",
+                        "arp -a (Inspect Layer 2 Data Link MAC Address Table Cache)",
+                        "nslookup www.google.com (Test Layer 7 Application DNS Resolution)",
+                        "netstat -an (Inspect Layer 4 Active TCP/UDP Sockets)",
+                        "ipconfig /all (Inspect Layer 2 MAC and Layer 3 IP Subnet Mask)"
+                    ];
+
+                    const questions = pData.practice_questions || [
+                        "Explain the step-by-step encapsulation process when a web browser sends an HTTP GET request to a remote server.",
+                        "Why does Layer 2 use 48-bit hardware MAC addresses while Layer 3 uses 32-bit logical IP addresses?",
+                        "Differentiate between connection-oriented TCP at Layer 4 and connectionless UDP at Layer 4.",
+                        "Which OSI layer is responsible for SSL/TLS data encryption and character encoding?",
+                        "How does bottom-up troubleshooting assist network engineers in isolating physical cable cuts versus DNS failures?"
+                    ];
+
                     pSection.innerHTML = `
-                        <h1 class="section-title">Academic Practice & Review</h1>
-                        <div class="section-body">
-                            <h3>Hands-on Exercises</h3>
-                            <p style="color:var(--text-muted); margin-bottom:15px;">Try executing these commands in the <b>Experiment</b> CLI to observe behavior.</p>
-                            <div class="task-grid" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:20px; margin-top:20px;">
-                                ${(pData.practice_commands || []).map(cmd => `
-                                    <div class="theory-card" style="border-left:4px solid var(--primary); padding:15px;">
-                                        <div style="font-size:10px; color:var(--text-muted); margin-bottom:5px; font-weight:800;">CLI EXERCISE</div>
-                                        <code style="background:#000; color:#10b981; padding:6px 10px; border-radius:6px; display:block; font-size:12px; font-family:'JetBrains Mono', monospace;">${cmd}</code>
-                                    </div>
-                                `).join('')}
-                            </div>
-                            <h3 style="margin-top:40px;">Review Questions</h3>
-                            <div class="theory-card" style="background:rgba(37,99,235,0.03); border:1px solid rgba(37,99,235,0.1);">
-                                <ul style="list-style:none; padding:0;">
-                                    ${(pData.practice_questions || []).map(q => `
-                                        <li style="margin-bottom:15px; padding-bottom:15px; border-bottom:1px solid rgba(0,0,0,0.05);">
-                                            <b style="color:var(--primary);">Q:</b> ${q}
-                                        </li>
+                        <h1 class="section-title">Academic Practice & Mini-Assignment Tasks</h1>
+                        <div class="section-body" style="padding:15px; display:flex; flex-direction:column; gap:24px;">
+                            
+                            <!-- Section 1: Mini-Assignment Checklist -->
+                            <div class="theory-card" style="border-left:4px solid var(--primary); padding:18px;">
+                                <h3 style="color:var(--primary); margin:0 0 10px 0; font-size:16px; font-weight:800; display:flex; align-items:center; gap:8px;">
+                                    <span>📝</span> Structured Mini-Assignment Tasks
+                                </h3>
+                                <p style="color:var(--text-muted); font-size:13px; margin-bottom:16px;">Complete these required practical tasks to reinforce your learning:</p>
+                                
+                                <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:14px;">
+                                    ${miniTasks.map((t, idx) => `
+                                        <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:10px; padding:14px; display:flex; gap:12px; align-items:flex-start;">
+                                            <input type="checkbox" id="mt-chk-${idx}" style="margin-top:4px; width:16px; height:16px; cursor:pointer;">
+                                            <div>
+                                                <div style="font-weight:800; font-size:14px; color:var(--text-main);">${t.title}</div>
+                                                <div style="font-size:12px; color:var(--text-muted); margin-top:4px; line-height:1.6;">${t.desc}</div>
+                                            </div>
+                                        </div>
                                     `).join('')}
-                                </ul>
+                                </div>
                             </div>
+
+                            <!-- Section 2: CLI Exercises -->
+                            <div>
+                                <h3 style="margin:0 0 10px 0; font-size:15px; font-weight:800; color:var(--primary);">💻 Hands-on CLI Exercises</h3>
+                                <p style="color:var(--text-muted); font-size:12px; margin-bottom:12px;">Try executing these commands in the <b>Experiment</b> terminal to observe live outputs:</p>
+                                <div class="task-grid" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:14px;">
+                                    ${commands.map(cmd => `
+                                        <div class="theory-card" style="border-left:4px solid #10b981; padding:12px; margin:0;">
+                                            <div style="font-size:10px; color:var(--text-muted); margin-bottom:4px; font-weight:800;">COMMAND EXERCISE</div>
+                                            <code style="background:#0b0f19; color:#10b981; padding:8px 12px; border-radius:6px; display:block; font-size:12px; font-family:'JetBrains Mono', monospace; border:1px solid #334155;">${cmd}</code>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+
+                            <!-- Section 3: Academic Review Questions -->
+                            <div>
+                                <h3 style="margin:0 0 10px 0; font-size:15px; font-weight:800; color:var(--primary);">❓ Theoretical Review & Viva Questions</h3>
+                                <div class="theory-card" style="background:rgba(37,99,235,0.03); border:1px solid rgba(37,99,235,0.1); padding:16px;">
+                                    <ul style="list-style:none; padding:0; margin:0;">
+                                        ${questions.map((q, idx) => `
+                                            <li style="margin-bottom:14px; padding-bottom:14px; border-bottom:1px solid var(--border); font-size:13px; line-height:1.7;">
+                                                <b style="color:var(--primary);">Q${idx + 1}:</b> ${q}
+                                            </li>
+                                        `).join('')}
+                                    </ul>
+                                </div>
+                            </div>
+
                         </div>
                     `;
                 }

@@ -13666,7 +13666,40 @@ window.VLAB_DATA = {
                 "a": "A PDU is the specific format of data payload plus headers at a layer: L7/6/5 = Data, L4 = Segment (TCP) / Datagram (UDP), L3 = Packet, L2 = Frame, L1 = Bits."
             }
         ],
-        "simType": "osi_tcpip_sim"
+        "simType": "osi_tcpip_sim",
+        "practice_commands": [
+            "ping 192.168.1.1 (Verify Layer 3 Network Connectivity to Default Gateway)",
+            "arp -a (Inspect Layer 2 Data Link MAC Address Table Cache)",
+            "nslookup www.google.com (Test Layer 7 Application DNS Domain Resolution)",
+            "netstat -an | grep 443 (Inspect Layer 4 Transport Active TCP Sockets)",
+            "traceroute 142.250.183.206 (Trace Multi-Hop Layer 3 Path Across WAN Routers)",
+            "ipconfig /all (Inspect Layer 2 MAC Address and Layer 3 IP Subnet Mask)"
+        ],
+        "practice_questions": [
+            "Explain the step-by-step encapsulation process when a web browser sends an HTTP GET request to a remote server.",
+            "Why does Layer 2 use 48-bit hardware MAC addresses while Layer 3 uses 32-bit logical IP addresses?",
+            "Differentiate between connection-oriented TCP at Layer 4 and connectionless UDP at Layer 4.",
+            "Which OSI layer is responsible for SSL/TLS data encryption and character encoding?",
+            "How does bottom-up troubleshooting assist network engineers in isolating physical cable cuts versus DNS failures?"
+        ],
+        "mini_tasks": [
+            {
+                "title": "Task 1: Layer 1 to Layer 7 Mapping",
+                "desc": "List the 7 OSI layers and write down one protocol and one hardware device for each layer."
+            },
+            {
+                "title": "Task 2: Encapsulation PDU Trace",
+                "desc": "Trace the PDU transformation (Data ➔ Segment ➔ Packet ➔ Frame ➔ Bits) as a packet moves down the sender stack."
+            },
+            {
+                "title": "Task 3: DNS & HTTP Protocol Capture",
+                "desc": "Use the interactive simulator to capture an HTTP GET request and record the source/destination port numbers and IP addresses."
+            },
+            {
+                "title": "Task 4: Bottom-Up Fault Isolation",
+                "desc": "Simulate a Layer 1 cable disconnect and contrast its symptoms with a Layer 7 DNS failure."
+            }
+        ]
     },
     "communication_models": {
         "title": "Practical 2: Network Communication Models (OSI & TCP/IP)",
@@ -13991,7 +14024,40 @@ window.VLAB_DATA = {
                 "a": "A PDU is the specific format of data payload plus headers at a layer: L7/6/5 = Data, L4 = Segment (TCP) / Datagram (UDP), L3 = Packet, L2 = Frame, L1 = Bits."
             }
         ],
-        "simType": "osi_tcpip_sim"
+        "simType": "osi_tcpip_sim",
+        "practice_commands": [
+            "ping 192.168.1.1 (Verify Layer 3 Network Connectivity to Default Gateway)",
+            "arp -a (Inspect Layer 2 Data Link MAC Address Table Cache)",
+            "nslookup www.google.com (Test Layer 7 Application DNS Domain Resolution)",
+            "netstat -an | grep 443 (Inspect Layer 4 Transport Active TCP Sockets)",
+            "traceroute 142.250.183.206 (Trace Multi-Hop Layer 3 Path Across WAN Routers)",
+            "ipconfig /all (Inspect Layer 2 MAC Address and Layer 3 IP Subnet Mask)"
+        ],
+        "practice_questions": [
+            "Explain the step-by-step encapsulation process when a web browser sends an HTTP GET request to a remote server.",
+            "Why does Layer 2 use 48-bit hardware MAC addresses while Layer 3 uses 32-bit logical IP addresses?",
+            "Differentiate between connection-oriented TCP at Layer 4 and connectionless UDP at Layer 4.",
+            "Which OSI layer is responsible for SSL/TLS data encryption and character encoding?",
+            "How does bottom-up troubleshooting assist network engineers in isolating physical cable cuts versus DNS failures?"
+        ],
+        "mini_tasks": [
+            {
+                "title": "Task 1: Layer 1 to Layer 7 Mapping",
+                "desc": "List the 7 OSI layers and write down one protocol and one hardware device for each layer."
+            },
+            {
+                "title": "Task 2: Encapsulation PDU Trace",
+                "desc": "Trace the PDU transformation (Data ➔ Segment ➔ Packet ➔ Frame ➔ Bits) as a packet moves down the sender stack."
+            },
+            {
+                "title": "Task 3: DNS & HTTP Protocol Capture",
+                "desc": "Use the interactive simulator to capture an HTTP GET request and record the source/destination port numbers and IP addresses."
+            },
+            {
+                "title": "Task 4: Bottom-Up Fault Isolation",
+                "desc": "Simulate a Layer 1 cable disconnect and contrast its symptoms with a Layer 7 DNS failure."
+            }
+        ]
     },
     "osi_tcpip_sim": {
         "title": "Practical 2: Network Communication Models (OSI & TCP/IP)",
@@ -14316,7 +14382,40 @@ window.VLAB_DATA = {
                 "a": "A PDU is the specific format of data payload plus headers at a layer: L7/6/5 = Data, L4 = Segment (TCP) / Datagram (UDP), L3 = Packet, L2 = Frame, L1 = Bits."
             }
         ],
-        "simType": "osi_tcpip_sim"
+        "simType": "osi_tcpip_sim",
+        "practice_commands": [
+            "ping 192.168.1.1 (Verify Layer 3 Network Connectivity to Default Gateway)",
+            "arp -a (Inspect Layer 2 Data Link MAC Address Table Cache)",
+            "nslookup www.google.com (Test Layer 7 Application DNS Domain Resolution)",
+            "netstat -an | grep 443 (Inspect Layer 4 Transport Active TCP Sockets)",
+            "traceroute 142.250.183.206 (Trace Multi-Hop Layer 3 Path Across WAN Routers)",
+            "ipconfig /all (Inspect Layer 2 MAC Address and Layer 3 IP Subnet Mask)"
+        ],
+        "practice_questions": [
+            "Explain the step-by-step encapsulation process when a web browser sends an HTTP GET request to a remote server.",
+            "Why does Layer 2 use 48-bit hardware MAC addresses while Layer 3 uses 32-bit logical IP addresses?",
+            "Differentiate between connection-oriented TCP at Layer 4 and connectionless UDP at Layer 4.",
+            "Which OSI layer is responsible for SSL/TLS data encryption and character encoding?",
+            "How does bottom-up troubleshooting assist network engineers in isolating physical cable cuts versus DNS failures?"
+        ],
+        "mini_tasks": [
+            {
+                "title": "Task 1: Layer 1 to Layer 7 Mapping",
+                "desc": "List the 7 OSI layers and write down one protocol and one hardware device for each layer."
+            },
+            {
+                "title": "Task 2: Encapsulation PDU Trace",
+                "desc": "Trace the PDU transformation (Data ➔ Segment ➔ Packet ➔ Frame ➔ Bits) as a packet moves down the sender stack."
+            },
+            {
+                "title": "Task 3: DNS & HTTP Protocol Capture",
+                "desc": "Use the interactive simulator to capture an HTTP GET request and record the source/destination port numbers and IP addresses."
+            },
+            {
+                "title": "Task 4: Bottom-Up Fault Isolation",
+                "desc": "Simulate a Layer 1 cable disconnect and contrast its symptoms with a Layer 7 DNS failure."
+            }
+        ]
     }
 };
 
