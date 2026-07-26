@@ -7534,9 +7534,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         let html = questions.map((q, i) => `
             <div class="theory-card" id="${prefix}-q${i}">
-                <strong>Q${i + 1}: ${q.q}</strong>
+                <strong>Q${i + 1}: ${q.question || q.q || 'Question'}</strong>
                 <div style="display:grid; gap:12px; margin-top:16px;">
-                    ${q.options.map((opt, oi) => `
+                    ${(q.options || []).map((opt, oi) => `
                         <label class="mcq-option" data-name="${prefix}-q${i}" for="${prefix}-q${i}-opt${oi}">
                             <input type="radio" id="${prefix}-q${i}-opt${oi}" name="${prefix}-q${i}" value="${oi}"> ${opt}
                         </label>
@@ -7570,17 +7570,27 @@ document.addEventListener('DOMContentLoaded', async () => {
                 questions.forEach((q, i) => {
                     const selected = container.querySelector(`input[name="${prefix}-q${i}"]:checked`);
                     const status = document.getElementById(`${prefix}-q${i}`).querySelector('.mcq-status');
-                    const targetAnswer = q.correct !== undefined ? q.correct : q.answer;
+                    
+                    let targetIdx = -1;
+                    if (typeof q.correct === 'number') {
+                        targetIdx = q.correct;
+                    } else if (typeof q.answer === 'number') {
+                        targetIdx = q.answer;
+                    } else if (typeof q.answer === 'string' && Array.isArray(q.options)) {
+                        targetIdx = q.options.findIndex(opt => opt.trim() === q.answer.trim());
+                    }
+
                     if (status) {
                         status.style.display = 'block';
-                        if (selected && parseInt(selected.value) === targetAnswer) {
+                        const userVal = selected ? parseInt(selected.value, 10) : -1;
+                        const expHtml = q.explanation ? `<div style="font-size:12px; font-weight:normal; margin-top:6px; color:var(--text-muted); line-height:1.5;"><b>Explanation:</b> ${q.explanation}</div>` : '';
+
+                        if (userVal !== -1 && userVal === targetIdx) {
                             correctCount++;
-                            status.textContent = 'Correct Answer ✓';
-                            status.style.color = 'var(--success)';
+                            status.innerHTML = `<span style="color:var(--success); font-weight:800;">Correct Answer ✓</span>${expHtml}`;
                         } else {
-                            const correctText = q.options && q.options[targetAnswer] ? q.options[targetAnswer] : `Option ${targetAnswer + 1}`;
-                            status.textContent = `Incorrect ✗. Correct Answer: ${correctText}`;
-                            status.style.color = 'var(--danger)';
+                            const correctText = (q.options && targetIdx >= 0 && q.options[targetIdx]) ? q.options[targetIdx] : (q.answer || 'Option ' + (targetIdx + 1));
+                            status.innerHTML = `<span style="color:var(--danger); font-weight:800;">Incorrect ✗. Correct Answer: ${correctText}</span>${expHtml}`;
                         }
                     }
                 });
