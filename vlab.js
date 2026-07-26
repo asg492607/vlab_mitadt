@@ -11950,11 +11950,16 @@ const initSubnettingSim = (container) => {
         };
 
 // Interactive Practical 7 Virtual LANs & Trunking Simulator
+// Interactive Practical 7 Virtual LANs & Trunking Simulator
 const initVlanSim = (container) => {
-    let currentTab = 'broadcast'; // 'broadcast', 'access', 'tag', 'roas', 'cli', 'faults'
+    let currentTab = 'msg_tester'; // Default Tab 1: 'msg_tester'
 
-    // Module 1 State: Broadcast Visualizer
-    let vlanMode = 'segmented'; // 'flat' or 'segmented'
+    // Tab 1 State: 4-PC Message Passing & Isolation Tester
+    let msgSrc = 'pc1';
+    let msgDst = 'pc2';
+    let isVlanIsolated = true; // True = VLANs isolated (PC1/PC2 in VLAN 10, PC3/PC4 in VLAN 20)
+    let isMsgAnimating = false;
+    let msgResultLog = null;
 
     // Module 2 State: Access Port Assignments (Ports 1 to 12)
     let portVlans = {
@@ -11964,14 +11969,24 @@ const initVlanSim = (container) => {
     };
     let selectedPort = 1;
 
+    // Module 1 State: Broadcast Visualizer
+    let vlanMode = 'segmented';
+
     // Module 7 State: Fault Injection Lab
     let activeFault = 'none';
 
     const vlanColors = {
-        10: '#3b82f6', // Blue
-        20: '#10b981', // Green
-        30: '#a855f7', // Purple
+        10: '#3b82f6', // Blue (Accounts)
+        20: '#10b981', // Green (Sales)
+        30: '#a855f7', // Purple (HR)
         1: '#64748b'   // Gray (Default)
+    };
+
+    const pcMap = {
+        pc1: { label: 'PC1 (VLAN 10)', ip: '192.168.10.10', vlan: 10, dept: 'Accounts', color: '#3b82f6' },
+        pc2: { label: 'PC2 (VLAN 10)', ip: '192.168.10.20', vlan: 10, dept: 'Accounts', color: '#3b82f6' },
+        pc3: { label: 'PC3 (VLAN 20)', ip: '192.168.20.10', vlan: 20, dept: 'Sales', color: '#10b981' },
+        pc4: { label: 'PC4 (VLAN 20)', ip: '192.168.20.20', vlan: 20, dept: 'Sales', color: '#10b981' }
     };
 
     const render = () => {
@@ -11981,6 +11996,7 @@ const initVlanSim = (container) => {
                 <span>VLAN & Trunking Engine 🏷️</span>
             </div>
             <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                <button class="btn-sim ${currentTab === 'msg_tester' ? 'primary' : ''}" id="tabMsgTester" style="font-size:12px; padding:6px 12px;">4-PC Message Passing Tester ✉️</button>
                 <button class="btn-sim ${currentTab === 'broadcast' ? 'primary' : ''}" id="tabBroadcast" style="font-size:12px; padding:6px 12px;">Broadcast Visualizer 📢</button>
                 <button class="btn-sim ${currentTab === 'access' ? 'primary' : ''}" id="tabAccess" style="font-size:12px; padding:6px 12px;">Access Port Configurator 🔀</button>
                 <button class="btn-sim ${currentTab === 'tag' ? 'primary' : ''}" id="tabTag" style="font-size:12px; padding:6px 12px;">802.1Q Tag Inspector 🏷️</button>
@@ -11991,6 +12007,107 @@ const initVlanSim = (container) => {
         </div>
 
         <div class="sim-workspace" style="padding:16px; display:flex; flex-direction:column; gap:16px; background:var(--bg-page);">
+            ${currentTab === 'msg_tester' ? `
+                <!-- Tab 1: 4-PC Message Passing & Isolation Tester -->
+                <div class="theory-card" style="margin:0; display:flex; flex-direction:column; gap:16px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+                        <div>
+                            <h3 style="color:var(--primary); margin:0;">Dynamic 4-PC VLAN Communication & Isolation Tester</h3>
+                            <p style="font-size:12px; color:var(--text-muted); margin:4px 0 0;">
+                                Select sender and receiver PCs to test if packets deliver successfully or get blocked by VLAN isolation.
+                            </p>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:8px; background:var(--bg-page); padding:8px 14px; border:1px solid var(--border); border-radius:10px;">
+                            <input type="checkbox" id="chkIsoMode" ${isVlanIsolated ? 'checked' : ''} style="width:18px; height:18px; cursor:pointer;">
+                            <label for="chkIsoMode" style="font-size:13px; font-weight:800; color:var(--text-main); cursor:pointer;">
+                                VLAN Isolation Active (VLAN 10 ⇹ VLAN 20 Blocked) 🔒
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- 4-PC Visual Switch Topology Board -->
+                    <div style="background:#0b0f19; padding:24px; border-radius:12px; border:1px solid var(--border); display:flex; flex-direction:column; gap:20px; align-items:center; position:relative;">
+                        <!-- Top Row: Central Switch -->
+                        <div style="padding:14px 28px; background:#1e293b; border:2px solid #3b82f6; border-radius:10px; display:flex; align-items:center; gap:14px; box-shadow:0 0 15px rgba(59,130,246,0.3);">
+                            <span style="font-size:32px;">🔀</span>
+                            <div>
+                                <div style="font-size:14px; font-weight:800; color:#ffffff;">Core Layer-2 Catalyst Switch</div>
+                                <div style="font-size:10px; color:#94a3b8; font-family:monospace;">
+                                    Ports Fa0/1–Fa0/2: VLAN 10 | Ports Fa0/3–Fa0/4: VLAN 20
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 4 PCs Grid (PC1, PC2 in VLAN 10 | PC3, PC4 in VLAN 20) -->
+                        <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:16px; width:100%;">
+                            <!-- PC 1 -->
+                            <div style="padding:14px; background:#1e293b; border:2px solid ${pcMap.pc1.color}; border-radius:10px; display:flex; flex-direction:column; align-items:center; gap:6px; text-align:center; box-shadow:0 0 10px ${pcMap.pc1.color}33;">
+                                <div style="font-size:32px;">💻</div>
+                                <div style="font-size:13px; font-weight:800; color:#ffffff;">PC1</div>
+                                <span style="font-size:10px; padding:2px 8px; border-radius:10px; background:rgba(59,130,246,0.2); color:#38bdf8; font-weight:bold;">VLAN 10 (Accounts)</span>
+                                <div style="font-size:9px; color:#94a3b8; font-family:monospace;">IP: ${pcMap.pc1.ip}</div>
+                            </div>
+
+                            <!-- PC 2 -->
+                            <div style="padding:14px; background:#1e293b; border:2px solid ${pcMap.pc2.color}; border-radius:10px; display:flex; flex-direction:column; align-items:center; gap:6px; text-align:center; box-shadow:0 0 10px ${pcMap.pc2.color}33;">
+                                <div style="font-size:32px;">💻</div>
+                                <div style="font-size:13px; font-weight:800; color:#ffffff;">PC2</div>
+                                <span style="font-size:10px; padding:2px 8px; border-radius:10px; background:rgba(59,130,246,0.2); color:#38bdf8; font-weight:bold;">VLAN 10 (Accounts)</span>
+                                <div style="font-size:9px; color:#94a3b8; font-family:monospace;">IP: ${pcMap.pc2.ip}</div>
+                            </div>
+
+                            <!-- PC 3 -->
+                            <div style="padding:14px; background:#1e293b; border:2px solid ${pcMap.pc3.color}; border-radius:10px; display:flex; flex-direction:column; align-items:center; gap:6px; text-align:center; box-shadow:0 0 10px ${pcMap.pc3.color}33;">
+                                <div style="font-size:32px;">💻</div>
+                                <div style="font-size:13px; font-weight:800; color:#ffffff;">PC3</div>
+                                <span style="font-size:10px; padding:2px 8px; border-radius:10px; background:rgba(16,185,129,0.2); color:#34d399; font-weight:bold;">VLAN 20 (Sales)</span>
+                                <div style="font-size:9px; color:#94a3b8; font-family:monospace;">IP: ${pcMap.pc3.ip}</div>
+                            </div>
+
+                            <!-- PC 4 -->
+                            <div style="padding:14px; background:#1e293b; border:2px solid ${pcMap.pc4.color}; border-radius:10px; display:flex; flex-direction:column; align-items:center; gap:6px; text-align:center; box-shadow:0 0 10px ${pcMap.pc4.color}33;">
+                                <div style="font-size:32px;">💻</div>
+                                <div style="font-size:13px; font-weight:800; color:#ffffff;">PC4</div>
+                                <span style="font-size:10px; padding:2px 8px; border-radius:10px; background:rgba(16,185,129,0.2); color:#34d399; font-weight:bold;">VLAN 20 (Sales)</span>
+                                <div style="font-size:9px; color:#94a3b8; font-family:monospace;">IP: ${pcMap.pc4.ip}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Dynamic Transmission Control Bar -->
+                    <div style="display:grid; grid-template-columns:1fr 1fr auto; gap:12px; background:var(--bg-page); padding:14px; border:1px solid var(--border); border-radius:10px; align-items:center;">
+                        <div>
+                            <label style="font-size:11px; font-weight:800; color:var(--text-muted);">SENDER HOST (SOURCE):</label>
+                            <select id="selMsgSrc" class="sim-select" style="width:100%; margin-top:4px; font-weight:700;">
+                                <option value="pc1" ${msgSrc === 'pc1' ? 'selected' : ''}>PC1 (VLAN 10 Accounts - 192.168.10.10)</option>
+                                <option value="pc2" ${msgSrc === 'pc2' ? 'selected' : ''}>PC2 (VLAN 10 Accounts - 192.168.10.20)</option>
+                                <option value="pc3" ${msgSrc === 'pc3' ? 'selected' : ''}>PC3 (VLAN 20 Sales - 192.168.20.10)</option>
+                                <option value="pc4" ${msgSrc === 'pc4' ? 'selected' : ''}>PC4 (VLAN 20 Sales - 192.168.20.20)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="font-size:11px; font-weight:800; color:var(--text-muted);">RECEIVER HOST (DESTINATION):</label>
+                            <select id="selMsgDst" class="sim-select" style="width:100%; margin-top:4px; font-weight:700;">
+                                <option value="pc2" ${msgDst === 'pc2' ? 'selected' : ''}>PC2 (VLAN 10 Accounts - 192.168.10.20)</option>
+                                <option value="pc1" ${msgDst === 'pc1' ? 'selected' : ''}>PC1 (VLAN 10 Accounts - 192.168.10.10)</option>
+                                <option value="pc3" ${msgDst === 'pc3' ? 'selected' : ''}>PC3 (VLAN 20 Sales - 192.168.20.10)</option>
+                                <option value="pc4" ${msgDst === 'pc4' ? 'selected' : ''}>PC4 (VLAN 20 Sales - 192.168.20.20)</option>
+                            </select>
+                        </div>
+                        <div style="align-self:end;">
+                            <button id="btnSendDynamicMsg" class="btn-sim primary" style="font-weight:700; height:38px; padding:0 20px;">
+                                Transmit Message Packet 🚀
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Dynamic Output Result Box -->
+                    <div id="dynamicMsgLogBox" style="padding:16px; background:var(--bg-page); border:1px solid var(--border); border-radius:10px; font-size:13px; min-height:70px; line-height:1.7;">
+                        ${msgResultLog || '💡 Select Sender and Receiver PCs above and click <b>Transmit Message Packet 🚀</b> to verify packet delivery!'}
+                    </div>
+                </div>
+            ` : ''}
+
             ${currentTab === 'broadcast' ? `
                 <!-- Module 1: Broadcast Domain Visualizer -->
                 <div class="theory-card" style="margin:0; display:flex; flex-direction:column; gap:16px;">
@@ -12181,6 +12298,7 @@ const initVlanSim = (container) => {
         `;
 
         // Tab Switch Handlers
+        document.getElementById('tabMsgTester').onclick = () => { currentTab = 'msg_tester'; render(); };
         document.getElementById('tabBroadcast').onclick = () => { currentTab = 'broadcast'; render(); };
         document.getElementById('tabAccess').onclick = () => { currentTab = 'access'; render(); };
         document.getElementById('tabTag').onclick = () => { currentTab = 'tag'; render(); };
@@ -12188,7 +12306,41 @@ const initVlanSim = (container) => {
         document.getElementById('tabCli').onclick = () => { currentTab = 'cli'; render(); };
         document.getElementById('tabFaults').onclick = () => { currentTab = 'faults'; render(); };
 
-        // Module 1 Handlers
+        // Tab 1 Handlers (4-PC Message Passing Tester)
+        if (currentTab === 'msg_tester') {
+            document.getElementById('selMsgSrc').onchange = (e) => { msgSrc = e.target.value; render(); };
+            document.getElementById('selMsgDst').onchange = (e) => { msgDst = e.target.value; render(); };
+            document.getElementById('chkIsoMode').onchange = (e) => { isVlanIsolated = e.target.checked; render(); };
+
+            document.getElementById('btnSendDynamicMsg').onclick = () => {
+                const sObj = pcMap[msgSrc];
+                const dObj = pcMap[msgDst];
+                const out = document.getElementById('dynamicMsgLogBox');
+
+                if (msgSrc === msgDst) {
+                    out.innerHTML = `<span style="color:#ef4444; font-weight:800;">⚠️ INVALID TRANSMISSION:</span> Source and Destination host cannot be the same device (${sObj.label})!`;
+                    return;
+                }
+
+                const sameVlan = sObj.vlan === dObj.vlan;
+
+                out.innerHTML = `[1] ${sObj.label} (${sObj.ip}) generates IP datagram for ${dObj.label} (${dObj.ip})...<br>`;
+                
+                setTimeout(() => {
+                    out.innerHTML += `[2] Frame enters Switch Port assigned to VLAN ${sObj.vlan}...<br>`;
+                }, 400);
+
+                setTimeout(() => {
+                    if (sameVlan || !isVlanIsolated) {
+                        out.innerHTML += `<span style="color:#10b981; font-weight:bold;">[3] 🟢 COMMUNICATION SUCCESSFUL!</span><br>Both <b>${sObj.label}</b> and <b>${dObj.label}</b> belong to the SAME Layer 2 Broadcast Domain (<b>VLAN ${sObj.vlan} - ${sObj.dept}</b>). Switch forwards frame directly out egress port!`;
+                    } else {
+                        out.innerHTML += `<span style="color:#ef4444; font-weight:bold;">[3] 🔴 ERROR: COMMUNICATION BLOCKED BY VLAN ISOLATION!</span><br><b>${sObj.label}</b> is in <b>VLAN ${sObj.vlan} (${sObj.dept})</b> while <b>${dObj.label}</b> is in <b>VLAN ${dObj.vlan} (${dObj.dept})</b>.<br><span style="color:var(--text-main);">Because VLAN Isolation is enabled, Layer 2 broadcast domains are completely separated. Inter-VLAN communication fails without a Layer 3 Router or Layer 3 Switch!</span>`;
+                    }
+                }, 900);
+            };
+        }
+
+        // Module 1 Handlers (Broadcast)
         if (currentTab === 'broadcast') {
             document.getElementById('btnModeFlat').onclick = () => { vlanMode = 'flat'; render(); };
             document.getElementById('btnModeSegmented').onclick = () => { vlanMode = 'segmented'; render(); };
@@ -12203,7 +12355,7 @@ const initVlanSim = (container) => {
             };
         }
 
-        // Module 2 Handlers
+        // Module 2 Handlers (Access Ports)
         if (currentTab === 'access') {
             container.querySelectorAll('.port-card').forEach(card => {
                 card.onclick = () => {
@@ -12289,7 +12441,6 @@ const initVlanSim = (container) => {
 
     render();
 };
-
 
         const initDnsSim = (container) => {
             container.innerHTML = `
