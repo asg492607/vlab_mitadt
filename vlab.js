@@ -12618,6 +12618,493 @@ const initVlanSim = (container) => {
         // --- PRACTICAL 8: DISTANCE VECTOR ROUTING PROTOCOL (RIP) SIMULATOR ---
 // Interactive Practical 8 Distance Vector Routing Protocol (RIP) Simulator
         // --- PRACTICAL 9: LINK STATE ROUTING PROTOCOL (OSPF) SIMULATOR ---
+        // --- PRACTICAL 10: ENHANCED INTERIOR GATEWAY ROUTING PROTOCOL (EIGRP) SIMULATOR ---
+const initEigrpSim = (container) => {
+    const AC = '#ec4899'; // Vibrant pink/magenta for EIGRP
+    container.innerHTML = `
+        <div style="padding:15px; font-family:var(--font-sans); color:var(--text-main); height:100%; display:flex; flex-direction:column; gap:12px; box-sizing:border-box;">
+            <!-- Header Banner -->
+            <div style="background:linear-gradient(135deg, rgba(236,72,153,0.15) 0%, rgba(15,23,42,0.6) 100%); border:1px solid ${AC}; border-radius:12px; padding:12px 18px; display:flex; justify-content:space-between; align-items:center; box-shadow:0 4px 12px rgba(0,0,0,0.15);">
+                <div>
+                    <h3 style="margin:0; color:${AC}; font-size:17px; font-weight:800; display:flex; align-items:center; gap:8px;">
+                        <span>⚡</span> Hybrid Routing - Cisco EIGRP AS 100 Simulator
+                    </h3>
+                    <p style="margin:4px 0 0 0; font-size:12px; color:var(--text-muted);">
+                        DUAL Algorithm • Successor & Feasible Successor • 0ms Instant Failover • Composite Metric (BW+Delay) • 3 EIGRP Tables
+                    </p>
+                </div>
+                <div style="display:flex; gap:10px;">
+                    <span style="background:rgba(236,72,153,0.2); color:${AC}; border:1px solid ${AC}; font-size:11px; padding:4px 10px; border-radius:20px; font-weight:700;">AS 100</span>
+                    <span style="background:rgba(56,189,248,0.2); color:#38bdf8; border:1px solid #38bdf8; font-size:11px; padding:4px 10px; border-radius:20px; font-weight:700;">AD: 90</span>
+                </div>
+            </div>
+
+            <!-- Tab Buttons Navigation -->
+            <div style="display:flex; gap:8px; border-bottom:1px solid var(--border); padding-bottom:6px; overflow-x:auto;">
+                <button class="eigrp-tab-btn active" data-tab="dual" style="padding:8px 14px; background:${AC}; color:#fff; border:none; border-radius:6px; font-weight:700; font-size:12px; cursor:pointer; display:flex; align-items:center; gap:6px;">
+                    <span>⚡</span> DUAL Instant Failover
+                </button>
+                <button class="eigrp-tab-btn" data-tab="tables" style="padding:8px 14px; background:var(--bg-card); color:var(--text-main); border:1px solid var(--border); border-radius:6px; font-weight:700; font-size:12px; cursor:pointer; display:flex; align-items:center; gap:6px;">
+                    <span>📊</span> 3-Table Explorer
+                </button>
+                <button class="eigrp-tab-btn" data-tab="metric" style="padding:8px 14px; background:var(--bg-card); color:var(--text-main); border:1px solid var(--border); border-radius:6px; font-weight:700; font-size:12px; cursor:pointer; display:flex; align-items:center; gap:6px;">
+                    <span>🧮</span> Metric Calculator
+                </button>
+                <button class="eigrp-tab-btn" data-tab="cli" style="padding:8px 14px; background:var(--bg-card); color:var(--text-main); border:1px solid var(--border); border-radius:6px; font-weight:700; font-size:12px; cursor:pointer; display:flex; align-items:center; gap:6px;">
+                    <span>💻</span> Cisco EIGRP CLI
+                </button>
+                <button class="eigrp-tab-btn" data-tab="rtp" style="padding:8px 14px; background:var(--bg-card); color:var(--text-main); border:1px solid var(--border); border-radius:6px; font-weight:700; font-size:12px; cursor:pointer; display:flex; align-items:center; gap:6px;">
+                    <span>📬</span> RTP & Updates
+                </button>
+            </div>
+
+            <!-- Tab Content Display Areas -->
+            <div id="eigrp-tab-body" style="flex:1; overflow-y:auto;">
+                <!-- Dynamically populated via JS -->
+            </div>
+        </div>
+    `;
+
+    // State Store for EIGRP Simulator
+    const state = {
+        activeTab: 'dual',
+        primaryFailed: false,
+        packetAnimating: false,
+        // Metric Calculator inputs
+        bwKbps: 100000, // 100 Mbps = 100,000 Kbps
+        delayUs: 100,    // 100 tens-of-microseconds
+        // CLI State
+        cliOutput: [
+            "Cisco IOS Software, 2900 Software (C2900-UNIVERSALK9-M), Version 15.7(3)M3",
+            "Router# configure terminal",
+            "Router(config)# router eigrp 100",
+            "Router(config-router)# network 192.168.1.0",
+            "Router(config-router)# network 10.0.0.0",
+            "Router(config-router)# no auto-summary",
+            "Router(config-router)# end",
+            "Router# show ip eigrp neighbors",
+            "IP-EIGRP neighbors for process 100",
+            "H   Address         Interface       Hold Uptime   SRTT   RTO  Q  Seq",
+            "0   192.168.1.2     Gi0/0             14 00:12:45   12   200  0  15",
+            "1   10.0.1.2        Gi0/1             12 00:08:30   10   200  0  8"
+        ]
+    };
+
+    // Calculate EIGRP metric: 256 * ( (10^7 / BW_kbps) + Delay_10us )
+    const calcEigrpMetric = (bwKbps, delay10us) => {
+        const bwComponent = Math.floor(10000000 / bwKbps);
+        return 256 * (bwComponent + delay10us);
+    };
+
+    // Tab 1: DUAL Successor & Feasible Successor Instant Failover Visualizer
+    const renderDualTab = () => {
+        // Path 1 (via R2): FD = 28160 (Successor)
+        // Path 2 (via R3): FD = 30720, RD = 20000 (Feasible Successor because 20000 < 28160!)
+        const activePath = state.primaryFailed ? ['R1', 'R3', 'R4'] : ['R1', 'R2', 'R4'];
+        const activeRole = state.primaryFailed ? 'FEASIBLE SUCCESSOR PROMOTED TO SUCCESSOR' : 'PRIMARY SUCCESSOR ACTIVE';
+
+        return `
+            <div style="display:grid; grid-template-columns: 1fr 340px; gap:16px; height:100%;">
+                <!-- Left: Interactive Topology Canvas -->
+                <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:14px; display:flex; flex-direction:column; gap:12px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <h4 style="margin:0; color:${AC}; font-size:14px;">DUAL Algorithm Loop-Free Topology Engine</h4>
+                        <div style="display:flex; gap:8px;">
+                            <button id="btn-toggle-eigrp-link" style="background:${state.primaryFailed ? '#10b981' : '#ef4444'}; color:#fff; border:none; padding:6px 12px; border-radius:6px; font-weight:700; font-size:12px; cursor:pointer;">
+                                ${state.primaryFailed ? '🔄 Restore Successor Link (R1-R2)' : '💥 Break Primary Successor Link (R1-R2)'}
+                            </button>
+                            <button id="btn-send-eigrp-pkt" style="background:${AC}; color:#fff; border:none; padding:6px 12px; border-radius:6px; font-weight:700; font-size:12px; cursor:pointer;">
+                                🚀 Send Packet
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Topology Canvas -->
+                    <div style="position:relative; width:100%; height:260px; background:#0b0f19; border:1px solid #1e293b; border-radius:10px; overflow:hidden;">
+                        <svg width="100%" height="100%" viewBox="0 0 500 260">
+                            <!-- Primary Path: R1 -> R2 -> R4 -->
+                            <line x1="100" y1="130" x2="250" y2="70" stroke="${state.primaryFailed ? '#ef4444' : '#10b981'}" stroke-width="${state.primaryFailed ? '2' : '4'}" stroke-dasharray="${state.primaryFailed ? '4,4' : 'none'}" />
+                            <line x1="250" y1="70" x2="400" y2="130" stroke="${state.primaryFailed ? '#64748b' : '#10b981'}" stroke-width="${state.primaryFailed ? '2' : '4'}" />
+
+                            <!-- Backup Path: R1 -> R3 -> R4 -->
+                            <line x1="100" y1="130" x2="250" y2="190" stroke="${state.primaryFailed ? '#10b981' : '#38bdf8'}" stroke-width="${state.primaryFailed ? '4' : '3'}" stroke-dasharray="${state.primaryFailed ? 'none' : '4,4'}" />
+                            <line x1="250" y1="190" x2="400" y2="130" stroke="${state.primaryFailed ? '#10b981' : '#38bdf8'}" stroke-width="${state.primaryFailed ? '4' : '3'}" stroke-dasharray="${state.primaryFailed ? 'none' : '4,4'}" />
+
+                            <!-- End Host Lines -->
+                            <line x1="30" y1="130" x2="100" y2="130" stroke="#64748b" stroke-width="2" stroke-dasharray="4,4"/>
+                            <line x1="400" y1="130" x2="470" y2="130" stroke="#64748b" stroke-width="2" stroke-dasharray="4,4"/>
+
+                            <!-- Link Labels -->
+                            <rect x="140" y="80" width="90" height="20" rx="4" fill="#0f172a" stroke="${state.primaryFailed ? '#ef4444' : '#10b981'}"/>
+                            <text x="185" y="94" fill="${state.primaryFailed ? '#ef4444' : '#34d399'}" font-size="9" font-weight="bold" text-anchor="middle">${state.primaryFailed ? 'BROKEN ❌' : 'FD: 28160 (Successor)'}</text>
+
+                            <rect x="140" y="160" width="105" height="20" rx="4" fill="#0f172a" stroke="${state.primaryFailed ? '#10b981' : '#38bdf8'}"/>
+                            <text x="192" y="174" fill="${state.primaryFailed ? '#34d399' : '#38bdf8'}" font-size="9" font-weight="bold" text-anchor="middle">${state.primaryFailed ? 'ACTIVE SUCCESSOR 🟢' : 'FD: 30720 (Feasible Succ)'}</text>
+
+                            <!-- Nodes -->
+                            <circle cx="100" cy="130" r="22" fill="#1e293b" stroke="#ec4899" stroke-width="3"/>
+                            <text x="100" y="134" fill="#ffffff" font-size="12" font-weight="bold" text-anchor="middle">R1</text>
+
+                            <circle cx="250" cy="70" r="22" fill="${state.primaryFailed ? '#450a0a' : '#1e293b'}" stroke="${state.primaryFailed ? '#ef4444' : '#10b981'}" stroke-width="3"/>
+                            <text x="250" y="74" fill="#ffffff" font-size="12" font-weight="bold" text-anchor="middle">R2</text>
+
+                            <circle cx="250" cy="190" r="22" fill="#1e293b" stroke="${state.primaryFailed ? '#10b981' : '#38bdf8'}" stroke-width="3"/>
+                            <text x="250" y="194" fill="#ffffff" font-size="12" font-weight="bold" text-anchor="middle">R3</text>
+
+                            <circle cx="400" cy="130" r="22" fill="#1e293b" stroke="#ec4899" stroke-width="3"/>
+                            <text x="400" y="134" fill="#ffffff" font-size="12" font-weight="bold" text-anchor="middle">R4</text>
+
+                            <!-- Hosts -->
+                            <rect x="10" y="115" width="30" height="30" rx="4" fill="#334155"/>
+                            <text x="25" y="134" fill="#ffffff" font-size="10" font-weight="bold" text-anchor="middle">PC1</text>
+
+                            <rect x="460" y="115" width="30" height="30" rx="4" fill="#334155"/>
+                            <text x="475" y="134" fill="#ffffff" font-size="10" font-weight="bold" text-anchor="middle">PC2</text>
+
+                            <!-- Animated Packet -->
+                            <circle id="eigrp-pkt" cx="25" cy="130" r="7" fill="#ec4899" style="display:none; transition: all 0.5s ease-in-out;"/>
+                        </svg>
+                    </div>
+
+                    <!-- DUAL Status Alert -->
+                    <div style="background:${state.primaryFailed ? 'rgba(16,185,129,0.15)' : 'rgba(236,72,153,0.1)'}; border:1px solid ${state.primaryFailed ? '#10b981' : AC}; border-radius:8px; padding:10px; font-size:12px; line-height:1.5;">
+                        <b style="color:${state.primaryFailed ? '#10b981' : AC};">DUAL Status: ${activeRole}</b><br>
+                        ${state.primaryFailed ? 
+                            '⚡ Primary link R1-R2 failed! EIGRP immediately promoted Feasible Successor (R3) with <b>0-millisecond convergence</b>! No packets dropped.' : 
+                            '🟢 Traffic flows via primary Successor (R2, FD: 28160). Precomputed Feasible Successor (R3, RD: 20000 < FD 28160) is ready in topology memory.'}
+                    </div>
+                </div>
+
+                <!-- Right: Feasibility Condition Mathematical Inspector -->
+                <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:14px; display:flex; flex-direction:column; gap:12px;">
+                    <h4 style="margin:0; color:${AC}; font-size:14px;">DUAL Feasibility Condition Check</h4>
+                    
+                    <div style="background:#0f172a; border:1px solid #334155; border-radius:8px; padding:12px; font-size:12px; line-height:1.6;">
+                        <b style="color:#38bdf8;">Loop-Free Feasibility Formula:</b><br>
+                        <code style="color:#f472b6; font-size:13px; font-weight:bold;">Reported Distance (RD) &lt; Feasible Distance (FD)</code><br><br>
+
+                        <b>Path 1 (via R2):</b><br>
+                        • Feasible Distance (FD): <span style="color:#10b981; font-weight:bold;">28,160</span><br>
+                        • Status: <b>PRIMARY SUCCESSOR</b> (Installed in Routing Table)<br><br>
+
+                        <b>Path 2 (via R3):</b><br>
+                        • Feasible Distance (FD): 30,720<br>
+                        • Reported Distance (RD from R3): <span style="color:#38bdf8; font-weight:bold;">20,000</span><br>
+                        • Feasibility Check: <code>20,000 &lt; 28,160</code> 🟢 <b>VALIDATED</b><br>
+                        • Status: <b>FEASIBLE SUCCESSOR</b> (Precalculated Backup)
+                    </div>
+
+                    <div style="background:rgba(56,189,248,0.1); border:1px solid #38bdf8; border-radius:8px; padding:10px; font-size:11px; color:#cbd5e1; line-height:1.4;">
+                        💡 Because R3's RD (20,000) is strictly less than R1's current FD (28,160), R3 is guaranteed to never route packets back through R1. No routing loops are mathematically possible!
+                    </div>
+                </div>
+            </div>
+        `;
+    };
+
+    // Tab 2: EIGRP 3-Table Explorer (Neighbor, Topology, Routing)
+    const renderTablesTab = () => {
+        return `
+            <div style="display:flex; flex-direction:column; gap:12px; height:100%;">
+                <!-- 1. Neighbor Table -->
+                <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:10px; padding:12px;">
+                    <h5 style="margin:0 0 6px 0; color:${AC}; font-size:13px; font-weight:800;">1. EIGRP Neighbor Table (show ip eigrp neighbors)</h5>
+                    <div style="background:#0b0f19; border:1px solid #1e293b; border-radius:6px; padding:8px; font-family:monospace; font-size:11px; color:#38bdf8; overflow-x:auto; line-height:1.5;">
+                        H   Address         Interface       Hold (s)   Uptime   SRTT (ms)   RTO    Q Cnt   Seq Num<br>
+                        0   192.168.1.2     Gi0/0             14       00:14:22     12      200      0       15<br>
+                        1   10.0.1.2        Gi0/1             12       00:09:40     10      200      0       8
+                    </div>
+                </div>
+
+                <!-- 2. Topology Table -->
+                <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:10px; padding:12px;">
+                    <h5 style="margin:0 0 6px 0; color:#38bdf8; font-size:13px; font-weight:800;">2. EIGRP Topology Table (show ip eigrp topology)</h5>
+                    <div style="background:#0b0f19; border:1px solid #1e293b; border-radius:6px; padding:8px; font-family:monospace; font-size:11px; color:#34d399; overflow-x:auto; line-height:1.5;">
+                        P 192.168.2.0/24, 1 successors, FD is 28160<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;via 192.168.1.2 (28160/20000), GigabitEthernet0/0 <span style="color:#10b981; font-weight:bold;">[SUCCESSOR]</span><br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;via 10.0.1.2 (30720/20000), GigabitEthernet0/1 <span style="color:#38bdf8; font-weight:bold;">[FEASIBLE SUCCESSOR]</span>
+                    </div>
+                </div>
+
+                <!-- 3. Routing Table -->
+                <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:10px; padding:12px;">
+                    <h5 style="margin:0 0 6px 0; color:#10b981; font-size:13px; font-weight:800;">3. IP Routing Table (show ip route)</h5>
+                    <div style="background:#0b0f19; border:1px solid #1e293b; border-radius:6px; padding:8px; font-family:monospace; font-size:11px; color:#f472b6; overflow-x:auto; line-height:1.5;">
+                        Codes: C - connected, S - static, R - RIP, O - OSPF, D - EIGRP<br>
+                        C    192.168.1.0/24 is directly connected, GigabitEthernet0/0<br>
+                        D    192.168.2.0/24 [90/28160] via 192.168.1.2, 00:14:22, GigabitEthernet0/0
+                    </div>
+                </div>
+            </div>
+        `;
+    };
+
+    // Tab 3: Composite Metric Calculator Tool
+    const renderMetricTab = () => {
+        const metricVal = calcEigrpMetric(state.bwKbps, state.delayUs);
+
+        return `
+            <div style="display:grid; grid-template-columns: 1fr 340px; gap:16px; height:100%;">
+                <!-- Left: Sliders and Live Formula -->
+                <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:16px; display:flex; flex-direction:column; gap:16px;">
+                    <h4 style="margin:0; color:${AC}; font-size:14px;">EIGRP Composite Metric Calculator (K1=1, K3=1)</h4>
+
+                    <!-- Bandwidth Slider -->
+                    <div style="background:var(--bg-page); border:1px solid var(--border); border-radius:8px; padding:12px;">
+                        <div style="display:flex; justify-content:space-between; font-weight:700; font-size:12px; margin-bottom:8px;">
+                            <span>Slowest Interface Bandwidth:</span>
+                            <span style="color:#38bdf8;">${state.bwKbps.toLocaleString()} Kbps (${(state.bwKbps/1000).toFixed(0)} Mbps)</span>
+                        </div>
+                        <input id="slider-bw" type="range" min="1000" max="1000000" step="1000" value="${state.bwKbps}" style="width:100%;">
+                    </div>
+
+                    <!-- Delay Slider -->
+                    <div style="background:var(--bg-page); border:1px solid var(--border); border-radius:8px; padding:12px;">
+                        <div style="display:flex; justify-space-between; font-weight:700; font-size:12px; margin-bottom:8px;">
+                            <span>Sum of Link Delays:</span>
+                            <span style="color:#38bdf8;">${state.delayUs} (in tens of microseconds)</span>
+                        </div>
+                        <input id="slider-delay" type="range" min="10" max="2000" step="10" value="${state.delayUs}" style="width:100%;">
+                    </div>
+
+                    <!-- Calculated Result Card -->
+                    <div style="background:#0f172a; border:2px solid ${AC}; border-radius:10px; padding:16px; text-align:center;">
+                        <div style="font-size:12px; color:var(--text-muted); margin-bottom:4px;">COMPUTED EIGRP 32-BIT METRIC</div>
+                        <div style="font-size:32px; font-weight:800; color:${AC}; font-family:monospace;">${metricVal.toLocaleString()}</div>
+                    </div>
+                </div>
+
+                <!-- Right: Formula Breakdown -->
+                <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:14px; display:flex; flex-direction:column; gap:12px;">
+                    <h4 style="margin:0; color:${AC}; font-size:14px;">Formula Step-by-Step</h4>
+
+                    <div style="background:#0f172a; border:1px solid #334155; border-radius:8px; padding:12px; font-family:monospace; font-size:11px; color:#cbd5e1; line-height:1.6;">
+                        <b style="color:#f472b6;">Formula:</b><br>
+                        Metric = 256 * ( (10^7 / Bandwidth_Kbps) + Sum_Delay )<br><br>
+
+                        <b>Step 1 (Bandwidth Component):</b><br>
+                        10,000,000 / ${state.bwKbps} = <span style="color:#38bdf8;">${Math.floor(10000000/state.bwKbps)}</span><br><br>
+
+                        <b>Step 2 (Delay Component):</b><br>
+                        Sum of Delays = <span style="color:#38bdf8;">${state.delayUs}</span><br><br>
+
+                        <b>Step 3 (Multiply by 256):</b><br>
+                        256 * (${Math.floor(10000000/state.bwKbps)} + ${state.delayUs}) = <b style="color:${AC}; font-size:13px;">${metricVal.toLocaleString()}</b>
+                    </div>
+                </div>
+            </div>
+        `;
+    };
+
+    // Tab 4: Cisco IOS EIGRP CLI Terminal
+    const renderCliTab = () => {
+        return `
+            <div style="background:#0f172a; border:1px solid #1e293b; border-radius:12px; padding:14px; display:flex; flex-direction:column; gap:10px; height:100%; box-sizing:border-box;">
+                <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #334155; padding-bottom:8px;">
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <span style="color:${AC}; font-weight:800; font-size:13px;">💻 Cisco IOS EIGRP Interactive Terminal</span>
+                        <span style="font-size:11px; color:#94a3b8;">(Router1#)</span>
+                    </div>
+                    <div style="display:flex; gap:6px;">
+                        <button class="cli-quick-cmd" data-cmd="show ip eigrp neighbors" style="background:#1e293b; color:#38bdf8; border:1px solid #334155; padding:3px 8px; border-radius:4px; font-size:11px; cursor:pointer;">show ip eigrp neighbors</button>
+                        <button class="cli-quick-cmd" data-cmd="show ip eigrp topology" style="background:#1e293b; color:#38bdf8; border:1px solid #334155; padding:3px 8px; border-radius:4px; font-size:11px; cursor:pointer;">show ip eigrp topology</button>
+                        <button class="cli-quick-cmd" data-cmd="show ip route" style="background:#1e293b; color:#38bdf8; border:1px solid #334155; padding:3px 8px; border-radius:4px; font-size:11px; cursor:pointer;">show ip route</button>
+                    </div>
+                </div>
+
+                <div id="eigrp-cli-output" style="flex:1; background:#0b0f19; border:1px solid #1e293b; border-radius:8px; padding:12px; font-family:monospace; font-size:12px; color:#f472b6; overflow-y:auto; line-height:1.6; min-height:220px;">
+                    ${state.cliOutput.map(line => `<div>${line}</div>`).join('')}
+                </div>
+
+                <div style="display:flex; gap:8px; align-items:center;">
+                    <span style="color:#ec4899; font-family:monospace; font-weight:bold; font-size:13px;">Router1#</span>
+                    <input id="eigrp-cli-input" type="text" placeholder="Type command e.g. show ip route, show ip eigrp topology, router eigrp 100..." style="flex:1; background:#0b0f19; border:1px solid #334155; color:#ffffff; padding:8px 12px; border-radius:6px; font-family:monospace; font-size:12px; outline:none;">
+                    <button id="btn-send-eigrp-cli" style="background:${AC}; color:#fff; border:none; padding:8px 16px; border-radius:6px; font-weight:700; font-size:12px; cursor:pointer;">Execute</button>
+                </div>
+            </div>
+        `;
+    };
+
+    // Tab 5: RTP & Incremental Update Inspector
+    const renderRtpTab = () => {
+        return `
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px; height:100%;">
+                <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:14px; display:flex; flex-direction:column; gap:12px;">
+                    <h4 style="margin:0; color:${AC}; font-size:14px;">Reliable Transport Protocol (RTP) - IP Protocol 88</h4>
+                    <p style="margin:0; font-size:11px; color:var(--text-muted);">
+                        EIGRP uses RTP to guarantee packet delivery without requiring TCP.
+                    </p>
+
+                    <div style="background:#0b0f19; border:1px solid #1e293b; border-radius:8px; padding:12px; font-family:monospace; font-size:11px; color:#38bdf8; line-height:1.6; flex:1;">
+                        <b style="color:#f472b6;">EIGRP 5 Packet Types:</b><br><br>
+                        1. <b>Hello</b> (Multicast 224.0.0.10) - Unacknowledged neighbor keepalive.<br>
+                        2. <b>Update</b> (Multicast / Unicast) - Reliable route updates (ACK required).<br>
+                        3. <b>Query</b> (Multicast / Unicast) - Sent when a route is active and needs backup.<br>
+                        4. <b>Reply</b> (Unicast) - Response to Query packet (ACK required).<br>
+                        5. <b>ACK</b> (Unicast) - Acknowledges receipt of Update, Query, or Reply.
+                    </div>
+                </div>
+
+                <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:14px; display:flex; flex-direction:column; gap:12px;">
+                    <h4 style="margin:0; color:${AC}; font-size:14px;">Bandwidth Efficiency: Incremental vs Full Table</h4>
+
+                    <div style="display:flex; flex-direction:column; gap:10px;">
+                        <div style="background:rgba(239,68,68,0.1); border-left:3px solid #ef4444; padding:10px; border-radius:6px; font-size:12px;">
+                            <b style="color:#ef4444;">RIP Protocol (Periodic Full Table)</b><br>
+                            Sends entire 100-route table every 30 seconds across all links regardless of whether changes occurred. High bandwidth consumption!
+                        </div>
+
+                        <div style="background:rgba(16,185,129,0.1); border-left:3px solid #10b981; padding:10px; border-radius:6px; font-size:12px;">
+                            <b style="color:#10b981;">EIGRP Protocol (Partial Incremental)</b><br>
+                            Sends ONLY the changed route subnet to affected neighbors when a link state changes. Zero periodic updates. Saves 95% bandwidth!
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    };
+
+    // Render Master Container
+    const updateView = () => {
+        const bodyEl = container.querySelector('#eigrp-tab-body');
+        if (!bodyEl) return;
+
+        if (state.activeTab === 'dual') bodyEl.innerHTML = renderDualTab();
+        else if (state.activeTab === 'tables') bodyEl.innerHTML = renderTablesTab();
+        else if (state.activeTab === 'metric') bodyEl.innerHTML = renderMetricTab();
+        else if (state.activeTab === 'cli') bodyEl.innerHTML = renderCliTab();
+        else if (state.activeTab === 'rtp') bodyEl.innerHTML = renderRtpTab();
+
+        attachTabListeners();
+    };
+
+    // Attach Event Listeners
+    const attachTabListeners = () => {
+        // Toggle Link Failure (Tab 1)
+        const toggleBtn = container.querySelector('#btn-toggle-eigrp-link');
+        if (toggleBtn) {
+            toggleBtn.onclick = () => {
+                state.primaryFailed = !state.primaryFailed;
+                updateView();
+            };
+        }
+
+        // Send Packet Animation (Tab 1)
+        const sendPktBtn = container.querySelector('#btn-send-eigrp-pkt');
+        if (sendPktBtn) {
+            sendPktBtn.onclick = () => {
+                const pkt = container.querySelector('#eigrp-pkt');
+                if (!pkt || state.packetAnimating) return;
+                state.packetAnimating = true;
+                pkt.style.display = 'block';
+
+                if (!state.primaryFailed) {
+                    // Successor path: R1 -> R2 -> R4
+                    pkt.setAttribute('cx', '25'); pkt.setAttribute('cy', '130');
+                    setTimeout(() => { pkt.setAttribute('cx', '100'); pkt.setAttribute('cy', '130'); }, 100);
+                    setTimeout(() => { pkt.setAttribute('cx', '250'); pkt.setAttribute('cy', '70'); }, 600);
+                    setTimeout(() => { pkt.setAttribute('cx', '400'); pkt.setAttribute('cy', '130'); }, 1200);
+                    setTimeout(() => { pkt.setAttribute('cx', '475'); pkt.setAttribute('cy', '130'); }, 1700);
+                    setTimeout(() => { pkt.style.display = 'none'; state.packetAnimating = false; }, 2200);
+                } else {
+                    // Feasible Successor path: R1 -> R3 -> R4
+                    pkt.setAttribute('cx', '25'); pkt.setAttribute('cy', '130');
+                    setTimeout(() => { pkt.setAttribute('cx', '100'); pkt.setAttribute('cy', '130'); }, 100);
+                    setTimeout(() => { pkt.setAttribute('cx', '250'); pkt.setAttribute('cy', '190'); }, 600);
+                    setTimeout(() => { pkt.setAttribute('cx', '400'); pkt.setAttribute('cy', '130'); }, 1200);
+                    setTimeout(() => { pkt.setAttribute('cx', '475'); pkt.setAttribute('cy', '130'); }, 1700);
+                    setTimeout(() => { pkt.style.display = 'none'; state.packetAnimating = false; }, 2200);
+                }
+            };
+        }
+
+        // Sliders (Tab 3)
+        const sliderBw = container.querySelector('#slider-bw');
+        const sliderDelay = container.querySelector('#slider-delay');
+        if (sliderBw) {
+            sliderBw.oninput = (e) => {
+                state.bwKbps = parseInt(e.target.value, 10);
+                updateView();
+            };
+        }
+        if (sliderDelay) {
+            sliderDelay.oninput = (e) => {
+                state.delayUs = parseInt(e.target.value, 10);
+                updateView();
+            };
+        }
+
+        // CLI Commands (Tab 4)
+        const cliInput = container.querySelector('#eigrp-cli-input');
+        const execBtn = container.querySelector('#btn-send-eigrp-cli');
+
+        const executeCli = (cmd) => {
+            if (!cmd.trim()) return;
+            state.cliOutput.push(`Router1# ${cmd}`);
+            const clean = cmd.trim().toLowerCase();
+
+            if (clean === 'show ip route') {
+                state.cliOutput.push("Codes: C - connected, S - static, R - RIP, O - OSPF, D - EIGRP");
+                state.cliOutput.push("Gateway of last resort is not set");
+                state.cliOutput.push("C    192.168.1.0/24 is directly connected, GigabitEthernet0/0");
+                state.cliOutput.push(`D    192.168.2.0/24 [90/${state.primaryFailed ? '30720' : '28160'}] via ${state.primaryFailed ? '10.0.1.2' : '192.168.1.2'}, 00:14:22, GigabitEthernet0/${state.primaryFailed ? '1' : '0'}`);
+            } else if (clean === 'show ip eigrp neighbors') {
+                state.cliOutput.push("IP-EIGRP neighbors for process 100");
+                state.cliOutput.push("H   Address         Interface       Hold Uptime   SRTT   RTO  Q  Seq");
+                if (!state.primaryFailed) {
+                    state.cliOutput.push("0   192.168.1.2     Gi0/0             14 00:14:22   12   200  0  15");
+                }
+                state.cliOutput.push("1   10.0.1.2        Gi0/1             12 00:09:40   10   200  0  8");
+            } else if (clean === 'show ip eigrp topology') {
+                state.cliOutput.push("IP-EIGRP Topology Table for AS(100)/ID(1.1.1.1)");
+                state.cliOutput.push("Codes: P - Passive, A - Active, U - Update, Q - Query, R - Reply, r - reply Status");
+                state.cliOutput.push("P 192.168.2.0/24, 1 successors, FD is 28160");
+                if (!state.primaryFailed) {
+                    state.cliOutput.push("        via 192.168.1.2 (28160/20000), GigabitEthernet0/0");
+                }
+                state.cliOutput.push("        via 10.0.1.2 (30720/20000), GigabitEthernet0/1");
+            } else if (clean.startsWith('router eigrp') || clean.startsWith('network') || clean.startsWith('no auto-summary')) {
+                state.cliOutput.push("EIGRP AS process updated successfully.");
+            } else {
+                state.cliOutput.push(`% Unknown command or incomplete entry: "${cmd}"`);
+            }
+            updateView();
+        };
+
+        if (execBtn && cliInput) {
+            execBtn.onclick = () => executeCli(cliInput.value);
+            cliInput.onkeypress = (e) => { if (e.key === 'Enter') executeCli(cliInput.value); };
+        }
+
+        container.querySelectorAll('.cli-quick-cmd').forEach(btn => {
+            btn.onclick = () => executeCli(btn.getAttribute('data-cmd'));
+        });
+    };
+
+    // Main Tab Switching Buttons Listener
+    container.querySelectorAll('.eigrp-tab-btn').forEach(btn => {
+        btn.onclick = () => {
+            container.querySelectorAll('.eigrp-tab-btn').forEach(b => {
+                b.classList.remove('active');
+                b.style.background = 'var(--bg-card)';
+                b.style.color = 'var(--text-main)';
+                b.style.border = '1px solid var(--border)';
+            });
+            btn.classList.add('active');
+            btn.style.background = AC;
+            btn.style.color = '#fff';
+            btn.style.border = 'none';
+
+            state.activeTab = btn.getAttribute('data-tab');
+            updateView();
+        };
+    });
+
+    // Initial View Render
+    updateView();
+};
+
+
 const initOspfSim = (container) => {
     const AC = '#10b981'; // Vibrant emerald green for OSPF
     container.innerHTML = `
@@ -18236,6 +18723,7 @@ const initRipSim = (container) => {
             `;
                 return;
             }
+            if (id === 'routing_eigrp' || id === 'eigrp_sim' || (data && (data.simType === 'eigrp_sim' || data.simType === 'routing_eigrp'))) { initEigrpSim(container); return; }
             if (id === 'routing_ospf' || id === 'ospf_sim' || (data && (data.simType === 'ospf_sim' || data.simType === 'routing_ospf'))) { initOspfSim(container); return; }
             if (id === 'routing_rip' || id === 'rip_sim' || (data && (data.simType === 'rip_sim' || data.simType === 'routing_rip'))) { initRipSim(container); return; }
             if (id === 'vlan_sim' || id === 'vlan' || (data && (data.simType === 'vlan_sim' || data.simType === 'vlan_trunking'))) { initVlanSim(container); return; }

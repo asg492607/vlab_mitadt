@@ -2825,51 +2825,438 @@ window.VLAB_DATA = {
     "simType": "ospf_sim"
 },
     'routing_eigrp': {
-        title: "Dynamic Routing - EIGRP",
-        aim: "To configure Cisco Enhanced Interior Gateway Routing Protocol (EIGRP AS 100) using DUAL algorithm.",
-        intro: {
-            summary: "EIGRP is an advanced distance-vector routing protocol utilizing the Diffusing Update Algorithm (DUAL) for ultra-fast convergence without routing loops.",
-            importance: "EIGRP supports unequal-cost load balancing and instant failover using pre-calculated Feasible Successor backup paths.",
-            applications: ["Cisco Enterprise WAN", "Branch Inter-Office Routing"],
-            outcome: "Students will configure EIGRP Autonomous Systems, set K-value metrics, and inspect successor paths."
-        },
-        prerequisites: ["Practical 9: Link State Routing - OSPF"],
-        outcomes: [
-            "Configure EIGRP Autonomous System numbers.",
-            "Understand EIGRP composite metric K-values (Bandwidth & Delay).",
-            "Verify Successor and Feasible Successor routes in EIGRP Topology table."
+    "title": "Practical 10: Enhanced Interior Gateway Routing Protocol (EIGRP)",
+    "aim": "To understand Advanced Distance Vector and Hybrid routing principles, configure Cisco EIGRP (Autonomous System 100) across a multi-router enterprise topology, evaluate composite metrics (Bandwidth and Delay), inspect the 3 EIGRP tables (Neighbor Table, Topology Table, and Routing Table), and verify instant failover using the Diffusing Update Algorithm (DUAL) with Successor and Feasible Successor routes.",
+    "intro": {
+        "summary": "As enterprise networks become larger and more complex, routing protocols must quickly adapt to changes while efficiently utilizing available network resources. Enhanced Interior Gateway Routing Protocol (EIGRP) is Cisco's Advanced Distance Vector / Hybrid Routing Protocol designed to combine the configuration simplicity of Distance Vector protocols with the rapid convergence, topology awareness, and loop-free operation of Link State protocols.",
+        "importance": "EIGRP is widely deployed in Cisco enterprise infrastructures due to its unmatched 0-millisecond instant failover capability using precomputed Feasible Successors, support for unequal-cost load balancing, and bandwidth-conserving partial incremental updates.",
+        "applications": [
+            "Cisco Enterprise Campus Core & Distribution Routing",
+            "Financial Institution & Banking Branch Interconnects",
+            "Manufacturing & Industrial Multi-Site Networks",
+            "High-Availability Enterprise Data Center Fabrics"
         ],
-        theory: {
-            intro: "EIGRP is a hybrid routing protocol leveraging Diffusing Update Algorithm (DUAL). Metric is calculated using Bandwidth, Delay, Reliability, and Load (K-values).",
-            cards: [
-                { title: "Successor Route", content: "The primary routing path stored in the Routing Table with lowest metric." },
-                { title: "Feasible Successor", content: "A backup loop-free path stored in the EIGRP Topology Table for instant failover." }
-            ],
-            formulas: ["EIGRP Metric = (256 * (10^7 / Min Bandwidth)) + (256 * Sum of Delays)"],
-            standards: ["RFC 7868 - Cisco's Enhanced Interior Gateway Routing Protocol (EIGRP)"]
-        },
-        tools: [
-            { name: "Cisco Router CLI", layer: "Layer 3 Router", ports: "Serial & Gigabit", usage: "DUAL calculation & AS neighbor formation", statusLED: "EIGRP Peer UP" }
-        ],
-        procedure: [
-            "Enter EIGRP configuration mode: `router eigrp 100`.",
-            "Disable auto-summarization: `no auto-summary`.",
-            "Advertise networks: `network 172.16.0.0 0.0.255.255`.",
-            "Verify neighbor adjacency: `show ip eigrp neighbors`."
-        ],
-        troubleshooting: {
-            problem: "EIGRP neighbor relationship fails to form.",
-            hints: ["Check if Autonomous System (AS) number matches on both routers.", "Verify K-values match."],
-            fix: "Ensure `router eigrp 100` uses matching AS number on both routers."
-        },
-        viva: [
-            { q: "What is a Feasible Successor in EIGRP?", a: "A backup route stored in the topology table that satisfies the Feasibility Condition, allowing zero-second convergence if the primary route fails." },
-            { q: "What is the Administrative Distance of internal EIGRP?", a: "90." }
-        ],
-        assignment: "Configure EIGRP AS 100 on 3 routers. Force link failover and observe convergence time.",
-        references: [{ title: "RFC 7868 - EIGRP Specification", link: "https://datatracker.ietf.org/doc/html/rfc7868" }],
-        simType: "cli"
+        "outcome": "After completing this practical, students will be able to configure EIGRP Autonomous System 100 on Cisco routers, calculate composite metric values based on Bandwidth and Delay, inspect EIGRP Neighbor, Topology, and Routing tables, and demonstrate instant DUAL failover using Feasible Successors."
     },
+    "prerequisites": [
+        "Practical 6: Subnetting, VLSM & CIDR",
+        "Practical 8: Distance Vector Routing Protocol (RIP)",
+        "Practical 9: Link State Routing Protocol (OSPF)"
+    ],
+    "outcomes": [
+        "Explain the operation of Hybrid / Advanced Distance Vector routing and EIGRP.",
+        "Configure EIGRP Autonomous System (AS 100) using Cisco IOS CLI commands.",
+        "Calculate EIGRP composite metrics using Bandwidth (slowest link) and Delay (sum of delays).",
+        "Differentiate between RIP, OSPF, and EIGRP routing protocols.",
+        "Inspect and analyze the 3 EIGRP tables: Neighbor Table, Topology Table, and Routing Table.",
+        "Explain the Diffusing Update Algorithm (DUAL) and the Feasibility Condition (RD < FD).",
+        "Identify Successor (primary best route) and Feasible Successor (precomputed backup route).",
+        "Demonstrate 0-millisecond instant failover without route recalculation during link failure."
+    ],
+    "theory": {
+        "intro": "Enterprise networking demands routing protocols that deliver rapid convergence without the design complexity of multi-area Link State protocols. Cisco developed EIGRP to provide instantaneous failover, composite bandwidth/delay metrics, and low bandwidth overhead through incremental updates.",
+        "sections": [
+            {
+                "heading": "1. Introduction to Advanced Distance Vector Routing & EIGRP",
+                "content": "Although RIP is simple to configure, it suffers from slow convergence and a 15-hop limit. OSPF overcomes these limitations but introduces area hierarchy complexity and heavy CPU/memory overhead. Cisco created the Enhanced Interior Gateway Routing Protocol (EIGRP) as an Advanced Distance Vector or Hybrid protocol that combines the configuration ease of distance vector with the rapid convergence and loop-free guarantees of link state protocols."
+            },
+            {
+                "heading": "2. Learning Objectives",
+                "content": "By completing this practical, students will master:\n• EIGRP Autonomous System (AS) number alignment.\n• EIGRP neighbor discovery via Hello packets (multicast 224.0.0.10).\n• Calculating composite metrics using Bandwidth and Delay.\n• Navigating the 3 EIGRP tables: Neighbor Table, Topology Table, Routing Table.\n• The DUAL algorithm, Feasible Distance (FD), Reported Distance (RD), and Feasibility Condition.\n• Instant failover from Successor to Feasible Successor."
+            },
+            {
+                "heading": "3. Why EIGRP is Required",
+                "content": "As networks scale:\n1. RIP is too slow to converge and ignores link bandwidth.\n2. OSPF requires rigid area architecture and heavy Dijkstra SPF recalculations.\nEIGRP resolves both by computing routes using composite metrics (Bandwidth + Delay), storing precomputed loop-free backup routes (Feasible Successors) for 0-millisecond failover, and transmitting incremental updates only when topology changes occur."
+            },
+            {
+                "heading": "4. What is EIGRP?",
+                "content": "Enhanced Interior Gateway Routing Protocol (EIGRP) is an advanced routing protocol (RFC 7868) that uses the Diffusing Update Algorithm (DUAL) to guarantee loop-free, lowest-cost path calculation. EIGRP uses Reliable Transport Protocol (RTP) to deliver unicast and multicast updates reliably."
+            },
+            {
+                "heading": "5. Hybrid Routing Protocol Characteristics",
+                "content": "EIGRP combines key attributes of both protocol families:\n• Distance Vector Traits: Learns routes from directly connected neighbors; advertises vectors of distance metrics.\n• Link State Traits: Maintains topology awareness in a Topology Table; achieves sub-second convergence; sends partial incremental updates only on change.\nHence, EIGRP is classified as a Hybrid or Advanced Distance Vector protocol."
+            },
+            {
+                "heading": "6. Basic EIGRP Terminology",
+                "content": "• Autonomous System (AS): Group of routers under common administration sharing the same AS number.\n• Neighbor Table: List of directly connected EIGRP neighbors.\n• Topology Table: Repository of all routes learned from neighbors (includes Successors and Feasible Successors).\n• Routing Table: List of primary best routes installed for packet forwarding.\n• Successor: Primary best path to a destination (installed in routing table).\n• Feasible Successor: Backup loop-free path stored in topology table for instant failover.\n• Feasible Distance (FD): Lowest calculated metric from local router to destination.\n• Reported Distance (RD): Metric advertised by neighbor router to reach destination.\n• DUAL Algorithm: State machine that calculates loop-free paths and manages failovers."
+            },
+            {
+                "heading": "7. Autonomous System (AS)",
+                "content": "Routers participating in EIGRP must be configured with the exact same Autonomous System (AS) number (e.g. router eigrp 100). Routers with mismatched AS numbers will drop Hello packets and fail to form neighbor adjacencies."
+            },
+            {
+                "heading": "8. EIGRP Neighbor Discovery Process",
+                "content": "EIGRP routers periodically transmit Hello packets to IPv4 multicast address 224.0.0.10. Neighbor discovery steps:\n1. Routers send Hello packets out EIGRP-enabled interfaces.\n2. Verify matching AS number, K-values, and primary subnet mask.\n3. Neighbor relationship formed and added to the local Neighbor Table.\n4. Exchange Full Topology Table via Reliable Transport Protocol (RTP).\n5. Subsequent updates are partial and incremental."
+            },
+            {
+                "heading": "9. EIGRP Neighbor Table",
+                "content": "The Neighbor Table maintains details for all adjacent EIGRP routers: IP address, outgoing interface, Hold Time countdown (default 15s), Smooth Round Trip Time (SRTT), and Retransmission Timeout (RTO)."
+            },
+            {
+                "heading": "10. EIGRP Topology Table",
+                "content": "The Topology Table contains every network destination learned from all neighbors, including Feasible Distance (FD), Reported Distance (RD), interface, and whether a route is a Successor or Feasible Successor. Unlike RIP or OSPF, backup routes are precomputed and ready in memory."
+            },
+            {
+                "heading": "11. Structure of the EIGRP Routing Table",
+                "content": "The Routing Table contains only the single best route (Successor) for each destination network. Internal EIGRP routes are demarcated with code 'D' and have an Administrative Distance (AD) of 90."
+            },
+            {
+                "heading": "12. Diffusing Update Algorithm (DUAL)",
+                "content": "DUAL is the decision engine of EIGRP. It guarantees:\n1. Complete freedom from routing loops at all times.\n2. Instant 0-millisecond convergence when a Feasible Successor exists.\n3. Active state queries (sending Query packets to neighbors) only when no Feasible Successor is available."
+            },
+            {
+                "heading": "13. Successor Route (Primary Path)",
+                "content": "The Successor is the route with the lowest total Feasible Distance (FD) to reach a destination. It is the primary route installed into the router's main IP routing table."
+            },
+            {
+                "heading": "14. Feasible Successor & The Feasibility Condition",
+                "content": "A Feasible Successor is a pre-calculated backup path. To prevent routing loops, a backup path qualifies as a Feasible Successor ONLY if it satisfies the Feasibility Condition:\nRule: Reported Distance (RD) of Neighbor < Feasible Distance (FD) of Current Successor\nIf this condition is met, the backup path is 100% loop-free and can be used immediately if the Successor fails!"
+            },
+            {
+                "heading": "15. Feasible Distance (FD) vs Reported Distance (RD)",
+                "content": "• Feasible Distance (FD): Total calculated metric from local router to destination via a specific neighbor.\n• Reported Distance (RD): The neighbor's own metric to reach the destination subnet."
+            },
+            {
+                "heading": "16. EIGRP Composite Metric Calculation",
+                "content": "EIGRP metric is derived using Bandwidth and Delay (K1=1, K2=0, K3=1, K4=0, K5=0):\nFormula: Metric = 256 * ( (10^7 / Slowest_Bandwidth_Kbps) + Sum_of_Delays_in_tens_of_microseconds )\n• Bandwidth component uses the slowest link in the path.\n• Delay component uses the cumulative sum of delays along the path."
+            },
+            {
+                "heading": "17. Reliable Transport Protocol (RTP)",
+                "content": "EIGRP uses RTP (IP Protocol 88) to deliver packets reliably. Hello packets are unacknowledged, but Update, Query, and Reply packets require explicit Acknowledgement (ACK) to ensure zero packet loss."
+            },
+            {
+                "heading": "18. EIGRP Packet Types",
+                "content": "1. Hello: Neighbor discovery and keepalive.\n2. Update: Transmits routing information.\n3. Query: Sent when a route fails and no Feasible Successor exists.\n4. Reply: Response to Query packet.\n5. ACK: Confirms receipt of Update, Query, or Reply."
+            },
+            {
+                "heading": "19. Cisco IOS Configuration Guide",
+                "content": "Configuring EIGRP AS 100 on a Cisco router:\nRouter# configure terminal\nRouter(config)# router eigrp 100\nRouter(config-router)# network 192.168.1.0\nRouter(config-router)# network 10.0.0.0\nRouter(config-router)# no auto-summary\nRouter(config-router)# end"
+            },
+            {
+                "heading": "20. Verification Commands",
+                "content": "• show ip eigrp neighbors - Displays EIGRP neighbors, interfaces, and hold times.\n• show ip route - Displays IP routing table (EIGRP routes marked with 'D', AD=90).\n• show ip eigrp topology - Displays Topology Table showing Successors, Feasible Successors, FD, and RD.\n• show ip protocols - Displays active EIGRP AS, K-values, and advertised networks."
+            },
+            {
+                "heading": "21. Comprehensive Protocol Comparison (RIP vs OSPF vs EIGRP)",
+                "content": "• Type: RIP (Distance Vector), OSPF (Link State), EIGRP (Hybrid / Advanced Distance Vector).\n• Algorithm: RIP (Bellman-Ford), OSPF (Dijkstra SPF), EIGRP (DUAL).\n• Metric: RIP (Hop Count max 15), OSPF (Cost = 10^8/BW), EIGRP (Bandwidth + Delay).\n• Convergence: RIP (Slow ~180s), OSPF (Fast ~sec), EIGRP (Ultra-Fast ~0ms with Feasible Successor).\n• Updates: RIP (Periodic 30s full table), OSPF (Triggered LSA flood), EIGRP (Partial incremental multicast 224.0.0.10).\n• Administrative Distance: RIP (120), OSPF (110), EIGRP Internal (90)."
+            },
+            {
+                "heading": "22. Advantages of EIGRP",
+                "content": "• Instant 0-millisecond convergence via precalculated Feasible Successors.\n• Supports Unequal-Cost Load Balancing using the variance command.\n• Low network bandwidth overhead (partial incremental updates only).\n• Simple configuration compared to OSPF Areas.\n• Supports VLSM, CIDR, and discontinuous subnets."
+            },
+            {
+                "heading": "23. Limitations of EIGRP",
+                "content": "• Primarily Cisco-focused enterprise deployment.\n• Requires clear understanding of DUAL and composite metric calculations.\n• Active-state stuck-in-active (SIA) scenarios if network query replies fail."
+            },
+            {
+                "heading": "24. Real-World Applications",
+                "content": "EIGRP is deployed in enterprise campuses, corporate branch offices, banking networks, and Cisco-centric data center infrastructures."
+            },
+            {
+                "heading": "25. Best Practices",
+                "content": "1. Ensure matching Autonomous System numbers (router eigrp 100) on all routers.\n2. Always configure no auto-summary to support classless VLSM subnetting.\n3. Use passive-interface on user-facing LAN ports to block Hello packets."
+            },
+            {
+                "heading": "26. Summary",
+                "content": "EIGRP combines Distance Vector simplicity with Link State speed, utilizing the DUAL algorithm, precomputed Feasible Successors, and composite Bandwidth/Delay metrics to deliver instantaneous, loop-free failover."
+            }
+        ]
+    },
+    "hardware_inspector": [
+        {
+            "id": "cisco_2911_eigrp_router",
+            "name": "Cisco 2911 ISR EIGRP Hybrid Router",
+            "category": "Layer 3 Advanced Distance Vector Router",
+            "description": "Enterprise Layer 3 router running EIGRP AS 100 process, executing DUAL algorithm and maintaining synchronized Neighbor, Topology, and Routing tables.",
+            "svg": `<svg viewBox="0 0 400 240" xmlns="http://www.w3.org/2000/svg">
+                <rect x="20" y="40" width="360" height="160" rx="10" fill="#0f172a" stroke="#ec4899" stroke-width="3"/>
+                <rect x="35" y="55" width="330" height="40" rx="5" fill="#1e293b"/>
+                <text x="50" y="80" fill="#f472b6" font-size="15" font-weight="bold" font-family="monospace">CISCO 2911 ISR [EIGRP AS 100 - DUAL ACTIVE]</text>
+                <circle cx="340" cy="75" r="7" fill="#ec4899"/>
+                <g transform="translate(40, 110)">
+                    <rect x="0" y="0" width="65" height="40" rx="4" fill="#334155" stroke="#ec4899" stroke-width="2"/>
+                    <text x="32" y="25" fill="#ffffff" font-size="10" font-weight="bold" text-anchor="middle">Gi0/0</text>
+                </g>
+                <g transform="translate(120, 110)">
+                    <rect x="0" y="0" width="65" height="40" rx="4" fill="#334155" stroke="#ec4899" stroke-width="2"/>
+                    <text x="32" y="25" fill="#ffffff" font-size="10" font-weight="bold" text-anchor="middle">Gi0/1</text>
+                </g>
+                <g transform="translate(200, 110)">
+                    <rect x="0" y="0" width="65" height="40" rx="4" fill="#334155" stroke="#38bdf8" stroke-width="2"/>
+                    <text x="32" y="25" fill="#38bdf8" font-size="10" font-weight="bold" text-anchor="middle">Gi0/2</text>
+                </g>
+                <g transform="translate(280, 110)">
+                    <rect x="0" y="0" width="65" height="40" rx="4" fill="#334155" stroke="#f59e0b" stroke-width="2"/>
+                    <text x="32" y="25" fill="#f59e0b" font-size="10" font-weight="bold" text-anchor="middle">Serial0/0</text>
+                </g>
+                <text x="200" y="185" fill="#cbd5e1" font-size="11" text-anchor="middle">EIGRP Engine (RTP Protocol 88 - Multicast 224.0.0.10)</text>
+            </svg>`
+        },
+        {
+            "id": "dual_failover_engine_diagram",
+            "name": "DUAL Instant Failover Engine (Successor vs Feasible Successor)",
+            "category": "Layer 3 Algorithm & Topology Table",
+            "description": "Visual illustration of DUAL zero-second failover when primary Successor link fails and precomputed Feasible Successor is promoted.",
+            "svg": `<svg viewBox="0 0 400 240" xmlns="http://www.w3.org/2000/svg">
+                <rect x="20" y="20" width="360" height="200" rx="8" fill="#0b0f19" stroke="#ec4899" stroke-width="2"/>
+                <text x="200" y="45" fill="#f472b6" font-size="14" font-weight="bold" text-anchor="middle">DUAL INSTANT FAILOVER ENGINE [AD = 90]</text>
+                <line x1="30" y1="55" x2="370" y2="55" stroke="#334155" stroke-width="2"/>
+
+                <circle cx="80" cy="130" r="22" fill="#1e293b" stroke="#ec4899" stroke-width="2"/>
+                <text x="80" y="134" fill="#ffffff" font-size="11" font-weight="bold" text-anchor="middle">R1</text>
+
+                <circle cx="200" cy="90" r="22" fill="#1e293b" stroke="#10b981" stroke-width="2"/>
+                <text x="200" y="94" fill="#ffffff" font-size="11" font-weight="bold" text-anchor="middle">R2</text>
+
+                <circle cx="200" cy="170" r="22" fill="#1e293b" stroke="#38bdf8" stroke-width="2"/>
+                <text x="200" y="174" fill="#ffffff" font-size="11" font-weight="bold" text-anchor="middle">R3</text>
+
+                <circle cx="320" cy="130" r="22" fill="#1e293b" stroke="#ec4899" stroke-width="2"/>
+                <text x="320" y="134" fill="#ffffff" font-size="11" font-weight="bold" text-anchor="middle">R4</text>
+
+                <line x1="100" y1="118" x2="180" y2="98" stroke="#10b981" stroke-width="4"/>
+                <text x="135" y="100" fill="#10b981" font-size="10" font-weight="bold">Successor (FD 28160)</text>
+
+                <line x1="100" y1="142" x2="180" y2="162" stroke="#38bdf8" stroke-width="3" stroke-dasharray="4,4"/>
+                <text x="135" y="170" fill="#38bdf8" font-size="10" font-weight="bold">Feasible Successor (RD 20000 &lt; FD 28160)</text>
+
+                <rect x="30" y="200" width="340" height="15" rx="3" fill="#1e293b"/>
+                <text x="200" y="211" fill="#f472b6" font-size="9" text-anchor="middle">Feasibility Condition Met! 0-millisecond instant failover on link break.</text>
+            </svg>`
+        }
+    ],
+    "evaluations": [
+        {
+            "id": "eigrp_pre_1",
+            "type": "pre",
+            "question": "How is EIGRP classified in routing protocol terminology?",
+            "options": [
+                "Distance Vector Protocol",
+                "Link State Protocol",
+                "Advanced Distance Vector / Hybrid Routing Protocol",
+                "Exterior Gateway Protocol"
+            ],
+            "answer": "Advanced Distance Vector / Hybrid Routing Protocol",
+            "explanation": "EIGRP is classified as a Hybrid or Advanced Distance Vector protocol because it combines distance vector neighbor advertisements with link state rapid convergence and topology tables."
+        },
+        {
+            "id": "eigrp_pre_2",
+            "type": "pre",
+            "question": "What algorithm does EIGRP use to calculate loop-free paths and manage route convergence?",
+            "options": [
+                "Bellman-Ford Algorithm",
+                "Dijkstra's Shortest Path First (SPF)",
+                "Diffusing Update Algorithm (DUAL)",
+                "Spanning Tree Protocol (STP)"
+            ],
+            "answer": "Diffusing Update Algorithm (DUAL)",
+            "explanation": "EIGRP uses the Diffusing Update Algorithm (DUAL) to guarantee loop-free routing and provide instantaneous failover using precalculated Feasible Successors."
+        },
+        {
+            "id": "eigrp_pre_3",
+            "type": "pre",
+            "question": "What primary metrics are used by default in EIGRP composite metric calculations?",
+            "options": [
+                "Hop Count and Cost",
+                "Bandwidth and Delay",
+                "Reliability and Load",
+                "MTU and Delay"
+            ],
+            "answer": "Bandwidth and Delay",
+            "explanation": "By default, EIGRP uses minimum Bandwidth along the path and cumulative Delay (K1=1, K3=1) to compute its 32-bit composite metric."
+        },
+        {
+            "id": "eigrp_pre_4",
+            "type": "pre",
+            "question": "What IPv4 multicast address is used by EIGRP routers for Hello packets and updates?",
+            "options": [
+                "224.0.0.5",
+                "224.0.0.6",
+                "224.0.0.9",
+                "224.0.0.10"
+            ],
+            "answer": "224.0.0.10",
+            "explanation": "EIGRP routers exchange Hello packets and incremental updates using IPv4 multicast address 224.0.0.10."
+        },
+        {
+            "id": "eigrp_pre_5",
+            "type": "pre",
+            "question": "What is the primary best route installed in the EIGRP routing table called?",
+            "options": [
+                "Feasible Successor",
+                "Successor",
+                "Reported Distance",
+                "Backup Route"
+            ],
+            "answer": "Successor",
+            "explanation": "The Successor is the primary best path to a destination network with the lowest Feasible Distance (FD), installed directly into the routing table."
+        },
+        {
+            "id": "eigrp_post_1",
+            "type": "post",
+            "question": "What is the Administrative Distance (AD) of internal EIGRP routes in Cisco IOS?",
+            "options": [
+                "90",
+                "110",
+                "120",
+                "170"
+            ],
+            "answer": "90",
+            "explanation": "In Cisco IOS, internal EIGRP routes have an Administrative Distance of 90 (OSPF is 110, RIP is 120, External EIGRP is 170)."
+        },
+        {
+            "id": "eigrp_post_2",
+            "type": "post",
+            "question": "What condition must a backup path satisfy to become a Feasible Successor in EIGRP?",
+            "options": [
+                "Reported Distance (RD) < Feasible Distance (FD) of current Successor",
+                "Reported Distance (RD) > Feasible Distance (FD)",
+                "Hop Count must be less than 15",
+                "Bandwidth must be greater than 1 Gbps"
+            ],
+            "answer": "Reported Distance (RD) < Feasible Distance (FD) of current Successor",
+            "explanation": "The Feasibility Condition states that a neighbor's Reported Distance (RD) must be strictly less than the local router's current Feasible Distance (FD) to guarantee a loop-free backup path."
+        },
+        {
+            "id": "eigrp_post_3",
+            "type": "post",
+            "question": "What table in EIGRP stores all learned destination networks, Successors, and Feasible Successors?",
+            "options": [
+                "Neighbor Table",
+                "Topology Table",
+                "Routing Table",
+                "ARP Table"
+            ],
+            "answer": "Topology Table",
+            "explanation": "The EIGRP Topology Table stores all learned network paths, metrics, Reported Distances, Successors, and Feasible Successor backup routes."
+        },
+        {
+            "id": "eigrp_post_4",
+            "type": "post",
+            "question": "What protocol does EIGRP use to deliver Update, Query, and Reply packets reliably?",
+            "options": [
+                "TCP",
+                "UDP",
+                "Reliable Transport Protocol (RTP)",
+                "ICMP"
+            ],
+            "answer": "Reliable Transport Protocol (RTP)",
+            "explanation": "EIGRP uses Cisco's Reliable Transport Protocol (RTP, IP protocol number 88) to manage reliable delivery and acknowledgement of EIGRP packets."
+        },
+        {
+            "id": "eigrp_post_5",
+            "type": "post",
+            "question": "What happens when two neighboring routers are configured with different EIGRP Autonomous System (AS) numbers?",
+            "options": [
+                "They form a partial neighbor relationship",
+                "They ignore each other's Hello packets and fail to form an EIGRP neighbor adjacency",
+                "They automatically merge AS numbers",
+                "OSPF takes over"
+            ],
+            "answer": "They ignore each other's Hello packets and fail to form an EIGRP neighbor adjacency",
+            "explanation": "EIGRP routers MUST share the exact same Autonomous System (AS) number to establish a neighbor relationship."
+        },
+        {
+            "id": "eigrp_post_6",
+            "type": "post",
+            "question": "Which Cisco command displays EIGRP neighbor IP addresses, interfaces, and Hold times?",
+            "options": [
+                "show ip eigrp neighbors",
+                "show ip eigrp topology",
+                "show ip route eigrp",
+                "show ip protocols"
+            ],
+            "answer": "show ip eigrp neighbors",
+            "explanation": "show ip eigrp neighbors lists all active adjacent EIGRP peers, interface connections, Hold times, and queue counts."
+        },
+        {
+            "id": "eigrp_post_7",
+            "type": "post",
+            "question": "What feature enables EIGRP to perform load balancing across links with different metrics (unequal cost)?",
+            "options": [
+                "Split Horizon",
+                "Variance command",
+                "Poison Reverse",
+                "Auto-Summary"
+            ],
+            "answer": "Variance command",
+            "explanation": "EIGRP supports unequal-cost load balancing using the variance multiplier command, allowing traffic to be shared across paths with metrics within the multiplier range."
+        },
+        {
+            "id": "eigrp_post_8",
+            "type": "post",
+            "question": "Why is no auto-summary strongly recommended in EIGRP configurations?",
+            "options": [
+                "To prevent EIGRP from automatically summarizing subnets at classful boundaries, supporting VLSM and CIDR",
+                "To speed up Hello packet intervals",
+                "To disable RIP compatibility",
+                "To encrypt EIGRP passwords"
+            ],
+            "answer": "To prevent EIGRP from automatically summarizing subnets at classful boundaries, supporting VLSM and CIDR",
+            "explanation": "no auto-summary prevents EIGRP from summarizing subnets to Class A, B, or C boundaries, ensuring correct routing across discontinuous subnets."
+        },
+        {
+            "id": "eigrp_post_9",
+            "type": "post",
+            "question": "Which Cisco command displays the EIGRP Topology Table showing FD, RD, and Feasible Successors?",
+            "options": [
+                "show ip eigrp topology",
+                "show ip route",
+                "show ip eigrp neighbors",
+                "show ip protocols"
+            ],
+            "answer": "show ip eigrp topology",
+            "explanation": "show ip eigrp topology displays all destination subnets, Feasible Distances, Reported Distances, Successors, and Feasible Successor routes."
+        },
+        {
+            "id": "eigrp_post_10",
+            "type": "post",
+            "question": "What is the convergence time when an EIGRP primary Successor link fails and a Feasible Successor is present in the topology table?",
+            "options": [
+                "0 milliseconds (instantaneous)",
+                "30 seconds",
+                "180 seconds",
+                "240 seconds"
+            ],
+            "answer": "0 milliseconds (instantaneous)",
+            "explanation": "Because the Feasible Successor is already precalculated and verified as loop-free in the Topology Table, EIGRP instantly promotes it to Successor with 0ms downtime."
+        }
+    ],
+    "viva": [
+        {
+            "q": "What is EIGRP and why is it referred to as a Hybrid or Advanced Distance Vector protocol?",
+            "a": "EIGRP combines the simple neighbor-vector configuration of Distance Vector protocols with the rapid convergence, topology tables, and partial incremental updates of Link State protocols."
+        },
+        {
+            "q": "Explain the difference between a Successor and a Feasible Successor in EIGRP.",
+            "a": "The Successor is the primary best path with the lowest Feasible Distance (installed in the routing table). The Feasible Successor is a precalculated backup route stored in the Topology Table that satisfies the Feasibility Condition (RD < FD), providing instant 0ms failover."
+        },
+        {
+            "q": "What is the Feasibility Condition and why is it critical?",
+            "a": "The Feasibility Condition states that a neighbor's Reported Distance (RD) must be strictly less than the current Feasible Distance (FD). This mathematically guarantees that the neighbor's path does not loop back through the local router."
+        },
+        {
+            "q": "How is the EIGRP composite metric calculated by default?",
+            "a": "Default composite metric uses minimum Bandwidth (kbps) and cumulative Delay (tens of microseconds): Metric = 256 * ((10^7 / Min_BW_Kbps) + Sum_Delay_10us)."
+        },
+        {
+            "q": "What are the 3 EIGRP tables and what information does each store?",
+            "a": "1. Neighbor Table: Lists adjacent EIGRP routers and hold times.\n2. Topology Table: Stores all learned routes, FD, RD, Successors, and Feasible Successors.\n3. Routing Table: Holds active primary Successor routes used for packet forwarding (AD=90)."
+        }
+    ],
+    "assignment": "1. Configure EIGRP AS 100 across a 3-router topology (R1 ⇹ R2/R3 ⇹ R4).\n2. Verify neighbor adjacencies with show ip eigrp neighbors.\n3. Inspect show ip eigrp topology to identify the Successor and Feasible Successor routes for R4's LAN.\n4. Shut down R2's interface (shutdown) and verify instant 0ms failover to R3's Feasible Successor path without dropping ping packets.",
+    "references": [
+        {
+            "title": "RFC 7868 - Cisco's Enhanced Interior Gateway Routing Protocol (EIGRP)",
+            "link": "https://datatracker.ietf.org/doc/html/rfc7868"
+        },
+        {
+            "title": "Cisco EIGRP Technical Technology Whitepaper",
+            "link": "https://www.cisco.com"
+        }
+    ],
+    "simType": "eigrp_sim"
+},
     'static_routing': {
         title: "Static Routing Configuration",
         aim: "To configure static default routes and manual next-hop IP routing entries across multi-hop networks.",
@@ -3119,4 +3506,6 @@ window.VLAB_DATA['rip_sim'] = window.VLAB_DATA['routing_rip'];
 window.VLAB_DATA['rip'] = window.VLAB_DATA['routing_rip'];
 window.VLAB_DATA['ospf_sim'] = window.VLAB_DATA['routing_ospf'];
 window.VLAB_DATA['ospf'] = window.VLAB_DATA['routing_ospf'];
+window.VLAB_DATA['eigrp_sim'] = window.VLAB_DATA['routing_eigrp'];
+window.VLAB_DATA['eigrp'] = window.VLAB_DATA['routing_eigrp'];
 
