@@ -2,6 +2,8 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/fireba
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 import { getFirestore, doc, setDoc, collection, getDocs, onSnapshot } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
+
+
 window.escapeHtml = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
 // evaluate.js and labs/index.js loaded on-demand if needed
@@ -183,7 +185,7 @@ window.syncProgress = syncProgress;
 // Intercept Canvas fillStyle and strokeStyle to support CSS variables natively
 const originalFillStyle = Object.getOwnPropertyDescriptor(CanvasRenderingContext2D.prototype, 'fillStyle');
 Object.defineProperty(CanvasRenderingContext2D.prototype, 'fillStyle', {
-    set: function(val) {
+    set: function (val) {
         if (typeof val === 'string' && val.startsWith('var(')) {
             const varName = val.substring(4, val.length - 1).trim();
             const resolved = getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
@@ -192,14 +194,14 @@ Object.defineProperty(CanvasRenderingContext2D.prototype, 'fillStyle', {
             originalFillStyle.set.call(this, val);
         }
     },
-    get: function() {
+    get: function () {
         return originalFillStyle.get.call(this);
     }
 });
 
 const originalStrokeStyle = Object.getOwnPropertyDescriptor(CanvasRenderingContext2D.prototype, 'strokeStyle');
 Object.defineProperty(CanvasRenderingContext2D.prototype, 'strokeStyle', {
-    set: function(val) {
+    set: function (val) {
         if (typeof val === 'string' && val.startsWith('var(')) {
             const varName = val.substring(4, val.length - 1).trim();
             const resolved = getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
@@ -208,7 +210,7 @@ Object.defineProperty(CanvasRenderingContext2D.prototype, 'strokeStyle', {
             originalStrokeStyle.set.call(this, val);
         }
     },
-    get: function() {
+    get: function () {
         return originalStrokeStyle.get.call(this);
     }
 });
@@ -262,7 +264,7 @@ const generatePDFReport = async (labId) => {
 
         const section = element.closest('.content-section');
         const wasActive = section?.classList.contains('active');
-        
+
         try {
             if (section && !wasActive) {
                 section.style.display = 'flex';
@@ -289,16 +291,16 @@ const generatePDFReport = async (labId) => {
                     const imgDataRaw = ctx.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
                     const data = imgDataRaw.data;
                     for (let i = 0; i < data.length; i += 4) {
-                        const r = data[i], g = data[i+1], b = data[i+2];
-                        if (r < 60 && g < 60 && b < 65) { 
+                        const r = data[i], g = data[i + 1], b = data[i + 2];
+                        if (r < 60 && g < 60 && b < 65) {
                             // Convert dark backgrounds to white
-                            data[i] = 255; data[i+1] = 255; data[i+2] = 255;
-                        } else if (r > 200 && g > 200 && b > 200) { 
+                            data[i] = 255; data[i + 1] = 255; data[i + 2] = 255;
+                        } else if (r > 200 && g > 200 && b > 200) {
                             // Convert white text to black
-                            data[i] = 0; data[i+1] = 0; data[i+2] = 0;
-                        } else if (r > 150 && g > 150 && b > 150 && Math.abs(r-g)<15 && Math.abs(g-b)<15) {
+                            data[i] = 0; data[i + 1] = 0; data[i + 2] = 0;
+                        } else if (r > 150 && g > 150 && b > 150 && Math.abs(r - g) < 15 && Math.abs(g - b) < 15) {
                             // Convert light grey text to dark grey
-                            data[i] = 50; data[i+1] = 50; data[i+2] = 50;
+                            data[i] = 50; data[i + 1] = 50; data[i + 2] = 50;
                         }
                     }
                     ctx.putImageData(imgDataRaw, 0, 0);
@@ -313,7 +315,7 @@ const generatePDFReport = async (labId) => {
             }
 
             // 2. Fallback to html2canvas for complex DOM elements
-            const canvas = await html2canvas(element, { 
+            const canvas = await html2canvas(element, {
                 scale: 1.5,
                 useCORS: true,
                 backgroundColor: '#ffffff'
@@ -323,7 +325,7 @@ const generatePDFReport = async (labId) => {
             pdf.setFont("helvetica", "bold"); pdf.setFontSize(12);
             pdf.text(title, 20, yPos);
             pdf.addImage(imgData, 'JPEG', 20, yPos + 5, 170, 85);
-            
+
             if (section && !wasActive) section.style.display = 'none';
             return yPos + 100;
 
@@ -387,7 +389,7 @@ const generatePDFReport = async (labId) => {
     y = 30;
     pdf.setFont("helvetica", "bold"); pdf.setFontSize(14);
     pdf.text("4. EXPERIMENT VISUALIZATIONS", 20, y); y += 15;
-    
+
     y = await addElementToPDF('simCanvas', "A. Protocol Animation State", y);
     if (y > 200) { pdf.addPage(); y = 30; }
     y = await addElementToPDF('topology-builder-ui', "B. Configured Network Topology", y);
@@ -661,7 +663,7 @@ class TopologySimulation {
             ['rip', 'eigrp'].forEach(proto => {
                 this.nodes.forEach(router => {
                     if (router.type !== 'router' || !router.config?.routing?.[proto]) return;
-                    
+
                     const cfg = router.config.routing[proto];
                     const connectedSubnets = [];
                     Object.keys(router.config.interfaces).forEach(iface => {
@@ -710,7 +712,7 @@ class TopologySimulation {
                     });
                 });
             });
-            
+
             // Path Vector (BGP)
             this.nodes.forEach(router => {
                 if (router.type !== 'router' || !router.config?.routing?.bgp) return;
@@ -723,7 +725,7 @@ class TopologySimulation {
                         router.config.routes.push({ dest: sub, mask: mask, nextHop: '0.0.0.0', metric: 0, proto: 'bgp', via: 'Direct' });
                     }
                 });
-                
+
                 bgp.neighbors.forEach(nbr => {
                     // Find actual neighbor node in topology
                     const neighborNode = this.nodes.find(n => n.type === 'router' && Object.values(n.config.interfaces).some(i => i.ip === nbr.ip));
@@ -734,7 +736,7 @@ class TopologySimulation {
                             // Find our IP facing this neighbor
                             const localIf = Object.values(router.config.interfaces).find(i => inSameSubnet(i.ip, nbr.ip, i.mask));
                             if (!localIf) return;
-                            
+
                             if (!existing) {
                                 neighborNode.config.routes.push({ dest: r.dest, mask: r.mask, nextHop: localIf.ip, metric: 0, proto: 'bgp', via: router.label });
                             }
@@ -868,7 +870,7 @@ class TopologySimulation {
 
         while (hopsCount++ < maxHops) {
             let actualTargetIp = targetIp;
-            
+
             // Check NAT translation
             for (const n of this.nodes) {
                 if (n.type === 'router' && n.config.nat && n.config.nat.static) {
@@ -877,8 +879,8 @@ class TopologySimulation {
                 }
             }
 
-            const targetNode = this.nodes.find(n => 
-                n.ip === actualTargetIp || 
+            const targetNode = this.nodes.find(n =>
+                n.ip === actualTargetIp ||
                 (n.config && Object.values(n.config.interfaces).some(i => i.ip === actualTargetIp))
             );
 
@@ -927,8 +929,8 @@ class TopologySimulation {
                 return null;
             }
 
-            const nextRouter = this.nodes.find(n => 
-                n.type === 'router' && 
+            const nextRouter = this.nodes.find(n =>
+                n.type === 'router' &&
                 Object.values(n.config.interfaces).some(i => i.ip === nextHopIP)
             );
 
@@ -1240,7 +1242,7 @@ class TopologySimulation {
                 this.syncCollabTopology();
                 statusText.textContent = "Room Active: " + roomId;
                 this.listenToTopoRoom(roomId);
-            } catch(e) { statusText.textContent = "Error: " + e.message; }
+            } catch (e) { statusText.textContent = "Error: " + e.message; }
         };
 
         const joinRoom = () => {
@@ -1463,7 +1465,7 @@ class TopologySimulation {
             type, x, y,
             icon: iconMap[type] || '📟',
             label: label || `${type.toUpperCase()}_${this.nodes.length + 1}`,
-            config: config || { 
+            config: config || {
                 hostname: label || `${type.toUpperCase()}_${this.nodes.length + 1}`,
                 interfaces: (type === 'router' || type === 'switch') ? {
                     'fa0/0': { ip: 'unassigned', mask: 'unassigned', status: 'down', desc: '' },
@@ -1535,7 +1537,7 @@ class TopologySimulation {
                     src.el?.classList.remove('packet-source');
                     this.packetSourceNode = null;
                     this.isSendingPacket = false;
-                    
+
                     const btnSendPacket = document.getElementById('btnSendPacket');
                     if (btnSendPacket) {
                         btnSendPacket.textContent = "✉️ Send Packet";
@@ -1544,7 +1546,7 @@ class TopologySimulation {
                     }
 
                     this.showHint(`Initiating packet from ${src.label} to ${dst.label}...`);
-                    
+
                     const logPDU = (s, d, status, color) => {
                         const panel = document.getElementById('pdu-list-panel');
                         const tbody = document.getElementById('pduTableBody');
@@ -1843,7 +1845,7 @@ class TopologySimulation {
                         if (next && next !== from) {
                             // Switches learn MACs, but in our simplified model they broadcast ARP/Unknowns
                             const nextProto = (protocol === 'ARP') ? 'ARP' : protocol;
-            this.animatePacket(to, next, isSuccess, nextProto, visited);
+                            this.animatePacket(to, next, isSuccess, nextProto, visited);
                         }
                     });
                 } else if (to.type === 'router' && protocol !== 'ARP') {
@@ -1859,10 +1861,10 @@ class TopologySimulation {
         // Close other panels first to prevent overlap
         const menu = document.getElementById('contextMenu');
         if (menu) menu.style.display = 'none';
-        
+
         const modal = document.getElementById('configModal');
         if (!modal) return;
-        
+
         this.currentConfigNode = node;
         modal.style.display = 'flex';
 
@@ -1896,7 +1898,7 @@ class TopologySimulation {
             const inputWrap = area.querySelector('.terminal-input-wrap');
             area.innerHTML = '';
             if (inputWrap) area.appendChild(inputWrap);
-            
+
             // Add a welcome message if this is the first time
             const welcome = document.createElement('div');
             welcome.className = 'terminal-line';
@@ -2739,7 +2741,7 @@ nf.bind_listener(on_packet_receive)</textarea>
 
     handleTabCompletion(node, input) {
         const val = input.value.trim().toLowerCase();
-        
+
         const commands = {
             'user': ['enable', 'ping', 'show', 'exit', 'help', 'traceroute', 'clear'],
             'privileged': ['configure terminal', 'disable', 'ping', 'show', 'write', 'copy', 'erase', 'reload', 'exit', 'traceroute'],
@@ -2750,7 +2752,7 @@ nf.bind_listener(on_packet_receive)</textarea>
 
         const currentPool = commands[node.cliMode] || [];
         const matches = currentPool.filter(c => c.startsWith(val));
-        
+
         if (matches.length === 1) {
             input.value = matches[0];
         } else if (matches.length > 1) {
@@ -2785,7 +2787,7 @@ nf.bind_listener(on_packet_receive)</textarea>
         const val = currentInput.trim().toLowerCase();
         const args = val.split(/\s+/);
         let helpList = [];
-        
+
         const commandsHelp = {
             'user': [
                 { cmd: 'enable', desc: 'Turn on privileged commands' },
@@ -3013,7 +3015,7 @@ nf.bind_listener(on_packet_receive)</textarea>
                     dLine.style.color = '#cbd5e1';
                     dLine.innerHTML = `RIP: sending v2 update to 224.0.0.9 via ${activeIf}`;
                     debugArea.insertBefore(dLine, debugArea.querySelector('.terminal-line-wrap'));
-                    
+
                     const dLine2 = document.createElement('div');
                     dLine2.className = 'terminal-line';
                     dLine2.style.color = '#cbd5e1';
@@ -3218,7 +3220,7 @@ nf.bind_listener(on_packet_receive)</textarea>
                 addLine(`% Incomplete command.`, "out");
             }
         }
- 
+
         // Configuration Commands
         else if (node.cliMode === 'config') {
             if (targetBaseCmd === 'hostname') {
@@ -3339,7 +3341,7 @@ nf.bind_listener(on_packet_receive)</textarea>
                 addLine("% Unrecognized command.", "out");
             }
         }
- 
+
         // Router Config
         else if (node.cliMode === 'config-router') {
             if (targetBaseCmd === 'network') {
@@ -3394,7 +3396,7 @@ nf.bind_listener(on_packet_receive)</textarea>
                 addLine("% Unrecognized command. Type '?' for help.", "out");
             }
         }
- 
+
         // Interface Config
         else if (node.cliMode === 'config-if') {
             const ifaceCmd = targetArgs.join(' ');
@@ -3497,7 +3499,7 @@ nf.bind_listener(on_packet_receive)</textarea>
                 addLine("");
             }
         }
- 
+
         // VLAN Config
         else if (node.cliMode === 'config-vlan') {
             if (targetBaseCmd === 'name') {
@@ -3521,7 +3523,7 @@ nf.bind_listener(on_packet_receive)</textarea>
                 addLine("% Unrecognized command.", "out");
             }
         }
-        
+
         // DHCP Config
         else if (node.cliMode === 'dhcp-config') {
             if (targetBaseCmd === 'network') {
@@ -3541,7 +3543,7 @@ nf.bind_listener(on_packet_receive)</textarea>
                 addLine("% Unrecognized command.", "out");
             }
         }
- 
+
         // Execution Commands (Ping)
         else if (targetBaseCmd === 'ping') {
             let targetIp = targetArgs[1];
@@ -3551,9 +3553,9 @@ nf.bind_listener(on_packet_receive)</textarea>
 
             if (!targetIp) { addLine("% Incomplete command.", "out"); return; }
             addLine(`Sending 5, 100-byte ICMP Echos to ${targetIp}, timeout is 2 seconds:`, 'out');
- 
+
             const path = this.tracePath(node, targetIp);
- 
+
             if (path && path.length >= 2) {
                 this.animatePathPackets(path, true, 'ICMP', () => {
                     const reversePath = [...path].reverse();
@@ -3567,7 +3569,7 @@ nf.bind_listener(on_packet_receive)</textarea>
                 });
             }
         }
- 
+
         else if (targetBaseCmd === 'traceroute' || targetBaseCmd === 'tracert') {
             let targetIp = targetArgs[1];
             if (node.config.dns && node.config.dns.hosts && node.config.dns.hosts[targetIp]) {
@@ -3762,11 +3764,11 @@ class NetworkingSim {
     resize() {
         const container = this.canvas.parentElement;
         if (!container) return;
-        
+
         // Ensure non-zero dimensions for proper rendering
         this.canvas.width = Math.max(container.clientWidth, 800);
         this.canvas.height = Math.max(container.clientHeight, 500);
-        
+
         this.senderPos = { x: 100, y: this.canvas.height / 2 };
         this.receiverPos = { x: this.canvas.width - 150, y: this.canvas.height / 2 };
         this.channelY = this.canvas.height / 2;
@@ -3957,7 +3959,7 @@ class NetworkingSim {
 
     runStep() {
         if (!this.isRunning) return;
-        
+
         // Ignore routing simulation modes so they do not spawn sliding window packets
         const routingModes = ['dv_sim', 'ls_sim', 'ospf', 'bgp', 'path_sim'];
         if (routingModes.includes(this.mode)) return;
@@ -4043,7 +4045,7 @@ class NetworkingSim {
         } else if (mode === 'gbn' && labId === 'tcp') {
             this.drawTcpTransferSim();
         } else if (mode === 'gbn' && labId === 'udp') {
-             this.drawUdpChatSim();
+            this.drawUdpChatSim();
         } else {
             // Determine realistic device names based on mode
             let senderLabel, receiverLabel;
@@ -4098,7 +4100,7 @@ class NetworkingSim {
                     p.y += Math.sin(Date.now() / 50) * 2;
                     if (p.collisionTime === undefined) p.collisionTime = Date.now();
                     if (Date.now() - p.collisionTime > 2000) arr.splice(i, 1);
-                    
+
                     // Collision Explosion Sparks
                     if (Math.random() < 0.6) {
                         this.particles.push({
@@ -4377,25 +4379,25 @@ class NetworkingSim {
 
     drawPacket(p) {
         this.ctx.save(); this.ctx.translate(p.x, p.y);
-        this.ctx.fillStyle = p.color; 
+        this.ctx.fillStyle = p.color;
         this.ctx.shadowBlur = 15; this.ctx.shadowColor = p.color;
-        
+
         // PDU Box
         this.ctx.beginPath(); this.ctx.roundRect(-14, -14, 28, 28, 6); this.ctx.fill();
         this.ctx.shadowBlur = 0;
-        
+
         // Icon on PDU
         this.ctx.fillStyle = "white"; this.ctx.font = "bold 14px 'JetBrains Mono', monospace";
         this.ctx.textAlign = "center"; this.ctx.textBaseline = "middle";
         this.ctx.fillText(p.type === 'ack' ? "A" : "D", 0, 0);
-        
+
         // Sequence Tag
-        this.ctx.fillStyle = "rgba(15, 23, 42, 0.95)"; 
+        this.ctx.fillStyle = "rgba(15, 23, 42, 0.95)";
         this.ctx.beginPath(); this.ctx.roundRect(14, -22, 22, 16, 4); this.ctx.fill();
-        this.ctx.fillStyle = "white"; 
-        this.ctx.font = "bold 10px 'JetBrains Mono', monospace"; 
+        this.ctx.fillStyle = "white";
+        this.ctx.font = "bold 10px 'JetBrains Mono', monospace";
         this.ctx.fillText(p.seq, 25, -14);
-        
+
         this.ctx.restore();
     }
 
@@ -4518,7 +4520,7 @@ class NetworkingSim {
         this.ctx.fillStyle = "var(--text-main)";
         this.ctx.font = "bold 16px Outfit, sans-serif";
         this.ctx.fillText("UDP: Unreliable 'Fire-and-Forget' Datagrams", 100, 50);
-        
+
         const cycle = time % 6;
         let px, py, label = "Datagram Sent", color = "#3b82f6";
         let progress = (cycle / 4);
@@ -4570,12 +4572,12 @@ class NetworkingSim {
             this.ctx.fillStyle = "#10b981";
             this.ctx.font = "bold 16px Outfit, sans-serif";
             this.ctx.fillText("PHASE 2: Data Transfer (Windowing & Congestion Control)", 100, 50);
-            
+
             const p = ((cycle - 6) % 2) / 2;
             const seq = Math.floor((cycle - 6) / 2);
             px = this.senderPos.x + (this.receiverPos.x - this.senderPos.x) * p; py = this.senderPos.y;
             label = `DATA (Seq=${102 + seq * 1460})`;
-            
+
             // Draw window visualization overlay
             this.ctx.fillStyle = "rgba(16, 185, 129, 0.1)";
             this.ctx.fillRect(this.senderPos.x + 40, this.senderPos.y - 40, 100, 80);
@@ -4657,7 +4659,7 @@ class NetworkingSim {
             this.ctx.fillText("OSPF LSDB (Global View)", 45, h - 120);
             this.ctx.fillText("• A-B (10) | A-C (2)", 45, h - 100);
             this.ctx.fillText("• B-D (5)  | C-D (20)", 45, h - 85);
-            
+
             // Highlight shortest path A -> B -> D (Cost = 15)
             this.ctx.strokeStyle = "#10b981";
             this.ctx.lineWidth = 4;
@@ -5126,7 +5128,7 @@ const executeSimulatedCode = async (lang, code, stdin, labId) => {
         const runner = new Function("ctx", `try { ${bodyCode} } catch(e) { throw e; }`);
         runner(ctx);
         stdout = ctx.stdout;
-    } catch(err) {
+    } catch (err) {
         stderr = err.message;
     }
     return { compileLog, stdout, stderr, code: stderr ? 1 : 0 };
@@ -5296,7 +5298,7 @@ const renderBTreeSVG = (tree) => {
         if (!node) return;
         const x = (xStart + xEnd) / 2;
         const keysText = node.keys.join(" | ");
-        html += `<rect x="${x - nodeWidth/2}" y="${y}" width="${nodeWidth}" height="${nodeHeight}" rx="6" ry="6" fill="#1e293b" stroke="#10b981" stroke-width="2" />`;
+        html += `<rect x="${x - nodeWidth / 2}" y="${y}" width="${nodeWidth}" height="${nodeHeight}" rx="6" ry="6" fill="#1e293b" stroke="#10b981" stroke-width="2" />`;
         html += `<text x="${x}" y="${y + 20}" font-family="'JetBrains Mono', monospace" font-size="12" fill="#fff" text-anchor="middle" font-weight="bold">${keysText}</text>`;
         if (!node.isLeaf) {
             const numChildren = node.children.length;
@@ -5325,7 +5327,7 @@ const saveUserCode = async (labId, code) => {
             code: code,
             lastSaved: new Date().toISOString()
         });
-    } catch(e) { console.error("Cloud autosave failed", e); }
+    } catch (e) { console.error("Cloud autosave failed", e); }
 };
 
 const loadUserCode = async (labId) => {
@@ -5335,7 +5337,7 @@ const loadUserCode = async (labId) => {
         const pathKey = getStateKey(labId);
         const snap = await getDoc(doc(db, "users", user.uid, "code", pathKey));
         if (snap.exists()) return snap.data().code;
-    } catch(e) { console.error("Cloud fetch failed", e); }
+    } catch (e) { console.error("Cloud fetch failed", e); }
     return null;
 };
 
@@ -5361,7 +5363,7 @@ const runStaticCodeAnalysis = (code, lang) => {
     let commentLines = 0;
     let cyclomaticComplexity = 1;
     let memoryIssues = [];
-    
+
     lines.forEach(line => {
         let trimmed = line.trim();
         if (trimmed.startsWith('//') || trimmed.startsWith('#')) {
@@ -5369,7 +5371,7 @@ const runStaticCodeAnalysis = (code, lang) => {
         } else if (trimmed.includes('/*') || trimmed.includes('*/')) {
             commentLines++;
         }
-        
+
         const matchKeywords = trimmed.match(/\b(if|else\s+if|for|while|switch|case|catch)\b/g);
         if (matchKeywords) {
             cyclomaticComplexity += matchKeywords.length;
@@ -5381,7 +5383,7 @@ const runStaticCodeAnalysis = (code, lang) => {
     });
 
     let commentRatio = totalLines > 0 ? (commentLines / totalLines) * 100 : 0;
-    
+
     let varNames = code.match(/\b(int|double|float|char|void|let|const|var)\s+(\w+)\b/g);
     let shortNames = 0;
     if (varNames) {
@@ -5399,7 +5401,7 @@ const runStaticCodeAnalysis = (code, lang) => {
         let freeCount = (code.match(/\bfree\b/g) || []).length;
         let newCount = (code.match(/\bnew\b/g) || []).length;
         let deleteCount = (code.match(/\bdelete\b/g) || []).length;
-        
+
         if (mallocCount > freeCount) {
             memoryIssues.push(`Memory Leak Warning: Found ${mallocCount} malloc(s) but only ${freeCount} free(s). Make sure to deallocate resources.`);
         }
@@ -5452,7 +5454,7 @@ const initAssemblySim = async (container, labId) => {
         const modIdx = window.currentModuleIndex !== undefined && window.currentModuleIndex !== null ? window.currentModuleIndex : 0;
         data = data.modules[modIdx];
     }
-    
+
     // UI Layout
     container.innerHTML = `
         <div class="asm-workspace" style="display:flex; height:100%; gap:15px; padding:10px; font-family:var(--font-sans);">
@@ -6128,7 +6130,7 @@ const initProgrammingLab = async (container, labId) => {
         editor.setTheme(theme === 'dark' ? 'ace/theme/tomorrow_night' : 'ace/theme/chrome');
     };
     syncEditorTheme();
-    
+
     // Listen to theme modifications
     const observer = new MutationObserver(syncEditorTheme);
     observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
@@ -6147,7 +6149,7 @@ const initProgrammingLab = async (container, labId) => {
             const currentCode = editor.getValue();
             await saveUserCode(labId, currentCode);
             document.getElementById('editorStatus').textContent = "Saved to cloud";
-            
+
             // Sync collaboration session
             if (window.activeCollRoomId) {
                 try {
@@ -6156,7 +6158,7 @@ const initProgrammingLab = async (container, labId) => {
                         updatedBy: localStorage.getItem('vlab_user_name') || 'Student',
                         timestamp: new Date().toISOString()
                     });
-                } catch(err) { console.error("Collab sync error", err); }
+                } catch (err) { console.error("Collab sync error", err); }
             }
         }, 1000);
     });
@@ -6245,7 +6247,7 @@ const initProgrammingLab = async (container, labId) => {
     let notebookCells = [];
     const savedNotebook = localStorage.getItem('vlab_notebook_cells_' + labId);
     if (savedNotebook) {
-        try { notebookCells = JSON.parse(savedNotebook); } catch(e) {}
+        try { notebookCells = JSON.parse(savedNotebook); } catch (e) { }
     }
     if (!notebookCells || notebookCells.length === 0) {
         notebookCells = [
@@ -6285,9 +6287,9 @@ const initProgrammingLab = async (container, labId) => {
             } else {
                 return `
                     <div class="notebook-cell code-cell" id="cell-container-${cell.id}" style="border: 1px solid var(--border); border-radius:8px; padding:12px; background:var(--bg-alt); display:flex; flex-direction:column; gap:10px; position:relative;">
-                        <div style="font-size:10px; color:var(--text-muted); position:absolute; right:8px; top:6px;">Code Cell (In [${cell.execCount || ' ' }])</div>
+                        <div style="font-size:10px; color:var(--text-muted); position:absolute; right:8px; top:6px;">Code Cell (In [${cell.execCount || ' '}])</div>
                         <div style="display:flex; gap:10px; align-items:flex-start; margin-top:12px;">
-                            <span style="font-family:'JetBrains Mono', monospace; font-size:13px; color:var(--primary); padding-top:8px; min-width:55px;">In [${cell.execCount || ' ' }]:</span>
+                            <span style="font-family:'JetBrains Mono', monospace; font-size:13px; color:var(--primary); padding-top:8px; min-width:55px;">In [${cell.execCount || ' '}]:</span>
                             <textarea id="cell-code-${cell.id}" style="flex:1; min-height:120px; font-family:'JetBrains Mono', monospace; font-size:13px; padding:10px; background:#1e1e1e; color:#d4d4d4; border:1px solid var(--border); border-radius:6px; outline:none; line-height:1.4; resize:vertical; box-sizing:border-box;">${cell.content}</textarea>
                         </div>
                         <div style="display:flex; justify-content:space-between; align-items:center;">
@@ -6402,7 +6404,7 @@ const initProgrammingLab = async (container, labId) => {
             toggleBtn.style.background = '#ea580c';
             normalView.style.display = 'none';
             notebookView.style.display = 'flex';
-            
+
             // Sync current editor code to the primary code cell
             const codeCellIndex = notebookCells.findIndex(c => c.type === 'code');
             if (codeCellIndex !== -1) {
@@ -6512,8 +6514,8 @@ const initProgrammingLab = async (container, labId) => {
 
         for (let idx = 0; idx < testCases.length; idx++) {
             const tc = testCases[idx];
-            terminalBox.textContent += `Running Test Case ${idx+1}/${testCases.length}... `;
-            
+            terminalBox.textContent += `Running Test Case ${idx + 1}/${testCases.length}... `;
+
             let res = await runPistonCode(data.lang, data.version, codeText, tc.input);
             let runOutput = "";
             if (res && res.run) {
@@ -6533,12 +6535,12 @@ const initProgrammingLab = async (container, labId) => {
 
         const finalScore = testCases.length > 0 ? Math.round((passedCases / testCases.length) * 100) : 100;
         terminalBox.textContent += `\nAutomated grading complete.\nPassed: ${passedCases}/${testCases.length}\nScore: ${finalScore}/100\n`;
-        
+
         // Update grade score display and sync progress
         const scoreDisp = document.getElementById('scoreDisplay');
         if (scoreDisp) scoreDisp.textContent = `Score: ${finalScore}`;
         await syncProgress(labId, { score: finalScore, completed: finalScore === 100 });
-        
+
         // Update user local storage status
         const localState = { score: finalScore, completed: finalScore === 100, lastUpdated: new Date().toISOString() };
         localStorage.setItem(`vlab_state_${getStateKey(labId)}`, JSON.stringify(localState));
@@ -6601,7 +6603,7 @@ const initProgrammingLab = async (container, labId) => {
 
         const codeText = editor.getValue();
         let aiResponse = "";
-        
+
         const key = getApiKey();
         if (key) {
             const systemPrompt = `You are the MIT VLab Academic AI Tutor. Provide clear, concise, step-by-step guidance on how to solve the student's coding issue. Do not give the direct solution code outright, but help guide them. Code Language: ${data.lang}. Student Code:\n${codeText}\n\nStudent Question: ${queryText}`;
@@ -6633,7 +6635,7 @@ const initProgrammingLab = async (container, labId) => {
     document.getElementById('btnAiAudit').addEventListener('click', () => {
         executeChatQuery("Audit my code quality, name checks, optimizations and let me know how to improve it.");
     });
-    
+
     document.getElementById('btnAiExplain').addEventListener('click', () => {
         executeChatQuery("Explain this code logic line-by-line in simple terms.");
     });
@@ -6650,7 +6652,7 @@ const initProgrammingLab = async (container, labId) => {
         const roomStatusText = document.getElementById('roomStatusText');
         const roomId = roomInput.value.trim().toUpperCase();
         if (!roomId) { alert("Enter a valid Room ID."); return; }
-        
+
         try {
             roomStatusText.textContent = "Setting room...";
             await setDoc(doc(db, "collaboration", roomId), {
@@ -6661,7 +6663,7 @@ const initProgrammingLab = async (container, labId) => {
             window.activeCollRoomId = roomId;
             roomStatusText.textContent = "Active Room: " + roomId;
             listenToRoom(roomId);
-        } catch(err) { roomStatusText.textContent = "Error creating room: " + err.message; }
+        } catch (err) { roomStatusText.textContent = "Error creating room: " + err.message; }
     };
 
     const joinRoom = () => {
@@ -6669,7 +6671,7 @@ const initProgrammingLab = async (container, labId) => {
         const roomStatusText = document.getElementById('roomStatusText');
         const roomId = roomInput.value.trim().toUpperCase();
         if (!roomId) { alert("Enter a Room ID."); return; }
-        
+
         window.activeCollRoomId = roomId;
         roomStatusText.textContent = "Connected to room: " + roomId;
         listenToRoom(roomId);
@@ -6678,15 +6680,17 @@ const initProgrammingLab = async (container, labId) => {
     let collabUnsubscribe = null;
     const listenToRoom = (roomId) => {
         if (collabUnsubscribe) collabUnsubscribe();
-        const { onSnapshot } = window.firebaseFirestore || { onSnapshot: (ref, cb) => {
-            // Fallback dynamic import if not loaded globally
-            import("https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js").then(mod => {
-                window.firebaseFirestore = mod;
-                listenToRoom(roomId);
-            });
-        }};
+        const { onSnapshot } = window.firebaseFirestore || {
+            onSnapshot: (ref, cb) => {
+                // Fallback dynamic import if not loaded globally
+                import("https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js").then(mod => {
+                    window.firebaseFirestore = mod;
+                    listenToRoom(roomId);
+                });
+            }
+        };
         if (!window.firebaseFirestore) return;
-        
+
         collabUnsubscribe = onSnapshot(doc(db, "collaboration", roomId), (docSnap) => {
             if (docSnap.exists()) {
                 const dataSnap = docSnap.data();
@@ -6799,22 +6803,22 @@ const initSqlLab = async (container, labId) => {
         const svgWidth = 300;
         const svgHeight = steps.length * levelHeight;
         let x = svgWidth / 2;
-        
+
         steps.forEach((step, idx) => {
             const y = 20 + idx * levelHeight;
             if (idx > 0) {
                 svgHtml += `
                     <line x1="${x}" y1="${y - levelHeight + nodeHeight}" x2="${x}" y2="${y}" stroke="var(--primary)" stroke-width="2" marker-end="url(#arrow)" />
-                    <text x="${x + 10}" y="${y - levelHeight/2 + 5}" fill="var(--text-muted)" font-family="monospace" font-size="11">${step.rows} rows</text>
+                    <text x="${x + 10}" y="${y - levelHeight / 2 + 5}" fill="var(--text-muted)" font-family="monospace" font-size="11">${step.rows} rows</text>
                 `;
             }
             svgHtml += `
-                <rect x="${x - nodeWidth/2}" y="${y}" width="${nodeWidth}" height="${nodeHeight}" rx="8" ry="8" fill="var(--bg-alt)" stroke="var(--primary)" stroke-width="1.5" />
+                <rect x="${x - nodeWidth / 2}" y="${y}" width="${nodeWidth}" height="${nodeHeight}" rx="8" ry="8" fill="var(--bg-alt)" stroke="var(--primary)" stroke-width="1.5" />
                 <text x="${x}" y="${y + 22}" fill="var(--primary)" font-family="'Outfit', sans-serif" font-weight="bold" font-size="13" text-anchor="middle">${step.name}</text>
-                <text x="${x}" y="${y + 40}" fill="var(--text-muted)" font-family="monospace" font-size="10" text-anchor="middle">${step.details.length > 30 ? step.details.substring(0,27) + '...' : step.details}</text>
+                <text x="${x}" y="${y + 40}" fill="var(--text-muted)" font-family="monospace" font-size="10" text-anchor="middle">${step.details.length > 30 ? step.details.substring(0, 27) + '...' : step.details}</text>
             `;
         });
-        
+
         return `
             <svg width="100%" height="${svgHeight}px" viewBox="0 0 ${svgWidth} ${svgHeight}">
                 <defs>
@@ -6887,7 +6891,7 @@ const initSqlLab = async (container, labId) => {
                 out.innerHTML = `<span style="color:#10b981;">Query executed successfully. ${window.escapeHtml(res.message || '')}</span>`;
                 planBox.innerHTML = `<div style="text-align:center; padding:30px; color:var(--text-muted);">Query does not return tabular rows (no scan plan needed).</div>`;
             }
-            
+
             syncProgress(labId, { score: 100, completed: true });
             const scoreDisp = document.getElementById('scoreDisplay');
             if (scoreDisp) scoreDisp.textContent = `Score: 100`;
@@ -6972,12 +6976,12 @@ const initTransactionsLab = (container, labId) => {
     document.getElementById('btnTxBegin').addEventListener('click', () => {
         activeTransaction = true;
         oldBalances = JSON.parse(JSON.stringify(MOCK_DB_WORKING.accounts));
-        
+
         document.getElementById('btnTxBegin').disabled = true;
         document.getElementById('btnTxCommit').disabled = false;
         document.getElementById('btnTxRollback').disabled = false;
         document.getElementById('tx-actions-panel').style.display = 'flex';
-        
+
         logBox.innerHTML = "";
         logMsg("Transaction block began. Isolation state: READ UNCOMMITTED (Intermediate changes visible locally).", "warning");
     });
@@ -7005,7 +7009,7 @@ const initTransactionsLab = (container, labId) => {
 
         logMsg("COMMIT TRANSACTION;", "success");
         logMsg("Database state successfully synchronized. ACID consistency checks: PASSED.", "success");
-        
+
         syncProgress(labId, { score: 100, completed: true });
         const scoreDisp = document.getElementById('scoreDisplay');
         if (scoreDisp) scoreDisp.textContent = `Score: 100`;
@@ -7067,14 +7071,14 @@ const initIndexingLab = (container, labId) => {
         const input = document.getElementById('btree-insert-val');
         const val = parseInt(input.value);
         if (isNaN(val)) { alert("Enter a valid integer."); return; }
-        
+
         tree.insert(val);
         updateVisual();
-        
+
         logBox.innerHTML += `Inserted key ${val} into index database.\n`;
         logBox.scrollTop = logBox.scrollHeight;
         input.value = "";
-        
+
         // Progress update
         syncProgress(labId, { score: 100, completed: true });
         const scoreDisp = document.getElementById('scoreDisplay');
@@ -7149,7 +7153,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const resultIndex = event.resultIndex;
             const transcript = event.results[resultIndex][0].transcript.toLowerCase().trim();
             console.log("Voice Command Detected:", transcript);
-            
+
             if (transcript.includes('run code') || transcript.includes('execute')) {
                 const runBtn = document.getElementById('btnRunCode') || document.getElementById('btnRunSql');
                 if (runBtn) {
@@ -7214,7 +7218,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         recognition.onend = () => {
             if (isListening) {
-                try { recognition.start(); } catch(e){}
+                try { recognition.start(); } catch (e) { }
             }
         };
 
@@ -7227,7 +7231,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 try {
                     recognition.start();
                     showVoiceHint("Voice Command Listening...");
-                } catch(e){}
+                } catch (e) { }
             } else {
                 btnVoice.style.background = '';
                 btnVoice.style.color = '';
@@ -7277,7 +7281,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (modSelect.getAttribute('data-current-lab') !== id) {
                     modSelect.innerHTML = data.modules.map((m, idx) => `<option value="${idx}">${m.title}</option>`).join('');
                     modSelect.setAttribute('data-current-lab', id);
-                    
+
                     const savedIdx = localStorage.getItem(`${id}_active_module`);
                     activeIndex = savedIdx ? parseInt(savedIdx, 10) : 0;
                     if (activeIndex >= data.modules.length) activeIndex = 0;
@@ -7287,16 +7291,16 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
             }
             window.currentModuleIndex = activeIndex;
-            
+
             const parentLang = data.lang;
             const parentVersion = data.version;
             const parentSimType = data.simType;
-            
+
             data = {
                 ...data,
                 ...data.modules[activeIndex]
             };
-            
+
             if (!data.lang && parentLang) data.lang = parentLang;
             if (!data.version && parentVersion) data.version = parentVersion;
             if (!data.simType && parentSimType) data.simType = parentSimType;
@@ -7313,7 +7317,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const content = document.getElementById('content-display');
         if (!content) return;
         content.style.opacity = '0';
-        
+
         window.setTimeout(() => {
             document.querySelectorAll('.section-title').forEach(el => el.textContent = data.title);
 
@@ -7428,7 +7432,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 data.viva.forEach((v, idx) => {
                     vivaHtml += `
                         <div class="theory-card" style="margin:0;">
-                            <div style="font-weight:800; font-size:14px; color:var(--primary); margin-bottom:8px;">Q${idx+1}: ${v.q}</div>
+                            <div style="font-weight:800; font-size:14px; color:var(--primary); margin-bottom:8px;">Q${idx + 1}: ${v.q}</div>
                             <button class="btn-action" style="padding:6px 12px; font-size:12px;" onclick="const a=this.nextElementSibling; a.style.display=a.style.display==='none'?'block':'none';">Reveal Answer 👁️</button>
                             <div style="display:none; margin-top:10px; padding:10px; background:rgba(16,185,129,0.08); border-left:3px solid var(--success); border-radius:6px; font-size:13px;">
                                 <b>Answer:</b> ${v.a}
@@ -7612,14 +7616,14 @@ document.addEventListener('DOMContentLoaded', async () => {
             const state = JSON.parse(localStorage.getItem(`vlab_state_${stateKey}`) || '{"pretest":false}');
 
             const initialMode = localStorage.getItem('vlab_current_mode') || 'learning';
-            
+
             // 1. Aggressive Cleanup: Hide ALL sections and remove active states
             document.querySelectorAll('.content-section').forEach(sec => {
                 sec.classList.remove('active');
                 sec.style.display = 'none'; // Explicitly hide to prevent overlap
             });
             document.querySelectorAll('.nav-item').forEach(ni => ni.classList.remove('active'));
-            
+
             // 2. Stop any running simulation engines to free up resources
             if (window.currentSim) { window.currentSim.isRunning = false; }
 
@@ -7673,14 +7677,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         const toBin8 = (n) => (n & 0xff).toString(2).padStart(8, '0');
 
         const challenges = [
-            { q: 'How many usable hosts are in a /24 network?', ans: ['254','254 hosts'], exp: '2^8 - 2 = 254. /24 leaves 8 host bits.' },
-            { q: 'What CIDR gives exactly 30 usable hosts per subnet?', ans: ['/27','27','255.255.255.224'], exp: '/27 → 2^5 − 2 = 30 hosts.' },
-            { q: 'What subnet mask corresponds to /28?', ans: ['255.255.255.240','/28'], exp: '11110000 in last octet = 255.255.255.240' },
-            { q: 'How many /26 subnets fit inside one /24?', ans: ['4','4 subnets'], exp: '/26 borrows 2 bits → 2^2 = 4 subnets, 62 hosts each.' },
-            { q: 'What class is 172.31.0.1?', ans: ['class b','b','class-b'], exp: '172.x.x.x (128-191) = Class B.' },
+            { q: 'How many usable hosts are in a /24 network?', ans: ['254', '254 hosts'], exp: '2^8 - 2 = 254. /24 leaves 8 host bits.' },
+            { q: 'What CIDR gives exactly 30 usable hosts per subnet?', ans: ['/27', '27', '255.255.255.224'], exp: '/27 → 2^5 − 2 = 30 hosts.' },
+            { q: 'What subnet mask corresponds to /28?', ans: ['255.255.255.240', '/28'], exp: '11110000 in last octet = 255.255.255.240' },
+            { q: 'How many /26 subnets fit inside one /24?', ans: ['4', '4 subnets'], exp: '/26 borrows 2 bits → 2^2 = 4 subnets, 62 hosts each.' },
+            { q: 'What class is 172.31.0.1?', ans: ['class b', 'b', 'class-b'], exp: '172.x.x.x (128-191) = Class B.' },
             { q: 'What is the broadcast address of 192.168.10.0/27?', ans: ['192.168.10.31'], exp: 'Block size 32 → network .0, broadcast .31.' },
-            { q: 'How many hosts can a /30 subnet support?', ans: ['2','2 hosts'], exp: '/30 → 2^2 − 2 = 2. Used for P2P WAN links.' },
-            { q: 'What CIDR gives 510 hosts?', ans: ['/23','23'], exp: '/23 → 2^9 − 2 = 510 hosts.' },
+            { q: 'How many hosts can a /30 subnet support?', ans: ['2', '2 hosts'], exp: '/30 → 2^2 − 2 = 2. Used for P2P WAN links.' },
+            { q: 'What CIDR gives 510 hosts?', ans: ['/23', '23'], exp: '/23 → 2^9 − 2 = 510 hosts.' },
         ];
         let cIdx = 0, challengeScore = 0;
 
@@ -7809,29 +7813,29 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const initIpSorter = (container) => {
         const ipPool = [
-            { ip: '10.0.0.1',    cls: 'A', type: 'Private' },
-            { ip: '172.16.0.1',  cls: 'B', type: 'Private' },
+            { ip: '10.0.0.1', cls: 'A', type: 'Private' },
+            { ip: '172.16.0.1', cls: 'B', type: 'Private' },
             { ip: '192.168.1.1', cls: 'C', type: 'Private' },
-            { ip: '8.8.8.8',     cls: 'A', type: 'Public' },
-            { ip: '128.0.0.1',   cls: 'B', type: 'Public' },
-            { ip: '200.1.1.1',   cls: 'C', type: 'Public' },
-            { ip: '127.0.0.1',   cls: 'A', type: 'Loopback' },
-            { ip: '224.0.0.1',   cls: 'D', type: 'Multicast' },
+            { ip: '8.8.8.8', cls: 'A', type: 'Public' },
+            { ip: '128.0.0.1', cls: 'B', type: 'Public' },
+            { ip: '200.1.1.1', cls: 'C', type: 'Public' },
+            { ip: '127.0.0.1', cls: 'A', type: 'Loopback' },
+            { ip: '224.0.0.1', cls: 'D', type: 'Multicast' },
         ];
-        const classLabels = { A:'1–126', B:'128–191', C:'192–223', D:'224–239' };
+        const classLabels = { A: '1–126', B: '128–191', C: '192–223', D: '224–239' };
         container.innerHTML = `
             <div class="sim-toolbar"><div class="section-title" style="font-size:22px; margin:0; color:var(--primary);">IPv4 Address Classification Lab 🏷️</div></div>
             <div class="sim-workspace" style="flex-direction:column; align-items:center; padding:25px; overflow-y:auto; gap:20px;">
                 <p style="color:var(--text-muted); margin:0;">Drag each IP address into its correct IPv4 Class bucket. Binary (first octet) shown as tooltip.</p>
                 <div id="ip-pool" style="display:flex; gap:10px; flex-wrap:wrap; justify-content:center;">
                     ${ipPool.map(item => `
-                        <div class="btn-sim" draggable="true" data-ip="${item.ip}" style="cursor:grab; font-family:'JetBrains Mono', monospace;" title="First octet binary: ${parseInt(item.ip.split('.')[0]).toString(2).padStart(8,'0')}">
+                        <div class="btn-sim" draggable="true" data-ip="${item.ip}" style="cursor:grab; font-family:'JetBrains Mono', monospace;" title="First octet binary: ${parseInt(item.ip.split('.')[0]).toString(2).padStart(8, '0')}">
                             <div>${item.ip}</div>
-                            <div style="font-size:9px; opacity:0.5; font-family:'JetBrains Mono', monospace;">${parseInt(item.ip.split('.')[0]).toString(2).padStart(8,'0')}…</div>
+                            <div style="font-size:9px; opacity:0.5; font-family:'JetBrains Mono', monospace;">${parseInt(item.ip.split('.')[0]).toString(2).padStart(8, '0')}…</div>
                         </div>`).join('')}
                 </div>
                 <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:15px; width:100%; max-width:960px;">
-                    ${['A','B','C','D'].map(cls => `
+                    ${['A', 'B', 'C', 'D'].map(cls => `
                         <div class="theory-card bucket" data-class="${cls}" ondragover="event.preventDefault()" ondrop="handleIpDrop(event,'${cls}')" style="min-height:120px; text-align:center; transition:border-color 0.2s; border:2px dashed var(--border);">
                             <div style="font-weight:800; color:var(--primary); margin-bottom:6px;">Class ${cls}</div>
                             <div style="font-size:11px; color:var(--text-muted); margin-bottom:10px;">${classLabels[cls]}</div>
@@ -7889,14 +7893,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                     const first = parseInt(ip.split('.')[0]);
                     const actual = first >= 1 && first <= 126 ? 'A' : first >= 128 && first <= 191 ? 'B' : first >= 192 && first <= 223 ? 'C' : first >= 224 && first <= 239 ? 'D' : 'E';
                     const ok = actual === target;
-                    if (ok) { correct++; item.style.color='var(--success)'; item.style.borderColor='var(--success)'; } else { item.style.color='var(--danger)'; item.style.borderColor='var(--danger)'; }
+                    if (ok) { correct++; item.style.color = 'var(--success)'; item.style.borderColor = 'var(--success)'; } else { item.style.color = 'var(--danger)'; item.style.borderColor = 'var(--danger)'; }
                     const pd = ipPool.find(p => p.ip === ip);
                     tbody.innerHTML += `<tr style="border-bottom:1px solid var(--border);">
                         <td style="padding:8px; font-weight:bold; color:${ok ? 'var(--success)' : 'var(--danger)'}">${ip} ${ok ? '✓' : '✗'}</td>
                         <td style="padding:8px;">Class ${actual}</td>
-                        <td style="padding:8px; color:${pd?.type==='Private'?'var(--warning)':'var(--primary)'}">${pd?.type||'Public'}</td>
-                        <td style="padding:8px;">${first.toString(2).padStart(8,'0')}</td>
-                        <td style="padding:8px;">${classLabels[actual]||'N/A'}</td>
+                        <td style="padding:8px; color:${pd?.type === 'Private' ? 'var(--warning)' : 'var(--primary)'}">${pd?.type || 'Public'}</td>
+                        <td style="padding:8px;">${first.toString(2).padStart(8, '0')}</td>
+                        <td style="padding:8px;">${classLabels[actual] || 'N/A'}</td>
                     </tr>`;
                 });
             });
@@ -7963,8 +7967,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <div class="theory-card" style="flex:1; min-width:220px; margin:0; display:flex; flex-direction:column; gap:10px;">
                         <h3 style="color:var(--primary); margin:0;">Quick Reference 📚</h3>
                         <div style="display:flex; flex-direction:column; gap:8px; flex:1; overflow-y:auto;">
-                            ${[['ping &lt;IP&gt;','Test host reachability'],['ipconfig','Show IP config (Windows)'],['ifconfig','Show interfaces (Linux)'],['nslookup &lt;host&gt;','DNS lookup'],['tracert &lt;host&gt;','Trace route (Windows)'],['netstat -an','Show all connections'],['route print','Display routing table'],['arp -a','Display ARP cache']].map(([cmd,desc])=>`
-                            <div style="padding:8px 12px; background:var(--bg-page); border:1px solid var(--border); border-radius:8px; cursor:pointer;" onclick="document.getElementById('cmdChallengeInput').value='${cmd.replace(/&lt;/g,'<').replace(/&gt;/g,'>')}'; document.getElementById('cmdChallengeInput').focus();">
+                            ${[['ping &lt;IP&gt;', 'Test host reachability'], ['ipconfig', 'Show IP config (Windows)'], ['ifconfig', 'Show interfaces (Linux)'], ['nslookup &lt;host&gt;', 'DNS lookup'], ['tracert &lt;host&gt;', 'Trace route (Windows)'], ['netstat -an', 'Show all connections'], ['route print', 'Display routing table'], ['arp -a', 'Display ARP cache']].map(([cmd, desc]) => `
+                            <div style="padding:8px 12px; background:var(--bg-page); border:1px solid var(--border); border-radius:8px; cursor:pointer;" onclick="document.getElementById('cmdChallengeInput').value='${cmd.replace(/&lt;/g, '<').replace(/&gt;/g, '>')}'; document.getElementById('cmdChallengeInput').focus();">
                                 <code style="color:var(--primary); font-size:11px;">${cmd}</code>
                                 <div style="font-size:10px; color:var(--text-muted); margin-top:2px;">${desc}</div>
                             </div>`).join('')}
@@ -8011,113 +8015,113 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
             if (base === 'help') {
                 return `Available Academic Network Commands:\n` +
-                       `  ipconfig [/all | /flushdns] - Display network interface details & DNS\n` +
-                       `  ifconfig / ip addr        - Display Linux network interfaces\n` +
-                       `  ping <target>             - Test Layer-3 reachability & ICMP latency\n` +
-                       `  tracert / traceroute      - Trace hop-by-hop packet path (TTL)\n` +
-                       `  arp -a                    - Display local ARP MAC cache table\n` +
-                       `  netstat -an               - Monitor active TCP/UDP sockets & ports\n` +
-                       `  nslookup <domain>         - Query DNS domain name resolution\n` +
-                       `  route print / ip route    - Display OS IPv4/IPv6 routing table\n` +
-                       `  pathping <target>         - 100-ping per-hop latency/loss audit\n` +
-                       `  show ip interface brief   - Cisco IOS interface status summary\n` +
-                       `  show mac address-table    - Cisco switch Layer-2 MAC address table\n` +
-                       `  show ip route             - Cisco router Layer-3 IP routing table\n` +
-                       `  clear / cls               - Clear terminal screen`;
+                    `  ipconfig [/all | /flushdns] - Display network interface details & DNS\n` +
+                    `  ifconfig / ip addr        - Display Linux network interfaces\n` +
+                    `  ping <target>             - Test Layer-3 reachability & ICMP latency\n` +
+                    `  tracert / traceroute      - Trace hop-by-hop packet path (TTL)\n` +
+                    `  arp -a                    - Display local ARP MAC cache table\n` +
+                    `  netstat -an               - Monitor active TCP/UDP sockets & ports\n` +
+                    `  nslookup <domain>         - Query DNS domain name resolution\n` +
+                    `  route print / ip route    - Display OS IPv4/IPv6 routing table\n` +
+                    `  pathping <target>         - 100-ping per-hop latency/loss audit\n` +
+                    `  show ip interface brief   - Cisco IOS interface status summary\n` +
+                    `  show mac address-table    - Cisco switch Layer-2 MAC address table\n` +
+                    `  show ip route             - Cisco router Layer-3 IP routing table\n` +
+                    `  clear / cls               - Clear terminal screen`;
             }
             if (lower === 'ipconfig /all') {
                 return `Windows IP Configuration\n\n` +
-                       `   Host Name . . . . . . . . . . . . : LAB-PC-01\n` +
-                       `   Primary Dns Suffix  . . . . . . . : mitadt.edu.in\n` +
-                       `   Node Type . . . . . . . . . . . . : Hybrid\n` +
-                       `   Ethernet adapter Ethernet0:\n` +
-                       `      Physical Address. . . . . . . : 00-1A-2B-3C-4D-01\n` +
-                       `      DHCP Enabled. . . . . . . . . : Yes\n` +
-                       `      IPv4 Address. . . . . . . . . : 192.168.1.10(Preferred)\n` +
-                       `      Subnet Mask . . . . . . . . . : 255.255.255.0\n` +
-                       `      Default Gateway . . . . . . . : 192.168.1.1\n` +
-                       `      DNS Servers . . . . . . . . . : 8.8.8.8, 1.1.1.1`;
+                    `   Host Name . . . . . . . . . . . . : LAB-PC-01\n` +
+                    `   Primary Dns Suffix  . . . . . . . : mitadt.edu.in\n` +
+                    `   Node Type . . . . . . . . . . . . : Hybrid\n` +
+                    `   Ethernet adapter Ethernet0:\n` +
+                    `      Physical Address. . . . . . . : 00-1A-2B-3C-4D-01\n` +
+                    `      DHCP Enabled. . . . . . . . . : Yes\n` +
+                    `      IPv4 Address. . . . . . . . . : 192.168.1.10(Preferred)\n` +
+                    `      Subnet Mask . . . . . . . . . : 255.255.255.0\n` +
+                    `      Default Gateway . . . . . . . : 192.168.1.1\n` +
+                    `      DNS Servers . . . . . . . . . : 8.8.8.8, 1.1.1.1`;
             }
             if (lower === 'ipconfig') {
                 return `Windows IP Configuration\n\n` +
-                       `Ethernet adapter Ethernet0:\n` +
-                       `   IPv4 Address. . . . . . . . . : 192.168.1.10\n` +
-                       `   Subnet Mask . . . . . . . . . : 255.255.255.0\n` +
-                       `   Default Gateway . . . . . . . : 192.168.1.1`;
+                    `Ethernet adapter Ethernet0:\n` +
+                    `   IPv4 Address. . . . . . . . . : 192.168.1.10\n` +
+                    `   Subnet Mask . . . . . . . . . : 255.255.255.0\n` +
+                    `   Default Gateway . . . . . . . : 192.168.1.1`;
             }
             if (lower === 'ipconfig /flushdns') {
                 return `Windows IP Configuration\n\nSuccessfully flushed the DNS Resolver Cache.`;
             }
             if (lower === 'ifconfig' || lower === 'ip addr') {
                 return `eth0: flags=4163<UP,BROADCAST,RUNNING,MULTICAST> mtu 1500\n` +
-                       `        inet 192.168.1.10  netmask 255.255.255.0  broadcast 192.168.1.255\n` +
-                       `        ether 00:1a:2b:3c:4d:01  txqueuelen 1000  (Ethernet)`;
+                    `        inet 192.168.1.10  netmask 255.255.255.0  broadcast 192.168.1.255\n` +
+                    `        ether 00:1a:2b:3c:4d:01  txqueuelen 1000  (Ethernet)`;
             }
             if (base === 'ping') {
                 return `Pinging ${target} with 32 bytes of data:\n` +
-                       `Reply from ${target}: bytes=32 time=2ms TTL=128\n` +
-                       `Reply from ${target}: bytes=32 time=1ms TTL=128\n` +
-                       `Reply from ${target}: bytes=32 time=2ms TTL=128\n` +
-                       `Reply from ${target}: bytes=32 time=1ms TTL=128\n\n` +
-                       `Ping statistics for ${target}:\n` +
-                       `    Packets: Sent = 4, Received = 4, Lost = 0 (0% loss),\n` +
-                       `Approximate round trip times in milli-seconds:\n` +
-                       `    Minimum = 1ms, Maximum = 2ms, Average = 1ms`;
+                    `Reply from ${target}: bytes=32 time=2ms TTL=128\n` +
+                    `Reply from ${target}: bytes=32 time=1ms TTL=128\n` +
+                    `Reply from ${target}: bytes=32 time=2ms TTL=128\n` +
+                    `Reply from ${target}: bytes=32 time=1ms TTL=128\n\n` +
+                    `Ping statistics for ${target}:\n` +
+                    `    Packets: Sent = 4, Received = 4, Lost = 0 (0% loss),\n` +
+                    `Approximate round trip times in milli-seconds:\n` +
+                    `    Minimum = 1ms, Maximum = 2ms, Average = 1ms`;
             }
             if (base === 'tracert' || base === 'traceroute') {
                 return `Tracing route to ${target}:\n` +
-                       `  1    1ms   <1ms     1ms  192.168.1.1 [Default Gateway]\n` +
-                       `  2    7ms    8ms     6ms  10.100.0.1 [ISP Edge Router]\n` +
-                       `  3   14ms   15ms    14ms  203.88.32.1 [ISP Core Backbone]\n` +
-                       `  4   21ms   20ms    22ms  ${target} [Destination Host]\n\nTrace complete.`;
+                    `  1    1ms   <1ms     1ms  192.168.1.1 [Default Gateway]\n` +
+                    `  2    7ms    8ms     6ms  10.100.0.1 [ISP Edge Router]\n` +
+                    `  3   14ms   15ms    14ms  203.88.32.1 [ISP Core Backbone]\n` +
+                    `  4   21ms   20ms    22ms  ${target} [Destination Host]\n\nTrace complete.`;
             }
             if (lower === 'arp -a' || lower === 'arp') {
                 return `Interface: 192.168.1.10 --- 0x2\n` +
-                       `  Internet Address      Physical Address      Type\n` +
-                       `  192.168.1.1           00-1a-2b-3c-4d-01     dynamic\n` +
-                       `  192.168.1.11          00-1a-2b-3c-4d-02     dynamic\n` +
-                       `  192.168.1.255         ff-ff-ff-ff-ff-ff     static`;
+                    `  Internet Address      Physical Address      Type\n` +
+                    `  192.168.1.1           00-1a-2b-3c-4d-01     dynamic\n` +
+                    `  192.168.1.11          00-1a-2b-3c-4d-02     dynamic\n` +
+                    `  192.168.1.255         ff-ff-ff-ff-ff-ff     static`;
             }
             if (base === 'netstat') {
                 return `Active Connections\n\n` +
-                       `  Proto  Local Address          Foreign Address        State\n` +
-                       `  TCP    0.0.0.0:80             0.0.0.0:0              LISTENING\n` +
-                       `  TCP    0.0.0.0:443            0.0.0.0:0              LISTENING\n` +
-                       `  TCP    192.168.1.10:51234     142.250.77.110:443     ESTABLISHED\n` +
-                       `  UDP    0.0.0.0:53             *:*`;
+                    `  Proto  Local Address          Foreign Address        State\n` +
+                    `  TCP    0.0.0.0:80             0.0.0.0:0              LISTENING\n` +
+                    `  TCP    0.0.0.0:443            0.0.0.0:0              LISTENING\n` +
+                    `  TCP    192.168.1.10:51234     142.250.77.110:443     ESTABLISHED\n` +
+                    `  UDP    0.0.0.0:53             *:*`;
             }
             if (base === 'nslookup') {
                 return `Server:  google-public-dns-a.google.com\n` +
-                       `Address: 8.8.8.8\n\n` +
-                       `Non-authoritative answer:\n` +
-                       `Name:    ${target}\n` +
-                       `Address: 142.250.77.110`;
+                    `Address: 8.8.8.8\n\n` +
+                    `Non-authoritative answer:\n` +
+                    `Name:    ${target}\n` +
+                    `Address: 142.250.77.110`;
             }
             if (lower === 'route print' || lower === 'ip route') {
                 return `IPv4 Route Table\n===========================================================================\n` +
-                       `Active Routes:\n` +
-                       `Network Destination        Netmask          Gateway       Interface  Metric\n` +
-                       `          0.0.0.0          0.0.0.0      192.168.1.1    192.168.1.10      25\n` +
-                       `        127.0.0.0        255.0.0.0         On-link        127.0.0.1     306\n` +
-                       `      192.168.1.0    255.255.255.0         On-link    192.168.1.10     281`;
+                    `Active Routes:\n` +
+                    `Network Destination        Netmask          Gateway       Interface  Metric\n` +
+                    `          0.0.0.0          0.0.0.0      192.168.1.1    192.168.1.10      25\n` +
+                    `        127.0.0.0        255.0.0.0         On-link        127.0.0.1     306\n` +
+                    `      192.168.1.0    255.255.255.0         On-link    192.168.1.10     281`;
             }
             if (base === 'pathping') {
                 return `Tracing route to ${target} over a maximum of 30 hops:\n` +
-                       `  0  LAB-PC-01 [192.168.1.10]\n` +
-                       `  1  192.168.1.1\n` +
-                       `  2  10.100.0.1\n` +
-                       `Computing statistics for 50 seconds...\n` +
-                       `            Source to Here   This Node/Link\n` +
-                       `Hop  RTT    Lost/Sent = Pct  Lost/Sent = Pct  Address\n` +
-                       `  0                                           LAB-PC-01 [192.168.1.10]\n` +
-                       `  1    1ms     0/ 100 =  0%     0/ 100 =  0%  192.168.1.1\n` +
-                       `  2    7ms     0/ 100 =  0%     0/ 100 =  0%  10.100.0.1\n\nTrace complete.`;
+                    `  0  LAB-PC-01 [192.168.1.10]\n` +
+                    `  1  192.168.1.1\n` +
+                    `  2  10.100.0.1\n` +
+                    `Computing statistics for 50 seconds...\n` +
+                    `            Source to Here   This Node/Link\n` +
+                    `Hop  RTT    Lost/Sent = Pct  Lost/Sent = Pct  Address\n` +
+                    `  0                                           LAB-PC-01 [192.168.1.10]\n` +
+                    `  1    1ms     0/ 100 =  0%     0/ 100 =  0%  192.168.1.1\n` +
+                    `  2    7ms     0/ 100 =  0%     0/ 100 =  0%  10.100.0.1\n\nTrace complete.`;
             }
             if (lower === 'show ip interface brief') {
                 return `Interface              IP-Address      OK? Method Status                  Protocol\n` +
-                       `GigabitEthernet0/0     192.168.1.1     YES NVRAM  up                      up      \n` +
-                       `GigabitEthernet0/1     10.0.0.1        YES NVRAM  up                      up      \n` +
-                       `GigabitEthernet0/2     unassigned      YES unset  administratively down   down    `;
+                    `GigabitEthernet0/0     192.168.1.1     YES NVRAM  up                      up      \n` +
+                    `GigabitEthernet0/1     10.0.0.1        YES NVRAM  up                      up      \n` +
+                    `GigabitEthernet0/2     unassigned      YES unset  administratively down   down    `;
             }
             if (lower === 'show mac address-table') {
                 return `          Mac Address Table\n-------------------------------------------\nVlan    Mac Address       Type        Ports\n----    -----------       --------    -----\n   1    001a.2b3c.4d01    DYNAMIC     Fa0/1\n   1    001a.2b3c.4d02    DYNAMIC     Fa0/2`;
@@ -8182,19 +8186,19 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const initMediaStudy = (container) => {
         const media = [
-            { name:'UTP Cat6', color:'#3b82f6', icon:'🔵', speed:'10 Gbps', dist:'100m', freq:'250 MHz', imp:'100Ω', pro:'Affordable, easy to install, widely used in LAN', con:'Susceptible to EMI, limited distance' },
-            { name:'STP Cat7', color:'#8b5cf6', icon:'🟣', speed:'10 Gbps', dist:'100m', freq:'600 MHz', imp:'100Ω', pro:'Better shielding than UTP, lower crosstalk', con:'More expensive, thicker and harder to route' },
-            { name:'Coaxial', color:'#f59e0b', icon:'🟡', speed:'10 Mbps', dist:'500m', freq:'~1 GHz', imp:'50/75Ω', pro:'Long distance, good noise immunity, used in cable TV', con:'Bulky, difficult termination, replaced by fiber' },
-            { name:'Fiber (SMF)', color:'#10b981', icon:'🟢', speed:'100+ Gbps', dist:'80km+', freq:'200+ THz', imp:'N/A', pro:'Highest bandwidth, immune to EMI, long distances', con:'Expensive splicing, fragile, costly equipment' },
-            { name:'Fiber (MMF)', color:'#06b6d4', icon:'🔷', speed:'10 Gbps', dist:'550m', freq:'200+ THz', imp:'N/A', pro:'Cheaper than SMF, easier to connect', con:'Modal dispersion limits bandwidth over distance' },
-            { name:'Wi-Fi 6 (Radio)', color:'#ec4899', icon:'📡', speed:'9.6 Gbps', dist:'~150m', freq:'2.4/5/6 GHz', imp:'N/A', pro:'No cables, mobile, covers large areas', con:'Interference, security concerns, shared medium' },
+            { name: 'UTP Cat6', color: '#3b82f6', icon: '🔵', speed: '10 Gbps', dist: '100m', freq: '250 MHz', imp: '100Ω', pro: 'Affordable, easy to install, widely used in LAN', con: 'Susceptible to EMI, limited distance' },
+            { name: 'STP Cat7', color: '#8b5cf6', icon: '🟣', speed: '10 Gbps', dist: '100m', freq: '600 MHz', imp: '100Ω', pro: 'Better shielding than UTP, lower crosstalk', con: 'More expensive, thicker and harder to route' },
+            { name: 'Coaxial', color: '#f59e0b', icon: '🟡', speed: '10 Mbps', dist: '500m', freq: '~1 GHz', imp: '50/75Ω', pro: 'Long distance, good noise immunity, used in cable TV', con: 'Bulky, difficult termination, replaced by fiber' },
+            { name: 'Fiber (SMF)', color: '#10b981', icon: '🟢', speed: '100+ Gbps', dist: '80km+', freq: '200+ THz', imp: 'N/A', pro: 'Highest bandwidth, immune to EMI, long distances', con: 'Expensive splicing, fragile, costly equipment' },
+            { name: 'Fiber (MMF)', color: '#06b6d4', icon: '🔷', speed: '10 Gbps', dist: '550m', freq: '200+ THz', imp: 'N/A', pro: 'Cheaper than SMF, easier to connect', con: 'Modal dispersion limits bandwidth over distance' },
+            { name: 'Wi-Fi 6 (Radio)', color: '#ec4899', icon: '📡', speed: '9.6 Gbps', dist: '~150m', freq: '2.4/5/6 GHz', imp: 'N/A', pro: 'No cables, mobile, covers large areas', con: 'Interference, security concerns, shared medium' },
         ];
         let selectedIdx = 0;
         const wiring = [
-            { name:'T568A', colors:['W/Green','Green','W/Orange','Blue','W/Blue','Orange','W/Brown','Brown'] },
-            { name:'T568B', colors:['W/Orange','Orange','W/Green','Blue','W/Blue','Green','W/Brown','Brown'] },
+            { name: 'T568A', colors: ['W/Green', 'Green', 'W/Orange', 'Blue', 'W/Blue', 'Orange', 'W/Brown', 'Brown'] },
+            { name: 'T568B', colors: ['W/Orange', 'Orange', 'W/Green', 'Blue', 'W/Blue', 'Green', 'W/Brown', 'Brown'] },
         ];
-        const pinColors = { 'W/Green':'#d4fce8', 'Green':'#10b981', 'W/Orange':'#fde8d0', 'Orange':'#f97316', 'Blue':'#3b82f6', 'W/Blue':'#bfdbfe', 'W/Brown':'#ede0d4', 'Brown':'#92400e' };
+        const pinColors = { 'W/Green': '#d4fce8', 'Green': '#10b981', 'W/Orange': '#fde8d0', 'Orange': '#f97316', 'Blue': '#3b82f6', 'W/Blue': '#bfdbfe', 'W/Brown': '#ede0d4', 'Brown': '#92400e' };
 
         const renderMedia = (idx) => {
             const m = media[idx];
@@ -8221,7 +8225,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <div class="theory-card" style="flex:1; min-width:260px; margin:0;">
                         <h3 style="color:var(--primary); margin-bottom:15px;">Select Medium</h3>
                         <div style="display:flex; flex-direction:column; gap:8px;" id="mediaList">
-                            ${media.map((m,i)=>`<div onclick="document.getElementById('mediaList').querySelectorAll('.media-item').forEach(el=>el.style.borderColor='var(--border)'); this.style.borderColor='${m.color}'; document.querySelector('[data-render-media]').dataset.renderMedia='${i}';" class="media-item" style="padding:12px; background:var(--bg-page); border:1px solid var(--border); border-radius:10px; cursor:pointer; display:flex; align-items:center; gap:10px; transition:border-color 0.2s;"
+                            ${media.map((m, i) => `<div onclick="document.getElementById('mediaList').querySelectorAll('.media-item').forEach(el=>el.style.borderColor='var(--border)'); this.style.borderColor='${m.color}'; document.querySelector('[data-render-media]').dataset.renderMedia='${i}';" class="media-item" style="padding:12px; background:var(--bg-page); border:1px solid var(--border); border-radius:10px; cursor:pointer; display:flex; align-items:center; gap:10px; transition:border-color 0.2s;"
                                 ><span style="font-size:20px;">${m.icon}</span><div><div style="font-weight:800; font-size:13px;">${m.name}</div><div style="font-size:10px; color:var(--text-muted);">${m.speed} · ${m.dist}</div></div></div>`).join('')}
                         </div>
                     </div>
@@ -8231,13 +8235,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <div class="theory-card" style="width:100%; margin:0;">
                     <h3 style="color:var(--primary); margin-bottom:15px;">RJ-45 Wiring Standards: T568A vs T568B</h3>
                     <div style="display:flex; gap:20px; flex-wrap:wrap;">
-                        ${wiring.map(w=>`<div style="flex:1; min-width:200px;">
+                        ${wiring.map(w => `<div style="flex:1; min-width:200px;">
                             <div style="font-weight:800; color:var(--primary); margin-bottom:10px;">${w.name}</div>
                             <div style="display:flex; gap:4px; align-items:flex-end; height:80px;">
-                                ${w.colors.map((c,i)=>`<div style="display:flex; flex-direction:column; align-items:center; gap:3px; flex:1;">
+                                ${w.colors.map((c, i) => `<div style="display:flex; flex-direction:column; align-items:center; gap:3px; flex:1;">
                                     <div style="font-size:8px; color:var(--text-muted); writing-mode:vertical-rl; transform:rotate(180deg); white-space:nowrap;">${c}</div>
-                                    <div style="flex:1; width:100%; background:${pinColors[c]||'#888'}; border-radius:2px 2px 0 0; min-height:30px; border:1px solid rgba(255,255,255,0.1);"></div>
-                                    <div style="font-size:9px; font-weight:800; color:var(--text-muted);">${i+1}</div>
+                                    <div style="flex:1; width:100%; background:${pinColors[c] || '#888'}; border-radius:2px 2px 0 0; min-height:30px; border:1px solid rgba(255,255,255,0.1);"></div>
+                                    <div style="font-size:9px; font-weight:800; color:var(--text-muted);">${i + 1}</div>
                                 </div>`).join('')}
                             </div>
                         </div>`).join('<div style="padding:10px; display:flex; align-items:center; font-weight:800; color:var(--text-muted);">VS</div>')}
@@ -8252,13 +8256,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <h3 style="color:var(--primary); margin-bottom:12px;">Cable Type Quick Quiz 🎯</h3>
                     <div style="display:flex; gap:10px; flex-wrap:wrap;" id="cableQuiz">
                         ${[
-                            { q:'PC → Switch', correct:'Straight-Through', opts:['Straight-Through','Crossover','Rollover'] },
-                            { q:'Router → Router', correct:'Crossover', opts:['Straight-Through','Crossover','Rollover'] },
-                            { q:'PC → Router (Console)', correct:'Rollover', opts:['Straight-Through','Crossover','Rollover'] },
-                            { q:'Switch → Switch', correct:'Crossover', opts:['Straight-Through','Crossover','Rollover'] },
-                        ].map((q,qi)=>`<div class="theory-card" style="flex:1; min-width:180px; margin:0; padding:12px;">
+                { q: 'PC → Switch', correct: 'Straight-Through', opts: ['Straight-Through', 'Crossover', 'Rollover'] },
+                { q: 'Router → Router', correct: 'Crossover', opts: ['Straight-Through', 'Crossover', 'Rollover'] },
+                { q: 'PC → Router (Console)', correct: 'Rollover', opts: ['Straight-Through', 'Crossover', 'Rollover'] },
+                { q: 'Switch → Switch', correct: 'Crossover', opts: ['Straight-Through', 'Crossover', 'Rollover'] },
+            ].map((q, qi) => `<div class="theory-card" style="flex:1; min-width:180px; margin:0; padding:12px;">
                             <div style="font-size:12px; font-weight:800; color:var(--primary); margin-bottom:10px;">${q.q}</div>
-                            ${q.opts.map(o=>`<button class="btn-sim" style="display:block; width:100%; margin-bottom:5px; font-size:11px; text-align:left; padding:6px 10px;" onclick="(function(btn,correct,container){
+                            ${q.opts.map(o => `<button class="btn-sim" style="display:block; width:100%; margin-bottom:5px; font-size:11px; text-align:left; padding:6px 10px;" onclick="(function(btn,correct,container){
                                 container.querySelectorAll('.btn-sim').forEach(b=>b.style.borderColor='');
                                 if(btn.textContent.trim()===correct){btn.style.borderColor='var(--success)';btn.style.color='var(--success)';}
                                 else{btn.style.borderColor='var(--danger)';btn.style.color='var(--danger)'; container.querySelectorAll('.btn-sim').forEach(b=>{if(b.textContent.trim()===correct){b.style.borderColor='var(--success)';b.style.color='var(--success)';}});}
@@ -8281,51 +8285,51 @@ document.addEventListener('DOMContentLoaded', async () => {
             mediaItems.forEach((el, i) => el.style.borderColor = i === idx ? media[i].color : 'var(--border)');
         });
         obs.observe(mediaDetail, { attributes: true, attributeFilter: ['data-render-media'] });
-    // --- TOPOLOGY SIMULATOR (PRACTICAL 3) ---
-    const initTopologySim = (container) => {
-        let activeTopo = 'bus';
-        let nodeCount = 4;
+        // --- TOPOLOGY SIMULATOR (PRACTICAL 3) ---
+        const initTopologySim = (container) => {
+            let activeTopo = 'bus';
+            let nodeCount = 4;
 
-        const topoConfigs = {
-            bus: {
-                name: "Bus Topology 🚌",
-                desc: "All nodes connect to a single central backbone cable via T-connectors with 50-ohm terminators at both ends.",
-                formula: (n) => ({ links: 1, dropLines: n, portsPerNode: 1, collisionRisk: "High (CSMA/CD Shared Medium)", redundancy: "⭐ (Poor - 1 Cut Downs All)" }),
-                diagram: `
+            const topoConfigs = {
+                bus: {
+                    name: "Bus Topology 🚌",
+                    desc: "All nodes connect to a single central backbone cable via T-connectors with 50-ohm terminators at both ends.",
+                    formula: (n) => ({ links: 1, dropLines: n, portsPerNode: 1, collisionRisk: "High (CSMA/CD Shared Medium)", redundancy: "⭐ (Poor - 1 Cut Downs All)" }),
+                    diagram: `
                  [ PC1 ]      [ PC2 ]      [ PC3 ]      [ PC4 ]
                     |            |            |            |
  [50Ω Term] =======+============+============+============+======= [50Ω Term]
                                Backbone Cable
                 `
-            },
-            star: {
-                name: "Star Topology ⭐️",
-                desc: "Every node connects via a dedicated point-to-point cable to a central Layer-2 Ethernet switch.",
-                formula: (n) => ({ links: n, dropLines: n, portsPerNode: 1, collisionRisk: "0% (Full-Duplex Switch Ports)", redundancy: "⭐⭐⭐ (Good - Node Isolated on Cut)" }),
-                diagram: `
+                },
+                star: {
+                    name: "Star Topology ⭐️",
+                    desc: "Every node connects via a dedicated point-to-point cable to a central Layer-2 Ethernet switch.",
+                    formula: (n) => ({ links: n, dropLines: n, portsPerNode: 1, collisionRisk: "0% (Full-Duplex Switch Ports)", redundancy: "⭐⭐⭐ (Good - Node Isolated on Cut)" }),
+                    diagram: `
                               [ PC1 ]
                                  |
                  [ PC2 ] ---- [ SWITCH ] ---- [ PC3 ]
                                  |
                               [ PC4 ]
                 `
-            },
-            ring: {
-                name: "Ring Topology ⭕️",
-                desc: "Nodes form a closed unidirectional loop. A 3-byte Token circulates continuously to control transmission.",
-                formula: (n) => ({ links: n, dropLines: 0, portsPerNode: 2, collisionRisk: "0% (Token Passing Protocol)", redundancy: "⭐⭐ (Medium - Loop Cut Breaks Ring)" }),
-                diagram: `
+                },
+                ring: {
+                    name: "Ring Topology ⭕️",
+                    desc: "Nodes form a closed unidirectional loop. A 3-byte Token circulates continuously to control transmission.",
+                    formula: (n) => ({ links: n, dropLines: 0, portsPerNode: 2, collisionRisk: "0% (Token Passing Protocol)", redundancy: "⭐⭐ (Medium - Loop Cut Breaks Ring)" }),
+                    diagram: `
                              [ PC1 ] ----> [ PC2 ]
                                 ^             |
                                 |   (Token)   v
                              [ PC4 ] <---- [ PC3 ]
                 `
-            },
-            mesh_full: {
-                name: "Full Mesh Topology 🕸️",
-                desc: "Every node is directly connected to every other node, providing maximum redundancy and bandwidth.",
-                formula: (n) => ({ links: Math.round(n * (n - 1) / 2), dropLines: 0, portsPerNode: n - 1, collisionRisk: "0% (Dedicated Direct Links)", redundancy: "⭐⭐⭐⭐⭐ (Excellent - Multi-Path Failover)" }),
-                diagram: `
+                },
+                mesh_full: {
+                    name: "Full Mesh Topology 🕸️",
+                    desc: "Every node is directly connected to every other node, providing maximum redundancy and bandwidth.",
+                    formula: (n) => ({ links: Math.round(n * (n - 1) / 2), dropLines: 0, portsPerNode: n - 1, collisionRisk: "0% (Dedicated Direct Links)", redundancy: "⭐⭐⭐⭐⭐ (Excellent - Multi-Path Failover)" }),
+                    diagram: `
                              [ PC1 ] ======== [ PC2 ]
                               |  \\          /  |
                               |   \\        /   |
@@ -8333,35 +8337,35 @@ document.addEventListener('DOMContentLoaded', async () => {
                               |     \\    /     |
                              [ PC4 ] ======== [ PC3 ]
                 `
-            },
-            tree: {
-                name: "Tree Topology 🌳",
-                desc: "Hierarchical structure combining Star topologies in Core, Distribution, and Access tiers.",
-                formula: (n) => ({ links: n + 2, dropLines: n, portsPerNode: 1, collisionRisk: "Low (Subtree Isolated)", redundancy: "⭐⭐⭐⭐ (High - Hierarchical Structure)" }),
-                diagram: `
+                },
+                tree: {
+                    name: "Tree Topology 🌳",
+                    desc: "Hierarchical structure combining Star topologies in Core, Distribution, and Access tiers.",
+                    formula: (n) => ({ links: n + 2, dropLines: n, portsPerNode: 1, collisionRisk: "Low (Subtree Isolated)", redundancy: "⭐⭐⭐⭐ (High - Hierarchical Structure)" }),
+                    diagram: `
                               [ Core Switch ]
                                /           \\
                     [ Dist Switch 1 ]    [ Dist Switch 2 ]
                        /        \\           /        \\
                     [ PC1 ]    [ PC2 ]   [ PC3 ]    [ PC4 ]
                 `
-            },
-            hybrid: {
-                name: "Hybrid Topology 🔀",
-                desc: "Integrates multiple distinct topologies (Star-Bus / Star-Ring / Mesh-Tree) into an enterprise network.",
-                formula: (n) => ({ links: n + 4, dropLines: n, portsPerNode: 2, collisionRisk: "0% (Isolated Domains)", redundancy: "⭐⭐⭐⭐⭐ (Maximum Custom Enterprise)" }),
-                diagram: `
+                },
+                hybrid: {
+                    name: "Hybrid Topology 🔀",
+                    desc: "Integrates multiple distinct topologies (Star-Bus / Star-Ring / Mesh-Tree) into an enterprise network.",
+                    formula: (n) => ({ links: n + 4, dropLines: n, portsPerNode: 2, collisionRisk: "0% (Isolated Domains)", redundancy: "⭐⭐⭐⭐⭐ (Maximum Custom Enterprise)" }),
+                    diagram: `
                    [ Star LAN 1 ] <==== Backbone ====> [ Ring LAN 2 ]
                      (4 Hosts)                          (4 Hosts)
                 `
-            }
-        };
+                }
+            };
 
-        const render = () => {
-            const cfg = topoConfigs[activeTopo];
-            const metrics = cfg.formula(nodeCount);
+            const render = () => {
+                const cfg = topoConfigs[activeTopo];
+                const metrics = cfg.formula(nodeCount);
 
-            container.innerHTML = `
+                container.innerHTML = `
                 <div class="sim-toolbar" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
                     <div class="section-title" style="font-size:22px; margin:0; color:var(--primary);">Interactive Topologies Simulator 🕸️</div>
                     <div style="display:flex; gap:6px; flex-wrap:wrap;">
@@ -8424,72 +8428,72 @@ ${cfg.diagram}
                 </div>
             `;
 
-            window.switchTopo = (key) => { activeTopo = key; render(); };
+                window.switchTopo = (key) => { activeTopo = key; render(); };
 
-            document.getElementById('btnSimTx').onclick = () => {
-                const log = document.getElementById('topoStatusLog');
-                if (activeTopo === 'bus') {
-                    log.innerHTML = `<span style="color:var(--primary); font-weight:bold;">[CSMA/CD Broadcast]</span> PC1 transmits frame onto 50Ω backbone... <br>PC2, PC3, PC4 receive frame simultaneously. PC3 accepts frame (MAC Match), PC2/PC4 drop frame. Signal absorbed by 50Ω terminators.`;
-                } else if (activeTopo === 'star') {
-                    log.innerHTML = `<span style="color:var(--success); font-weight:bold;">[Switch Micro-Segmented Flow]</span> PC1 sends unicast frame to Switch Port 1.<br>Switch checks MAC table: Target PC3 on Port 3. Frame forwarded exclusively to PC3 with zero collision!`;
-                } else if (activeTopo === 'ring') {
-                    log.innerHTML = `<span style="color:var(--warning); font-weight:bold;">[Token Passing Loop]</span> Token frame captured by PC1.<br>PC1 appends data frame and forwards to PC2 → PC3. PC3 copies data & sets ACK bit → forwards back to PC1 → PC1 releases Token!`;
-                } else if (activeTopo === 'mesh_full') {
-                    log.innerHTML = `<span style="color:var(--success); font-weight:bold;">[Direct Dedicated Link]</span> PC1 sends frame via direct link PC1↔PC3.<br>Zero intermediary hops, max bandwidth (100 Gbps), zero collision!`;
-                } else if (activeTopo === 'tree') {
-                    log.innerHTML = `<span style="color:var(--primary); font-weight:bold;">[Hierarchical Routing]</span> PC1 (Access Switch 1) sends frame to Distribution Switch 1 → Core Switch → Distribution Switch 2 → PC3 (Access Switch 2).`;
-                } else {
-                    log.innerHTML = `<span style="color:var(--primary); font-weight:bold;">[Hybrid Gateway Rerouting]</span> Frame routed from Star LAN 1 over backbone link to Ring LAN 2 seamlessly.`;
-                }
+                document.getElementById('btnSimTx').onclick = () => {
+                    const log = document.getElementById('topoStatusLog');
+                    if (activeTopo === 'bus') {
+                        log.innerHTML = `<span style="color:var(--primary); font-weight:bold;">[CSMA/CD Broadcast]</span> PC1 transmits frame onto 50Ω backbone... <br>PC2, PC3, PC4 receive frame simultaneously. PC3 accepts frame (MAC Match), PC2/PC4 drop frame. Signal absorbed by 50Ω terminators.`;
+                    } else if (activeTopo === 'star') {
+                        log.innerHTML = `<span style="color:var(--success); font-weight:bold;">[Switch Micro-Segmented Flow]</span> PC1 sends unicast frame to Switch Port 1.<br>Switch checks MAC table: Target PC3 on Port 3. Frame forwarded exclusively to PC3 with zero collision!`;
+                    } else if (activeTopo === 'ring') {
+                        log.innerHTML = `<span style="color:var(--warning); font-weight:bold;">[Token Passing Loop]</span> Token frame captured by PC1.<br>PC1 appends data frame and forwards to PC2 → PC3. PC3 copies data & sets ACK bit → forwards back to PC1 → PC1 releases Token!`;
+                    } else if (activeTopo === 'mesh_full') {
+                        log.innerHTML = `<span style="color:var(--success); font-weight:bold;">[Direct Dedicated Link]</span> PC1 sends frame via direct link PC1↔PC3.<br>Zero intermediary hops, max bandwidth (100 Gbps), zero collision!`;
+                    } else if (activeTopo === 'tree') {
+                        log.innerHTML = `<span style="color:var(--primary); font-weight:bold;">[Hierarchical Routing]</span> PC1 (Access Switch 1) sends frame to Distribution Switch 1 → Core Switch → Distribution Switch 2 → PC3 (Access Switch 2).`;
+                    } else {
+                        log.innerHTML = `<span style="color:var(--primary); font-weight:bold;">[Hybrid Gateway Rerouting]</span> Frame routed from Star LAN 1 over backbone link to Ring LAN 2 seamlessly.`;
+                    }
+                };
+
+                document.getElementById('btnCutLink').onclick = () => {
+                    const log = document.getElementById('topoStatusLog');
+                    if (activeTopo === 'bus') {
+                        log.innerHTML = `<span style="color:var(--danger); font-weight:bold;">❌ BACKBONE CABLE CUT!</span><br>Signal reflection occurs at break point. <b>Entire Bus network collapses (100% outage for all hosts).</b>`;
+                    } else if (activeTopo === 'star') {
+                        log.innerHTML = `<span style="color:var(--warning); font-weight:bold;">⚠️ WORKSTATION CABLE CUT (PC2)!</span><br>PC2 loses connectivity. <b>PC1, PC3, and PC4 continue communicating via central switch without disruption!</b>`;
+                    } else if (activeTopo === 'ring') {
+                        log.innerHTML = `<span style="color:var(--danger); font-weight:bold;">❌ RING LOOP BROKEN (Link PC2-PC3 Cut)!</span><br>Token circulation halts. <b>Entire ring network downs unless Dual Ring (FDDI) wraps around.</b>`;
+                    } else if (activeTopo === 'mesh_full') {
+                        log.innerHTML = `<span style="color:var(--success); font-weight:bold;">🛡️ MESH LINK PC1↔PC3 CUT!</span><br>Spanning Tree / OSPF detects failure instantly: <b>Traffic automatically reroutes via PC1 → PC2 → PC3. Zero downtime!</b>`;
+                    } else if (activeTopo === 'tree') {
+                        log.innerHTML = `<span style="color:var(--danger); font-weight:bold;">⚠️ DISTRIBUTION LINK CUT!</span><br>Subtree PCs (PC1 & PC2) disconnected from Core. Remaining network operates normally.`;
+                    } else {
+                        log.innerHTML = `<span style="color:var(--warning); font-weight:bold;">⚠️ HYBRID LINK SEVERED!</span><br>Redundant gateway link activated to maintain cross-topology data flow.`;
+                    }
+                };
+
+                document.getElementById('btnCrashNode').onclick = () => {
+                    const log = document.getElementById('topoStatusLog');
+                    if (activeTopo === 'star') {
+                        log.innerHTML = `<span style="color:var(--danger); font-weight:bold;">💥 CENTRAL SWITCH CRASHED!</span><br>Single point of failure triggered: <b>All connected devices (PC1, PC2, PC3, PC4) lose connectivity completely.</b>`;
+                    } else if (activeTopo === 'mesh_full') {
+                        log.innerHTML = `<span style="color:var(--success); font-weight:bold;">🛡️ CORE NODE CRASHED!</span><br>Mesh redundancy activates: <b>Surviving nodes automatically re-mesh around the dead node.</b>`;
+                    } else {
+                        log.innerHTML = `<span style="color:var(--danger); font-weight:bold;">💥 ROOT / CORE NODE FAILURE!</span><br>Hierarchical backbone affected. Backup standby router takes over active role.`;
+                    }
+                };
+
+                document.getElementById('btnResetTopo').onclick = () => {
+                    render();
+                };
             };
 
-            document.getElementById('btnCutLink').onclick = () => {
-                const log = document.getElementById('topoStatusLog');
-                if (activeTopo === 'bus') {
-                    log.innerHTML = `<span style="color:var(--danger); font-weight:bold;">❌ BACKBONE CABLE CUT!</span><br>Signal reflection occurs at break point. <b>Entire Bus network collapses (100% outage for all hosts).</b>`;
-                } else if (activeTopo === 'star') {
-                    log.innerHTML = `<span style="color:var(--warning); font-weight:bold;">⚠️ WORKSTATION CABLE CUT (PC2)!</span><br>PC2 loses connectivity. <b>PC1, PC3, and PC4 continue communicating via central switch without disruption!</b>`;
-                } else if (activeTopo === 'ring') {
-                    log.innerHTML = `<span style="color:var(--danger); font-weight:bold;">❌ RING LOOP BROKEN (Link PC2-PC3 Cut)!</span><br>Token circulation halts. <b>Entire ring network downs unless Dual Ring (FDDI) wraps around.</b>`;
-                } else if (activeTopo === 'mesh_full') {
-                    log.innerHTML = `<span style="color:var(--success); font-weight:bold;">🛡️ MESH LINK PC1↔PC3 CUT!</span><br>Spanning Tree / OSPF detects failure instantly: <b>Traffic automatically reroutes via PC1 → PC2 → PC3. Zero downtime!</b>`;
-                } else if (activeTopo === 'tree') {
-                    log.innerHTML = `<span style="color:var(--danger); font-weight:bold;">⚠️ DISTRIBUTION LINK CUT!</span><br>Subtree PCs (PC1 & PC2) disconnected from Core. Remaining network operates normally.`;
-                } else {
-                    log.innerHTML = `<span style="color:var(--warning); font-weight:bold;">⚠️ HYBRID LINK SEVERED!</span><br>Redundant gateway link activated to maintain cross-topology data flow.`;
-                }
-            };
-
-            document.getElementById('btnCrashNode').onclick = () => {
-                const log = document.getElementById('topoStatusLog');
-                if (activeTopo === 'star') {
-                    log.innerHTML = `<span style="color:var(--danger); font-weight:bold;">💥 CENTRAL SWITCH CRASHED!</span><br>Single point of failure triggered: <b>All connected devices (PC1, PC2, PC3, PC4) lose connectivity completely.</b>`;
-                } else if (activeTopo === 'mesh_full') {
-                    log.innerHTML = `<span style="color:var(--success); font-weight:bold;">🛡️ CORE NODE CRASHED!</span><br>Mesh redundancy activates: <b>Surviving nodes automatically re-mesh around the dead node.</b>`;
-                } else {
-                    log.innerHTML = `<span style="color:var(--danger); font-weight:bold;">💥 ROOT / CORE NODE FAILURE!</span><br>Hierarchical backbone affected. Backup standby router takes over active role.`;
-                }
-            };
-
-            document.getElementById('btnResetTopo').onclick = () => {
-                render();
-            };
+            render();
         };
 
-        render();
-    };
-
-    // --- OPERATING SYSTEMS SIMULATORS ---
-    const initCpuSchedulingSim = (container) => {
-        const COLORS = ['#2563eb','#10b981','#f59e0b','#ef4444','#8b5cf6','#06b6d4','#ec4899','#84cc16'];
-        const algoInfoMap = {
-            fcfs: '<b>FCFS:</b> Processes run in arrival order. Non-preemptive. Simple but can cause convoy effect.',
-            sjf: '<b>SJF:</b> Picks the shortest burst time. Non-preemptive. Optimal avg waiting time.',
-            srtf: '<b>SRTF:</b> Preemptive SJF. Interrupts running process if a new shorter one arrives.',
-            rr: '<b>Round Robin:</b> Each process gets a fixed time quantum. Fair, set quantum below.',
-            priority: '<b>Priority:</b> Lower number = higher priority. Non-preemptive.',
-        };
-        container.innerHTML = `
+        // --- OPERATING SYSTEMS SIMULATORS ---
+        const initCpuSchedulingSim = (container) => {
+            const COLORS = ['#2563eb', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4', '#ec4899', '#84cc16'];
+            const algoInfoMap = {
+                fcfs: '<b>FCFS:</b> Processes run in arrival order. Non-preemptive. Simple but can cause convoy effect.',
+                sjf: '<b>SJF:</b> Picks the shortest burst time. Non-preemptive. Optimal avg waiting time.',
+                srtf: '<b>SRTF:</b> Preemptive SJF. Interrupts running process if a new shorter one arrives.',
+                rr: '<b>Round Robin:</b> Each process gets a fixed time quantum. Fair, set quantum below.',
+                priority: '<b>Priority:</b> Lower number = higher priority. Non-preemptive.',
+            };
+            container.innerHTML = `
             <div class="sim-toolbar">
                 <div class="section-title" style="font-size:22px; margin:0; color:var(--primary);">CPU Scheduling Visualizer</div>
             </div>
@@ -8592,140 +8596,140 @@ ${cfg.diagram}
             </div>
         `;
 
-        const cpuAlgoSelect = document.getElementById('cpuAlgoSelect');
-        const quantumContainer = document.getElementById('quantumContainer');
-        const cpuProcessRows = document.getElementById('cpuProcessRows');
-        const btnAddProcess = document.getElementById('btnAddProcess');
-        const btnRunCpuSim = document.getElementById('btnRunCpuSim');
-        let procCounter = 3;
+            const cpuAlgoSelect = document.getElementById('cpuAlgoSelect');
+            const quantumContainer = document.getElementById('quantumContainer');
+            const cpuProcessRows = document.getElementById('cpuProcessRows');
+            const btnAddProcess = document.getElementById('btnAddProcess');
+            const btnRunCpuSim = document.getElementById('btnRunCpuSim');
+            let procCounter = 3;
 
-        cpuAlgoSelect.addEventListener('change', () => {
-            const val = cpuAlgoSelect.value;
-            quantumContainer.style.display = val === 'rr' ? 'block' : 'none';
-            document.getElementById('algoInfo').innerHTML = algoInfoMap[val] || '';
-            const showP = val === 'priority';
-            document.getElementById('priorityHeader').style.display = showP ? '' : 'none';
-            document.querySelectorAll('.priority-col').forEach(el => el.style.display = showP ? '' : 'none');
-        });
+            cpuAlgoSelect.addEventListener('change', () => {
+                const val = cpuAlgoSelect.value;
+                quantumContainer.style.display = val === 'rr' ? 'block' : 'none';
+                document.getElementById('algoInfo').innerHTML = algoInfoMap[val] || '';
+                const showP = val === 'priority';
+                document.getElementById('priorityHeader').style.display = showP ? '' : 'none';
+                document.querySelectorAll('.priority-col').forEach(el => el.style.display = showP ? '' : 'none');
+            });
 
-        btnAddProcess.addEventListener('click', () => {
-            procCounter++;
-            const color = COLORS[(procCounter - 1) % COLORS.length];
-            const showP = cpuAlgoSelect.value === 'priority';
-            const row = document.createElement('tr');
-            row.style.borderBottom = '1px solid var(--border)';
-            row.innerHTML = `
+            btnAddProcess.addEventListener('click', () => {
+                procCounter++;
+                const color = COLORS[(procCounter - 1) % COLORS.length];
+                const showP = cpuAlgoSelect.value === 'priority';
+                const row = document.createElement('tr');
+                row.style.borderBottom = '1px solid var(--border)';
+                row.innerHTML = `
                 <td style="padding:8px; font-weight:bold; color:${color};">P${procCounter}</td>
                 <td style="padding:8px;"><input type="number" class="sim-select" style="width:70px;" value="0" min="0" id="at-P${procCounter}"></td>
                 <td style="padding:8px;"><input type="number" class="sim-select" style="width:70px;" value="3" min="1" id="bt-P${procCounter}"></td>
                 <td style="padding:8px; display:${showP ? '' : 'none'};" class="priority-col"><input type="number" class="sim-select" style="width:60px;" value="1" min="1" id="pr-P${procCounter}"></td>
                 <td style="padding:8px;"><button class="btn-sim" style="padding:3px 8px; font-size:11px;" onclick="this.closest('tr').remove();">✕</button></td>
             `;
-            cpuProcessRows.appendChild(row);
-        });
-
-        btnRunCpuSim.addEventListener('click', () => {
-            const processes = [];
-            cpuProcessRows.querySelectorAll('tr').forEach((row, i) => {
-                const pid = row.cells[0].textContent.trim();
-                const at = parseInt(row.querySelector('[id^="at-"]')?.value) || 0;
-                const bt = parseInt(row.querySelector('[id^="bt-"]')?.value) || 1;
-                const pr = parseInt(row.querySelector('[id^="pr-"]')?.value) || 1;
-                processes.push({ pid, at, bt, pr, color: COLORS[i % COLORS.length], ct: 0, tat: 0, wt: 0, rt: -1 });
+                cpuProcessRows.appendChild(row);
             });
-            if (!processes.length) return alert('Please configure at least one process.');
 
-            const algo = cpuAlgoSelect.value;
-            const gantt = [];
-            const n = processes.length;
-            let t = 0;
-
-            if (algo === 'fcfs') {
-                processes.sort((a, b) => a.at - b.at);
-                processes.forEach(p => {
-                    if (t < p.at) { gantt.push({ pid: 'Idle', start: t, end: p.at, color: '#374151' }); t = p.at; }
-                    if (p.rt < 0) p.rt = t - p.at;
-                    gantt.push({ pid: p.pid, start: t, end: t + p.bt, color: p.color });
-                    t += p.bt; p.ct = t; p.tat = p.ct - p.at; p.wt = p.tat - p.bt;
+            btnRunCpuSim.addEventListener('click', () => {
+                const processes = [];
+                cpuProcessRows.querySelectorAll('tr').forEach((row, i) => {
+                    const pid = row.cells[0].textContent.trim();
+                    const at = parseInt(row.querySelector('[id^="at-"]')?.value) || 0;
+                    const bt = parseInt(row.querySelector('[id^="bt-"]')?.value) || 1;
+                    const pr = parseInt(row.querySelector('[id^="pr-"]')?.value) || 1;
+                    processes.push({ pid, at, bt, pr, color: COLORS[i % COLORS.length], ct: 0, tat: 0, wt: 0, rt: -1 });
                 });
-            } else if (algo === 'sjf') {
-                const done = new Array(n).fill(false); let comp = 0;
-                while (comp < n) {
-                    let mi = -1, mb = Infinity;
-                    for (let i = 0; i < n; i++) { if (!done[i] && processes[i].at <= t && processes[i].bt < mb) { mb = processes[i].bt; mi = i; } }
-                    if (mi < 0) { gantt.push({ pid: 'Idle', start: t, end: t + 1, color: '#374151' }); t++; }
-                    else {
-                        const p = processes[mi]; if (p.rt < 0) p.rt = t - p.at;
+                if (!processes.length) return alert('Please configure at least one process.');
+
+                const algo = cpuAlgoSelect.value;
+                const gantt = [];
+                const n = processes.length;
+                let t = 0;
+
+                if (algo === 'fcfs') {
+                    processes.sort((a, b) => a.at - b.at);
+                    processes.forEach(p => {
+                        if (t < p.at) { gantt.push({ pid: 'Idle', start: t, end: p.at, color: '#374151' }); t = p.at; }
+                        if (p.rt < 0) p.rt = t - p.at;
                         gantt.push({ pid: p.pid, start: t, end: t + p.bt, color: p.color });
-                        t += p.bt; p.ct = t; p.tat = p.ct - p.at; p.wt = p.tat - p.bt; done[mi] = true; comp++;
+                        t += p.bt; p.ct = t; p.tat = p.ct - p.at; p.wt = p.tat - p.bt;
+                    });
+                } else if (algo === 'sjf') {
+                    const done = new Array(n).fill(false); let comp = 0;
+                    while (comp < n) {
+                        let mi = -1, mb = Infinity;
+                        for (let i = 0; i < n; i++) { if (!done[i] && processes[i].at <= t && processes[i].bt < mb) { mb = processes[i].bt; mi = i; } }
+                        if (mi < 0) { gantt.push({ pid: 'Idle', start: t, end: t + 1, color: '#374151' }); t++; }
+                        else {
+                            const p = processes[mi]; if (p.rt < 0) p.rt = t - p.at;
+                            gantt.push({ pid: p.pid, start: t, end: t + p.bt, color: p.color });
+                            t += p.bt; p.ct = t; p.tat = p.ct - p.at; p.wt = p.tat - p.bt; done[mi] = true; comp++;
+                        }
                     }
-                }
-            } else if (algo === 'srtf') {
-                const rem = processes.map(p => p.bt); const done = new Array(n).fill(false); let comp = 0;
-                while (comp < n) {
-                    let mi = -1, mr = Infinity;
-                    for (let i = 0; i < n; i++) { if (!done[i] && processes[i].at <= t && rem[i] < mr) { mr = rem[i]; mi = i; } }
-                    if (mi < 0) { gantt.push({ pid: 'Idle', start: t, end: t + 1, color: '#374151' }); t++; continue; }
-                    const p = processes[mi]; if (p.rt < 0) p.rt = t - p.at;
-                    if (gantt.length && gantt[gantt.length - 1].pid === p.pid) gantt[gantt.length - 1].end++;
-                    else gantt.push({ pid: p.pid, start: t, end: t + 1, color: p.color });
-                    rem[mi]--; t++;
-                    if (rem[mi] === 0) { done[mi] = true; comp++; p.ct = t; p.tat = p.ct - p.at; p.wt = p.tat - p.bt; }
-                }
-            } else if (algo === 'rr') {
-                const quantum = parseInt(document.getElementById('cpuQuantum').value) || 2;
-                const rem = processes.map(p => p.bt); processes.sort((a, b) => a.at - b.at);
-                const vis = new Array(n).fill(false); const q = [0]; vis[0] = true;
-                t = processes[0].at; if (t > 0) gantt.push({ pid: 'Idle', start: 0, end: t, color: '#374151' });
-                let comp = 0;
-                while (comp < n) {
-                    if (!q.length) {
-                        const nx = Math.min(...processes.filter((_, i) => !vis[i]).map(p => p.at));
-                        gantt.push({ pid: 'Idle', start: t, end: nx, color: '#374151' }); t = nx;
+                } else if (algo === 'srtf') {
+                    const rem = processes.map(p => p.bt); const done = new Array(n).fill(false); let comp = 0;
+                    while (comp < n) {
+                        let mi = -1, mr = Infinity;
+                        for (let i = 0; i < n; i++) { if (!done[i] && processes[i].at <= t && rem[i] < mr) { mr = rem[i]; mi = i; } }
+                        if (mi < 0) { gantt.push({ pid: 'Idle', start: t, end: t + 1, color: '#374151' }); t++; continue; }
+                        const p = processes[mi]; if (p.rt < 0) p.rt = t - p.at;
+                        if (gantt.length && gantt[gantt.length - 1].pid === p.pid) gantt[gantt.length - 1].end++;
+                        else gantt.push({ pid: p.pid, start: t, end: t + 1, color: p.color });
+                        rem[mi]--; t++;
+                        if (rem[mi] === 0) { done[mi] = true; comp++; p.ct = t; p.tat = p.ct - p.at; p.wt = p.tat - p.bt; }
+                    }
+                } else if (algo === 'rr') {
+                    const quantum = parseInt(document.getElementById('cpuQuantum').value) || 2;
+                    const rem = processes.map(p => p.bt); processes.sort((a, b) => a.at - b.at);
+                    const vis = new Array(n).fill(false); const q = [0]; vis[0] = true;
+                    t = processes[0].at; if (t > 0) gantt.push({ pid: 'Idle', start: 0, end: t, color: '#374151' });
+                    let comp = 0;
+                    while (comp < n) {
+                        if (!q.length) {
+                            const nx = Math.min(...processes.filter((_, i) => !vis[i]).map(p => p.at));
+                            gantt.push({ pid: 'Idle', start: t, end: nx, color: '#374151' }); t = nx;
+                            for (let i = 0; i < n; i++) { if (processes[i].at <= t && !vis[i]) { q.push(i); vis[i] = true; } }
+                        }
+                        const idx = q.shift(); const p = processes[idx];
+                        if (p.rt < 0) p.rt = t - p.at;
+                        const run = Math.min(rem[idx], quantum);
+                        gantt.push({ pid: p.pid, start: t, end: t + run, color: p.color }); t += run; rem[idx] -= run;
                         for (let i = 0; i < n; i++) { if (processes[i].at <= t && !vis[i]) { q.push(i); vis[i] = true; } }
+                        if (rem[idx] > 0) q.push(idx);
+                        else { p.ct = t; p.tat = p.ct - p.at; p.wt = p.tat - p.bt; comp++; }
                     }
-                    const idx = q.shift(); const p = processes[idx];
-                    if (p.rt < 0) p.rt = t - p.at;
-                    const run = Math.min(rem[idx], quantum);
-                    gantt.push({ pid: p.pid, start: t, end: t + run, color: p.color }); t += run; rem[idx] -= run;
-                    for (let i = 0; i < n; i++) { if (processes[i].at <= t && !vis[i]) { q.push(i); vis[i] = true; } }
-                    if (rem[idx] > 0) q.push(idx);
-                    else { p.ct = t; p.tat = p.ct - p.at; p.wt = p.tat - p.bt; comp++; }
-                }
-            } else if (algo === 'priority') {
-                const done = new Array(n).fill(false); let comp = 0;
-                while (comp < n) {
-                    let mi = -1, mp = Infinity;
-                    for (let i = 0; i < n; i++) { if (!done[i] && processes[i].at <= t && processes[i].pr < mp) { mp = processes[i].pr; mi = i; } }
-                    if (mi < 0) { gantt.push({ pid: 'Idle', start: t, end: t + 1, color: '#374151' }); t++; }
-                    else {
-                        const p = processes[mi]; if (p.rt < 0) p.rt = t - p.at;
-                        gantt.push({ pid: p.pid, start: t, end: t + p.bt, color: p.color });
-                        t += p.bt; p.ct = t; p.tat = p.ct - p.at; p.wt = p.tat - p.bt; done[mi] = true; comp++;
+                } else if (algo === 'priority') {
+                    const done = new Array(n).fill(false); let comp = 0;
+                    while (comp < n) {
+                        let mi = -1, mp = Infinity;
+                        for (let i = 0; i < n; i++) { if (!done[i] && processes[i].at <= t && processes[i].pr < mp) { mp = processes[i].pr; mi = i; } }
+                        if (mi < 0) { gantt.push({ pid: 'Idle', start: t, end: t + 1, color: '#374151' }); t++; }
+                        else {
+                            const p = processes[mi]; if (p.rt < 0) p.rt = t - p.at;
+                            gantt.push({ pid: p.pid, start: t, end: t + p.bt, color: p.color });
+                            t += p.bt; p.ct = t; p.tat = p.ct - p.at; p.wt = p.tat - p.bt; done[mi] = true; comp++;
+                        }
                     }
                 }
-            }
 
-            const ganttBox = document.getElementById('ganttChartContainer');
-            ganttBox.innerHTML = '';
-            gantt.forEach(block => {
-                const pct = Math.max(((block.end - block.start) / t) * 100, 1.5);
-                const div = document.createElement('div');
-                div.style.cssText = `width:${pct}%; height:100%; background:${block.color}; color:#fff; display:flex; flex-direction:column; align-items:center; justify-content:center; border-radius:4px; flex-shrink:0; transition:transform 0.2s; cursor:default;`;
-                div.title = `${block.pid}: t=${block.start}→${block.end} (Δ=${block.end - block.start})`;
-                div.innerHTML = `<span style="font-weight:800; font-size:12px; white-space:nowrap; overflow:hidden; max-width:95%;">${block.pid}</span><span style="font-size:9px; opacity:0.8;">${block.start}→${block.end}</span>`;
-                div.onmouseenter = () => div.style.transform = 'scaleY(1.08)';
-                div.onmouseleave = () => div.style.transform = '';
-                ganttBox.appendChild(div);
-            });
+                const ganttBox = document.getElementById('ganttChartContainer');
+                ganttBox.innerHTML = '';
+                gantt.forEach(block => {
+                    const pct = Math.max(((block.end - block.start) / t) * 100, 1.5);
+                    const div = document.createElement('div');
+                    div.style.cssText = `width:${pct}%; height:100%; background:${block.color}; color:#fff; display:flex; flex-direction:column; align-items:center; justify-content:center; border-radius:4px; flex-shrink:0; transition:transform 0.2s; cursor:default;`;
+                    div.title = `${block.pid}: t=${block.start}→${block.end} (Δ=${block.end - block.start})`;
+                    div.innerHTML = `<span style="font-weight:800; font-size:12px; white-space:nowrap; overflow:hidden; max-width:95%;">${block.pid}</span><span style="font-size:9px; opacity:0.8;">${block.start}→${block.end}</span>`;
+                    div.onmouseenter = () => div.style.transform = 'scaleY(1.08)';
+                    div.onmouseleave = () => div.style.transform = '';
+                    ganttBox.appendChild(div);
+                });
 
-            const tbody = document.getElementById('cpuAnalysisRows');
-            tbody.innerHTML = '';
-            let sTAT = 0, sWT = 0, sRT = 0, idle = 0;
-            gantt.forEach(b => { if (b.pid === 'Idle') idle += b.end - b.start; });
-            processes.forEach(p => {
-                sTAT += p.tat; sWT += p.wt; sRT += Math.max(0, p.rt);
-                tbody.innerHTML += `<tr style="border-bottom:1px solid var(--border);">
+                const tbody = document.getElementById('cpuAnalysisRows');
+                tbody.innerHTML = '';
+                let sTAT = 0, sWT = 0, sRT = 0, idle = 0;
+                gantt.forEach(b => { if (b.pid === 'Idle') idle += b.end - b.start; });
+                processes.forEach(p => {
+                    sTAT += p.tat; sWT += p.wt; sRT += Math.max(0, p.rt);
+                    tbody.innerHTML += `<tr style="border-bottom:1px solid var(--border);">
                     <td style="padding:8px; font-weight:bold; color:${p.color};">${p.pid}</td>
                     <td style="padding:8px;">${p.at}</td><td style="padding:8px;">${p.bt}</td>
                     <td style="padding:8px; color:var(--success);">${p.ct}</td>
@@ -8733,31 +8737,31 @@ ${cfg.diagram}
                     <td style="padding:8px; color:var(--warning);">${p.wt}</td>
                     <td style="padding:8px; color:var(--danger);">${p.rt >= 0 ? p.rt : '-'}</td>
                 </tr>`;
+                });
+                document.getElementById('cpuAvgTAT').textContent = (sTAT / n).toFixed(2);
+                document.getElementById('cpuAvgWT').textContent = (sWT / n).toFixed(2);
+                document.getElementById('cpuAvgRT').textContent = (sRT / n).toFixed(2);
+                document.getElementById('cpuUtil').textContent = (((t - idle) / t) * 100).toFixed(1) + '%';
+                document.getElementById('cpuResultsPanel').style.display = 'block';
             });
-            document.getElementById('cpuAvgTAT').textContent = (sTAT / n).toFixed(2);
-            document.getElementById('cpuAvgWT').textContent = (sWT / n).toFixed(2);
-            document.getElementById('cpuAvgRT').textContent = (sRT / n).toFixed(2);
-            document.getElementById('cpuUtil').textContent = (((t - idle) / t) * 100).toFixed(1) + '%';
-            document.getElementById('cpuResultsPanel').style.display = 'block';
-        });
 
-        // Pre-select algorithm based on active module index
-        if (window.currentModuleIndex === 0) {
-            cpuAlgoSelect.value = 'fcfs';
-        } else if (window.currentModuleIndex === 1) {
-            cpuAlgoSelect.value = 'sjf';
-        } else if (window.currentModuleIndex === 2) {
-            cpuAlgoSelect.value = 'rr';
-        }
-        cpuAlgoSelect.dispatchEvent(new Event('change'));
-    };
+            // Pre-select algorithm based on active module index
+            if (window.currentModuleIndex === 0) {
+                cpuAlgoSelect.value = 'fcfs';
+            } else if (window.currentModuleIndex === 1) {
+                cpuAlgoSelect.value = 'sjf';
+            } else if (window.currentModuleIndex === 2) {
+                cpuAlgoSelect.value = 'rr';
+            }
+            cpuAlgoSelect.dispatchEvent(new Event('change'));
+        };
 
 
-    const initProcessSyncSim = (container) => {
-        const modIdx = window.currentModuleIndex !== undefined && window.currentModuleIndex !== null ? window.currentModuleIndex : 0;
-        
-        if (modIdx === 0) {
-            container.innerHTML = `
+        const initProcessSyncSim = (container) => {
+            const modIdx = window.currentModuleIndex !== undefined && window.currentModuleIndex !== null ? window.currentModuleIndex : 0;
+
+            if (modIdx === 0) {
+                container.innerHTML = `
                 <div class="sim-toolbar">
                     <div class="section-title" style="font-size:22px; margin:0; color:var(--primary);">Producer-Consumer Semaphore Sim</div>
                 </div>
@@ -8807,115 +8811,115 @@ ${cfg.diagram}
                     </div>
                 </div>
             `;
-    
-            const bufferSlots = document.getElementById('bufferSlots');
-            const syncMutex = document.getElementById('syncMutex');
-            const syncEmpty = document.getElementById('syncEmpty');
-            const syncFull = document.getElementById('syncFull');
-            const syncLog = document.getElementById('syncLog');
-    
-            const bufferSize = 5;
-            let buffer = new Array(bufferSize).fill(null);
-            let inPtr = 0;
-            let outPtr = 0;
-            let count = 0;
-    
-            let autoPlayTimer = null;
-    
-            const updateBufferUI = () => {
-                bufferSlots.innerHTML = '';
-                for (let i = 0; i < bufferSize; i++) {
-                    const slot = document.createElement('div');
-                    slot.style.cssText = `
+
+                const bufferSlots = document.getElementById('bufferSlots');
+                const syncMutex = document.getElementById('syncMutex');
+                const syncEmpty = document.getElementById('syncEmpty');
+                const syncFull = document.getElementById('syncFull');
+                const syncLog = document.getElementById('syncLog');
+
+                const bufferSize = 5;
+                let buffer = new Array(bufferSize).fill(null);
+                let inPtr = 0;
+                let outPtr = 0;
+                let count = 0;
+
+                let autoPlayTimer = null;
+
+                const updateBufferUI = () => {
+                    bufferSlots.innerHTML = '';
+                    for (let i = 0; i < bufferSize; i++) {
+                        const slot = document.createElement('div');
+                        slot.style.cssText = `
                         width: 60px; height: 60px; border-radius: 12px;
                         border: 2px solid ${buffer[i] ? 'var(--primary)' : 'var(--border)'};
                         display: flex; align-items: center; justify-content: center;
                         font-size: 24px; position: relative; background: var(--container-bg);
                         transition: all 0.3s ease;
                     `;
-                    if (buffer[i]) {
-                        slot.style.boxShadow = '0 0 15px rgba(168,85,247,0.2)';
-                        slot.innerHTML = '📦';
-                        const idx = document.createElement('span');
-                        idx.textContent = `Item ${buffer[i]}`;
-                        idx.style.cssText = 'font-size:9px; position:absolute; bottom:2px; color:var(--text-muted);';
-                        slot.appendChild(idx);
-                    } else {
-                        slot.innerHTML = '⚙️';
-                        slot.style.opacity = '0.4';
-                    }
-                    bufferSlots.appendChild(slot);
-                }
-                syncMutex.textContent = '1';
-                syncEmpty.textContent = bufferSize - count;
-                syncFull.textContent = count;
-            };
-    
-            const logOp = (msg, type = 'info') => {
-                const div = document.createElement('div');
-                const color = type === 'produce' ? 'var(--primary)' : (type === 'consume' ? 'var(--success)' : 'var(--danger)');
-                div.innerHTML = `<span style="color:${color}; font-weight:800;">&gt;</span> ${msg}`;
-                syncLog.appendChild(div);
-                syncLog.scrollTop = syncLog.scrollHeight;
-            };
-    
-            updateBufferUI();
-    
-            document.getElementById('btnProduceSync').addEventListener('click', () => {
-                if (count >= bufferSize) {
-                    logOp("PRODUCER BLOCKED: Buffer is full! (empty semaphore = 0)", "error");
-                    return;
-                }
-                const itemId = Math.floor(Math.random() * 900) + 100;
-                logOp(`Producer calls wait(empty) -> empty=${bufferSize - count - 1}`, "info");
-                logOp(`Producer enters critical section: wait(mutex)`, "info");
-                buffer[inPtr] = itemId;
-                logOp(`Producer added Item ${itemId} at slot ${inPtr + 1}`, "produce");
-                inPtr = (inPtr + 1) % bufferSize;
-                count++;
-                logOp(`Producer exits critical section: signal(mutex)`, "info");
-                logOp(`Producer signals full -> full=${count}`, "info");
-                updateBufferUI();
-            });
-    
-            document.getElementById('btnConsumeSync').addEventListener('click', () => {
-                if (count === 0) {
-                    logOp("CONSUMER BLOCKED: Buffer is empty! (full semaphore = 0)", "error");
-                    return;
-                }
-                logOp(`Consumer calls wait(full) -> full=${count - 1}`, "info");
-                logOp(`Consumer enters critical section: wait(mutex)`, "info");
-                const item = buffer[outPtr];
-                buffer[outPtr] = null;
-                logOp(`Consumer retrieved Item ${item} from slot ${outPtr + 1}`, "consume");
-                outPtr = (outPtr + 1) % bufferSize;
-                count--;
-                logOp(`Consumer exits critical section: signal(mutex)`, "info");
-                logOp(`Consumer signals empty -> empty=${bufferSize - count}`, "info");
-                updateBufferUI();
-            });
-    
-            document.getElementById('btnAutoSync').addEventListener('click', () => {
-                const btn = document.getElementById('btnAutoSync');
-                if (autoPlayTimer) {
-                    clearInterval(autoPlayTimer);
-                    autoPlayTimer = null;
-                    btn.textContent = "Toggle Auto Play";
-                    btn.classList.remove('primary');
-                } else {
-                    btn.textContent = "Stop Auto Play";
-                    btn.classList.add('primary');
-                    autoPlayTimer = setInterval(() => {
-                        if (Math.random() > 0.4) {
-                            document.getElementById('btnProduceSync').click();
+                        if (buffer[i]) {
+                            slot.style.boxShadow = '0 0 15px rgba(168,85,247,0.2)';
+                            slot.innerHTML = '📦';
+                            const idx = document.createElement('span');
+                            idx.textContent = `Item ${buffer[i]}`;
+                            idx.style.cssText = 'font-size:9px; position:absolute; bottom:2px; color:var(--text-muted);';
+                            slot.appendChild(idx);
                         } else {
-                            document.getElementById('btnConsumeSync').click();
+                            slot.innerHTML = '⚙️';
+                            slot.style.opacity = '0.4';
                         }
-                    }, 1500);
-                }
-            });
-        } else if (modIdx === 1) {
-            container.innerHTML = `
+                        bufferSlots.appendChild(slot);
+                    }
+                    syncMutex.textContent = '1';
+                    syncEmpty.textContent = bufferSize - count;
+                    syncFull.textContent = count;
+                };
+
+                const logOp = (msg, type = 'info') => {
+                    const div = document.createElement('div');
+                    const color = type === 'produce' ? 'var(--primary)' : (type === 'consume' ? 'var(--success)' : 'var(--danger)');
+                    div.innerHTML = `<span style="color:${color}; font-weight:800;">&gt;</span> ${msg}`;
+                    syncLog.appendChild(div);
+                    syncLog.scrollTop = syncLog.scrollHeight;
+                };
+
+                updateBufferUI();
+
+                document.getElementById('btnProduceSync').addEventListener('click', () => {
+                    if (count >= bufferSize) {
+                        logOp("PRODUCER BLOCKED: Buffer is full! (empty semaphore = 0)", "error");
+                        return;
+                    }
+                    const itemId = Math.floor(Math.random() * 900) + 100;
+                    logOp(`Producer calls wait(empty) -> empty=${bufferSize - count - 1}`, "info");
+                    logOp(`Producer enters critical section: wait(mutex)`, "info");
+                    buffer[inPtr] = itemId;
+                    logOp(`Producer added Item ${itemId} at slot ${inPtr + 1}`, "produce");
+                    inPtr = (inPtr + 1) % bufferSize;
+                    count++;
+                    logOp(`Producer exits critical section: signal(mutex)`, "info");
+                    logOp(`Producer signals full -> full=${count}`, "info");
+                    updateBufferUI();
+                });
+
+                document.getElementById('btnConsumeSync').addEventListener('click', () => {
+                    if (count === 0) {
+                        logOp("CONSUMER BLOCKED: Buffer is empty! (full semaphore = 0)", "error");
+                        return;
+                    }
+                    logOp(`Consumer calls wait(full) -> full=${count - 1}`, "info");
+                    logOp(`Consumer enters critical section: wait(mutex)`, "info");
+                    const item = buffer[outPtr];
+                    buffer[outPtr] = null;
+                    logOp(`Consumer retrieved Item ${item} from slot ${outPtr + 1}`, "consume");
+                    outPtr = (outPtr + 1) % bufferSize;
+                    count--;
+                    logOp(`Consumer exits critical section: signal(mutex)`, "info");
+                    logOp(`Consumer signals empty -> empty=${bufferSize - count}`, "info");
+                    updateBufferUI();
+                });
+
+                document.getElementById('btnAutoSync').addEventListener('click', () => {
+                    const btn = document.getElementById('btnAutoSync');
+                    if (autoPlayTimer) {
+                        clearInterval(autoPlayTimer);
+                        autoPlayTimer = null;
+                        btn.textContent = "Toggle Auto Play";
+                        btn.classList.remove('primary');
+                    } else {
+                        btn.textContent = "Stop Auto Play";
+                        btn.classList.add('primary');
+                        autoPlayTimer = setInterval(() => {
+                            if (Math.random() > 0.4) {
+                                document.getElementById('btnProduceSync').click();
+                            } else {
+                                document.getElementById('btnConsumeSync').click();
+                            }
+                        }, 1500);
+                    }
+                });
+            } else if (modIdx === 1) {
+                container.innerHTML = `
                 <div class="sim-toolbar">
                     <div class="section-title" style="font-size:22px; margin:0; color:var(--primary);">Readers-Writers Mutex Sim</div>
                 </div>
@@ -8974,139 +8978,139 @@ ${cfg.diagram}
                     </div>
                 </div>
             `;
-    
-            const rwLog = document.getElementById('rwLog');
-            const rwReadCount = document.getElementById('rwReadCount');
-            const rwMutex = document.getElementById('rwMutex');
-            const rwWrt = document.getElementById('rwWrt');
-            const dbResourceState = document.getElementById('dbResourceState');
-            const dbStateIcon = document.getElementById('dbStateIcon');
-            const dbStateText = document.getElementById('dbStateText');
-            const activeReadersText = document.getElementById('activeReadersText');
-            const writersQueueText = document.getElementById('writersQueueText');
-    
-            let readers = [];
-            let writersQueue = [];
-            let activeWriter = null;
-            let readcount = 0;
-            let mutex = 1;
-            let wrt = 1;
-            let nextReaderId = 1;
-            let nextWriterId = 1;
-    
-            const logRw = (msg, type = 'info') => {
-                const div = document.createElement('div');
-                let color = 'var(--text-main)';
-                if (type === 'read') color = 'var(--primary)';
-                else if (type === 'write') color = 'var(--warning)';
-                else if (type === 'error') color = 'var(--danger)';
-                div.innerHTML = `<span style="color:${color}; font-weight:800;">&gt;</span> ${msg}`;
-                rwLog.appendChild(div);
-                rwLog.scrollTop = rwLog.scrollHeight;
-            };
-    
-            const updateRwUI = () => {
-                rwReadCount.textContent = readcount;
-                rwMutex.textContent = mutex;
-                rwWrt.textContent = wrt;
-                
-                if (activeWriter) {
-                    dbResourceState.style.borderColor = 'var(--warning)';
-                    dbStateIcon.textContent = '📝';
-                    dbStateText.textContent = `Writer ${activeWriter} active`;
-                    dbStateText.style.color = 'var(--warning)';
-                } else if (readcount > 0) {
-                    dbResourceState.style.borderColor = 'var(--primary)';
-                    dbStateIcon.textContent = '📖';
-                    dbStateText.textContent = `${readcount} Reader(s) active`;
-                    dbStateText.style.color = 'var(--primary)';
-                } else {
-                    dbResourceState.style.borderColor = 'var(--success)';
-                    dbStateIcon.textContent = '🟢';
-                    dbStateText.textContent = 'Idle / Free';
-                    dbStateText.style.color = 'var(--success)';
-                }
-    
-                activeReadersText.textContent = readers.length > 0 ? readers.map(r => `Reader ${r}`).join(', ') : 'None';
-                writersQueueText.textContent = writersQueue.length > 0 ? writersQueue.map(w => `Writer ${w}`).join(', ') : 'None';
-            };
-    
-            document.getElementById('btnAddReader').addEventListener('click', () => {
-                const rId = nextReaderId++;
-                logRw(`Reader ${rId} arrives at database.`, 'info');
-                if (activeWriter || writersQueue.length > 0) {
-                    logRw(`Reader ${rId} blocked. Writer active or waiting.`, 'error');
-                } else {
+
+                const rwLog = document.getElementById('rwLog');
+                const rwReadCount = document.getElementById('rwReadCount');
+                const rwMutex = document.getElementById('rwMutex');
+                const rwWrt = document.getElementById('rwWrt');
+                const dbResourceState = document.getElementById('dbResourceState');
+                const dbStateIcon = document.getElementById('dbStateIcon');
+                const dbStateText = document.getElementById('dbStateText');
+                const activeReadersText = document.getElementById('activeReadersText');
+                const writersQueueText = document.getElementById('writersQueueText');
+
+                let readers = [];
+                let writersQueue = [];
+                let activeWriter = null;
+                let readcount = 0;
+                let mutex = 1;
+                let wrt = 1;
+                let nextReaderId = 1;
+                let nextWriterId = 1;
+
+                const logRw = (msg, type = 'info') => {
+                    const div = document.createElement('div');
+                    let color = 'var(--text-main)';
+                    if (type === 'read') color = 'var(--primary)';
+                    else if (type === 'write') color = 'var(--warning)';
+                    else if (type === 'error') color = 'var(--danger)';
+                    div.innerHTML = `<span style="color:${color}; font-weight:800;">&gt;</span> ${msg}`;
+                    rwLog.appendChild(div);
+                    rwLog.scrollTop = rwLog.scrollHeight;
+                };
+
+                const updateRwUI = () => {
+                    rwReadCount.textContent = readcount;
+                    rwMutex.textContent = mutex;
+                    rwWrt.textContent = wrt;
+
+                    if (activeWriter) {
+                        dbResourceState.style.borderColor = 'var(--warning)';
+                        dbStateIcon.textContent = '📝';
+                        dbStateText.textContent = `Writer ${activeWriter} active`;
+                        dbStateText.style.color = 'var(--warning)';
+                    } else if (readcount > 0) {
+                        dbResourceState.style.borderColor = 'var(--primary)';
+                        dbStateIcon.textContent = '📖';
+                        dbStateText.textContent = `${readcount} Reader(s) active`;
+                        dbStateText.style.color = 'var(--primary)';
+                    } else {
+                        dbResourceState.style.borderColor = 'var(--success)';
+                        dbStateIcon.textContent = '🟢';
+                        dbStateText.textContent = 'Idle / Free';
+                        dbStateText.style.color = 'var(--success)';
+                    }
+
+                    activeReadersText.textContent = readers.length > 0 ? readers.map(r => `Reader ${r}`).join(', ') : 'None';
+                    writersQueueText.textContent = writersQueue.length > 0 ? writersQueue.map(w => `Writer ${w}`).join(', ') : 'None';
+                };
+
+                document.getElementById('btnAddReader').addEventListener('click', () => {
+                    const rId = nextReaderId++;
+                    logRw(`Reader ${rId} arrives at database.`, 'info');
+                    if (activeWriter || writersQueue.length > 0) {
+                        logRw(`Reader ${rId} blocked. Writer active or waiting.`, 'error');
+                    } else {
+                        logRw(`Reader ${rId} executes wait(mutex) -> locking readcount.`, 'info');
+                        mutex = 0;
+                        readcount++;
+                        if (readcount === 1) {
+                            logRw(`First Reader ${rId} calls wait(wrt) -> locking database.`, 'info');
+                            wrt = 0;
+                        }
+                        mutex = 1;
+                        logRw(`Reader ${rId} executes signal(mutex) -> releasing readcount.`, 'info');
+                        readers.push(rId);
+                        logRw(`Reader ${rId} starts reading database.`, 'read');
+                    }
+                    updateRwUI();
+                });
+
+                document.getElementById('btnRemoveReader').addEventListener('click', () => {
+                    if (readers.length === 0) return;
+                    const rId = readers.shift();
+                    logRw(`Reader ${rId} finishes reading.`, 'info');
                     logRw(`Reader ${rId} executes wait(mutex) -> locking readcount.`, 'info');
                     mutex = 0;
-                    readcount++;
-                    if (readcount === 1) {
-                        logRw(`First Reader ${rId} calls wait(wrt) -> locking database.`, 'info');
-                        wrt = 0;
+                    readcount--;
+                    if (readcount === 0) {
+                        logRw(`Last Reader ${rId} calls signal(wrt) -> releasing database lock.`, 'info');
+                        wrt = 1;
+                        if (writersQueue.length > 0) {
+                            const wId = writersQueue.shift();
+                            activeWriter = wId;
+                            wrt = 0;
+                            logRw(`Waiting Writer ${wId} scheduled. calls wait(wrt) -> DB locked.`, 'write');
+                        }
                     }
                     mutex = 1;
                     logRw(`Reader ${rId} executes signal(mutex) -> releasing readcount.`, 'info');
-                    readers.push(rId);
-                    logRw(`Reader ${rId} starts reading database.`, 'read');
-                }
-                updateRwUI();
-            });
-    
-            document.getElementById('btnRemoveReader').addEventListener('click', () => {
-                if (readers.length === 0) return;
-                const rId = readers.shift();
-                logRw(`Reader ${rId} finishes reading.`, 'info');
-                logRw(`Reader ${rId} executes wait(mutex) -> locking readcount.`, 'info');
-                mutex = 0;
-                readcount--;
-                if (readcount === 0) {
-                    logRw(`Last Reader ${rId} calls signal(wrt) -> releasing database lock.`, 'info');
-                    wrt = 1;
-                    if (writersQueue.length > 0) {
-                        const wId = writersQueue.shift();
-                        activeWriter = wId;
+                    updateRwUI();
+                });
+
+                document.getElementById('btnAddWriter').addEventListener('click', () => {
+                    const wId = nextWriterId++;
+                    logRw(`Writer ${wId} requests database write access.`, 'info');
+                    if (wrt === 0 || readcount > 0 || activeWriter) {
+                        logRw(`Database busy. Writer ${wId} queued in waiting line.`, 'error');
+                        writersQueue.push(wId);
+                    } else {
                         wrt = 0;
-                        logRw(`Waiting Writer ${wId} scheduled. calls wait(wrt) -> DB locked.`, 'write');
+                        activeWriter = wId;
+                        logRw(`Writer ${wId} acquires wrt lock -> database locked.`, 'write');
                     }
-                }
-                mutex = 1;
-                logRw(`Reader ${rId} executes signal(mutex) -> releasing readcount.`, 'info');
-                updateRwUI();
-            });
-    
-            document.getElementById('btnAddWriter').addEventListener('click', () => {
-                const wId = nextWriterId++;
-                logRw(`Writer ${wId} requests database write access.`, 'info');
-                if (wrt === 0 || readcount > 0 || activeWriter) {
-                    logRw(`Database busy. Writer ${wId} queued in waiting line.`, 'error');
-                    writersQueue.push(wId);
-                } else {
-                    wrt = 0;
-                    activeWriter = wId;
-                    logRw(`Writer ${wId} acquires wrt lock -> database locked.`, 'write');
-                }
-                updateRwUI();
-            });
-    
-            document.getElementById('btnRemoveWriter').addEventListener('click', () => {
-                if (!activeWriter) return;
-                const wId = activeWriter;
-                activeWriter = null;
-                wrt = 1;
-                logRw(`Writer ${wId} finishes writing and releases wrt lock (signal(wrt)).`, 'info');
-                
-                if (writersQueue.length > 0) {
-                    const nextW = writersQueue.shift();
-                    activeWriter = nextW;
-                    wrt = 0;
-                    logRw(`Waiting Writer ${nextW} starts writing immediately (acquires wrt lock).`, 'write');
-                } else {
-                    logRw("Database is now completely free.", 'info');
-                }
-                updateRwUI();
-            });
-        } else if (modIdx === 2) {
-            container.innerHTML = `
+                    updateRwUI();
+                });
+
+                document.getElementById('btnRemoveWriter').addEventListener('click', () => {
+                    if (!activeWriter) return;
+                    const wId = activeWriter;
+                    activeWriter = null;
+                    wrt = 1;
+                    logRw(`Writer ${wId} finishes writing and releases wrt lock (signal(wrt)).`, 'info');
+
+                    if (writersQueue.length > 0) {
+                        const nextW = writersQueue.shift();
+                        activeWriter = nextW;
+                        wrt = 0;
+                        logRw(`Waiting Writer ${nextW} starts writing immediately (acquires wrt lock).`, 'write');
+                    } else {
+                        logRw("Database is now completely free.", 'info');
+                    }
+                    updateRwUI();
+                });
+            } else if (modIdx === 2) {
+                container.innerHTML = `
                 <div class="sim-toolbar">
                     <div class="section-title" style="font-size:22px; margin:0; color:var(--primary);">Dining Philosophers Visualizer</div>
                 </div>
@@ -9166,30 +9170,30 @@ ${cfg.diagram}
                     </div>
                 </div>
             `;
-    
-            const philoLog = document.getElementById('philoLog');
-            const chopsticksList = document.getElementById('chopsticksList');
-            
-            let philoStates = new Array(5).fill('thinking'); // thinking, hungry, eating
-            let chopsticks = new Array(5).fill(1); // 1 = available, 0 = taken
-            let philoEatingTimers = new Array(5).fill(null);
-            let philoAutoTimer = null;
-    
-            const logPhilo = (msg, type = 'info') => {
-                const div = document.createElement('div');
-                let color = 'var(--text-main)';
-                if (type === 'eat') color = 'var(--primary)';
-                else if (type === 'hungry') color = 'var(--warning)';
-                else if (type === 'deadlock') color = 'var(--danger)';
-                div.innerHTML = `<span style="color:${color}; font-weight:800;">&gt;</span> ${msg}`;
-                philoLog.appendChild(div);
-                philoLog.scrollTop = philoLog.scrollHeight;
-            };
-    
-            const updatePhiloUI = () => {
-                chopsticksList.innerHTML = '';
-                for (let i = 0; i < 5; i++) {
-                    chopsticksList.innerHTML += `
+
+                const philoLog = document.getElementById('philoLog');
+                const chopsticksList = document.getElementById('chopsticksList');
+
+                let philoStates = new Array(5).fill('thinking'); // thinking, hungry, eating
+                let chopsticks = new Array(5).fill(1); // 1 = available, 0 = taken
+                let philoEatingTimers = new Array(5).fill(null);
+                let philoAutoTimer = null;
+
+                const logPhilo = (msg, type = 'info') => {
+                    const div = document.createElement('div');
+                    let color = 'var(--text-main)';
+                    if (type === 'eat') color = 'var(--primary)';
+                    else if (type === 'hungry') color = 'var(--warning)';
+                    else if (type === 'deadlock') color = 'var(--danger)';
+                    div.innerHTML = `<span style="color:${color}; font-weight:800;">&gt;</span> ${msg}`;
+                    philoLog.appendChild(div);
+                    philoLog.scrollTop = philoLog.scrollHeight;
+                };
+
+                const updatePhiloUI = () => {
+                    chopsticksList.innerHTML = '';
+                    for (let i = 0; i < 5; i++) {
+                        chopsticksList.innerHTML += `
                         <div style="display:flex; justify-content:space-between; padding:6px 12px; background:var(--bg-page); border:1px solid var(--border); border-radius:6px; font-size:11px;">
                             <span><b>Chopstick ${i}:</b></span>
                             <span style="font-family:monospace; font-weight:800; color:${chopsticks[i] === 1 ? 'var(--success)' : 'var(--danger)'};">
@@ -9197,146 +9201,146 @@ ${cfg.diagram}
                             </span>
                         </div>
                     `;
-                    
-                    const line = document.getElementById(`chopstickLine${i}`);
-                    if (line) {
-                        line.setAttribute('stroke', chopsticks[i] === 1 ? 'var(--success)' : 'var(--danger)');
+
+                        const line = document.getElementById(`chopstickLine${i}`);
+                        if (line) {
+                            line.setAttribute('stroke', chopsticks[i] === 1 ? 'var(--success)' : 'var(--danger)');
+                        }
                     }
-                }
-    
+
+                    for (let i = 0; i < 5; i++) {
+                        const circle = document.getElementById(`philoCircle${i}`);
+                        if (circle) {
+                            if (philoStates[i] === 'eating') {
+                                circle.setAttribute('fill', '#a855f7');
+                                circle.setAttribute('stroke', '#c084fc');
+                            } else if (philoStates[i] === 'hungry') {
+                                circle.setAttribute('fill', '#f59e0b');
+                                circle.setAttribute('stroke', '#fbbf24');
+                            } else {
+                                circle.setAttribute('fill', 'var(--bg-card)');
+                                circle.setAttribute('stroke', 'var(--border)');
+                            }
+                        }
+                    }
+                };
+
+                const tryEat = (philoIdx) => {
+                    if (philoStates[philoIdx] !== 'hungry') return;
+
+                    const left = philoIdx;
+                    const right = (philoIdx + 1) % 5;
+
+                    if (philoIdx % 2 !== 0) {
+                        if (chopsticks[left] === 1) {
+                            logPhilo(`Philosopher ${philoIdx} (Odd) picks up Left Chopstick ${left}.`, 'info');
+                            if (chopsticks[right] === 1) {
+                                chopsticks[left] = 0;
+                                chopsticks[right] = 0;
+                                philoStates[philoIdx] = 'eating';
+                                logPhilo(`Philosopher ${philoIdx} picks up Right Chopstick ${right} and starts EATING.`, 'eat');
+                                startEatingTimer(philoIdx);
+                            } else {
+                                logPhilo(`Philosopher ${philoIdx} waiting for Right Chopstick ${right}...`, 'hungry');
+                            }
+                        }
+                    } else {
+                        if (chopsticks[right] === 1) {
+                            logPhilo(`Philosopher ${philoIdx} (Even) picks up Right Chopstick ${right}.`, 'info');
+                            if (chopsticks[left] === 1) {
+                                chopsticks[right] = 0;
+                                chopsticks[left] = 0;
+                                philoStates[philoIdx] = 'eating';
+                                logPhilo(`Philosopher ${philoIdx} picks up Left Chopstick ${left} and starts EATING.`, 'eat');
+                                startEatingTimer(philoIdx);
+                            } else {
+                                logPhilo(`Philosopher ${philoIdx} waiting for Left Chopstick ${left}...`, 'hungry');
+                            }
+                        }
+                    }
+                    updatePhiloUI();
+                };
+
+                const startEatingTimer = (philoIdx) => {
+                    if (philoEatingTimers[philoIdx]) clearTimeout(philoEatingTimers[philoIdx]);
+                    philoEatingTimers[philoIdx] = setTimeout(() => {
+                        philoStates[philoIdx] = 'thinking';
+                        const left = philoIdx;
+                        const right = (philoIdx + 1) % 5;
+                        chopsticks[left] = 1;
+                        chopsticks[right] = 1;
+                        logPhilo(`Philosopher ${philoIdx} finished eating. Released Chopsticks ${left} and ${right}.`, 'info');
+                        updatePhiloUI();
+
+                        const leftNeighbor = (philoIdx + 4) % 5;
+                        const rightNeighbor = (philoIdx + 1) % 5;
+                        tryEat(leftNeighbor);
+                        tryEat(rightNeighbor);
+                    }, 3000);
+                };
+
                 for (let i = 0; i < 5; i++) {
                     const circle = document.getElementById(`philoCircle${i}`);
                     if (circle) {
-                        if (philoStates[i] === 'eating') {
-                            circle.setAttribute('fill', '#a855f7');
-                            circle.setAttribute('stroke', '#c084fc');
-                        } else if (philoStates[i] === 'hungry') {
-                            circle.setAttribute('fill', '#f59e0b');
-                            circle.setAttribute('stroke', '#fbbf24');
-                        } else {
-                            circle.setAttribute('fill', 'var(--bg-card)');
-                            circle.setAttribute('stroke', 'var(--border)');
-                        }
+                        circle.style.cursor = 'pointer';
+                        circle.addEventListener('click', () => {
+                            if (philoStates[i] === 'thinking') {
+                                philoStates[i] = 'hungry';
+                                logPhilo(`Philosopher ${i} gets HUNGRY.`, 'hungry');
+                                updatePhiloUI();
+                                tryEat(i);
+                            }
+                        });
                     }
                 }
-            };
-    
-            const tryEat = (philoIdx) => {
-                if (philoStates[philoIdx] !== 'hungry') return;
-    
-                const left = philoIdx;
-                const right = (philoIdx + 1) % 5;
-    
-                if (philoIdx % 2 !== 0) {
-                    if (chopsticks[left] === 1) {
-                        logPhilo(`Philosopher ${philoIdx} (Odd) picks up Left Chopstick ${left}.`, 'info');
-                        if (chopsticks[right] === 1) {
-                            chopsticks[left] = 0;
-                            chopsticks[right] = 0;
-                            philoStates[philoIdx] = 'eating';
-                            logPhilo(`Philosopher ${philoIdx} picks up Right Chopstick ${right} and starts EATING.`, 'eat');
-                            startEatingTimer(philoIdx);
-                        } else {
-                            logPhilo(`Philosopher ${philoIdx} waiting for Right Chopstick ${right}...`, 'hungry');
-                        }
-                    }
-                } else {
-                    if (chopsticks[right] === 1) {
-                        logPhilo(`Philosopher ${philoIdx} (Even) picks up Right Chopstick ${right}.`, 'info');
-                        if (chopsticks[left] === 1) {
-                            chopsticks[right] = 0;
-                            chopsticks[left] = 0;
-                            philoStates[philoIdx] = 'eating';
-                            logPhilo(`Philosopher ${philoIdx} picks up Left Chopstick ${left} and starts EATING.`, 'eat');
-                            startEatingTimer(philoIdx);
-                        } else {
-                            logPhilo(`Philosopher ${philoIdx} waiting for Left Chopstick ${left}...`, 'hungry');
-                        }
-                    }
-                }
-                updatePhiloUI();
-            };
-    
-            const startEatingTimer = (philoIdx) => {
-                if (philoEatingTimers[philoIdx]) clearTimeout(philoEatingTimers[philoIdx]);
-                philoEatingTimers[philoIdx] = setTimeout(() => {
-                    philoStates[philoIdx] = 'thinking';
-                    const left = philoIdx;
-                    const right = (philoIdx + 1) % 5;
-                    chopsticks[left] = 1;
-                    chopsticks[right] = 1;
-                    logPhilo(`Philosopher ${philoIdx} finished eating. Released Chopsticks ${left} and ${right}.`, 'info');
-                    updatePhiloUI();
-                    
-                    const leftNeighbor = (philoIdx + 4) % 5;
-                    const rightNeighbor = (philoIdx + 1) % 5;
-                    tryEat(leftNeighbor);
-                    tryEat(rightNeighbor);
-                }, 3000);
-            };
-    
-            for (let i = 0; i < 5; i++) {
-                const circle = document.getElementById(`philoCircle${i}`);
-                if (circle) {
-                    circle.style.cursor = 'pointer';
-                    circle.addEventListener('click', () => {
-                        if (philoStates[i] === 'thinking') {
-                            philoStates[i] = 'hungry';
-                            logPhilo(`Philosopher ${i} gets HUNGRY.`, 'hungry');
-                            updatePhiloUI();
-                            tryEat(i);
-                        }
-                    });
-                }
-            }
-    
-            document.getElementById('btnPhiloReset').addEventListener('click', () => {
-                philoStates.fill('thinking');
-                chopsticks.fill(1);
-                philoEatingTimers.forEach(t => { if (t) clearTimeout(t); });
-                philoEatingTimers.fill(null);
-                if (philoAutoTimer) {
-                    clearInterval(philoAutoTimer);
-                    philoAutoTimer = null;
-                    document.getElementById('btnPhiloAuto').textContent = "Toggle Auto Run";
-                    document.getElementById('btnPhiloAuto').classList.remove('primary');
-                }
-                logPhilo("Dining philosophers visualizer reset.", 'info');
-                updatePhiloUI();
-            });
-    
-            document.getElementById('btnPhiloAuto').addEventListener('click', () => {
-                const btn = document.getElementById('btnPhiloAuto');
-                if (philoAutoTimer) {
-                    clearInterval(philoAutoTimer);
-                    philoAutoTimer = null;
-                    btn.textContent = "Toggle Auto Run";
-                    btn.classList.remove('primary');
-                } else {
-                    btn.textContent = "Stop Auto Run";
-                    btn.classList.add('primary');
-                    philoAutoTimer = setInterval(() => {
-                        const thinkingPhils = [];
-                        for (let i = 0; i < 5; i++) {
-                            if (philoStates[i] === 'thinking') thinkingPhils.push(i);
-                        }
-                        if (thinkingPhils.length > 0) {
-                            const randomPhil = thinkingPhils[Math.floor(Math.random() * thinkingPhils.length)];
-                            philoStates[randomPhil] = 'hungry';
-                            logPhilo(`Philosopher ${randomPhil} gets HUNGRY.`, 'hungry');
-                            updatePhiloUI();
-                            tryEat(randomPhil);
-                        }
-                    }, 1500);
-                }
-            });
-    
-            updatePhiloUI();
-        }
-    };
 
-    const initBankersSim = (container) => {
-        container.innerHTML = `
+                document.getElementById('btnPhiloReset').addEventListener('click', () => {
+                    philoStates.fill('thinking');
+                    chopsticks.fill(1);
+                    philoEatingTimers.forEach(t => { if (t) clearTimeout(t); });
+                    philoEatingTimers.fill(null);
+                    if (philoAutoTimer) {
+                        clearInterval(philoAutoTimer);
+                        philoAutoTimer = null;
+                        document.getElementById('btnPhiloAuto').textContent = "Toggle Auto Run";
+                        document.getElementById('btnPhiloAuto').classList.remove('primary');
+                    }
+                    logPhilo("Dining philosophers visualizer reset.", 'info');
+                    updatePhiloUI();
+                });
+
+                document.getElementById('btnPhiloAuto').addEventListener('click', () => {
+                    const btn = document.getElementById('btnPhiloAuto');
+                    if (philoAutoTimer) {
+                        clearInterval(philoAutoTimer);
+                        philoAutoTimer = null;
+                        btn.textContent = "Toggle Auto Run";
+                        btn.classList.remove('primary');
+                    } else {
+                        btn.textContent = "Stop Auto Run";
+                        btn.classList.add('primary');
+                        philoAutoTimer = setInterval(() => {
+                            const thinkingPhils = [];
+                            for (let i = 0; i < 5; i++) {
+                                if (philoStates[i] === 'thinking') thinkingPhils.push(i);
+                            }
+                            if (thinkingPhils.length > 0) {
+                                const randomPhil = thinkingPhils[Math.floor(Math.random() * thinkingPhils.length)];
+                                philoStates[randomPhil] = 'hungry';
+                                logPhilo(`Philosopher ${randomPhil} gets HUNGRY.`, 'hungry');
+                                updatePhiloUI();
+                                tryEat(randomPhil);
+                            }
+                        }, 1500);
+                    }
+                });
+
+                updatePhiloUI();
+            }
+        };
+
+        const initBankersSim = (container) => {
+            container.innerHTML = `
             <div class="sim-toolbar">
                 <div class="section-title" style="font-size:22px; margin:0; color:var(--primary);">Banker's Deadlock Avoidance Sim</div>
             </div>
@@ -9422,153 +9426,153 @@ ${cfg.diagram}
             </div>
         `;
 
-        const logBankers = (msg, type = 'info') => {
-            const div = document.createElement('div');
-            const color = type === 'success' ? 'var(--success)' : (type === 'danger' ? 'var(--danger)' : 'var(--text-main)');
-            div.innerHTML = `<span style="color:${color}; font-weight:800;">&gt;</span> ${msg}`;
-            const logBox = document.getElementById('bankersLog');
-            logBox.appendChild(div);
-            logBox.scrollTop = logBox.scrollHeight;
-        };
+            const logBankers = (msg, type = 'info') => {
+                const div = document.createElement('div');
+                const color = type === 'success' ? 'var(--success)' : (type === 'danger' ? 'var(--danger)' : 'var(--text-main)');
+                div.innerHTML = `<span style="color:${color}; font-weight:800;">&gt;</span> ${msg}`;
+                const logBox = document.getElementById('bankersLog');
+                logBox.appendChild(div);
+                logBox.scrollTop = logBox.scrollHeight;
+            };
 
-        const getMatrices = () => {
-            const alloc = [], max = [], need = [];
-            const avail = document.getElementById('bankersAvail').value.trim().split(/\s+/).map(Number);
-            
-            for (let i = 0; i < 4; i++) {
-                const a = document.getElementById(`alloc-P${i}`).value.trim().split(/\s+/).map(Number);
-                const m = document.getElementById(`max-P${i}`).value.trim().split(/\s+/).map(Number);
-                const n = m.map((val, idx) => val - a[idx]);
-                alloc.push(a);
-                max.push(m);
-                need.push(n);
-                document.getElementById(`need-P${i}`).textContent = n.join(' ');
-            }
-            return { alloc, max, need, avail };
-        };
+            const getMatrices = () => {
+                const alloc = [], max = [], need = [];
+                const avail = document.getElementById('bankersAvail').value.trim().split(/\s+/).map(Number);
 
-        document.getElementById('btnRecalcNeed').addEventListener('click', () => {
-            getMatrices();
-            logBankers("Recalculated process remaining need vectors successfully.");
-        });
-
-        const checkSafetyState = () => {
-            const { alloc, need, avail } = getMatrices();
-            const work = [...avail];
-            const finish = new Array(4).fill(false);
-            const safeSeq = [];
-            
-            logBankers(`Safety Algorithm started. Work vector: [${work.join(', ')}]`);
-            let count = 0;
-            
-            while (count < 4) {
-                let found = false;
                 for (let i = 0; i < 4; i++) {
-                    if (!finish[i]) {
-                        // Check if Need <= Work
-                        let possible = true;
-                        for (let j = 0; j < 3; j++) {
-                            if (need[i][j] > work[j]) {
-                                possible = false;
+                    const a = document.getElementById(`alloc-P${i}`).value.trim().split(/\s+/).map(Number);
+                    const m = document.getElementById(`max-P${i}`).value.trim().split(/\s+/).map(Number);
+                    const n = m.map((val, idx) => val - a[idx]);
+                    alloc.push(a);
+                    max.push(m);
+                    need.push(n);
+                    document.getElementById(`need-P${i}`).textContent = n.join(' ');
+                }
+                return { alloc, max, need, avail };
+            };
+
+            document.getElementById('btnRecalcNeed').addEventListener('click', () => {
+                getMatrices();
+                logBankers("Recalculated process remaining need vectors successfully.");
+            });
+
+            const checkSafetyState = () => {
+                const { alloc, need, avail } = getMatrices();
+                const work = [...avail];
+                const finish = new Array(4).fill(false);
+                const safeSeq = [];
+
+                logBankers(`Safety Algorithm started. Work vector: [${work.join(', ')}]`);
+                let count = 0;
+
+                while (count < 4) {
+                    let found = false;
+                    for (let i = 0; i < 4; i++) {
+                        if (!finish[i]) {
+                            // Check if Need <= Work
+                            let possible = true;
+                            for (let j = 0; j < 3; j++) {
+                                if (need[i][j] > work[j]) {
+                                    possible = false;
+                                    break;
+                                }
+                            }
+
+                            if (possible) {
+                                logBankers(`Process P${i} requirements [${need[i].join(', ')}] are <= Work [${work.join(', ')}]. Process can run.`);
+                                for (let j = 0; j < 3; j++) {
+                                    work[j] += alloc[i][j];
+                                }
+                                finish[i] = true;
+                                safeSeq.push(`P${i}`);
+                                logBankers(`P${i} released resources. New Work: [${work.join(', ')}]`);
+                                found = true;
+                                count++;
                                 break;
                             }
                         }
-                        
-                        if (possible) {
-                            logBankers(`Process P${i} requirements [${need[i].join(', ')}] are <= Work [${work.join(', ')}]. Process can run.`);
-                            for (let j = 0; j < 3; j++) {
-                                work[j] += alloc[i][j];
-                            }
-                            finish[i] = true;
-                            safeSeq.push(`P${i}`);
-                            logBankers(`P${i} released resources. New Work: [${work.join(', ')}]`);
-                            found = true;
-                            count++;
-                            break;
-                        }
+                    }
+                    if (!found) break;
+                }
+
+                const resultBox = document.getElementById('safetyResultBox');
+                resultBox.style.display = 'block';
+                if (count === 4) {
+                    resultBox.style.background = 'rgba(16,185,129,0.1)';
+                    resultBox.style.borderColor = 'var(--success)';
+                    resultBox.style.color = 'var(--success)';
+                    resultBox.innerHTML = `SAFE STATE DETECTED<br>Sequence: &lt;${safeSeq.join(', ')}&gt;`;
+                    logBankers(`SYSTEM SAFE: Safe sequence found: <${safeSeq.join(', ')}>`, 'success');
+                    return true;
+                } else {
+                    resultBox.style.background = 'rgba(239,68,68,0.1)';
+                    resultBox.style.borderColor = 'var(--danger)';
+                    resultBox.style.color = 'var(--danger)';
+                    resultBox.innerHTML = `UNSAFE STATE DETECTED<br>Potential Deadlock State!`;
+                    logBankers("SYSTEM UNSAFE: No valid scheduling execution sequence avoids circular dependency!", "danger");
+                    return false;
+                }
+            };
+
+            document.getElementById('btnCheckSafety').addEventListener('click', checkSafetyState);
+
+            document.getElementById('btnRequestBankers').addEventListener('click', () => {
+                const reqPid = parseInt(document.getElementById('reqPid').value);
+                const req = document.getElementById('reqVector').value.trim().split(/\s+/).map(Number);
+                const { alloc, need, avail } = getMatrices();
+
+                logBankers(`Resource Request Evaluation: P${reqPid} requests [${req.join(', ')}]`);
+
+                // Check if Request <= Need
+                for (let j = 0; j < 3; j++) {
+                    if (req[j] > need[reqPid][j]) {
+                        logBankers(`Error: Process P${reqPid} requested more than its maximum need!`, 'danger');
+                        return;
                     }
                 }
-                if (!found) break;
-            }
 
-            const resultBox = document.getElementById('safetyResultBox');
-            resultBox.style.display = 'block';
-            if (count === 4) {
-                resultBox.style.background = 'rgba(16,185,129,0.1)';
-                resultBox.style.borderColor = 'var(--success)';
-                resultBox.style.color = 'var(--success)';
-                resultBox.innerHTML = `SAFE STATE DETECTED<br>Sequence: &lt;${safeSeq.join(', ')}&gt;`;
-                logBankers(`SYSTEM SAFE: Safe sequence found: <${safeSeq.join(', ')}>`, 'success');
-                return true;
-            } else {
-                resultBox.style.background = 'rgba(239,68,68,0.1)';
-                resultBox.style.borderColor = 'var(--danger)';
-                resultBox.style.color = 'var(--danger)';
-                resultBox.innerHTML = `UNSAFE STATE DETECTED<br>Potential Deadlock State!`;
-                logBankers("SYSTEM UNSAFE: No valid scheduling execution sequence avoids circular dependency!", "danger");
-                return false;
-            }
-        };
-
-        document.getElementById('btnCheckSafety').addEventListener('click', checkSafetyState);
-
-        document.getElementById('btnRequestBankers').addEventListener('click', () => {
-            const reqPid = parseInt(document.getElementById('reqPid').value);
-            const req = document.getElementById('reqVector').value.trim().split(/\s+/).map(Number);
-            const { alloc, need, avail } = getMatrices();
-
-            logBankers(`Resource Request Evaluation: P${reqPid} requests [${req.join(', ')}]`);
-            
-            // Check if Request <= Need
-            for (let j = 0; j < 3; j++) {
-                if (req[j] > need[reqPid][j]) {
-                    logBankers(`Error: Process P${reqPid} requested more than its maximum need!`, 'danger');
-                    return;
-                }
-            }
-
-            // Check if Request <= Available
-            for (let j = 0; j < 3; j++) {
-                if (req[j] > avail[j]) {
-                    logBankers(`Process P${reqPid} must wait: resources unavailable immediately.`, 'danger');
-                    return;
-                }
-            }
-
-            // Pretend to allocate
-            for (let j = 0; j < 3; j++) {
-                avail[j] -= req[j];
-                alloc[reqPid][j] += req[j];
-                need[reqPid][j] -= req[j];
-            }
-
-            // Apply to UI fields temporarily
-            document.getElementById('bankersAvail').value = avail.join(' ');
-            document.getElementById(`alloc-P${reqPid}`).value = alloc[reqPid].join(' ');
-            getMatrices();
-
-            logBankers("Pretending to allocate resources. Running safety algorithm check...");
-            const safe = checkSafetyState();
-
-            if (safe) {
-                logBankers("Request Approved: Safe state preserved. Allocation complete.", 'success');
-            } else {
-                logBankers("Request Denied: Reverting allocation. Deadlock danger detected.", 'danger');
-                // Revert
+                // Check if Request <= Available
                 for (let j = 0; j < 3; j++) {
-                    avail[j] += req[j];
-                    alloc[reqPid][j] -= req[j];
+                    if (req[j] > avail[j]) {
+                        logBankers(`Process P${reqPid} must wait: resources unavailable immediately.`, 'danger');
+                        return;
+                    }
                 }
+
+                // Pretend to allocate
+                for (let j = 0; j < 3; j++) {
+                    avail[j] -= req[j];
+                    alloc[reqPid][j] += req[j];
+                    need[reqPid][j] -= req[j];
+                }
+
+                // Apply to UI fields temporarily
                 document.getElementById('bankersAvail').value = avail.join(' ');
                 document.getElementById(`alloc-P${reqPid}`).value = alloc[reqPid].join(' ');
                 getMatrices();
-                checkSafetyState();
-            }
-        });
-    };
 
-    const initPageReplacementSim = (container) => {
-        container.innerHTML = `
+                logBankers("Pretending to allocate resources. Running safety algorithm check...");
+                const safe = checkSafetyState();
+
+                if (safe) {
+                    logBankers("Request Approved: Safe state preserved. Allocation complete.", 'success');
+                } else {
+                    logBankers("Request Denied: Reverting allocation. Deadlock danger detected.", 'danger');
+                    // Revert
+                    for (let j = 0; j < 3; j++) {
+                        avail[j] += req[j];
+                        alloc[reqPid][j] -= req[j];
+                    }
+                    document.getElementById('bankersAvail').value = avail.join(' ');
+                    document.getElementById(`alloc-P${reqPid}`).value = alloc[reqPid].join(' ');
+                    getMatrices();
+                    checkSafetyState();
+                }
+            });
+        };
+
+        const initPageReplacementSim = (container) => {
+            container.innerHTML = `
             <div class="sim-toolbar">
                 <div class="section-title" style="font-size:22px; margin:0; color:var(--primary);">Page Replacement Visualizer</div>
             </div>
@@ -9630,158 +9634,158 @@ ${cfg.diagram}
             </div>
         `;
 
-        const refInput = document.getElementById('refString');
-        const frameLimitInput = document.getElementById('frameLimit');
-        const pageAlgoSelect = document.getElementById('pageAlgoSelect');
-        const btnStepPageSim = document.getElementById('btnStepPageSim');
-        const btnResetPageSim = document.getElementById('btnResetPageSim');
+            const refInput = document.getElementById('refString');
+            const frameLimitInput = document.getElementById('frameLimit');
+            const pageAlgoSelect = document.getElementById('pageAlgoSelect');
+            const btnStepPageSim = document.getElementById('btnStepPageSim');
+            const btnResetPageSim = document.getElementById('btnResetPageSim');
 
-        let stepIndex = 0;
-        let pageFaults = 0;
-        let pageHits = 0;
-        let framesState = [];
-        let stepsLog = [];
+            let stepIndex = 0;
+            let pageFaults = 0;
+            let pageHits = 0;
+            let framesState = [];
+            let stepsLog = [];
 
-        const resetPageSim = () => {
-            stepIndex = 0;
-            pageFaults = 0;
-            pageHits = 0;
-            framesState = new Array(parseInt(frameLimitInput.value) || 3).fill(null);
-            stepsLog = [];
-            
-            document.getElementById('statPageFaults').textContent = '0';
-            document.getElementById('statPageHits').textContent = '0';
-            document.getElementById('statPageRatio').textContent = '0%';
-            
-            document.getElementById('pageHeaderRow').innerHTML = '';
-            document.getElementById('pageFramesBody').innerHTML = '';
-        };
+            const resetPageSim = () => {
+                stepIndex = 0;
+                pageFaults = 0;
+                pageHits = 0;
+                framesState = new Array(parseInt(frameLimitInput.value) || 3).fill(null);
+                stepsLog = [];
 
-        btnResetPageSim.addEventListener('click', resetPageSim);
-        frameLimitInput.addEventListener('change', resetPageSim);
-        pageAlgoSelect.addEventListener('change', resetPageSim);
+                document.getElementById('statPageFaults').textContent = '0';
+                document.getElementById('statPageHits').textContent = '0';
+                document.getElementById('statPageRatio').textContent = '0%';
 
-        btnStepPageSim.addEventListener('click', () => {
-            const pages = refInput.value.trim().split(',').map(s => parseInt(s.trim()));
-            const framesCount = parseInt(frameLimitInput.value) || 3;
-            const algo = pageAlgoSelect.value;
-            
-            if (stepIndex >= pages.length) return alert("Finished reference string traversal.");
+                document.getElementById('pageHeaderRow').innerHTML = '';
+                document.getElementById('pageFramesBody').innerHTML = '';
+            };
 
-            const currentPage = pages[stepIndex];
-            let isHit = framesState.includes(currentPage);
-            let replacedIdx = -1;
+            btnResetPageSim.addEventListener('click', resetPageSim);
+            frameLimitInput.addEventListener('change', resetPageSim);
+            pageAlgoSelect.addEventListener('change', resetPageSim);
 
-            if (isHit) {
-                pageHits++;
-            } else {
-                pageFaults++;
-                // Find empty slot
-                let emptyIdx = framesState.indexOf(null);
-                if (emptyIdx !== -1) {
-                    framesState[emptyIdx] = currentPage;
-                    replacedIdx = emptyIdx;
+            btnStepPageSim.addEventListener('click', () => {
+                const pages = refInput.value.trim().split(',').map(s => parseInt(s.trim()));
+                const framesCount = parseInt(frameLimitInput.value) || 3;
+                const algo = pageAlgoSelect.value;
+
+                if (stepIndex >= pages.length) return alert("Finished reference string traversal.");
+
+                const currentPage = pages[stepIndex];
+                let isHit = framesState.includes(currentPage);
+                let replacedIdx = -1;
+
+                if (isHit) {
+                    pageHits++;
                 } else {
-                    // Evict depending on algorithm
-                    if (algo === 'fifo') {
-                        // FIFO Replacement: Replace first entered
-                        // Queue indices simply rotate: pageFaults mod framesCount
-                        const idxToEvict = (pageFaults - 1) % framesCount;
-                        framesState[idxToEvict] = currentPage;
-                        replacedIdx = idxToEvict;
-                    } else if (algo === 'lru') {
-                        // LRU Replacement: Replace least recently used
-                        let oldestAccess = Infinity;
-                        let idxToEvict = -1;
-                        for (let f = 0; f < framesCount; f++) {
-                            const val = framesState[f];
-                            // Find last index of val in processed list
-                            const lastIdx = pages.slice(0, stepIndex).lastIndexOf(val);
-                            if (lastIdx < oldestAccess) {
-                                oldestAccess = lastIdx;
-                                idxToEvict = f;
+                    pageFaults++;
+                    // Find empty slot
+                    let emptyIdx = framesState.indexOf(null);
+                    if (emptyIdx !== -1) {
+                        framesState[emptyIdx] = currentPage;
+                        replacedIdx = emptyIdx;
+                    } else {
+                        // Evict depending on algorithm
+                        if (algo === 'fifo') {
+                            // FIFO Replacement: Replace first entered
+                            // Queue indices simply rotate: pageFaults mod framesCount
+                            const idxToEvict = (pageFaults - 1) % framesCount;
+                            framesState[idxToEvict] = currentPage;
+                            replacedIdx = idxToEvict;
+                        } else if (algo === 'lru') {
+                            // LRU Replacement: Replace least recently used
+                            let oldestAccess = Infinity;
+                            let idxToEvict = -1;
+                            for (let f = 0; f < framesCount; f++) {
+                                const val = framesState[f];
+                                // Find last index of val in processed list
+                                const lastIdx = pages.slice(0, stepIndex).lastIndexOf(val);
+                                if (lastIdx < oldestAccess) {
+                                    oldestAccess = lastIdx;
+                                    idxToEvict = f;
+                                }
                             }
+                            framesState[idxToEvict] = currentPage;
+                            replacedIdx = idxToEvict;
+                        } else if (algo === 'optimal') {
+                            // Optimal Replacement: Replace one that won't be used longest in future
+                            let farthestUsage = -1;
+                            let idxToEvict = -1;
+                            for (let f = 0; f < framesCount; f++) {
+                                const val = framesState[f];
+                                let nextUsage = pages.slice(stepIndex + 1).indexOf(val);
+                                if (nextUsage === -1) {
+                                    idxToEvict = f;
+                                    break; // Unused in future has highest replacement priority
+                                }
+                                if (nextUsage > farthestUsage) {
+                                    farthestUsage = nextUsage;
+                                    idxToEvict = f;
+                                }
+                            }
+                            framesState[idxToEvict] = currentPage;
+                            replacedIdx = idxToEvict;
                         }
-                        framesState[idxToEvict] = currentPage;
-                        replacedIdx = idxToEvict;
-                    } else if (algo === 'optimal') {
-                        // Optimal Replacement: Replace one that won't be used longest in future
-                        let farthestUsage = -1;
-                        let idxToEvict = -1;
-                        for (let f = 0; f < framesCount; f++) {
-                            const val = framesState[f];
-                            let nextUsage = pages.slice(stepIndex + 1).indexOf(val);
-                            if (nextUsage === -1) {
-                                idxToEvict = f;
-                                break; // Unused in future has highest replacement priority
-                            }
-                            if (nextUsage > farthestUsage) {
-                                farthestUsage = nextUsage;
-                                idxToEvict = f;
-                            }
-                        }
-                        framesState[idxToEvict] = currentPage;
-                        replacedIdx = idxToEvict;
                     }
                 }
-            }
 
-            stepsLog.push({
-                page: currentPage,
-                hit: isHit,
-                replacedIdx,
-                frames: [...framesState]
-            });
-
-            // Re-render Page Table Matrix
-            const head = document.getElementById('pageHeaderRow');
-            head.innerHTML = '<th style="padding:10px; border:1px solid var(--border);">Req Page</th>' + 
-                stepsLog.map((log, idx) => `<th style="padding:10px; border:1px solid var(--border); background:${log.hit ? 'rgba(16,185,129,0.08)' : 'rgba(239,68,68,0.08)'};">${log.page}</th>`).join('');
-
-            const body = document.getElementById('pageFramesBody');
-            body.innerHTML = '';
-            for (let f = 0; f < framesCount; f++) {
-                let row = `<td style="padding:10px; font-weight:bold; border:1px solid var(--border);">Frame ${f + 1}</td>`;
-                stepsLog.forEach(log => {
-                    const isAllocated = log.frames[f] !== null && log.frames[f] !== undefined;
-                    const val = isAllocated ? log.frames[f] : '-';
-                    const isReplaced = log.replacedIdx === f && !log.hit;
-                    row += `<td style="padding:10px; border:1px solid var(--border); font-weight:${isReplaced ? '800' : 'normal'}; color:${isReplaced ? 'var(--danger)' : 'var(--text-main)'}; background:${isReplaced ? 'rgba(239,68,68,0.15)' : 'none'};">${val}</td>`;
+                stepsLog.push({
+                    page: currentPage,
+                    hit: isHit,
+                    replacedIdx,
+                    frames: [...framesState]
                 });
-                body.innerHTML += `<tr>${row}</tr>`;
-            }
 
-            // Append status row
-            let statusRow = '<td style="padding:10px; font-weight:bold; border:1px solid var(--border);">Status</td>';
-            stepsLog.forEach(log => {
-                statusRow += `<td style="padding:10px; border:1px solid var(--border); font-weight:800; color:${log.hit ? 'var(--success)' : 'var(--danger)'};">${log.hit ? 'HIT' : 'FAULT'}</td>`;
+                // Re-render Page Table Matrix
+                const head = document.getElementById('pageHeaderRow');
+                head.innerHTML = '<th style="padding:10px; border:1px solid var(--border);">Req Page</th>' +
+                    stepsLog.map((log, idx) => `<th style="padding:10px; border:1px solid var(--border); background:${log.hit ? 'rgba(16,185,129,0.08)' : 'rgba(239,68,68,0.08)'};">${log.page}</th>`).join('');
+
+                const body = document.getElementById('pageFramesBody');
+                body.innerHTML = '';
+                for (let f = 0; f < framesCount; f++) {
+                    let row = `<td style="padding:10px; font-weight:bold; border:1px solid var(--border);">Frame ${f + 1}</td>`;
+                    stepsLog.forEach(log => {
+                        const isAllocated = log.frames[f] !== null && log.frames[f] !== undefined;
+                        const val = isAllocated ? log.frames[f] : '-';
+                        const isReplaced = log.replacedIdx === f && !log.hit;
+                        row += `<td style="padding:10px; border:1px solid var(--border); font-weight:${isReplaced ? '800' : 'normal'}; color:${isReplaced ? 'var(--danger)' : 'var(--text-main)'}; background:${isReplaced ? 'rgba(239,68,68,0.15)' : 'none'};">${val}</td>`;
+                    });
+                    body.innerHTML += `<tr>${row}</tr>`;
+                }
+
+                // Append status row
+                let statusRow = '<td style="padding:10px; font-weight:bold; border:1px solid var(--border);">Status</td>';
+                stepsLog.forEach(log => {
+                    statusRow += `<td style="padding:10px; border:1px solid var(--border); font-weight:800; color:${log.hit ? 'var(--success)' : 'var(--danger)'};">${log.hit ? 'HIT' : 'FAULT'}</td>`;
+                });
+                body.innerHTML += `<tr>${statusRow}</tr>`;
+
+                document.getElementById('statPageFaults').textContent = pageFaults;
+                document.getElementById('statPageHits').textContent = pageHits;
+                const total = pageFaults + pageHits;
+                document.getElementById('statPageRatio').textContent = ((pageFaults / total) * 100).toFixed(1) + '%';
+
+                stepIndex++;
             });
-            body.innerHTML += `<tr>${statusRow}</tr>`;
 
-            document.getElementById('statPageFaults').textContent = pageFaults;
-            document.getElementById('statPageHits').textContent = pageHits;
-            const total = pageFaults + pageHits;
-            document.getElementById('statPageRatio').textContent = ((pageFaults / total) * 100).toFixed(1) + '%';
+            // Pre-select based on active module index
+            if (window.currentModuleIndex === 0) {
+                pageAlgoSelect.value = 'fifo';
+                refInput.value = '1,2,3,4,1,2,5,1,2,3,4,5'; // Belady's anomaly reference string
+            } else if (window.currentModuleIndex === 1) {
+                pageAlgoSelect.value = 'lru';
+                refInput.value = '7,0,1,2,0,3,0,4,2,3,0,3,2';
+            } else if (window.currentModuleIndex === 2) {
+                pageAlgoSelect.value = 'optimal';
+                refInput.value = '7,0,1,2,0,3,0,4,2,3,0,3,2';
+            }
+            resetPageSim();
+        };
 
-            stepIndex++;
-        });
-
-        // Pre-select based on active module index
-        if (window.currentModuleIndex === 0) {
-            pageAlgoSelect.value = 'fifo';
-            refInput.value = '1,2,3,4,1,2,5,1,2,3,4,5'; // Belady's anomaly reference string
-        } else if (window.currentModuleIndex === 1) {
-            pageAlgoSelect.value = 'lru';
-            refInput.value = '7,0,1,2,0,3,0,4,2,3,0,3,2';
-        } else if (window.currentModuleIndex === 2) {
-            pageAlgoSelect.value = 'optimal';
-            refInput.value = '7,0,1,2,0,3,0,4,2,3,0,3,2';
-        }
-        resetPageSim();
-    };
-
-    const initDiskSchedulingSim = (container) => {
-        container.innerHTML = `
+        const initDiskSchedulingSim = (container) => {
+            container.innerHTML = `
             <div class="sim-toolbar">
                 <div class="section-title" style="font-size:22px; margin:0; color:var(--primary);">Disk Cylinder Scheduling Sim</div>
             </div>
@@ -9837,165 +9841,165 @@ ${cfg.diagram}
             </div>
         `;
 
-        const btnRunDiskSim = document.getElementById('btnRunDiskSim');
-        const diskQueueInput = document.getElementById('diskQueue');
-        const diskInitialHeadInput = document.getElementById('diskInitialHead');
-        const diskAlgoSelect = document.getElementById('diskAlgoSelect');
-        const diskScanDir = document.getElementById('diskScanDir');
-        const canvas = document.getElementById('diskCanvas');
-        const ctx = canvas.getContext('2d');
+            const btnRunDiskSim = document.getElementById('btnRunDiskSim');
+            const diskQueueInput = document.getElementById('diskQueue');
+            const diskInitialHeadInput = document.getElementById('diskInitialHead');
+            const diskAlgoSelect = document.getElementById('diskAlgoSelect');
+            const diskScanDir = document.getElementById('diskScanDir');
+            const canvas = document.getElementById('diskCanvas');
+            const ctx = canvas.getContext('2d');
 
-        // Draw initial track guidelines
-        const drawGrid = () => {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.strokeStyle = 'rgba(255,255,255,0.05)';
-            ctx.lineWidth = 1;
-            for (let i = 0; i <= 200; i += 20) {
-                const x = 50 + (i / 200) * 500;
+            // Draw initial track guidelines
+            const drawGrid = () => {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+                ctx.lineWidth = 1;
+                for (let i = 0; i <= 200; i += 20) {
+                    const x = 50 + (i / 200) * 500;
+                    ctx.beginPath();
+                    ctx.moveTo(x, 20);
+                    ctx.lineTo(x, 280);
+                    ctx.stroke();
+                    ctx.fillStyle = 'var(--text-muted)';
+                    ctx.font = '9px Outfit';
+                    ctx.fillText(i, x - 6, 15);
+                }
+            };
+
+            drawGrid();
+
+            btnRunDiskSim.addEventListener('click', () => {
+                const queue = diskQueueInput.value.trim().split(',').map(s => parseInt(s.trim()));
+                const initialHead = parseInt(diskInitialHeadInput.value) || 53;
+                const algo = diskAlgoSelect.value;
+                const direction = diskScanDir.value;
+
+                if (queue.some(isNaN)) return alert("Please specify a valid numeric cylinder request list.");
+
+                let seekSeq = [initialHead];
+                let head = initialHead;
+
+                if (algo === 'fcfs') {
+                    seekSeq = [initialHead, ...queue];
+                } else if (algo === 'sstf') {
+                    let remaining = [...queue];
+                    while (remaining.length > 0) {
+                        remaining.sort((a, b) => Math.abs(a - head) - Math.abs(b - head));
+                        const next = remaining.shift();
+                        seekSeq.push(next);
+                        head = next;
+                    }
+                } else if (algo === 'scan') {
+                    const left = [], right = [];
+                    queue.forEach(q => {
+                        if (q < initialHead) left.push(q);
+                        else right.push(q);
+                    });
+                    left.sort((a, b) => b - a); // descending
+                    right.sort((a, b) => a - b); // ascending
+
+                    if (direction === 'left') {
+                        seekSeq = [initialHead, ...left, 0, ...right];
+                    } else {
+                        seekSeq = [initialHead, ...right, 199, ...left];
+                    }
+                } else if (algo === 'cscan') {
+                    const left = [], right = [];
+                    queue.forEach(q => {
+                        if (q < initialHead) left.push(q);
+                        else right.push(q);
+                    });
+                    left.sort((a, b) => a - b); // ascending
+                    right.sort((a, b) => a - b); // ascending
+
+                    if (direction === 'left') {
+                        const leftDesc = [...left].sort((a, b) => b - a);
+                        const rightDesc = [...right].sort((a, b) => b - a);
+                        seekSeq = [initialHead, ...leftDesc, 0, 199, ...rightDesc];
+                    } else {
+                        seekSeq = [initialHead, ...right, 199, 0, ...left];
+                    }
+                } else if (algo === 'look') {
+                    const left = [], right = [];
+                    queue.forEach(q => {
+                        if (q < initialHead) left.push(q);
+                        else right.push(q);
+                    });
+                    left.sort((a, b) => b - a); // descending
+                    right.sort((a, b) => a - b); // ascending
+
+                    if (direction === 'left') {
+                        if (left.length > 0) {
+                            seekSeq = [initialHead, ...left];
+                            if (right.length > 0) seekSeq.push(...right);
+                        } else {
+                            seekSeq = [initialHead, ...right];
+                        }
+                    } else {
+                        if (right.length > 0) {
+                            seekSeq = [initialHead, ...right];
+                            if (left.length > 0) seekSeq.push(...left);
+                        } else {
+                            seekSeq = [initialHead, ...left];
+                        }
+                    }
+                }
+
+                // Calculate movement
+                let movement = 0;
+                for (let i = 0; i < seekSeq.length - 1; i++) {
+                    movement += Math.abs(seekSeq[i] - seekSeq[i + 1]);
+                }
+                document.getElementById('statDiskSeek').textContent = movement;
+
+                // Draw seek trace on Canvas — use OS purple if OS subject, blue for networking
+                const diskSubject = localStorage.getItem('vlab_current_subject') || 'networking';
+                drawGrid();
+                ctx.lineWidth = 2;
+                ctx.strokeStyle = diskSubject === 'os' ? '#a855f7' : '#2563eb';
+                ctx.fillStyle = diskSubject === 'os' ? '#c084fc' : '#60a5fa';
+
+                const startX = 50 + (seekSeq[0] / 200) * 500;
+                const yStep = 240 / (seekSeq.length - 1);
+
+                // Draw lines
                 ctx.beginPath();
-                ctx.moveTo(x, 20);
-                ctx.lineTo(x, 280);
+                ctx.moveTo(startX, 40);
+                for (let i = 1; i < seekSeq.length; i++) {
+                    const x = 50 + (seekSeq[i] / 200) * 500;
+                    const y = 40 + i * yStep;
+                    ctx.lineTo(x, y);
+                }
                 ctx.stroke();
-                ctx.fillStyle = 'var(--text-muted)';
-                ctx.font = '9px Outfit';
-                ctx.fillText(i, x - 6, 15);
+
+                // Draw points
+                for (let i = 0; i < seekSeq.length; i++) {
+                    const x = 50 + (seekSeq[i] / 200) * 500;
+                    const y = 40 + i * yStep;
+                    ctx.beginPath();
+                    ctx.arc(x, y, 4, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    ctx.fillStyle = '#fff';
+                    ctx.font = '10px Outfit';
+                    ctx.fillText(`P(${seekSeq[i]})`, x + 8, y + 3);
+                    ctx.fillStyle = diskSubject === 'os' ? '#c084fc' : '#60a5fa';
+                }
+            });
+
+            if (window.currentModuleIndex === 0) {
+                diskAlgoSelect.value = 'fcfs';
+            } else if (window.currentModuleIndex === 1) {
+                diskAlgoSelect.value = 'scan';
+            } else if (window.currentModuleIndex === 2) {
+                diskAlgoSelect.value = 'look';
             }
+
+            drawGrid();
         };
 
-        drawGrid();
-
-        btnRunDiskSim.addEventListener('click', () => {
-            const queue = diskQueueInput.value.trim().split(',').map(s => parseInt(s.trim()));
-            const initialHead = parseInt(diskInitialHeadInput.value) || 53;
-            const algo = diskAlgoSelect.value;
-            const direction = diskScanDir.value;
-
-            if (queue.some(isNaN)) return alert("Please specify a valid numeric cylinder request list.");
-
-            let seekSeq = [initialHead];
-            let head = initialHead;
-
-            if (algo === 'fcfs') {
-                seekSeq = [initialHead, ...queue];
-            } else if (algo === 'sstf') {
-                let remaining = [...queue];
-                while (remaining.length > 0) {
-                    remaining.sort((a, b) => Math.abs(a - head) - Math.abs(b - head));
-                    const next = remaining.shift();
-                    seekSeq.push(next);
-                    head = next;
-                }
-            } else if (algo === 'scan') {
-                const left = [], right = [];
-                queue.forEach(q => {
-                    if (q < initialHead) left.push(q);
-                    else right.push(q);
-                });
-                left.sort((a, b) => b - a); // descending
-                right.sort((a, b) => a - b); // ascending
-
-                if (direction === 'left') {
-                    seekSeq = [initialHead, ...left, 0, ...right];
-                } else {
-                    seekSeq = [initialHead, ...right, 199, ...left];
-                }
-            } else if (algo === 'cscan') {
-                const left = [], right = [];
-                queue.forEach(q => {
-                    if (q < initialHead) left.push(q);
-                    else right.push(q);
-                });
-                left.sort((a, b) => a - b); // ascending
-                right.sort((a, b) => a - b); // ascending
-
-                if (direction === 'left') {
-                    const leftDesc = [...left].sort((a, b) => b - a);
-                    const rightDesc = [...right].sort((a, b) => b - a);
-                    seekSeq = [initialHead, ...leftDesc, 0, 199, ...rightDesc];
-                } else {
-                    seekSeq = [initialHead, ...right, 199, 0, ...left];
-                }
-            } else if (algo === 'look') {
-                const left = [], right = [];
-                queue.forEach(q => {
-                    if (q < initialHead) left.push(q);
-                    else right.push(q);
-                });
-                left.sort((a, b) => b - a); // descending
-                right.sort((a, b) => a - b); // ascending
-
-                if (direction === 'left') {
-                    if (left.length > 0) {
-                        seekSeq = [initialHead, ...left];
-                        if (right.length > 0) seekSeq.push(...right);
-                    } else {
-                        seekSeq = [initialHead, ...right];
-                    }
-                } else {
-                    if (right.length > 0) {
-                        seekSeq = [initialHead, ...right];
-                        if (left.length > 0) seekSeq.push(...left);
-                    } else {
-                        seekSeq = [initialHead, ...left];
-                    }
-                }
-            }
-
-            // Calculate movement
-            let movement = 0;
-            for (let i = 0; i < seekSeq.length - 1; i++) {
-                movement += Math.abs(seekSeq[i] - seekSeq[i+1]);
-            }
-            document.getElementById('statDiskSeek').textContent = movement;
-
-            // Draw seek trace on Canvas — use OS purple if OS subject, blue for networking
-            const diskSubject = localStorage.getItem('vlab_current_subject') || 'networking';
-            drawGrid();
-            ctx.lineWidth = 2;
-            ctx.strokeStyle = diskSubject === 'os' ? '#a855f7' : '#2563eb';
-            ctx.fillStyle = diskSubject === 'os' ? '#c084fc' : '#60a5fa';
-
-            const startX = 50 + (seekSeq[0] / 200) * 500;
-            const yStep = 240 / (seekSeq.length - 1);
-            
-            // Draw lines
-            ctx.beginPath();
-            ctx.moveTo(startX, 40);
-            for (let i = 1; i < seekSeq.length; i++) {
-                const x = 50 + (seekSeq[i] / 200) * 500;
-                const y = 40 + i * yStep;
-                ctx.lineTo(x, y);
-            }
-            ctx.stroke();
-
-            // Draw points
-            for (let i = 0; i < seekSeq.length; i++) {
-                const x = 50 + (seekSeq[i] / 200) * 500;
-                const y = 40 + i * yStep;
-                ctx.beginPath();
-                ctx.arc(x, y, 4, 0, Math.PI * 2);
-                ctx.fill();
-                
-                ctx.fillStyle = '#fff';
-                ctx.font = '10px Outfit';
-                ctx.fillText(`P(${seekSeq[i]})`, x + 8, y + 3);
-                ctx.fillStyle = diskSubject === 'os' ? '#c084fc' : '#60a5fa';
-            }
-        });
-
-        if (window.currentModuleIndex === 0) {
-            diskAlgoSelect.value = 'fcfs';
-        } else if (window.currentModuleIndex === 1) {
-            diskAlgoSelect.value = 'scan';
-        } else if (window.currentModuleIndex === 2) {
-            diskAlgoSelect.value = 'look';
-        }
-        
-        drawGrid();
-    };
-
-    const initVlanSim = (container) => {
-        container.innerHTML = `
+        const initVlanSim = (container) => {
+            container.innerHTML = `
             <div class="sim-toolbar">
                 <div class="section-title" style="font-size:22px; margin:0; color:var(--primary);">VLAN & IEEE 802.1Q Trunking</div>
             </div>
@@ -10046,83 +10050,83 @@ ${cfg.diagram}
                 </div>
             </div>
         `;
-        
-        const canvas = document.getElementById('vlanCanvas');
-        const ctx = canvas.getContext('2d');
-        let aniFrame = null;
-        let isSimRunning = false;
 
-        const pcVlans = { pc1: 10, pc2: 10, pc3: 20, pc4: 20 };
+            const canvas = document.getElementById('vlanCanvas');
+            const ctx = canvas.getContext('2d');
+            let aniFrame = null;
+            let isSimRunning = false;
 
-        const getPos = (id) => {
-            const el = document.getElementById(id);
-            const rect = el.getBoundingClientRect();
-            const parentRect = canvas.parentElement.getBoundingClientRect();
-            return {
-                x: rect.left - parentRect.left + (rect.width/2),
-                y: rect.top - parentRect.top + (rect.height/2)
+            const pcVlans = { pc1: 10, pc2: 10, pc3: 20, pc4: 20 };
+
+            const getPos = (id) => {
+                const el = document.getElementById(id);
+                const rect = el.getBoundingClientRect();
+                const parentRect = canvas.parentElement.getBoundingClientRect();
+                return {
+                    x: rect.left - parentRect.left + (rect.width / 2),
+                    y: rect.top - parentRect.top + (rect.height / 2)
+                };
             };
-        };
 
-        const drawLine = (p1, p2, color, isTrunk=false) => {
-            ctx.beginPath();
-            ctx.moveTo(p1.x, p1.y);
-            ctx.lineTo(p2.x, p2.y);
-            ctx.strokeStyle = color;
-            ctx.lineWidth = isTrunk ? 4 : 2;
-            if(isTrunk) ctx.setLineDash([5,5]); else ctx.setLineDash([]);
-            ctx.stroke();
-            ctx.setLineDash([]);
-        };
+            const drawLine = (p1, p2, color, isTrunk = false) => {
+                ctx.beginPath();
+                ctx.moveTo(p1.x, p1.y);
+                ctx.lineTo(p2.x, p2.y);
+                ctx.strokeStyle = color;
+                ctx.lineWidth = isTrunk ? 4 : 2;
+                if (isTrunk) ctx.setLineDash([5, 5]); else ctx.setLineDash([]);
+                ctx.stroke();
+                ctx.setLineDash([]);
+            };
 
-        const getVlanColor = (vlanVal) => {
-            return vlanVal === 10 ? '#3b82f6' : '#ef4444';
-        };
+            const getVlanColor = (vlanVal) => {
+                return vlanVal === 10 ? '#3b82f6' : '#ef4444';
+            };
 
-        const drawTopology = () => {
-            canvas.width = canvas.parentElement.clientWidth;
-            canvas.height = canvas.parentElement.clientHeight;
-            ctx.clearRect(0,0, canvas.width, canvas.height);
-            
-            const sw1 = getPos('sw1'), sw2 = getPos('sw2');
-            const pc1 = getPos('pc1'), pc2 = getPos('pc2');
-            const pc3 = getPos('pc3'), pc4 = getPos('pc4');
+            const drawTopology = () => {
+                canvas.width = canvas.parentElement.clientWidth;
+                canvas.height = canvas.parentElement.clientHeight;
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            drawLine(pc1, sw1, getVlanColor(pcVlans.pc1) + '4D');
-            drawLine(pc3, sw1, getVlanColor(pcVlans.pc3) + '4D');
-            drawLine(pc2, sw2, getVlanColor(pcVlans.pc2) + '4D');
-            drawLine(pc4, sw2, getVlanColor(pcVlans.pc4) + '4D');
-            drawLine(sw1, sw2, 'rgba(100,116,139,0.8)', true);
-        };
-        
-        const log = (msg, color='#10b981') => {
-            const c = document.getElementById('vlanConsole');
-            if (c) {
-                c.innerHTML += `<div style="color:${color}; margin-bottom:4px;">> ${msg}</div>`;
-                c.scrollTop = c.scrollHeight;
-            }
-        };
+                const sw1 = getPos('sw1'), sw2 = getPos('sw2');
+                const pc1 = getPos('pc1'), pc2 = getPos('pc2');
+                const pc3 = getPos('pc3'), pc4 = getPos('pc4');
 
-        const updateVlanUI = () => {
-            ['pc1', 'pc2', 'pc3', 'pc4'].forEach(id => {
-                const tagEl = document.getElementById(id + 'VlanTag');
-                const pcEl = document.getElementById(id);
-                if (tagEl && pcEl) {
-                    const val = pcVlans[id];
-                    tagEl.textContent = 'VLAN ' + val;
-                    tagEl.style.background = getVlanColor(val);
-                    pcEl.style.borderColor = getVlanColor(val);
+                drawLine(pc1, sw1, getVlanColor(pcVlans.pc1) + '4D');
+                drawLine(pc3, sw1, getVlanColor(pcVlans.pc3) + '4D');
+                drawLine(pc2, sw2, getVlanColor(pcVlans.pc2) + '4D');
+                drawLine(pc4, sw2, getVlanColor(pcVlans.pc4) + '4D');
+                drawLine(sw1, sw2, 'rgba(100,116,139,0.8)', true);
+            };
+
+            const log = (msg, color = '#10b981') => {
+                const c = document.getElementById('vlanConsole');
+                if (c) {
+                    c.innerHTML += `<div style="color:${color}; margin-bottom:4px;">> ${msg}</div>`;
+                    c.scrollTop = c.scrollHeight;
                 }
-            });
-            drawTopology();
-        };
+            };
 
-        const buildInputs = () => {
-            const container = document.getElementById('vlanConfigSection');
-            if (!container) return;
-            container.innerHTML = '';
-            ['pc1', 'pc2', 'pc3', 'pc4'].forEach(id => {
-                container.innerHTML += `
+            const updateVlanUI = () => {
+                ['pc1', 'pc2', 'pc3', 'pc4'].forEach(id => {
+                    const tagEl = document.getElementById(id + 'VlanTag');
+                    const pcEl = document.getElementById(id);
+                    if (tagEl && pcEl) {
+                        const val = pcVlans[id];
+                        tagEl.textContent = 'VLAN ' + val;
+                        tagEl.style.background = getVlanColor(val);
+                        pcEl.style.borderColor = getVlanColor(val);
+                    }
+                });
+                drawTopology();
+            };
+
+            const buildInputs = () => {
+                const container = document.getElementById('vlanConfigSection');
+                if (!container) return;
+                container.innerHTML = '';
+                ['pc1', 'pc2', 'pc3', 'pc4'].forEach(id => {
+                    container.innerHTML += `
                     <div style="display:flex; flex-direction:column; gap:3px;">
                         <label style="font-size:11px; font-weight:800; color:var(--text-muted); text-transform:uppercase;">${id.toUpperCase()} VLAN:</label>
                         <select data-pc="${id}" class="sim-select" style="padding:4px; font-size:12px;">
@@ -10131,180 +10135,180 @@ ${cfg.diagram}
                         </select>
                     </div>
                 `;
-            });
-
-            container.querySelectorAll('select').forEach(sel => {
-                sel.addEventListener('change', (e) => {
-                    const pc = e.target.dataset.pc;
-                    pcVlans[pc] = parseInt(e.target.value);
-                    updateVlanUI();
-                    log(`${pc.toUpperCase()} reassigned to VLAN ${pcVlans[pc]}`, '#fff');
                 });
-            });
-        };
 
-        const animatePacket = (path, color, tag, onComplete) => {
-            let start = performance.now();
-            const duration = 1000; 
-            
-            const animate = (time) => {
-                if(!document.getElementById('vlanCanvas')) return;
-                let progress = (time - start) / duration;
-                if(progress > 1) progress = 1;
-                
-                drawTopology();
-                const x = path[0].x + (path[1].x - path[0].x) * progress;
-                const y = path[0].y + (path[1].y - path[0].y) * progress;
-                
-                ctx.fillStyle = color;
-                ctx.beginPath();
-                ctx.arc(x, y, 8, 0, Math.PI*2);
-                ctx.fill();
-                ctx.strokeStyle = '#fff';
-                ctx.lineWidth = 2;
-                ctx.stroke();
-                
-                if(tag) {
-                    ctx.fillStyle = 'rgba(0,0,0,0.8)';
-                    ctx.fillRect(x - 20, y - 25, 40, 14);
-                    ctx.fillStyle = '#f59e0b';
-                    ctx.font = 'bold 9px Outfit, sans-serif';
-                    ctx.textAlign = 'center';
-                    ctx.fillText(tag, x, y - 15);
-                }
-                
-                if(progress < 1) {
-                    aniFrame = requestAnimationFrame(animate);
-                } else {
-                    if(onComplete) onComplete();
-                }
-            };
-            aniFrame = requestAnimationFrame(animate);
-        };
-
-        const runVlanBroadcast = (srcPcId) => {
-            if(isSimRunning) return;
-            isSimRunning = true;
-            
-            const sw1 = getPos('sw1'), sw2 = getPos('sw2');
-            const srcPos = getPos(srcPcId);
-            const vlanId = pcVlans[srcPcId];
-            const color = getVlanColor(vlanId);
-            
-            document.querySelectorAll('button, select').forEach(b => b.disabled = true);
-            log(`${srcPcId.toUpperCase()} (VLAN ${vlanId}) broadcasting frame...`, '#fff');
-            
-            animatePacket([srcPos, sw1], color, null, () => {
-                log(`SW-1 received frame. Attaching 802.1Q Tag: [VLAN ${vlanId}]`, '#f59e0b');
-                
-                const otherLocalPc = srcPcId === 'pc1' ? 'pc3' : 'pc1';
-                const otherLocalPos = getPos(otherLocalPc);
-                
-                if (pcVlans[otherLocalPc] === vlanId) {
-                    log(`SW-1 forwards copy to ${otherLocalPc.toUpperCase()} (Match)`, '#10b981');
-                    animatePacket([sw1, otherLocalPos], color, null);
-                } else {
-                    ctx.fillStyle = 'rgba(239,68,68,0.8)';
-                    ctx.font = 'bold 20px Outfit, sans-serif';
-                    ctx.fillText('X', otherLocalPos.x + 30, otherLocalPos.y);
-                    log(`SW-1 drops frame for ${otherLocalPc.toUpperCase()} (VLAN Mismatch)`, '#ef4444');
-                }
-                
-                setTimeout(() => {
-                    log(`SW-1 forwarding tagged frame across TRUNK...`);
-                    animatePacket([sw1, sw2], color, `VLAN ${vlanId}`, () => {
-                        log(`SW-2 received frame. Stripping 802.1Q Tag.`, '#f59e0b');
-                        
-                        const dests = ['pc2', 'pc4'];
-                        dests.forEach(destId => {
-                            const destPos = getPos(destId);
-                            if (pcVlans[destId] === vlanId) {
-                                log(`SW-2 forwards untagged copy to ${destId.toUpperCase()} (Match)`, '#10b981');
-                                animatePacket([sw2, destPos], color, null, () => {
-                                    log(`${destId.toUpperCase()} received Broadcast.`, '#3b82f6');
-                                });
-                            } else {
-                                ctx.fillStyle = 'rgba(239,68,68,0.8)';
-                                ctx.font = 'bold 20px Outfit, sans-serif';
-                                ctx.fillText('X', destPos.x - 30, destPos.y);
-                                log(`SW-2 drops frame for ${destId.toUpperCase()} (VLAN Mismatch)`, '#ef4444');
-                            }
-                        });
-
-                        setTimeout(()=> {
-                            drawTopology();
-                            isSimRunning = false;
-                            document.querySelectorAll('button, select').forEach(b => b.disabled = false);
-                        }, 2000);
+                container.querySelectorAll('select').forEach(sel => {
+                    sel.addEventListener('change', (e) => {
+                        const pc = e.target.dataset.pc;
+                        pcVlans[pc] = parseInt(e.target.value);
+                        updateVlanUI();
+                        log(`${pc.toUpperCase()} reassigned to VLAN ${pcVlans[pc]}`, '#fff');
                     });
-                }, 1000);
-            });
-        };
+                });
+            };
 
-        const runPing = (src, dest) => {
-            if(isSimRunning) return;
-            isSimRunning = true;
-            
-            const srcPos = getPos(src);
-            const destPos = getPos(dest);
-            const sw1 = getPos('sw1'), sw2 = getPos('sw2');
-            
-            document.querySelectorAll('button, select').forEach(b => b.disabled = true);
-            log(`Ping: ${src.toUpperCase()} (VLAN ${pcVlans[src]}) ➔ ${dest.toUpperCase()} (VLAN ${pcVlans[dest]})...`, '#fff');
-            
-            animatePacket([srcPos, sw1], getVlanColor(pcVlans[src]), null, () => {
-                if (pcVlans[src] !== pcVlans[dest]) {
-                    log(`SW-1 checking VLAN mappings: Mismatch!`, '#f59e0b');
-                    setTimeout(() => {
+            const animatePacket = (path, color, tag, onComplete) => {
+                let start = performance.now();
+                const duration = 1000;
+
+                const animate = (time) => {
+                    if (!document.getElementById('vlanCanvas')) return;
+                    let progress = (time - start) / duration;
+                    if (progress > 1) progress = 1;
+
+                    drawTopology();
+                    const x = path[0].x + (path[1].x - path[0].x) * progress;
+                    const y = path[0].y + (path[1].y - path[0].y) * progress;
+
+                    ctx.fillStyle = color;
+                    ctx.beginPath();
+                    ctx.arc(x, y, 8, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.strokeStyle = '#fff';
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+
+                    if (tag) {
+                        ctx.fillStyle = 'rgba(0,0,0,0.8)';
+                        ctx.fillRect(x - 20, y - 25, 40, 14);
+                        ctx.fillStyle = '#f59e0b';
+                        ctx.font = 'bold 9px Outfit, sans-serif';
+                        ctx.textAlign = 'center';
+                        ctx.fillText(tag, x, y - 15);
+                    }
+
+                    if (progress < 1) {
+                        aniFrame = requestAnimationFrame(animate);
+                    } else {
+                        if (onComplete) onComplete();
+                    }
+                };
+                aniFrame = requestAnimationFrame(animate);
+            };
+
+            const runVlanBroadcast = (srcPcId) => {
+                if (isSimRunning) return;
+                isSimRunning = true;
+
+                const sw1 = getPos('sw1'), sw2 = getPos('sw2');
+                const srcPos = getPos(srcPcId);
+                const vlanId = pcVlans[srcPcId];
+                const color = getVlanColor(vlanId);
+
+                document.querySelectorAll('button, select').forEach(b => b.disabled = true);
+                log(`${srcPcId.toUpperCase()} (VLAN ${vlanId}) broadcasting frame...`, '#fff');
+
+                animatePacket([srcPos, sw1], color, null, () => {
+                    log(`SW-1 received frame. Attaching 802.1Q Tag: [VLAN ${vlanId}]`, '#f59e0b');
+
+                    const otherLocalPc = srcPcId === 'pc1' ? 'pc3' : 'pc1';
+                    const otherLocalPos = getPos(otherLocalPc);
+
+                    if (pcVlans[otherLocalPc] === vlanId) {
+                        log(`SW-1 forwards copy to ${otherLocalPc.toUpperCase()} (Match)`, '#10b981');
+                        animatePacket([sw1, otherLocalPos], color, null);
+                    } else {
                         ctx.fillStyle = 'rgba(239,68,68,0.8)';
-                        ctx.font = 'bold 24px Outfit, sans-serif';
-                        ctx.fillText('DROP', sw1.x, sw1.y + 40);
-                        log(`SW-1 DROP: Cannot route between VLANs without a Layer 3 Device!`, '#ef4444');
-                        setTimeout(() => {
-                            drawTopology();
-                            isSimRunning = false;
-                            document.querySelectorAll('button, select').forEach(b => b.disabled = false);
-                        }, 2000);
+                        ctx.font = 'bold 20px Outfit, sans-serif';
+                        ctx.fillText('X', otherLocalPos.x + 30, otherLocalPos.y);
+                        log(`SW-1 drops frame for ${otherLocalPc.toUpperCase()} (VLAN Mismatch)`, '#ef4444');
+                    }
+
+                    setTimeout(() => {
+                        log(`SW-1 forwarding tagged frame across TRUNK...`);
+                        animatePacket([sw1, sw2], color, `VLAN ${vlanId}`, () => {
+                            log(`SW-2 received frame. Stripping 802.1Q Tag.`, '#f59e0b');
+
+                            const dests = ['pc2', 'pc4'];
+                            dests.forEach(destId => {
+                                const destPos = getPos(destId);
+                                if (pcVlans[destId] === vlanId) {
+                                    log(`SW-2 forwards untagged copy to ${destId.toUpperCase()} (Match)`, '#10b981');
+                                    animatePacket([sw2, destPos], color, null, () => {
+                                        log(`${destId.toUpperCase()} received Broadcast.`, '#3b82f6');
+                                    });
+                                } else {
+                                    ctx.fillStyle = 'rgba(239,68,68,0.8)';
+                                    ctx.font = 'bold 20px Outfit, sans-serif';
+                                    ctx.fillText('X', destPos.x - 30, destPos.y);
+                                    log(`SW-2 drops frame for ${destId.toUpperCase()} (VLAN Mismatch)`, '#ef4444');
+                                }
+                            });
+
+                            setTimeout(() => {
+                                drawTopology();
+                                isSimRunning = false;
+                                document.querySelectorAll('button, select').forEach(b => b.disabled = false);
+                            }, 2000);
+                        });
                     }, 1000);
-                } else {
-                    log(`SW-1 tag-encapsulates frame and forwards across TRUNK...`, '#10b981');
-                    animatePacket([sw1, sw2], getVlanColor(pcVlans[src]), `VLAN ${pcVlans[src]}`, () => {
-                        log(`SW-2 received frame. Stripping Tag. Forwards to ${dest.toUpperCase()}`, '#10b981');
-                        animatePacket([sw2, destPos], getVlanColor(pcVlans[src]), null, () => {
-                            log(`Ping Request reached ${dest.toUpperCase()}! Sending Reply...`, '#3b82f6');
-                            animatePacket([destPos, sw2], getVlanColor(pcVlans[src]), null, () => {
-                                animatePacket([sw2, sw1], getVlanColor(pcVlans[src]), `VLAN ${pcVlans[src]}`, () => {
-                                    animatePacket([sw1, srcPos], getVlanColor(pcVlans[src]), null, () => {
-                                        log(`Ping Reply received! RTT < 1ms. Success!`, '#10b981');
-                                        setTimeout(() => {
-                                            drawTopology();
-                                            isSimRunning = false;
-                                            document.querySelectorAll('button, select').forEach(b => b.disabled = false);
-                                        }, 1500);
+                });
+            };
+
+            const runPing = (src, dest) => {
+                if (isSimRunning) return;
+                isSimRunning = true;
+
+                const srcPos = getPos(src);
+                const destPos = getPos(dest);
+                const sw1 = getPos('sw1'), sw2 = getPos('sw2');
+
+                document.querySelectorAll('button, select').forEach(b => b.disabled = true);
+                log(`Ping: ${src.toUpperCase()} (VLAN ${pcVlans[src]}) ➔ ${dest.toUpperCase()} (VLAN ${pcVlans[dest]})...`, '#fff');
+
+                animatePacket([srcPos, sw1], getVlanColor(pcVlans[src]), null, () => {
+                    if (pcVlans[src] !== pcVlans[dest]) {
+                        log(`SW-1 checking VLAN mappings: Mismatch!`, '#f59e0b');
+                        setTimeout(() => {
+                            ctx.fillStyle = 'rgba(239,68,68,0.8)';
+                            ctx.font = 'bold 24px Outfit, sans-serif';
+                            ctx.fillText('DROP', sw1.x, sw1.y + 40);
+                            log(`SW-1 DROP: Cannot route between VLANs without a Layer 3 Device!`, '#ef4444');
+                            setTimeout(() => {
+                                drawTopology();
+                                isSimRunning = false;
+                                document.querySelectorAll('button, select').forEach(b => b.disabled = false);
+                            }, 2000);
+                        }, 1000);
+                    } else {
+                        log(`SW-1 tag-encapsulates frame and forwards across TRUNK...`, '#10b981');
+                        animatePacket([sw1, sw2], getVlanColor(pcVlans[src]), `VLAN ${pcVlans[src]}`, () => {
+                            log(`SW-2 received frame. Stripping Tag. Forwards to ${dest.toUpperCase()}`, '#10b981');
+                            animatePacket([sw2, destPos], getVlanColor(pcVlans[src]), null, () => {
+                                log(`Ping Request reached ${dest.toUpperCase()}! Sending Reply...`, '#3b82f6');
+                                animatePacket([destPos, sw2], getVlanColor(pcVlans[src]), null, () => {
+                                    animatePacket([sw2, sw1], getVlanColor(pcVlans[src]), `VLAN ${pcVlans[src]}`, () => {
+                                        animatePacket([sw1, srcPos], getVlanColor(pcVlans[src]), null, () => {
+                                            log(`Ping Reply received! RTT < 1ms. Success!`, '#10b981');
+                                            setTimeout(() => {
+                                                drawTopology();
+                                                isSimRunning = false;
+                                                document.querySelectorAll('button, select').forEach(b => b.disabled = false);
+                                            }, 1500);
+                                        });
                                     });
                                 });
                             });
                         });
-                    });
-                }
-            });
+                    }
+                });
+            };
+
+            setTimeout(() => {
+                buildInputs();
+                updateVlanUI();
+            }, 50);
+
+            window.addEventListener('resize', () => { if (document.getElementById('vlanCanvas')) drawTopology(); });
+
+            document.getElementById('btnVlanBc1').addEventListener('click', () => runVlanBroadcast('pc1'));
+            document.getElementById('btnVlanBc3').addEventListener('click', () => runVlanBroadcast('pc3'));
+            document.getElementById('btnVlanPing12').addEventListener('click', () => runPing('pc1', 'pc2'));
+            document.getElementById('btnVlanPing13').addEventListener('click', () => runPing('pc1', 'pc3'));
         };
 
-        setTimeout(() => {
-            buildInputs();
-            updateVlanUI();
-        }, 50);
-
-        window.addEventListener('resize', () => { if(document.getElementById('vlanCanvas')) drawTopology(); });
-
-        document.getElementById('btnVlanBc1').addEventListener('click', () => runVlanBroadcast('pc1'));
-        document.getElementById('btnVlanBc3').addEventListener('click', () => runVlanBroadcast('pc3'));
-        document.getElementById('btnVlanPing12').addEventListener('click', () => runPing('pc1', 'pc2'));
-        document.getElementById('btnVlanPing13').addEventListener('click', () => runPing('pc1', 'pc3'));
-    };
-
-    const initDnsSim = (container) => {
-        container.innerHTML = `
+        const initDnsSim = (container) => {
+            container.innerHTML = `
             <div class="sim-toolbar">
                 <div class="section-title" style="font-size:22px; margin:0; color:var(--primary);">DNS Name Resolution</div>
             </div>
@@ -10363,193 +10367,193 @@ ${cfg.diagram}
                 </div>
             </div>
         `;
-        
-        const canvas = document.getElementById('dnsCanvas');
-        const ctx = canvas.getContext('2d');
-        let aniFrame = null;
-        let isSimRunning = false;
 
-        const getPos = (id) => {
-            const el = document.getElementById(id);
-            const rect = el.getBoundingClientRect();
-            const parentRect = canvas.parentElement.getBoundingClientRect();
-            return {
-                x: rect.left - parentRect.left + (rect.width/2),
-                y: rect.top - parentRect.top + (rect.height/2)
+            const canvas = document.getElementById('dnsCanvas');
+            const ctx = canvas.getContext('2d');
+            let aniFrame = null;
+            let isSimRunning = false;
+
+            const getPos = (id) => {
+                const el = document.getElementById(id);
+                const rect = el.getBoundingClientRect();
+                const parentRect = canvas.parentElement.getBoundingClientRect();
+                return {
+                    x: rect.left - parentRect.left + (rect.width / 2),
+                    y: rect.top - parentRect.top + (rect.height / 2)
+                };
             };
-        };
 
-        const drawTopology = () => {
-            canvas.width = canvas.parentElement.clientWidth;
-            canvas.height = canvas.parentElement.clientHeight;
-            ctx.clearRect(0,0, canvas.width, canvas.height);
-            
-            const client = getPos('dnsClient'), res = getPos('dnsResolver');
-            const root = getPos('dnsRoot'), tld = getPos('dnsTld'), auth = getPos('dnsAuth');
+            const drawTopology = () => {
+                canvas.width = canvas.parentElement.clientWidth;
+                canvas.height = canvas.parentElement.clientHeight;
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            ctx.lineWidth = 1;
-            ctx.setLineDash([4,4]);
-            ctx.strokeStyle = 'rgba(255,255,255,0.1)';
-            [root, tld, auth].forEach(dest => {
+                const client = getPos('dnsClient'), res = getPos('dnsResolver');
+                const root = getPos('dnsRoot'), tld = getPos('dnsTld'), auth = getPos('dnsAuth');
+
+                ctx.lineWidth = 1;
+                ctx.setLineDash([4, 4]);
+                ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+                [root, tld, auth].forEach(dest => {
+                    ctx.beginPath();
+                    ctx.moveTo(res.x, res.y);
+                    ctx.lineTo(dest.x, dest.y);
+                    ctx.stroke();
+                });
+                ctx.setLineDash([]);
+                ctx.strokeStyle = 'rgba(255,255,255,0.3)';
                 ctx.beginPath();
-                ctx.moveTo(res.x, res.y);
-                ctx.lineTo(dest.x, dest.y);
+                ctx.moveTo(client.x, client.y);
+                ctx.lineTo(res.x, res.y);
                 ctx.stroke();
-            });
-            ctx.setLineDash([]);
-            ctx.strokeStyle = 'rgba(255,255,255,0.3)';
-            ctx.beginPath();
-            ctx.moveTo(client.x, client.y);
-            ctx.lineTo(res.x, res.y);
-            ctx.stroke();
-        };
-        
-        setTimeout(drawTopology, 50);
-        window.addEventListener('resize', () => { if(document.getElementById('dnsCanvas')) drawTopology(); });
-
-        const selectEl = document.getElementById('dnsQueryHost');
-        selectEl.addEventListener('change', () => {
-            const opt = selectEl.options[selectEl.selectedIndex];
-            document.getElementById('dnsTldLabel').textContent = opt.dataset.tld;
-            document.getElementById('dnsAuthLabel').textContent = opt.dataset.auth;
-        });
-        
-        const log = (msg, color='#10b981') => {
-            const c = document.getElementById('dnsConsole');
-            c.innerHTML += `<div style="color:${color}; margin-bottom:4px;">> ${msg}</div>`;
-            c.scrollTop = c.scrollHeight;
-        };
-
-        const animatePacket = (path, color, tag, isResp, onComplete) => {
-            let start = performance.now();
-            const duration = 1000; 
-            
-            const animate = (time) => {
-                if(!document.getElementById('dnsCanvas')) return;
-                let progress = (time - start) / duration;
-                if(progress > 1) progress = 1;
-                
-                drawTopology();
-                const x = path[0].x + (path[1].x - path[0].x) * progress;
-                const y = path[0].y + (path[1].y - path[0].y) * progress;
-                
-                ctx.fillStyle = color;
-                ctx.beginPath();
-                ctx.arc(x, y, 6, 0, Math.PI*2);
-                ctx.fill();
-                
-                if(tag) {
-                    ctx.fillStyle = 'rgba(0,0,0,0.8)';
-                    ctx.fillRect(x - 20, y - 25, 40, 14);
-                    ctx.fillStyle = isResp ? '#10b981' : '#f59e0b';
-                    ctx.font = 'bold 9px Outfit, sans-serif';
-                    ctx.textAlign = 'center';
-                    ctx.fillText(tag, x, y - 15);
-                }
-                
-                if(progress < 1) {
-                    aniFrame = requestAnimationFrame(animate);
-                } else {
-                    if(onComplete) onComplete();
-                }
             };
-            aniFrame = requestAnimationFrame(animate);
-        };
 
-        const runQuery = (type) => {
-            if(isSimRunning) return;
-            isSimRunning = true;
-            document.getElementById('dnsConsole').innerHTML = '';
+            setTimeout(drawTopology, 50);
+            window.addEventListener('resize', () => { if (document.getElementById('dnsCanvas')) drawTopology(); });
 
-            const opt = selectEl.options[selectEl.selectedIndex];
-            const host = opt.value;
-            const tld = opt.dataset.tld;
-            const auth = opt.dataset.auth;
-            const ip = opt.dataset.ip;
+            const selectEl = document.getElementById('dnsQueryHost');
+            selectEl.addEventListener('change', () => {
+                const opt = selectEl.options[selectEl.selectedIndex];
+                document.getElementById('dnsTldLabel').textContent = opt.dataset.tld;
+                document.getElementById('dnsAuthLabel').textContent = opt.dataset.auth;
+            });
 
-            log(`Starting ${type.toUpperCase()} resolution for ${host}...`, '#fff');
-            
-            const c = getPos('dnsClient'), r = getPos('dnsResolver');
-            const rt = getPos('dnsRoot'), tl = getPos('dnsTld'), au = getPos('dnsAuth');
-            document.querySelectorAll('#btnDnsIterative, #btnDnsRecursive, #dnsQueryHost').forEach(b => b.disabled = true);
-            
-            animatePacket([c, r], '#3b82f6', 'Query', false, () => {
-                log('Resolver checks cache: MISS.', '#f59e0b');
-                
-                if(type === 'iterative') {
-                    // Iterative
-                    setTimeout(() => {
-                        log(`Resolver -> Root: Where is ${tld}?`, '#3b82f6');
-                        animatePacket([r, rt], '#ef4444', '?', false, () => {
-                            log(`Root -> Resolver: Try TLD server for ${tld}.`, '#10b981');
-                            animatePacket([rt, r], '#ef4444', 'TLD IP', true, () => {
-                                setTimeout(() => {
-                                    log(`Resolver -> TLD: Where is ${auth}?`, '#3b82f6');
-                                    animatePacket([r, tl], '#10b981', '?', false, () => {
-                                        log(`TLD -> Resolver: Try Auth server for ${auth}.`, '#10b981');
-                                        animatePacket([tl, r], '#10b981', 'Auth IP', true, () => {
-                                            setTimeout(() => {
-                                                log(`Resolver -> Auth: What is IP of ${host}?`, '#3b82f6');
-                                                animatePacket([r, au], '#8b5cf6', '?', false, () => {
-                                                    log(`Auth -> Resolver: IP is ${ip}`, '#10b981');
-                                                    animatePacket([au, r], '#8b5cf6', 'A Rec', true, () => {
-                                                        setTimeout(() => {
-                                                            log('Resolver caches result and replies to Client.', '#f59e0b');
-                                                            animatePacket([r, c], '#3b82f6', 'IP Ans', true, () => {
-                                                                log(`Client successfully resolved ${host} to ${ip}!`, '#fff');
-                                                                isSimRunning = false;
-                                                                document.querySelectorAll('#btnDnsIterative, #btnDnsRecursive, #dnsQueryHost').forEach(b => b.disabled = false);
-                                                            });
-                                                        }, 500);
-                                                    });
-                                                });
-                                            }, 500);
-                                        });
-                                    });
-                                }, 500);
-                            });
-                        });
-                    }, 500);
-                } else {
-                    // Recursive
-                    setTimeout(() => {
-                        log(`Resolver -> Root: Resolve ${host}`, '#3b82f6');
-                        animatePacket([r, rt], '#ef4444', 'Query', false, () => {
-                            log(`Root -> TLD: Resolve ${host}`, '#3b82f6');
-                            animatePacket([rt, tl], '#10b981', 'Query', false, () => {
-                                log(`TLD -> Auth: Resolve ${host}`, '#3b82f6');
-                                animatePacket([tl, au], '#8b5cf6', 'Query', false, () => {
-                                    log(`Auth -> TLD: IP is ${ip}`, '#10b981');
-                                    animatePacket([au, tl], '#8b5cf6', 'A Rec', true, () => {
-                                        log('TLD -> Root: Forwarding Answer', '#10b981');
-                                        animatePacket([tl, rt], '#10b981', 'A Rec', true, () => {
-                                            log('Root -> Resolver: Forwarding Answer', '#10b981');
-                                            animatePacket([rt, r], '#ef4444', 'A Rec', true, () => {
+            const log = (msg, color = '#10b981') => {
+                const c = document.getElementById('dnsConsole');
+                c.innerHTML += `<div style="color:${color}; margin-bottom:4px;">> ${msg}</div>`;
+                c.scrollTop = c.scrollHeight;
+            };
+
+            const animatePacket = (path, color, tag, isResp, onComplete) => {
+                let start = performance.now();
+                const duration = 1000;
+
+                const animate = (time) => {
+                    if (!document.getElementById('dnsCanvas')) return;
+                    let progress = (time - start) / duration;
+                    if (progress > 1) progress = 1;
+
+                    drawTopology();
+                    const x = path[0].x + (path[1].x - path[0].x) * progress;
+                    const y = path[0].y + (path[1].y - path[0].y) * progress;
+
+                    ctx.fillStyle = color;
+                    ctx.beginPath();
+                    ctx.arc(x, y, 6, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    if (tag) {
+                        ctx.fillStyle = 'rgba(0,0,0,0.8)';
+                        ctx.fillRect(x - 20, y - 25, 40, 14);
+                        ctx.fillStyle = isResp ? '#10b981' : '#f59e0b';
+                        ctx.font = 'bold 9px Outfit, sans-serif';
+                        ctx.textAlign = 'center';
+                        ctx.fillText(tag, x, y - 15);
+                    }
+
+                    if (progress < 1) {
+                        aniFrame = requestAnimationFrame(animate);
+                    } else {
+                        if (onComplete) onComplete();
+                    }
+                };
+                aniFrame = requestAnimationFrame(animate);
+            };
+
+            const runQuery = (type) => {
+                if (isSimRunning) return;
+                isSimRunning = true;
+                document.getElementById('dnsConsole').innerHTML = '';
+
+                const opt = selectEl.options[selectEl.selectedIndex];
+                const host = opt.value;
+                const tld = opt.dataset.tld;
+                const auth = opt.dataset.auth;
+                const ip = opt.dataset.ip;
+
+                log(`Starting ${type.toUpperCase()} resolution for ${host}...`, '#fff');
+
+                const c = getPos('dnsClient'), r = getPos('dnsResolver');
+                const rt = getPos('dnsRoot'), tl = getPos('dnsTld'), au = getPos('dnsAuth');
+                document.querySelectorAll('#btnDnsIterative, #btnDnsRecursive, #dnsQueryHost').forEach(b => b.disabled = true);
+
+                animatePacket([c, r], '#3b82f6', 'Query', false, () => {
+                    log('Resolver checks cache: MISS.', '#f59e0b');
+
+                    if (type === 'iterative') {
+                        // Iterative
+                        setTimeout(() => {
+                            log(`Resolver -> Root: Where is ${tld}?`, '#3b82f6');
+                            animatePacket([r, rt], '#ef4444', '?', false, () => {
+                                log(`Root -> Resolver: Try TLD server for ${tld}.`, '#10b981');
+                                animatePacket([rt, r], '#ef4444', 'TLD IP', true, () => {
+                                    setTimeout(() => {
+                                        log(`Resolver -> TLD: Where is ${auth}?`, '#3b82f6');
+                                        animatePacket([r, tl], '#10b981', '?', false, () => {
+                                            log(`TLD -> Resolver: Try Auth server for ${auth}.`, '#10b981');
+                                            animatePacket([tl, r], '#10b981', 'Auth IP', true, () => {
                                                 setTimeout(() => {
-                                                    log('Resolver caches result and replies to Client.', '#f59e0b');
-                                                    animatePacket([r, c], '#3b82f6', 'IP Ans', true, () => {
-                                                        log(`Client successfully resolved ${host} to ${ip}!`, '#fff');
-                                                        isSimRunning = false;
-                                                        document.querySelectorAll('#btnDnsIterative, #btnDnsRecursive, #dnsQueryHost').forEach(b => b.disabled = false);
+                                                    log(`Resolver -> Auth: What is IP of ${host}?`, '#3b82f6');
+                                                    animatePacket([r, au], '#8b5cf6', '?', false, () => {
+                                                        log(`Auth -> Resolver: IP is ${ip}`, '#10b981');
+                                                        animatePacket([au, r], '#8b5cf6', 'A Rec', true, () => {
+                                                            setTimeout(() => {
+                                                                log('Resolver caches result and replies to Client.', '#f59e0b');
+                                                                animatePacket([r, c], '#3b82f6', 'IP Ans', true, () => {
+                                                                    log(`Client successfully resolved ${host} to ${ip}!`, '#fff');
+                                                                    isSimRunning = false;
+                                                                    document.querySelectorAll('#btnDnsIterative, #btnDnsRecursive, #dnsQueryHost').forEach(b => b.disabled = false);
+                                                                });
+                                                            }, 500);
+                                                        });
                                                     });
                                                 }, 500);
+                                            });
+                                        });
+                                    }, 500);
+                                });
+                            });
+                        }, 500);
+                    } else {
+                        // Recursive
+                        setTimeout(() => {
+                            log(`Resolver -> Root: Resolve ${host}`, '#3b82f6');
+                            animatePacket([r, rt], '#ef4444', 'Query', false, () => {
+                                log(`Root -> TLD: Resolve ${host}`, '#3b82f6');
+                                animatePacket([rt, tl], '#10b981', 'Query', false, () => {
+                                    log(`TLD -> Auth: Resolve ${host}`, '#3b82f6');
+                                    animatePacket([tl, au], '#8b5cf6', 'Query', false, () => {
+                                        log(`Auth -> TLD: IP is ${ip}`, '#10b981');
+                                        animatePacket([au, tl], '#8b5cf6', 'A Rec', true, () => {
+                                            log('TLD -> Root: Forwarding Answer', '#10b981');
+                                            animatePacket([tl, rt], '#10b981', 'A Rec', true, () => {
+                                                log('Root -> Resolver: Forwarding Answer', '#10b981');
+                                                animatePacket([rt, r], '#ef4444', 'A Rec', true, () => {
+                                                    setTimeout(() => {
+                                                        log('Resolver caches result and replies to Client.', '#f59e0b');
+                                                        animatePacket([r, c], '#3b82f6', 'IP Ans', true, () => {
+                                                            log(`Client successfully resolved ${host} to ${ip}!`, '#fff');
+                                                            isSimRunning = false;
+                                                            document.querySelectorAll('#btnDnsIterative, #btnDnsRecursive, #dnsQueryHost').forEach(b => b.disabled = false);
+                                                        });
+                                                    }, 500);
+                                                });
                                             });
                                         });
                                     });
                                 });
                             });
-                        });
-                    }, 500);
-                }
-            });
+                        }, 500);
+                    }
+                });
+            };
+
+            document.getElementById('btnDnsIterative').addEventListener('click', () => runQuery('iterative'));
+            document.getElementById('btnDnsRecursive').addEventListener('click', () => runQuery('recursive'));
         };
 
-        document.getElementById('btnDnsIterative').addEventListener('click', () => runQuery('iterative'));
-        document.getElementById('btnDnsRecursive').addEventListener('click', () => runQuery('recursive'));
-    };
-
-    const initRoutingSim = (container) => {
-        container.innerHTML = `
+        const initRoutingSim = (container) => {
+            container.innerHTML = `
             <div class="sim-toolbar">
                 <div class="section-title" style="font-size:22px; margin:0; color:var(--primary);">Routing Algorithm Convergence</div>
             </div>
@@ -10603,304 +10607,304 @@ ${cfg.diagram}
                 </div>
             </div>
         `;
-        
-        const canvas = document.getElementById('routingCanvas');
-        const ctx = canvas.getContext('2d');
-        let step = 0;
-        let simSteps = [];
 
-        // Topology definition
-        const nodes = ['A', 'B', 'C', 'D', 'E'];
-        const edges = [
-            {n1: 'A', n2: 'B', cost: 2},
-            {n1: 'A', n2: 'C', cost: 5},
-            {n1: 'B', n2: 'C', cost: 3},
-            {n1: 'B', n2: 'D', cost: 1},
-            {n1: 'C', n2: 'E', cost: 2},
-            {n1: 'D', n2: 'E', cost: 4},
-            {n1: 'C', n2: 'D', cost: 2}
-        ];
+            const canvas = document.getElementById('routingCanvas');
+            const ctx = canvas.getContext('2d');
+            let step = 0;
+            let simSteps = [];
 
-        const getPos = (id) => {
-            const el = document.getElementById('rt' + id);
-            if(!el) return {x:0,y:0};
-            const rect = el.getBoundingClientRect();
-            const parentRect = canvas.parentElement.getBoundingClientRect();
-            return {
-                x: rect.left - parentRect.left + (rect.width/2),
-                y: rect.top - parentRect.top + (rect.height/2)
+            // Topology definition
+            const nodes = ['A', 'B', 'C', 'D', 'E'];
+            const edges = [
+                { n1: 'A', n2: 'B', cost: 2 },
+                { n1: 'A', n2: 'C', cost: 5 },
+                { n1: 'B', n2: 'C', cost: 3 },
+                { n1: 'B', n2: 'D', cost: 1 },
+                { n1: 'C', n2: 'E', cost: 2 },
+                { n1: 'D', n2: 'E', cost: 4 },
+                { n1: 'C', n2: 'D', cost: 2 }
+            ];
+
+            const getPos = (id) => {
+                const el = document.getElementById('rt' + id);
+                if (!el) return { x: 0, y: 0 };
+                const rect = el.getBoundingClientRect();
+                const parentRect = canvas.parentElement.getBoundingClientRect();
+                return {
+                    x: rect.left - parentRect.left + (rect.width / 2),
+                    y: rect.top - parentRect.top + (rect.height / 2)
+                };
             };
-        };
 
-        const drawTopology = (activeNodes = [], activeEdges = []) => {
-            canvas.width = canvas.parentElement.clientWidth;
-            canvas.height = canvas.parentElement.clientHeight;
-            ctx.clearRect(0,0, canvas.width, canvas.height);
-            
-            edges.forEach(e => {
-                const p1 = getPos(e.n1);
-                const p2 = getPos(e.n2);
-                const isActive = activeEdges.some(ae => (ae.n1===e.n1 && ae.n2===e.n2) || (ae.n1===e.n2 && ae.n2===e.n1));
-                
-                ctx.beginPath();
-                ctx.moveTo(p1.x, p1.y);
-                ctx.lineTo(p2.x, p2.y);
-                ctx.strokeStyle = isActive ? '#10b981' : 'rgba(255,255,255,0.1)';
-                ctx.lineWidth = isActive ? 3 : 2;
-                ctx.stroke();
-                
-                // Draw cost
-                const cx = (p1.x + p2.x)/2;
-                const cy = (p1.y + p2.y)/2;
-                ctx.fillStyle = 'var(--bg-card)';
-                ctx.beginPath();
-                ctx.arc(cx, cy, 10, 0, Math.PI*2);
-                ctx.fill();
-                ctx.strokeStyle = 'var(--border)';
-                ctx.lineWidth = 1;
-                ctx.stroke();
-                
-                ctx.fillStyle = isActive ? '#10b981' : '#fff';
-                ctx.font = "bold 11px Outfit, sans-serif";
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.fillText(e.cost, cx, cy);
-            });
-            
-            // Highlight active nodes
-            nodes.forEach(n => {
-                const el = document.getElementById('rt'+n);
-                if(el) {
-                    if(activeNodes.includes(n)) {
-                        el.style.boxShadow = '0 0 15px #10b981';
-                        el.style.borderColor = '#10b981';
-                    } else {
-                        el.style.boxShadow = 'none';
-                        el.style.borderColor = n==='A'?'#3b82f6':n==='B'?'#10b981':n==='C'?'#f59e0b':n==='D'?'#8b5cf6':'#ef4444';
+            const drawTopology = (activeNodes = [], activeEdges = []) => {
+                canvas.width = canvas.parentElement.clientWidth;
+                canvas.height = canvas.parentElement.clientHeight;
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                edges.forEach(e => {
+                    const p1 = getPos(e.n1);
+                    const p2 = getPos(e.n2);
+                    const isActive = activeEdges.some(ae => (ae.n1 === e.n1 && ae.n2 === e.n2) || (ae.n1 === e.n2 && ae.n2 === e.n1));
+
+                    ctx.beginPath();
+                    ctx.moveTo(p1.x, p1.y);
+                    ctx.lineTo(p2.x, p2.y);
+                    ctx.strokeStyle = isActive ? '#10b981' : 'rgba(255,255,255,0.1)';
+                    ctx.lineWidth = isActive ? 3 : 2;
+                    ctx.stroke();
+
+                    // Draw cost
+                    const cx = (p1.x + p2.x) / 2;
+                    const cy = (p1.y + p2.y) / 2;
+                    ctx.fillStyle = 'var(--bg-card)';
+                    ctx.beginPath();
+                    ctx.arc(cx, cy, 10, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.strokeStyle = 'var(--border)';
+                    ctx.lineWidth = 1;
+                    ctx.stroke();
+
+                    ctx.fillStyle = isActive ? '#10b981' : '#fff';
+                    ctx.font = "bold 11px Outfit, sans-serif";
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(e.cost, cx, cy);
+                });
+
+                // Highlight active nodes
+                nodes.forEach(n => {
+                    const el = document.getElementById('rt' + n);
+                    if (el) {
+                        if (activeNodes.includes(n)) {
+                            el.style.boxShadow = '0 0 15px #10b981';
+                            el.style.borderColor = '#10b981';
+                        } else {
+                            el.style.boxShadow = 'none';
+                            el.style.borderColor = n === 'A' ? '#3b82f6' : n === 'B' ? '#10b981' : n === 'C' ? '#f59e0b' : n === 'D' ? '#8b5cf6' : '#ef4444';
+                        }
                     }
-                }
-            });
-        };
+                });
+            };
 
-        const renderTableA = (data) => {
-            const tbody = document.getElementById('routingTableA');
-            if (!tbody) return;
-            tbody.innerHTML = '';
-            nodes.forEach(n => {
-                if(n==='A') return;
-                const r = data[n] || {cost: '∞', hop: '-'};
-                tbody.innerHTML += `
+            const renderTableA = (data) => {
+                const tbody = document.getElementById('routingTableA');
+                if (!tbody) return;
+                tbody.innerHTML = '';
+                nodes.forEach(n => {
+                    if (n === 'A') return;
+                    const r = data[n] || { cost: '∞', hop: '-' };
+                    tbody.innerHTML += `
                     <tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
                         <td style="padding:6px; color:#fff;">${n}</td>
                         <td style="padding:6px; color:#10b981;">${r.cost}</td>
                         <td style="padding:6px; color:var(--text-muted);">${r.hop}</td>
                     </tr>
                 `;
-            });
-        };
+                });
+            };
 
-        const calculateSteps = (algo) => {
-            simSteps = [];
-            
-            if (algo === 'ls') {
-                // Dijkstra
-                let queue = ['A', 'B', 'C', 'D', 'E'];
-                let dist = {A: 0, B: Infinity, C: Infinity, D: Infinity, E: Infinity};
-                let prev = {A: null, B: null, C: null, D: null, E: null};
-                let visited = new Set();
+            const calculateSteps = (algo) => {
+                simSteps = [];
 
-                for (let stepIdx = 0; stepIdx < 5; stepIdx++) {
-                    let u = null;
-                    let minDist = Infinity;
-                    queue.forEach(n => {
-                        if (dist[n] < minDist) {
-                            minDist = dist[n];
-                            u = n;
-                        }
-                    });
-                    
-                    if (!u) break;
-                    
-                    queue = queue.filter(n => n !== u);
-                    visited.add(u);
-                    
-                    edges.forEach(e => {
-                        if (e.n1 === u || e.n2 === u) {
-                            const v = e.n1 === u ? e.n2 : e.n1;
-                            if (!visited.has(v)) {
-                                const alt = dist[u] + e.cost;
-                                if (alt < dist[v]) {
-                                    dist[v] = alt;
-                                    prev[v] = u;
+                if (algo === 'ls') {
+                    // Dijkstra
+                    let queue = ['A', 'B', 'C', 'D', 'E'];
+                    let dist = { A: 0, B: Infinity, C: Infinity, D: Infinity, E: Infinity };
+                    let prev = { A: null, B: null, C: null, D: null, E: null };
+                    let visited = new Set();
+
+                    for (let stepIdx = 0; stepIdx < 5; stepIdx++) {
+                        let u = null;
+                        let minDist = Infinity;
+                        queue.forEach(n => {
+                            if (dist[n] < minDist) {
+                                minDist = dist[n];
+                                u = n;
+                            }
+                        });
+
+                        if (!u) break;
+
+                        queue = queue.filter(n => n !== u);
+                        visited.add(u);
+
+                        edges.forEach(e => {
+                            if (e.n1 === u || e.n2 === u) {
+                                const v = e.n1 === u ? e.n2 : e.n1;
+                                if (!visited.has(v)) {
+                                    const alt = dist[u] + e.cost;
+                                    if (alt < dist[v]) {
+                                        dist[v] = alt;
+                                        prev[v] = u;
+                                    }
                                 }
                             }
-                        }
-                    });
-                    
-                    let activeEdges = [];
-                    let activeNodes = Array.from(visited);
-                    Object.keys(prev).forEach(nodeId => {
-                        if (prev[nodeId] && visited.has(nodeId)) {
-                            activeEdges.push({n1: prev[nodeId], n2: nodeId});
-                        }
-                    });
-                    
-                    edges.forEach(e => {
-                        if ((e.n1 === u && !visited.has(e.n2)) || (e.n2 === u && !visited.has(e.n1))) {
-                            if (!activeEdges.some(ae => (ae.n1 === e.n1 && ae.n2 === e.n2) || (ae.n1 === e.n2 && ae.n2 === e.n1))) {
+                        });
+
+                        let activeEdges = [];
+                        let activeNodes = Array.from(visited);
+                        Object.keys(prev).forEach(nodeId => {
+                            if (prev[nodeId] && visited.has(nodeId)) {
+                                activeEdges.push({ n1: prev[nodeId], n2: nodeId });
+                            }
+                        });
+
+                        edges.forEach(e => {
+                            if ((e.n1 === u && !visited.has(e.n2)) || (e.n2 === u && !visited.has(e.n1))) {
+                                if (!activeEdges.some(ae => (ae.n1 === e.n1 && ae.n2 === e.n2) || (ae.n1 === e.n2 && ae.n2 === e.n1))) {
+                                    activeEdges.push(e);
+                                }
+                            }
+                        });
+
+                        let table = {};
+                        ['B', 'C', 'D', 'E'].forEach(n => {
+                            if (dist[n] === Infinity) {
+                                table[n] = { cost: '∞', hop: '-' };
+                            } else {
+                                let curr = n;
+                                let hop = '-';
+                                while (curr && curr !== 'A') {
+                                    hop = curr;
+                                    curr = prev[curr];
+                                }
+                                table[n] = { cost: dist[n], hop: hop };
+                            }
+                        });
+
+                        simSteps.push({ activeNodes, activeEdges, table });
+                    }
+                } else {
+                    // Bellman-Ford
+                    let dist = { A: 0, B: Infinity, C: Infinity, D: Infinity, E: Infinity };
+                    let prev = { A: null, B: null, C: null, D: null, E: null };
+
+                    for (let round = 1; round <= 4; round++) {
+                        let updated = false;
+                        let activeEdges = [];
+                        let activeNodes = ['A'];
+
+                        edges.forEach(e => {
+                            const u = e.n1;
+                            const v = e.n2;
+
+                            if (dist[u] !== Infinity && dist[u] + e.cost < dist[v]) {
+                                dist[v] = dist[u] + e.cost;
+                                prev[v] = u;
+                                updated = true;
                                 activeEdges.push(e);
+                                if (!activeNodes.includes(v)) activeNodes.push(v);
                             }
-                        }
-                    });
+                            if (dist[v] !== Infinity && dist[v] + e.cost < dist[u]) {
+                                dist[u] = dist[v] + e.cost;
+                                prev[u] = v;
+                                updated = true;
+                                activeEdges.push(e);
+                                if (!activeNodes.includes(u)) activeNodes.push(u);
+                            }
+                        });
 
-                    let table = {};
-                    ['B', 'C', 'D', 'E'].forEach(n => {
-                        if (dist[n] === Infinity) {
-                            table[n] = {cost: '∞', hop: '-'};
-                        } else {
-                            let curr = n;
-                            let hop = '-';
-                            while (curr && curr !== 'A') {
-                                hop = curr;
-                                curr = prev[curr];
+                        let table = {};
+                        ['B', 'C', 'D', 'E'].forEach(n => {
+                            if (dist[n] === Infinity) {
+                                table[n] = { cost: '∞', hop: '-' };
+                            } else {
+                                let curr = n;
+                                let hop = '-';
+                                while (curr && curr !== 'A') {
+                                    hop = curr;
+                                    curr = prev[curr];
+                                }
+                                table[n] = { cost: dist[n], hop: hop };
                             }
-                            table[n] = {cost: dist[n], hop: hop};
-                        }
-                    });
-                    
-                    simSteps.push({ activeNodes, activeEdges, table });
+                        });
+
+                        simSteps.push({ activeNodes, activeEdges, table });
+                        if (!updated) break;
+                    }
                 }
-            } else {
-                // Bellman-Ford
-                let dist = {A: 0, B: Infinity, C: Infinity, D: Infinity, E: Infinity};
-                let prev = {A: null, B: null, C: null, D: null, E: null};
+            };
 
-                for (let round = 1; round <= 4; round++) {
-                    let updated = false;
-                    let activeEdges = [];
-                    let activeNodes = ['A'];
-                    
-                    edges.forEach(e => {
-                        const u = e.n1;
-                        const v = e.n2;
-                        
-                        if (dist[u] !== Infinity && dist[u] + e.cost < dist[v]) {
-                            dist[v] = dist[u] + e.cost;
-                            prev[v] = u;
-                            updated = true;
-                            activeEdges.push(e);
-                            if (!activeNodes.includes(v)) activeNodes.push(v);
-                        }
-                        if (dist[v] !== Infinity && dist[v] + e.cost < dist[u]) {
-                            dist[u] = dist[v] + e.cost;
-                            prev[u] = v;
-                            updated = true;
-                            activeEdges.push(e);
-                            if (!activeNodes.includes(u)) activeNodes.push(u);
-                        }
-                    });
-                    
-                    let table = {};
-                    ['B', 'C', 'D', 'E'].forEach(n => {
-                        if (dist[n] === Infinity) {
-                            table[n] = {cost: '∞', hop: '-'};
-                        } else {
-                            let curr = n;
-                            let hop = '-';
-                            while (curr && curr !== 'A') {
-                                hop = curr;
-                                curr = prev[curr];
-                            }
-                            table[n] = {cost: dist[n], hop: hop};
-                        }
-                    });
-                    
-                    simSteps.push({ activeNodes, activeEdges, table });
-                    if (!updated) break;
+            const resetSim = () => {
+                step = 0;
+                calculateSteps(document.getElementById('routeAlgoSelect').value);
+                drawTopology();
+                renderTableA({
+                    B: { cost: '∞', hop: '-' },
+                    C: { cost: '∞', hop: '-' },
+                    D: { cost: '∞', hop: '-' },
+                    E: { cost: '∞', hop: '-' }
+                });
+                const btn = document.getElementById('btnRouteStep');
+                if (btn) {
+                    btn.disabled = false;
+                    btn.textContent = 'Execute Next Step';
                 }
-            }
-        };
+            };
 
-        const resetSim = () => {
-            step = 0;
-            calculateSteps(document.getElementById('routeAlgoSelect').value);
-            drawTopology();
-            renderTableA({
-                B: {cost: '∞', hop: '-'},
-                C: {cost: '∞', hop: '-'},
-                D: {cost: '∞', hop: '-'},
-                E: {cost: '∞', hop: '-'}
-            });
-            const btn = document.getElementById('btnRouteStep');
-            if (btn) {
-                btn.disabled = false;
-                btn.textContent = 'Execute Next Step';
-            }
-        };
-
-        const buildLinkInputs = () => {
-            const container = document.getElementById('linkCostInputs');
-            if (!container) return;
-            container.innerHTML = '';
-            edges.forEach((e, idx) => {
-                container.innerHTML += `
+            const buildLinkInputs = () => {
+                const container = document.getElementById('linkCostInputs');
+                if (!container) return;
+                container.innerHTML = '';
+                edges.forEach((e, idx) => {
+                    container.innerHTML += `
                     <div style="display:flex; align-items:center; gap:5px; font-size:12px;">
                         <span style="color:var(--text-muted); font-weight:800;">${e.n1}-${e.n2}:</span>
                         <input type="number" min="1" max="99" value="${e.cost}" data-index="${idx}" style="width:40px; padding:3px; background:var(--bg-page); border:1px solid var(--border); color:#fff; border-radius:4px; text-align:center;">
                     </div>
                 `;
-            });
-            
-            container.querySelectorAll('input').forEach(input => {
-                input.addEventListener('change', (ev) => {
-                    const val = Math.max(1, parseInt(ev.target.value) || 1);
-                    ev.target.value = val;
-                    const idx = parseInt(ev.target.dataset.index);
-                    edges[idx].cost = val;
-                    resetSim();
                 });
+
+                container.querySelectorAll('input').forEach(input => {
+                    input.addEventListener('change', (ev) => {
+                        const val = Math.max(1, parseInt(ev.target.value) || 1);
+                        ev.target.value = val;
+                        const idx = parseInt(ev.target.dataset.index);
+                        edges[idx].cost = val;
+                        resetSim();
+                    });
+                });
+            };
+
+            setTimeout(() => {
+                buildLinkInputs();
+                resetSim();
+            }, 50);
+
+            window.addEventListener('resize', () => { if (document.getElementById('routingCanvas')) drawTopology(); });
+
+            document.getElementById('btnRouteReset').addEventListener('click', () => {
+                resetSim();
+            });
+            document.getElementById('routeAlgoSelect').addEventListener('change', () => {
+                resetSim();
+            });
+
+            document.getElementById('btnRouteStep').addEventListener('click', () => {
+                const algo = document.getElementById('routeAlgoSelect').value;
+                if (simSteps.length === 0) {
+                    calculateSteps(algo);
+                }
+
+                if (step < simSteps.length) {
+                    const current = simSteps[step];
+                    drawTopology(current.activeNodes, current.activeEdges);
+                    renderTableA(current.table);
+
+                    const btn = document.getElementById('btnRouteStep');
+                    if (btn) {
+                        btn.textContent = step === simSteps.length - 1 ? 'Converged' : 'Execute Next Step';
+                        if (step === simSteps.length - 1) {
+                            btn.disabled = true;
+                        }
+                    }
+                    step++;
+                }
             });
         };
 
-        setTimeout(() => {
-            buildLinkInputs();
-            resetSim();
-        }, 50);
-
-        window.addEventListener('resize', () => { if(document.getElementById('routingCanvas')) drawTopology(); });
-
-        document.getElementById('btnRouteReset').addEventListener('click', () => {
-            resetSim();
-        });
-        document.getElementById('routeAlgoSelect').addEventListener('change', () => {
-            resetSim();
-        });
-
-        document.getElementById('btnRouteStep').addEventListener('click', () => {
-            const algo = document.getElementById('routeAlgoSelect').value;
-            if (simSteps.length === 0) {
-                calculateSteps(algo);
-            }
-            
-            if (step < simSteps.length) {
-                const current = simSteps[step];
-                drawTopology(current.activeNodes, current.activeEdges);
-                renderTableA(current.table);
-                
-                const btn = document.getElementById('btnRouteStep');
-                if (btn) {
-                    btn.textContent = step === simSteps.length - 1 ? 'Converged' : 'Execute Next Step';
-                    if (step === simSteps.length - 1) {
-                        btn.disabled = true;
-                    }
-                }
-                step++;
-            }
-        });
-    };
-
-    const initTransportSim = (container) => {
-        container.innerHTML = `
+        const initTransportSim = (container) => {
+            container.innerHTML = `
             <div class="sim-toolbar">
                 <div class="section-title" style="font-size:22px; margin:0; color:var(--primary);">Transport Layer: TCP vs UDP</div>
             </div>
@@ -10955,278 +10959,278 @@ ${cfg.diagram}
                 </div>
             </div>
         `;
-        
-        const canvas = document.getElementById('transCanvas');
-        const ctx = canvas.getContext('2d');
-        let aniFrame = null;
-        let isSimRunning = false;
 
-        const getPos = (id) => {
-            const el = document.getElementById(id);
-            const rect = el.getBoundingClientRect();
-            const parentRect = canvas.parentElement.getBoundingClientRect();
-            return {
-                x: rect.left - parentRect.left + (rect.width/2),
-                y: rect.top - parentRect.top + (rect.height/2)
+            const canvas = document.getElementById('transCanvas');
+            const ctx = canvas.getContext('2d');
+            let aniFrame = null;
+            let isSimRunning = false;
+
+            const getPos = (id) => {
+                const el = document.getElementById(id);
+                const rect = el.getBoundingClientRect();
+                const parentRect = canvas.parentElement.getBoundingClientRect();
+                return {
+                    x: rect.left - parentRect.left + (rect.width / 2),
+                    y: rect.top - parentRect.top + (rect.height / 2)
+                };
             };
-        };
 
-        const drawTopology = () => {
-            canvas.width = canvas.parentElement.clientWidth;
-            canvas.height = canvas.parentElement.clientHeight;
-            ctx.clearRect(0,0, canvas.width, canvas.height);
-            
-            const client = getPos('transClient');
-            const server = getPos('transServer');
+            const drawTopology = () => {
+                canvas.width = canvas.parentElement.clientWidth;
+                canvas.height = canvas.parentElement.clientHeight;
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            ctx.lineWidth = 2;
-            ctx.strokeStyle = 'rgba(255,255,255,0.2)';
-            ctx.beginPath();
-            ctx.moveTo(client.x, client.y);
-            ctx.lineTo(server.x, server.y);
-            ctx.stroke();
-        };
+                const client = getPos('transClient');
+                const server = getPos('transServer');
 
-        setTimeout(drawTopology, 50);
-        window.addEventListener('resize', () => { if(document.getElementById('transCanvas')) drawTopology(); });
-        
-        const log = (msg, color='#10b981') => {
-            const c = document.getElementById('transConsole');
-            if (c) {
-                c.innerHTML += `<div style="color:${color}; margin-bottom:4px;">> ${msg}</div>`;
-                c.scrollTop = c.scrollHeight;
-            }
-        };
+                ctx.lineWidth = 2;
+                ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+                ctx.beginPath();
+                ctx.moveTo(client.x, client.y);
+                ctx.lineTo(server.x, server.y);
+                ctx.stroke();
+            };
 
-        const setTcpState = (host, state, color) => {
-            const el = document.getElementById(host === 'A' ? 'tcpStateA' : 'tcpStateB');
-            if (el) {
-                el.textContent = state;
-                el.style.color = color;
-            }
-        };
+            setTimeout(drawTopology, 50);
+            window.addEventListener('resize', () => { if (document.getElementById('transCanvas')) drawTopology(); });
 
-        let activePackets = [];
+            const log = (msg, color = '#10b981') => {
+                const c = document.getElementById('transConsole');
+                if (c) {
+                    c.innerHTML += `<div style="color:${color}; margin-bottom:4px;">> ${msg}</div>`;
+                    c.scrollTop = c.scrollHeight;
+                }
+            };
 
-        const animateLoop = () => {
-            if(!document.getElementById('transCanvas')) return;
-            drawTopology();
-            
-            const now = performance.now();
-            const client = getPos('transClient');
-            const server = getPos('transServer');
+            const setTcpState = (host, state, color) => {
+                const el = document.getElementById(host === 'A' ? 'tcpStateA' : 'tcpStateB');
+                if (el) {
+                    el.textContent = state;
+                    el.style.color = color;
+                }
+            };
 
-            activePackets = activePackets.filter(p => {
-                const elapsed = now - p.startTime;
-                let progress = elapsed / p.duration;
-                if(progress > 1) progress = 1;
+            let activePackets = [];
 
-                // If packet is dropped, it disappears halfway
-                if (p.isDropped && progress >= 0.5) {
-                    // Draw a collision/drop marker
-                    const dropX = p.from.x + (p.to.x - p.from.x) * 0.5;
-                    const dropY = p.from.y + (p.to.y - p.from.y) * 0.5 + p.yOffset;
-                    ctx.fillStyle = '#ef4444';
-                    ctx.font = 'bold 12px sans-serif';
-                    ctx.fillText('⚡ LOST', dropX - 20, dropY - 10);
-                    if (p.onDropTriggered) {
-                        p.onDropTriggered();
-                        p.onDropTriggered = null; // trigger once
+            const animateLoop = () => {
+                if (!document.getElementById('transCanvas')) return;
+                drawTopology();
+
+                const now = performance.now();
+                const client = getPos('transClient');
+                const server = getPos('transServer');
+
+                activePackets = activePackets.filter(p => {
+                    const elapsed = now - p.startTime;
+                    let progress = elapsed / p.duration;
+                    if (progress > 1) progress = 1;
+
+                    // If packet is dropped, it disappears halfway
+                    if (p.isDropped && progress >= 0.5) {
+                        // Draw a collision/drop marker
+                        const dropX = p.from.x + (p.to.x - p.from.x) * 0.5;
+                        const dropY = p.from.y + (p.to.y - p.from.y) * 0.5 + p.yOffset;
+                        ctx.fillStyle = '#ef4444';
+                        ctx.font = 'bold 12px sans-serif';
+                        ctx.fillText('⚡ LOST', dropX - 20, dropY - 10);
+                        if (p.onDropTriggered) {
+                            p.onDropTriggered();
+                            p.onDropTriggered = null; // trigger once
+                        }
+                        return false;
                     }
-                    return false;
+
+                    const x = p.from.x + (p.to.x - p.from.x) * progress;
+                    const y = p.from.y + (p.to.y - p.from.y) * progress + p.yOffset;
+
+                    ctx.fillStyle = p.color;
+                    ctx.fillRect(x - 10, y - 10, 20, 20);
+
+                    if (p.tag) {
+                        ctx.fillStyle = '#fff';
+                        ctx.font = 'bold 9px Outfit, sans-serif';
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        ctx.fillText(p.tag, x, y);
+                    }
+
+                    if (progress >= 1) {
+                        if (p.onComplete) p.onComplete();
+                        return false;
+                    }
+                    return true;
+                });
+
+                if (isSimRunning || activePackets.length > 0) {
+                    aniFrame = requestAnimationFrame(animateLoop);
                 }
+            };
 
-                const x = p.from.x + (p.to.x - p.from.x) * progress;
-                const y = p.from.y + (p.to.y - p.from.y) * progress + p.yOffset;
-
-                ctx.fillStyle = p.color;
-                ctx.fillRect(x - 10, y - 10, 20, 20);
-
-                if(p.tag) {
-                    ctx.fillStyle = '#fff';
-                    ctx.font = 'bold 9px Outfit, sans-serif';
-                    ctx.textAlign = 'center';
-                    ctx.textBaseline = 'middle';
-                    ctx.fillText(p.tag, x, y);
+            const pushPacket = (fromId, toId, color, tag, duration, yOffset, isDropped, onComplete, onDropTriggered) => {
+                const from = getPos(fromId);
+                const to = getPos(toId);
+                activePackets.push({
+                    from, to, color, tag, duration, yOffset, isDropped, startTime: performance.now(), onComplete, onDropTriggered
+                });
+                if (activePackets.length === 1) {
+                    animateLoop();
                 }
+            };
 
-                if(progress >= 1) {
-                    if (p.onComplete) p.onComplete();
-                    return false;
-                }
-                return true;
-            });
+            document.getElementById('btnTransStart').addEventListener('click', () => {
+                if (isSimRunning) return;
+                isSimRunning = true;
+                activePackets = [];
+                document.getElementById('transConsole').innerHTML = '';
+                document.getElementById('btnTransStart').disabled = true;
 
-            if(isSimRunning || activePackets.length > 0) {
-                aniFrame = requestAnimationFrame(animateLoop);
-            }
-        };
+                const protocol = document.getElementById('transProtocol').value;
+                const windowSize = parseInt(document.getElementById('transWindow').value);
+                const lossRate = parseInt(document.getElementById('transLoss').value) / 100;
 
-        const pushPacket = (fromId, toId, color, tag, duration, yOffset, isDropped, onComplete, onDropTriggered) => {
-            const from = getPos(fromId);
-            const to = getPos(toId);
-            activePackets.push({
-                from, to, color, tag, duration, yOffset, isDropped, startTime: performance.now(), onComplete, onDropTriggered
-            });
-            if (activePackets.length === 1) {
-                animateLoop();
-            }
-        };
+                if (protocol === 'tcp') {
+                    log('Initiating TCP 3-Way Handshake...', '#fff');
+                    setTcpState('A', 'SYN-SENT', '#f59e0b');
+                    log('Host A ➔ Host B: [SYN] Seq=0', '#3b82f6');
 
-        document.getElementById('btnTransStart').addEventListener('click', () => {
-            if(isSimRunning) return;
-            isSimRunning = true;
-            activePackets = [];
-            document.getElementById('transConsole').innerHTML = '';
-            document.getElementById('btnTransStart').disabled = true;
-            
-            const protocol = document.getElementById('transProtocol').value;
-            const windowSize = parseInt(document.getElementById('transWindow').value);
-            const lossRate = parseInt(document.getElementById('transLoss').value) / 100;
-            
-            if(protocol === 'tcp') {
-                log('Initiating TCP 3-Way Handshake...', '#fff');
-                setTcpState('A', 'SYN-SENT', '#f59e0b');
-                log('Host A ➔ Host B: [SYN] Seq=0', '#3b82f6');
-                
-                pushPacket('transClient', 'transServer', '#3b82f6', 'SYN', 1200, 0, false, () => {
-                    setTcpState('B', 'SYN-RCVD', '#f59e0b');
-                    log('Host B ➔ Host A: Received SYN. Sending [SYN, ACK] Seq=0, Ack=1', '#10b981');
-                    
-                    pushPacket('transServer', 'transClient', '#10b981', 'S-A', 1200, 0, false, () => {
-                        setTcpState('A', 'ESTABLISHED', '#10b981');
-                        log('Host A ➔ Host B: Received SYN-ACK. Sending [ACK] Seq=1, Ack=1', '#3b82f6');
-                        
-                        pushPacket('transClient', 'transServer', '#3b82f6', 'ACK', 1200, 0, false, () => {
-                            setTcpState('B', 'ESTABLISHED', '#10b981');
-                            log('TCP CONNECTION ESTABLISHED. Starting Sliding Window Transfer...', '#fff');
-                            
-                            setTimeout(() => {
-                                // Start sliding window flow
-                                runSlidingWindow(windowSize, lossRate);
-                            }, 1000);
+                    pushPacket('transClient', 'transServer', '#3b82f6', 'SYN', 1200, 0, false, () => {
+                        setTcpState('B', 'SYN-RCVD', '#f59e0b');
+                        log('Host B ➔ Host A: Received SYN. Sending [SYN, ACK] Seq=0, Ack=1', '#10b981');
+
+                        pushPacket('transServer', 'transClient', '#10b981', 'S-A', 1200, 0, false, () => {
+                            setTcpState('A', 'ESTABLISHED', '#10b981');
+                            log('Host A ➔ Host B: Received SYN-ACK. Sending [ACK] Seq=1, Ack=1', '#3b82f6');
+
+                            pushPacket('transClient', 'transServer', '#3b82f6', 'ACK', 1200, 0, false, () => {
+                                setTcpState('B', 'ESTABLISHED', '#10b981');
+                                log('TCP CONNECTION ESTABLISHED. Starting Sliding Window Transfer...', '#fff');
+
+                                setTimeout(() => {
+                                    // Start sliding window flow
+                                    runSlidingWindow(windowSize, lossRate);
+                                }, 1000);
+                            });
                         });
                     });
-                });
-            } else {
-                // UDP
-                setTcpState('A', 'N/A', '#64748b');
-                setTcpState('B', 'N/A', '#64748b');
-                log('Starting UDP Datagram Stream (Connectionless)...', '#fff');
-                log('No handshake required. Blasting datagrams...', '#f59e0b');
-                
-                let count = 0;
-                const blastInterval = setInterval(() => {
-                    if (count >= 10) {
-                        clearInterval(blastInterval);
-                        setTimeout(() => {
-                            isSimRunning = false;
-                            document.getElementById('btnTransStart').disabled = false;
-                            log('UDP Stream Finished. No ACKs requested or expected.', '#fff');
-                        }, 1500);
-                        return;
-                    }
-                    count++;
-                    const isDropped = Math.random() < lossRate;
-                    log(`Host A: Blasting Datagram ${count}...`, '#3b82f6');
-                    
-                    pushPacket('transClient', 'transServer', '#3b82f6', `D${count}`, 1000, (Math.random() - 0.5) * 80, isDropped, () => {
-                        log(`Host B: Received Datagram ${count}. (Delivered to App Layer)`, '#10b981');
-                    }, () => {
-                        log(`Datagram ${count} dropped in transit due to network noise!`, '#ef4444');
-                    });
-                }, 200);
-            }
-        });
-
-        const runSlidingWindow = (windowSize, lossRate) => {
-            let base = 1;
-            let nextSeqNum = 1;
-            const totalPackets = 7;
-            const packetStatuses = {}; // 'sent', 'acked', 'lost'
-            let timer = null;
-
-            const sendWindow = () => {
-                while (nextSeqNum < base + windowSize && nextSeqNum <= totalPackets) {
-                    const seq = nextSeqNum;
-                    packetStatuses[seq] = 'sent';
-                    const isDropped = Math.random() < lossRate;
-                    log(`Host A: Sending Packet ${seq}...`, '#8b5cf6');
-                    
-                    const offset = (seq - base) * 25 - 40;
-                    
-                    pushPacket('transClient', 'transServer', '#8b5cf6', `P${seq}`, 1500, offset, isDropped, () => {
-                        // Packet arrived successfully at server
-                        handlePacketArrivalAtServer(seq);
-                    }, () => {
-                        // Packet dropped
-                        packetStatuses[seq] = 'lost';
-                        log(`[Loss] Packet ${seq} lost in transit!`, '#ef4444');
-                    });
-                    
-                    nextSeqNum++;
-                }
-                
-                // Set retransmission timer
-                if (timer) clearTimeout(timer);
-                timer = setTimeout(() => {
-                    handleTimeout();
-                }, 3500);
-            };
-
-            let expectedSeq = 1;
-
-            const handlePacketArrivalAtServer = (seq) => {
-                if (seq === expectedSeq) {
-                    log(`Host B: Received in-order Packet ${seq}. Sending ACK ${seq + 1}`, '#10b981');
-                    expectedSeq++;
-                    // Send ACK
-                    pushPacket('transServer', 'transClient', '#10b981', `A${expectedSeq}`, 1200, 0, false, () => {
-                        handleAckArrivalAtClient(expectedSeq);
-                    });
                 } else {
-                    log(`Host B: Out-of-order Packet ${seq} (Expected P${expectedSeq}). Duplicate ACK ${expectedSeq}`, '#ef4444');
-                    pushPacket('transServer', 'transClient', '#10b981', `A${expectedSeq}`, 1200, 0, false, () => {
-                        handleAckArrivalAtClient(expectedSeq);
-                    });
-                }
-            };
+                    // UDP
+                    setTcpState('A', 'N/A', '#64748b');
+                    setTcpState('B', 'N/A', '#64748b');
+                    log('Starting UDP Datagram Stream (Connectionless)...', '#fff');
+                    log('No handshake required. Blasting datagrams...', '#f59e0b');
 
-            const handleAckArrivalAtClient = (ackNum) => {
-                if (ackNum > base) {
-                    log(`Host A: Received ACK ${ackNum}. Sliding window base to ${ackNum}`, '#3b82f6');
-                    base = ackNum;
-                    if (base > totalPackets) {
-                        clearTimeout(timer);
-                        log('TCP Data transfer complete. Initiating Connection Teardown...', '#fff');
-                        setTimeout(() => {
-                            setTcpState('A', 'CLOSED', '#ef4444');
-                            setTcpState('B', 'LISTEN', '#f59e0b');
-                            isSimRunning = false;
-                            document.getElementById('btnTransStart').disabled = false;
-                            log('TCP connection closed gracefully.', '#10b981');
-                        }, 1000);
+                    let count = 0;
+                    const blastInterval = setInterval(() => {
+                        if (count >= 10) {
+                            clearInterval(blastInterval);
+                            setTimeout(() => {
+                                isSimRunning = false;
+                                document.getElementById('btnTransStart').disabled = false;
+                                log('UDP Stream Finished. No ACKs requested or expected.', '#fff');
+                            }, 1500);
+                            return;
+                        }
+                        count++;
+                        const isDropped = Math.random() < lossRate;
+                        log(`Host A: Blasting Datagram ${count}...`, '#3b82f6');
+
+                        pushPacket('transClient', 'transServer', '#3b82f6', `D${count}`, 1000, (Math.random() - 0.5) * 80, isDropped, () => {
+                            log(`Host B: Received Datagram ${count}. (Delivered to App Layer)`, '#10b981');
+                        }, () => {
+                            log(`Datagram ${count} dropped in transit due to network noise!`, '#ef4444');
+                        });
+                    }, 200);
+                }
+            });
+
+            const runSlidingWindow = (windowSize, lossRate) => {
+                let base = 1;
+                let nextSeqNum = 1;
+                const totalPackets = 7;
+                const packetStatuses = {}; // 'sent', 'acked', 'lost'
+                let timer = null;
+
+                const sendWindow = () => {
+                    while (nextSeqNum < base + windowSize && nextSeqNum <= totalPackets) {
+                        const seq = nextSeqNum;
+                        packetStatuses[seq] = 'sent';
+                        const isDropped = Math.random() < lossRate;
+                        log(`Host A: Sending Packet ${seq}...`, '#8b5cf6');
+
+                        const offset = (seq - base) * 25 - 40;
+
+                        pushPacket('transClient', 'transServer', '#8b5cf6', `P${seq}`, 1500, offset, isDropped, () => {
+                            // Packet arrived successfully at server
+                            handlePacketArrivalAtServer(seq);
+                        }, () => {
+                            // Packet dropped
+                            packetStatuses[seq] = 'lost';
+                            log(`[Loss] Packet ${seq} lost in transit!`, '#ef4444');
+                        });
+
+                        nextSeqNum++;
+                    }
+
+                    // Set retransmission timer
+                    if (timer) clearTimeout(timer);
+                    timer = setTimeout(() => {
+                        handleTimeout();
+                    }, 3500);
+                };
+
+                let expectedSeq = 1;
+
+                const handlePacketArrivalAtServer = (seq) => {
+                    if (seq === expectedSeq) {
+                        log(`Host B: Received in-order Packet ${seq}. Sending ACK ${seq + 1}`, '#10b981');
+                        expectedSeq++;
+                        // Send ACK
+                        pushPacket('transServer', 'transClient', '#10b981', `A${expectedSeq}`, 1200, 0, false, () => {
+                            handleAckArrivalAtClient(expectedSeq);
+                        });
                     } else {
-                        // Send new packets in the sliding window
+                        log(`Host B: Out-of-order Packet ${seq} (Expected P${expectedSeq}). Duplicate ACK ${expectedSeq}`, '#ef4444');
+                        pushPacket('transServer', 'transClient', '#10b981', `A${expectedSeq}`, 1200, 0, false, () => {
+                            handleAckArrivalAtClient(expectedSeq);
+                        });
+                    }
+                };
+
+                const handleAckArrivalAtClient = (ackNum) => {
+                    if (ackNum > base) {
+                        log(`Host A: Received ACK ${ackNum}. Sliding window base to ${ackNum}`, '#3b82f6');
+                        base = ackNum;
+                        if (base > totalPackets) {
+                            clearTimeout(timer);
+                            log('TCP Data transfer complete. Initiating Connection Teardown...', '#fff');
+                            setTimeout(() => {
+                                setTcpState('A', 'CLOSED', '#ef4444');
+                                setTcpState('B', 'LISTEN', '#f59e0b');
+                                isSimRunning = false;
+                                document.getElementById('btnTransStart').disabled = false;
+                                log('TCP connection closed gracefully.', '#10b981');
+                            }, 1000);
+                        } else {
+                            // Send new packets in the sliding window
+                            sendWindow();
+                        }
+                    }
+                };
+
+                const handleTimeout = () => {
+                    if (base <= totalPackets) {
+                        log(`[Timeout] Packet ACK not received for base P${base}. Retransmitting window...`, '#ef4444');
+                        nextSeqNum = base; // Go Back N
                         sendWindow();
                     }
-                }
-            };
+                };
 
-            const handleTimeout = () => {
-                if (base <= totalPackets) {
-                    log(`[Timeout] Packet ACK not received for base P${base}. Retransmitting window...`, '#ef4444');
-                    nextSeqNum = base; // Go Back N
-                    sendWindow();
-                }
+                sendWindow();
             };
-
-            sendWindow();
         };
-    };
 
-    const initCsmaSim = (container) => {
-        container.innerHTML = `
+        const initCsmaSim = (container) => {
+            container.innerHTML = `
             <div class="sim-toolbar">
                 <div class="section-title" style="font-size:22px; margin:0; color:var(--primary);">Media Access Control: CSMA</div>
             </div>
@@ -11293,306 +11297,306 @@ ${cfg.diagram}
                 </div>
             </div>
         `;
-        
-        const canvas = document.getElementById('csmaCanvas');
-        const ctx = canvas.getContext('2d');
-        let isSimRunning = false;
 
-        const getPos = (id) => {
-            const el = document.getElementById(id);
-            const rect = el.getBoundingClientRect();
-            const parentRect = canvas.parentElement.getBoundingClientRect();
-            return {
-                x: rect.left - parentRect.left + (rect.width/2),
-                y: rect.top - parentRect.top + (rect.height/2)
+            const canvas = document.getElementById('csmaCanvas');
+            const ctx = canvas.getContext('2d');
+            let isSimRunning = false;
+
+            const getPos = (id) => {
+                const el = document.getElementById(id);
+                const rect = el.getBoundingClientRect();
+                const parentRect = canvas.parentElement.getBoundingClientRect();
+                return {
+                    x: rect.left - parentRect.left + (rect.width / 2),
+                    y: rect.top - parentRect.top + (rect.height / 2)
+                };
             };
-        };
 
-        const drawTopology = () => {
-            canvas.width = canvas.parentElement.clientWidth;
-            canvas.height = canvas.parentElement.clientHeight;
-            ctx.clearRect(0,0, canvas.width, canvas.height);
-            
-            const n1 = getPos('macNode1'), n2 = getPos('macNode2'), n3 = getPos('macNode3');
-            const busY = canvas.height / 2;
+            const drawTopology = () => {
+                canvas.width = canvas.parentElement.clientWidth;
+                canvas.height = canvas.parentElement.clientHeight;
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            ctx.lineWidth = 2;
-            ctx.strokeStyle = '#1e293b';
-            
-            // Drop cables
-            [n1, n2, n3].forEach(n => {
-                ctx.beginPath();
-                ctx.moveTo(n.x, n.y);
-                ctx.lineTo(n.x, busY);
-                ctx.stroke();
-            });
-        };
+                const n1 = getPos('macNode1'), n2 = getPos('macNode2'), n3 = getPos('macNode3');
+                const busY = canvas.height / 2;
 
-        setTimeout(drawTopology, 50);
-        window.addEventListener('resize', () => { if(document.getElementById('csmaCanvas')) drawTopology(); });
-        
-        const log = (msg, color='#10b981') => {
-            const c = document.getElementById('macConsole');
-            if (c) {
-                c.innerHTML += `<div style="color:${color}; margin-bottom:4px;">> ${msg}</div>`;
-                c.scrollTop = c.scrollHeight;
-            }
-        };
+                ctx.lineWidth = 2;
+                ctx.strokeStyle = '#1e293b';
 
-        const setState = (id, state, color) => {
-            const el = document.getElementById(id);
-            if (el) {
-                el.textContent = state;
-                el.style.color = color;
-            }
-        };
+                // Drop cables
+                [n1, n2, n3].forEach(n => {
+                    ctx.beginPath();
+                    ctx.moveTo(n.x, n.y);
+                    ctx.lineTo(n.x, busY);
+                    ctx.stroke();
+                });
+            };
 
-        const animateSignal = (srcNode, isCollision, color, tag, onComplete) => {
-            let start = performance.now();
-            const dur = 1200;
-            const srcPos = getPos(srcNode);
-            const busY = canvas.height / 2;
-            
-            const animate = (time) => {
-                if(!document.getElementById('csmaCanvas')) return;
-                let prog = (time - start) / dur;
-                if(prog > 1) prog = 1;
-                
-                drawTopology();
-                
-                // Drop to bus
-                let dropProg = Math.min(prog * 3, 1);
-                ctx.fillStyle = color;
-                ctx.fillRect(srcPos.x - 5, srcPos.y + (busY - srcPos.y)*dropProg - 5, 10, 10);
-                
-                if(prog > 0.33) {
-                    // Spread on bus
-                    let spreadProg = (prog - 0.33) * 1.5;
-                    const maxSpread = canvas.width * 0.4;
-                    ctx.fillStyle = color;
-                    ctx.globalAlpha = 0.5;
-                    ctx.fillRect(srcPos.x - maxSpread*spreadProg, busY - 4, maxSpread*spreadProg*2, 8);
-                    ctx.globalAlpha = 1.0;
-                    
-                    if(isCollision && prog > 0.6) {
-                        ctx.fillStyle = '#ef4444';
-                        ctx.beginPath();
-                        ctx.arc(srcPos.x, busY, 20 + Math.sin(time/50)*10, 0, Math.PI*2);
-                        ctx.fill();
-                        ctx.fillStyle = '#fff';
-                        ctx.font = 'bold 12px sans-serif';
-                        ctx.textAlign = 'center';
-                        ctx.fillText('COLLISION', srcPos.x, busY + 35);
-                    } else if (tag && prog > 0.5 && prog < 0.9) {
-                        ctx.fillStyle = '#fff';
-                        ctx.font = 'bold 10px monospace';
-                        ctx.fillText(tag, srcPos.x + 15, busY - 15);
-                    }
+            setTimeout(drawTopology, 50);
+            window.addEventListener('resize', () => { if (document.getElementById('csmaCanvas')) drawTopology(); });
+
+            const log = (msg, color = '#10b981') => {
+                const c = document.getElementById('macConsole');
+                if (c) {
+                    c.innerHTML += `<div style="color:${color}; margin-bottom:4px;">> ${msg}</div>`;
+                    c.scrollTop = c.scrollHeight;
                 }
-                
-                if(prog < 1) requestAnimationFrame(animate);
-                else { drawTopology(); if(onComplete) onComplete(); }
             };
-            requestAnimationFrame(animate);
-        };
 
-        const calculateBackoff = (attempt, algo) => {
-            if (algo === 'none') return 0;
-            if (algo === 'linear') {
-                // Delay proportional to attempt
-                return Math.floor(Math.random() * (attempt * 4)) + 1; 
-            }
-            // BEB: 0 to 2^attempt - 1 slots
-            const maxSlots = Math.pow(2, Math.min(attempt, 10)) - 1;
-            return Math.floor(Math.random() * maxSlots) + 1;
-        };
+            const setState = (id, state, color) => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.textContent = state;
+                    el.style.color = color;
+                }
+            };
 
-        document.getElementById('btnMacStart').addEventListener('click', () => {
-            if(isSimRunning) return;
-            isSimRunning = true;
-            document.getElementById('macConsole').innerHTML = '';
-            
-            const proto = document.getElementById('macProtocol').value;
-            const node1Active = document.getElementById('chkNode1').checked;
-            const node3Active = document.getElementById('chkNode3').checked;
-            const backoffAlgo = document.getElementById('macBackoff').value;
-            const rts = document.getElementById('macRts').checked;
-            
-            document.querySelectorAll('[id^=stateN]').forEach(el => {el.textContent = 'IDLE'; el.style.color='#64748b';});
-            
-            if(!node1Active && !node3Active) {
-                log('No transmitting nodes selected!', '#ef4444');
-                isSimRunning = false;
-                return;
-            }
+            const animateSignal = (srcNode, isCollision, color, tag, onComplete) => {
+                let start = performance.now();
+                const dur = 1200;
+                const srcPos = getPos(srcNode);
+                const busY = canvas.height / 2;
 
-            if(proto === 'cd') {
-                log('CSMA/CD: Sensing shared coaxial bus...', '#fff');
-                
-                if (node1Active) setState('stateN1', 'SENSING', '#f59e0b');
-                if (node3Active) setState('stateN3', 'SENSING', '#f59e0b');
-                
-                setTimeout(() => {
-                    if (node1Active && node3Active) {
-                        // Both transmit simultaneously ➔ Collision!
-                        log('Both Node 1 and Node 3 detect IDLE bus and transmit!', '#3b82f6');
-                        setState('stateN1', 'TRANSMITTING', '#3b82f6');
-                        setState('stateN3', 'TRANSMITTING', '#3b82f6');
-                        
-                        animateSignal('macNode1', true, '#3b82f6', 'DATA');
-                        setTimeout(() => animateSignal('macNode3', true, '#f59e0b', 'DATA'), 100);
-                        
-                        setTimeout(() => {
-                            log('COLLISION DETECTED on wire!', '#ef4444');
-                            setState('stateN1', 'JAMMING', '#ef4444');
-                            setState('stateN3', 'JAMMING', '#ef4444');
-                            log('Nodes broadcasting JAM signal to clear bus...', '#f59e0b');
-                            
-                            setTimeout(() => {
-                                const delay1 = calculateBackoff(1, backoffAlgo);
-                                const delay3 = calculateBackoff(1, backoffAlgo);
-                                
-                                log(`Exponential Backoff (Attempt 1):`, '#fff');
-                                log(`-> Node 1 chose delay: ${delay1} slots`);
-                                log(`-> Node 3 chose delay: ${delay3} slots`);
-                                
-                                setState('stateN1', `BACKOFF (${delay1} slots)`, '#8b5cf6');
-                                setState('stateN3', `BACKOFF (${delay3} slots)`, '#8b5cf6');
-                                
-                                // Retransmit based on who has shorter backoff
-                                setTimeout(() => {
-                                    if (delay1 <= delay3) {
-                                        log('Node 1 backoff timer expired first. Retransmitting...', '#10b981');
-                                        setState('stateN1', 'TRANSMITTING', '#3b82f6');
-                                        animateSignal('macNode1', false, '#3b82f6', 'DATA', () => {
-                                            log('Node 1 transmission completed successfully.', '#10b981');
-                                            setState('stateN1', 'IDLE', '#64748b');
-                                            
-                                            // Node 3 transmits later
-                                            setTimeout(() => {
-                                                log('Node 3 backoff timer expired. Retransmitting...', '#10b981');
-                                                setState('stateN3', 'TRANSMITTING', '#3b82f6');
-                                                animateSignal('macNode3', false, '#f59e0b', 'DATA', () => {
-                                                    log('Node 3 transmission completed successfully.', '#10b981');
-                                                    setState('stateN3', 'IDLE', '#64748b');
-                                                    isSimRunning = false;
-                                                });
-                                            }, 1000);
-                                        });
-                                    } else {
-                                        log('Node 3 backoff timer expired first. Retransmitting...', '#10b981');
-                                        setState('stateN3', 'TRANSMITTING', '#3b82f6');
-                                        animateSignal('macNode3', false, '#f59e0b', 'DATA', () => {
-                                            log('Node 3 transmission completed successfully.', '#10b981');
-                                            setState('stateN3', 'IDLE', '#64748b');
-                                            
-                                            // Node 1 transmits later
-                                            setTimeout(() => {
-                                                log('Node 1 backoff timer expired. Retransmitting...', '#10b981');
-                                                setState('stateN1', 'TRANSMITTING', '#3b82f6');
-                                                animateSignal('macNode1', false, '#3b82f6', 'DATA', () => {
-                                                    log('Node 1 transmission completed successfully.', '#10b981');
-                                                    setState('stateN1', 'IDLE', '#64748b');
-                                                    isSimRunning = false;
-                                                });
-                                            }, 1000);
-                                        });
-                                    }
-                                }, 1500);
-                            }, 1000);
-                        }, 1000);
-                    } else {
-                        // Single node active ➔ Success!
-                        const activeNode = node1Active ? 'stateN1' : 'stateN3';
-                        const activePos = node1Active ? 'macNode1' : 'macNode3';
-                        log(`Bus is IDLE. ${node1Active?'Node 1':'Node 3'} transmits...`, '#10b981');
-                        setState(activeNode, 'TRANSMITTING', '#3b82f6');
-                        animateSignal(activePos, false, '#3b82f6', 'DATA', () => {
-                            log('Transmission completed successfully without any conflicts.', '#10b981');
-                            setState(activeNode, 'IDLE', '#64748b');
-                            isSimRunning = false;
-                        });
+                const animate = (time) => {
+                    if (!document.getElementById('csmaCanvas')) return;
+                    let prog = (time - start) / dur;
+                    if (prog > 1) prog = 1;
+
+                    drawTopology();
+
+                    // Drop to bus
+                    let dropProg = Math.min(prog * 3, 1);
+                    ctx.fillStyle = color;
+                    ctx.fillRect(srcPos.x - 5, srcPos.y + (busY - srcPos.y) * dropProg - 5, 10, 10);
+
+                    if (prog > 0.33) {
+                        // Spread on bus
+                        let spreadProg = (prog - 0.33) * 1.5;
+                        const maxSpread = canvas.width * 0.4;
+                        ctx.fillStyle = color;
+                        ctx.globalAlpha = 0.5;
+                        ctx.fillRect(srcPos.x - maxSpread * spreadProg, busY - 4, maxSpread * spreadProg * 2, 8);
+                        ctx.globalAlpha = 1.0;
+
+                        if (isCollision && prog > 0.6) {
+                            ctx.fillStyle = '#ef4444';
+                            ctx.beginPath();
+                            ctx.arc(srcPos.x, busY, 20 + Math.sin(time / 50) * 10, 0, Math.PI * 2);
+                            ctx.fill();
+                            ctx.fillStyle = '#fff';
+                            ctx.font = 'bold 12px sans-serif';
+                            ctx.textAlign = 'center';
+                            ctx.fillText('COLLISION', srcPos.x, busY + 35);
+                        } else if (tag && prog > 0.5 && prog < 0.9) {
+                            ctx.fillStyle = '#fff';
+                            ctx.font = 'bold 10px monospace';
+                            ctx.fillText(tag, srcPos.x + 15, busY - 15);
+                        }
                     }
-                }, 800);
-            } else {
-                // CSMA/CA
-                log('CSMA/CA: SIFS/DIFS wireless sensing active...', '#fff');
-                const sender = node1Active ? 'macNode1' : 'macNode3';
-                const senderState = node1Active ? 'stateN1' : 'stateN3';
-                
-                setState(senderState, 'DIFS WAIT', '#f59e0b');
-                
-                setTimeout(() => {
-                    if (rts) {
-                        log(`${node1Active?'Node 1':'Node 3'} broadcasting RTS (Request to Send)...`, '#8b5cf6');
-                        setState(senderState, 'RTS SENT', '#8b5cf6');
-                        
-                        animateSignal(sender, false, '#8b5cf6', 'RTS', () => {
-                            log('Access Point (Node 2) replies with CTS (Clear to Send)...', '#10b981');
-                            setState('stateN2', 'CTS SENT', '#10b981');
-                            
-                            // If other node is active, it must update NAV
-                            const otherState = node1Active ? 'stateN3' : 'stateN1';
-                            setState(otherState, 'NAV BLOCKED', '#ef4444');
-                            log(`AP CTS blocks other nodes from transmitting (NAV Vector set).`, '#ef4444');
-                            
-                            animateSignal('macNode2', false, '#10b981', 'CTS', () => {
-                                log(`${node1Active?'Node 1':'Node 3'} transmitting DATA frame...`, '#3b82f6');
+
+                    if (prog < 1) requestAnimationFrame(animate);
+                    else { drawTopology(); if (onComplete) onComplete(); }
+                };
+                requestAnimationFrame(animate);
+            };
+
+            const calculateBackoff = (attempt, algo) => {
+                if (algo === 'none') return 0;
+                if (algo === 'linear') {
+                    // Delay proportional to attempt
+                    return Math.floor(Math.random() * (attempt * 4)) + 1;
+                }
+                // BEB: 0 to 2^attempt - 1 slots
+                const maxSlots = Math.pow(2, Math.min(attempt, 10)) - 1;
+                return Math.floor(Math.random() * maxSlots) + 1;
+            };
+
+            document.getElementById('btnMacStart').addEventListener('click', () => {
+                if (isSimRunning) return;
+                isSimRunning = true;
+                document.getElementById('macConsole').innerHTML = '';
+
+                const proto = document.getElementById('macProtocol').value;
+                const node1Active = document.getElementById('chkNode1').checked;
+                const node3Active = document.getElementById('chkNode3').checked;
+                const backoffAlgo = document.getElementById('macBackoff').value;
+                const rts = document.getElementById('macRts').checked;
+
+                document.querySelectorAll('[id^=stateN]').forEach(el => { el.textContent = 'IDLE'; el.style.color = '#64748b'; });
+
+                if (!node1Active && !node3Active) {
+                    log('No transmitting nodes selected!', '#ef4444');
+                    isSimRunning = false;
+                    return;
+                }
+
+                if (proto === 'cd') {
+                    log('CSMA/CD: Sensing shared coaxial bus...', '#fff');
+
+                    if (node1Active) setState('stateN1', 'SENSING', '#f59e0b');
+                    if (node3Active) setState('stateN3', 'SENSING', '#f59e0b');
+
+                    setTimeout(() => {
+                        if (node1Active && node3Active) {
+                            // Both transmit simultaneously ➔ Collision!
+                            log('Both Node 1 and Node 3 detect IDLE bus and transmit!', '#3b82f6');
+                            setState('stateN1', 'TRANSMITTING', '#3b82f6');
+                            setState('stateN3', 'TRANSMITTING', '#3b82f6');
+
+                            animateSignal('macNode1', true, '#3b82f6', 'DATA');
+                            setTimeout(() => animateSignal('macNode3', true, '#f59e0b', 'DATA'), 100);
+
+                            setTimeout(() => {
+                                log('COLLISION DETECTED on wire!', '#ef4444');
+                                setState('stateN1', 'JAMMING', '#ef4444');
+                                setState('stateN3', 'JAMMING', '#ef4444');
+                                log('Nodes broadcasting JAM signal to clear bus...', '#f59e0b');
+
+                                setTimeout(() => {
+                                    const delay1 = calculateBackoff(1, backoffAlgo);
+                                    const delay3 = calculateBackoff(1, backoffAlgo);
+
+                                    log(`Exponential Backoff (Attempt 1):`, '#fff');
+                                    log(`-> Node 1 chose delay: ${delay1} slots`);
+                                    log(`-> Node 3 chose delay: ${delay3} slots`);
+
+                                    setState('stateN1', `BACKOFF (${delay1} slots)`, '#8b5cf6');
+                                    setState('stateN3', `BACKOFF (${delay3} slots)`, '#8b5cf6');
+
+                                    // Retransmit based on who has shorter backoff
+                                    setTimeout(() => {
+                                        if (delay1 <= delay3) {
+                                            log('Node 1 backoff timer expired first. Retransmitting...', '#10b981');
+                                            setState('stateN1', 'TRANSMITTING', '#3b82f6');
+                                            animateSignal('macNode1', false, '#3b82f6', 'DATA', () => {
+                                                log('Node 1 transmission completed successfully.', '#10b981');
+                                                setState('stateN1', 'IDLE', '#64748b');
+
+                                                // Node 3 transmits later
+                                                setTimeout(() => {
+                                                    log('Node 3 backoff timer expired. Retransmitting...', '#10b981');
+                                                    setState('stateN3', 'TRANSMITTING', '#3b82f6');
+                                                    animateSignal('macNode3', false, '#f59e0b', 'DATA', () => {
+                                                        log('Node 3 transmission completed successfully.', '#10b981');
+                                                        setState('stateN3', 'IDLE', '#64748b');
+                                                        isSimRunning = false;
+                                                    });
+                                                }, 1000);
+                                            });
+                                        } else {
+                                            log('Node 3 backoff timer expired first. Retransmitting...', '#10b981');
+                                            setState('stateN3', 'TRANSMITTING', '#3b82f6');
+                                            animateSignal('macNode3', false, '#f59e0b', 'DATA', () => {
+                                                log('Node 3 transmission completed successfully.', '#10b981');
+                                                setState('stateN3', 'IDLE', '#64748b');
+
+                                                // Node 1 transmits later
+                                                setTimeout(() => {
+                                                    log('Node 1 backoff timer expired. Retransmitting...', '#10b981');
+                                                    setState('stateN1', 'TRANSMITTING', '#3b82f6');
+                                                    animateSignal('macNode1', false, '#3b82f6', 'DATA', () => {
+                                                        log('Node 1 transmission completed successfully.', '#10b981');
+                                                        setState('stateN1', 'IDLE', '#64748b');
+                                                        isSimRunning = false;
+                                                    });
+                                                }, 1000);
+                                            });
+                                        }
+                                    }, 1500);
+                                }, 1000);
+                            }, 1000);
+                        } else {
+                            // Single node active ➔ Success!
+                            const activeNode = node1Active ? 'stateN1' : 'stateN3';
+                            const activePos = node1Active ? 'macNode1' : 'macNode3';
+                            log(`Bus is IDLE. ${node1Active ? 'Node 1' : 'Node 3'} transmits...`, '#10b981');
+                            setState(activeNode, 'TRANSMITTING', '#3b82f6');
+                            animateSignal(activePos, false, '#3b82f6', 'DATA', () => {
+                                log('Transmission completed successfully without any conflicts.', '#10b981');
+                                setState(activeNode, 'IDLE', '#64748b');
+                                isSimRunning = false;
+                            });
+                        }
+                    }, 800);
+                } else {
+                    // CSMA/CA
+                    log('CSMA/CA: SIFS/DIFS wireless sensing active...', '#fff');
+                    const sender = node1Active ? 'macNode1' : 'macNode3';
+                    const senderState = node1Active ? 'stateN1' : 'stateN3';
+
+                    setState(senderState, 'DIFS WAIT', '#f59e0b');
+
+                    setTimeout(() => {
+                        if (rts) {
+                            log(`${node1Active ? 'Node 1' : 'Node 3'} broadcasting RTS (Request to Send)...`, '#8b5cf6');
+                            setState(senderState, 'RTS SENT', '#8b5cf6');
+
+                            animateSignal(sender, false, '#8b5cf6', 'RTS', () => {
+                                log('Access Point (Node 2) replies with CTS (Clear to Send)...', '#10b981');
+                                setState('stateN2', 'CTS SENT', '#10b981');
+
+                                // If other node is active, it must update NAV
+                                const otherState = node1Active ? 'stateN3' : 'stateN1';
+                                setState(otherState, 'NAV BLOCKED', '#ef4444');
+                                log(`AP CTS blocks other nodes from transmitting (NAV Vector set).`, '#ef4444');
+
+                                animateSignal('macNode2', false, '#10b981', 'CTS', () => {
+                                    log(`${node1Active ? 'Node 1' : 'Node 3'} transmitting DATA frame...`, '#3b82f6');
+                                    setState(senderState, 'TRANSMITTING', '#3b82f6');
+
+                                    animateSignal(sender, false, '#3b82f6', 'DATA', () => {
+                                        log('AP (Node 2) replies with ACK.', '#10b981');
+                                        setState('stateN2', 'ACK SENT', '#10b981');
+                                        animateSignal('macNode2', false, '#10b981', 'ACK', () => {
+                                            log('CSMA/CA Exchange completed successfully!', '#10b981');
+                                            document.querySelectorAll('[id^=stateN]').forEach(el => { el.textContent = 'IDLE'; el.style.color = '#64748b'; });
+                                            isSimRunning = false;
+                                        });
+                                    });
+                                });
+                            });
+                        } else {
+                            // RTS/CTS disabled ➔ check hidden node collision
+                            if (node1Active && node3Active) {
+                                log('RTS/CTS disabled. Both Node 1 and Node 3 transmit directly!', '#ef4444');
+                                setState('stateN1', 'TRANSMITTING', '#3b82f6');
+                                setState('stateN3', 'TRANSMITTING', '#3b82f6');
+
+                                animateSignal('macNode1', true, '#3b82f6', 'DATA');
+                                setTimeout(() => animateSignal('macNode3', true, '#f59e0b', 'DATA'), 100);
+
+                                setTimeout(() => {
+                                    log('Collision occurred at receiver Node 2! Frames corrupted.', '#ef4444');
+                                    setState('stateN1', 'COLLISION/TIMEOUT', '#ef4444');
+                                    setState('stateN3', 'COLLISION/TIMEOUT', '#ef4444');
+
+                                    setTimeout(() => {
+                                        log('Executing backoff recovery...', '#f59e0b');
+                                        document.querySelectorAll('[id^=stateN]').forEach(el => { el.textContent = 'IDLE'; el.style.color = '#64748b'; });
+                                        isSimRunning = false;
+                                    }, 1500);
+                                }, 1200);
+                            } else {
+                                log('RTS/CTS disabled. Sending data frame directly...', '#3b82f6');
                                 setState(senderState, 'TRANSMITTING', '#3b82f6');
-                                
                                 animateSignal(sender, false, '#3b82f6', 'DATA', () => {
                                     log('AP (Node 2) replies with ACK.', '#10b981');
                                     setState('stateN2', 'ACK SENT', '#10b981');
                                     animateSignal('macNode2', false, '#10b981', 'ACK', () => {
-                                        log('CSMA/CA Exchange completed successfully!', '#10b981');
-                                        document.querySelectorAll('[id^=stateN]').forEach(el => {el.textContent = 'IDLE'; el.style.color='#64748b';});
+                                        log('Direct CSMA/CA Exchange completed successfully.', '#10b981');
+                                        document.querySelectorAll('[id^=stateN]').forEach(el => { el.textContent = 'IDLE'; el.style.color = '#64748b'; });
                                         isSimRunning = false;
                                     });
                                 });
-                            });
-                        });
-                    } else {
-                        // RTS/CTS disabled ➔ check hidden node collision
-                        if (node1Active && node3Active) {
-                            log('RTS/CTS disabled. Both Node 1 and Node 3 transmit directly!', '#ef4444');
-                            setState('stateN1', 'TRANSMITTING', '#3b82f6');
-                            setState('stateN3', 'TRANSMITTING', '#3b82f6');
-                            
-                            animateSignal('macNode1', true, '#3b82f6', 'DATA');
-                            setTimeout(() => animateSignal('macNode3', true, '#f59e0b', 'DATA'), 100);
-                            
-                            setTimeout(() => {
-                                log('Collision occurred at receiver Node 2! Frames corrupted.', '#ef4444');
-                                setState('stateN1', 'COLLISION/TIMEOUT', '#ef4444');
-                                setState('stateN3', 'COLLISION/TIMEOUT', '#ef4444');
-                                
-                                setTimeout(() => {
-                                    log('Executing backoff recovery...', '#f59e0b');
-                                    document.querySelectorAll('[id^=stateN]').forEach(el => {el.textContent = 'IDLE'; el.style.color='#64748b';});
-                                    isSimRunning = false;
-                                }, 1500);
-                            }, 1200);
-                        } else {
-                            log('RTS/CTS disabled. Sending data frame directly...', '#3b82f6');
-                            setState(senderState, 'TRANSMITTING', '#3b82f6');
-                            animateSignal(sender, false, '#3b82f6', 'DATA', () => {
-                                log('AP (Node 2) replies with ACK.', '#10b981');
-                                setState('stateN2', 'ACK SENT', '#10b981');
-                                animateSignal('macNode2', false, '#10b981', 'ACK', () => {
-                                    log('Direct CSMA/CA Exchange completed successfully.', '#10b981');
-                                    document.querySelectorAll('[id^=stateN]').forEach(el => {el.textContent = 'IDLE'; el.style.color='#64748b';});
-                                    isSimRunning = false;
-                                });
-                            });
+                            }
                         }
-                    }
-                }, 1000);
-            }
-        });
-    };
+                    }, 1000);
+                }
+            });
+        };
 
-    const initDfaSim = (container) => {
-        container.innerHTML = `
+        const initDfaSim = (container) => {
+            container.innerHTML = `
             <div class="sim-toolbar" style="border-bottom:1px solid rgba(255,255,255,0.1); padding:10px 20px;">
                 <div class="sim-title" style="font-weight:800; font-size:18px; color:var(--primary);">DFA Simulator - Lang: { w | w contains '01' }</div>
             </div>
@@ -11672,19 +11676,19 @@ ${cfg.diagram}
             </div>
         `;
 
-        let inputStr = "10101";
-        let activeIdx = -1;
-        let currentState = "q0";
-        let intervalId = null;
+            let inputStr = "10101";
+            let activeIdx = -1;
+            let currentState = "q0";
+            let intervalId = null;
 
-        const updateTape = () => {
-            const containerTape = document.getElementById('dfaTapeContainer');
-            containerTape.innerHTML = '';
-            for (let i = 0; i < inputStr.length; i++) {
-                const isActive = i === activeIdx;
-                const isProcessed = i < activeIdx;
-                const charEl = document.createElement('div');
-                charEl.style.cssText = `
+            const updateTape = () => {
+                const containerTape = document.getElementById('dfaTapeContainer');
+                containerTape.innerHTML = '';
+                for (let i = 0; i < inputStr.length; i++) {
+                    const isActive = i === activeIdx;
+                    const isProcessed = i < activeIdx;
+                    const charEl = document.createElement('div');
+                    charEl.style.cssText = `
                     min-width: 45px;
                     height: 45px;
                     border: 2px solid ${isActive ? 'var(--primary)' : (isProcessed ? '#475569' : 'rgba(255,255,255,0.05)')};
@@ -11700,10 +11704,10 @@ ${cfg.diagram}
                     transition: all 0.2s;
                     position: relative;
                 `;
-                charEl.textContent = inputStr[i];
-                if (isActive) {
-                    const arrow = document.createElement('div');
-                    arrow.style.cssText = `
+                    charEl.textContent = inputStr[i];
+                    if (isActive) {
+                        const arrow = document.createElement('div');
+                        arrow.style.cssText = `
                         position: absolute;
                         bottom: -15px;
                         left: 50%;
@@ -11711,123 +11715,123 @@ ${cfg.diagram}
                         font-size: 12px;
                         color: var(--primary);
                     `;
-                    arrow.textContent = '▲';
-                    charEl.appendChild(arrow);
-                }
-                containerTape.appendChild(charEl);
-            }
-        };
-
-        const highlightState = (state) => {
-            const states = ['q0', 'q1', 'q2'];
-            states.forEach(s => {
-                const el = document.getElementById(`node-${s}`);
-                const inner = document.getElementById(`node-${s}-inner`);
-                if (s === state) {
-                    el.setAttribute('fill', 'rgba(13,148,136,0.2)');
-                    el.setAttribute('stroke', 'var(--primary)');
-                    if (inner) inner.setAttribute('stroke', 'var(--primary)');
-                } else {
-                    el.setAttribute('fill', '#1e293b');
-                    el.setAttribute('stroke', '#475569');
-                    if (inner) inner.setAttribute('stroke', '#475569');
-                }
-            });
-            document.getElementById('dfaCurrentState').textContent = state;
-        };
-
-        const addLog = (msg, color = '#fff') => {
-            const log = document.getElementById('dfaTraceLog');
-            const div = document.createElement('div');
-            div.style.color = color;
-            div.style.marginBottom = '4px';
-            div.textContent = msg;
-            log.appendChild(div);
-            log.scrollTop = log.scrollHeight;
-        };
-
-        const resetDfa = () => {
-            clearInterval(intervalId);
-            intervalId = null;
-            document.getElementById('btnDfaRun').textContent = "Auto Run";
-            inputStr = document.getElementById('dfaInputString').value.trim();
-            if (!/^[01]*\$/.test(inputStr)) {
-                addLog("[Error] Input string must only contain 0s and 1s.", "#ef4444");
-                return;
-            }
-            activeIdx = -1;
-            currentState = "q0";
-            highlightState("q0");
-            updateTape();
-            document.getElementById('dfaTraceLog').innerHTML = `<div style="color:#64748b;">[System] Reset completed. Ready to step.</div>`;
-        };
-
-        const stepDfa = () => {
-            if (activeIdx >= inputStr.length - 1) {
-                if (currentState === 'q2') {
-                    addLog(`[Success] String finished. DFA is in accepting state q2. String ACCEPTED!`, '#10b981');
-                } else {
-                    addLog(`[Reject] String finished. DFA is in state ${currentState} which is NOT accepting. String REJECTED!`, '#ef4444');
-                }
-                clearInterval(intervalId);
-                return false;
-            }
-            activeIdx++;
-            const symbol = inputStr[activeIdx];
-            const oldState = currentState;
-            
-            if (currentState === 'q0') {
-                if (symbol === '0') currentState = 'q1';
-                else currentState = 'q0';
-            } else if (currentState === 'q1') {
-                if (symbol === '1') currentState = 'q2';
-                else currentState = 'q1';
-            } else if (currentState === 'q2') {
-                currentState = 'q2';
-            }
-            
-            highlightState(currentState);
-            updateTape();
-            addLog(`Read '${symbol}' from ${oldState} → transitioned to ${currentState}`, '#3b82f6');
-            
-            if (activeIdx === inputStr.length - 1) {
-                setTimeout(() => {
-                    if (currentState === 'q2') {
-                        addLog(`[Success] Traversal complete. DFA ended in accepting state q2. String ACCEPTED!`, '#10b981');
-                    } else {
-                        addLog(`[Reject] Traversal complete. DFA ended in non-accepting state ${currentState}. String REJECTED!`, '#ef4444');
+                        arrow.textContent = '▲';
+                        charEl.appendChild(arrow);
                     }
-                }, 400);
-            }
-            return true;
-        };
+                    containerTape.appendChild(charEl);
+                }
+            };
 
-        const runDfa = () => {
-            if (intervalId) {
+            const highlightState = (state) => {
+                const states = ['q0', 'q1', 'q2'];
+                states.forEach(s => {
+                    const el = document.getElementById(`node-${s}`);
+                    const inner = document.getElementById(`node-${s}-inner`);
+                    if (s === state) {
+                        el.setAttribute('fill', 'rgba(13,148,136,0.2)');
+                        el.setAttribute('stroke', 'var(--primary)');
+                        if (inner) inner.setAttribute('stroke', 'var(--primary)');
+                    } else {
+                        el.setAttribute('fill', '#1e293b');
+                        el.setAttribute('stroke', '#475569');
+                        if (inner) inner.setAttribute('stroke', '#475569');
+                    }
+                });
+                document.getElementById('dfaCurrentState').textContent = state;
+            };
+
+            const addLog = (msg, color = '#fff') => {
+                const log = document.getElementById('dfaTraceLog');
+                const div = document.createElement('div');
+                div.style.color = color;
+                div.style.marginBottom = '4px';
+                div.textContent = msg;
+                log.appendChild(div);
+                log.scrollTop = log.scrollHeight;
+            };
+
+            const resetDfa = () => {
                 clearInterval(intervalId);
                 intervalId = null;
                 document.getElementById('btnDfaRun').textContent = "Auto Run";
-            } else {
-                document.getElementById('btnDfaRun').textContent = "Pause";
-                intervalId = setInterval(() => {
-                    const hasNext = stepDfa();
-                    if (!hasNext) {
-                        clearInterval(intervalId);
-                        intervalId = null;
-                        document.getElementById('btnDfaRun').textContent = "Auto Run";
+                inputStr = document.getElementById('dfaInputString').value.trim();
+                if (!/^[01]*\$/.test(inputStr)) {
+                    addLog("[Error] Input string must only contain 0s and 1s.", "#ef4444");
+                    return;
+                }
+                activeIdx = -1;
+                currentState = "q0";
+                highlightState("q0");
+                updateTape();
+                document.getElementById('dfaTraceLog').innerHTML = `<div style="color:#64748b;">[System] Reset completed. Ready to step.</div>`;
+            };
+
+            const stepDfa = () => {
+                if (activeIdx >= inputStr.length - 1) {
+                    if (currentState === 'q2') {
+                        addLog(`[Success] String finished. DFA is in accepting state q2. String ACCEPTED!`, '#10b981');
+                    } else {
+                        addLog(`[Reject] String finished. DFA is in state ${currentState} which is NOT accepting. String REJECTED!`, '#ef4444');
                     }
-                }, 1000);
-            }
+                    clearInterval(intervalId);
+                    return false;
+                }
+                activeIdx++;
+                const symbol = inputStr[activeIdx];
+                const oldState = currentState;
+
+                if (currentState === 'q0') {
+                    if (symbol === '0') currentState = 'q1';
+                    else currentState = 'q0';
+                } else if (currentState === 'q1') {
+                    if (symbol === '1') currentState = 'q2';
+                    else currentState = 'q1';
+                } else if (currentState === 'q2') {
+                    currentState = 'q2';
+                }
+
+                highlightState(currentState);
+                updateTape();
+                addLog(`Read '${symbol}' from ${oldState} → transitioned to ${currentState}`, '#3b82f6');
+
+                if (activeIdx === inputStr.length - 1) {
+                    setTimeout(() => {
+                        if (currentState === 'q2') {
+                            addLog(`[Success] Traversal complete. DFA ended in accepting state q2. String ACCEPTED!`, '#10b981');
+                        } else {
+                            addLog(`[Reject] Traversal complete. DFA ended in non-accepting state ${currentState}. String REJECTED!`, '#ef4444');
+                        }
+                    }, 400);
+                }
+                return true;
+            };
+
+            const runDfa = () => {
+                if (intervalId) {
+                    clearInterval(intervalId);
+                    intervalId = null;
+                    document.getElementById('btnDfaRun').textContent = "Auto Run";
+                } else {
+                    document.getElementById('btnDfaRun').textContent = "Pause";
+                    intervalId = setInterval(() => {
+                        const hasNext = stepDfa();
+                        if (!hasNext) {
+                            clearInterval(intervalId);
+                            intervalId = null;
+                            document.getElementById('btnDfaRun').textContent = "Auto Run";
+                        }
+                    }, 1000);
+                }
+            };
+
+            document.getElementById('btnDfaReset').addEventListener('click', resetDfa);
+            document.getElementById('btnDfaStep').addEventListener('click', stepDfa);
+            document.getElementById('btnDfaRun').addEventListener('click', runDfa);
+            resetDfa();
         };
 
-        document.getElementById('btnDfaReset').addEventListener('click', resetDfa);
-        document.getElementById('btnDfaStep').addEventListener('click', stepDfa);
-        document.getElementById('btnDfaRun').addEventListener('click', runDfa);
-        resetDfa();
-    };
-
-    const initNfaToDfaSim = (container) => {
-        container.innerHTML = `
+        const initNfaToDfaSim = (container) => {
+            container.innerHTML = `
             <div class="sim-toolbar" style="border-bottom:1px solid rgba(255,255,255,0.1); padding:10px 20px;">
                 <div class="sim-title" style="font-weight:800; font-size:18px; color:var(--primary);">NFA to DFA Subset Construction</div>
             </div>
@@ -11903,92 +11907,92 @@ ${cfg.diagram}
             </div>
         `;
 
-        let steps = [
-            {
-                state: "q0",
-                subset: "{A}",
-                on0: "{A, B, C}",
-                on1: "{A}",
-                accept: "No",
-                log: "Initialize DFA start state q0 = e-closure(A) = {A}. Compute transition on 0: closure(δ(A,0)) = closure({A,B}) = {A,B,C}. Compute transition on 1: closure(δ(A,1)) = {A}."
-            },
-            {
-                state: "q1",
-                subset: "{A, B, C}",
-                on0: "{A, B, C}",
-                on1: "{A, C}",
-                accept: "Yes (contains C)",
-                log: "Process queue subset {A,B,C} (q1). Transition on 0: δ(A,0)={A,B}, δ(B,0)=∅, δ(C,0)=∅. closure({A,B}) = {A,B,C} = q1. Transition on 1: δ(A,1)={A}, δ(B,1)={C}, δ(C,1)=∅. closure({A,C}) = {A,C} = new state q2."
-            },
-            {
-                state: "q2",
-                subset: "{A, C}",
-                on0: "{A, B, C}",
-                on1: "{A}",
-                accept: "Yes (contains C)",
-                log: "Process queue subset {A,C} (q2). Transition on 0: δ(A,0)={A,B}, δ(C,0)=∅. closure({A,B}) = {A,B,C} = q1. Transition on 1: δ(A,1)={A}, δ(C,1)=∅. closure({A}) = {A} = q0. Queue is now empty!"
-            }
-        ];
-        let currentStepIdx = 0;
+            let steps = [
+                {
+                    state: "q0",
+                    subset: "{A}",
+                    on0: "{A, B, C}",
+                    on1: "{A}",
+                    accept: "No",
+                    log: "Initialize DFA start state q0 = e-closure(A) = {A}. Compute transition on 0: closure(δ(A,0)) = closure({A,B}) = {A,B,C}. Compute transition on 1: closure(δ(A,1)) = {A}."
+                },
+                {
+                    state: "q1",
+                    subset: "{A, B, C}",
+                    on0: "{A, B, C}",
+                    on1: "{A, C}",
+                    accept: "Yes (contains C)",
+                    log: "Process queue subset {A,B,C} (q1). Transition on 0: δ(A,0)={A,B}, δ(B,0)=∅, δ(C,0)=∅. closure({A,B}) = {A,B,C} = q1. Transition on 1: δ(A,1)={A}, δ(B,1)={C}, δ(C,1)=∅. closure({A,C}) = {A,C} = new state q2."
+                },
+                {
+                    state: "q2",
+                    subset: "{A, C}",
+                    on0: "{A, B, C}",
+                    on1: "{A}",
+                    accept: "Yes (contains C)",
+                    log: "Process queue subset {A,C} (q2). Transition on 0: δ(A,0)={A,B}, δ(C,0)=∅. closure({A,B}) = {A,B,C} = q1. Transition on 1: δ(A,1)={A}, δ(C,1)=∅. closure({A}) = {A} = q0. Queue is now empty!"
+                }
+            ];
+            let currentStepIdx = 0;
 
-        const updateTable = () => {
-            const tbody = document.getElementById('dfaResultBody');
-            tbody.innerHTML = '';
-            for (let i = 0; i < currentStepIdx; i++) {
-                const s = steps[i];
-                const tr = document.createElement('tr');
-                tr.style.borderBottom = '1px solid rgba(255,255,255,0.05)';
-                tr.innerHTML = `
+            const updateTable = () => {
+                const tbody = document.getElementById('dfaResultBody');
+                tbody.innerHTML = '';
+                for (let i = 0; i < currentStepIdx; i++) {
+                    const s = steps[i];
+                    const tr = document.createElement('tr');
+                    tr.style.borderBottom = '1px solid rgba(255,255,255,0.05)';
+                    tr.innerHTML = `
                     <td style="padding:8px; font-weight:800; color:var(--primary);">${s.state}</td>
                     <td style="padding:8px; font-family:monospace;">${s.subset}</td>
                     <td style="padding:8px; font-family:monospace;">${s.on0}</td>
                     <td style="padding:8px; font-family:monospace;">${s.on1}</td>
                     <td style="padding:8px; font-weight:bold; color:${s.accept.startsWith('Yes') ? 'var(--success)' : '#94a3b8'}">${s.accept}</td>
                 `;
-                tbody.appendChild(tr);
-            }
-        };
-
-        const addLog = (msg, color = '#fff') => {
-            const log = document.getElementById('nfaTraceLog');
-            const div = document.createElement('div');
-            div.style.color = color;
-            div.style.marginBottom = '6px';
-            div.textContent = msg;
-            log.appendChild(div);
-            log.scrollTop = log.scrollHeight;
-        };
-
-        const resetSim = () => {
-            currentStepIdx = 0;
-            updateTable();
-            document.getElementById('dfaResultBody').innerHTML = '';
-            document.getElementById('nfaTraceLog').innerHTML = `<div style="color:#64748b;">[System] Click Step Construction to begin subset conversion.</div>`;
-            document.getElementById('nfaCompletedPill').style.display = 'none';
-            document.getElementById('btnNfaStep').disabled = false;
-        };
-
-        const runStep = () => {
-            if (currentStepIdx < steps.length) {
-                const s = steps[currentStepIdx];
-                currentStepIdx++;
-                updateTable();
-                addLog(`[Step ${currentStepIdx}] ${s.log}`, 'var(--primary)');
-                if (currentStepIdx === steps.length) {
-                    addLog("✓ All reachable subsets processed. Construction completed.", "var(--success)");
-                    document.getElementById('nfaCompletedPill').style.display = 'block';
-                    document.getElementById('btnNfaStep').disabled = true;
+                    tbody.appendChild(tr);
                 }
-            }
+            };
+
+            const addLog = (msg, color = '#fff') => {
+                const log = document.getElementById('nfaTraceLog');
+                const div = document.createElement('div');
+                div.style.color = color;
+                div.style.marginBottom = '6px';
+                div.textContent = msg;
+                log.appendChild(div);
+                log.scrollTop = log.scrollHeight;
+            };
+
+            const resetSim = () => {
+                currentStepIdx = 0;
+                updateTable();
+                document.getElementById('dfaResultBody').innerHTML = '';
+                document.getElementById('nfaTraceLog').innerHTML = `<div style="color:#64748b;">[System] Click Step Construction to begin subset conversion.</div>`;
+                document.getElementById('nfaCompletedPill').style.display = 'none';
+                document.getElementById('btnNfaStep').disabled = false;
+            };
+
+            const runStep = () => {
+                if (currentStepIdx < steps.length) {
+                    const s = steps[currentStepIdx];
+                    currentStepIdx++;
+                    updateTable();
+                    addLog(`[Step ${currentStepIdx}] ${s.log}`, 'var(--primary)');
+                    if (currentStepIdx === steps.length) {
+                        addLog("✓ All reachable subsets processed. Construction completed.", "var(--success)");
+                        document.getElementById('nfaCompletedPill').style.display = 'block';
+                        document.getElementById('btnNfaStep').disabled = true;
+                    }
+                }
+            };
+
+            document.getElementById('btnNfaReset').addEventListener('click', resetSim);
+            document.getElementById('btnNfaStep').addEventListener('click', runStep);
+            resetSim();
         };
 
-        document.getElementById('btnNfaReset').addEventListener('click', resetSim);
-        document.getElementById('btnNfaStep').addEventListener('click', runStep);
-        resetSim();
-    };
-
-    const initRegexThompsonSim = (container) => {
-        container.innerHTML = `
+        const initRegexThompsonSim = (container) => {
+            container.innerHTML = `
             <div class="sim-toolbar" style="border-bottom:1px solid rgba(255,255,255,0.1); padding:10px 20px;">
                 <div class="sim-title" style="font-weight:800; font-size:18px; color:var(--primary);">Regex to NFA (Thompson's Construction)</div>
             </div>
@@ -12033,217 +12037,217 @@ ${cfg.diagram}
             </div>
         `;
 
-        let currentStep = 0;
-        let selectedRegex = "union";
+            let currentStep = 0;
+            let selectedRegex = "union";
 
-        const addLog = (msg, color = '#fff') => {
-            const log = document.getElementById('regexTraceLog');
-            if (!log) return;
-            const div = document.createElement('div');
-            div.style.color = color;
-            div.style.marginBottom = '5px';
-            div.textContent = msg;
-            log.appendChild(div);
-            log.scrollTop = log.scrollHeight;
-        };
+            const addLog = (msg, color = '#fff') => {
+                const log = document.getElementById('regexTraceLog');
+                if (!log) return;
+                const div = document.createElement('div');
+                div.style.color = color;
+                div.style.marginBottom = '5px';
+                div.textContent = msg;
+                log.appendChild(div);
+                log.scrollTop = log.scrollHeight;
+            };
 
-        const regexToPostfix = (exp) => {
-            let formatted = "";
-            for (let i = 0; i < exp.length; i++) {
-                let c = exp[i];
-                formatted += c;
-                if (i < exp.length - 1) {
-                    let next = exp[i+1];
-                    const isLiteral = (x) => /[a-z0-9]/.test(x) || x === ')';
-                    const isNextLiteral = (x) => /[a-z0-9]/.test(x) || x === '(';
-                    if (isLiteral(c) && isNextLiteral(next)) {
-                        formatted += '.';
-                    } else if (c === '*' && isNextLiteral(next)) {
-                        formatted += '.';
+            const regexToPostfix = (exp) => {
+                let formatted = "";
+                for (let i = 0; i < exp.length; i++) {
+                    let c = exp[i];
+                    formatted += c;
+                    if (i < exp.length - 1) {
+                        let next = exp[i + 1];
+                        const isLiteral = (x) => /[a-z0-9]/.test(x) || x === ')';
+                        const isNextLiteral = (x) => /[a-z0-9]/.test(x) || x === '(';
+                        if (isLiteral(c) && isNextLiteral(next)) {
+                            formatted += '.';
+                        } else if (c === '*' && isNextLiteral(next)) {
+                            formatted += '.';
+                        }
                     }
                 }
-            }
-            let output = "";
-            let operators = [];
-            const precedence = { '*': 3, '.': 2, '|': 1 };
-            for (let i = 0; i < formatted.length; i++) {
-                let c = formatted[i];
-                if (/[a-z0-9]/.test(c)) {
-                    output += c;
-                } else if (c === '(') {
-                    operators.push(c);
-                } else if (c === ')') {
-                    while (operators.length > 0 && operators[operators.length - 1] !== '(') {
-                        output += operators.pop();
+                let output = "";
+                let operators = [];
+                const precedence = { '*': 3, '.': 2, '|': 1 };
+                for (let i = 0; i < formatted.length; i++) {
+                    let c = formatted[i];
+                    if (/[a-z0-9]/.test(c)) {
+                        output += c;
+                    } else if (c === '(') {
+                        operators.push(c);
+                    } else if (c === ')') {
+                        while (operators.length > 0 && operators[operators.length - 1] !== '(') {
+                            output += operators.pop();
+                        }
+                        operators.pop();
+                    } else {
+                        while (operators.length > 0 && precedence[operators[operators.length - 1]] >= precedence[c]) {
+                            output += operators.pop();
+                        }
+                        operators.push(c);
                     }
-                    operators.pop();
-                } else {
-                    while (operators.length > 0 && precedence[operators[operators.length - 1]] >= precedence[c]) {
-                        output += operators.pop();
+                }
+                while (operators.length > 0) {
+                    output += operators.pop();
+                }
+                return output;
+            };
+
+            const buildThompsonNFA = (postfix) => {
+                let stateCounter = 0;
+                const nextState = () => stateCounter++;
+                let stack = [];
+
+                for (let i = 0; i < postfix.length; i++) {
+                    let c = postfix[i];
+                    if (/[a-z0-9]/.test(c)) {
+                        let s0 = nextState();
+                        let s1 = nextState();
+                        stack.push({ start: s0, accept: s1, transitions: [{ from: s0, to: s1, label: c }] });
+                    } else if (c === '*') {
+                        if (stack.length === 0) continue;
+                        let frag = stack.pop();
+                        let s0 = nextState();
+                        let s1 = nextState();
+                        let transitions = [
+                            { from: s0, to: frag.start, label: 'ε' },
+                            { from: s0, to: s1, label: 'ε' },
+                            { from: frag.accept, to: frag.start, label: 'ε' },
+                            { from: frag.accept, to: s1, label: 'ε' },
+                            ...frag.transitions
+                        ];
+                        stack.push({ start: s0, accept: s1, transitions });
+                    } else if (c === '.') {
+                        if (stack.length < 2) continue;
+                        let frag2 = stack.pop();
+                        let frag1 = stack.pop();
+                        let transitions = [
+                            { from: frag1.accept, to: frag2.start, label: 'ε' },
+                            ...frag1.transitions,
+                            ...frag2.transitions
+                        ];
+                        stack.push({ start: frag1.start, accept: frag2.accept, transitions });
+                    } else if (c === '|') {
+                        if (stack.length < 2) continue;
+                        let frag2 = stack.pop();
+                        let frag1 = stack.pop();
+                        let s0 = nextState();
+                        let s1 = nextState();
+                        let transitions = [
+                            { from: s0, to: frag1.start, label: 'ε' },
+                            { from: s0, to: frag2.start, label: 'ε' },
+                            { from: frag1.accept, to: s1, label: 'ε' },
+                            { from: frag2.accept, to: s1, label: 'ε' },
+                            ...frag1.transitions,
+                            ...frag2.transitions
+                        ];
+                        stack.push({ start: s0, accept: s1, transitions });
                     }
-                    operators.push(c);
                 }
-            }
-            while (operators.length > 0) {
-                output += operators.pop();
-            }
-            return output;
-        };
+                return stack.pop();
+            };
 
-        const buildThompsonNFA = (postfix) => {
-            let stateCounter = 0;
-            const nextState = () => stateCounter++;
-            let stack = [];
-            
-            for (let i = 0; i < postfix.length; i++) {
-                let c = postfix[i];
-                if (/[a-z0-9]/.test(c)) {
-                    let s0 = nextState();
-                    let s1 = nextState();
-                    stack.push({ start: s0, accept: s1, transitions: [{ from: s0, to: s1, label: c }] });
-                } else if (c === '*') {
-                    if (stack.length === 0) continue;
-                    let frag = stack.pop();
-                    let s0 = nextState();
-                    let s1 = nextState();
-                    let transitions = [
-                        { from: s0, to: frag.start, label: 'ε' },
-                        { from: s0, to: s1, label: 'ε' },
-                        { from: frag.accept, to: frag.start, label: 'ε' },
-                        { from: frag.accept, to: s1, label: 'ε' },
-                        ...frag.transitions
-                    ];
-                    stack.push({ start: s0, accept: s1, transitions });
-                } else if (c === '.') {
-                    if (stack.length < 2) continue;
-                    let frag2 = stack.pop();
-                    let frag1 = stack.pop();
-                    let transitions = [
-                        { from: frag1.accept, to: frag2.start, label: 'ε' },
-                        ...frag1.transitions,
-                        ...frag2.transitions
-                    ];
-                    stack.push({ start: frag1.start, accept: frag2.accept, transitions });
-                } else if (c === '|') {
-                    if (stack.length < 2) continue;
-                    let frag2 = stack.pop();
-                    let frag1 = stack.pop();
-                    let s0 = nextState();
-                    let s1 = nextState();
-                    let transitions = [
-                        { from: s0, to: frag1.start, label: 'ε' },
-                        { from: s0, to: frag2.start, label: 'ε' },
-                        { from: frag1.accept, to: s1, label: 'ε' },
-                        { from: frag2.accept, to: s1, label: 'ε' },
-                        ...frag1.transitions,
-                        ...frag2.transitions
-                    ];
-                    stack.push({ start: s0, accept: s1, transitions });
-                }
-            }
-            return stack.pop();
-        };
-
-        const generateNFALayout = (nfa) => {
-            if (!nfa) return {};
-            let statesSet = new Set();
-            nfa.transitions.forEach(t => {
-                statesSet.add(t.from);
-                statesSet.add(t.to);
-            });
-            let states = Array.from(statesSet).sort((a,b) => a - b);
-            let distances = {};
-            states.forEach(s => distances[s] = 999);
-            distances[nfa.start] = 0;
-            
-            for (let k = 0; k < states.length; k++) {
+            const generateNFALayout = (nfa) => {
+                if (!nfa) return {};
+                let statesSet = new Set();
                 nfa.transitions.forEach(t => {
-                    if (distances[t.from] !== 999 && distances[t.from] + 1 < distances[t.to]) {
-                        distances[t.to] = distances[t.from] + 1;
-                    }
+                    statesSet.add(t.from);
+                    statesSet.add(t.to);
                 });
-            }
-            
-            let levelGroups = {};
-            states.forEach(s => {
-                let dist = distances[s];
-                if (dist === 999) dist = states.indexOf(s);
-                if (!levelGroups[dist]) levelGroups[dist] = [];
-                levelGroups[dist].push(s);
-            });
-            
-            let layout = {};
-            const maxDistance = Math.max(...Object.keys(levelGroups).map(Number));
-            const width = 460;
-            const height = 200;
-            
-            Object.keys(levelGroups).forEach(levelKey => {
-                let level = Number(levelKey);
-                let grp = levelGroups[level];
-                let x = 40 + (level / (maxDistance || 1)) * (width - 80);
-                
-                grp.forEach((stateId, idx) => {
-                    let y = height / 2;
-                    if (grp.length > 1) {
-                        y = 35 + (idx / (grp.length - 1)) * (height - 70);
-                    }
-                    layout[stateId] = { x, y };
-                });
-            });
-            return layout;
-        };
+                let states = Array.from(statesSet).sort((a, b) => a - b);
+                let distances = {};
+                states.forEach(s => distances[s] = 999);
+                distances[nfa.start] = 0;
 
-        const renderDynamicNFA = (nfa, layout) => {
-            const svg = document.getElementById('regexSvg');
-            if (!svg || !nfa) return;
-            svg.innerHTML = `
+                for (let k = 0; k < states.length; k++) {
+                    nfa.transitions.forEach(t => {
+                        if (distances[t.from] !== 999 && distances[t.from] + 1 < distances[t.to]) {
+                            distances[t.to] = distances[t.from] + 1;
+                        }
+                    });
+                }
+
+                let levelGroups = {};
+                states.forEach(s => {
+                    let dist = distances[s];
+                    if (dist === 999) dist = states.indexOf(s);
+                    if (!levelGroups[dist]) levelGroups[dist] = [];
+                    levelGroups[dist].push(s);
+                });
+
+                let layout = {};
+                const maxDistance = Math.max(...Object.keys(levelGroups).map(Number));
+                const width = 460;
+                const height = 200;
+
+                Object.keys(levelGroups).forEach(levelKey => {
+                    let level = Number(levelKey);
+                    let grp = levelGroups[level];
+                    let x = 40 + (level / (maxDistance || 1)) * (width - 80);
+
+                    grp.forEach((stateId, idx) => {
+                        let y = height / 2;
+                        if (grp.length > 1) {
+                            y = 35 + (idx / (grp.length - 1)) * (height - 70);
+                        }
+                        layout[stateId] = { x, y };
+                    });
+                });
+                return layout;
+            };
+
+            const renderDynamicNFA = (nfa, layout) => {
+                const svg = document.getElementById('regexSvg');
+                if (!svg || !nfa) return;
+                svg.innerHTML = `
                 <defs>
                     <marker id="arrow" viewBox="0 0 10 10" refX="16" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
                         <path d="M 0 1 L 10 5 L 0 9 z" fill="var(--primary)" />
                     </marker>
                 </defs>
             `;
-            
-            nfa.transitions.forEach(t => {
-                const fromPos = layout[t.from];
-                const toPos = layout[t.to];
-                if (!fromPos || !toPos) return;
-                const isBackwards = fromPos.x >= toPos.x;
-                let dPath = "";
-                
-                if (isBackwards) {
-                    dPath = `M ${fromPos.x},${fromPos.y} C ${fromPos.x},${fromPos.y - 45} ${toPos.x},${toPos.y - 45} ${toPos.x},${toPos.y}`;
-                } else if (Math.abs(fromPos.y - toPos.y) > 10) {
-                    const mx = (fromPos.x + toPos.x) / 2;
-                    const my = (fromPos.y + toPos.y) / 2 + (fromPos.y > toPos.y ? -15 : 15);
-                    dPath = `M ${fromPos.x},${fromPos.y} Q ${mx},${my} ${toPos.x},${toPos.y}`;
-                } else {
-                    dPath = `M ${fromPos.x},${fromPos.y} L ${toPos.x},${toPos.y}`;
-                }
-                
-                svg.innerHTML += `
+
+                nfa.transitions.forEach(t => {
+                    const fromPos = layout[t.from];
+                    const toPos = layout[t.to];
+                    if (!fromPos || !toPos) return;
+                    const isBackwards = fromPos.x >= toPos.x;
+                    let dPath = "";
+
+                    if (isBackwards) {
+                        dPath = `M ${fromPos.x},${fromPos.y} C ${fromPos.x},${fromPos.y - 45} ${toPos.x},${toPos.y - 45} ${toPos.x},${toPos.y}`;
+                    } else if (Math.abs(fromPos.y - toPos.y) > 10) {
+                        const mx = (fromPos.x + toPos.x) / 2;
+                        const my = (fromPos.y + toPos.y) / 2 + (fromPos.y > toPos.y ? -15 : 15);
+                        dPath = `M ${fromPos.x},${fromPos.y} Q ${mx},${my} ${toPos.x},${toPos.y}`;
+                    } else {
+                        dPath = `M ${fromPos.x},${fromPos.y} L ${toPos.x},${toPos.y}`;
+                    }
+
+                    svg.innerHTML += `
                     <path d="${dPath}" stroke="${t.label === 'ε' ? '#64748b' : 'var(--primary)'}" stroke-width="1.5" stroke-dasharray="${t.label === 'ε' ? '4,4' : 'none'}" fill="none" marker-end="url(#arrow)" />
-                    <text x="${(fromPos.x + toPos.x)/2}" y="${(fromPos.y + toPos.y)/2 - 8}" fill="${t.label === 'ε' ? '#94a3b8' : 'var(--primary)'}" font-family="monospace" font-size="10" text-anchor="middle" font-weight="bold">${t.label}</text>
+                    <text x="${(fromPos.x + toPos.x) / 2}" y="${(fromPos.y + toPos.y) / 2 - 8}" fill="${t.label === 'ε' ? '#94a3b8' : 'var(--primary)'}" font-family="monospace" font-size="10" text-anchor="middle" font-weight="bold">${t.label}</text>
                 `;
-            });
-            
-            Object.keys(layout).forEach(stateId => {
-                const pos = layout[stateId];
-                const isStart = Number(stateId) === nfa.start;
-                const isAccept = Number(stateId) === nfa.accept;
-                
-                svg.innerHTML += `
+                });
+
+                Object.keys(layout).forEach(stateId => {
+                    const pos = layout[stateId];
+                    const isStart = Number(stateId) === nfa.start;
+                    const isAccept = Number(stateId) === nfa.accept;
+
+                    svg.innerHTML += `
                     <circle cx="${pos.x}" cy="${pos.y}" r="14" fill="${isStart ? 'rgba(13,148,136,0.15)' : '#1e293b'}" stroke="${isAccept || isStart ? 'var(--primary)' : '#475569'}" stroke-width="2" />
                     ${isAccept ? `<circle cx="${pos.x}" cy="${pos.y}" r="11" fill="none" stroke="var(--primary)" stroke-width="1" />` : ''}
                     <text x="${pos.x}" y="${pos.y + 4}" fill="#fff" font-size="9" text-anchor="middle" font-family="monospace">q${stateId}</text>
                 `;
-            });
-        };
+                });
+            };
 
-        const renderGraph = () => {
-            const svg = document.getElementById('regexSvg');
-            if (!svg) return;
-            svg.innerHTML = `
+            const renderGraph = () => {
+                const svg = document.getElementById('regexSvg');
+                if (!svg) return;
+                svg.innerHTML = `
                 <defs>
                     <marker id="arrow" viewBox="0 0 10 10" refX="16" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
                         <path d="M 0 1 L 10 5 L 0 9 z" fill="#64748b" />
@@ -12251,9 +12255,9 @@ ${cfg.diagram}
                 </defs>
             `;
 
-            if (selectedRegex === "union") {
-                if (currentStep >= 1) {
-                    svg.innerHTML += `
+                if (selectedRegex === "union") {
+                    if (currentStep >= 1) {
+                        svg.innerHTML += `
                         <circle cx="150" cy="70" r="16" fill="#1e293b" stroke="#475569" stroke-width="2"/>
                         <text x="150" y="74" fill="#fff" font-size="11" text-anchor="middle">q1</text>
                         <circle cx="250" cy="70" r="16" fill="#1e293b" stroke="#475569" stroke-width="2"/>
@@ -12261,9 +12265,9 @@ ${cfg.diagram}
                         <path d="M 166,70 L 234,70" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arrow)"/>
                         <text x="200" y="62" fill="var(--primary)" font-size="11" font-weight="bold" text-anchor="middle">a</text>
                     `;
-                }
-                if (currentStep >= 2) {
-                    svg.innerHTML += `
+                    }
+                    if (currentStep >= 2) {
+                        svg.innerHTML += `
                         <circle cx="150" cy="150" r="16" fill="#1e293b" stroke="#475569" stroke-width="2"/>
                         <text x="150" y="154" fill="#fff" font-size="11" text-anchor="middle">q3</text>
                         <circle cx="250" cy="150" r="16" fill="#1e293b" stroke="#475569" stroke-width="2"/>
@@ -12271,9 +12275,9 @@ ${cfg.diagram}
                         <path d="M 166,150 L 234,150" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arrow)"/>
                         <text x="200" y="142" fill="var(--primary)" font-size="11" font-weight="bold" text-anchor="middle">b</text>
                     `;
-                }
-                if (currentStep >= 3) {
-                    svg.innerHTML += `
+                    }
+                    if (currentStep >= 3) {
+                        svg.innerHTML += `
                         <circle cx="50" cy="110" r="16" fill="rgba(13,148,136,0.1)" stroke="var(--primary)" stroke-width="2"/>
                         <text x="50" y="114" fill="#fff" font-size="11" text-anchor="middle">q0</text>
                         
@@ -12293,10 +12297,10 @@ ${cfg.diagram}
                         <path d="M 266,144 L 334,114" stroke="#64748b" stroke-width="1.5" stroke-dasharray="4,4" marker-end="url(#arrow)"/>
                         <text x="305" y="144" fill="#94a3b8" font-size="10">ε</text>
                     `;
-                }
-            } else if (selectedRegex === "star") {
-                if (currentStep >= 1) {
-                    svg.innerHTML += `
+                    }
+                } else if (selectedRegex === "star") {
+                    if (currentStep >= 1) {
+                        svg.innerHTML += `
                         <circle cx="200" cy="110" r="16" fill="#1e293b" stroke="#475569" stroke-width="2"/>
                         <text x="200" y="114" fill="#fff" font-size="11" text-anchor="middle">q1</text>
                         <circle cx="300" cy="110" r="16" fill="#1e293b" stroke="#475569" stroke-width="2"/>
@@ -12304,9 +12308,9 @@ ${cfg.diagram}
                         <path d="M 216,110 L 284,110" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arrow)"/>
                         <text x="250" y="102" fill="var(--primary)" font-size="11" font-weight="bold" text-anchor="middle">a</text>
                     `;
-                }
-                if (currentStep >= 2) {
-                    svg.innerHTML += `
+                    }
+                    if (currentStep >= 2) {
+                        svg.innerHTML += `
                         <circle cx="100" cy="110" r="16" fill="rgba(13,148,136,0.1)" stroke="var(--primary)" stroke-width="2"/>
                         <text x="100" y="114" fill="#fff" font-size="11" text-anchor="middle">q0</text>
                         
@@ -12326,10 +12330,10 @@ ${cfg.diagram}
                         <path d="M 100,126 C 100,180, 400,180, 400,126" stroke="#64748b" stroke-width="1.5" stroke-dasharray="4,4" marker-end="url(#arrow)"/>
                         <text x="250" y="172" fill="#94a3b8" font-size="10">ε</text>
                     `;
-                }
-            } else if (selectedRegex === "concat") {
-                if (currentStep >= 1) {
-                    svg.innerHTML += `
+                    }
+                } else if (selectedRegex === "concat") {
+                    if (currentStep >= 1) {
+                        svg.innerHTML += `
                         <circle cx="100" cy="110" r="16" fill="rgba(13,148,136,0.1)" stroke="var(--primary)" stroke-width="2"/>
                         <text x="100" y="114" fill="#fff" font-size="11" text-anchor="middle">q0</text>
                         <circle cx="230" cy="110" r="16" fill="#1e293b" stroke="#475569" stroke-width="2"/>
@@ -12337,19 +12341,19 @@ ${cfg.diagram}
                         <path d="M 116,110 L 214,110" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arrow)"/>
                         <text x="165" y="102" fill="var(--primary)" font-size="11" font-weight="bold" text-anchor="middle">a</text>
                     `;
-                }
-                if (currentStep >= 2) {
-                    svg.innerHTML += `
+                    }
+                    if (currentStep >= 2) {
+                        svg.innerHTML += `
                         <circle cx="360" cy="110" r="16" fill="#1e293b" stroke="var(--primary)" stroke-width="2"/>
                         <circle cx="360" cy="110" r="12" fill="none" stroke="var(--primary)" stroke-width="1"/>
                         <text x="360" y="114" fill="#fff" font-size="11" text-anchor="middle">q2</text>
                         <path d="M 246,110 L 344,110" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arrow)"/>
                         <text x="295" y="102" fill="var(--primary)" font-size="11" font-weight="bold" text-anchor="middle">b</text>
                     `;
-                }
-            } else if (selectedRegex === "star_concat") {
-                if (currentStep >= 1) {
-                    svg.innerHTML += `
+                    }
+                } else if (selectedRegex === "star_concat") {
+                    if (currentStep >= 1) {
+                        svg.innerHTML += `
                         <circle cx="60" cy="110" r="16" fill="rgba(13,148,136,0.1)" stroke="var(--primary)" stroke-width="2"/>
                         <text x="60" y="114" fill="#fff" font-size="11" text-anchor="middle">q0</text>
                         <circle cx="150" cy="110" r="16" fill="#1e293b" stroke="#475569" stroke-width="2"/>
@@ -12369,99 +12373,99 @@ ${cfg.diagram}
                         <path d="M 60,126 C 60,175, 330,175, 330,126" stroke="#64748b" stroke-width="1.5" stroke-dasharray="4,4" marker-end="url(#arrow)"/>
                         <text x="195" y="165" fill="#94a3b8" font-size="10">ε</text>
                     `;
-                }
-                if (currentStep >= 2) {
-                    svg.innerHTML += `
+                    }
+                    if (currentStep >= 2) {
+                        svg.innerHTML += `
                         <circle cx="440" cy="110" r="16" fill="#1e293b" stroke="var(--primary)" stroke-width="2"/>
                         <circle cx="440" cy="110" r="12" fill="none" stroke="var(--primary)" stroke-width="1"/>
                         <text x="440" y="114" fill="#fff" font-size="11" text-anchor="middle">q4</text>
                         <path d="M 346,110 L 424,110" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arrow)"/>
                         <text x="385" y="102" fill="var(--primary)" font-size="11" font-weight="bold" text-anchor="middle">b</text>
                     `;
+                    }
                 }
-            }
+            };
+
+            const resetSim = () => {
+                currentStep = 0;
+                selectedRegex = document.getElementById('regexChoice').value;
+                const customWrap = document.getElementById('custom-regex-wrap');
+                if (selectedRegex === "custom") {
+                    customWrap.style.display = 'flex';
+                    document.getElementById('btnRegexStep').textContent = "Build NFA";
+                } else {
+                    customWrap.style.display = 'none';
+                    document.getElementById('btnRegexStep').textContent = "Step Graph";
+                }
+                renderGraph();
+                document.getElementById('regexTraceLog').innerHTML = `<div style="color:#64748b;">[System] Ready to construct e-NFA. Click Build/Step.</div>`;
+                document.getElementById('btnRegexStep').disabled = false;
+            };
+
+            const runStep = () => {
+                if (selectedRegex === "custom") {
+                    const rxVal = document.getElementById('customRegexInput').value;
+                    if (!rxVal) { alert("Enter a valid regex expression."); return; }
+
+                    try {
+                        const postfix = regexToPostfix(rxVal);
+                        const nfa = buildThompsonNFA(postfix);
+                        if (!nfa) throw new Error("Could not parse expression.");
+                        const layout = generateNFALayout(nfa);
+                        renderDynamicNFA(nfa, layout);
+                        document.getElementById('regexTraceLog').innerHTML = "";
+                        addLog(`Successfully parsed infix expression: "${rxVal}"`, "var(--success)");
+                        addLog(`Generated postfix expression: "${postfix}"`, "var(--primary)");
+                        addLog(`Created Thompson NFA with ${Object.keys(layout).length} states.`, "var(--primary)");
+                    } catch (err) {
+                        alert("Regex parsing failed: " + err.message);
+                    }
+                    return;
+                }
+
+                currentStep++;
+                renderGraph();
+                if (selectedRegex === "union") {
+                    if (currentStep === 1) {
+                        addLog("Step 1: Construct NFA sub-graph for base symbol 'a' (states q1 → q2).", "var(--primary)");
+                    } else if (currentStep === 2) {
+                        addLog("Step 2: Construct NFA sub-graph for base symbol 'b' (states q3 → q4).", "var(--primary)");
+                    } else if (currentStep === 3) {
+                        addLog("Step 3: Combine using Alternation rule (|). Add new start q0 pointing to both subgraphs via ε, and link their accepts to new accept state q5 via ε.", "var(--success)");
+                        document.getElementById('btnRegexStep').disabled = true;
+                    }
+                } else if (selectedRegex === "star") {
+                    if (currentStep === 1) {
+                        addLog("Step 1: Construct NFA sub-graph for base symbol 'a' (states q1 → q2).", "var(--primary)");
+                    } else if (currentStep === 2) {
+                        addLog("Step 2: Apply Kleene Star (*). Add new start q0, accept q3, ε-loopback (q2 → q1) and ε-bypass (q0 → q3).", "var(--success)");
+                        document.getElementById('btnRegexStep').disabled = true;
+                    }
+                } else if (selectedRegex === "concat") {
+                    if (currentStep === 1) {
+                        addLog("Step 1: Construct first NFA symbol 'a' (states q0 → q1).", "var(--primary)");
+                    } else if (currentStep === 2) {
+                        addLog("Step 2: Concatenate with 'b' (states q1 → q2). Accept of 'a' merges with start of 'b'.", "var(--success)");
+                        document.getElementById('btnRegexStep').disabled = true;
+                    }
+                } else if (selectedRegex === "star_concat") {
+                    if (currentStep === 1) {
+                        addLog("Step 1: Construct Kleene Star graph for 'a*' (states q0 → q3).", "var(--primary)");
+                    } else if (currentStep === 2) {
+                        addLog("Step 2: Concatenate the NFA of 'b' (states q3 → q4) to the accept state of 'a*'.", "var(--success)");
+                        document.getElementById('btnRegexStep').disabled = true;
+                    }
+                }
+            };
+
+            document.getElementById('regexChoice').addEventListener('change', resetSim);
+            document.getElementById('btnRegexReset').addEventListener('click', resetSim);
+            document.getElementById('btnRegexStep').addEventListener('click', runStep);
+            resetSim();
         };
 
-        const resetSim = () => {
-            currentStep = 0;
-            selectedRegex = document.getElementById('regexChoice').value;
-            const customWrap = document.getElementById('custom-regex-wrap');
-            if (selectedRegex === "custom") {
-                customWrap.style.display = 'flex';
-                document.getElementById('btnRegexStep').textContent = "Build NFA";
-            } else {
-                customWrap.style.display = 'none';
-                document.getElementById('btnRegexStep').textContent = "Step Graph";
-            }
-            renderGraph();
-            document.getElementById('regexTraceLog').innerHTML = `<div style="color:#64748b;">[System] Ready to construct e-NFA. Click Build/Step.</div>`;
-            document.getElementById('btnRegexStep').disabled = false;
-        };
-
-        const runStep = () => {
-            if (selectedRegex === "custom") {
-                const rxVal = document.getElementById('customRegexInput').value;
-                if (!rxVal) { alert("Enter a valid regex expression."); return; }
-                
-                try {
-                    const postfix = regexToPostfix(rxVal);
-                    const nfa = buildThompsonNFA(postfix);
-                    if (!nfa) throw new Error("Could not parse expression.");
-                    const layout = generateNFALayout(nfa);
-                    renderDynamicNFA(nfa, layout);
-                    document.getElementById('regexTraceLog').innerHTML = "";
-                    addLog(`Successfully parsed infix expression: "${rxVal}"`, "var(--success)");
-                    addLog(`Generated postfix expression: "${postfix}"`, "var(--primary)");
-                    addLog(`Created Thompson NFA with ${Object.keys(layout).length} states.`, "var(--primary)");
-                } catch(err) {
-                    alert("Regex parsing failed: " + err.message);
-                }
-                return;
-            }
-
-            currentStep++;
-            renderGraph();
-            if (selectedRegex === "union") {
-                if (currentStep === 1) {
-                    addLog("Step 1: Construct NFA sub-graph for base symbol 'a' (states q1 → q2).", "var(--primary)");
-                } else if (currentStep === 2) {
-                    addLog("Step 2: Construct NFA sub-graph for base symbol 'b' (states q3 → q4).", "var(--primary)");
-                } else if (currentStep === 3) {
-                    addLog("Step 3: Combine using Alternation rule (|). Add new start q0 pointing to both subgraphs via ε, and link their accepts to new accept state q5 via ε.", "var(--success)");
-                    document.getElementById('btnRegexStep').disabled = true;
-                }
-            } else if (selectedRegex === "star") {
-                if (currentStep === 1) {
-                    addLog("Step 1: Construct NFA sub-graph for base symbol 'a' (states q1 → q2).", "var(--primary)");
-                } else if (currentStep === 2) {
-                    addLog("Step 2: Apply Kleene Star (*). Add new start q0, accept q3, ε-loopback (q2 → q1) and ε-bypass (q0 → q3).", "var(--success)");
-                    document.getElementById('btnRegexStep').disabled = true;
-                }
-            } else if (selectedRegex === "concat") {
-                if (currentStep === 1) {
-                    addLog("Step 1: Construct first NFA symbol 'a' (states q0 → q1).", "var(--primary)");
-                } else if (currentStep === 2) {
-                    addLog("Step 2: Concatenate with 'b' (states q1 → q2). Accept of 'a' merges with start of 'b'.", "var(--success)");
-                    document.getElementById('btnRegexStep').disabled = true;
-                }
-            } else if (selectedRegex === "star_concat") {
-                if (currentStep === 1) {
-                    addLog("Step 1: Construct Kleene Star graph for 'a*' (states q0 → q3).", "var(--primary)");
-                } else if (currentStep === 2) {
-                    addLog("Step 2: Concatenate the NFA of 'b' (states q3 → q4) to the accept state of 'a*'.", "var(--success)");
-                    document.getElementById('btnRegexStep').disabled = true;
-                }
-            }
-        };
-
-        document.getElementById('regexChoice').addEventListener('change', resetSim);
-        document.getElementById('btnRegexReset').addEventListener('click', resetSim);
-        document.getElementById('btnRegexStep').addEventListener('click', runStep);
-        resetSim();
-    };
-
-    const initCfgParserSim = (container) => {
-        container.innerHTML = `
+        const initCfgParserSim = (container) => {
+            container.innerHTML = `
             <div class="sim-toolbar" style="border-bottom:1px solid rgba(255,255,255,0.1); padding:10px 20px;">
                 <div class="sim-title" style="font-weight:800; font-size:18px; color:var(--primary);">CFG & Derivation Trees</div>
             </div>
@@ -12498,160 +12502,160 @@ ${cfg.diagram}
             </div>
         `;
 
-        let currentLevel = 0;
-        let inputVal = "aabb";
-        let grammarType = "anbn";
+            let currentLevel = 0;
+            let inputVal = "aabb";
+            let grammarType = "anbn";
 
-        const addLog = (msg, color = '#fff') => {
-            const log = document.getElementById('cfgTraceLog');
-            const div = document.createElement('div');
-            div.style.color = color;
-            div.style.marginBottom = '5px';
-            div.textContent = msg;
-            log.appendChild(div);
-            log.scrollTop = log.scrollHeight;
-        };
+            const addLog = (msg, color = '#fff') => {
+                const log = document.getElementById('cfgTraceLog');
+                const div = document.createElement('div');
+                div.style.color = color;
+                div.style.marginBottom = '5px';
+                div.textContent = msg;
+                log.appendChild(div);
+                log.scrollTop = log.scrollHeight;
+            };
 
-        const renderTree = () => {
-            const svg = document.getElementById('cfgSvg');
-            svg.innerHTML = '';
-            
-            svg.innerHTML += `
+            const renderTree = () => {
+                const svg = document.getElementById('cfgSvg');
+                svg.innerHTML = '';
+
+                svg.innerHTML += `
                 <circle cx="250" cy="30" r="14" fill="#1e293b" stroke="var(--primary)" stroke-width="2"/>
                 <text x="250" y="34" fill="#fff" font-size="11" font-weight="bold" text-anchor="middle">S</text>
             `;
 
-            if (grammarType === "anbn") {
-                const maxLevel = Math.min(3, inputVal.length / 2);
-                
-                for (let lvl = 1; lvl <= currentLevel; lvl++) {
-                    const py = 30 + (lvl - 1) * 50;
-                    const cy = 30 + lvl * 50;
-                    
-                    if (lvl <= maxLevel) {
-                        const px = 250;
-                        const ax = 250 - lvl * 40;
-                        svg.innerHTML += `
+                if (grammarType === "anbn") {
+                    const maxLevel = Math.min(3, inputVal.length / 2);
+
+                    for (let lvl = 1; lvl <= currentLevel; lvl++) {
+                        const py = 30 + (lvl - 1) * 50;
+                        const cy = 30 + lvl * 50;
+
+                        if (lvl <= maxLevel) {
+                            const px = 250;
+                            const ax = 250 - lvl * 40;
+                            svg.innerHTML += `
                             <line x1="${px}" y1="${py + 14}" x2="${ax}" y2="${cy - 14}" stroke="#64748b" stroke-width="1.5"/>
                             <circle cx="${ax}" cy="${cy}" r="12" fill="#f8fafc" stroke="var(--success)" stroke-width="1.5"/>
                             <text x="${ax}" y="${cy + 4}" fill="#10b981" font-size="10" font-weight="bold" text-anchor="middle">a</text>
                         `;
-                        
-                        svg.innerHTML += `
+
+                            svg.innerHTML += `
                             <line x1="${px}" y1="${py + 14}" x2="250" y2="${cy - 14}" stroke="#64748b" stroke-width="1.5"/>
                             <circle cx="250" cy="${cy}" r="14" fill="#1e293b" stroke="var(--primary)" stroke-width="2"/>
                             <text x="250" y="${cy + 4}" fill="#fff" font-size="11" font-weight="bold" text-anchor="middle">S</text>
                         `;
 
-                        const bx = 250 + lvl * 40;
-                        svg.innerHTML += `
+                            const bx = 250 + lvl * 40;
+                            svg.innerHTML += `
                             <line x1="${px}" y1="${py + 14}" x2="${bx}" y2="${cy - 14}" stroke="#64748b" stroke-width="1.5"/>
                             <circle cx="${bx}" cy="${cy}" r="12" fill="#f8fafc" stroke="var(--success)" stroke-width="1.5"/>
                             <text x="${bx}" y="${cy + 4}" fill="#10b981" font-size="10" font-weight="bold" text-anchor="middle">b</text>
                         `;
-                    }
-                    
-                    if (lvl > maxLevel) {
-                        svg.innerHTML += `
+                        }
+
+                        if (lvl > maxLevel) {
+                            svg.innerHTML += `
                             <line x1="250" y1="${py + 14}" x2="250" y2="${cy - 12}" stroke="#64748b" stroke-width="1.5"/>
                             <circle cx="250" cy="${cy}" r="12" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.5"/>
                             <text x="250" y="${cy + 4}" fill="#94a3b8" font-size="12" font-weight="bold" text-anchor="middle">ε</text>
                         `;
+                        }
                     }
-                }
-            } else {
-                const maxLevel = Math.min(3, inputVal.length / 2);
-                for (let lvl = 1; lvl <= currentLevel; lvl++) {
-                    const py = 30 + (lvl - 1) * 50;
-                    const cy = 30 + lvl * 50;
-                    
-                    if (lvl <= maxLevel) {
-                        const px = 250;
-                        const ax = 250 - lvl * 40;
-                        svg.innerHTML += `
+                } else {
+                    const maxLevel = Math.min(3, inputVal.length / 2);
+                    for (let lvl = 1; lvl <= currentLevel; lvl++) {
+                        const py = 30 + (lvl - 1) * 50;
+                        const cy = 30 + lvl * 50;
+
+                        if (lvl <= maxLevel) {
+                            const px = 250;
+                            const ax = 250 - lvl * 40;
+                            svg.innerHTML += `
                             <line x1="${px}" y1="${py + 14}" x2="${ax}" y2="${cy - 14}" stroke="#64748b" stroke-width="1.5"/>
                             <circle cx="${ax}" cy="${cy}" r="12" fill="#f8fafc" stroke="var(--success)" stroke-width="1.5"/>
                             <text x="${ax}" y="${cy + 4}" fill="#10b981" font-size="10" font-weight="bold" text-anchor="middle">(</text>
                         `;
-                        
-                        svg.innerHTML += `
+
+                            svg.innerHTML += `
                             <line x1="${px}" y1="${py + 14}" x2="250" y2="${cy - 14}" stroke="#64748b" stroke-width="1.5"/>
                             <circle cx="250" cy="${cy}" r="14" fill="#1e293b" stroke="var(--primary)" stroke-width="2"/>
                             <text x="250" y="${cy + 4}" fill="#fff" font-size="11" font-weight="bold" text-anchor="middle">S</text>
                         `;
 
-                        const bx = 250 + lvl * 40;
-                        svg.innerHTML += `
+                            const bx = 250 + lvl * 40;
+                            svg.innerHTML += `
                             <line x1="${px}" y1="${py + 14}" x2="${bx}" y2="${cy - 14}" stroke="#64748b" stroke-width="1.5"/>
                             <circle cx="${bx}" cy="${cy}" r="12" fill="#f8fafc" stroke="var(--success)" stroke-width="1.5"/>
                             <text x="${bx}" y="${cy + 4}" fill="#10b981" font-size="10" font-weight="bold" text-anchor="middle">)</text>
                         `;
-                    }
-                    
-                    if (lvl > maxLevel) {
-                        svg.innerHTML += `
+                        }
+
+                        if (lvl > maxLevel) {
+                            svg.innerHTML += `
                             <line x1="250" y1="${py + 14}" x2="250" y2="${cy - 12}" stroke="#64748b" stroke-width="1.5"/>
                             <circle cx="250" cy="${cy}" r="12" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.5"/>
                             <text x="250" y="${cy + 4}" fill="#94a3b8" font-size="12" font-weight="bold" text-anchor="middle">ε</text>
                         `;
+                        }
                     }
                 }
-            }
-        };
+            };
 
-        const resetSim = () => {
-            currentLevel = 0;
-            grammarType = document.getElementById('cfgGrammar').value;
-            inputVal = document.getElementById('cfgInput').value.trim();
-            
-            if (grammarType === "anbn") {
-                if (!/^[ab]*\$/.test(inputVal) || inputVal.length % 2 !== 0) {
-                    addLog("[Error] Input must be format a^n b^n (even length of a's and b's)", "#ef4444");
-                    return;
-                }
-            } else {
-                if (!/^[()]*\$/.test(inputVal) || inputVal.length % 2 !== 0) {
-                    addLog("[Error] Input must contain nested parentheses only.", "#ef4444");
-                    return;
-                }
-            }
+            const resetSim = () => {
+                currentLevel = 0;
+                grammarType = document.getElementById('cfgGrammar').value;
+                inputVal = document.getElementById('cfgInput').value.trim();
 
-            renderTree();
-            document.getElementById('cfgTraceLog').innerHTML = `<div style="color:#64748b;">[System] Grammar loaded. Click Next Derivation.</div>`;
-            document.getElementById('btnCfgStep').disabled = false;
-        };
-
-        const runStep = () => {
-            const maxLvl = Math.min(3, inputVal.length / 2) + 1;
-            if (currentLevel < maxLvl) {
-                currentLevel++;
-                renderTree();
-                const count = Math.min(3, inputVal.length / 2);
-                if (currentLevel <= count) {
-                    if (grammarType === "anbn") {
-                        addLog(`[Step ${currentLevel}] Expand leftmost variable: S ⇒ aSb`, "var(--primary)");
-                    } else {
-                        addLog(`[Step ${currentLevel}] Expand leftmost variable: S ⇒ (S)`, "var(--primary)");
+                if (grammarType === "anbn") {
+                    if (!/^[ab]*\$/.test(inputVal) || inputVal.length % 2 !== 0) {
+                        addLog("[Error] Input must be format a^n b^n (even length of a's and b's)", "#ef4444");
+                        return;
                     }
                 } else {
-                    addLog(`[Step ${currentLevel}] Base condition reached. Replace final S with ε. Derivation complete!`, "var(--success)");
-                    document.getElementById('btnCfgStep').disabled = true;
+                    if (!/^[()]*\$/.test(inputVal) || inputVal.length % 2 !== 0) {
+                        addLog("[Error] Input must contain nested parentheses only.", "#ef4444");
+                        return;
+                    }
                 }
-            }
+
+                renderTree();
+                document.getElementById('cfgTraceLog').innerHTML = `<div style="color:#64748b;">[System] Grammar loaded. Click Next Derivation.</div>`;
+                document.getElementById('btnCfgStep').disabled = false;
+            };
+
+            const runStep = () => {
+                const maxLvl = Math.min(3, inputVal.length / 2) + 1;
+                if (currentLevel < maxLvl) {
+                    currentLevel++;
+                    renderTree();
+                    const count = Math.min(3, inputVal.length / 2);
+                    if (currentLevel <= count) {
+                        if (grammarType === "anbn") {
+                            addLog(`[Step ${currentLevel}] Expand leftmost variable: S ⇒ aSb`, "var(--primary)");
+                        } else {
+                            addLog(`[Step ${currentLevel}] Expand leftmost variable: S ⇒ (S)`, "var(--primary)");
+                        }
+                    } else {
+                        addLog(`[Step ${currentLevel}] Base condition reached. Replace final S with ε. Derivation complete!`, "var(--success)");
+                        document.getElementById('btnCfgStep').disabled = true;
+                    }
+                }
+            };
+
+            document.getElementById('btnCfgReset').addEventListener('click', resetSim);
+            document.getElementById('btnCfgStep').addEventListener('click', runStep);
+            document.getElementById('cfgGrammar').addEventListener('change', () => {
+                const type = document.getElementById('cfgGrammar').value;
+                document.getElementById('cfgInput').value = type === "anbn" ? "aabb" : "(())";
+                resetSim();
+            });
+            resetSim();
         };
 
-        document.getElementById('btnCfgReset').addEventListener('click', resetSim);
-        document.getElementById('btnCfgStep').addEventListener('click', runStep);
-        document.getElementById('cfgGrammar').addEventListener('change', () => {
-            const type = document.getElementById('cfgGrammar').value;
-            document.getElementById('cfgInput').value = type === "anbn" ? "aabb" : "(())";
-            resetSim();
-        });
-        resetSim();
-    };
-
-    const initPdaStackSim = (container) => {
-        container.innerHTML = `
+        const initPdaStackSim = (container) => {
+            container.innerHTML = `
             <div class="sim-toolbar" style="border-bottom:1px solid rgba(255,255,255,0.1); padding:10px 20px;">
                 <div class="sim-title" style="font-weight:800; font-size:18px; color:var(--primary);">PDA Stack Simulator - a^n b^n</div>
             </div>
@@ -12685,17 +12689,17 @@ ${cfg.diagram}
             </div>
         `;
 
-        let inputStr = "aaabbb";
-        let activeIdx = -1;
-        let pdaState = "q0";
-        let stack = ["Z0"];
+            let inputStr = "aaabbb";
+            let activeIdx = -1;
+            let pdaState = "q0";
+            let stack = ["Z0"];
 
-        const updateStackUI = () => {
-            const container = document.getElementById('pdaStackContainer');
-            container.innerHTML = '';
-            stack.forEach(val => {
-                const el = document.createElement('div');
-                el.style.cssText = `
+            const updateStackUI = () => {
+                const container = document.getElementById('pdaStackContainer');
+                container.innerHTML = '';
+                stack.forEach(val => {
+                    const el = document.createElement('div');
+                    el.style.cssText = `
                     width: 100px;
                     padding: 8px 0;
                     text-align: center;
@@ -12707,95 +12711,95 @@ ${cfg.diagram}
                     background: ${val === 'Z0' ? '#1e293b' : 'rgba(13,148,136,0.15)'};
                     color: ${val === 'Z0' ? '#94a3b8' : 'var(--primary)'};
                 `;
-                el.textContent = val;
-                container.appendChild(el);
-            });
-        };
+                    el.textContent = val;
+                    container.appendChild(el);
+                });
+            };
 
-        const addLog = (msg, color = '#fff') => {
-            const log = document.getElementById('pdaTraceLog');
-            const div = document.createElement('div');
-            div.style.color = color;
-            div.style.marginBottom = '5px';
-            div.textContent = msg;
-            log.appendChild(div);
-            log.scrollTop = log.scrollHeight;
-        };
+            const addLog = (msg, color = '#fff') => {
+                const log = document.getElementById('pdaTraceLog');
+                const div = document.createElement('div');
+                div.style.color = color;
+                div.style.marginBottom = '5px';
+                div.textContent = msg;
+                log.appendChild(div);
+                log.scrollTop = log.scrollHeight;
+            };
 
-        const resetSim = () => {
-            inputStr = document.getElementById('pdaInput').value.trim();
-            if (!/^[ab]*\$/.test(inputStr)) {
-                addLog("[Error] Input string must only contain 'a' and 'b'.", "#ef4444");
-                return;
-            }
-            activeIdx = -1;
-            pdaState = "q0";
-            stack = ["Z0"];
-            updateStackUI();
-            document.getElementById('pdaState').textContent = "q0";
-            document.getElementById('pdaHead').textContent = "-";
-            document.getElementById('pdaTraceLog').innerHTML = `<div style="color:#64748b;">[System] PDA reset complete. Z0 pushed.</div>`;
-            document.getElementById('btnPdaStep').disabled = false;
-        };
-
-        const runStep = () => {
-            if (activeIdx >= inputStr.length - 1) {
-                if (stack.length === 1 && stack[0] === 'Z0' && pdaState === 'q1') {
-                    pdaState = "q2";
-                    document.getElementById('pdaState').textContent = "q2";
-                    addLog("✓ Input complete. Stack contains Z0. State transitioned to accepting state q2. String ACCEPTED!", "var(--success)");
-                } else {
-                    addLog("✗ Finished parsing but stack is not empty or is in invalid state. String REJECTED!", "#ef4444");
+            const resetSim = () => {
+                inputStr = document.getElementById('pdaInput').value.trim();
+                if (!/^[ab]*\$/.test(inputStr)) {
+                    addLog("[Error] Input string must only contain 'a' and 'b'.", "#ef4444");
+                    return;
                 }
-                document.getElementById('btnPdaStep').disabled = true;
-                return;
-            }
+                activeIdx = -1;
+                pdaState = "q0";
+                stack = ["Z0"];
+                updateStackUI();
+                document.getElementById('pdaState').textContent = "q0";
+                document.getElementById('pdaHead').textContent = "-";
+                document.getElementById('pdaTraceLog').innerHTML = `<div style="color:#64748b;">[System] PDA reset complete. Z0 pushed.</div>`;
+                document.getElementById('btnPdaStep').disabled = false;
+            };
 
-            activeIdx++;
-            const char = inputStr[activeIdx];
-            document.getElementById('pdaHead').textContent = `${char} (Pos: ${activeIdx + 1})`;
-
-            if (pdaState === 'q0') {
-                if (char === 'a') {
-                    stack.push('A');
-                    updateStackUI();
-                    addLog(`Read 'a' in q0: Push 'A' to stack. Transition: δ(q0, a, Z0/A) → (q0, Push A)`, 'var(--primary)');
-                } else if (char === 'b') {
-                    if (stack.length > 1) {
-                        stack.pop();
-                        updateStackUI();
-                        pdaState = "q1";
-                        document.getElementById('pdaState').textContent = "q1";
-                        addLog(`Read 'b' in q0: Pop 'A' from stack. Transition state to q1.`, 'var(--accent)');
+            const runStep = () => {
+                if (activeIdx >= inputStr.length - 1) {
+                    if (stack.length === 1 && stack[0] === 'Z0' && pdaState === 'q1') {
+                        pdaState = "q2";
+                        document.getElementById('pdaState').textContent = "q2";
+                        addLog("✓ Input complete. Stack contains Z0. State transitioned to accepting state q2. String ACCEPTED!", "var(--success)");
                     } else {
-                        addLog("✗ Stack underflow! Read 'b' but no 'A' left to pop. REJECTED!", "#ef4444");
-                        document.getElementById('btnPdaStep').disabled = true;
+                        addLog("✗ Finished parsing but stack is not empty or is in invalid state. String REJECTED!", "#ef4444");
                     }
-                }
-            } else if (pdaState === 'q1') {
-                if (char === 'a') {
-                    addLog("✗ Non-regular format error: Read 'a' after 'b' was already read. REJECTED!", "#ef4444");
                     document.getElementById('btnPdaStep').disabled = true;
-                } else if (char === 'b') {
-                    if (stack.length > 1) {
-                        stack.pop();
+                    return;
+                }
+
+                activeIdx++;
+                const char = inputStr[activeIdx];
+                document.getElementById('pdaHead').textContent = `${char} (Pos: ${activeIdx + 1})`;
+
+                if (pdaState === 'q0') {
+                    if (char === 'a') {
+                        stack.push('A');
                         updateStackUI();
-                        addLog(`Read 'b' in q1: Pop 'A' from stack.`, 'var(--accent)');
-                    } else {
-                        addLog("✗ Stack underflow! Read 'b' but stack only contains Z0. REJECTED!", "#ef4444");
+                        addLog(`Read 'a' in q0: Push 'A' to stack. Transition: δ(q0, a, Z0/A) → (q0, Push A)`, 'var(--primary)');
+                    } else if (char === 'b') {
+                        if (stack.length > 1) {
+                            stack.pop();
+                            updateStackUI();
+                            pdaState = "q1";
+                            document.getElementById('pdaState').textContent = "q1";
+                            addLog(`Read 'b' in q0: Pop 'A' from stack. Transition state to q1.`, 'var(--accent)');
+                        } else {
+                            addLog("✗ Stack underflow! Read 'b' but no 'A' left to pop. REJECTED!", "#ef4444");
+                            document.getElementById('btnPdaStep').disabled = true;
+                        }
+                    }
+                } else if (pdaState === 'q1') {
+                    if (char === 'a') {
+                        addLog("✗ Non-regular format error: Read 'a' after 'b' was already read. REJECTED!", "#ef4444");
                         document.getElementById('btnPdaStep').disabled = true;
+                    } else if (char === 'b') {
+                        if (stack.length > 1) {
+                            stack.pop();
+                            updateStackUI();
+                            addLog(`Read 'b' in q1: Pop 'A' from stack.`, 'var(--accent)');
+                        } else {
+                            addLog("✗ Stack underflow! Read 'b' but stack only contains Z0. REJECTED!", "#ef4444");
+                            document.getElementById('btnPdaStep').disabled = true;
+                        }
                     }
                 }
-            }
+            };
+
+            document.getElementById('btnPdaReset').addEventListener('click', resetSim);
+            document.getElementById('btnPdaStep').addEventListener('click', runStep);
+            resetSim();
         };
 
-        document.getElementById('btnPdaReset').addEventListener('click', resetSim);
-        document.getElementById('btnPdaStep').addEventListener('click', runStep);
-        resetSim();
-    };
-
-    const initTuringMachineSim = (container) => {
-        container.innerHTML = `
+        const initTuringMachineSim = (container) => {
+            container.innerHTML = `
             <div class="sim-toolbar" style="border-bottom:1px solid rgba(255,255,255,0.1); padding:10px 20px;">
                 <div class="sim-title" style="font-weight:800; font-size:18px; color:var(--primary);">Turing Machine Tape Simulator (Binary Increment)</div>
             </div>
@@ -12831,18 +12835,18 @@ ${cfg.diagram}
             </div>
         `;
 
-        let tape = [];
-        let headPos = 2;
-        let tmState = "q0_find_end";
+            let tape = [];
+            let headPos = 2;
+            let tmState = "q0_find_end";
 
-        const updateTapeUI = () => {
-            const wrapper = document.getElementById('tmTapeWrapper');
-            wrapper.innerHTML = '';
-            
-            for (let i = 0; i < tape.length; i++) {
-                const cell = document.createElement('div');
-                const isHead = i === headPos;
-                cell.style.cssText = `
+            const updateTapeUI = () => {
+                const wrapper = document.getElementById('tmTapeWrapper');
+                wrapper.innerHTML = '';
+
+                for (let i = 0; i < tape.length; i++) {
+                    const cell = document.createElement('div');
+                    const isHead = i === headPos;
+                    cell.style.cssText = `
                     min-width: 45px;
                     height: 45px;
                     border: 2px solid ${isHead ? 'var(--primary)' : 'rgba(255,255,255,0.05)'};
@@ -12857,104 +12861,104 @@ ${cfg.diagram}
                     font-family: monospace;
                     position: relative;
                 `;
-                cell.textContent = tape[i] === 'B' ? '␣' : tape[i];
-                if (isHead) {
-                    const arrow = document.createElement('div');
-                    arrow.style.cssText = `
+                    cell.textContent = tape[i] === 'B' ? '␣' : tape[i];
+                    if (isHead) {
+                        const arrow = document.createElement('div');
+                        arrow.style.cssText = `
                         position: absolute;
                         bottom: -16px;
                         color: var(--primary);
                         font-size: 11px;
                     `;
-                    arrow.textContent = '▲';
-                    cell.appendChild(arrow);
+                        arrow.textContent = '▲';
+                        cell.appendChild(arrow);
+                    }
+                    wrapper.appendChild(cell);
                 }
-                wrapper.appendChild(cell);
-            }
-            
-            const offset = (5 - headPos) * 49;
-            wrapper.style.transform = `translateX(${offset}px)`;
-        };
 
-        const addLog = (msg, color = '#fff') => {
-            const log = document.getElementById('tmTraceLog');
-            const div = document.createElement('div');
-            div.style.color = color;
-            div.style.marginBottom = '5px';
-            div.textContent = msg;
-            log.appendChild(div);
-            log.scrollTop = log.scrollHeight;
-        };
+                const offset = (5 - headPos) * 49;
+                wrapper.style.transform = `translateX(${offset}px)`;
+            };
 
-        const resetSim = () => {
-            const input = document.getElementById('tmInput').value.trim();
-            if (!/^[01]*\$/.test(input) || input.length === 0) {
-                addLog("[Error] Input must be a non-empty binary string.", "#ef4444");
-                return;
-            }
-            tape = ['B', 'B', ...input.split(''), 'B', 'B', 'B'];
-            headPos = 2;
-            tmState = "q0_find_end";
-            
-            document.getElementById('tmState').textContent = tmState;
-            document.getElementById('tmHeadIdx').textContent = headPos - 2;
-            updateTapeUI();
-            
-            document.getElementById('tmTraceLog').innerHTML = `<div style="color:#64748b;">[System] TM initialized. Pos centered at starting cell.</div>`;
-            document.getElementById('btnTmStep').disabled = false;
-        };
+            const addLog = (msg, color = '#fff') => {
+                const log = document.getElementById('tmTraceLog');
+                const div = document.createElement('div');
+                div.style.color = color;
+                div.style.marginBottom = '5px';
+                div.textContent = msg;
+                log.appendChild(div);
+                log.scrollTop = log.scrollHeight;
+            };
 
-        const runStep = () => {
-            const symbol = tape[headPos];
-            const oldPos = headPos;
-
-            if (tmState === 'q_halt') {
-                addLog("Turing Machine halted. Output complete.", "var(--success)");
-                document.getElementById('btnTmStep').disabled = true;
-                return;
-            }
-
-            if (tmState === 'q0_find_end') {
-                if (symbol === '0' || symbol === '1') {
-                    headPos++;
-                    addLog(`[State: q0] Read '${symbol}'. Action: Write '${symbol}', Move Right. Stay in q0.`, '#94a3b8');
-                } else if (symbol === 'B') {
-                    headPos--;
-                    tmState = "q1_carry";
-                    addLog(`[State: q0] Read '␣'. End found. Action: Write '␣', Move Left. Transition state to q1_carry.`, 'var(--accent)');
+            const resetSim = () => {
+                const input = document.getElementById('tmInput').value.trim();
+                if (!/^[01]*\$/.test(input) || input.length === 0) {
+                    addLog("[Error] Input must be a non-empty binary string.", "#ef4444");
+                    return;
                 }
-            } else if (tmState === 'q1_carry') {
-                if (symbol === '1') {
-                    tape[headPos] = '0';
-                    headPos--;
-                    addLog(`[State: q1] Read '1'. Action: Write '0' (Carry), Move Left. Stay in q1.`, 'var(--primary)');
-                } else if (symbol === '0' || symbol === 'B') {
-                    tape[headPos] = '1';
-                    headPos++;
-                    tmState = "q_halt";
-                    addLog(`[State: q1] Read '${symbol === 'B' ? '␣' : '0'}'. Action: Write '1' (No Carry), Move Right. Transition to q_halt.`, 'var(--success)');
-                }
-            }
+                tape = ['B', 'B', ...input.split(''), 'B', 'B', 'B'];
+                headPos = 2;
+                tmState = "q0_find_end";
 
-            document.getElementById('tmState').textContent = tmState;
-            document.getElementById('tmHeadIdx').textContent = headPos - 2;
-            updateTapeUI();
-            
-            if (tmState === 'q_halt') {
-                setTimeout(() => {
-                    const result = tape.slice(2, -2).join('').replace(/B/g, ' ').trim();
-                    addLog(`✓ Halt state reached successfully! Final Tape Output: ${result}`, 'var(--success)');
-                }, 400);
-            }
+                document.getElementById('tmState').textContent = tmState;
+                document.getElementById('tmHeadIdx').textContent = headPos - 2;
+                updateTapeUI();
+
+                document.getElementById('tmTraceLog').innerHTML = `<div style="color:#64748b;">[System] TM initialized. Pos centered at starting cell.</div>`;
+                document.getElementById('btnTmStep').disabled = false;
+            };
+
+            const runStep = () => {
+                const symbol = tape[headPos];
+                const oldPos = headPos;
+
+                if (tmState === 'q_halt') {
+                    addLog("Turing Machine halted. Output complete.", "var(--success)");
+                    document.getElementById('btnTmStep').disabled = true;
+                    return;
+                }
+
+                if (tmState === 'q0_find_end') {
+                    if (symbol === '0' || symbol === '1') {
+                        headPos++;
+                        addLog(`[State: q0] Read '${symbol}'. Action: Write '${symbol}', Move Right. Stay in q0.`, '#94a3b8');
+                    } else if (symbol === 'B') {
+                        headPos--;
+                        tmState = "q1_carry";
+                        addLog(`[State: q0] Read '␣'. End found. Action: Write '␣', Move Left. Transition state to q1_carry.`, 'var(--accent)');
+                    }
+                } else if (tmState === 'q1_carry') {
+                    if (symbol === '1') {
+                        tape[headPos] = '0';
+                        headPos--;
+                        addLog(`[State: q1] Read '1'. Action: Write '0' (Carry), Move Left. Stay in q1.`, 'var(--primary)');
+                    } else if (symbol === '0' || symbol === 'B') {
+                        tape[headPos] = '1';
+                        headPos++;
+                        tmState = "q_halt";
+                        addLog(`[State: q1] Read '${symbol === 'B' ? '␣' : '0'}'. Action: Write '1' (No Carry), Move Right. Transition to q_halt.`, 'var(--success)');
+                    }
+                }
+
+                document.getElementById('tmState').textContent = tmState;
+                document.getElementById('tmHeadIdx').textContent = headPos - 2;
+                updateTapeUI();
+
+                if (tmState === 'q_halt') {
+                    setTimeout(() => {
+                        const result = tape.slice(2, -2).join('').replace(/B/g, ' ').trim();
+                        addLog(`✓ Halt state reached successfully! Final Tape Output: ${result}`, 'var(--success)');
+                    }, 400);
+                }
+            };
+
+            document.getElementById('btnTmReset').addEventListener('click', resetSim);
+            document.getElementById('btnTmStep').addEventListener('click', runStep);
+            resetSim();
         };
 
-        document.getElementById('btnTmReset').addEventListener('click', resetSim);
-        document.getElementById('btnTmStep').addEventListener('click', runStep);
-        resetSim();
-    };
-
-    const initDfaMinimizationSim = (container) => {
-        container.innerHTML = `
+        const initDfaMinimizationSim = (container) => {
+            container.innerHTML = `
             <div class="sim-toolbar" style="border-bottom:1px solid rgba(255,255,255,0.1); padding:10px 20px;">
                 <div class="sim-title" style="font-weight:800; font-size:18px; color:var(--primary);">DFA Minimization (Table-Filling Algorithm)</div>
             </div>
@@ -13013,105 +13017,105 @@ ${cfg.diagram}
             </div>
         `;
 
-        let currentStep = 0;
+            let currentStep = 0;
 
-        const addLog = (msg, color = '#fff') => {
-            const log = document.getElementById('minTraceLog');
-            const div = document.createElement('div');
-            div.style.color = color;
-            div.style.marginBottom = '5px';
-            div.textContent = msg;
-            log.appendChild(div);
-            log.scrollTop = log.scrollHeight;
-        };
+            const addLog = (msg, color = '#fff') => {
+                const log = document.getElementById('minTraceLog');
+                const div = document.createElement('div');
+                div.style.color = color;
+                div.style.marginBottom = '5px';
+                div.textContent = msg;
+                log.appendChild(div);
+                log.scrollTop = log.scrollHeight;
+            };
 
-        const resetSim = () => {
-            currentStep = 0;
-            const cells = ['BA', 'CA', 'CB', 'DA', 'DB', 'DC', 'EA', 'EB', 'EC', 'ED'];
-            cells.forEach(c => {
-                const el = document.getElementById(`cell-${c}`);
-                if (el) {
-                    el.textContent = '-';
-                    el.style.background = '#0b0f19';
-                    el.style.color = '#fff';
+            const resetSim = () => {
+                currentStep = 0;
+                const cells = ['BA', 'CA', 'CB', 'DA', 'DB', 'DC', 'EA', 'EB', 'EC', 'ED'];
+                cells.forEach(c => {
+                    const el = document.getElementById(`cell-${c}`);
+                    if (el) {
+                        el.textContent = '-';
+                        el.style.background = '#0b0f19';
+                        el.style.color = '#fff';
+                    }
+                });
+                document.getElementById('minTraceLog').innerHTML = `<div style="color:#64748b;">[System] Reset complete. Grid initialized.</div>`;
+                document.getElementById('minResultPill').style.display = 'none';
+                document.getElementById('btnMinStep').disabled = false;
+            };
+
+            const runStep = () => {
+                currentStep++;
+                if (currentStep === 1) {
+                    const finalPairs = ['EA', 'EB', 'EC', 'ED'];
+                    finalPairs.forEach(c => {
+                        const el = document.getElementById(`cell-${c}`);
+                        if (el) {
+                            el.textContent = 'X';
+                            el.style.background = 'rgba(239, 68, 68, 0.15)';
+                            el.style.color = '#ef4444';
+                        }
+                    });
+                    addLog("[Step 1: Base Case] Mark all final and non-final state splits: (E, A), (E, B), (E, C), and (E, D) are distinguishable.", "var(--primary)");
+                } else if (currentStep === 2) {
+                    const pairs = ['DA', 'DB', 'DC'];
+                    pairs.forEach(c => {
+                        const el = document.getElementById(`cell-${c}`);
+                        if (el) {
+                            el.textContent = 'X';
+                            el.style.background = 'rgba(239, 68, 68, 0.15)';
+                            el.style.color = '#ef4444';
+                        }
+                    });
+                    addLog("[Step 2: Induction 1] Check remaining pairs on transitions. (A, D) on input 1 goes to (C, E), which is already marked. So mark (A, D). Similarly, mark (B, D) and (C, D).", "var(--accent)");
+                } else if (currentStep === 3) {
+                    const pairs = ['BA', 'CA'];
+                    pairs.forEach(c => {
+                        const el = document.getElementById(`cell-${c}`);
+                        if (el) {
+                            el.textContent = 'X';
+                            el.style.background = 'rgba(239, 68, 68, 0.15)';
+                            el.style.color = '#ef4444';
+                        }
+                    });
+                    addLog("[Step 3: Induction 2] Check remaining pairs. (A, B) transitions to (C, D) on input 1. Since (C, D) was marked, mark (A, B). Similarly, mark (A, C).", "var(--accent)");
+                } else if (currentStep === 4) {
+                    const el = document.getElementById('cell-CB');
+                    if (el) {
+                        el.textContent = '≡';
+                        el.style.background = 'rgba(16, 185, 129, 0.15)';
+                        el.style.color = '#10b981';
+                    }
+                    addLog("[Step 4: Completion] No more pairs can be marked! Unmarked cells are equivalent. State B and C are equivalent (B ≡ C) and can be merged.", "var(--success)");
+                    document.getElementById('minResultPill').style.display = 'block';
+                    document.getElementById('btnMinStep').disabled = true;
                 }
-            });
-            document.getElementById('minTraceLog').innerHTML = `<div style="color:#64748b;">[System] Reset complete. Grid initialized.</div>`;
-            document.getElementById('minResultPill').style.display = 'none';
-            document.getElementById('btnMinStep').disabled = false;
+            };
+
+            document.getElementById('btnMinReset').addEventListener('click', resetSim);
+            document.getElementById('btnMinStep').addEventListener('click', runStep);
+            resetSim();
         };
 
-        const runStep = () => {
-            currentStep++;
-            if (currentStep === 1) {
-                const finalPairs = ['EA', 'EB', 'EC', 'ED'];
-                finalPairs.forEach(c => {
-                    const el = document.getElementById(`cell-${c}`);
-                    if (el) {
-                        el.textContent = 'X';
-                        el.style.background = 'rgba(239, 68, 68, 0.15)';
-                        el.style.color = '#ef4444';
-                    }
-                });
-                addLog("[Step 1: Base Case] Mark all final and non-final state splits: (E, A), (E, B), (E, C), and (E, D) are distinguishable.", "var(--primary)");
-            } else if (currentStep === 2) {
-                const pairs = ['DA', 'DB', 'DC'];
-                pairs.forEach(c => {
-                    const el = document.getElementById(`cell-${c}`);
-                    if (el) {
-                        el.textContent = 'X';
-                        el.style.background = 'rgba(239, 68, 68, 0.15)';
-                        el.style.color = '#ef4444';
-                    }
-                });
-                addLog("[Step 2: Induction 1] Check remaining pairs on transitions. (A, D) on input 1 goes to (C, E), which is already marked. So mark (A, D). Similarly, mark (B, D) and (C, D).", "var(--accent)");
-            } else if (currentStep === 3) {
-                const pairs = ['BA', 'CA'];
-                pairs.forEach(c => {
-                    const el = document.getElementById(`cell-${c}`);
-                    if (el) {
-                        el.textContent = 'X';
-                        el.style.background = 'rgba(239, 68, 68, 0.15)';
-                        el.style.color = '#ef4444';
-                    }
-                });
-                addLog("[Step 3: Induction 2] Check remaining pairs. (A, B) transitions to (C, D) on input 1. Since (C, D) was marked, mark (A, B). Similarly, mark (A, C).", "var(--accent)");
-            } else if (currentStep === 4) {
-                const el = document.getElementById('cell-CB');
-                if (el) {
-                    el.textContent = '≡';
-                    el.style.background = 'rgba(16, 185, 129, 0.15)';
-                    el.style.color = '#10b981';
-                }
-                addLog("[Step 4: Completion] No more pairs can be marked! Unmarked cells are equivalent. State B and C are equivalent (B ≡ C) and can be merged.", "var(--success)");
-                document.getElementById('minResultPill').style.display = 'block';
-                document.getElementById('btnMinStep').disabled = true;
-            }
-        };
-
-        document.getElementById('btnMinReset').addEventListener('click', resetSim);
-        document.getElementById('btnMinStep').addEventListener('click', runStep);
-        resetSim();
-    };
 
 
+        // ============================================================
+        // AI TRACK — 12 Simulation Functions
+        // ============================================================
 
-    // ============================================================
-    // AI TRACK — 12 Simulation Functions
-    // ============================================================
-
-    const initAiSearchSim = (container) => {
-        const AC = '#f97316';
-        const nodes = [
-            {id:'S',x:80,y:200,h:7},{id:'A',x:200,y:100,h:5},{id:'B',x:200,y:300,h:6},
-            {id:'C',x:340,y:80,h:3},{id:'D',x:340,y:200,h:4},{id:'E',x:340,y:320,h:5},
-            {id:'G',x:480,y:200,h:0}
-        ];
-        const edges = [
-            {f:'S',t:'A',w:2},{f:'S',t:'B',w:3},{f:'A',t:'C',w:1},{f:'A',t:'D',w:3},
-            {f:'B',t:'D',w:2},{f:'B',t:'E',w:4},{f:'C',t:'G',w:5},{f:'D',t:'G',w:2},{f:'E',t:'G',w:3}
-        ];
-        container.innerHTML = `
+        const initAiSearchSim = (container) => {
+            const AC = '#f97316';
+            const nodes = [
+                { id: 'S', x: 80, y: 200, h: 7 }, { id: 'A', x: 200, y: 100, h: 5 }, { id: 'B', x: 200, y: 300, h: 6 },
+                { id: 'C', x: 340, y: 80, h: 3 }, { id: 'D', x: 340, y: 200, h: 4 }, { id: 'E', x: 340, y: 320, h: 5 },
+                { id: 'G', x: 480, y: 200, h: 0 }
+            ];
+            const edges = [
+                { f: 'S', t: 'A', w: 2 }, { f: 'S', t: 'B', w: 3 }, { f: 'A', t: 'C', w: 1 }, { f: 'A', t: 'D', w: 3 },
+                { f: 'B', t: 'D', w: 2 }, { f: 'B', t: 'E', w: 4 }, { f: 'C', t: 'G', w: 5 }, { f: 'D', t: 'G', w: 2 }, { f: 'E', t: 'G', w: 3 }
+            ];
+            container.innerHTML = `
         <div style="padding:20px; font-family:var(--font-sans);">
             <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:16px;">
                 <select id="ai-search-algo" style="padding:8px 12px;border-radius:8px;border:1px solid ${AC};background:var(--bg-card);color:var(--text-main);font-weight:700;">
@@ -13139,77 +13143,77 @@ ${cfg.diagram}
                 </div>
             </div>
         </div>`;
-        const canvas = document.getElementById('ai-search-canvas');
-        const ctx = canvas.getContext('2d');
-        let state = { visited:[], frontier:[], path:[], exploring:false };
-        const nd = (id) => nodes.find(n=>n.id===id);
-        const drawGraph = () => {
-            ctx.clearRect(0,0,canvas.width,canvas.height);
-            edges.forEach(e => {
-                const a=nd(e.f),b=nd(e.t);
-                ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y);
-                ctx.strokeStyle=state.path.includes(e.f+'→'+e.t)||state.path.includes(e.t+'→'+e.f)?'#22c55e':'var(--border)';
-                ctx.lineWidth=state.path.includes(e.f+'→'+e.t)||state.path.includes(e.t+'→'+e.f)?3:1.5;
-                ctx.stroke();
-                const mx=(a.x+b.x)/2,my=(a.y+b.y)/2;
-                ctx.fillStyle='var(--text-muted)'; ctx.font='11px monospace';
-                ctx.fillText(e.w,mx-5,my-5);
-            });
-            nodes.forEach(n => {
-                let color='#475569';
-                if(state.path.some(p=>p.includes(n.id))) color='#22c55e';
-                else if(state.visited.includes(n.id)) color=AC;
-                else if(state.frontier.includes(n.id)) color='#fbbf24';
-                ctx.beginPath(); ctx.arc(n.x,n.y,22,0,Math.PI*2);
-                ctx.fillStyle=color+'33'; ctx.fill();
-                ctx.strokeStyle=color; ctx.lineWidth=2.5; ctx.stroke();
-                ctx.fillStyle=color; ctx.font='bold 14px sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
-                ctx.fillText(n.id,n.x,n.y);
-                ctx.fillStyle='var(--text-muted)'; ctx.font='10px sans-serif';
-                ctx.fillText('h='+n.h,n.x,n.y+32);
-            });
-        };
-        const sleep = ms => new Promise(r=>setTimeout(r,ms));
-        const runSearch = async () => {
-            const algo = document.getElementById('ai-search-algo').value;
-            state = {visited:[],frontier:[],path:[],exploring:true};
-            const order = []; let found=false;
-            const adj = (id) => edges.filter(e=>e.f===id).map(e=>({id:e.t,w:e.w})).concat(edges.filter(e=>e.t===id).map(e=>({id:e.f,w:e.w})));
-            if(algo==='bfs'||algo==='dfs') {
-                const queue=['S']; const parent={S:null}; const vis=new Set();
-                while(queue.length&&state.exploring) {
-                    const cur = algo==='bfs'?queue.shift():queue.pop();
-                    if(vis.has(cur))continue; vis.add(cur);
-                    state.visited=[...vis]; order.push(cur);
-                    document.getElementById('ai-search-order').innerHTML=order.join(' → ');
-                    if(cur==='G'){found=true; let n=cur; const p=[]; while(n){p.unshift(n);n=parent[n];} for(let i=0;i<p.length-1;i++)state.path.push(p[i]+'→'+p[i+1]); break;}
-                    adj(cur).forEach(nb=>{if(!vis.has(nb.id)){parent[nb.id]=cur;queue.push(nb.id);state.frontier=queue.slice();}});
-                    drawGraph(); await sleep(600);
+            const canvas = document.getElementById('ai-search-canvas');
+            const ctx = canvas.getContext('2d');
+            let state = { visited: [], frontier: [], path: [], exploring: false };
+            const nd = (id) => nodes.find(n => n.id === id);
+            const drawGraph = () => {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                edges.forEach(e => {
+                    const a = nd(e.f), b = nd(e.t);
+                    ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y);
+                    ctx.strokeStyle = state.path.includes(e.f + '→' + e.t) || state.path.includes(e.t + '→' + e.f) ? '#22c55e' : 'var(--border)';
+                    ctx.lineWidth = state.path.includes(e.f + '→' + e.t) || state.path.includes(e.t + '→' + e.f) ? 3 : 1.5;
+                    ctx.stroke();
+                    const mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
+                    ctx.fillStyle = 'var(--text-muted)'; ctx.font = '11px monospace';
+                    ctx.fillText(e.w, mx - 5, my - 5);
+                });
+                nodes.forEach(n => {
+                    let color = '#475569';
+                    if (state.path.some(p => p.includes(n.id))) color = '#22c55e';
+                    else if (state.visited.includes(n.id)) color = AC;
+                    else if (state.frontier.includes(n.id)) color = '#fbbf24';
+                    ctx.beginPath(); ctx.arc(n.x, n.y, 22, 0, Math.PI * 2);
+                    ctx.fillStyle = color + '33'; ctx.fill();
+                    ctx.strokeStyle = color; ctx.lineWidth = 2.5; ctx.stroke();
+                    ctx.fillStyle = color; ctx.font = 'bold 14px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                    ctx.fillText(n.id, n.x, n.y);
+                    ctx.fillStyle = 'var(--text-muted)'; ctx.font = '10px sans-serif';
+                    ctx.fillText('h=' + n.h, n.x, n.y + 32);
+                });
+            };
+            const sleep = ms => new Promise(r => setTimeout(r, ms));
+            const runSearch = async () => {
+                const algo = document.getElementById('ai-search-algo').value;
+                state = { visited: [], frontier: [], path: [], exploring: true };
+                const order = []; let found = false;
+                const adj = (id) => edges.filter(e => e.f === id).map(e => ({ id: e.t, w: e.w })).concat(edges.filter(e => e.t === id).map(e => ({ id: e.f, w: e.w })));
+                if (algo === 'bfs' || algo === 'dfs') {
+                    const queue = ['S']; const parent = { S: null }; const vis = new Set();
+                    while (queue.length && state.exploring) {
+                        const cur = algo === 'bfs' ? queue.shift() : queue.pop();
+                        if (vis.has(cur)) continue; vis.add(cur);
+                        state.visited = [...vis]; order.push(cur);
+                        document.getElementById('ai-search-order').innerHTML = order.join(' → ');
+                        if (cur === 'G') { found = true; let n = cur; const p = []; while (n) { p.unshift(n); n = parent[n]; } for (let i = 0; i < p.length - 1; i++)state.path.push(p[i] + '→' + p[i + 1]); break; }
+                        adj(cur).forEach(nb => { if (!vis.has(nb.id)) { parent[nb.id] = cur; queue.push(nb.id); state.frontier = queue.slice(); } });
+                        drawGraph(); await sleep(600);
+                    }
+                } else {
+                    const pq = [{ id: 'S', g: 0, f: nd('S').h, parent: null }]; const vis = {}; let found = false;
+                    while (pq.length && state.exploring) {
+                        pq.sort((a, b) => a.f - b.f); const cur = pq.shift();
+                        if (vis[cur.id]) continue; vis[cur.id] = cur;
+                        state.visited = Object.keys(vis); order.push(cur.id + '(f=' + cur.f + ')');
+                        document.getElementById('ai-search-order').innerHTML = order.join(' → ');
+                        if (cur.id === 'G') { found = true; let n = cur; const p = []; while (n) { p.unshift(n.id); n = vis[n.parent]; }; for (let i = 0; i < p.length - 1; i++)state.path.push(p[i] + '→' + p[i + 1]); break; }
+                        adj(cur.id).forEach(nb => { if (!vis[nb.id]) { const g = cur.g + nb.w; pq.push({ id: nb.id, g, f: g + nd(nb.id).h, parent: cur.id }); state.frontier = pq.map(x => x.id); } });
+                        drawGraph(); await sleep(700);
+                    }
                 }
-            } else {
-                const pq=[{id:'S',g:0,f:nd('S').h,parent:null}]; const vis={}; let found=false;
-                while(pq.length&&state.exploring) {
-                    pq.sort((a,b)=>a.f-b.f); const cur=pq.shift();
-                    if(vis[cur.id])continue; vis[cur.id]=cur;
-                    state.visited=Object.keys(vis); order.push(cur.id+'(f='+cur.f+')');
-                    document.getElementById('ai-search-order').innerHTML=order.join(' → ');
-                    if(cur.id==='G'){found=true; let n=cur; const p=[]; while(n){p.unshift(n.id);n=vis[n.parent];}; for(let i=0;i<p.length-1;i++)state.path.push(p[i]+'→'+p[i+1]); break;}
-                    adj(cur.id).forEach(nb=>{if(!vis[nb.id]){const g=cur.g+nb.w; pq.push({id:nb.id,g,f:g+nd(nb.id).h,parent:cur.id}); state.frontier=pq.map(x=>x.id);}});
-                    drawGraph(); await sleep(700);
-                }
-            }
-            state.exploring=false; drawGraph();
-            document.getElementById('ai-search-info').textContent = found?`✅ Path found! Nodes explored: ${state.visited.length}`:'❌ No path found';
-            document.getElementById('ai-search-stats').innerHTML=`<div style="font-size:12px;font-weight:700;color:#22c55e;">Path: S→...→G</div>`;
+                state.exploring = false; drawGraph();
+                document.getElementById('ai-search-info').textContent = found ? `✅ Path found! Nodes explored: ${state.visited.length}` : '❌ No path found';
+                document.getElementById('ai-search-stats').innerHTML = `<div style="font-size:12px;font-weight:700;color:#22c55e;">Path: S→...→G</div>`;
+            };
+            document.getElementById('ai-search-run').addEventListener('click', runSearch);
+            document.getElementById('ai-search-reset').addEventListener('click', () => { state = { visited: [], frontier: [], path: [], exploring: false }; document.getElementById('ai-search-order').innerHTML = ''; document.getElementById('ai-search-info').textContent = ''; drawGraph(); });
+            drawGraph();
         };
-        document.getElementById('ai-search-run').addEventListener('click', runSearch);
-        document.getElementById('ai-search-reset').addEventListener('click', ()=>{ state={visited:[],frontier:[],path:[],exploring:false}; document.getElementById('ai-search-order').innerHTML=''; document.getElementById('ai-search-info').textContent=''; drawGraph(); });
-        drawGraph();
-    };
 
-    const initAiHeuristicSim = (container) => {
-        const AC = '#f97316';
-        container.innerHTML = `
+        const initAiHeuristicSim = (container) => {
+            const AC = '#f97316';
+            container.innerHTML = `
         <div style="padding:20px;font-family:var(--font-sans);">
             <div style="margin-bottom:16px;display:flex;gap:12px;flex-wrap:wrap;align-items:center;">
                 <select id="ai-h-algo" style="padding:8px 12px;border-radius:8px;border:1px solid ${AC};background:var(--bg-card);color:var(--text-main);font-weight:700;">
@@ -13229,41 +13233,41 @@ ${cfg.diagram}
                 </div>
             </div>
         </div>`;
-        const nodes = [{id:'S',x:60,y:180,h:10},{id:'A',x:180,y:80,h:6},{id:'B',x:180,y:280,h:7},{id:'C',x:320,y:60,h:3},{id:'D',x:320,y:180,h:4},{id:'E',x:320,y:300,h:8},{id:'G',x:460,y:180,h:0}];
-        const edges=[{f:'S',t:'A',w:3},{f:'S',t:'B',w:1},{f:'A',t:'C',w:2},{f:'A',t:'D',w:5},{f:'B',t:'D',w:3},{f:'B',t:'E',w:7},{f:'C',t:'G',w:6},{f:'D',t:'G',w:2},{f:'E',t:'G',w:4}];
-        const canvas=document.getElementById('ai-h-canvas'); const ctx=canvas.getContext('2d');
-        const nd=(id)=>nodes.find(n=>n.id===id);
-        document.getElementById('ai-h-table').innerHTML=nodes.map(n=>`<div>${n.id}: <b style="color:${AC}">${n.h}</b></div>`).join('');
-        let pathEdges=[],explored=[];
-        const draw=()=>{
-            ctx.clearRect(0,0,canvas.width,canvas.height);
-            edges.forEach(e=>{const a=nd(e.f),b=nd(e.t); ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.strokeStyle=pathEdges.includes(e.f+e.t)?'#22c55e':'var(--border)'; ctx.lineWidth=pathEdges.includes(e.f+e.t)?3:1.5; ctx.stroke(); ctx.fillStyle='var(--text-muted)';ctx.font='11px monospace';ctx.fillText(e.w,(a.x+b.x)/2,(a.y+b.y)/2-6);});
-            nodes.forEach(n=>{let c=explored.includes(n.id)?AC:'#475569'; if(pathEdges.some(p=>p.includes(n.id)))c='#22c55e'; ctx.beginPath();ctx.arc(n.x,n.y,22,0,Math.PI*2);ctx.fillStyle=c+'22';ctx.fill();ctx.strokeStyle=c;ctx.lineWidth=2.5;ctx.stroke();ctx.fillStyle=c;ctx.font='bold 13px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(n.id,n.x,n.y);ctx.fillStyle='var(--text-muted)';ctx.font='10px sans-serif';ctx.fillText('h='+n.h,n.x,n.y+32);});
+            const nodes = [{ id: 'S', x: 60, y: 180, h: 10 }, { id: 'A', x: 180, y: 80, h: 6 }, { id: 'B', x: 180, y: 280, h: 7 }, { id: 'C', x: 320, y: 60, h: 3 }, { id: 'D', x: 320, y: 180, h: 4 }, { id: 'E', x: 320, y: 300, h: 8 }, { id: 'G', x: 460, y: 180, h: 0 }];
+            const edges = [{ f: 'S', t: 'A', w: 3 }, { f: 'S', t: 'B', w: 1 }, { f: 'A', t: 'C', w: 2 }, { f: 'A', t: 'D', w: 5 }, { f: 'B', t: 'D', w: 3 }, { f: 'B', t: 'E', w: 7 }, { f: 'C', t: 'G', w: 6 }, { f: 'D', t: 'G', w: 2 }, { f: 'E', t: 'G', w: 4 }];
+            const canvas = document.getElementById('ai-h-canvas'); const ctx = canvas.getContext('2d');
+            const nd = (id) => nodes.find(n => n.id === id);
+            document.getElementById('ai-h-table').innerHTML = nodes.map(n => `<div>${n.id}: <b style="color:${AC}">${n.h}</b></div>`).join('');
+            let pathEdges = [], explored = [];
+            const draw = () => {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                edges.forEach(e => { const a = nd(e.f), b = nd(e.t); ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.strokeStyle = pathEdges.includes(e.f + e.t) ? '#22c55e' : 'var(--border)'; ctx.lineWidth = pathEdges.includes(e.f + e.t) ? 3 : 1.5; ctx.stroke(); ctx.fillStyle = 'var(--text-muted)'; ctx.font = '11px monospace'; ctx.fillText(e.w, (a.x + b.x) / 2, (a.y + b.y) / 2 - 6); });
+                nodes.forEach(n => { let c = explored.includes(n.id) ? AC : '#475569'; if (pathEdges.some(p => p.includes(n.id))) c = '#22c55e'; ctx.beginPath(); ctx.arc(n.x, n.y, 22, 0, Math.PI * 2); ctx.fillStyle = c + '22'; ctx.fill(); ctx.strokeStyle = c; ctx.lineWidth = 2.5; ctx.stroke(); ctx.fillStyle = c; ctx.font = 'bold 13px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(n.id, n.x, n.y); ctx.fillStyle = 'var(--text-muted)'; ctx.font = '10px sans-serif'; ctx.fillText('h=' + n.h, n.x, n.y + 32); });
+            };
+            const sleep = ms => new Promise(r => setTimeout(r, ms));
+            const run = async () => {
+                pathEdges = []; explored = []; const log = []; const algo = document.getElementById('ai-h-algo').value;
+                const adj = (id) => edges.filter(e => e.f === id).map(e => ({ id: e.t, w: e.w }));
+                const pq = [{ id: 'S', g: 0, path: ['S'] }]; const vis = new Set();
+                while (pq.length) {
+                    const fn = algo === 'greedy' ? (a, b) => nd(a.id).h - nd(b.id).h : (a, b) => (a.g + nd(a.id).h) - (b.g + nd(b.id).h);
+                    pq.sort(fn); const cur = pq.shift();
+                    if (vis.has(cur.id)) continue; vis.add(cur.id); explored = [...vis];
+                    log.push(`Expand ${cur.id} (f=${cur.g + nd(cur.id).h})`);
+                    document.getElementById('ai-h-log').innerHTML = log.slice(-8).join('<br>');
+                    draw(); await sleep(700);
+                    if (cur.id === 'G') { pathEdges = []; for (let i = 0; i < cur.path.length - 1; i++)pathEdges.push(cur.path[i] + cur.path[i + 1]); draw(); document.getElementById('ai-h-result').textContent = `✅ Cost: ${cur.g} | Nodes: ${vis.size}`; break; }
+                    adj(cur.id).forEach(nb => { if (!vis.has(nb.id)) pq.push({ id: nb.id, g: cur.g + nb.w, path: [...cur.path, nb.id] }); });
+                }
+            };
+            document.getElementById('ai-h-run').addEventListener('click', run);
+            document.getElementById('ai-h-reset').addEventListener('click', () => { pathEdges = []; explored = []; document.getElementById('ai-h-log').innerHTML = ''; document.getElementById('ai-h-result').textContent = ''; draw(); });
+            draw();
         };
-        const sleep=ms=>new Promise(r=>setTimeout(r,ms));
-        const run=async()=>{
-            pathEdges=[]; explored=[]; const log=[]; const algo=document.getElementById('ai-h-algo').value;
-            const adj=(id)=>edges.filter(e=>e.f===id).map(e=>({id:e.t,w:e.w}));
-            const pq=[{id:'S',g:0,path:['S']}]; const vis=new Set();
-            while(pq.length){
-                const fn=algo==='greedy'?(a,b)=>nd(a.id).h-nd(b.id).h:(a,b)=>(a.g+nd(a.id).h)-(b.g+nd(b.id).h);
-                pq.sort(fn); const cur=pq.shift();
-                if(vis.has(cur.id))continue; vis.add(cur.id); explored=[...vis];
-                log.push(`Expand ${cur.id} (f=${cur.g+nd(cur.id).h})`);
-                document.getElementById('ai-h-log').innerHTML=log.slice(-8).join('<br>');
-                draw(); await sleep(700);
-                if(cur.id==='G'){pathEdges=[];for(let i=0;i<cur.path.length-1;i++)pathEdges.push(cur.path[i]+cur.path[i+1]); draw(); document.getElementById('ai-h-result').textContent=`✅ Cost: ${cur.g} | Nodes: ${vis.size}`; break;}
-                adj(cur.id).forEach(nb=>{if(!vis.has(nb.id))pq.push({id:nb.id,g:cur.g+nb.w,path:[...cur.path,nb.id]});});
-            }
-        };
-        document.getElementById('ai-h-run').addEventListener('click',run);
-        document.getElementById('ai-h-reset').addEventListener('click',()=>{pathEdges=[];explored=[];document.getElementById('ai-h-log').innerHTML='';document.getElementById('ai-h-result').textContent='';draw();});
-        draw();
-    };
 
-    const initAiCspSim = (container) => {
-        const AC='#f97316';
-        container.innerHTML=`
+        const initAiCspSim = (container) => {
+            const AC = '#f97316';
+            container.innerHTML = `
         <div style="padding:20px;font-family:var(--font-sans);">
             <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:16px;">
                 <label style="font-weight:700;">N (Board Size): <input id="ai-csp-n" type="range" min="4" max="8" value="6" style="width:100px;accent-color:${AC};"> <span id="ai-csp-nval">6</span></label>
@@ -13280,51 +13284,53 @@ ${cfg.diagram}
                 </div>
             </div>
         </div>`;
-        const canvas=document.getElementById('ai-csp-canvas'); const ctx=canvas.getContext('2d');
-        const nInp=document.getElementById('ai-csp-n'); const nVal=document.getElementById('ai-csp-nval');
-        nInp.oninput=()=>{nVal.textContent=nInp.value;};
-        let queens=[]; let backtracks=0; let solving=false;
-        const draw=(n,qs,conflict=[])=>{
-            const cell=Math.min(420/n,70); const off=(420-cell*n)/2;
-            ctx.clearRect(0,0,canvas.width,canvas.height);
-            for(let r=0;r<n;r++)for(let c=0;c<n;c++){ctx.fillStyle=(r+c)%2===0?'#1e293b':'#0f172a'; ctx.fillRect(off+c*cell,off+r*cell,cell,cell);}
-            qs.forEach((col,row)=>{if(col===-1)return; const x=off+col*cell+cell/2,y=off+row*cell+cell/2; const isConflict=conflict.includes(row);
-            ctx.fillStyle=isConflict?'#ef4444':AC; ctx.font=`bold ${Math.round(cell*0.6)}px sans-serif`; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText('♛',x,y);});
-        };
-        const isValid=(qs,row,col)=>{for(let r=0;r<row;r++){const c=qs[r]; if(c===col||Math.abs(c-col)===Math.abs(r-row))return false;} return true;};
-        const sleep=ms=>new Promise(r=>setTimeout(r,ms));
-        const solve=async(n,qs,row,log)=>{
-            if(row===n)return true;
-            for(let col=0;col<n;col++){
-                if(!solving)return false;
-                qs[row]=col;
-                if(isValid(qs,row,col)){
-                    log.push(`Col ${col} ✓ @ row ${row}`);
-                    document.getElementById('ai-csp-log').innerHTML=log.slice(-10).join('<br>');
-                    draw(n,qs);await sleep(120);
-                    if(await solve(n,qs,row+1,log))return true;
+            const canvas = document.getElementById('ai-csp-canvas'); const ctx = canvas.getContext('2d');
+            const nInp = document.getElementById('ai-csp-n'); const nVal = document.getElementById('ai-csp-nval');
+            nInp.oninput = () => { nVal.textContent = nInp.value; };
+            let queens = []; let backtracks = 0; let solving = false;
+            const draw = (n, qs, conflict = []) => {
+                const cell = Math.min(420 / n, 70); const off = (420 - cell * n) / 2;
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                for (let r = 0; r < n; r++)for (let c = 0; c < n; c++) { ctx.fillStyle = (r + c) % 2 === 0 ? '#1e293b' : '#0f172a'; ctx.fillRect(off + c * cell, off + r * cell, cell, cell); }
+                qs.forEach((col, row) => {
+                    if (col === -1) return; const x = off + col * cell + cell / 2, y = off + row * cell + cell / 2; const isConflict = conflict.includes(row);
+                    ctx.fillStyle = isConflict ? '#ef4444' : AC; ctx.font = `bold ${Math.round(cell * 0.6)}px sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('♛', x, y);
+                });
+            };
+            const isValid = (qs, row, col) => { for (let r = 0; r < row; r++) { const c = qs[r]; if (c === col || Math.abs(c - col) === Math.abs(r - row)) return false; } return true; };
+            const sleep = ms => new Promise(r => setTimeout(r, ms));
+            const solve = async (n, qs, row, log) => {
+                if (row === n) return true;
+                for (let col = 0; col < n; col++) {
+                    if (!solving) return false;
+                    qs[row] = col;
+                    if (isValid(qs, row, col)) {
+                        log.push(`Col ${col} ✓ @ row ${row}`);
+                        document.getElementById('ai-csp-log').innerHTML = log.slice(-10).join('<br>');
+                        draw(n, qs); await sleep(120);
+                        if (await solve(n, qs, row + 1, log)) return true;
+                    }
+                    qs[row] = -1; backtracks++; draw(n, qs, [row]); await sleep(60);
                 }
-                qs[row]=-1; backtracks++; draw(n,qs,[row]); await sleep(60);
-            }
-            return false;
+                return false;
+            };
+            document.getElementById('ai-csp-solve').addEventListener('click', async () => {
+                const n = parseInt(nInp.value); queens = new Array(n).fill(-1); backtracks = 0; solving = true;
+                document.getElementById('ai-csp-info').textContent = 'Solving...';
+                const log = []; const ok = await solve(n, queens, 0, log);
+                solving = false; draw(n, queens);
+                document.getElementById('ai-csp-info').textContent = ok ? `✅ Solved! Backtracks: ${backtracks}` : '❌ No solution';
+                document.getElementById('ai-csp-stats').innerHTML = `<div style="font-size:12px;font-weight:700;color:#22c55e;">Total backtracks: ${backtracks}</div>`;
+            });
+            document.getElementById('ai-csp-reset').addEventListener('click', () => { solving = false; queens = []; document.getElementById('ai-csp-log').innerHTML = ''; document.getElementById('ai-csp-info').textContent = ''; document.getElementById('ai-csp-stats').innerHTML = ''; ctx.clearRect(0, 0, canvas.width, canvas.height); const n = parseInt(nInp.value); draw(n, new Array(n).fill(-1)); });
+            draw(parseInt(nInp.value), new Array(parseInt(nInp.value)).fill(-1));
         };
-        document.getElementById('ai-csp-solve').addEventListener('click',async()=>{
-            const n=parseInt(nInp.value); queens=new Array(n).fill(-1); backtracks=0; solving=true;
-            document.getElementById('ai-csp-info').textContent='Solving...';
-            const log=[]; const ok=await solve(n,queens,0,log);
-            solving=false; draw(n,queens);
-            document.getElementById('ai-csp-info').textContent=ok?`✅ Solved! Backtracks: ${backtracks}`:'❌ No solution';
-            document.getElementById('ai-csp-stats').innerHTML=`<div style="font-size:12px;font-weight:700;color:#22c55e;">Total backtracks: ${backtracks}</div>`;
-        });
-        document.getElementById('ai-csp-reset').addEventListener('click',()=>{solving=false;queens=[];document.getElementById('ai-csp-log').innerHTML='';document.getElementById('ai-csp-info').textContent='';document.getElementById('ai-csp-stats').innerHTML='';ctx.clearRect(0,0,canvas.width,canvas.height);const n=parseInt(nInp.value);draw(n,new Array(n).fill(-1));});
-        draw(parseInt(nInp.value),new Array(parseInt(nInp.value)).fill(-1));
-    };
 
-    const initAiMinimaxSim = (container) => {
-        const AC='#f97316';
-        const tree={val:null,children:[{val:null,children:[{val:3,children:[]},{val:5,children:[]}]},{val:null,children:[{val:2,children:[]},{val:9,children:[]}]},{val:null,children:[{val:8,children:[]},{val:1,children:[]}]}]};
-        let evaluated=[];let pruned=[];
-        container.innerHTML=`
+        const initAiMinimaxSim = (container) => {
+            const AC = '#f97316';
+            const tree = { val: null, children: [{ val: null, children: [{ val: 3, children: [] }, { val: 5, children: [] }] }, { val: null, children: [{ val: 2, children: [] }, { val: 9, children: [] }] }, { val: null, children: [{ val: 8, children: [] }, { val: 1, children: [] }] }] };
+            let evaluated = []; let pruned = [];
+            container.innerHTML = `
         <div style="padding:20px;font-family:var(--font-sans);">
             <div style="display:flex;gap:12px;align-items:center;margin-bottom:16px;flex-wrap:wrap;">
                 <button id="ai-mm-minimax" style="padding:8px 20px;border-radius:8px;background:${AC};color:#fff;border:none;font-weight:700;cursor:pointer;">▶ Run Minimax</button>
@@ -13340,75 +13346,79 @@ ${cfg.diagram}
                 </div>
             </div>
         </div>`;
-        const canvas=document.getElementById('ai-mm-canvas'); const ctx=canvas.getContext('2d');
-        const layout=[{node:tree,x:280,y:40,level:0}];
-        const positions={};
-        const buildLayout=(node,x,y,level,spread)=>{positions[node]=({x,y,level}); node.children.forEach((c,i)=>{const cx=x-spread*(node.children.length-1)/2+i*spread; buildLayout(c,cx,y+90,level+1,spread/2);});};
-        buildLayout(tree,280,40,0,160);
-        const draw=()=>{
-            ctx.clearRect(0,0,canvas.width,canvas.height);
-            const drawNode=(node)=>{
-                const {x,y,level}=positions[node]; const isMax=level%2===0;
-                node.children.forEach(c=>{const cp=positions[c]; ctx.beginPath();ctx.moveTo(x,y+20);ctx.lineTo(cp.x,cp.y-20);ctx.strokeStyle=pruned.includes(c)?'#ef444466':'var(--border)';ctx.lineWidth=pruned.includes(c)?1:2;ctx.stroke();});
-                const color=evaluated.includes(node)?isMax?AC:'#6366f1':'#475569';
-                ctx.beginPath();ctx.arc(x,y,22,0,Math.PI*2);ctx.fillStyle=pruned.includes(node)?'#ef444422':color+'22';ctx.fill();
-                ctx.strokeStyle=pruned.includes(node)?'#ef4444':color;ctx.lineWidth=2.5;ctx.stroke();
-                const v=node.val!==null?node.val:(isMax?'MAX':'MIN');
-                ctx.fillStyle=pruned.includes(node)?'#ef4444':color;ctx.font='bold 12px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(v,x,y);
-                node.children.forEach(c=>drawNode(c));
+            const canvas = document.getElementById('ai-mm-canvas'); const ctx = canvas.getContext('2d');
+            const layout = [{ node: tree, x: 280, y: 40, level: 0 }];
+            const positions = {};
+            const buildLayout = (node, x, y, level, spread) => { positions[node] = ({ x, y, level }); node.children.forEach((c, i) => { const cx = x - spread * (node.children.length - 1) / 2 + i * spread; buildLayout(c, cx, y + 90, level + 1, spread / 2); }); };
+            buildLayout(tree, 280, 40, 0, 160);
+            const draw = () => {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                const drawNode = (node) => {
+                    const { x, y, level } = positions[node]; const isMax = level % 2 === 0;
+                    node.children.forEach(c => { const cp = positions[c]; ctx.beginPath(); ctx.moveTo(x, y + 20); ctx.lineTo(cp.x, cp.y - 20); ctx.strokeStyle = pruned.includes(c) ? '#ef444466' : 'var(--border)'; ctx.lineWidth = pruned.includes(c) ? 1 : 2; ctx.stroke(); });
+                    const color = evaluated.includes(node) ? isMax ? AC : '#6366f1' : '#475569';
+                    ctx.beginPath(); ctx.arc(x, y, 22, 0, Math.PI * 2); ctx.fillStyle = pruned.includes(node) ? '#ef444422' : color + '22'; ctx.fill();
+                    ctx.strokeStyle = pruned.includes(node) ? '#ef4444' : color; ctx.lineWidth = 2.5; ctx.stroke();
+                    const v = node.val !== null ? node.val : (isMax ? 'MAX' : 'MIN');
+                    ctx.fillStyle = pruned.includes(node) ? '#ef4444' : color; ctx.font = 'bold 12px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(v, x, y);
+                    node.children.forEach(c => drawNode(c));
+                };
+                drawNode(tree);
             };
-            drawNode(tree);
+            const sleep = ms => new Promise(r => setTimeout(r, ms));
+            const resetTree = (node) => { node.val = node.children.length ? null : node.val; node.children.forEach(c => resetTree(c)); };
+            const leafVals = [3, 5, 2, 9, 8, 1];
+            const setLeaves = (node, idx) => { if (!node.children.length) { node.val = leafVals[idx.v++]; return; } node.children.forEach(c => setLeaves(c, idx)); };
+            const doReset = () => { evaluated = []; pruned = []; const idx = { v: 0 }; setLeaves(tree, idx); draw(); document.getElementById('ai-mm-log').innerHTML = ''; document.getElementById('ai-mm-info').textContent = ''; };
+            const minimax = async (node, depth, isMax) => {
+                evaluated.push(node); draw(); await sleep(400);
+                if (!node.children.length) return node.val;
+                const vals = await Promise.all(node.children.map(c => minimax(c, depth + 1, !isMax)));
+                node.val = isMax ? Math.max(...vals) : Math.min(...vals); draw(); return node.val;
+            };
+            const alphabeta = async (node, depth, isMax, alpha, beta) => {
+                evaluated.push(node); draw(); await sleep(400);
+                if (!node.children.length) return node.val;
+                let val = isMax ? -Infinity : Infinity;
+                for (const c of node.children) {
+                    const cv = await alphabeta(c, depth + 1, !isMax, alpha, beta);
+                    if (isMax) { val = Math.max(val, cv); alpha = Math.max(alpha, val); if (beta <= alpha) { node.children.slice(node.children.indexOf(c) + 1).forEach(x => pruned.push(x)); break; } }
+                    else { val = Math.min(val, cv); beta = Math.min(beta, val); if (beta <= alpha) { node.children.slice(node.children.indexOf(c) + 1).forEach(x => pruned.push(x)); break; } }
+                }
+                node.val = val; draw(); return val;
+            };
+            doReset();
+            document.getElementById('ai-mm-minimax').addEventListener('click', async () => { doReset(); await minimax(tree, 0, true); document.getElementById('ai-mm-info').textContent = `✅ Root value: ${tree.val} | Nodes evaluated: ${evaluated.length}`; });
+            document.getElementById('ai-mm-ab').addEventListener('click', async () => { doReset(); await alphabeta(tree, 0, true, -Infinity, Infinity); document.getElementById('ai-mm-info').textContent = `✅ Root: ${tree.val} | Evaluated: ${evaluated.length} | Pruned: ${pruned.length}`; });
+            document.getElementById('ai-mm-reset').addEventListener('click', doReset);
         };
-        const sleep=ms=>new Promise(r=>setTimeout(r,ms));
-        const resetTree=(node)=>{node.val=node.children.length?null:node.val; node.children.forEach(c=>resetTree(c));}; 
-        const leafVals=[3,5,2,9,8,1];
-        const setLeaves=(node,idx)=>{if(!node.children.length){node.val=leafVals[idx.v++];return;}node.children.forEach(c=>setLeaves(c,idx));};
-        const doReset=()=>{evaluated=[];pruned=[];const idx={v:0};setLeaves(tree,idx);draw();document.getElementById('ai-mm-log').innerHTML='';document.getElementById('ai-mm-info').textContent='';};
-        const minimax=async(node,depth,isMax)=>{evaluated.push(node);draw();await sleep(400);
-            if(!node.children.length)return node.val;
-            const vals=await Promise.all(node.children.map(c=>minimax(c,depth+1,!isMax)));
-            node.val=isMax?Math.max(...vals):Math.min(...vals);draw();return node.val;};
-        const alphabeta=async(node,depth,isMax,alpha,beta)=>{evaluated.push(node);draw();await sleep(400);
-            if(!node.children.length)return node.val;
-            let val=isMax?-Infinity:Infinity;
-            for(const c of node.children){
-                const cv=await alphabeta(c,depth+1,!isMax,alpha,beta);
-                if(isMax){val=Math.max(val,cv);alpha=Math.max(alpha,val);if(beta<=alpha){node.children.slice(node.children.indexOf(c)+1).forEach(x=>pruned.push(x));break;}}
-                else{val=Math.min(val,cv);beta=Math.min(beta,val);if(beta<=alpha){node.children.slice(node.children.indexOf(c)+1).forEach(x=>pruned.push(x));break;}}
-            }
-            node.val=val;draw();return val;};
-        doReset();
-        document.getElementById('ai-mm-minimax').addEventListener('click',async()=>{doReset();await minimax(tree,0,true);document.getElementById('ai-mm-info').textContent=`✅ Root value: ${tree.val} | Nodes evaluated: ${evaluated.length}`;});
-        document.getElementById('ai-mm-ab').addEventListener('click',async()=>{doReset();await alphabeta(tree,0,true,-Infinity,Infinity);document.getElementById('ai-mm-info').textContent=`✅ Root: ${tree.val} | Evaluated: ${evaluated.length} | Pruned: ${pruned.length}`;});
-        document.getElementById('ai-mm-reset').addEventListener('click',doReset);
-    };
 
-    const initAiNaiveBayesSim = (container) => {
-        const AC='#f97316';
-        const data=[
-            {outlook:'sunny',humidity:'high',windy:false,play:false},
-            {outlook:'sunny',humidity:'high',windy:true,play:false},
-            {outlook:'overcast',humidity:'high',windy:false,play:true},
-            {outlook:'rainy',humidity:'high',windy:false,play:true},
-            {outlook:'rainy',humidity:'normal',windy:false,play:true},
-            {outlook:'rainy',humidity:'normal',windy:true,play:false},
-            {outlook:'overcast',humidity:'normal',windy:true,play:true},
-            {outlook:'sunny',humidity:'high',windy:false,play:false},
-            {outlook:'sunny',humidity:'normal',windy:false,play:true},
-            {outlook:'rainy',humidity:'normal',windy:false,play:true},
-            {outlook:'sunny',humidity:'normal',windy:true,play:true},
-            {outlook:'overcast',humidity:'high',windy:true,play:true},
-            {outlook:'overcast',humidity:'normal',windy:false,play:true},
-            {outlook:'rainy',humidity:'high',windy:true,play:false}
-        ];
-        container.innerHTML=`
+        const initAiNaiveBayesSim = (container) => {
+            const AC = '#f97316';
+            const data = [
+                { outlook: 'sunny', humidity: 'high', windy: false, play: false },
+                { outlook: 'sunny', humidity: 'high', windy: true, play: false },
+                { outlook: 'overcast', humidity: 'high', windy: false, play: true },
+                { outlook: 'rainy', humidity: 'high', windy: false, play: true },
+                { outlook: 'rainy', humidity: 'normal', windy: false, play: true },
+                { outlook: 'rainy', humidity: 'normal', windy: true, play: false },
+                { outlook: 'overcast', humidity: 'normal', windy: true, play: true },
+                { outlook: 'sunny', humidity: 'high', windy: false, play: false },
+                { outlook: 'sunny', humidity: 'normal', windy: false, play: true },
+                { outlook: 'rainy', humidity: 'normal', windy: false, play: true },
+                { outlook: 'sunny', humidity: 'normal', windy: true, play: true },
+                { outlook: 'overcast', humidity: 'high', windy: true, play: true },
+                { outlook: 'overcast', humidity: 'normal', windy: false, play: true },
+                { outlook: 'rainy', humidity: 'high', windy: true, play: false }
+            ];
+            container.innerHTML = `
         <div style="padding:20px;font-family:var(--font-sans);">
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
                 <div>
                     <h3 style="color:${AC};margin-bottom:12px;">Training Dataset (Weather-Play)</h3>
                     <table style="width:100%;border-collapse:collapse;font-size:12px;">
                         <tr style="background:${AC}22;font-weight:700;"><td style="padding:6px 8px;">Outlook</td><td style="padding:6px 8px;">Humidity</td><td style="padding:6px 8px;">Windy</td><td style="padding:6px 8px;">Play?</td></tr>
-                        ${data.map(d=>`<tr style="border-bottom:1px solid var(--border);"><td style="padding:5px 8px;">${d.outlook}</td><td style="padding:5px 8px;">${d.humidity}</td><td style="padding:5px 8px;">${d.windy?'Yes':'No'}</td><td style="padding:5px 8px;font-weight:700;color:${d.play?'#22c55e':'#ef4444'}">${d.play?'Yes':'No'}</td></tr>`).join('')}
+                        ${data.map(d => `<tr style="border-bottom:1px solid var(--border);"><td style="padding:5px 8px;">${d.outlook}</td><td style="padding:5px 8px;">${d.humidity}</td><td style="padding:5px 8px;">${d.windy ? 'Yes' : 'No'}</td><td style="padding:5px 8px;font-weight:700;color:${d.play ? '#22c55e' : '#ef4444'}">${d.play ? 'Yes' : 'No'}</td></tr>`).join('')}
                     </table>
                 </div>
                 <div>
@@ -13423,22 +13433,22 @@ ${cfg.diagram}
                 </div>
             </div>
         </div>`;
-        document.getElementById('ai-nb-classify').addEventListener('click',()=>{
-            const outlook=document.getElementById('ai-nb-outlook').value;
-            const humidity=document.getElementById('ai-nb-humidity').value;
-            const windy=document.getElementById('ai-nb-windy').value==='true';
-            const yes=data.filter(d=>d.play); const no=data.filter(d=>!d.play);
-            const pYes=yes.length/data.length; const pNo=no.length/data.length;
-            const L=1; const V=3;
-            const p=(arr,fn)=>(arr.filter(fn).length+L)/(arr.length+L*V);
-            const pyO=p(yes,d=>d.outlook===outlook); const pnO=p(no,d=>d.outlook===outlook);
-            const pyH=p(yes,d=>d.humidity===humidity); const pnH=p(no,d=>d.humidity===humidity);
-            const pyW=p(yes,d=>d.windy===windy); const pnW=p(no,d=>d.windy===windy);
-            const scoreYes=pYes*pyO*pyH*pyW; const scoreNo=pNo*pnO*pnH*pnW;
-            const total=scoreYes+scoreNo;
-            const pYesFinal=(scoreYes/total*100).toFixed(1); const pNoFinal=(scoreNo/total*100).toFixed(1);
-            const pred=scoreYes>scoreNo;
-            document.getElementById('ai-nb-result').innerHTML=`
+            document.getElementById('ai-nb-classify').addEventListener('click', () => {
+                const outlook = document.getElementById('ai-nb-outlook').value;
+                const humidity = document.getElementById('ai-nb-humidity').value;
+                const windy = document.getElementById('ai-nb-windy').value === 'true';
+                const yes = data.filter(d => d.play); const no = data.filter(d => !d.play);
+                const pYes = yes.length / data.length; const pNo = no.length / data.length;
+                const L = 1; const V = 3;
+                const p = (arr, fn) => (arr.filter(fn).length + L) / (arr.length + L * V);
+                const pyO = p(yes, d => d.outlook === outlook); const pnO = p(no, d => d.outlook === outlook);
+                const pyH = p(yes, d => d.humidity === humidity); const pnH = p(no, d => d.humidity === humidity);
+                const pyW = p(yes, d => d.windy === windy); const pnW = p(no, d => d.windy === windy);
+                const scoreYes = pYes * pyO * pyH * pyW; const scoreNo = pNo * pnO * pnH * pnW;
+                const total = scoreYes + scoreNo;
+                const pYesFinal = (scoreYes / total * 100).toFixed(1); const pNoFinal = (scoreNo / total * 100).toFixed(1);
+                const pred = scoreYes > scoreNo;
+                document.getElementById('ai-nb-result').innerHTML = `
                 <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:14px;font-size:12px;">
                     <div style="font-weight:800;margin-bottom:10px;color:${AC};">Computation Steps</div>
                     <div style="font-family:var(--font-mono);line-height:1.9;">
@@ -13447,20 +13457,20 @@ ${cfg.diagram}
                         P(No)=${pNo.toFixed(3)} × P(O|N)=${pnO.toFixed(3)} × P(H|N)=${pnH.toFixed(3)} × P(W|N)=${pnW.toFixed(3)}<br>
                         → Score(No) = <b>${scoreNo.toFixed(5)}</b>
                     </div>
-                    <div style="margin-top:12px;font-size:16px;font-weight:800;color:${pred?'#22c55e':'#ef4444'};">
-                        Prediction: ${pred?'✅ PLAY':'❌ DON\'T PLAY'} (${pred?pYesFinal:pNoFinal}% confidence)
+                    <div style="margin-top:12px;font-size:16px;font-weight:800;color:${pred ? '#22c55e' : '#ef4444'};">
+                        Prediction: ${pred ? '✅ PLAY' : '❌ DON\'T PLAY'} (${pred ? pYesFinal : pNoFinal}% confidence)
                     </div>
                     <div style="display:flex;gap:8px;margin-top:10px;">
                         <div style="flex:${pYesFinal};height:10px;background:#22c55e;border-radius:5px;"></div>
                         <div style="flex:${pNoFinal};height:10px;background:#ef4444;border-radius:5px;"></div>
                     </div>
                 </div>`;
-        });
-    };
+            });
+        };
 
-    const initAiKnnSim = (container) => {
-        const AC='#f97316';
-        container.innerHTML=`
+        const initAiKnnSim = (container) => {
+            const AC = '#f97316';
+            container.innerHTML = `
         <div style="padding:20px;font-family:var(--font-sans);">
             <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:16px;">
                 <label style="font-weight:700;">K = <input id="ai-knn-k" type="range" min="1" max="11" step="2" value="3" style="width:100px;accent-color:${AC};"> <span id="ai-knn-kval">3</span></label>
@@ -13470,43 +13480,45 @@ ${cfg.diagram}
             </div>
             <canvas id="ai-knn-canvas" width="580" height="420" style="border-radius:12px;background:var(--bg-card);border:1px solid var(--border);cursor:crosshair;"></canvas>
         </div>`;
-        const canvas=document.getElementById('ai-knn-canvas'); const ctx=canvas.getContext('2d');
-        const kInp=document.getElementById('ai-knn-k'); const kVal=document.getElementById('ai-knn-kval');
-        kInp.oninput=()=>{kVal.textContent=kInp.value;};
-        let pts=[]; let testPt=null;
-        const genData=()=>{pts=[];
-            for(let i=0;i<20;i++)pts.push({x:60+Math.random()*200,y:60+Math.random()*300,c:0});
-            for(let i=0;i<20;i++)pts.push({x:300+Math.random()*240,y:60+Math.random()*300,c:1});
-            testPt=null; draw();};
-        const dist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
-        const draw=(neighbors=[],pred=-1)=>{
-            ctx.clearRect(0,0,canvas.width,canvas.height);
-            pts.forEach(p=>{ctx.beginPath();ctx.arc(p.x,p.y,7,0,Math.PI*2);ctx.fillStyle=p.c===0?'#3b82f6':'#ef4444';ctx.fill();});
-            if(testPt){
-                neighbors.forEach(n=>{ctx.beginPath();ctx.moveTo(testPt.x,testPt.y);ctx.lineTo(n.x,n.y);ctx.strokeStyle='#fbbf24';ctx.lineWidth=1.5;ctx.setLineDash([4,4]);ctx.stroke();ctx.setLineDash([]);});
-                ctx.beginPath();ctx.arc(testPt.x,testPt.y,12,0,Math.PI*2);
-                ctx.fillStyle=pred===0?'#3b82f688':pred===1?'#ef444488':'#94a3b8';ctx.fill();
-                ctx.strokeStyle=pred===0?'#3b82f6':pred===1?'#ef4444':AC;ctx.lineWidth=3;ctx.stroke();
-                ctx.fillStyle='#fff';ctx.font='bold 11px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('?',testPt.x,testPt.y);
-            }
+            const canvas = document.getElementById('ai-knn-canvas'); const ctx = canvas.getContext('2d');
+            const kInp = document.getElementById('ai-knn-k'); const kVal = document.getElementById('ai-knn-kval');
+            kInp.oninput = () => { kVal.textContent = kInp.value; };
+            let pts = []; let testPt = null;
+            const genData = () => {
+                pts = [];
+                for (let i = 0; i < 20; i++)pts.push({ x: 60 + Math.random() * 200, y: 60 + Math.random() * 300, c: 0 });
+                for (let i = 0; i < 20; i++)pts.push({ x: 300 + Math.random() * 240, y: 60 + Math.random() * 300, c: 1 });
+                testPt = null; draw();
+            };
+            const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
+            const draw = (neighbors = [], pred = -1) => {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                pts.forEach(p => { ctx.beginPath(); ctx.arc(p.x, p.y, 7, 0, Math.PI * 2); ctx.fillStyle = p.c === 0 ? '#3b82f6' : '#ef4444'; ctx.fill(); });
+                if (testPt) {
+                    neighbors.forEach(n => { ctx.beginPath(); ctx.moveTo(testPt.x, testPt.y); ctx.lineTo(n.x, n.y); ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 1.5; ctx.setLineDash([4, 4]); ctx.stroke(); ctx.setLineDash([]); });
+                    ctx.beginPath(); ctx.arc(testPt.x, testPt.y, 12, 0, Math.PI * 2);
+                    ctx.fillStyle = pred === 0 ? '#3b82f688' : pred === 1 ? '#ef444488' : '#94a3b8'; ctx.fill();
+                    ctx.strokeStyle = pred === 0 ? '#3b82f6' : pred === 1 ? '#ef4444' : AC; ctx.lineWidth = 3; ctx.stroke();
+                    ctx.fillStyle = '#fff'; ctx.font = 'bold 11px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('?', testPt.x, testPt.y);
+                }
+            };
+            canvas.addEventListener('click', e => {
+                const r = canvas.getBoundingClientRect(); const K = parseInt(kInp.value);
+                testPt = { x: e.clientX - r.left, y: e.clientY - r.top };
+                const sorted = [...pts].sort((a, b) => dist(a, testPt) - dist(b, testPt));
+                const knn = sorted.slice(0, K);
+                const votes = [0, 0]; knn.forEach(p => votes[p.c]++);
+                const pred = votes[0] >= votes[1] ? 0 : 1;
+                draw(knn, pred);
+                document.getElementById('ai-knn-result').innerHTML = `K=${K} → Class: <b style="color:${pred === 0 ? '#3b82f6' : '#ef4444'}">${pred === 0 ? 'Blue' : 'Red'}</b> (${votes[pred]}/${K} votes)`;
+            });
+            document.getElementById('ai-knn-gen').addEventListener('click', genData);
+            genData();
         };
-        canvas.addEventListener('click',e=>{
-            const r=canvas.getBoundingClientRect(); const K=parseInt(kInp.value);
-            testPt={x:e.clientX-r.left,y:e.clientY-r.top};
-            const sorted=[...pts].sort((a,b)=>dist(a,testPt)-dist(b,testPt));
-            const knn=sorted.slice(0,K);
-            const votes=[0,0]; knn.forEach(p=>votes[p.c]++);
-            const pred=votes[0]>=votes[1]?0:1;
-            draw(knn,pred);
-            document.getElementById('ai-knn-result').innerHTML=`K=${K} → Class: <b style="color:${pred===0?'#3b82f6':'#ef4444'}">${pred===0?'Blue':'Red'}</b> (${votes[pred]}/${K} votes)`;
-        });
-        document.getElementById('ai-knn-gen').addEventListener('click',genData);
-        genData();
-    };
 
-    const initAiKmeansSim = (container) => {
-        const AC='#f97316'; const COLORS=['#3b82f6','#ef4444','#22c55e','#a855f7','#fbbf24'];
-        container.innerHTML=`
+        const initAiKmeansSim = (container) => {
+            const AC = '#f97316'; const COLORS = ['#3b82f6', '#ef4444', '#22c55e', '#a855f7', '#fbbf24'];
+            container.innerHTML = `
         <div style="padding:20px;font-family:var(--font-sans);">
             <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:16px;">
                 <label style="font-weight:700;">K = <input id="ai-km-k" type="range" min="2" max="5" value="3" style="width:80px;accent-color:${AC};"> <span id="ai-km-kval">3</span></label>
@@ -13518,30 +13530,32 @@ ${cfg.diagram}
             </div>
             <canvas id="ai-km-canvas" width="580" height="420" style="border-radius:12px;background:var(--bg-card);border:1px solid var(--border);"></canvas>
         </div>`;
-        const canvas=document.getElementById('ai-km-canvas'); const ctx=canvas.getContext('2d');
-        const kInp=document.getElementById('ai-km-k'); const kVal=document.getElementById('ai-km-kval');
-        kInp.oninput=()=>kVal.textContent=kInp.value;
-        let pts=[],centroids=[],assignments=[];
-        const gen=()=>{pts=[];const K=parseInt(kInp.value); for(let k=0;k<K;k++){const cx=80+Math.random()*420,cy=60+Math.random()*300;for(let i=0;i<15;i++)pts.push({x:cx+(Math.random()-0.5)*80,y:cy+(Math.random()-0.5)*80});}centroids=[];assignments=[];draw();};
-        const dist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
-        const draw=()=>{ctx.clearRect(0,0,canvas.width,canvas.height);
-            pts.forEach((p,i)=>{ctx.beginPath();ctx.arc(p.x,p.y,5,0,Math.PI*2);ctx.fillStyle=assignments[i]!==undefined?COLORS[assignments[i]]+'99':'#94a3b8';ctx.fill();});
-            centroids.forEach((c,k)=>{ctx.beginPath();ctx.arc(c.x,c.y,12,0,Math.PI*2);ctx.fillStyle=COLORS[k];ctx.fill();ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.stroke();ctx.fillStyle='#fff';ctx.font='bold 11px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(k+1,c.x,c.y);});};
-        const assign=()=>{assignments=pts.map(p=>centroids.reduce((bi,c,k)=>dist(p,c)<dist(p,centroids[bi])?k:bi,0));};
-        const update=()=>{const K=parseInt(kInp.value); return centroids.map((c,k)=>{const mem=pts.filter((_,i)=>assignments[i]===k);if(!mem.length)return c;return{x:mem.reduce((s,p)=>s+p.x,0)/mem.length,y:mem.reduce((s,p)=>s+p.y,0)/mem.length};});};
-        const step=()=>{if(!centroids.length)return;assign();const nc=update();const moved=nc.some((c,k)=>dist(c,centroids[k])>0.5);centroids=nc;draw();document.getElementById('ai-km-info').textContent=moved?'Centroids updated...':'✅ Converged!';return moved;};
-        const initCentroids=()=>{const K=parseInt(kInp.value);centroids=[];for(let k=0;k<K;k++)centroids.push({...pts[Math.floor(Math.random()*pts.length)]});assign();draw();};
-        document.getElementById('ai-km-gen').addEventListener('click',gen);
-        document.getElementById('ai-km-init').addEventListener('click',initCentroids);
-        document.getElementById('ai-km-step').addEventListener('click',step);
-        document.getElementById('ai-km-run').addEventListener('click',async()=>{if(!centroids.length)initCentroids();let moved=true;while(moved){moved=step();await new Promise(r=>setTimeout(r,350));}});
-        gen();
-    };
+            const canvas = document.getElementById('ai-km-canvas'); const ctx = canvas.getContext('2d');
+            const kInp = document.getElementById('ai-km-k'); const kVal = document.getElementById('ai-km-kval');
+            kInp.oninput = () => kVal.textContent = kInp.value;
+            let pts = [], centroids = [], assignments = [];
+            const gen = () => { pts = []; const K = parseInt(kInp.value); for (let k = 0; k < K; k++) { const cx = 80 + Math.random() * 420, cy = 60 + Math.random() * 300; for (let i = 0; i < 15; i++)pts.push({ x: cx + (Math.random() - 0.5) * 80, y: cy + (Math.random() - 0.5) * 80 }); } centroids = []; assignments = []; draw(); };
+            const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
+            const draw = () => {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                pts.forEach((p, i) => { ctx.beginPath(); ctx.arc(p.x, p.y, 5, 0, Math.PI * 2); ctx.fillStyle = assignments[i] !== undefined ? COLORS[assignments[i]] + '99' : '#94a3b8'; ctx.fill(); });
+                centroids.forEach((c, k) => { ctx.beginPath(); ctx.arc(c.x, c.y, 12, 0, Math.PI * 2); ctx.fillStyle = COLORS[k]; ctx.fill(); ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.stroke(); ctx.fillStyle = '#fff'; ctx.font = 'bold 11px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(k + 1, c.x, c.y); });
+            };
+            const assign = () => { assignments = pts.map(p => centroids.reduce((bi, c, k) => dist(p, c) < dist(p, centroids[bi]) ? k : bi, 0)); };
+            const update = () => { const K = parseInt(kInp.value); return centroids.map((c, k) => { const mem = pts.filter((_, i) => assignments[i] === k); if (!mem.length) return c; return { x: mem.reduce((s, p) => s + p.x, 0) / mem.length, y: mem.reduce((s, p) => s + p.y, 0) / mem.length }; }); };
+            const step = () => { if (!centroids.length) return; assign(); const nc = update(); const moved = nc.some((c, k) => dist(c, centroids[k]) > 0.5); centroids = nc; draw(); document.getElementById('ai-km-info').textContent = moved ? 'Centroids updated...' : '✅ Converged!'; return moved; };
+            const initCentroids = () => { const K = parseInt(kInp.value); centroids = []; for (let k = 0; k < K; k++)centroids.push({ ...pts[Math.floor(Math.random() * pts.length)] }); assign(); draw(); };
+            document.getElementById('ai-km-gen').addEventListener('click', gen);
+            document.getElementById('ai-km-init').addEventListener('click', initCentroids);
+            document.getElementById('ai-km-step').addEventListener('click', step);
+            document.getElementById('ai-km-run').addEventListener('click', async () => { if (!centroids.length) initCentroids(); let moved = true; while (moved) { moved = step(); await new Promise(r => setTimeout(r, 350)); } });
+            gen();
+        };
 
-    const initAiAnnSim = (container) => {
-        const AC='#f97316';
-        const datasets={AND:{pts:[{x:0,y:0,c:0},{x:0,y:1,c:0},{x:1,y:0,c:0},{x:1,y:1,c:1}],name:'AND Gate'},OR:{pts:[{x:0,y:0,c:0},{x:0,y:1,c:1},{x:1,y:0,c:1},{x:1,y:1,c:1}],name:'OR Gate'},XOR:{pts:[{x:0,y:0,c:0},{x:0,y:1,c:1},{x:1,y:0,c:1},{x:1,y:1,c:0}],name:'XOR (Unsolvable)'}};
-        container.innerHTML=`
+        const initAiAnnSim = (container) => {
+            const AC = '#f97316';
+            const datasets = { AND: { pts: [{ x: 0, y: 0, c: 0 }, { x: 0, y: 1, c: 0 }, { x: 1, y: 0, c: 0 }, { x: 1, y: 1, c: 1 }], name: 'AND Gate' }, OR: { pts: [{ x: 0, y: 0, c: 0 }, { x: 0, y: 1, c: 1 }, { x: 1, y: 0, c: 1 }, { x: 1, y: 1, c: 1 }], name: 'OR Gate' }, XOR: { pts: [{ x: 0, y: 0, c: 0 }, { x: 0, y: 1, c: 1 }, { x: 1, y: 0, c: 1 }, { x: 1, y: 1, c: 0 }], name: 'XOR (Unsolvable)' } };
+            container.innerHTML = `
         <div style="padding:20px;font-family:var(--font-sans);">
             <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:16px;">
                 <select id="ai-ann-data" style="padding:8px;border-radius:8px;border:1px solid ${AC};background:var(--bg-card);color:var(--text-main);font-weight:700;"><option value="AND">AND Gate</option><option value="OR">OR Gate</option><option value="XOR">XOR (No solution)</option></select>
@@ -13561,46 +13575,46 @@ ${cfg.diagram}
                 </div>
             </div>
         </div>`;
-        let w=[Math.random()-0.5,Math.random()-0.5],b=Math.random()-0.5,epoch=0,lossHist=[];
-        const lrInp=document.getElementById('ai-ann-lr'); const lrVal=document.getElementById('ai-ann-lrval');
-        lrInp.oninput=()=>lrVal.textContent=parseFloat(lrInp.value).toFixed(2);
-        const step=(x)=>x>=0?1:0;
-        const drawBoundary=()=>{
-            const canvas=document.getElementById('ai-ann-boundary'); const ctx=canvas.getContext('2d');
-            const ds=datasets[document.getElementById('ai-ann-data').value];
-            ctx.clearRect(0,0,320,320);
-            for(let px=0;px<32;px++)for(let py=0;py<32;py++){const xi=px/31,yi=py/31;const out=step(w[0]*xi+w[1]*yi+b);ctx.fillStyle=out?'#f9731611':'#3b82f611';ctx.fillRect(px*10,py*10,10,10);}
-            if(Math.abs(w[1])>0.01){ctx.beginPath();const x0=0,y0=(-b-w[0]*x0)/w[1];const x1=1,y1=(-b-w[0]*x1)/w[1];ctx.moveTo(x0*320,(1-y0)*320);ctx.lineTo(x1*320,(1-y1)*320);ctx.strokeStyle=AC;ctx.lineWidth=2.5;ctx.stroke();}
-            ds.pts.forEach(p=>{ctx.beginPath();ctx.arc(p.x*280+20,(1-p.y)*280+20,12,0,Math.PI*2);ctx.fillStyle=p.c?'#22c55e':'#ef4444';ctx.fill();ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.stroke();ctx.fillStyle='#fff';ctx.font='bold 10px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(p.c,p.x*280+20,(1-p.y)*280+20);});
+            let w = [Math.random() - 0.5, Math.random() - 0.5], b = Math.random() - 0.5, epoch = 0, lossHist = [];
+            const lrInp = document.getElementById('ai-ann-lr'); const lrVal = document.getElementById('ai-ann-lrval');
+            lrInp.oninput = () => lrVal.textContent = parseFloat(lrInp.value).toFixed(2);
+            const step = (x) => x >= 0 ? 1 : 0;
+            const drawBoundary = () => {
+                const canvas = document.getElementById('ai-ann-boundary'); const ctx = canvas.getContext('2d');
+                const ds = datasets[document.getElementById('ai-ann-data').value];
+                ctx.clearRect(0, 0, 320, 320);
+                for (let px = 0; px < 32; px++)for (let py = 0; py < 32; py++) { const xi = px / 31, yi = py / 31; const out = step(w[0] * xi + w[1] * yi + b); ctx.fillStyle = out ? '#f9731611' : '#3b82f611'; ctx.fillRect(px * 10, py * 10, 10, 10); }
+                if (Math.abs(w[1]) > 0.01) { ctx.beginPath(); const x0 = 0, y0 = (-b - w[0] * x0) / w[1]; const x1 = 1, y1 = (-b - w[0] * x1) / w[1]; ctx.moveTo(x0 * 320, (1 - y0) * 320); ctx.lineTo(x1 * 320, (1 - y1) * 320); ctx.strokeStyle = AC; ctx.lineWidth = 2.5; ctx.stroke(); }
+                ds.pts.forEach(p => { ctx.beginPath(); ctx.arc(p.x * 280 + 20, (1 - p.y) * 280 + 20, 12, 0, Math.PI * 2); ctx.fillStyle = p.c ? '#22c55e' : '#ef4444'; ctx.fill(); ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.stroke(); ctx.fillStyle = '#fff'; ctx.font = 'bold 10px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(p.c, p.x * 280 + 20, (1 - p.y) * 280 + 20); });
+            };
+            const drawLoss = () => {
+                const canvas = document.getElementById('ai-ann-loss'); if (!canvas) return; const ctx = canvas.getContext('2d');
+                ctx.clearRect(0, 0, 260, 120); ctx.strokeStyle = 'var(--border)'; ctx.strokeRect(0, 0, 260, 120);
+                if (lossHist.length < 2) return; const max = Math.max(...lossHist);
+                ctx.beginPath(); ctx.strokeStyle = AC; ctx.lineWidth = 2;
+                lossHist.forEach((v, i) => { const x = (i / (lossHist.length - 1)) * 250 + 5, y = 110 - (v / max) * 100; if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y); }); ctx.stroke();
+            };
+            const updateWeightDisplay = () => { document.getElementById('ai-ann-weights').innerHTML = `w₁ = <b style="color:${AC}">${w[0].toFixed(4)}</b><br>w₂ = <b style="color:${AC}">${w[1].toFixed(4)}</b><br>b  = <b style="color:${AC}">${b.toFixed(4)}</b>`; };
+            const trainEpoch = () => {
+                const ds = datasets[document.getElementById('ai-ann-data').value]; const lr = parseFloat(lrInp.value);
+                let errors = 0;
+                ds.pts.forEach(p => { const out = step(w[0] * p.x + w[1] * p.y + b); const err = p.c - out; if (err !== 0) { errors++; w[0] += lr * err * p.x; w[1] += lr * err * p.y; b += lr * err; } });
+                epoch++; lossHist.push(errors / ds.pts.length); if (lossHist.length > 50) lossHist.shift();
+                document.getElementById('ai-ann-epoch').textContent = `Epoch: ${epoch} | Errors: ${errors}`;
+                const isXOR = document.getElementById('ai-ann-data').value === 'XOR';
+                document.getElementById('ai-ann-status').innerHTML = errors === 0 ? '<span style="color:#22c55e;">✅ Converged!</span>' : isXOR ? '<span style="color:#ef4444;">⚠ XOR is not linearly separable — will never converge</span>' : '<span style="color:#fbbf24;">⏳ Training...</span>';
+                updateWeightDisplay(); drawBoundary(); drawLoss();
+            };
+            const reset = () => { w = [Math.random() - 0.5, Math.random() - 0.5]; b = Math.random() - 0.5; epoch = 0; lossHist = []; updateWeightDisplay(); drawBoundary(); drawLoss(); document.getElementById('ai-ann-epoch').textContent = ''; document.getElementById('ai-ann-status').textContent = ''; };
+            document.getElementById('ai-ann-train').addEventListener('click', trainEpoch);
+            document.getElementById('ai-ann-reset').addEventListener('click', reset);
+            document.getElementById('ai-ann-data').addEventListener('change', reset);
+            reset();
         };
-        const drawLoss=()=>{
-            const canvas=document.getElementById('ai-ann-loss');if(!canvas)return; const ctx=canvas.getContext('2d');
-            ctx.clearRect(0,0,260,120);ctx.strokeStyle='var(--border)';ctx.strokeRect(0,0,260,120);
-            if(lossHist.length<2)return;const max=Math.max(...lossHist);
-            ctx.beginPath();ctx.strokeStyle=AC;ctx.lineWidth=2;
-            lossHist.forEach((v,i)=>{const x=(i/(lossHist.length-1))*250+5,y=110-(v/max)*100;if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);});ctx.stroke();
-        };
-        const updateWeightDisplay=()=>{document.getElementById('ai-ann-weights').innerHTML=`w₁ = <b style="color:${AC}">${w[0].toFixed(4)}</b><br>w₂ = <b style="color:${AC}">${w[1].toFixed(4)}</b><br>b  = <b style="color:${AC}">${b.toFixed(4)}</b>`;};
-        const trainEpoch=()=>{
-            const ds=datasets[document.getElementById('ai-ann-data').value]; const lr=parseFloat(lrInp.value);
-            let errors=0;
-            ds.pts.forEach(p=>{const out=step(w[0]*p.x+w[1]*p.y+b);const err=p.c-out;if(err!==0){errors++;w[0]+=lr*err*p.x;w[1]+=lr*err*p.y;b+=lr*err;}});
-            epoch++; lossHist.push(errors/ds.pts.length); if(lossHist.length>50)lossHist.shift();
-            document.getElementById('ai-ann-epoch').textContent=`Epoch: ${epoch} | Errors: ${errors}`;
-            const isXOR=document.getElementById('ai-ann-data').value==='XOR';
-            document.getElementById('ai-ann-status').innerHTML=errors===0?'<span style="color:#22c55e;">✅ Converged!</span>':isXOR?'<span style="color:#ef4444;">⚠ XOR is not linearly separable — will never converge</span>':'<span style="color:#fbbf24;">⏳ Training...</span>';
-            updateWeightDisplay(); drawBoundary(); drawLoss();
-        };
-        const reset=()=>{w=[Math.random()-0.5,Math.random()-0.5];b=Math.random()-0.5;epoch=0;lossHist=[];updateWeightDisplay();drawBoundary();drawLoss();document.getElementById('ai-ann-epoch').textContent='';document.getElementById('ai-ann-status').textContent='';};
-        document.getElementById('ai-ann-train').addEventListener('click',trainEpoch);
-        document.getElementById('ai-ann-reset').addEventListener('click',reset);
-        document.getElementById('ai-ann-data').addEventListener('change',reset);
-        reset();
-    };
 
-    const initAiBackpropSim = (container) => {
-        const AC='#f97316';
-        container.innerHTML=`
+        const initAiBackpropSim = (container) => {
+            const AC = '#f97316';
+            container.innerHTML = `
         <div style="padding:20px;font-family:var(--font-sans);">
             <h3 style="color:${AC};margin-bottom:16px;">2→3→1 MLP Backpropagation Visualizer</h3>
             <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:16px;">
@@ -13623,71 +13637,71 @@ ${cfg.diagram}
                 </div>
             </div>
         </div>`;
-        const sig=(z)=>1/(1+Math.exp(-z));
-        const sigD=(a)=>a*(1-a);
-        let W1=[[Math.random()-0.5,Math.random()-0.5],[Math.random()-0.5,Math.random()-0.5],[Math.random()-0.5,Math.random()-0.5]];
-        let b1=[0,0,0];
-        let W2=[Math.random()-0.5,Math.random()-0.5,Math.random()-0.5];
-        let b2=0;
-        let a1=[],a2=0,lossHist=[],epoch=0;
-        const canvas=document.getElementById('ai-bp-canvas');const ctx=canvas.getContext('2d');
-        const layers=[[{x:60,y:100},{x:60,y:220}],[{x:200,y:60},{x:200,y:160},{x:200,y:260}],[{x:360,y:160}]];
-        const drawNet=(activations=[],grads=[])=>{
-            ctx.clearRect(0,0,440,320);
-            layers.forEach((layer,li)=>layer.forEach((n,ni)=>{
-                if(li<layers.length-1)layers[li+1].forEach((nxt)=>{ctx.beginPath();ctx.moveTo(n.x,n.y);ctx.lineTo(nxt.x,nxt.y);ctx.strokeStyle='var(--border)';ctx.lineWidth=1;ctx.stroke();});
-            }));
-            layers.forEach((layer,li)=>layer.forEach((n,ni)=>{
-                const a=activations[li]?activations[li][ni]:null;
-                const g=grads[li]?grads[li][ni]:null;
-                ctx.beginPath();ctx.arc(n.x,n.y,22,0,Math.PI*2);
-                ctx.fillStyle=a!==null?`rgba(249,115,22,${Math.min(Math.abs(a),1)*0.6+0.1})`:'#1e293b';ctx.fill();
-                ctx.strokeStyle=g!==null&&Math.abs(g)>0.1?'#ef4444':AC;ctx.lineWidth=2;ctx.stroke();
-                if(a!==null){ctx.fillStyle='#fff';ctx.font='bold 10px monospace';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(a.toFixed(2),n.x,n.y);}
-            }));
-        };
-        drawNet();
-        const fwd=()=>{
-            const x1=parseFloat(document.getElementById('ai-bp-x1').value);
-            const x2=parseFloat(document.getElementById('ai-bp-x2').value);
-            const X=[x1,x2];
-            a1=W1.map((w,i)=>sig(w[0]*X[0]+w[1]*X[1]+b1[i]));
-            a2=sig(W2.reduce((s,w,i)=>s+w*a1[i],0)+b2);
-            const loss=0.5*(parseFloat(document.getElementById('ai-bp-y').value)-a2)**2;
-            lossHist.push(loss);epoch++;
-            document.getElementById('ai-bp-log').innerHTML+=`Forward: a1=[${a1.map(v=>v.toFixed(3)).join(', ')}] a2=${a2.toFixed(4)} Loss=${loss.toFixed(5)}<br>`;
-            drawNet([[parseFloat(document.getElementById('ai-bp-x1').value),parseFloat(document.getElementById('ai-bp-x2').value)],a1,[a2]]);
-        };
-        const back=()=>{
-            const y=parseFloat(document.getElementById('ai-bp-y').value);
-            const dL_da2=a2-y; const da2_dz2=sigD(a2); const delta2=dL_da2*da2_dz2;
-            const delta1=a1.map((a,i)=>W2[i]*delta2*sigD(a));
-            document.getElementById('ai-bp-log').innerHTML+=`Backprop: δ₂=${delta2.toFixed(4)} δ₁=[${delta1.map(v=>v.toFixed(3)).join(', ')}]<br>`;
-            drawNet([[],[],[]],[],delta1);
-            window._delta1=delta1; window._delta2=delta2;
-        };
-        const updateW=()=>{
-            const lr=parseFloat(document.getElementById('ai-bp-lr').value);
-            const x1=parseFloat(document.getElementById('ai-bp-x1').value);
-            const x2=parseFloat(document.getElementById('ai-bp-x2').value);
-            if(!window._delta2)return;
-            W2=W2.map((w,i)=>w-lr*window._delta2*a1[i]); b2-=lr*window._delta2;
-            W1=W1.map((w,i)=>w.map((wj,j)=>wj-lr*window._delta1[i]*(j===0?x1:x2))); b1=b1.map((b,i)=>b-lr*window._delta1[i]);
+            const sig = (z) => 1 / (1 + Math.exp(-z));
+            const sigD = (a) => a * (1 - a);
+            let W1 = [[Math.random() - 0.5, Math.random() - 0.5], [Math.random() - 0.5, Math.random() - 0.5], [Math.random() - 0.5, Math.random() - 0.5]];
+            let b1 = [0, 0, 0];
+            let W2 = [Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5];
+            let b2 = 0;
+            let a1 = [], a2 = 0, lossHist = [], epoch = 0;
+            const canvas = document.getElementById('ai-bp-canvas'); const ctx = canvas.getContext('2d');
+            const layers = [[{ x: 60, y: 100 }, { x: 60, y: 220 }], [{ x: 200, y: 60 }, { x: 200, y: 160 }, { x: 200, y: 260 }], [{ x: 360, y: 160 }]];
+            const drawNet = (activations = [], grads = []) => {
+                ctx.clearRect(0, 0, 440, 320);
+                layers.forEach((layer, li) => layer.forEach((n, ni) => {
+                    if (li < layers.length - 1) layers[li + 1].forEach((nxt) => { ctx.beginPath(); ctx.moveTo(n.x, n.y); ctx.lineTo(nxt.x, nxt.y); ctx.strokeStyle = 'var(--border)'; ctx.lineWidth = 1; ctx.stroke(); });
+                }));
+                layers.forEach((layer, li) => layer.forEach((n, ni) => {
+                    const a = activations[li] ? activations[li][ni] : null;
+                    const g = grads[li] ? grads[li][ni] : null;
+                    ctx.beginPath(); ctx.arc(n.x, n.y, 22, 0, Math.PI * 2);
+                    ctx.fillStyle = a !== null ? `rgba(249,115,22,${Math.min(Math.abs(a), 1) * 0.6 + 0.1})` : '#1e293b'; ctx.fill();
+                    ctx.strokeStyle = g !== null && Math.abs(g) > 0.1 ? '#ef4444' : AC; ctx.lineWidth = 2; ctx.stroke();
+                    if (a !== null) { ctx.fillStyle = '#fff'; ctx.font = 'bold 10px monospace'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(a.toFixed(2), n.x, n.y); }
+                }));
+            };
             drawNet();
-            const lc=document.getElementById('ai-bp-loss'); if(!lc)return; const lx=lc.getContext('2d');
-            lx.clearRect(0,0,250,100); if(lossHist.length<2)return;
-            const mx=Math.max(...lossHist);lx.beginPath();lx.strokeStyle=AC;lx.lineWidth=2;
-            lossHist.forEach((v,i)=>{const px=(i/(lossHist.length-1))*240+5,py=90-(v/mx)*80;if(i===0)lx.moveTo(px,py);else lx.lineTo(px,py);});lx.stroke();
+            const fwd = () => {
+                const x1 = parseFloat(document.getElementById('ai-bp-x1').value);
+                const x2 = parseFloat(document.getElementById('ai-bp-x2').value);
+                const X = [x1, x2];
+                a1 = W1.map((w, i) => sig(w[0] * X[0] + w[1] * X[1] + b1[i]));
+                a2 = sig(W2.reduce((s, w, i) => s + w * a1[i], 0) + b2);
+                const loss = 0.5 * (parseFloat(document.getElementById('ai-bp-y').value) - a2) ** 2;
+                lossHist.push(loss); epoch++;
+                document.getElementById('ai-bp-log').innerHTML += `Forward: a1=[${a1.map(v => v.toFixed(3)).join(', ')}] a2=${a2.toFixed(4)} Loss=${loss.toFixed(5)}<br>`;
+                drawNet([[parseFloat(document.getElementById('ai-bp-x1').value), parseFloat(document.getElementById('ai-bp-x2').value)], a1, [a2]]);
+            };
+            const back = () => {
+                const y = parseFloat(document.getElementById('ai-bp-y').value);
+                const dL_da2 = a2 - y; const da2_dz2 = sigD(a2); const delta2 = dL_da2 * da2_dz2;
+                const delta1 = a1.map((a, i) => W2[i] * delta2 * sigD(a));
+                document.getElementById('ai-bp-log').innerHTML += `Backprop: δ₂=${delta2.toFixed(4)} δ₁=[${delta1.map(v => v.toFixed(3)).join(', ')}]<br>`;
+                drawNet([[], [], []], [], delta1);
+                window._delta1 = delta1; window._delta2 = delta2;
+            };
+            const updateW = () => {
+                const lr = parseFloat(document.getElementById('ai-bp-lr').value);
+                const x1 = parseFloat(document.getElementById('ai-bp-x1').value);
+                const x2 = parseFloat(document.getElementById('ai-bp-x2').value);
+                if (!window._delta2) return;
+                W2 = W2.map((w, i) => w - lr * window._delta2 * a1[i]); b2 -= lr * window._delta2;
+                W1 = W1.map((w, i) => w.map((wj, j) => wj - lr * window._delta1[i] * (j === 0 ? x1 : x2))); b1 = b1.map((b, i) => b - lr * window._delta1[i]);
+                drawNet();
+                const lc = document.getElementById('ai-bp-loss'); if (!lc) return; const lx = lc.getContext('2d');
+                lx.clearRect(0, 0, 250, 100); if (lossHist.length < 2) return;
+                const mx = Math.max(...lossHist); lx.beginPath(); lx.strokeStyle = AC; lx.lineWidth = 2;
+                lossHist.forEach((v, i) => { const px = (i / (lossHist.length - 1)) * 240 + 5, py = 90 - (v / mx) * 80; if (i === 0) lx.moveTo(px, py); else lx.lineTo(px, py); }); lx.stroke();
+            };
+            document.getElementById('ai-bp-fwd').addEventListener('click', fwd);
+            document.getElementById('ai-bp-back').addEventListener('click', back);
+            document.getElementById('ai-bp-update').addEventListener('click', updateW);
+            document.getElementById('ai-bp-auto').addEventListener('click', async () => { for (let i = 0; i < 100; i++) { fwd(); back(); updateW(); await new Promise(r => setTimeout(r, 30)); } });
         };
-        document.getElementById('ai-bp-fwd').addEventListener('click',fwd);
-        document.getElementById('ai-bp-back').addEventListener('click',back);
-        document.getElementById('ai-bp-update').addEventListener('click',updateW);
-        document.getElementById('ai-bp-auto').addEventListener('click',async()=>{for(let i=0;i<100;i++){fwd();back();updateW();await new Promise(r=>setTimeout(r,30));}});
-    };
 
-    const initAiFuzzySim = (container) => {
-        const AC='#f97316';
-        container.innerHTML=`
+        const initAiFuzzySim = (container) => {
+            const AC = '#f97316';
+            container.innerHTML = `
         <div style="padding:20px;font-family:var(--font-sans);">
             <h3 style="color:${AC};margin-bottom:16px;">Mamdani Fuzzy Inference System — Temperature → Fan Speed</h3>
             <div style="display:flex;gap:20px;flex-wrap:wrap;align-items:flex-start;">
@@ -13720,39 +13734,41 @@ ${cfg.diagram}
                 </div>
             </div>
         </div>`;
-        const tri=(x,a,b,c)=>Math.max(0,x<=b?(x-a)/(b-a):(c-x)/(c-b));
-        const update=()=>{
-            const T=parseFloat(document.getElementById('ai-fz-temp').value);
-            document.getElementById('ai-fz-tempval').textContent=T;
-            const mCold=tri(T,0,10,25); const mWarm=tri(T,15,25,35); const mHot=tri(T,28,40,50);
-            document.getElementById('ai-fz-memb').innerHTML=`Cold: <b style="color:#3b82f6">${mCold.toFixed(3)}</b><br>Warm: <b style="color:#fbbf24">${mWarm.toFixed(3)}</b><br>Hot: <b style="color:#ef4444">${mHot.toFixed(3)}</b>`;
-            const drawMF=(canvasId,xmax,mfs,val,colors)=>{
-                const c=document.getElementById(canvasId); const ctx=c.getContext('2d');
-                ctx.clearRect(0,0,340,130);ctx.strokeStyle='var(--border)';ctx.strokeRect(1,1,338,128);
-                mfs.forEach((mf,i)=>{ctx.beginPath();ctx.strokeStyle=colors[i];ctx.lineWidth=2;
-                    for(let x=0;x<=xmax;x++){const px=10+(x/xmax)*320;const py=115-tri(x,...mf)*100;if(x===0)ctx.moveTo(px,py);else ctx.lineTo(px,py);}
-                    ctx.stroke();});
-                const vpx=10+(val/xmax)*320;ctx.strokeStyle=AC;ctx.lineWidth=2;ctx.setLineDash([4,4]);ctx.beginPath();ctx.moveTo(vpx,10);ctx.lineTo(vpx,120);ctx.stroke();ctx.setLineDash([]);
-                ctx.fillStyle=AC;ctx.font='bold 11px monospace';ctx.textAlign='center';ctx.fillText(val.toFixed(0),vpx,10);
+            const tri = (x, a, b, c) => Math.max(0, x <= b ? (x - a) / (b - a) : (c - x) / (c - b));
+            const update = () => {
+                const T = parseFloat(document.getElementById('ai-fz-temp').value);
+                document.getElementById('ai-fz-tempval').textContent = T;
+                const mCold = tri(T, 0, 10, 25); const mWarm = tri(T, 15, 25, 35); const mHot = tri(T, 28, 40, 50);
+                document.getElementById('ai-fz-memb').innerHTML = `Cold: <b style="color:#3b82f6">${mCold.toFixed(3)}</b><br>Warm: <b style="color:#fbbf24">${mWarm.toFixed(3)}</b><br>Hot: <b style="color:#ef4444">${mHot.toFixed(3)}</b>`;
+                const drawMF = (canvasId, xmax, mfs, val, colors) => {
+                    const c = document.getElementById(canvasId); const ctx = c.getContext('2d');
+                    ctx.clearRect(0, 0, 340, 130); ctx.strokeStyle = 'var(--border)'; ctx.strokeRect(1, 1, 338, 128);
+                    mfs.forEach((mf, i) => {
+                        ctx.beginPath(); ctx.strokeStyle = colors[i]; ctx.lineWidth = 2;
+                        for (let x = 0; x <= xmax; x++) { const px = 10 + (x / xmax) * 320; const py = 115 - tri(x, ...mf) * 100; if (x === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py); }
+                        ctx.stroke();
+                    });
+                    const vpx = 10 + (val / xmax) * 320; ctx.strokeStyle = AC; ctx.lineWidth = 2; ctx.setLineDash([4, 4]); ctx.beginPath(); ctx.moveTo(vpx, 10); ctx.lineTo(vpx, 120); ctx.stroke(); ctx.setLineDash([]);
+                    ctx.fillStyle = AC; ctx.font = 'bold 11px monospace'; ctx.textAlign = 'center'; ctx.fillText(val.toFixed(0), vpx, 10);
+                };
+                drawMF('ai-fz-input', 50, [[0, 10, 25], [15, 25, 35], [28, 40, 50]], T, ['#3b82f6', '#fbbf24', '#ef4444']);
+                const fSlow = mCold; const fMed = mWarm; const fFast = mHot;
+                let num = 0, den = 0;
+                for (let s = 0; s <= 100; s++) { const mS = Math.min(tri(s, 0, 10, 30), fSlow); const mM = Math.min(tri(s, 25, 50, 75), fMed); const mF = Math.min(tri(s, 60, 90, 100), fFast); const agg = Math.max(mS, mM, mF); num += s * agg; den += agg; }
+                const crisp = den > 0 ? (num / den).toFixed(1) : 0;
+                document.getElementById('ai-fz-crisp').textContent = crisp + '%';
+                const cCtx = document.getElementById('ai-fz-output').getContext('2d');
+                cCtx.clearRect(0, 0, 340, 130); cCtx.strokeStyle = 'var(--border)'; cCtx.strokeRect(1, 1, 338, 128);
+                [[0, 10, 30], [25, 50, 75], [60, 90, 100]].forEach((mf, i) => { cCtx.beginPath(); cCtx.strokeStyle = ['#3b82f6', '#fbbf24', '#ef4444'][i]; cCtx.lineWidth = 1.5; for (let s = 0; s <= 100; s++) { const px = 10 + (s / 100) * 320, py = 115 - tri(s, ...mf) * 100; if (s === 0) cCtx.moveTo(px, py); else cCtx.lineTo(px, py); } cCtx.stroke(); });
+                const cpx = 10 + (parseFloat(crisp) / 100) * 320; cCtx.strokeStyle = AC; cCtx.lineWidth = 2.5; cCtx.setLineDash([4, 4]); cCtx.beginPath(); cCtx.moveTo(cpx, 10); cCtx.lineTo(cpx, 120); cCtx.stroke(); cCtx.setLineDash([]);
+                cCtx.fillStyle = AC; cCtx.font = 'bold 11px monospace'; cCtx.textAlign = 'center'; cCtx.fillText(crisp + '%', cpx, 10);
             };
-            drawMF('ai-fz-input',50,[[0,10,25],[15,25,35],[28,40,50]],T,['#3b82f6','#fbbf24','#ef4444']);
-            const fSlow=mCold; const fMed=mWarm; const fFast=mHot;
-            let num=0,den=0;
-            for(let s=0;s<=100;s++){const mS=Math.min(tri(s,0,10,30),fSlow); const mM=Math.min(tri(s,25,50,75),fMed); const mF=Math.min(tri(s,60,90,100),fFast); const agg=Math.max(mS,mM,mF); num+=s*agg; den+=agg;}
-            const crisp=den>0?(num/den).toFixed(1):0;
-            document.getElementById('ai-fz-crisp').textContent=crisp+'%';
-            const cCtx=document.getElementById('ai-fz-output').getContext('2d');
-            cCtx.clearRect(0,0,340,130);cCtx.strokeStyle='var(--border)';cCtx.strokeRect(1,1,338,128);
-            [[0,10,30],[25,50,75],[60,90,100]].forEach((mf,i)=>{cCtx.beginPath();cCtx.strokeStyle=['#3b82f6','#fbbf24','#ef4444'][i];cCtx.lineWidth=1.5;for(let s=0;s<=100;s++){const px=10+(s/100)*320,py=115-tri(s,...mf)*100;if(s===0)cCtx.moveTo(px,py);else cCtx.lineTo(px,py);}cCtx.stroke();});
-            const cpx=10+(parseFloat(crisp)/100)*320;cCtx.strokeStyle=AC;cCtx.lineWidth=2.5;cCtx.setLineDash([4,4]);cCtx.beginPath();cCtx.moveTo(cpx,10);cCtx.lineTo(cpx,120);cCtx.stroke();cCtx.setLineDash([]);
-            cCtx.fillStyle=AC;cCtx.font='bold 11px monospace';cCtx.textAlign='center';cCtx.fillText(crisp+'%',cpx,10);
+            document.getElementById('ai-fz-temp').addEventListener('input', update); update();
         };
-        document.getElementById('ai-fz-temp').addEventListener('input',update); update();
-    };
 
-    const initAiGeneticSim = (container) => {
-        const AC='#f97316';
-        container.innerHTML=`
+        const initAiGeneticSim = (container) => {
+            const AC = '#f97316';
+            container.innerHTML = `
         <div style="padding:20px;font-family:var(--font-sans);">
             <h3 style="color:${AC};margin-bottom:4px;">Genetic Algorithm — Maximize f(x) = x·sin(10πx) + 2</h3>
             <div style="font-size:12px;color:var(--text-muted);margin-bottom:16px;">x ∈ [0, 1], binary chromosome (16 bits)</div>
@@ -13774,54 +13790,62 @@ ${cfg.diagram}
                 </div>
             </div>
         </div>`;
-        const FN=(x)=>x*Math.sin(10*Math.PI*x)+2;
-        const BITS=16; const MAX=Math.pow(2,BITS)-1;
-        const decode=(chrom)=>chrom.reduce((v,b,i)=>v+(b<<(BITS-1-i)),0)/MAX;
-        const fitness=(chrom)=>Math.max(0,FN(decode(chrom)));
-        let pop=[],gen=0,bestHist=[];
-        const canvas=document.getElementById('ai-ga-canvas');const ctx=canvas.getContext('2d');
-        const drawFn=()=>{ctx.clearRect(0,0,420,280);ctx.strokeStyle='var(--border)';ctx.strokeRect(30,20,380,240);
-            ctx.beginPath();ctx.strokeStyle='#6366f1';ctx.lineWidth=2;
-            for(let i=0;i<=380;i++){const x=i/380;const y=FN(x);const px=30+i,py=260-(y/3)*220;if(i===0)ctx.moveTo(px,py);else ctx.lineTo(px,py);}ctx.stroke();
-            if(pop.length){pop.forEach(c=>{const x=decode(c);const y=FN(x);const px=30+(x*380),py=260-(y/3)*220;ctx.beginPath();ctx.arc(px,py,4,0,Math.PI*2);ctx.fillStyle=AC+'99';ctx.fill();});
-            const best=pop.reduce((b,c)=>fitness(c)>fitness(b)?c:b);const bx=decode(best);const by=FN(bx);const bpx=30+(bx*380),bpy=260-(by/3)*220;
-            ctx.beginPath();ctx.arc(bpx,bpy,8,0,Math.PI*2);ctx.fillStyle=AC;ctx.fill();ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.stroke();}};
-        const drawFitHist=()=>{const c=document.getElementById('ai-ga-fit');const lx=c.getContext('2d');lx.clearRect(0,0,200,120);if(bestHist.length<2)return;const mx=Math.max(...bestHist);lx.beginPath();lx.strokeStyle=AC;lx.lineWidth=2;bestHist.forEach((v,i)=>{const px=(i/(bestHist.length-1))*190+5,py=110-(v/mx)*100;if(i===0)lx.moveTo(px,py);else lx.lineTo(px,py);});lx.stroke();};
-        const init=()=>{const N=parseInt(document.getElementById('ai-ga-pop').value); pop=Array.from({length:N},()=>Array.from({length:BITS},()=>Math.round(Math.random())));gen=0;bestHist=[];drawFn();drawFitHist();document.getElementById('ai-ga-pop-display').innerHTML='';};
-        const select=(pop)=>{const a=pop[Math.floor(Math.random()*pop.length)],b=pop[Math.floor(Math.random()*pop.length)];return fitness(a)>fitness(b)?a:b;};
-        const evolve=()=>{const Pc=parseFloat(document.getElementById('ai-ga-pc').value),Pm=parseFloat(document.getElementById('ai-ga-pm').value);
-            const newPop=[];while(newPop.length<pop.length){const p1=select(pop),p2=select(pop);let c1,c2;if(Math.random()<Pc){const pt=Math.floor(Math.random()*BITS);c1=[...p1.slice(0,pt),...p2.slice(pt)];c2=[...p2.slice(0,pt),...p1.slice(pt)];}else{c1=[...p1];c2=[...p2];}
-            [c1,c2].forEach(c=>{newPop.push(c.map(b=>Math.random()<Pm?1-b:b));});}
-            pop=newPop.slice(0,pop.length);gen++;
-            const best=pop.reduce((b,c)=>fitness(c)>fitness(b)?c:b);bestHist.push(fitness(best));if(bestHist.length>100)bestHist.shift();
-            document.getElementById('ai-ga-info').textContent=`Gen: ${gen} | Best f(x)=${fitness(best).toFixed(4)} x=${decode(best).toFixed(4)}`;
-            document.getElementById('ai-ga-pop-display').innerHTML=pop.slice(0,8).map((c,i)=>`<div>${i+1}: x=${decode(c).toFixed(3)} f=${fitness(c).toFixed(2)}</div>`).join('');
-            drawFn();drawFitHist();};
-        document.getElementById('ai-ga-init').addEventListener('click',init);
-        document.getElementById('ai-ga-step').addEventListener('click',()=>{if(!pop.length)init();evolve();});
-        document.getElementById('ai-ga-run').addEventListener('click',async()=>{if(!pop.length)init();for(let i=0;i<50;i++){evolve();await new Promise(r=>setTimeout(r,80));}});
-        init();
-    };
+            const FN = (x) => x * Math.sin(10 * Math.PI * x) + 2;
+            const BITS = 16; const MAX = Math.pow(2, BITS) - 1;
+            const decode = (chrom) => chrom.reduce((v, b, i) => v + (b << (BITS - 1 - i)), 0) / MAX;
+            const fitness = (chrom) => Math.max(0, FN(decode(chrom)));
+            let pop = [], gen = 0, bestHist = [];
+            const canvas = document.getElementById('ai-ga-canvas'); const ctx = canvas.getContext('2d');
+            const drawFn = () => {
+                ctx.clearRect(0, 0, 420, 280); ctx.strokeStyle = 'var(--border)'; ctx.strokeRect(30, 20, 380, 240);
+                ctx.beginPath(); ctx.strokeStyle = '#6366f1'; ctx.lineWidth = 2;
+                for (let i = 0; i <= 380; i++) { const x = i / 380; const y = FN(x); const px = 30 + i, py = 260 - (y / 3) * 220; if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py); } ctx.stroke();
+                if (pop.length) {
+                    pop.forEach(c => { const x = decode(c); const y = FN(x); const px = 30 + (x * 380), py = 260 - (y / 3) * 220; ctx.beginPath(); ctx.arc(px, py, 4, 0, Math.PI * 2); ctx.fillStyle = AC + '99'; ctx.fill(); });
+                    const best = pop.reduce((b, c) => fitness(c) > fitness(b) ? c : b); const bx = decode(best); const by = FN(bx); const bpx = 30 + (bx * 380), bpy = 260 - (by / 3) * 220;
+                    ctx.beginPath(); ctx.arc(bpx, bpy, 8, 0, Math.PI * 2); ctx.fillStyle = AC; ctx.fill(); ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.stroke();
+                }
+            };
+            const drawFitHist = () => { const c = document.getElementById('ai-ga-fit'); const lx = c.getContext('2d'); lx.clearRect(0, 0, 200, 120); if (bestHist.length < 2) return; const mx = Math.max(...bestHist); lx.beginPath(); lx.strokeStyle = AC; lx.lineWidth = 2; bestHist.forEach((v, i) => { const px = (i / (bestHist.length - 1)) * 190 + 5, py = 110 - (v / mx) * 100; if (i === 0) lx.moveTo(px, py); else lx.lineTo(px, py); }); lx.stroke(); };
+            const init = () => { const N = parseInt(document.getElementById('ai-ga-pop').value); pop = Array.from({ length: N }, () => Array.from({ length: BITS }, () => Math.round(Math.random()))); gen = 0; bestHist = []; drawFn(); drawFitHist(); document.getElementById('ai-ga-pop-display').innerHTML = ''; };
+            const select = (pop) => { const a = pop[Math.floor(Math.random() * pop.length)], b = pop[Math.floor(Math.random() * pop.length)]; return fitness(a) > fitness(b) ? a : b; };
+            const evolve = () => {
+                const Pc = parseFloat(document.getElementById('ai-ga-pc').value), Pm = parseFloat(document.getElementById('ai-ga-pm').value);
+                const newPop = []; while (newPop.length < pop.length) {
+                    const p1 = select(pop), p2 = select(pop); let c1, c2; if (Math.random() < Pc) { const pt = Math.floor(Math.random() * BITS); c1 = [...p1.slice(0, pt), ...p2.slice(pt)]; c2 = [...p2.slice(0, pt), ...p1.slice(pt)]; } else { c1 = [...p1]; c2 = [...p2]; }
+                    [c1, c2].forEach(c => { newPop.push(c.map(b => Math.random() < Pm ? 1 - b : b)); });
+                }
+                pop = newPop.slice(0, pop.length); gen++;
+                const best = pop.reduce((b, c) => fitness(c) > fitness(b) ? c : b); bestHist.push(fitness(best)); if (bestHist.length > 100) bestHist.shift();
+                document.getElementById('ai-ga-info').textContent = `Gen: ${gen} | Best f(x)=${fitness(best).toFixed(4)} x=${decode(best).toFixed(4)}`;
+                document.getElementById('ai-ga-pop-display').innerHTML = pop.slice(0, 8).map((c, i) => `<div>${i + 1}: x=${decode(c).toFixed(3)} f=${fitness(c).toFixed(2)}</div>`).join('');
+                drawFn(); drawFitHist();
+            };
+            document.getElementById('ai-ga-init').addEventListener('click', init);
+            document.getElementById('ai-ga-step').addEventListener('click', () => { if (!pop.length) init(); evolve(); });
+            document.getElementById('ai-ga-run').addEventListener('click', async () => { if (!pop.length) init(); for (let i = 0; i < 50; i++) { evolve(); await new Promise(r => setTimeout(r, 80)); } });
+            init();
+        };
 
-    const initAiExpertSim = (container) => {
-        const AC='#f97316';
-        const KB=[
-            {id:'R1',if:['fever','cough','sore_throat'],then:'flu',desc:'IF fever AND cough AND sore_throat → Flu'},
-            {id:'R2',if:['fever','rash'],then:'measles',desc:'IF fever AND rash → Measles'},
-            {id:'R3',if:['cough','chest_pain','shortness_breath'],then:'pneumonia',desc:'IF cough AND chest_pain AND shortness_breath → Pneumonia'},
-            {id:'R4',if:['headache','stiff_neck','fever'],then:'meningitis',desc:'IF headache AND stiff_neck AND fever → Meningitis'},
-            {id:'R5',if:['fatigue','weight_loss','night_sweats'],then:'tuberculosis',desc:'IF fatigue AND weight_loss AND night_sweats → Tuberculosis'},
-            {id:'R6',if:['flu'],then:'influenza_confirmed',desc:'IF flu → Influenza Confirmed'},
-        ];
-        const symptoms=['fever','cough','sore_throat','rash','chest_pain','shortness_breath','headache','stiff_neck','fatigue','weight_loss','night_sweats'];
-        container.innerHTML=`
+        const initAiExpertSim = (container) => {
+            const AC = '#f97316';
+            const KB = [
+                { id: 'R1', if: ['fever', 'cough', 'sore_throat'], then: 'flu', desc: 'IF fever AND cough AND sore_throat → Flu' },
+                { id: 'R2', if: ['fever', 'rash'], then: 'measles', desc: 'IF fever AND rash → Measles' },
+                { id: 'R3', if: ['cough', 'chest_pain', 'shortness_breath'], then: 'pneumonia', desc: 'IF cough AND chest_pain AND shortness_breath → Pneumonia' },
+                { id: 'R4', if: ['headache', 'stiff_neck', 'fever'], then: 'meningitis', desc: 'IF headache AND stiff_neck AND fever → Meningitis' },
+                { id: 'R5', if: ['fatigue', 'weight_loss', 'night_sweats'], then: 'tuberculosis', desc: 'IF fatigue AND weight_loss AND night_sweats → Tuberculosis' },
+                { id: 'R6', if: ['flu'], then: 'influenza_confirmed', desc: 'IF flu → Influenza Confirmed' },
+            ];
+            const symptoms = ['fever', 'cough', 'sore_throat', 'rash', 'chest_pain', 'shortness_breath', 'headache', 'stiff_neck', 'fatigue', 'weight_loss', 'night_sweats'];
+            container.innerHTML = `
         <div style="padding:20px;font-family:var(--font-sans);">
             <h3 style="color:${AC};margin-bottom:16px;">Medical Expert System — Forward Chaining</h3>
             <div style="display:flex;gap:20px;flex-wrap:wrap;">
                 <div style="width:240px;">
                     <div style="font-weight:800;margin-bottom:10px;">Patient Symptoms</div>
                     <div style="display:flex;flex-direction:column;gap:6px;">
-                        ${symptoms.map(s=>`<label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;"><input type="checkbox" id="ai-es-${s}" style="accent-color:${AC};width:15px;height:15px;"> ${s.replace(/_/g,' ')}</label>`).join('')}
+                        ${symptoms.map(s => `<label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;"><input type="checkbox" id="ai-es-${s}" style="accent-color:${AC};width:15px;height:15px;"> ${s.replace(/_/g, ' ')}</label>`).join('')}
                     </div>
                     <button id="ai-es-run" style="width:100%;margin-top:14px;padding:10px;border-radius:8px;background:${AC};color:#fff;border:none;font-weight:700;cursor:pointer;">⚕ Run Inference</button>
                     <button id="ai-es-reset" style="width:100%;margin-top:8px;padding:8px;border-radius:8px;background:transparent;color:${AC};border:1px solid ${AC};cursor:pointer;font-weight:700;">↺ Reset</button>
@@ -13829,7 +13853,7 @@ ${cfg.diagram}
                 <div style="flex:1;min-width:280px;">
                     <div style="font-weight:800;color:${AC};margin-bottom:8px;">Knowledge Base</div>
                     <div style="font-size:11px;border:1px solid var(--border);border-radius:8px;padding:10px;margin-bottom:12px;line-height:2;">
-                        ${KB.map(r=>`<div id="ai-es-rule-${r.id}" style="padding:2px 6px;border-radius:4px;">${r.id}: ${r.desc}</div>`).join('')}
+                        ${KB.map(r => `<div id="ai-es-rule-${r.id}" style="padding:2px 6px;border-radius:4px;">${r.id}: ${r.desc}</div>`).join('')}
                     </div>
                     <div style="font-weight:800;color:${AC};margin-bottom:8px;">Working Memory & Inference Log</div>
                     <div id="ai-es-log" style="font-size:12px;font-family:var(--font-mono);border:1px solid var(--border);border-radius:8px;padding:10px;min-height:100px;max-height:200px;overflow-y:auto;line-height:2;"></div>
@@ -13837,46 +13861,47 @@ ${cfg.diagram}
                 </div>
             </div>
         </div>`;
-        document.getElementById('ai-es-run').addEventListener('click',async()=>{
-            let wm=new Set(symptoms.filter(s=>document.getElementById(`ai-es-${s}`)&&document.getElementById(`ai-es-${s}`).checked));
-            const log=[`📋 Initial facts: [${[...wm].join(', ')||'none'}]`];
-            document.getElementById('ai-es-log').innerHTML=log.join('<br>');
-            let fired=true; const diagnoses=[];
-            while(fired){fired=false;
-                for(const rule of KB){
-                    KB.forEach(r=>document.getElementById('ai-es-rule-'+r.id)&&(document.getElementById('ai-es-rule-'+r.id).style.background=''));
-                    if(!wm.has(rule.then)&&rule.if.every(c=>wm.has(c))){
-                        const el=document.getElementById('ai-es-rule-'+rule.id);
-                        if(el)el.style.background=AC+'33';
-                        wm.add(rule.then); fired=true;
-                        log.push(`🔥 Fire ${rule.id}: derived <b style="color:${AC}">${rule.then}</b>`);
-                        diagnoses.push(rule.then);
-                        document.getElementById('ai-es-log').innerHTML=log.join('<br>');
-                        await new Promise(r=>setTimeout(r,600));
+            document.getElementById('ai-es-run').addEventListener('click', async () => {
+                let wm = new Set(symptoms.filter(s => document.getElementById(`ai-es-${s}`) && document.getElementById(`ai-es-${s}`).checked));
+                const log = [`📋 Initial facts: [${[...wm].join(', ') || 'none'}]`];
+                document.getElementById('ai-es-log').innerHTML = log.join('<br>');
+                let fired = true; const diagnoses = [];
+                while (fired) {
+                    fired = false;
+                    for (const rule of KB) {
+                        KB.forEach(r => document.getElementById('ai-es-rule-' + r.id) && (document.getElementById('ai-es-rule-' + r.id).style.background = ''));
+                        if (!wm.has(rule.then) && rule.if.every(c => wm.has(c))) {
+                            const el = document.getElementById('ai-es-rule-' + rule.id);
+                            if (el) el.style.background = AC + '33';
+                            wm.add(rule.then); fired = true;
+                            log.push(`🔥 Fire ${rule.id}: derived <b style="color:${AC}">${rule.then}</b>`);
+                            diagnoses.push(rule.then);
+                            document.getElementById('ai-es-log').innerHTML = log.join('<br>');
+                            await new Promise(r => setTimeout(r, 600));
+                        }
                     }
                 }
-            }
-            const final=diagnoses.filter(d=>!['flu','measles','pneumonia','meningitis','tuberculosis'].includes(d)||d==='influenza_confirmed'?false:true);
-            const diags=diagnoses.filter(d=>!['influenza_confirmed'].includes(d));
-            document.getElementById('ai-es-diagnosis').innerHTML=diags.length?`<div style="padding:14px;background:#22c55e22;border:1px solid #22c55e;border-radius:10px;"><div style="font-weight:800;font-size:14px;color:#22c55e;">✅ Diagnosis: ${diags.join(', ')}</div><div style="font-size:12px;margin-top:4px;color:var(--text-muted);">Based on ${log.length} inference steps</div></div>`:`<div style="padding:14px;background:#ef444422;border:1px solid #ef4444;border-radius:10px;font-weight:700;color:#ef4444;">❌ No diagnosis derived from given symptoms.</div>`;
-        });
-        document.getElementById('ai-es-reset').addEventListener('click',()=>{symptoms.forEach(s=>{const el=document.getElementById('ai-es-'+s);if(el)el.checked=false;});document.getElementById('ai-es-log').innerHTML='';document.getElementById('ai-es-diagnosis').innerHTML='';KB.forEach(r=>{const el=document.getElementById('ai-es-rule-'+r.id);if(el)el.style.background='';});});
-    };
+                const final = diagnoses.filter(d => !['flu', 'measles', 'pneumonia', 'meningitis', 'tuberculosis'].includes(d) || d === 'influenza_confirmed' ? false : true);
+                const diags = diagnoses.filter(d => !['influenza_confirmed'].includes(d));
+                document.getElementById('ai-es-diagnosis').innerHTML = diags.length ? `<div style="padding:14px;background:#22c55e22;border:1px solid #22c55e;border-radius:10px;"><div style="font-weight:800;font-size:14px;color:#22c55e;">✅ Diagnosis: ${diags.join(', ')}</div><div style="font-size:12px;margin-top:4px;color:var(--text-muted);">Based on ${log.length} inference steps</div></div>` : `<div style="padding:14px;background:#ef444422;border:1px solid #ef4444;border-radius:10px;font-weight:700;color:#ef4444;">❌ No diagnosis derived from given symptoms.</div>`;
+            });
+            document.getElementById('ai-es-reset').addEventListener('click', () => { symptoms.forEach(s => { const el = document.getElementById('ai-es-' + s); if (el) el.checked = false; }); document.getElementById('ai-es-log').innerHTML = ''; document.getElementById('ai-es-diagnosis').innerHTML = ''; KB.forEach(r => { const el = document.getElementById('ai-es-rule-' + r.id); if (el) el.style.background = ''; }); });
+        };
 
-    const buildSimHeader = (title, subtitle, icon, color) => {
-        return `<div style="padding:15px;border-bottom:1px solid var(--border);background:linear-gradient(135deg,${color}15,transparent);display:flex;align-items:center;gap:12px;border-radius:12px 12px 0 0;">
+        const buildSimHeader = (title, subtitle, icon, color) => {
+            return `<div style="padding:15px;border-bottom:1px solid var(--border);background:linear-gradient(135deg,${color}15,transparent);display:flex;align-items:center;gap:12px;border-radius:12px 12px 0 0;">
             <div style="font-size:32px;">${icon}</div>
             <div>
                 <h3 style="margin:0;font-size:16px;color:${color}">${title}</h3>
                 <p style="margin:2px 0 0;font-size:11px;color:var(--text-muted);">${subtitle}</p>
             </div>
         </div>`;
-    };
+        };
 
-    // ── CLOUD COMPUTING SIMULATIONS ──────────────────────────────────────
-    const initCloudVirtualizationSim = (container) => {
-        const AC = '#0ea5e9';
-        container.innerHTML = buildSimHeader('VM Lifecycle Manager', 'Provision and manage virtual instances', '🖥️', AC) + `
+        // ── CLOUD COMPUTING SIMULATIONS ──────────────────────────────────────
+        const initCloudVirtualizationSim = (container) => {
+            const AC = '#0ea5e9';
+            container.innerHTML = buildSimHeader('VM Lifecycle Manager', 'Provision and manage virtual instances', '🖥️', AC) + `
         <div style="padding:15px;font-family:var(--font-sans);font-size:13px;display:grid;grid-template-columns:1fr 1fr;gap:15px;">
             <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;">
                 <h4 style="margin:0 0 10px;color:${AC}">Provision VM</h4>
@@ -13892,16 +13917,16 @@ ${cfg.diagram}
                 <div id="cv-vm-list" style="flex:1;display:flex;flex-direction:column;gap:8px;overflow-y:auto;max-height:220px;"></div>
             </div>
         </div>`;
-        let vms = [];
-        const render = () => {
-            const list = document.getElementById('cv-vm-list');
-            if(!list) return;
-            if(!vms.length) { list.innerHTML = '<div style="color:var(--text-muted);text-align:center;padding:20px;">No VMs provisioned</div>'; return; }
-            list.innerHTML = vms.map(vm => `
+            let vms = [];
+            const render = () => {
+                const list = document.getElementById('cv-vm-list');
+                if (!list) return;
+                if (!vms.length) { list.innerHTML = '<div style="color:var(--text-muted);text-align:center;padding:20px;">No VMs provisioned</div>'; return; }
+                list.innerHTML = vms.map(vm => `
                 <div style="border:1px solid var(--border);border-radius:6px;padding:8px;display:flex;justify-content:space-between;align-items:center;background:var(--bg-card);">
                     <div>
                         <b>${vm.name}</b> (${vm.cpu} vCPU, ${vm.ram}GB RAM)<br>
-                        <span style="font-size:10px;color:${vm.status==='Running'?'#22c55e':vm.status==='Paused'?'#fbbf24':'#ef4444'}">${vm.status}</span>
+                        <span style="font-size:10px;color:${vm.status === 'Running' ? '#22c55e' : vm.status === 'Paused' ? '#fbbf24' : '#ef4444'}">${vm.status}</span>
                     </div>
                     <div style="display:flex;gap:4px;">
                         <button class="cv-act-run" data-id="${vm.id}" style="padding:4px;border:none;border-radius:4px;background:#22c55e22;color:#22c55e;cursor:pointer;">▶</button>
@@ -13910,29 +13935,29 @@ ${cfg.diagram}
                     </div>
                 </div>
             `).join('');
-            list.querySelectorAll('.cv-act-run').forEach(btn => {
-                btn.onclick = () => { const vm = vms.find(v=>v.id===btn.dataset.id); if(vm){vm.status='Running'; render();} };
-            });
-            list.querySelectorAll('.cv-act-pause').forEach(btn => {
-                btn.onclick = () => { const vm = vms.find(v=>v.id===btn.dataset.id); if(vm){vm.status='Paused'; render();} };
-            });
-            list.querySelectorAll('.cv-act-delete').forEach(btn => {
-                btn.onclick = () => { vms = vms.filter(v=>v.id!==btn.dataset.id); render(); };
-            });
-        };
-        document.getElementById('cv-vm-create').onclick = () => {
-            const name = document.getElementById('cv-vm-name').value;
-            const cpu = document.getElementById('cv-vm-cpu').value;
-            const ram = document.getElementById('cv-vm-ram').value;
-            vms.push({ id: Math.random().toString(36).slice(2, 11), name, cpu, ram, status: 'Running' });
+                list.querySelectorAll('.cv-act-run').forEach(btn => {
+                    btn.onclick = () => { const vm = vms.find(v => v.id === btn.dataset.id); if (vm) { vm.status = 'Running'; render(); } };
+                });
+                list.querySelectorAll('.cv-act-pause').forEach(btn => {
+                    btn.onclick = () => { const vm = vms.find(v => v.id === btn.dataset.id); if (vm) { vm.status = 'Paused'; render(); } };
+                });
+                list.querySelectorAll('.cv-act-delete').forEach(btn => {
+                    btn.onclick = () => { vms = vms.filter(v => v.id !== btn.dataset.id); render(); };
+                });
+            };
+            document.getElementById('cv-vm-create').onclick = () => {
+                const name = document.getElementById('cv-vm-name').value;
+                const cpu = document.getElementById('cv-vm-cpu').value;
+                const ram = document.getElementById('cv-vm-ram').value;
+                vms.push({ id: Math.random().toString(36).slice(2, 11), name, cpu, ram, status: 'Running' });
+                render();
+            };
             render();
         };
-        render();
-    };
 
-    const initCloudDockerSim = (container) => {
-        const AC = '#0ea5e9';
-        container.innerHTML = buildSimHeader('Docker Container Manager', 'Build images and spin up containerized services', '🐳', AC) + `
+        const initCloudDockerSim = (container) => {
+            const AC = '#0ea5e9';
+            container.innerHTML = buildSimHeader('Docker Container Manager', 'Build images and spin up containerized services', '🐳', AC) + `
         <div style="padding:15px;font-family:var(--font-sans);font-size:13px;display:grid;grid-template-columns:1.2fr 1fr;gap:15px;">
             <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;">
                 <h4 style="margin:0 0 8px;color:${AC}">Dockerfile</h4>
@@ -13946,33 +13971,33 @@ ${cfg.diagram}
                 </div>
             </div>
         </div>`;
-        let containers = [];
-        const render = () => {
-            const list = document.getElementById('cd-c-list');
-            if(!list) return;
-            if(!containers.length) { list.innerHTML = '<div style="color:var(--text-muted);text-align:center;padding:20px;">No containers running</div>'; return; }
-            list.innerHTML = containers.map(c => `
+            let containers = [];
+            const render = () => {
+                const list = document.getElementById('cd-c-list');
+                if (!list) return;
+                if (!containers.length) { list.innerHTML = '<div style="color:var(--text-muted);text-align:center;padding:20px;">No containers running</div>'; return; }
+                list.innerHTML = containers.map(c => `
                 <div style="border:1px solid var(--border);border-radius:6px;padding:8px;background:var(--bg-card);font-family:monospace;font-size:11px;">
                     <b>ID:</b> ${c.id} | <b>Port:</b> ${c.port}<br>
                     <span style="color:#22c55e">● Up ${c.uptime}s</span>
                 </div>
             `).join('');
+            };
+            document.getElementById('cd-build').onclick = () => {
+                const id = 'c-' + Math.floor(Math.random() * 9000 + 1000);
+                const port = '8080:' + Math.floor(Math.random() * 90 + 80);
+                containers.push({ id, port, uptime: 0 });
+                render();
+                setInterval(() => {
+                    const c = containers.find(x => x.id === id);
+                    if (c) { c.uptime++; render(); }
+                }, 1000);
+            };
         };
-        document.getElementById('cd-build').onclick = () => {
-            const id = 'c-' + Math.floor(Math.random()*9000+1000);
-            const port = '8080:' + Math.floor(Math.random()*90+80);
-            containers.push({ id, port, uptime: 0 });
-            render();
-            setInterval(() => {
-                const c = containers.find(x=>x.id===id);
-                if(c) { c.uptime++; render(); }
-            }, 1000);
-        };
-    };
 
-    const initCloudLoadBalancerSim = (container) => {
-        const AC = '#0ea5e9';
-        container.innerHTML = buildSimHeader('Load Balancer Router', 'Distribute client traffic to servers', '⚖️', AC) + `
+        const initCloudLoadBalancerSim = (container) => {
+            const AC = '#0ea5e9';
+            container.innerHTML = buildSimHeader('Load Balancer Router', 'Distribute client traffic to servers', '⚖️', AC) + `
         <div style="padding:15px;font-family:var(--font-sans);font-size:13px;display:grid;grid-template-columns:1.2fr 1fr;gap:15px;">
             <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;">
                 <h4 style="margin:0 0 10px;color:${AC}">Controls</h4>
@@ -13993,27 +14018,27 @@ ${cfg.diagram}
                 </div>
             </div>
         </div>`;
-        let reqs = [0, 0, 0]; let rrIdx = 0;
-        document.getElementById('clb-send').onclick = () => {
-            const algo = document.getElementById('clb-algo').value;
-            let target = 0;
-            if (algo === 'rr') {
-                target = rrIdx;
-                rrIdx = (rrIdx + 1) % 3;
-            } else {
-                target = Math.floor(Math.random()*3);
-            }
-            reqs[target]++;
-            const sEl = document.getElementById(`clb-s${target}`);
-            sEl.querySelector('.req').textContent = reqs[target];
-            sEl.style.background = AC + '22';
-            setTimeout(() => { sEl.style.background = ''; }, 300);
+            let reqs = [0, 0, 0]; let rrIdx = 0;
+            document.getElementById('clb-send').onclick = () => {
+                const algo = document.getElementById('clb-algo').value;
+                let target = 0;
+                if (algo === 'rr') {
+                    target = rrIdx;
+                    rrIdx = (rrIdx + 1) % 3;
+                } else {
+                    target = Math.floor(Math.random() * 3);
+                }
+                reqs[target]++;
+                const sEl = document.getElementById(`clb-s${target}`);
+                sEl.querySelector('.req').textContent = reqs[target];
+                sEl.style.background = AC + '22';
+                setTimeout(() => { sEl.style.background = ''; }, 300);
+            };
         };
-    };
 
-    const initCloudAutoScalingSim = (container) => {
-        const AC = '#0ea5e9';
-        container.innerHTML = buildSimHeader('Auto-Scaling Engine', 'Dynamic resource provisioning based on CPU load', '📈', AC) + `
+        const initCloudAutoScalingSim = (container) => {
+            const AC = '#0ea5e9';
+            container.innerHTML = buildSimHeader('Auto-Scaling Engine', 'Dynamic resource provisioning based on CPU load', '📈', AC) + `
         <div style="padding:15px;font-family:var(--font-sans);font-size:13px;display:grid;grid-template-columns:1fr 1.2fr;gap:15px;">
             <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;">
                 <h4 style="margin:0 0 10px;color:${AC}">Scale Controller</h4>
@@ -14030,34 +14055,34 @@ ${cfg.diagram}
                 <div id="cas-nodes" style="display:flex;gap:8px;flex-wrap:wrap;"></div>
             </div>
         </div>`;
-        let nodes = 1;
-        const render = () => {
-            const containerNodes = document.getElementById('cas-nodes');
-            if(!containerNodes) return;
-            containerNodes.innerHTML = Array(nodes).fill(0).map((_,i) => `
+            let nodes = 1;
+            const render = () => {
+                const containerNodes = document.getElementById('cas-nodes');
+                if (!containerNodes) return;
+                containerNodes.innerHTML = Array(nodes).fill(0).map((_, i) => `
                 <div style="border:1.5px solid ${AC};border-radius:8px;padding:12px;background:var(--bg-card);text-align:center;width:60px;">
                     <div style="font-size:20px;">🖥️</div>
-                    <span style="font-size:10px;font-weight:700;color:${AC}">Node-${i+1}</span>
+                    <span style="font-size:10px;font-weight:700;color:${AC}">Node-${i + 1}</span>
                 </div>
             `).join('');
+            };
+            document.getElementById('cas-load').oninput = (e) => {
+                const val = parseInt(e.target.value);
+                document.getElementById('cas-load-txt').textContent = val + '%';
+                if (val > 75 && nodes < 4) {
+                    nodes++;
+                    render();
+                } else if (val < 25 && nodes > 1) {
+                    nodes--;
+                    render();
+                }
+            };
+            render();
         };
-        document.getElementById('cas-load').oninput = (e) => {
-            const val = parseInt(e.target.value);
-            document.getElementById('cas-load-txt').textContent = val + '%';
-            if (val > 75 && nodes < 4) {
-                nodes++;
-                render();
-            } else if (val < 25 && nodes > 1) {
-                nodes--;
-                render();
-            }
-        };
-        render();
-    };
 
-    const initCloudStorageSim = (container) => {
-        const AC = '#0ea5e9';
-        container.innerHTML = buildSimHeader('Distributed Object Storage', 'Upload objects and replicate data across Availability Zones', '📦', AC) + `
+        const initCloudStorageSim = (container) => {
+            const AC = '#0ea5e9';
+            container.innerHTML = buildSimHeader('Distributed Object Storage', 'Upload objects and replicate data across Availability Zones', '📦', AC) + `
         <div style="padding:15px;font-family:var(--font-sans);font-size:13px;display:grid;grid-template-columns:1fr 1.2fr;gap:15px;">
             <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;">
                 <h4 style="margin:0 0 10px;color:${AC}">Upload Object</h4>
@@ -14073,23 +14098,23 @@ ${cfg.diagram}
                 </div>
             </div>
         </div>`;
-        document.getElementById('cs-upload').onclick = () => {
-            const fname = document.getElementById('cs-file-name').value;
-            for(let i=0;i<3;i++) {
-                const el = document.getElementById(`cs-z${i}`);
-                el.style.color = '#fbbf24';
-                el.textContent = 'Syncing...';
-                setTimeout(() => {
-                    el.style.color = '#22c55e';
-                    el.textContent = `Synced: ${fname}`;
-                }, (i+1)*400);
-            }
+            document.getElementById('cs-upload').onclick = () => {
+                const fname = document.getElementById('cs-file-name').value;
+                for (let i = 0; i < 3; i++) {
+                    const el = document.getElementById(`cs-z${i}`);
+                    el.style.color = '#fbbf24';
+                    el.textContent = 'Syncing...';
+                    setTimeout(() => {
+                        el.style.color = '#22c55e';
+                        el.textContent = `Synced: ${fname}`;
+                    }, (i + 1) * 400);
+                }
+            };
         };
-    };
 
-    const initCloudCdnSim = (container) => {
-        const AC = '#0ea5e9';
-        container.innerHTML = buildSimHeader('CDN Cache Manager', 'Cache static assets on global edge servers', '🌐', AC) + `
+        const initCloudCdnSim = (container) => {
+            const AC = '#0ea5e9';
+            container.innerHTML = buildSimHeader('CDN Cache Manager', 'Cache static assets on global edge servers', '🌐', AC) + `
         <div style="padding:15px;font-family:var(--font-sans);font-size:13px;display:grid;grid-template-columns:1fr 1fr;gap:15px;">
             <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center;">
                 <h4 style="margin:0 0 10px;color:${AC}">Global Clients</h4>
@@ -14104,25 +14129,25 @@ ${cfg.diagram}
                 <div id="cdn-log" style="font-family:monospace;font-size:11px;line-height:1.6;overflow-y:auto;max-height:150px;"></div>
             </div>
         </div>`;
-        const cache = {};
-        container.querySelectorAll('.cdn-fetch').forEach(btn => {
-            btn.onclick = () => {
-                const city = btn.getAttribute('data-city');
-                const log = document.getElementById('cdn-log');
-                if (cache[city]) {
-                    log.innerHTML += `<div style="color:#22c55e">● Cache HIT at ${city} Edge (12ms)</div>`;
-                } else {
-                    cache[city] = true;
-                    log.innerHTML += `<div style="color:#ef4444">○ Cache MISS at ${city} Edge -> Origin Fetch (240ms)</div>`;
-                }
-                log.scrollTop = log.scrollHeight;
-            };
-        });
-    };
+            const cache = {};
+            container.querySelectorAll('.cdn-fetch').forEach(btn => {
+                btn.onclick = () => {
+                    const city = btn.getAttribute('data-city');
+                    const log = document.getElementById('cdn-log');
+                    if (cache[city]) {
+                        log.innerHTML += `<div style="color:#22c55e">● Cache HIT at ${city} Edge (12ms)</div>`;
+                    } else {
+                        cache[city] = true;
+                        log.innerHTML += `<div style="color:#ef4444">○ Cache MISS at ${city} Edge -> Origin Fetch (240ms)</div>`;
+                    }
+                    log.scrollTop = log.scrollHeight;
+                };
+            });
+        };
 
-    const initCloudIamSim = (container) => {
-        const AC = '#0ea5e9';
-        container.innerHTML = buildSimHeader('IAM Identity Broker', 'Define users, policies, and test access control', '🔑', AC) + `
+        const initCloudIamSim = (container) => {
+            const AC = '#0ea5e9';
+            container.innerHTML = buildSimHeader('IAM Identity Broker', 'Define users, policies, and test access control', '🔑', AC) + `
         <div style="padding:15px;font-family:var(--font-sans);font-size:13px;display:grid;grid-template-columns:1fr 1fr;gap:15px;">
             <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;">
                 <h4 style="margin:0 0 8px;color:${AC}">IAM Policy</h4>
@@ -14151,25 +14176,25 @@ ${cfg.diagram}
                 <div id="iam-result-text" style="font-weight:700;margin-top:10px;">Configure and test access rules</div>
             </div>
         </div>`;
-        document.getElementById('iam-test').onclick = () => {
-            const user = document.getElementById('iam-user').value;
-            const res = document.getElementById('iam-resource').value;
-            const act = document.getElementById('iam-action').value;
-            const rIcon = document.getElementById('iam-result-icon');
-            const rText = document.getElementById('iam-result-text');
-            if (user === 'admin' || (user === 'readOnly' && act === 'read')) {
-                rIcon.textContent = '🔓';
-                rText.innerHTML = '<span style="color:#22c55e">Access ALLOWED</span>';
-            } else {
-                rIcon.textContent = '❌';
-                rText.innerHTML = '<span style="color:#ef4444">Access DENIED</span><br><span style="font-size:11px;color:var(--text-muted);">Missing permission policy</span>';
-            }
+            document.getElementById('iam-test').onclick = () => {
+                const user = document.getElementById('iam-user').value;
+                const res = document.getElementById('iam-resource').value;
+                const act = document.getElementById('iam-action').value;
+                const rIcon = document.getElementById('iam-result-icon');
+                const rText = document.getElementById('iam-result-text');
+                if (user === 'admin' || (user === 'readOnly' && act === 'read')) {
+                    rIcon.textContent = '🔓';
+                    rText.innerHTML = '<span style="color:#22c55e">Access ALLOWED</span>';
+                } else {
+                    rIcon.textContent = '❌';
+                    rText.innerHTML = '<span style="color:#ef4444">Access DENIED</span><br><span style="font-size:11px;color:var(--text-muted);">Missing permission policy</span>';
+                }
+            };
         };
-    };
 
-    const initCloudServerlessSim = (container) => {
-        const AC = '#0ea5e9';
-        container.innerHTML = buildSimHeader('Serverless FaaS Sandbox', 'Deploy event-driven functions and monitor cold starts', '⚡', AC) + `
+        const initCloudServerlessSim = (container) => {
+            const AC = '#0ea5e9';
+            container.innerHTML = buildSimHeader('Serverless FaaS Sandbox', 'Deploy event-driven functions and monitor cold starts', '⚡', AC) + `
         <div style="padding:15px;font-family:var(--font-sans);font-size:13px;display:grid;grid-template-columns:1.2fr 1fr;gap:15px;">
             <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;">
                 <h4 style="margin:0 0 8px;color:${AC}">Handler Code (Node.js)</h4>
@@ -14185,23 +14210,23 @@ ${cfg.diagram}
                 </div>
             </div>
         </div>`;
-        let cold = true;
-        document.getElementById('cf-deploy').onclick = () => {
-            const mEl = document.getElementById('cf-metrics');
-            const latency = cold ? Math.floor(Math.random()*250+150) + 'ms (Cold Start)' : Math.floor(Math.random()*15+3) + 'ms (Warm)';
-            cold = false;
-            mEl.innerHTML = `
+            let cold = true;
+            document.getElementById('cf-deploy').onclick = () => {
+                const mEl = document.getElementById('cf-metrics');
+                const latency = cold ? Math.floor(Math.random() * 250 + 150) + 'ms (Cold Start)' : Math.floor(Math.random() * 15 + 3) + 'ms (Warm)';
+                cold = false;
+                mEl.innerHTML = `
                 Status: <span style="color:#22c55e">● Success (200)</span><br>
-                Latency: <span style="color:${cold?'#fbbf24':'#22c55e'}">${latency}</span><br>
+                Latency: <span style="color:${cold ? '#fbbf24' : '#22c55e'}">${latency}</span><br>
                 Response: <span style="color:#0ea5e9">{ "greeting": "Hello, World!" }</span>
             `;
-            setTimeout(() => { cold = true; }, 8000);
+                setTimeout(() => { cold = true; }, 8000);
+            };
         };
-    };
 
-    const initCloudSlaSim = (container) => {
-        const AC = '#0ea5e9';
-        container.innerHTML = buildSimHeader('SLA Monitoring Dashboard', 'Simulate system load and measure reliability thresholds', '📊', AC) + `
+        const initCloudSlaSim = (container) => {
+            const AC = '#0ea5e9';
+            container.innerHTML = buildSimHeader('SLA Monitoring Dashboard', 'Simulate system load and measure reliability thresholds', '📊', AC) + `
         <div style="padding:15px;font-family:var(--font-sans);font-size:13px;display:grid;grid-template-columns:1fr 1.2fr;gap:15px;">
             <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;">
                 <h4 style="margin:0 0 10px;color:${AC}">SLA Metric Options</h4>
@@ -14215,27 +14240,27 @@ ${cfg.diagram}
                 Active Status: <span id="csla-status" style="color:#22c55e;font-weight:700;">Healthy</span>
             </div>
         </div>`;
-        document.getElementById('csla-normal').onclick = () => {
-            document.getElementById('csla-avail').textContent = '100%';
-            document.getElementById('csla-avail').style.color = '#22c55e';
-            document.getElementById('csla-status').textContent = 'Healthy';
-            document.getElementById('csla-status').style.color = '#22c55e';
-        };
-        document.getElementById('csla-fail').onclick = () => {
-            document.getElementById('csla-avail').textContent = '99.85%';
-            document.getElementById('csla-avail').style.color = '#ef4444';
-            document.getElementById('csla-status').textContent = 'Failing over to US-West backup...';
-            document.getElementById('csla-status').style.color = '#fbbf24';
-            setTimeout(() => {
-                document.getElementById('csla-status').textContent = 'Recovered (Multi-AZ redundant)';
+            document.getElementById('csla-normal').onclick = () => {
+                document.getElementById('csla-avail').textContent = '100%';
+                document.getElementById('csla-avail').style.color = '#22c55e';
+                document.getElementById('csla-status').textContent = 'Healthy';
                 document.getElementById('csla-status').style.color = '#22c55e';
-            }, 1500);
+            };
+            document.getElementById('csla-fail').onclick = () => {
+                document.getElementById('csla-avail').textContent = '99.85%';
+                document.getElementById('csla-avail').style.color = '#ef4444';
+                document.getElementById('csla-status').textContent = 'Failing over to US-West backup...';
+                document.getElementById('csla-status').style.color = '#fbbf24';
+                setTimeout(() => {
+                    document.getElementById('csla-status').textContent = 'Recovered (Multi-AZ redundant)';
+                    document.getElementById('csla-status').style.color = '#22c55e';
+                }, 1500);
+            };
         };
-    };
 
-    const initCloudMapReduceSim = (container) => {
-        const AC = '#0ea5e9';
-        container.innerHTML = buildSimHeader('MapReduce Cluster Console', 'Distribute computation tasks to Map/Reduce worker nodes', '🔀', AC) + `
+        const initCloudMapReduceSim = (container) => {
+            const AC = '#0ea5e9';
+            container.innerHTML = buildSimHeader('MapReduce Cluster Console', 'Distribute computation tasks to Map/Reduce worker nodes', '🔀', AC) + `
         <div style="padding:15px;font-family:var(--font-sans);font-size:13px;display:grid;grid-template-columns:1fr 1fr;gap:15px;">
             <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;">
                 <h4 style="margin:0 0 8px;color:${AC}">Dataset Input</h4>
@@ -14247,25 +14272,25 @@ ${cfg.diagram}
                 <div id="cmr-out" style="font-family:monospace;font-size:11px;overflow-y:auto;max-height:140px;line-height:1.8;"></div>
             </div>
         </div>`;
-        document.getElementById('cmr-run').onclick = () => {
-            const val = document.getElementById('cmr-input').value;
-            const words = val.trim().split(/\s+/);
-            const out = document.getElementById('cmr-out');
-            out.innerHTML = '<b>Mapping...</b><br>';
-            const mapping = words.map(w=>`(${w}, 1)`).join(', ');
-            out.innerHTML += `<span style="color:var(--text-muted)">${mapping}</span><br>`;
-            setTimeout(() => {
-                out.innerHTML += '<b style="color:#0ea5e9">Reducing & Aggregating...</b><br>';
-                const counts = {};
-                words.forEach(w => counts[w] = (counts[w] || 0) + 1);
-                out.innerHTML += Object.keys(counts).map(k=>`<b>${k}:</b> ${counts[k]}`).join('<br>');
-            }, 1000);
+            document.getElementById('cmr-run').onclick = () => {
+                const val = document.getElementById('cmr-input').value;
+                const words = val.trim().split(/\s+/);
+                const out = document.getElementById('cmr-out');
+                out.innerHTML = '<b>Mapping...</b><br>';
+                const mapping = words.map(w => `(${w}, 1)`).join(', ');
+                out.innerHTML += `<span style="color:var(--text-muted)">${mapping}</span><br>`;
+                setTimeout(() => {
+                    out.innerHTML += '<b style="color:#0ea5e9">Reducing & Aggregating...</b><br>';
+                    const counts = {};
+                    words.forEach(w => counts[w] = (counts[w] || 0) + 1);
+                    out.innerHTML += Object.keys(counts).map(k => `<b>${k}:</b> ${counts[k]}`).join('<br>');
+                }, 1000);
+            };
         };
-    };
 
-    const initCloudKubernetesSim = (container) => {
-        const AC = '#0ea5e9';
-        container.innerHTML = buildSimHeader('K8s Cluster Scheduler', 'Assign application pods to worker nodes based on CPU limits', '☸️', AC) + `
+        const initCloudKubernetesSim = (container) => {
+            const AC = '#0ea5e9';
+            container.innerHTML = buildSimHeader('K8s Cluster Scheduler', 'Assign application pods to worker nodes based on CPU limits', '☸️', AC) + `
         <div style="padding:15px;font-family:var(--font-sans);font-size:13px;display:grid;grid-template-columns:1fr 1.2fr;gap:15px;">
             <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;">
                 <h4 style="margin:0 0 10px;color:${AC}">Schedule Pod</h4>
@@ -14286,31 +14311,31 @@ ${cfg.diagram}
                 </div>
             </div>
         </div>`;
-        let n0 = 2; let n1 = 1;
-        document.getElementById('ck-sched').onclick = () => {
-            const cpu = parseInt(document.getElementById('ck-cpu').value);
-            const name = document.getElementById('ck-name').value;
-            let targetNode = null;
-            if (n0 + cpu <= 4) {
-                targetNode = 0;
-                n0 += cpu;
-            } else if (n1 + cpu <= 4) {
-                targetNode = 1;
-                n1 += cpu;
-            }
-            if (targetNode !== null) {
-                const el = document.getElementById(`ck-n${targetNode}`);
-                el.innerHTML += `<span style="background:${AC}40;color:${AC};border:1px solid ${AC};padding:2px 6px;border-radius:4px;font-size:10px;">${name} (\${cpu}C)</span>`;
-            } else {
-                alert('Out of scheduling capacity! Scale cluster node pool.');
-            }
+            let n0 = 2; let n1 = 1;
+            document.getElementById('ck-sched').onclick = () => {
+                const cpu = parseInt(document.getElementById('ck-cpu').value);
+                const name = document.getElementById('ck-name').value;
+                let targetNode = null;
+                if (n0 + cpu <= 4) {
+                    targetNode = 0;
+                    n0 += cpu;
+                } else if (n1 + cpu <= 4) {
+                    targetNode = 1;
+                    n1 += cpu;
+                }
+                if (targetNode !== null) {
+                    const el = document.getElementById(`ck-n${targetNode}`);
+                    el.innerHTML += `<span style="background:${AC}40;color:${AC};border:1px solid ${AC};padding:2px 6px;border-radius:4px;font-size:10px;">${name} (\${cpu}C)</span>`;
+                } else {
+                    alert('Out of scheduling capacity! Scale cluster node pool.');
+                }
+            };
         };
-    };
 
-    // ── CYBERSECURITY SIMULATIONS ────────────────────────────────────────
-    const initCyberCaesarSim = (container) => {
-        const AC = '#ef4444';
-        container.innerHTML = buildSimHeader('Caesar & ROT13 Encryption', 'Shift characters along the alphabet ring', '🔐', AC) + `
+        // ── CYBERSECURITY SIMULATIONS ────────────────────────────────────────
+        const initCyberCaesarSim = (container) => {
+            const AC = '#ef4444';
+            container.innerHTML = buildSimHeader('Caesar & ROT13 Encryption', 'Shift characters along the alphabet ring', '🔐', AC) + `
         <div style="padding:15px;font-family:var(--font-sans);font-size:13px;display:grid;grid-template-columns:1fr 1.2fr;gap:15px;">
             <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;">
                 <h4 style="margin:0 0 8px;color:${AC}">Config</h4>
@@ -14323,27 +14348,27 @@ ${cfg.diagram}
                 Formula: C = (P + K) mod 26
             </div>
         </div>`;
-        const run = () => {
-            const shift = parseInt(document.getElementById('cc-shift').value) || 0;
-            const plain = document.getElementById('cc-plain').value.toUpperCase();
-            let c = '';
-            for(let i=0;i<plain.length;i++){
-                const code = plain.charCodeAt(i);
-                if(code >= 65 && code <= 90) {
-                    c += String.fromCharCode(((code - 65 + shift) % 26) + 65);
-                } else {
-                    c += plain.charAt(i);
+            const run = () => {
+                const shift = parseInt(document.getElementById('cc-shift').value) || 0;
+                const plain = document.getElementById('cc-plain').value.toUpperCase();
+                let c = '';
+                for (let i = 0; i < plain.length; i++) {
+                    const code = plain.charCodeAt(i);
+                    if (code >= 65 && code <= 90) {
+                        c += String.fromCharCode(((code - 65 + shift) % 26) + 65);
+                    } else {
+                        c += plain.charAt(i);
+                    }
                 }
-            }
-            document.getElementById('cc-cipher').textContent = c;
+                document.getElementById('cc-cipher').textContent = c;
+            };
+            document.getElementById('cc-shift').oninput = run;
+            document.getElementById('cc-plain').oninput = run;
         };
-        document.getElementById('cc-shift').oninput = run;
-        document.getElementById('cc-plain').oninput = run;
-    };
 
-    const initCyberVigenereSim = (container) => {
-        const AC = '#ef4444';
-        container.innerHTML = buildSimHeader('Vigenère Polyalphabetic Cipher', 'Encrypt data using a repeating string key matrix', '🔐', AC) + `
+        const initCyberVigenereSim = (container) => {
+            const AC = '#ef4444';
+            container.innerHTML = buildSimHeader('Vigenère Polyalphabetic Cipher', 'Encrypt data using a repeating string key matrix', '🔐', AC) + `
         <div style="padding:15px;font-family:var(--font-sans);font-size:13px;display:grid;grid-template-columns:1fr 1.2fr;gap:15px;">
             <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;">
                 <h4 style="margin:0 0 8px;color:${AC}">Input Parameters</h4>
@@ -14356,27 +14381,27 @@ ${cfg.diagram}
                 Ciphered Text: <b id="cvig-cipher" style="color:${AC};font-size:15px;">KXRECK</b>
             </div>
         </div>`;
-        const run = () => {
-            const key = document.getElementById('cvig-key').value.toUpperCase().replace(/[^A-Z]/g,'');
-            const plain = document.getElementById('cvig-plain').value.toUpperCase().replace(/[^A-Z]/g,'');
-            if(!key.length || !plain.length) return;
-            let repKey = ''; let cipher = '';
-            for(let i=0;i<plain.length;i++){
-                const kChar = key.charCodeAt(i % key.length) - 65;
-                const pChar = plain.charCodeAt(i) - 65;
-                repKey += key.charAt(i % key.length);
-                cipher += String.fromCharCode(((pChar + kChar) % 26) + 65);
-            }
-            document.getElementById('cvig-repkey').textContent = repKey;
-            document.getElementById('cvig-cipher').textContent = cipher;
+            const run = () => {
+                const key = document.getElementById('cvig-key').value.toUpperCase().replace(/[^A-Z]/g, '');
+                const plain = document.getElementById('cvig-plain').value.toUpperCase().replace(/[^A-Z]/g, '');
+                if (!key.length || !plain.length) return;
+                let repKey = ''; let cipher = '';
+                for (let i = 0; i < plain.length; i++) {
+                    const kChar = key.charCodeAt(i % key.length) - 65;
+                    const pChar = plain.charCodeAt(i) - 65;
+                    repKey += key.charAt(i % key.length);
+                    cipher += String.fromCharCode(((pChar + kChar) % 26) + 65);
+                }
+                document.getElementById('cvig-repkey').textContent = repKey;
+                document.getElementById('cvig-cipher').textContent = cipher;
+            };
+            document.getElementById('cvig-key').oninput = run;
+            document.getElementById('cvig-plain').oninput = run;
         };
-        document.getElementById('cvig-key').oninput = run;
-        document.getElementById('cvig-plain').oninput = run;
-    };
 
-    const initCyberRsaSim = (container) => {
-        const AC = '#ef4444';
-        container.innerHTML = buildSimHeader('RSA Asymmetric Cipher', 'Simulate key pair derivation and encrypt messages', '🔐', AC) + `
+        const initCyberRsaSim = (container) => {
+            const AC = '#ef4444';
+            container.innerHTML = buildSimHeader('RSA Asymmetric Cipher', 'Simulate key pair derivation and encrypt messages', '🔐', AC) + `
         <div style="padding:15px;font-family:var(--font-sans);font-size:13px;display:grid;grid-template-columns:1fr 1fr;gap:15px;">
             <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;">
                 <h4 style="margin:0 0 8px;color:${AC}">Key Generation</h4>
@@ -14397,23 +14422,23 @@ ${cfg.diagram}
                 &nbsp;&nbsp; Decrypted = <b><span id="crsa-d">5</span></b>
             </div>
         </div>`;
-        const run = () => {
-            const m = parseInt(document.getElementById('crsa-msg').value) || 0;
-            const e = 3; const n = 33; const d = 7;
-            let c = 1;
-            for(let i=0;i<e;i++) c = (c * m) % n;
-            let plain = 1;
-            for(let i=0;i<d;i++) plain = (plain * c) % n;
-            document.getElementById('crsa-c').textContent = c;
-            document.getElementById('crsa-d').textContent = plain;
+            const run = () => {
+                const m = parseInt(document.getElementById('crsa-msg').value) || 0;
+                const e = 3; const n = 33; const d = 7;
+                let c = 1;
+                for (let i = 0; i < e; i++) c = (c * m) % n;
+                let plain = 1;
+                for (let i = 0; i < d; i++) plain = (plain * c) % n;
+                document.getElementById('crsa-c').textContent = c;
+                document.getElementById('crsa-d').textContent = plain;
+            };
+            document.getElementById('crsa-msg').oninput = run;
+            run();
         };
-        document.getElementById('crsa-msg').oninput = run;
-        run();
-    };
 
-    const initCyberAesSim = (container) => {
-        const AC = '#ef4444';
-        container.innerHTML = buildSimHeader('AES Symmetric Round Block', 'Observe diffusion and confusion block operations', '🔐', AC) + `
+        const initCyberAesSim = (container) => {
+            const AC = '#ef4444';
+            container.innerHTML = buildSimHeader('AES Symmetric Round Block', 'Observe diffusion and confusion block operations', '🔐', AC) + `
         <div style="padding:15px;font-family:var(--font-sans);font-size:13px;display:grid;grid-template-columns:1.2fr 1fr;gap:15px;">
             <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;">
                 <h4 style="margin:0 0 10px;color:${AC}">Round 1 Substitution State</h4>
@@ -14444,14 +14469,14 @@ ${cfg.diagram}
                 <div id="caes-log" style="font-size:11px;font-family:monospace;margin-top:6px;color:var(--text-muted);">Click a round step to execute transformation</div>
             </div>
         </div>`;
-        document.getElementById('caes-sub').onclick = () => { document.getElementById('caes-log').textContent = 'S-Box transformation applied: replaced bytes with Rijndael lookup mapping.'; };
-        document.getElementById('caes-shift').onclick = () => { document.getElementById('caes-log').textContent = 'Row offsets applied: Row 1 left-shifted 1 byte, Row 2 by 2 bytes, Row 3 by 3 bytes.'; };
-        document.getElementById('caes-mix').onclick = () => { document.getElementById('caes-log').textContent = 'Linear mapping applied: multiplied matrix columns against constant MDS matrix.'; };
-    };
+            document.getElementById('caes-sub').onclick = () => { document.getElementById('caes-log').textContent = 'S-Box transformation applied: replaced bytes with Rijndael lookup mapping.'; };
+            document.getElementById('caes-shift').onclick = () => { document.getElementById('caes-log').textContent = 'Row offsets applied: Row 1 left-shifted 1 byte, Row 2 by 2 bytes, Row 3 by 3 bytes.'; };
+            document.getElementById('caes-mix').onclick = () => { document.getElementById('caes-log').textContent = 'Linear mapping applied: multiplied matrix columns against constant MDS matrix.'; };
+        };
 
-    const initCyberHashingSim = (container) => {
-        const AC = '#ef4444';
-        container.innerHTML = buildSimHeader('Integrity Hashes & Avalanche Effect', 'Produce cryptographic signatures of data', '🔐', AC) + `
+        const initCyberHashingSim = (container) => {
+            const AC = '#ef4444';
+            container.innerHTML = buildSimHeader('Integrity Hashes & Avalanche Effect', 'Produce cryptographic signatures of data', '🔐', AC) + `
         <div style="padding:15px;font-family:var(--font-sans);font-size:13px;display:grid;grid-template-columns:1.2fr 1fr;gap:15px;">
             <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;">
                 <h4 style="margin:0 0 10px;color:${AC}">Input Message</h4>
@@ -14463,25 +14488,25 @@ ${cfg.diagram}
                 SHA-256:<br><b id="chash-sha2" style="color:${AC}">2c74a9f8b1c5e...</b>
             </div>
         </div>`;
-        const simpleHash = (str, len) => {
-            let h = 0;
-            for(let i=0;i<str.length;i++) h = (h * 31 + str.charCodeAt(i)) & 0xffffffff;
-            let res = Math.abs(h).toString(16);
-            while(res.length < len) res += 'a';
-            return res.substring(0, len);
+            const simpleHash = (str, len) => {
+                let h = 0;
+                for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) & 0xffffffff;
+                let res = Math.abs(h).toString(16);
+                while (res.length < len) res += 'a';
+                return res.substring(0, len);
+            };
+            const run = () => {
+                const val = document.getElementById('chash-msg').value;
+                document.getElementById('chash-md5').textContent = simpleHash(val, 32);
+                document.getElementById('chash-sha2').textContent = simpleHash(val + 'sha2', 64);
+            };
+            document.getElementById('chash-msg').oninput = run;
+            run();
         };
-        const run = () => {
-            const val = document.getElementById('chash-msg').value;
-            document.getElementById('chash-md5').textContent = simpleHash(val, 32);
-            document.getElementById('chash-sha2').textContent = simpleHash(val + 'sha2', 64);
-        };
-        document.getElementById('chash-msg').oninput = run;
-        run();
-    };
 
-    const initCyberFirewallSim = (container) => {
-        const AC = '#ef4444';
-        container.innerHTML = buildSimHeader('Firewall Inspection Engine', 'Apply access control rules to filter packets', '🛡️', AC) + `
+        const initCyberFirewallSim = (container) => {
+            const AC = '#ef4444';
+            container.innerHTML = buildSimHeader('Firewall Inspection Engine', 'Apply access control rules to filter packets', '🛡️', AC) + `
         <div style="padding:15px;font-family:var(--font-sans);font-size:13px;display:grid;grid-template-columns:1fr 1fr;gap:15px;">
             <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;">
                 <h4 style="margin:0 0 10px;color:${AC}">Active Policy</h4>
@@ -14500,23 +14525,23 @@ ${cfg.diagram}
                 <div id="cfw-res-txt" style="font-weight:700;margin-top:10px;">Packet status logs</div>
             </div>
         </div>`;
-        document.getElementById('cfw-test').onclick = () => {
-            const port = parseInt(document.getElementById('cfw-port').value);
-            const icon = document.getElementById('cfw-res-icon');
-            const txt = document.getElementById('cfw-res-txt');
-            if (port === 80 || port === 443 || port === 53) {
-                icon.textContent = '🟢';
-                txt.innerHTML = `<span style="color:#22c55e;font-weight:700;">PASS</span><br><span style="font-size:11px;color:var(--text-muted)">Matched port rule allowed</span>`;
-            } else {
-                icon.textContent = '🔴';
-                txt.innerHTML = `<span style="color:#ef4444;font-weight:700;">BLOCKED & DROPPED</span><br><span style="font-size:11px;color:var(--text-muted)">Default deny rule hit</span>`;
-            }
+            document.getElementById('cfw-test').onclick = () => {
+                const port = parseInt(document.getElementById('cfw-port').value);
+                const icon = document.getElementById('cfw-res-icon');
+                const txt = document.getElementById('cfw-res-txt');
+                if (port === 80 || port === 443 || port === 53) {
+                    icon.textContent = '🟢';
+                    txt.innerHTML = `<span style="color:#22c55e;font-weight:700;">PASS</span><br><span style="font-size:11px;color:var(--text-muted)">Matched port rule allowed</span>`;
+                } else {
+                    icon.textContent = '🔴';
+                    txt.innerHTML = `<span style="color:#ef4444;font-weight:700;">BLOCKED & DROPPED</span><br><span style="font-size:11px;color:var(--text-muted)">Default deny rule hit</span>`;
+                }
+            };
         };
-    };
 
-    const initCyberIdsSim = (container) => {
-        const AC = '#ef4444';
-        container.innerHTML = buildSimHeader('IDS Pattern Alerts', 'Monitor raw socket streams for attack patterns', '🚨', AC) + `
+        const initCyberIdsSim = (container) => {
+            const AC = '#ef4444';
+            container.innerHTML = buildSimHeader('IDS Pattern Alerts', 'Monitor raw socket streams for attack patterns', '🚨', AC) + `
         <div style="padding:15px;font-family:var(--font-sans);font-size:13px;display:grid;grid-template-columns:1fr 1fr;gap:15px;">
             <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center;">
                 <h4 style="margin:0 0 10px;color:${AC}">Trigger Signatures</h4>
@@ -14530,24 +14555,24 @@ ${cfg.diagram}
                 <div id="ids-log" style="font-family:monospace;font-size:11px;line-height:1.6;overflow-y:auto;max-height:150px;"></div>
             </div>
         </div>`;
-        container.querySelectorAll('.ids-trigger').forEach(btn => {
-            btn.onclick = () => {
-                const type = btn.getAttribute('data-type');
-                const log = document.getElementById('ids-log');
-                const time = new Date().toLocaleTimeString();
-                if (type === 'sqli') {
-                    log.innerHTML += `<div style="color:#ef4444">[${time}] ALERT: SQLi attempt - Match (' OR '1'='1)</div>`;
-                } else {
-                    log.innerHTML += `<div style="color:#fbbf24">[${time}] ALERT: PortScan - Match (ICMP ping flood)</div>`;
-                }
-                log.scrollTop = log.scrollHeight;
-            };
-        });
-    };
+            container.querySelectorAll('.ids-trigger').forEach(btn => {
+                btn.onclick = () => {
+                    const type = btn.getAttribute('data-type');
+                    const log = document.getElementById('ids-log');
+                    const time = new Date().toLocaleTimeString();
+                    if (type === 'sqli') {
+                        log.innerHTML += `<div style="color:#ef4444">[${time}] ALERT: SQLi attempt - Match (' OR '1'='1)</div>`;
+                    } else {
+                        log.innerHTML += `<div style="color:#fbbf24">[${time}] ALERT: PortScan - Match (ICMP ping flood)</div>`;
+                    }
+                    log.scrollTop = log.scrollHeight;
+                };
+            });
+        };
 
-    const initCyberSqlInjectSim = (container) => {
-        const AC = '#ef4444';
-        container.innerHTML = buildSimHeader('SQL Injection Attack Sandbox', 'Bypass authentication checks using SQL payloads', '🔐', AC) + `
+        const initCyberSqlInjectSim = (container) => {
+            const AC = '#ef4444';
+            container.innerHTML = buildSimHeader('SQL Injection Attack Sandbox', 'Bypass authentication checks using SQL payloads', '🔐', AC) + `
         <div style="padding:15px;font-family:var(--font-sans);font-size:13px;display:grid;grid-template-columns:1fr 1fr;gap:15px;">
             <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:8px;">
                 <h4 style="margin:0 0 4px;color:${AC}">Admin Login Portal</h4>
@@ -14575,16 +14600,16 @@ ${cfg.diagram}
                 </div>
             </div>
         </div>`;
-        const run = () => {
-            const user = document.getElementById('sqli-user').value;
-            const pass = document.getElementById('sqli-pass').value;
-            const query = `SELECT * FROM users WHERE user='${user}' AND pass='${pass}';`;
-            document.getElementById('sqli-query').textContent = query;
-            const isInject = user.includes("'") || pass.includes("'");
-            
-            const logicBox = document.getElementById('sqli-logic-step1');
-            if (isInject) {
-                logicBox.innerHTML = `
+            const run = () => {
+                const user = document.getElementById('sqli-user').value;
+                const pass = document.getElementById('sqli-pass').value;
+                const query = `SELECT * FROM users WHERE user='${user}' AND pass='${pass}';`;
+                document.getElementById('sqli-query').textContent = query;
+                const isInject = user.includes("'") || pass.includes("'");
+
+                const logicBox = document.getElementById('sqli-logic-step1');
+                if (isInject) {
+                    logicBox.innerHTML = `
                     <span style="color:#ef4444;">1. Evaluate User Condition: (user='${user}')</span><br>
                     &nbsp;&nbsp;&nbsp;Result: <span style="color:#ef4444;">FALSE</span> (No user named "${user}")<br><br>
                     <span style="color:#22c55e;">2. Evaluate Injected Condition: ('1'='1' or '1'='1')</span><br>
@@ -14592,24 +14617,24 @@ ${cfg.diagram}
                     <span style="color:#22c55e;">3. Final Resolver: FALSE OR TRUE = TRUE</span><br>
                     &nbsp;&nbsp;&nbsp;Result: <span style="color:#22c55e;font-weight:bold;">BYPASSED!</span> (Auth bypass complete)
                 `;
-                document.getElementById('sqli-res').innerHTML = '<span style="color:#22c55e;font-weight:bold;">SUCCESS: Authenticated as Admin!</span>';
-            } else {
-                logicBox.innerHTML = `
+                    document.getElementById('sqli-res').innerHTML = '<span style="color:#22c55e;font-weight:bold;">SUCCESS: Authenticated as Admin!</span>';
+                } else {
+                    logicBox.innerHTML = `
                     <span style="color:#ef4444;">1. Evaluate User Condition: (user='${user}')</span><br>
-                    &nbsp;&nbsp;&nbsp;Result: ${user==='admin' ? '<span style="color:#22c55e;">TRUE</span>' : '<span style="color:#ef4444;">FALSE</span>'}<br><br>
+                    &nbsp;&nbsp;&nbsp;Result: ${user === 'admin' ? '<span style="color:#22c55e;">TRUE</span>' : '<span style="color:#ef4444;">FALSE</span>'}<br><br>
                     <span style="color:#ef4444;">2. Evaluate Password Condition: (pass='${pass}')</span><br>
                     &nbsp;&nbsp;&nbsp;Result: <span style="color:#ef4444;">FALSE</span><br><br>
                     <span style="color:#ef4444;">3. Final Resolver: TRUE AND FALSE = FALSE</span>
                 `;
-                document.getElementById('sqli-res').innerHTML = '<span style="color:#ef4444">Access Denied (Fail)</span>';
-            }
+                    document.getElementById('sqli-res').innerHTML = '<span style="color:#ef4444">Access Denied (Fail)</span>';
+                }
+            };
+            document.getElementById('sqli-login').onclick = run;
         };
-        document.getElementById('sqli-login').onclick = run;
-    };
 
-    const initCyberXssSim = (container) => {
-        const AC = '#ef4444';
-        container.innerHTML = buildSimHeader('Cross-Site Scripting (XSS)', 'Observe script injection and output sanitization', '🔐', AC) + `
+        const initCyberXssSim = (container) => {
+            const AC = '#ef4444';
+            container.innerHTML = buildSimHeader('Cross-Site Scripting (XSS)', 'Observe script injection and output sanitization', '🔐', AC) + `
         <div style="padding:15px;font-family:var(--font-sans);font-size:13px;display:grid;grid-template-columns:1fr 1fr;gap:15px;">
             <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:8px;">
                 <h4 style="margin:0 0 4px;color:${AC}">Post Message Workspace</h4>
@@ -14636,42 +14661,42 @@ ${cfg.diagram}
                 </div>
             </div>
         </div>`;
-        
-        const triggerHackerSync = (val) => {
-            const logs = document.getElementById('hacker-logs');
-            const time = new Date().toLocaleTimeString();
-            if (val.includes('cookie') || val.includes('location')) {
-                logs.innerHTML += `
+
+            const triggerHackerSync = (val) => {
+                const logs = document.getElementById('hacker-logs');
+                const time = new Date().toLocaleTimeString();
+                if (val.includes('cookie') || val.includes('location')) {
+                    logs.innerHTML += `
                     <div style="color:#f87171;margin-top:6px;">[${time}] *INCOMING PAYLOAD INTERCEPT*</div>
                     <div style="color:#fbbf24;">[${time}] URL Query: GET /log?cookie=vlab_session_token%3Dh4ck_me_123</div>
                     <div style="color:#22c55e;font-weight:bold;">[${time}] Cookie Hijacked Successfully! Token: h4ck_me_123</div>
                 `;
-            } else if (val.includes('<script>')) {
-                logs.innerHTML += `
+                } else if (val.includes('<script>')) {
+                    logs.innerHTML += `
                     <div style="color:#fbbf24;margin-top:6px;">[${time}] Script injected: execution verified.</div>
                 `;
-            }
-            logs.scrollTop = logs.scrollHeight;
+                }
+                logs.scrollTop = logs.scrollHeight;
+            };
+
+            document.getElementById('xss-unsafe').onclick = () => {
+                const val = document.getElementById('xss-msg').value;
+                document.getElementById('xss-render').innerHTML = val;
+                if (val.includes('<script>')) {
+                    alert('Unsafe Script Injected and Executed!');
+                    triggerHackerSync(val);
+                }
+            };
+            document.getElementById('xss-safe').onclick = () => {
+                const val = document.getElementById('xss-msg').value;
+                const escaped = val.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                document.getElementById('xss-render').innerHTML = escaped;
+            };
         };
 
-        document.getElementById('xss-unsafe').onclick = () => {
-            const val = document.getElementById('xss-msg').value;
-            document.getElementById('xss-render').innerHTML = val;
-            if (val.includes('<script>')) {
-                alert('Unsafe Script Injected and Executed!');
-                triggerHackerSync(val);
-            }
-        };
-        document.getElementById('xss-safe').onclick = () => {
-            const val = document.getElementById('xss-msg').value;
-            const escaped = val.replace(/</g, '&lt;').replace(/>/g, '&gt;');
-            document.getElementById('xss-render').innerHTML = escaped;
-        };
-    };
-
-    const initCyberMitmSim = (container) => {
-        const AC = '#ef4444';
-        container.innerHTML = buildSimHeader('Man-in-the-Middle Network Flow', 'Simulate ARP poisoning redirecting client packets', '🔐', AC) + `
+        const initCyberMitmSim = (container) => {
+            const AC = '#ef4444';
+            container.innerHTML = buildSimHeader('Man-in-the-Middle Network Flow', 'Simulate ARP poisoning redirecting client packets', '🔐', AC) + `
         <div style="padding:15px;font-family:var(--font-sans);font-size:13px;display:grid;grid-template-columns:1fr 1fr;gap:15px;">
             <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;">
                 <h4 style="margin:0 0 10px;color:${AC}">Flow Toggle</h4>
@@ -14686,29 +14711,29 @@ ${cfg.diagram}
                 Payload Log: <span id="mitm-payload" style="font-family:monospace;font-size:11px;color:var(--text-muted);">Listening...</span>
             </div>
         </div>`;
-        let poisoned = false;
-        document.getElementById('mitm-poison').onclick = () => {
-            poisoned = !poisoned;
-            const state = document.getElementById('mitm-state');
-            const pl = document.getElementById('mitm-payload');
-            const btn = document.getElementById('mitm-poison');
-            if (poisoned) {
-                state.textContent = 'POISONED (Intercepting)';
-                state.style.color = '#ef4444';
-                pl.innerHTML = `<span style="color:#ef4444">GET /login.html HTTP/1.1<br>Authorization: Bearer Session-41b9...</span>`;
-                btn.textContent = 'Recover Router ARP';
-            } else {
-                state.textContent = 'Inactive (Direct Link)';
-                state.style.color = '#22c55e';
-                pl.textContent = 'Listening...';
-                btn.textContent = 'ARP Poison Router';
-            }
+            let poisoned = false;
+            document.getElementById('mitm-poison').onclick = () => {
+                poisoned = !poisoned;
+                const state = document.getElementById('mitm-state');
+                const pl = document.getElementById('mitm-payload');
+                const btn = document.getElementById('mitm-poison');
+                if (poisoned) {
+                    state.textContent = 'POISONED (Intercepting)';
+                    state.style.color = '#ef4444';
+                    pl.innerHTML = `<span style="color:#ef4444">GET /login.html HTTP/1.1<br>Authorization: Bearer Session-41b9...</span>`;
+                    btn.textContent = 'Recover Router ARP';
+                } else {
+                    state.textContent = 'Inactive (Direct Link)';
+                    state.style.color = '#22c55e';
+                    pl.textContent = 'Listening...';
+                    btn.textContent = 'ARP Poison Router';
+                }
+            };
         };
-    };
 
-    const initCyberSteganographySim = (container) => {
-        const AC = '#ef4444';
-        container.innerHTML = buildSimHeader('LSB Steganography Data Hiding', 'Embed text payloads into Least Significant Bits of pixels', '🖼️', AC) + `
+        const initCyberSteganographySim = (container) => {
+            const AC = '#ef4444';
+            container.innerHTML = buildSimHeader('LSB Steganography Data Hiding', 'Embed text payloads into Least Significant Bits of pixels', '🖼️', AC) + `
         <div style="padding:15px;font-family:var(--font-sans);font-size:13px;display:grid;grid-template-columns:1fr 1.2fr;gap:15px;">
             <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;">
                 <h4 style="margin:0 0 8px;color:${AC}">Secret Payload</h4>
@@ -14722,16 +14747,16 @@ ${cfg.diagram}
                 Decoded Secret: <b id="stego-decode" style="color:#22c55e">N/A</b>
             </div>
         </div>`;
-        document.getElementById('stego-embed').onclick = () => {
-            const val = document.getElementById('stego-payload').value;
-            document.getElementById('stego-rgb').textContent = `[1101011\${val.includes('F')?'1':'0'}, 0100101\${val.includes('L')?'1':'0'}, 1010110\${val.includes('A')?'1':'0'}]`;
-            document.getElementById('stego-decode').textContent = val;
+            document.getElementById('stego-embed').onclick = () => {
+                const val = document.getElementById('stego-payload').value;
+                document.getElementById('stego-rgb').textContent = `[1101011\${val.includes('F')?'1':'0'}, 0100101\${val.includes('L')?'1':'0'}, 1010110\${val.includes('A')?'1':'0'}]`;
+                document.getElementById('stego-decode').textContent = val;
+            };
         };
-    };
 
-    const initCyberNetworkScanSim = (container) => {
-        const AC = '#ef4444';
-        container.innerHTML = buildSimHeader('Port Scanner Reconnaissance', 'Map open server socket ports and identify vulnerabilities', '🔍', AC) + `
+        const initCyberNetworkScanSim = (container) => {
+            const AC = '#ef4444';
+            container.innerHTML = buildSimHeader('Port Scanner Reconnaissance', 'Map open server socket ports and identify vulnerabilities', '🔍', AC) + `
         <div style="padding:15px;font-family:var(--font-sans);font-size:13px;display:grid;grid-template-columns:1fr 1.2fr;gap:15px;">
             <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;">
                 <h4 style="margin:0 0 10px;color:${AC}">Scan Options</h4>
@@ -14743,125 +14768,125 @@ ${cfg.diagram}
                 <div id="cns-log" style="line-height:1.8;">Ready to scan target host...</div>
             </div>
         </div>`;
-        document.getElementById('cns-scan').onclick = () => {
-            const ip = document.getElementById('cns-ip').value;
-            const log = document.getElementById('cns-log');
-            log.innerHTML = `Starting Nmap TCP-SYN scan on \${ip}...<br>`;
-            setTimeout(() => { log.innerHTML += `● Port 22 (SSH) - <span style="color:#22c55e">OPEN</span><br>`; }, 300);
-            setTimeout(() => { log.innerHTML += `● Port 80 (HTTP) - <span style="color:#22c55e">OPEN</span> (Nginx 1.18)<br>`; }, 600);
-            setTimeout(() => { log.innerHTML += `● Port 3306 (MySQL) - <span style="color:#ef4444">FILTERED</span><br>`; }, 900);
-            setTimeout(() => { log.innerHTML += `<b style="color:#ef4444">Scan Complete: 2 open ports found.</b>`; }, 1200);
+            document.getElementById('cns-scan').onclick = () => {
+                const ip = document.getElementById('cns-ip').value;
+                const log = document.getElementById('cns-log');
+                log.innerHTML = `Starting Nmap TCP-SYN scan on \${ip}...<br>`;
+                setTimeout(() => { log.innerHTML += `● Port 22 (SSH) - <span style="color:#22c55e">OPEN</span><br>`; }, 300);
+                setTimeout(() => { log.innerHTML += `● Port 80 (HTTP) - <span style="color:#22c55e">OPEN</span> (Nginx 1.18)<br>`; }, 600);
+                setTimeout(() => { log.innerHTML += `● Port 3306 (MySQL) - <span style="color:#ef4444">FILTERED</span><br>`; }, 900);
+                setTimeout(() => { log.innerHTML += `<b style="color:#ef4444">Scan Complete: 2 open ports found.</b>`; }, 1200);
+            };
         };
-    };
 
-    const initSimulation = (id) => {
-        const data = window.VLAB_DATA[id];
-        let container = document.getElementById('dynamic-sim-ui');
-        if (!container) {
-            const sec = document.getElementById('section-simulation');
-            if (sec) {
-                const body = sec.querySelector('.section-body');
-                if (body) {
-                    body.innerHTML = '<div id="dynamic-sim-ui" style="width:100%; height:100%;"></div>';
-                } else {
-                    sec.innerHTML = '<div class="section-body" style="width:100%; height:100%;"><div id="dynamic-sim-ui" style="width:100%; height:100%;"></div></div>';
+        const initSimulation = (id) => {
+            const data = window.VLAB_DATA[id];
+            let container = document.getElementById('dynamic-sim-ui');
+            if (!container) {
+                const sec = document.getElementById('section-simulation');
+                if (sec) {
+                    const body = sec.querySelector('.section-body');
+                    if (body) {
+                        body.innerHTML = '<div id="dynamic-sim-ui" style="width:100%; height:100%;"></div>';
+                    } else {
+                        sec.innerHTML = '<div class="section-body" style="width:100%; height:100%;"><div id="dynamic-sim-ui" style="width:100%; height:100%;"></div></div>';
+                    }
+                    container = document.getElementById('dynamic-sim-ui');
                 }
-                container = document.getElementById('dynamic-sim-ui');
             }
-        }
 
-        if (!data) {
-            container.innerHTML = `
+            if (!data) {
+                container.innerHTML = `
                 <div class="sim-placeholder" style="text-align:center; padding:100px; color:var(--text-muted);">
                     <div style="font-size:48px; margin-bottom:20px;">🛡️</div>
                     <h2>Standard Simulation Unavailable</h2>
                     <p>This is a free-form Practice Lab. Switch to the <b>Experiment</b> tab to build your network.</p>
                 </div>
             `;
-            return;
-        }
+                return;
+            }
 
-        // Specialized Interactive Simulation Dispatchers
-        if (data.simType === 'dfa_sim')            { initDfaSim(container);            return; }
-        if (data.simType === 'nfa_to_dfa')         { initNfaToDfaSim(container);       return; }
-        if (data.simType === 'regex_thompson')     { initRegexThompsonSim(container);   return; }
-        if (data.simType === 'cfg_parser')         { initCfgParserSim(container);       return; }
-        if (data.simType === 'pda_stack')          { initPdaStackSim(container);        return; }
-        if (data.simType === 'turing_machine')     { initTuringMachineSim(container);   return; }
-        if (data.simType === 'dfa_minimization')   { initDfaMinimizationSim(container); return; }
-        if (data.simType === 'assembly_sim')       { initAssemblySim(container, id);   return; }
-        if (data.simType === 'programming')        { initProgrammingLab(container, id);return; }
-        if (data.simType === 'dbms_sql')           { initSqlLab(container, id);        return; }
-        if (data.simType === 'dbms_transactions')  { initTransactionsLab(container, id); return; }
-        if (data.simType === 'dbms_indexing')      { initIndexingLab(container, id);    return; }
-        if (data.simType === 'cpu_scheduling')     { initCpuSchedulingSim(container);   return; }
-        if (data.simType === 'process_sync')       { initProcessSyncSim(container);     return; }
-        if (data.simType === 'bankers')            { initBankersSim(container);          return; }
-        if (data.simType === 'page_replacement')   { initPageReplacementSim(container); return; }
-        if (data.simType === 'disk_scheduling')    { initDiskSchedulingSim(container);  return; }
-        if (data.simType === 'subnet_calc')        { initSubnetCalc(container);        return; }
-        if (data.simType === 'ip_sorter')          { initIpSorter(container);          return; }
-        if (data.simType === 'cmd_challenge' || data.simType === 'cli') { initCmdChallenge(container); return; }
-        if (data.simType === 'media_study')        { initMediaStudy(container);        return; }
-        if (data.simType === 'topologies')         { initTopologySim(container);        return; }
-        if (data.simType === 'vlan_sim')           { initVlanSim(container);           return; }
-        if (data.simType === 'dns')                { initDnsSim(container);            return; }
-        if (data.simType === 'dv_sim' || data.simType === 'ls_sim') { initRoutingSim(container); return; }
-        if (data.simType === 'gbn' || data.simType === 'udp')       { initTransportSim(container); return; }
-        if (data.simType === 'pkt_tracer')         { initPktTracerSim(container);       return; }
+            // Specialized Interactive Simulation Dispatchers
+            if (data.simType === 'dfa_sim') { initDfaSim(container); return; }
+            if (data.simType === 'nfa_to_dfa') { initNfaToDfaSim(container); return; }
+            if (data.simType === 'regex_thompson') { initRegexThompsonSim(container); return; }
+            if (data.simType === 'cfg_parser') { initCfgParserSim(container); return; }
+            if (data.simType === 'pda_stack') { initPdaStackSim(container); return; }
+            if (data.simType === 'turing_machine') { initTuringMachineSim(container); return; }
+            if (data.simType === 'dfa_minimization') { initDfaMinimizationSim(container); return; }
+            if (data.simType === 'assembly_sim') { initAssemblySim(container, id); return; }
+            if (data.simType === 'programming') { initProgrammingLab(container, id); return; }
+            if (data.simType === 'dbms_sql') { initSqlLab(container, id); return; }
+            if (data.simType === 'dbms_transactions') { initTransactionsLab(container, id); return; }
+            if (data.simType === 'dbms_indexing') { initIndexingLab(container, id); return; }
+            if (data.simType === 'cpu_scheduling') { initCpuSchedulingSim(container); return; }
+            if (data.simType === 'process_sync') { initProcessSyncSim(container); return; }
+            if (data.simType === 'bankers') { initBankersSim(container); return; }
+            if (data.simType === 'page_replacement') { initPageReplacementSim(container); return; }
+            if (data.simType === 'disk_scheduling') { initDiskSchedulingSim(container); return; }
+            if (data.simType === 'subnet_calc') { initSubnetCalc(container); return; }
+            if (data.simType === 'ip_sorter') { initIpSorter(container); return; }
+            if (data.simType === 'cmd_challenge' || data.simType === 'cli') { initCmdChallenge(container); return; }
+            if (data.simType === 'media_study') { initMediaStudy(container); return; }
+            if (data.simType === 'topologies') { initTopologySim(container); return; }
+            if (data.simType === 'vlan_sim') { initVlanSim(container); return; }
+            if (data.simType === 'dns') { initDnsSim(container); return; }
+            if (data.simType === 'dv_sim' || data.simType === 'ls_sim') { initRoutingSim(container); return; }
+            if (data.simType === 'gbn' || data.simType === 'udp') { initTransportSim(container); return; }
+            if (data.simType === 'pkt_tracer') { initPktTracerSim(container); return; }
 
-        // AI Simulations
-        if (data.simType === 'ai_search')      { initAiSearchSim(container);     return; }
-        if (data.simType === 'ai_heuristic')   { initAiHeuristicSim(container);  return; }
-        if (data.simType === 'ai_csp')         { initAiCspSim(container);        return; }
-        if (data.simType === 'ai_minimax')     { initAiMinimaxSim(container);    return; }
-        if (data.simType === 'ai_naive_bayes') { initAiNaiveBayesSim(container); return; }
-        if (data.simType === 'ai_knn')         { initAiKnnSim(container);        return; }
-        if (data.simType === 'ai_kmeans')      { initAiKmeansSim(container);     return; }
-        if (data.simType === 'ai_ann')         { initAiAnnSim(container);        return; }
-        if (data.simType === 'ai_backprop')    { initAiBackpropSim(container);   return; }
-        if (data.simType === 'ai_fuzzy')       { initAiFuzzySim(container);      return; }
-        if (data.simType === 'ai_genetic')     { initAiGeneticSim(container);    return; }
-        if (data.simType === 'ai_expert')      { initAiExpertSim(container);     return; }
+            // AI Simulations
+            if (data.simType === 'ai_search') { initAiSearchSim(container); return; }
+            if (data.simType === 'ai_heuristic') { initAiHeuristicSim(container); return; }
+            if (data.simType === 'ai_csp') { initAiCspSim(container); return; }
+            if (data.simType === 'ai_minimax') { initAiMinimaxSim(container); return; }
+            if (data.simType === 'ai_naive_bayes') { initAiNaiveBayesSim(container); return; }
+            if (data.simType === 'ai_knn') { initAiKnnSim(container); return; }
+            if (data.simType === 'ai_kmeans') { initAiKmeansSim(container); return; }
+            if (data.simType === 'ai_ann') { initAiAnnSim(container); return; }
+            if (data.simType === 'ai_backprop') { initAiBackpropSim(container); return; }
+            if (data.simType === 'ai_fuzzy') { initAiFuzzySim(container); return; }
+            if (data.simType === 'ai_genetic') { initAiGeneticSim(container); return; }
+            if (data.simType === 'ai_expert') { initAiExpertSim(container); return; }
 
-        // Cloud Computing Simulations
-        if (data.simType === 'cloud_virtualization') { initCloudVirtualizationSim(container); return; }
-        if (data.simType === 'cloud_docker')         { initCloudDockerSim(container);         return; }
-        if (data.simType === 'cloud_loadbalancer')   { initCloudLoadBalancerSim(container);   return; }
-        if (data.simType === 'cloud_autoscaling')    { initCloudAutoScalingSim(container);    return; }
-        if (data.simType === 'cloud_storage')        { initCloudStorageSim(container);        return; }
-        if (data.simType === 'cloud_cdn')            { initCloudCdnSim(container);            return; }
-        if (data.simType === 'cloud_iam')            { initCloudIamSim(container);            return; }
-        if (data.simType === 'cloud_serverless')     { initCloudServerlessSim(container);     return; }
-        if (data.simType === 'cloud_sla')            { initCloudSlaSim(container);            return; }
-        if (data.simType === 'cloud_mapreduce')      { initCloudMapReduceSim(container);      return; }
-        if (data.simType === 'cloud_kubernetes')     { initCloudKubernetesSim(container);     return; }
-        if (data.simType === 'cloud_security')       { initCloudIamSim(container);            return; }
-        if (data.simType === 'cloud_monitoring')     { initCloudSlaSim(container);            return; }
-        if (data.simType === 'cloud_intro')          { initCloudVirtualizationSim(container); return; }
-        if (data.simType === 'cloud_devops')         { initCloudDockerSim(container);         return; }
+            // Cloud Computing Simulations
+            if (data.simType === 'cloud_virtualization') { initCloudVirtualizationSim(container); return; }
+            if (data.simType === 'cloud_docker') { initCloudDockerSim(container); return; }
+            if (data.simType === 'cloud_loadbalancer') { initCloudLoadBalancerSim(container); return; }
+            if (data.simType === 'cloud_autoscaling') { initCloudAutoScalingSim(container); return; }
+            if (data.simType === 'cloud_storage') { initCloudStorageSim(container); return; }
+            if (data.simType === 'cloud_cdn') { initCloudCdnSim(container); return; }
+            if (data.simType === 'cloud_iam') { initCloudIamSim(container); return; }
+            if (data.simType === 'cloud_serverless') { initCloudServerlessSim(container); return; }
+            if (data.simType === 'cloud_sla') { initCloudSlaSim(container); return; }
+            if (data.simType === 'cloud_mapreduce') { initCloudMapReduceSim(container); return; }
+            if (data.simType === 'cloud_kubernetes') { initCloudKubernetesSim(container); return; }
+            if (data.simType === 'cloud_security') { initCloudIamSim(container); return; }
+            if (data.simType === 'cloud_monitoring') { initCloudSlaSim(container); return; }
+            if (data.simType === 'cloud_intro') { initCloudVirtualizationSim(container); return; }
+            if (data.simType === 'cloud_devops') { initCloudDockerSim(container); return; }
 
-        // Cybersecurity Simulations
-        if (data.simType === 'cyber_caesar')       { initCyberCaesarSim(container);      return; }
-        if (data.simType === 'cyber_vigenere')     { initCyberVigenereSim(container);    return; }
-        if (data.simType === 'cyber_rsa')          { initCyberRsaSim(container);         return; }
-        if (data.simType === 'cyber_aes')          { initCyberAesSim(container);         return; }
-        if (data.simType === 'cyber_hashing')      { initCyberHashingSim(container);     return; }
-        if (data.simType === 'cyber_firewall')     { initCyberFirewallSim(container);    return; }
-        if (data.simType === 'cyber_ids')          { initCyberIdsSim(container);         return; }
-        if (data.simType === 'cyber_sql_inject')   { initCyberSqlInjectSim(container);   return; }
-        if (data.simType === 'cyber_xss')          { initCyberXssSim(container);         return; }
-        if (data.simType === 'cyber_mitm')         { initCyberMitmSim(container);        return; }
-        if (data.simType === 'cyber_steganography') { initCyberSteganographySim(container); return; }
-        if (data.simType === 'cyber_network_scan') { initCyberNetworkScanSim(container); return; }
+            // Cybersecurity Simulations
+            if (data.simType === 'cyber_caesar') { initCyberCaesarSim(container); return; }
+            if (data.simType === 'cyber_vigenere') { initCyberVigenereSim(container); return; }
+            if (data.simType === 'cyber_rsa') { initCyberRsaSim(container); return; }
+            if (data.simType === 'cyber_aes') { initCyberAesSim(container); return; }
+            if (data.simType === 'cyber_hashing') { initCyberHashingSim(container); return; }
+            if (data.simType === 'cyber_firewall') { initCyberFirewallSim(container); return; }
+            if (data.simType === 'cyber_ids') { initCyberIdsSim(container); return; }
+            if (data.simType === 'cyber_sql_inject') { initCyberSqlInjectSim(container); return; }
+            if (data.simType === 'cyber_xss') { initCyberXssSim(container); return; }
+            if (data.simType === 'cyber_mitm') { initCyberMitmSim(container); return; }
+            if (data.simType === 'cyber_steganography') { initCyberSteganographySim(container); return; }
+            if (data.simType === 'cyber_network_scan') { initCyberNetworkScanSim(container); return; }
 
-        // Fallback: Protocol Canvas Simulator (CSMA/CD / CSMA/CA)
-        if (window.currentSim) {
-            window.currentSim.destroy();
-            window.currentSim = null;
-        }
+            // Fallback: Protocol Canvas Simulator (CSMA/CD / CSMA/CA)
+            if (window.currentSim) {
+                window.currentSim.destroy();
+                window.currentSim = null;
+            }
 
-        container.innerHTML = `
+            container.innerHTML = `
             <div class="sim-toolbar">
                 <div class="sim-controls">
                     <button id="btnResetSim" class="btn-sim">Reset</button>
@@ -14924,133 +14949,133 @@ ${cfg.diagram}
             <div id="sim-overlay" class="sim-overlay-panel"></div>
         `;
 
-        // Hide generic protocol dropdown for labs with dedicated visualizations
-        const specializedTypes = ['dv_sim', 'ls_sim', 'path_sim', 'vlan_sim', 'dns', 'modulation', 'gbn', 'csma_ca', 'udp'];
-        if (specializedTypes.includes(data.simType)) {
-            const opts = container.querySelector('.sim-options');
-            if (opts) {
-                if (data.simType === 'path_sim') {
-                    opts.style.display = 'block';
-                    const typeSel = opts.querySelector('#simType');
-                    if (typeSel) {
-                        typeSel.innerHTML = `
+            // Hide generic protocol dropdown for labs with dedicated visualizations
+            const specializedTypes = ['dv_sim', 'ls_sim', 'path_sim', 'vlan_sim', 'dns', 'modulation', 'gbn', 'csma_ca', 'udp'];
+            if (specializedTypes.includes(data.simType)) {
+                const opts = container.querySelector('.sim-options');
+                if (opts) {
+                    if (data.simType === 'path_sim') {
+                        opts.style.display = 'block';
+                        const typeSel = opts.querySelector('#simType');
+                        if (typeSel) {
+                            typeSel.innerHTML = `
                             <option value="ospf">OSPF (Shortest Path First)</option>
                             <option value="bgp">BGP (Path Vector)</option>
                         `;
-                        typeSel.value = 'ospf';
+                            typeSel.value = 'ospf';
+                        }
+                    } else {
+                        opts.style.display = 'none';
                     }
-                } else {
-                    opts.style.display = 'none';
                 }
             }
-        }
 
-        setTimeout(() => {
-            if (window.currentSim) window.currentSim.destroy();
-            const sim = new NetworkingSim('simCanvas', data.simType, id);
-            sim.mode = data.simType === 'path_sim' ? 'ospf' : data.simType; 
-            window.currentSim = sim;
-            
-            sim.resize();
-            setTimeout(() => sim.resize(), 100);
-            
-            setupSimControls(sim);
-        }, 100);
-    };
+            setTimeout(() => {
+                if (window.currentSim) window.currentSim.destroy();
+                const sim = new NetworkingSim('simCanvas', data.simType, id);
+                sim.mode = data.simType === 'path_sim' ? 'ospf' : data.simType;
+                window.currentSim = sim;
 
-    const handleOsCommand = (cmdStr, outputEl) => {
-        const parts = cmdStr.split(/\s+/);
-        const baseCmd = parts[0].toLowerCase();
-        const args = parts.slice(1);
-        let output = `\nstudent@mitadt-os:~$ ${cmdStr}\n`;
-        
-        switch (baseCmd) {
-            case 'help':
-                output += `Available commands:\n` +
-                          `  help                  - List all commands\n` +
-                          `  clear                 - Clear terminal screen\n` +
-                          `  ls                    - List workspace code files\n` +
-                          `  cat [filename]        - Display code of a file\n` +
-                          `  ps                    - List active processes in system\n` +
-                          `  top                   - Show real-time CPU resource usage\n` +
-                          `  ipcs                  - List active semaphores and shared memory segments\n` +
-                          `  nice -n [val] [proc]  - Adjust process execution priority`;
-                break;
-            case 'clear':
-                outputEl.innerHTML = `Welcome to the MIT ADT OS Shell v2.1 (Kernel: NetForge-OS)\nType 'help' to list available academic commands.\n\nstudent@mitadt-os:~$ `;
-                return;
-            case 'ls':
-                output += `process.c    sem_prod_cons.c    banker.py    page_replacement.c    disk_sched.c`;
-                break;
-            case 'cat':
-                if (!args[0]) {
-                    output += `Usage: cat [filename]`;
-                } else {
-                    const fn = args[0].toLowerCase();
-                    if (fn === 'process.c') {
-                        output += `/* CPU Scheduling Algorithm implementation */\n#include <stdio.h>\nint main() {\n    printf("Running FCFS / SJF Scheduler...\\n");\n    return 0;\n}`;
-                    } else if (fn === 'sem_prod_cons.c') {
-                        output += `/* Semaphore Producer-Consumer Synchronization */\n#include <pthread.h>\n#include <semaphore.h>\nsem_t empty, full;\npthread_mutex_t mutex;`;
-                    } else if (fn === 'banker.py') {
-                        output += `# Banker's Algorithm Deadlock Avoidance\ndef check_safety(allocation, max_need, available):\n    # safety checking logic`;
-                    } else if (fn === 'page_replacement.c') {
-                        output += `/* Page Replacement Simulation - FIFO/LRU */\nvoid replace_page(int page, int frames[]) {\n    // replacement algorithm\n}`;
-                    } else if (fn === 'disk_sched.c') {
-                        output += `/* Disk Scheduling cylinder sweep */\nint calculate_seek_time(int queue[], int head) {\n    return total_head_movement;\n}`;
+                sim.resize();
+                setTimeout(() => sim.resize(), 100);
+
+                setupSimControls(sim);
+            }, 100);
+        };
+
+        const handleOsCommand = (cmdStr, outputEl) => {
+            const parts = cmdStr.split(/\s+/);
+            const baseCmd = parts[0].toLowerCase();
+            const args = parts.slice(1);
+            let output = `\nstudent@mitadt-os:~$ ${cmdStr}\n`;
+
+            switch (baseCmd) {
+                case 'help':
+                    output += `Available commands:\n` +
+                        `  help                  - List all commands\n` +
+                        `  clear                 - Clear terminal screen\n` +
+                        `  ls                    - List workspace code files\n` +
+                        `  cat [filename]        - Display code of a file\n` +
+                        `  ps                    - List active processes in system\n` +
+                        `  top                   - Show real-time CPU resource usage\n` +
+                        `  ipcs                  - List active semaphores and shared memory segments\n` +
+                        `  nice -n [val] [proc]  - Adjust process execution priority`;
+                    break;
+                case 'clear':
+                    outputEl.innerHTML = `Welcome to the MIT ADT OS Shell v2.1 (Kernel: NetForge-OS)\nType 'help' to list available academic commands.\n\nstudent@mitadt-os:~$ `;
+                    return;
+                case 'ls':
+                    output += `process.c    sem_prod_cons.c    banker.py    page_replacement.c    disk_sched.c`;
+                    break;
+                case 'cat':
+                    if (!args[0]) {
+                        output += `Usage: cat [filename]`;
                     } else {
-                        output += `cat: ${args[0]}: No such file in user workspace.`;
+                        const fn = args[0].toLowerCase();
+                        if (fn === 'process.c') {
+                            output += `/* CPU Scheduling Algorithm implementation */\n#include <stdio.h>\nint main() {\n    printf("Running FCFS / SJF Scheduler...\\n");\n    return 0;\n}`;
+                        } else if (fn === 'sem_prod_cons.c') {
+                            output += `/* Semaphore Producer-Consumer Synchronization */\n#include <pthread.h>\n#include <semaphore.h>\nsem_t empty, full;\npthread_mutex_t mutex;`;
+                        } else if (fn === 'banker.py') {
+                            output += `# Banker's Algorithm Deadlock Avoidance\ndef check_safety(allocation, max_need, available):\n    # safety checking logic`;
+                        } else if (fn === 'page_replacement.c') {
+                            output += `/* Page Replacement Simulation - FIFO/LRU */\nvoid replace_page(int page, int frames[]) {\n    // replacement algorithm\n}`;
+                        } else if (fn === 'disk_sched.c') {
+                            output += `/* Disk Scheduling cylinder sweep */\nint calculate_seek_time(int queue[], int head) {\n    return total_head_movement;\n}`;
+                        } else {
+                            output += `cat: ${args[0]}: No such file in user workspace.`;
+                        }
                     }
-                }
-                break;
-            case 'ps':
-                output += `PID   TTY      TIME     CMD       PRIORITY  STATUS\n` +
-                          `1     tty1     00:00:02 init      20        RUNNING\n` +
-                          `142   tty1     00:00:01 bash      20        SLEEPING\n` +
-                          `205   tty1     00:00:00 ps        20        RUNNING\n` +
-                          `304   tty1     00:00:05 kworker   15        IDLE`;
-                break;
-            case 'top':
-                output += `OS Load average: 0.12, 0.08, 0.02\n` +
-                          `Tasks: 4 total, 2 running, 2 sleeping\n` +
-                          `CPU utilization: 4.8% user, 1.2% system, 94.0% idle\n\n` +
-                          `PID   USER      PR  NI    VIRT    RES    SHR S  %CPU  %MEM     TIME+ COMMAND\n` +
-                          `1     student   20   0    4200   1200   1000 R   0.2   0.1   0:02.10 init\n` +
-                          `142   student   20   0    5100   2100   1800 S   0.0   0.2   0:01.45 bash\n` +
-                          `304   root      15  -5       0      0      0 S   0.5   0.0   0:05.12 kworker\n` +
-                          `312   student   20   0    9100   3400   2100 R   4.1   0.3   0:00.08 top`;
-                break;
-            case 'ipcs':
-                output += `------ Shared Memory Segments ------\n` +
-                          `key        shmid      owner      perms      bytes      nattch     status\n` +
-                          `0x00007f12 65536      student    660        1024       2\n\n` +
-                          `------ Semaphore Arrays ------\n` +
-                          `key        semid      owner      perms      nsems\n` +
-                          `0x00007f13 98304      student    660        3\n` +
-                          `  [empty: 5, full: 0, mutex: 1]`;
-                break;
-            case 'nice':
-                if (args.length < 3 || args[0] !== '-n') {
-                    output += `Usage: nice -n [increment] [process_name]`;
-                } else {
-                    output += `Adjusted scheduling priority for process '${args[2]}' by ${args[1]}. New Nice value: ${args[1]}.`;
-                }
-                break;
-            default:
-                output += `bash: ${baseCmd}: command not found. Type 'help' to see valid commands.`;
-        }
-        
-        outputEl.textContent += output + '\nstudent@mitadt-os:~$ ';
-        outputEl.scrollTop = outputEl.scrollHeight;
-    };
+                    break;
+                case 'ps':
+                    output += `PID   TTY      TIME     CMD       PRIORITY  STATUS\n` +
+                        `1     tty1     00:00:02 init      20        RUNNING\n` +
+                        `142   tty1     00:00:01 bash      20        SLEEPING\n` +
+                        `205   tty1     00:00:00 ps        20        RUNNING\n` +
+                        `304   tty1     00:00:05 kworker   15        IDLE`;
+                    break;
+                case 'top':
+                    output += `OS Load average: 0.12, 0.08, 0.02\n` +
+                        `Tasks: 4 total, 2 running, 2 sleeping\n` +
+                        `CPU utilization: 4.8% user, 1.2% system, 94.0% idle\n\n` +
+                        `PID   USER      PR  NI    VIRT    RES    SHR S  %CPU  %MEM     TIME+ COMMAND\n` +
+                        `1     student   20   0    4200   1200   1000 R   0.2   0.1   0:02.10 init\n` +
+                        `142   student   20   0    5100   2100   1800 S   0.0   0.2   0:01.45 bash\n` +
+                        `304   root      15  -5       0      0      0 S   0.5   0.0   0:05.12 kworker\n` +
+                        `312   student   20   0    9100   3400   2100 R   4.1   0.3   0:00.08 top`;
+                    break;
+                case 'ipcs':
+                    output += `------ Shared Memory Segments ------\n` +
+                        `key        shmid      owner      perms      bytes      nattch     status\n` +
+                        `0x00007f12 65536      student    660        1024       2\n\n` +
+                        `------ Semaphore Arrays ------\n` +
+                        `key        semid      owner      perms      nsems\n` +
+                        `0x00007f13 98304      student    660        3\n` +
+                        `  [empty: 5, full: 0, mutex: 1]`;
+                    break;
+                case 'nice':
+                    if (args.length < 3 || args[0] !== '-n') {
+                        output += `Usage: nice -n [increment] [process_name]`;
+                    } else {
+                        output += `Adjusted scheduling priority for process '${args[2]}' by ${args[1]}. New Nice value: ${args[1]}.`;
+                    }
+                    break;
+                default:
+                    output += `bash: ${baseCmd}: command not found. Type 'help' to see valid commands.`;
+            }
 
-    const initExperiment = (id) => {
-        if (window.currentTopo) window.currentTopo.destroy();
-        const container = document.getElementById('topology-builder-ui');
-        if (!container) return;
+            outputEl.textContent += output + '\nstudent@mitadt-os:~$ ';
+            outputEl.scrollTop = outputEl.scrollHeight;
+        };
 
-        const currentSubject = localStorage.getItem('vlab_current_subject') || 'networking';
-        if (currentSubject === 'os') {
-            container.innerHTML = `
+        const initExperiment = (id) => {
+            if (window.currentTopo) window.currentTopo.destroy();
+            const container = document.getElementById('topology-builder-ui');
+            if (!container) return;
+
+            const currentSubject = localStorage.getItem('vlab_current_subject') || 'networking';
+            if (currentSubject === 'os') {
+                container.innerHTML = `
                 <div class="terminal-workspace" style="height:100%; display:flex; flex-direction:column; background:#f8fafc; border-radius:12px; border:1px solid var(--border); overflow:hidden; font-family:'JetBrains Mono', monospace; color:#10b981; min-height:400px;">
                     <div style="background:#131824; padding:10px 15px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
                         <span style="color:var(--text-muted); font-size:12px; font-weight:800;">OS INTERACTIVE CLI TERMINAL</span>
@@ -15070,224 +15095,224 @@ student@mitadt-os:~$ </div>
                     </div>
                 </div>
             `;
-            
-            const termInput = document.getElementById('osTerminalInput');
-            const termOutput = document.getElementById('osTerminalOutput');
-            
-            if (termInput) {
-                termInput.addEventListener('keydown', (e) => {
-                    if (e.key === 'Enter') {
-                        const cmd = termInput.value.trim();
-                        termInput.value = '';
-                        if (cmd) {
-                            handleOsCommand(cmd, termOutput);
+
+                const termInput = document.getElementById('osTerminalInput');
+                const termOutput = document.getElementById('osTerminalOutput');
+
+                if (termInput) {
+                    termInput.addEventListener('keydown', (e) => {
+                        if (e.key === 'Enter') {
+                            const cmd = termInput.value.trim();
+                            termInput.value = '';
+                            if (cmd) {
+                                handleOsCommand(cmd, termOutput);
+                            }
                         }
-                    }
-                });
-            }
-            return;
-        }
-
-        if (container) {
-            const topo = new TopologySimulation(container);
-            window.currentTopo = topo;
-
-            // Lab-Specific Scenario Presets
-            setTimeout(() => {
-                const rect = topo.workspace.getBoundingClientRect();
-                const midX = rect.width / 2;
-                const midY = rect.height / 2;
-
-                if (id === 'vlan') {
-                    topo.addNode('switch', midX - 30, midY - 30, 'Core_Switch');
-                    topo.addNode('pc', midX - 150, midY - 150, 'PC_V10_1');
-                    topo.addNode('pc', midX + 150, midY - 150, 'PC_V10_2');
-                    topo.addNode('pc', midX - 150, midY + 150, 'PC_V20_1');
-                    topo.addNode('pc', midX + 150, midY + 150, 'PC_V20_2');
-                    topo.showHint("VLAN Scenario Loaded: Configure VLAN 10 and 20.");
-                } else if (id === 'routing_protocols' || id === 'routing_dv' || id === 'routing_ls') {
-                    topo.addNode('router', midX - 200, midY, 'R1');
-                    topo.addNode('router', midX, midY - 100, 'R2');
-                    topo.addNode('router', midX, midY + 100, 'R3');
-                    topo.addNode('router', midX + 200, midY, 'R4');
-                    topo.showHint("Routing Mesh Loaded: Configure OSPF/RIP/BGP.");
-                } else if (id === 'dns') {
-                    topo.addNode('server', midX + 150, midY - 100, 'Root_DNS');
-                    topo.addNode('server', midX + 150, midY, 'TLD_COM');
-                    topo.addNode('server', midX + 150, midY + 100, 'Auth_NS');
-                    topo.addNode('pc', midX - 150, midY, 'Client_PC');
-                    topo.showHint("DNS Infrastructure Loaded.");
+                    });
                 }
-            }, 300);
-        }
-    };
-
-    const setupSimControls = (s) => {
-        const play = document.getElementById('btnPlaySim');
-        if (!play) return;
-
-        play.addEventListener('click', () => {
-            if (s.isRunning) { s.isRunning = false; play.textContent = "Resume Engine"; play.classList.add('primary'); }
-            else { s.start(); play.textContent = "Pause Engine"; play.classList.remove('primary'); }
-        });
-        document.getElementById('btnResetSim').addEventListener('click', () => { s.reset(); play.textContent = "Start Simulation"; play.classList.add('primary'); });
-
-        const typeSel = document.getElementById('simType');
-        if (typeSel) typeSel.addEventListener('change', (e) => { s.mode = e.target.value; s.reset(); });
-
-        const winSize = document.getElementById('windowSize');
-        if (winSize) winSize.addEventListener('input', (e) => { s.windowSize = parseInt(e.target.value) || 4; s.reset(); });
-    };
-
-    // Splash Screen Handling
-    const hideSplash = () => {
-        const splash = document.getElementById('splash-screen');
-        if (splash) {
-            splash.style.opacity = '0';
-            window.setTimeout(() => splash.style.display = 'none', 800);
-        }
-    };
-    window.setTimeout(hideSplash, 1500);
-
-    document.getElementById('labSelect').addEventListener('change', (e) => {
-        const targetLab = e.target.value;
-        const splash = document.getElementById('splash-screen');
-        if (splash) {
-            splash.style.display = 'flex';
-            splash.style.opacity = '1';
-        }
-
-        // Cleanup Sandbox if we are moving AWAY from it
-        const app = document.getElementById('vlab-app');
-        const sandbox = document.getElementById('topology-builder-ui-sandbox');
-        const floatingHome = document.querySelector('.floating-back-btn');
-
-        if (targetLab === 'practice') {
-            if (app) app.style.display = 'none';
-            document.body.classList.add('sandbox-mode');
-            if (!sandbox) {
-                const s = document.createElement('div');
-                s.id = 'topology-builder-ui-sandbox';
-                s.style.cssText = "height: 100vh; width: 100vw; overflow: hidden; background: var(--bg-page);";
-                document.body.appendChild(s);
+                return;
             }
-        } else {
-            if (app) app.style.display = 'flex';
-            document.body.classList.remove('sandbox-mode');
-            if (sandbox) sandbox.remove();
-            if (floatingHome) floatingHome.remove();
-        }
 
-        loadLab(targetLab);
-        const activeSectionEl = document.querySelector('.nav-item.active');
-        const activeSection = activeSectionEl ? activeSectionEl.getAttribute('data-section') : 'aim';
-        
-        if (activeSection === 'simulation') initSimulation(targetLab);
-        if (activeSection === 'experiment') initExperiment(targetLab);
+            if (container) {
+                const topo = new TopologySimulation(container);
+                window.currentTopo = topo;
 
-        window.setTimeout(() => {
-            const splash2 = document.getElementById('splash-screen');
-            if (splash2) {
-                splash2.style.opacity = '0';
-                window.setTimeout(() => splash2.style.display = 'none', 800);
+                // Lab-Specific Scenario Presets
+                setTimeout(() => {
+                    const rect = topo.workspace.getBoundingClientRect();
+                    const midX = rect.width / 2;
+                    const midY = rect.height / 2;
+
+                    if (id === 'vlan') {
+                        topo.addNode('switch', midX - 30, midY - 30, 'Core_Switch');
+                        topo.addNode('pc', midX - 150, midY - 150, 'PC_V10_1');
+                        topo.addNode('pc', midX + 150, midY - 150, 'PC_V10_2');
+                        topo.addNode('pc', midX - 150, midY + 150, 'PC_V20_1');
+                        topo.addNode('pc', midX + 150, midY + 150, 'PC_V20_2');
+                        topo.showHint("VLAN Scenario Loaded: Configure VLAN 10 and 20.");
+                    } else if (id === 'routing_protocols' || id === 'routing_dv' || id === 'routing_ls') {
+                        topo.addNode('router', midX - 200, midY, 'R1');
+                        topo.addNode('router', midX, midY - 100, 'R2');
+                        topo.addNode('router', midX, midY + 100, 'R3');
+                        topo.addNode('router', midX + 200, midY, 'R4');
+                        topo.showHint("Routing Mesh Loaded: Configure OSPF/RIP/BGP.");
+                    } else if (id === 'dns') {
+                        topo.addNode('server', midX + 150, midY - 100, 'Root_DNS');
+                        topo.addNode('server', midX + 150, midY, 'TLD_COM');
+                        topo.addNode('server', midX + 150, midY + 100, 'Auth_NS');
+                        topo.addNode('pc', midX - 150, midY, 'Client_PC');
+                        topo.showHint("DNS Infrastructure Loaded.");
+                    }
+                }, 300);
             }
-        }, 1200);
-    });
+        };
 
-    const moduleSelectEl = document.getElementById('moduleSelect');
-    if (moduleSelectEl) {
-        moduleSelectEl.addEventListener('change', (e) => {
-            const labId = document.getElementById('labSelect').value;
-            const newIndex = parseInt(e.target.value, 10);
-            localStorage.setItem(`${labId}_active_module`, newIndex);
-            window.currentModuleIndex = newIndex;
-            
-            // Reload active lab details
-            loadLab(labId);
-            
-            // Re-trigger click on active nav item to refresh the panel and check lock status
+        const setupSimControls = (s) => {
+            const play = document.getElementById('btnPlaySim');
+            if (!play) return;
+
+            play.addEventListener('click', () => {
+                if (s.isRunning) { s.isRunning = false; play.textContent = "Resume Engine"; play.classList.add('primary'); }
+                else { s.start(); play.textContent = "Pause Engine"; play.classList.remove('primary'); }
+            });
+            document.getElementById('btnResetSim').addEventListener('click', () => { s.reset(); play.textContent = "Start Simulation"; play.classList.add('primary'); });
+
+            const typeSel = document.getElementById('simType');
+            if (typeSel) typeSel.addEventListener('change', (e) => { s.mode = e.target.value; s.reset(); });
+
+            const winSize = document.getElementById('windowSize');
+            if (winSize) winSize.addEventListener('input', (e) => { s.windowSize = parseInt(e.target.value) || 4; s.reset(); });
+        };
+
+        // Splash Screen Handling
+        const hideSplash = () => {
+            const splash = document.getElementById('splash-screen');
+            if (splash) {
+                splash.style.opacity = '0';
+                window.setTimeout(() => splash.style.display = 'none', 800);
+            }
+        };
+        window.setTimeout(hideSplash, 1500);
+
+        document.getElementById('labSelect').addEventListener('change', (e) => {
+            const targetLab = e.target.value;
+            const splash = document.getElementById('splash-screen');
+            if (splash) {
+                splash.style.display = 'flex';
+                splash.style.opacity = '1';
+            }
+
+            // Cleanup Sandbox if we are moving AWAY from it
+            const app = document.getElementById('vlab-app');
+            const sandbox = document.getElementById('topology-builder-ui-sandbox');
+            const floatingHome = document.querySelector('.floating-back-btn');
+
+            if (targetLab === 'practice') {
+                if (app) app.style.display = 'none';
+                document.body.classList.add('sandbox-mode');
+                if (!sandbox) {
+                    const s = document.createElement('div');
+                    s.id = 'topology-builder-ui-sandbox';
+                    s.style.cssText = "height: 100vh; width: 100vw; overflow: hidden; background: var(--bg-page);";
+                    document.body.appendChild(s);
+                }
+            } else {
+                if (app) app.style.display = 'flex';
+                document.body.classList.remove('sandbox-mode');
+                if (sandbox) sandbox.remove();
+                if (floatingHome) floatingHome.remove();
+            }
+
+            loadLab(targetLab);
             const activeSectionEl = document.querySelector('.nav-item.active');
-            if (activeSectionEl) {
-                activeSectionEl.click();
+            const activeSection = activeSectionEl ? activeSectionEl.getAttribute('data-section') : 'aim';
+
+            if (activeSection === 'simulation') initSimulation(targetLab);
+            if (activeSection === 'experiment') initExperiment(targetLab);
+
+            window.setTimeout(() => {
+                const splash2 = document.getElementById('splash-screen');
+                if (splash2) {
+                    splash2.style.opacity = '0';
+                    window.setTimeout(() => splash2.style.display = 'none', 800);
+                }
+            }, 1200);
+        });
+
+        const moduleSelectEl = document.getElementById('moduleSelect');
+        if (moduleSelectEl) {
+            moduleSelectEl.addEventListener('change', (e) => {
+                const labId = document.getElementById('labSelect').value;
+                const newIndex = parseInt(e.target.value, 10);
+                localStorage.setItem(`${labId}_active_module`, newIndex);
+                window.currentModuleIndex = newIndex;
+
+                // Reload active lab details
+                loadLab(labId);
+
+                // Re-trigger click on active nav item to refresh the panel and check lock status
+                const activeSectionEl = document.querySelector('.nav-item.active');
+                if (activeSectionEl) {
+                    activeSectionEl.click();
+                }
+            });
+        }
+
+        document.getElementById('themeToggle').addEventListener('click', () => {
+            const current = document.documentElement.getAttribute('data-theme');
+            const target = current === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', target);
+            localStorage.setItem('vlab_theme', target);
+            const toggleEl = document.getElementById('themeToggle');
+            if (toggleEl.querySelector('.sun')) {
+                // Already has complex inner structure (like in landing/dashboard)
+            } else {
+                toggleEl.innerHTML = target === 'dark' ? '🌙' : '☀️';
             }
         });
-    }
 
-    document.getElementById('themeToggle').addEventListener('click', () => {
-        const current = document.documentElement.getAttribute('data-theme');
-        const target = current === 'dark' ? 'light' : 'dark';
-        document.documentElement.setAttribute('data-theme', target);
-        localStorage.setItem('vlab_theme', target);
-        const toggleEl = document.getElementById('themeToggle');
-        if (toggleEl.querySelector('.sun')) {
-            // Already has complex inner structure (like in landing/dashboard)
-        } else {
-            toggleEl.innerHTML = target === 'dark' ? '🌙' : '☀️';
-        }
-    });
+        // Technical Focus Manager: Prevent simulation hotkeys while typing
+        window.addEventListener('keydown', (e) => {
+            const active = document.activeElement;
+            const isTyping = active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.isContentEditable;
+            if (isTyping && e.code === 'Space') {
+                e.stopPropagation(); // Prevent spacebar from pausing sim while typing
+            }
+        }, true);
+        document.getElementById('btnHome').addEventListener('click', () => window.location.href = 'dashboard.html');
 
-    // Technical Focus Manager: Prevent simulation hotkeys while typing
-    window.addEventListener('keydown', (e) => {
-        const active = document.activeElement;
-        const isTyping = active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.isContentEditable;
-        if (isTyping && e.code === 'Space') {
-            e.stopPropagation(); // Prevent spacebar from pausing sim while typing
-        }
-    }, true);
-    document.getElementById('btnHome').addEventListener('click', () => window.location.href = 'dashboard.html');
-
-    const currentSubject = localStorage.getItem('vlab_current_subject') || 'networking';
-    const labSelectEl = document.getElementById('labSelect');
-    if (labSelectEl) {
-        let optionsHtml = '';
-        if (currentSubject === 'os') {
-            optionsHtml = `
+        const currentSubject = localStorage.getItem('vlab_current_subject') || 'networking';
+        const labSelectEl = document.getElementById('labSelect');
+        if (labSelectEl) {
+            let optionsHtml = '';
+            if (currentSubject === 'os') {
+                optionsHtml = `
                 <option value="cpu_scheduling">1. CPU Scheduling Algorithms</option>
                 <option value="process_sync">2. Process Synchronization & Semaphores</option>
                 <option value="deadlock_avoidance">3. Deadlock Avoidance (Banker's)</option>
                 <option value="page_replacement">4. Page Replacement Algorithms</option>
                 <option value="disk_scheduling">5. Disk Scheduling Algorithms</option>
             `;
-            const crumbs = document.querySelectorAll('.breadcrumb .crumb');
-            if (crumbs.length >= 2) {
-                crumbs[1].textContent = "Operating Systems Lab";
-            }
-            document.documentElement.style.setProperty('--primary', '#a855f7');
-            document.documentElement.style.setProperty('--primary-rgb', '168, 85, 247');
-            document.documentElement.style.setProperty('--accent', '#c084fc');
-            document.title = "MIT ADT VLAB - Operating Systems";
-        } else if (currentSubject === 'programming') {
-            optionsHtml = `
+                const crumbs = document.querySelectorAll('.breadcrumb .crumb');
+                if (crumbs.length >= 2) {
+                    crumbs[1].textContent = "Operating Systems Lab";
+                }
+                document.documentElement.style.setProperty('--primary', '#a855f7');
+                document.documentElement.style.setProperty('--primary-rgb', '168, 85, 247');
+                document.documentElement.style.setProperty('--accent', '#c084fc');
+                document.title = "MIT ADT VLAB - Operating Systems";
+            } else if (currentSubject === 'programming') {
+                optionsHtml = `
                 <option value="c_prog">1. C Programming Lab</option>
                 <option value="cpp_prog">2. C++ OOP Concepts Lab</option>
                 <option value="java_prog">3. Java Programming Lab</option>
                 <option value="python_prog">4. Python Scripting Lab</option>
                 <option value="asm_prog">5. x86 Assembly Level Language (NASM)</option>
             `;
-            const crumbs = document.querySelectorAll('.breadcrumb .crumb');
-            if (crumbs.length >= 2) {
-                crumbs[1].textContent = "Computer Programming Lab";
-            }
-            document.documentElement.style.setProperty('--primary', '#10b981');
-            document.documentElement.style.setProperty('--primary-rgb', '16, 185, 129');
-            document.documentElement.style.setProperty('--accent', '#34d399');
-            document.title = "MIT ADT VLAB - Computer Programming";
-        } else if (currentSubject === 'dbms') {
-            optionsHtml = `
+                const crumbs = document.querySelectorAll('.breadcrumb .crumb');
+                if (crumbs.length >= 2) {
+                    crumbs[1].textContent = "Computer Programming Lab";
+                }
+                document.documentElement.style.setProperty('--primary', '#10b981');
+                document.documentElement.style.setProperty('--primary-rgb', '16, 185, 129');
+                document.documentElement.style.setProperty('--accent', '#34d399');
+                document.title = "MIT ADT VLAB - Computer Programming";
+            } else if (currentSubject === 'dbms') {
+                optionsHtml = `
                 <option value="sql_queries">1. Relational Schemas & SQL</option>
                 <option value="transactions">2. Concurrency & Transactions</option>
                 <option value="indexing">3. Indexing & B-Trees</option>
             `;
-            const crumbs = document.querySelectorAll('.breadcrumb .crumb');
-            if (crumbs.length >= 2) {
-                crumbs[1].textContent = "Database Systems Lab";
-            }
-            document.documentElement.style.setProperty('--primary', '#f59e0b');
-            document.documentElement.style.setProperty('--primary-rgb', '245, 158, 11');
-            document.documentElement.style.setProperty('--accent', '#fbbf24');
-            document.title = "MIT ADT VLAB - Database Systems";
-        } else if (currentSubject === 'toc') {
-            optionsHtml = `
+                const crumbs = document.querySelectorAll('.breadcrumb .crumb');
+                if (crumbs.length >= 2) {
+                    crumbs[1].textContent = "Database Systems Lab";
+                }
+                document.documentElement.style.setProperty('--primary', '#f59e0b');
+                document.documentElement.style.setProperty('--primary-rgb', '245, 158, 11');
+                document.documentElement.style.setProperty('--accent', '#fbbf24');
+                document.title = "MIT ADT VLAB - Database Systems";
+            } else if (currentSubject === 'toc') {
+                optionsHtml = `
                 <option value="dfa_sim">1. DFA Simulator</option>
                 <option value="nfa_to_dfa">2. NFA to DFA Converter</option>
                 <option value="regex_thompson">3. Regex to NFA (Thompson's)</option>
@@ -15296,16 +15321,16 @@ student@mitadt-os:~$ </div>
                 <option value="turing_machine">6. Turing Machine Tape Sim</option>
                 <option value="dfa_minimization">7. DFA Minimization</option>
             `;
-            const crumbs = document.querySelectorAll('.breadcrumb .crumb');
-            if (crumbs.length >= 2) {
-                crumbs[1].textContent = "Theory of Computation Lab";
-            }
-            document.documentElement.style.setProperty('--primary', '#0d9488');
-            document.documentElement.style.setProperty('--primary-rgb', '13, 148, 136');
-            document.documentElement.style.setProperty('--accent', '#2dd4bf');
-            document.title = "MIT ADT VLAB - Theory of Computation";
-        } else if (currentSubject === 'ai') {
-            optionsHtml = `
+                const crumbs = document.querySelectorAll('.breadcrumb .crumb');
+                if (crumbs.length >= 2) {
+                    crumbs[1].textContent = "Theory of Computation Lab";
+                }
+                document.documentElement.style.setProperty('--primary', '#0d9488');
+                document.documentElement.style.setProperty('--primary-rgb', '13, 148, 136');
+                document.documentElement.style.setProperty('--accent', '#2dd4bf');
+                document.title = "MIT ADT VLAB - Theory of Computation";
+            } else if (currentSubject === 'ai') {
+                optionsHtml = `
                 <option value="ai_search">1. BFS / DFS / A* Search</option>
                 <option value="ai_heuristic">2. Heuristic & Informed Search</option>
                 <option value="ai_csp">3. CSP — N-Queens</option>
@@ -15319,16 +15344,16 @@ student@mitadt-os:~$ </div>
                 <option value="ai_genetic">11. Genetic Algorithm</option>
                 <option value="ai_expert">12. Expert System</option>
             `;
-            const crumbs = document.querySelectorAll('.breadcrumb .crumb');
-            if (crumbs.length >= 2) {
-                crumbs[1].textContent = "Artificial Intelligence Lab";
-            }
-            document.documentElement.style.setProperty('--primary', '#f97316');
-            document.documentElement.style.setProperty('--primary-rgb', '249, 115, 22');
-            document.documentElement.style.setProperty('--accent', '#fb923c');
-            document.title = "MIT ADT VLAB - Artificial Intelligence";
-        } else if (currentSubject === 'cloud') {
-            optionsHtml = `
+                const crumbs = document.querySelectorAll('.breadcrumb .crumb');
+                if (crumbs.length >= 2) {
+                    crumbs[1].textContent = "Artificial Intelligence Lab";
+                }
+                document.documentElement.style.setProperty('--primary', '#f97316');
+                document.documentElement.style.setProperty('--primary-rgb', '249, 115, 22');
+                document.documentElement.style.setProperty('--accent', '#fb923c');
+                document.title = "MIT ADT VLAB - Artificial Intelligence";
+            } else if (currentSubject === 'cloud') {
+                optionsHtml = `
                 <option value="cloud_virtualization">1. Virtualization & VM Lifecycle</option>
                 <option value="cloud_docker">2. Docker Container Orchestration</option>
                 <option value="cloud_loadbalancer">3. Load Balancing</option>
@@ -15341,16 +15366,16 @@ student@mitadt-os:~$ </div>
                 <option value="cloud_mapreduce">10. MapReduce Parallel Processing</option>
                 <option value="cloud_kubernetes">11. Kubernetes Pod Scheduling</option>
             `;
-            const crumbs = document.querySelectorAll('.breadcrumb .crumb');
-            if (crumbs.length >= 2) {
-                crumbs[1].textContent = "Cloud Computing Lab";
-            }
-            document.documentElement.style.setProperty('--primary', '#0ea5e9');
-            document.documentElement.style.setProperty('--primary-rgb', '14, 165, 233');
-            document.documentElement.style.setProperty('--accent', '#38bdf8');
-            document.title = "MIT ADT VLAB - Cloud Computing";
-        } else if (currentSubject === 'cyber') {
-            optionsHtml = `
+                const crumbs = document.querySelectorAll('.breadcrumb .crumb');
+                if (crumbs.length >= 2) {
+                    crumbs[1].textContent = "Cloud Computing Lab";
+                }
+                document.documentElement.style.setProperty('--primary', '#0ea5e9');
+                document.documentElement.style.setProperty('--primary-rgb', '14, 165, 233');
+                document.documentElement.style.setProperty('--accent', '#38bdf8');
+                document.title = "MIT ADT VLAB - Cloud Computing";
+            } else if (currentSubject === 'cyber') {
+                optionsHtml = `
                 <option value="cyber_caesar">1. Caesar Cipher & ROT13</option>
                 <option value="cyber_vigenere">2. Vigenère Cipher</option>
                 <option value="cyber_rsa">3. RSA Public-Key Encryption</option>
@@ -15364,16 +15389,16 @@ student@mitadt-os:~$ </div>
                 <option value="cyber_steganography">11. Steganography (LSB)</option>
                 <option value="cyber_network_scan">12. Port Scanner & Vulnerability Assessment</option>
             `;
-            const crumbs = document.querySelectorAll('.breadcrumb .crumb');
-            if (crumbs.length >= 2) {
-                crumbs[1].textContent = "Cybersecurity Lab";
-            }
-            document.documentElement.style.setProperty('--primary', '#ef4444');
-            document.documentElement.style.setProperty('--primary-rgb', '239, 68, 68');
-            document.documentElement.style.setProperty('--accent', '#f87171');
-            document.title = "MIT ADT VLAB - Cybersecurity";
-        } else {
-            optionsHtml = `
+                const crumbs = document.querySelectorAll('.breadcrumb .crumb');
+                if (crumbs.length >= 2) {
+                    crumbs[1].textContent = "Cybersecurity Lab";
+                }
+                document.documentElement.style.setProperty('--primary', '#ef4444');
+                document.documentElement.style.setProperty('--primary-rgb', '239, 68, 68');
+                document.documentElement.style.setProperty('--accent', '#f87171');
+                document.title = "MIT ADT VLAB - Cybersecurity";
+            } else {
+                optionsHtml = `
                 <option value="intro_tools">1. Introduction to Networking Tools, Devices & Media</option>
                 <option value="net_commands">2. Network Commands & CLI Utilities</option>
                 <option value="topologies">3. Network Topologies (Bus, Star, Ring, Mesh, Tree)</option>
@@ -15391,363 +15416,363 @@ student@mitadt-os:~$ </div>
                 <option value="dynamic_nat">15. Dynamic NAT & PAT Overload</option>
                 <option value="practice" style="display:none;">Practice Sandbox Lab</option>
             `;
-            const crumbs = document.querySelectorAll('.breadcrumb .crumb');
-            if (crumbs.length >= 2) {
-                crumbs[1].textContent = "Computer Networks Lab";
+                const crumbs = document.querySelectorAll('.breadcrumb .crumb');
+                if (crumbs.length >= 2) {
+                    crumbs[1].textContent = "Computer Networks Lab";
+                }
+                document.title = "MIT ADT VLAB - Computer Networks";
             }
-            document.title = "MIT ADT VLAB - Computer Networks";
-        }
-        labSelectEl.innerHTML = optionsHtml;
-    }
-
-    // Sanitize initial lab variable by active subject track to prevent cross-subject loading bugs
-    const osLabs = ['cpu_scheduling', 'process_sync', 'deadlock_avoidance', 'page_replacement', 'disk_scheduling'];
-    const netLabs = ['intro_tools', 'net_commands', 'topologies', 'ip_class', 'lan_cables', 'subnetting', 'vlan', 'routing_rip', 'routing_ospf', 'routing_eigrp', 'static_routing', 'udp_tcp', 'dhcp_config', 'static_nat', 'dynamic_nat', 'practice'];
-    const progLabs = ['c_prog', 'cpp_prog', 'java_prog', 'python_prog', 'asm_prog'];
-    const dbmsLabs = ['sql_queries', 'transactions', 'indexing'];
-    const tocLabs = ['dfa_sim', 'nfa_to_dfa', 'regex_thompson', 'cfg_parser', 'pda_stack', 'turing_machine', 'dfa_minimization'];
-    const aiLabs = ['ai_search', 'ai_heuristic', 'ai_csp', 'ai_minimax', 'ai_naive_bayes', 'ai_knn', 'ai_kmeans', 'ai_ann', 'ai_backprop', 'ai_fuzzy', 'ai_genetic', 'ai_expert'];
-    const cloudLabs = ['cloud_virtualization', 'cloud_docker', 'cloud_loadbalancer', 'cloud_autoscaling', 'cloud_storage', 'cloud_cdn', 'cloud_iam', 'cloud_serverless', 'cloud_sla', 'cloud_mapreduce', 'cloud_kubernetes'];
-    const cyberLabs = ['cyber_caesar', 'cyber_vigenere', 'cyber_rsa', 'cyber_aes', 'cyber_hashing', 'cyber_firewall', 'cyber_ids', 'cyber_sql_inject', 'cyber_xss', 'cyber_mitm', 'cyber_steganography', 'cyber_network_scan'];
-    
-    let initialLab = localStorage.getItem('vlab_current_lab');
-    if (currentSubject === 'os') {
-        if (!osLabs.includes(initialLab)) {
-            initialLab = 'cpu_scheduling';
-            localStorage.setItem('vlab_current_lab', 'cpu_scheduling');
-        }
-    } else if (currentSubject === 'programming') {
-        if (!progLabs.includes(initialLab)) {
-            initialLab = 'c_prog';
-            localStorage.setItem('vlab_current_lab', 'c_prog');
-        }
-    } else if (currentSubject === 'dbms') {
-        if (!dbmsLabs.includes(initialLab)) {
-            initialLab = 'sql_queries';
-            localStorage.setItem('vlab_current_lab', 'sql_queries');
-        }
-    } else if (currentSubject === 'toc') {
-        if (!tocLabs.includes(initialLab)) {
-            initialLab = 'dfa_sim';
-            localStorage.setItem('vlab_current_lab', 'dfa_sim');
-        }
-    } else if (currentSubject === 'ai') {
-        if (!aiLabs.includes(initialLab)) {
-            initialLab = 'ai_search';
-            localStorage.setItem('vlab_current_lab', 'ai_search');
-        }
-    } else if (currentSubject === 'cloud') {
-        if (!cloudLabs.includes(initialLab)) {
-            initialLab = 'cloud_virtualization';
-            localStorage.setItem('vlab_current_lab', 'cloud_virtualization');
-        }
-    } else if (currentSubject === 'cyber') {
-        if (!cyberLabs.includes(initialLab)) {
-            initialLab = 'cyber_caesar';
-            localStorage.setItem('vlab_current_lab', 'cyber_caesar');
-        }
-    } else {
-        if (!netLabs.includes(initialLab)) {
-            initialLab = 'intro_tools';
-            localStorage.setItem('vlab_current_lab', 'intro_tools');
-        }
-    }
-
-    const initialMode = localStorage.getItem('vlab_current_mode') || 'learning';
-    if (labSelectEl) labSelectEl.value = initialLab;
-    loadLab(initialLab);
-
-    // Aggressive Sandbox Mode: Preserve essential UI components while clearing workspace
-    if (initialMode === 'sandbox' || initialLab === 'practice') {
-        document.body.classList.add('sandbox-mode');
-
-        const app = document.getElementById('vlab-app');
-        if (app) app.style.display = 'none';
-
-        let sandboxContainer = document.getElementById('topology-builder-ui-sandbox');
-        if (!sandboxContainer) {
-            sandboxContainer = document.createElement('div');
-            sandboxContainer.id = 'topology-builder-ui-sandbox';
-            sandboxContainer.style.cssText = "height: 100vh; width: 100vw; overflow: hidden; background: var(--bg-page);";
-            document.body.appendChild(sandboxContainer);
+            labSelectEl.innerHTML = optionsHtml;
         }
 
-        const floatingHome = document.createElement('a');
-        floatingHome.href = 'dashboard.html';
-        floatingHome.className = 'floating-back-btn';
-        floatingHome.innerHTML = '🏠';
-        floatingHome.title = 'Back to Dashboard';
-        document.body.appendChild(floatingHome);
+        // Sanitize initial lab variable by active subject track to prevent cross-subject loading bugs
+        const osLabs = ['cpu_scheduling', 'process_sync', 'deadlock_avoidance', 'page_replacement', 'disk_scheduling'];
+        const netLabs = ['intro_tools', 'net_commands', 'topologies', 'ip_class', 'lan_cables', 'subnetting', 'vlan', 'routing_rip', 'routing_ospf', 'routing_eigrp', 'static_routing', 'udp_tcp', 'dhcp_config', 'static_nat', 'dynamic_nat', 'practice'];
+        const progLabs = ['c_prog', 'cpp_prog', 'java_prog', 'python_prog', 'asm_prog'];
+        const dbmsLabs = ['sql_queries', 'transactions', 'indexing'];
+        const tocLabs = ['dfa_sim', 'nfa_to_dfa', 'regex_thompson', 'cfg_parser', 'pda_stack', 'turing_machine', 'dfa_minimization'];
+        const aiLabs = ['ai_search', 'ai_heuristic', 'ai_csp', 'ai_minimax', 'ai_naive_bayes', 'ai_knn', 'ai_kmeans', 'ai_ann', 'ai_backprop', 'ai_fuzzy', 'ai_genetic', 'ai_expert'];
+        const cloudLabs = ['cloud_virtualization', 'cloud_docker', 'cloud_loadbalancer', 'cloud_autoscaling', 'cloud_storage', 'cloud_cdn', 'cloud_iam', 'cloud_serverless', 'cloud_sla', 'cloud_mapreduce', 'cloud_kubernetes'];
+        const cyberLabs = ['cyber_caesar', 'cyber_vigenere', 'cyber_rsa', 'cyber_aes', 'cyber_hashing', 'cyber_firewall', 'cyber_ids', 'cyber_sql_inject', 'cyber_xss', 'cyber_mitm', 'cyber_steganography', 'cyber_network_scan'];
 
-        // Re-initialize the experiment in the new clean container
-        const topo = new TopologySimulation(sandboxContainer);
-        window.currentTopo = topo;
-    } else {
-        // Start on Aim for learning mode to avoid immediate "Locked" screen confusion
-        const aimTab = document.querySelector('.nav-item[data-section="aim"]');
-        if (aimTab) aimTab.click();
-    }
+        let initialLab = localStorage.getItem('vlab_current_lab');
+        if (currentSubject === 'os') {
+            if (!osLabs.includes(initialLab)) {
+                initialLab = 'cpu_scheduling';
+                localStorage.setItem('vlab_current_lab', 'cpu_scheduling');
+            }
+        } else if (currentSubject === 'programming') {
+            if (!progLabs.includes(initialLab)) {
+                initialLab = 'c_prog';
+                localStorage.setItem('vlab_current_lab', 'c_prog');
+            }
+        } else if (currentSubject === 'dbms') {
+            if (!dbmsLabs.includes(initialLab)) {
+                initialLab = 'sql_queries';
+                localStorage.setItem('vlab_current_lab', 'sql_queries');
+            }
+        } else if (currentSubject === 'toc') {
+            if (!tocLabs.includes(initialLab)) {
+                initialLab = 'dfa_sim';
+                localStorage.setItem('vlab_current_lab', 'dfa_sim');
+            }
+        } else if (currentSubject === 'ai') {
+            if (!aiLabs.includes(initialLab)) {
+                initialLab = 'ai_search';
+                localStorage.setItem('vlab_current_lab', 'ai_search');
+            }
+        } else if (currentSubject === 'cloud') {
+            if (!cloudLabs.includes(initialLab)) {
+                initialLab = 'cloud_virtualization';
+                localStorage.setItem('vlab_current_lab', 'cloud_virtualization');
+            }
+        } else if (currentSubject === 'cyber') {
+            if (!cyberLabs.includes(initialLab)) {
+                initialLab = 'cyber_caesar';
+                localStorage.setItem('vlab_current_lab', 'cyber_caesar');
+            }
+        } else {
+            if (!netLabs.includes(initialLab)) {
+                initialLab = 'intro_tools';
+                localStorage.setItem('vlab_current_lab', 'intro_tools');
+            }
+        }
 
-    // ==========================================
-    // GLOBAL AI TUTOR ASSISTANT LOGIC
-    // ==========================================
-    const globalBubble = document.getElementById('global-ai-bubble');
-    const globalDrawer = document.getElementById('global-ai-drawer');
-    const btnGlobalAiClose = document.getElementById('btnGlobalAiClose');
-    const btnGlobalAiSend = document.getElementById('btnGlobalAiSend');
-    const globalAiInput = document.getElementById('global-ai-chat-input');
-    const globalChatLogs = document.getElementById('global-ai-chat-logs');
-    
-    if (globalBubble && globalDrawer) {
-        globalBubble.addEventListener('click', () => {
-            const isOpen = globalDrawer.style.display === 'flex';
-            globalDrawer.style.display = isOpen ? 'none' : 'flex';
-            if (isOpen) {
+        const initialMode = localStorage.getItem('vlab_current_mode') || 'learning';
+        if (labSelectEl) labSelectEl.value = initialLab;
+        loadLab(initialLab);
+
+        // Aggressive Sandbox Mode: Preserve essential UI components while clearing workspace
+        if (initialMode === 'sandbox' || initialLab === 'practice') {
+            document.body.classList.add('sandbox-mode');
+
+            const app = document.getElementById('vlab-app');
+            if (app) app.style.display = 'none';
+
+            let sandboxContainer = document.getElementById('topology-builder-ui-sandbox');
+            if (!sandboxContainer) {
+                sandboxContainer = document.createElement('div');
+                sandboxContainer.id = 'topology-builder-ui-sandbox';
+                sandboxContainer.style.cssText = "height: 100vh; width: 100vw; overflow: hidden; background: var(--bg-page);";
+                document.body.appendChild(sandboxContainer);
+            }
+
+            const floatingHome = document.createElement('a');
+            floatingHome.href = 'dashboard.html';
+            floatingHome.className = 'floating-back-btn';
+            floatingHome.innerHTML = '🏠';
+            floatingHome.title = 'Back to Dashboard';
+            document.body.appendChild(floatingHome);
+
+            // Re-initialize the experiment in the new clean container
+            const topo = new TopologySimulation(sandboxContainer);
+            window.currentTopo = topo;
+        } else {
+            // Start on Aim for learning mode to avoid immediate "Locked" screen confusion
+            const aimTab = document.querySelector('.nav-item[data-section="aim"]');
+            if (aimTab) aimTab.click();
+        }
+
+        // ==========================================
+        // GLOBAL AI TUTOR ASSISTANT LOGIC
+        // ==========================================
+        const globalBubble = document.getElementById('global-ai-bubble');
+        const globalDrawer = document.getElementById('global-ai-drawer');
+        const btnGlobalAiClose = document.getElementById('btnGlobalAiClose');
+        const btnGlobalAiSend = document.getElementById('btnGlobalAiSend');
+        const globalAiInput = document.getElementById('global-ai-chat-input');
+        const globalChatLogs = document.getElementById('global-ai-chat-logs');
+
+        if (globalBubble && globalDrawer) {
+            globalBubble.addEventListener('click', () => {
+                const isOpen = globalDrawer.style.display === 'flex';
+                globalDrawer.style.display = isOpen ? 'none' : 'flex';
+                if (isOpen) {
+                    globalBubble.classList.remove('active');
+                } else {
+                    globalBubble.classList.add('active');
+                    globalAiInput.focus();
+                }
+            });
+
+            btnGlobalAiClose.addEventListener('click', () => {
+                globalDrawer.style.display = 'none';
                 globalBubble.classList.remove('active');
-            } else {
-                globalBubble.classList.add('active');
-                globalAiInput.focus();
-            }
-        });
-        
-        btnGlobalAiClose.addEventListener('click', () => {
-            globalDrawer.style.display = 'none';
-            globalBubble.classList.remove('active');
-        });
-        
-        const appendGlobalMessage = (sender, message) => {
-            const msgDiv = document.createElement('div');
-            msgDiv.className = `global-ai-msg ${sender}`;
-            msgDiv.textContent = message;
-            globalChatLogs.appendChild(msgDiv);
-            globalChatLogs.scrollTop = globalChatLogs.scrollHeight;
-        };
-        
-        const getActiveContext = () => {
-            const subject = localStorage.getItem('vlab_current_subject') || 'networking';
-            const labId = document.getElementById('labSelect').value;
-            const labData = window.VLAB_DATA ? window.VLAB_DATA[labId] : null;
-            const labTitle = labData ? labData.title : 'Custom Lab';
-            const activeSectionEl = document.querySelector('.nav-item.active');
-            const activeTab = activeSectionEl ? activeSectionEl.getAttribute('data-section') : 'aim';
-            
-            let context = `Active Subject: ${subject}. Active Lab: ${labTitle}. Current Screen: ${activeTab}.\n`;
-            
-            // Check if programming/multi-module
-            if (labData && labData.isMultiModule) {
-                const modIdx = window.currentModuleIndex !== undefined && window.currentModuleIndex !== null ? window.currentModuleIndex : 0;
-                const modData = labData.modules[modIdx];
-                context += `Active Sub-Module: ${modData ? modData.title : 'N/A'}.\n`;
-            }
-            
-            // Extract code context if in programming sandbox or DBMS editor
-            const aceEl = document.getElementById('ace-editor');
-            if (aceEl && window.ace) {
-                try {
-                    const editor = window.ace.edit("ace-editor");
-                    const code = editor.getValue();
-                    if (code && code.trim()) {
-                        context += `Student's current editor code:\n${code.substring(0, 1000)}\n`;
-                    }
-                } catch(e) {}
-            }
-            
-            // Extract SQL query if active
-            const sqlTextarea = document.getElementById('sql-query-input');
-            if (sqlTextarea && sqlTextarea.value.trim()) {
-                context += `Student's SQL query:\n${sqlTextarea.value.trim()}\n`;
-            }
-            
-            // Extract topology nodes/connections if in network editor
-            if (window.currentTopo && window.currentTopo.nodes) {
-                const nodesCount = window.currentTopo.nodes.length;
-                const linksCount = window.currentTopo.links ? window.currentTopo.links.length : 0;
-                context += `Network Topology: ${nodesCount} nodes, ${linksCount} links. Node names: ${window.currentTopo.nodes.map(n => n.name).join(', ')}.\n`;
-            }
-            
-            return context;
-        };
-        
-        const getCurriculumDataCorpus = () => {
-            const subject = localStorage.getItem('vlab_current_subject') || 'networking';
-            let corpus = `=== MIT ADT VLAB CURRICULUM REFERENCE MANUAL - SUBJECT: ${subject.toUpperCase()} ===\n\n`;
-            
-            const osLabs = ['cpu_scheduling', 'process_sync', 'deadlock_avoidance', 'page_replacement', 'disk_scheduling'];
-            const netLabs = ['cables_devices', 'modulation', 'net_commands', 'ip_class', 'csma', 'csma_ca', 'subnet', 'vlan', 'routing_protocols', 'routing_dv', 'routing_ls', 'udp', 'tcp', 'dns', 'practice'];
-            const progLabs = ['c_prog', 'cpp_prog', 'java_prog', 'python_prog'];
-            const dbmsLabs = ['sql_queries', 'transactions', 'indexing'];
-            
-            const tocLabs = ['dfa_sim', 'nfa_to_dfa', 'regex_thompson', 'cfg_parser', 'pda_stack', 'turing_machine', 'dfa_minimization'];
-            const aiLabs = ['ai_search', 'ai_heuristic', 'ai_csp', 'ai_minimax', 'ai_naive_bayes', 'ai_knn', 'ai_kmeans', 'ai_ann', 'ai_backprop', 'ai_fuzzy', 'ai_genetic', 'ai_expert'];
-            const cloudLabs = ['cloud_virtualization', 'cloud_docker', 'cloud_loadbalancer', 'cloud_autoscaling', 'cloud_storage', 'cloud_cdn', 'cloud_iam', 'cloud_serverless', 'cloud_sla', 'cloud_mapreduce', 'cloud_kubernetes'];
-            const cyberLabs = ['cyber_caesar', 'cyber_vigenere', 'cyber_rsa', 'cyber_aes', 'cyber_hashing', 'cyber_firewall', 'cyber_ids', 'cyber_sql_inject', 'cyber_xss', 'cyber_mitm', 'cyber_steganography', 'cyber_network_scan'];
+            });
 
-            let targetKeys = [];
-            if (subject === 'os') targetKeys = osLabs;
-            else if (subject === 'dbms') targetKeys = dbmsLabs;
-            else if (subject === 'programming') targetKeys = progLabs;
-            else if (subject === 'toc') targetKeys = tocLabs;
-            else if (subject === 'ai') targetKeys = aiLabs;
-            else if (subject === 'cloud') targetKeys = cloudLabs;
-            else if (subject === 'cyber') targetKeys = cyberLabs;
-            else targetKeys = netLabs;
-            
-            targetKeys.forEach(key => {
-                const data = window.VLAB_DATA[key];
-                if (!data) return;
-                
-                corpus += `--- LAB ID: ${key} ---\n`;
-                corpus += `Title: ${data.title}\n`;
-                corpus += `Aim: ${data.aim}\n`;
-                if (data.theory) {
-                    corpus += `Theory Intro: ${data.theory.intro || ''}\n`;
-                    if (data.theory.cards) {
-                        data.theory.cards.forEach((c, idx) => {
-                            corpus += `Theory Concept ${idx+1}: ${c.title} - ${c.content}\n`;
+            const appendGlobalMessage = (sender, message) => {
+                const msgDiv = document.createElement('div');
+                msgDiv.className = `global-ai-msg ${sender}`;
+                msgDiv.textContent = message;
+                globalChatLogs.appendChild(msgDiv);
+                globalChatLogs.scrollTop = globalChatLogs.scrollHeight;
+            };
+
+            const getActiveContext = () => {
+                const subject = localStorage.getItem('vlab_current_subject') || 'networking';
+                const labId = document.getElementById('labSelect').value;
+                const labData = window.VLAB_DATA ? window.VLAB_DATA[labId] : null;
+                const labTitle = labData ? labData.title : 'Custom Lab';
+                const activeSectionEl = document.querySelector('.nav-item.active');
+                const activeTab = activeSectionEl ? activeSectionEl.getAttribute('data-section') : 'aim';
+
+                let context = `Active Subject: ${subject}. Active Lab: ${labTitle}. Current Screen: ${activeTab}.\n`;
+
+                // Check if programming/multi-module
+                if (labData && labData.isMultiModule) {
+                    const modIdx = window.currentModuleIndex !== undefined && window.currentModuleIndex !== null ? window.currentModuleIndex : 0;
+                    const modData = labData.modules[modIdx];
+                    context += `Active Sub-Module: ${modData ? modData.title : 'N/A'}.\n`;
+                }
+
+                // Extract code context if in programming sandbox or DBMS editor
+                const aceEl = document.getElementById('ace-editor');
+                if (aceEl && window.ace) {
+                    try {
+                        const editor = window.ace.edit("ace-editor");
+                        const code = editor.getValue();
+                        if (code && code.trim()) {
+                            context += `Student's current editor code:\n${code.substring(0, 1000)}\n`;
+                        }
+                    } catch (e) { }
+                }
+
+                // Extract SQL query if active
+                const sqlTextarea = document.getElementById('sql-query-input');
+                if (sqlTextarea && sqlTextarea.value.trim()) {
+                    context += `Student's SQL query:\n${sqlTextarea.value.trim()}\n`;
+                }
+
+                // Extract topology nodes/connections if in network editor
+                if (window.currentTopo && window.currentTopo.nodes) {
+                    const nodesCount = window.currentTopo.nodes.length;
+                    const linksCount = window.currentTopo.links ? window.currentTopo.links.length : 0;
+                    context += `Network Topology: ${nodesCount} nodes, ${linksCount} links. Node names: ${window.currentTopo.nodes.map(n => n.name).join(', ')}.\n`;
+                }
+
+                return context;
+            };
+
+            const getCurriculumDataCorpus = () => {
+                const subject = localStorage.getItem('vlab_current_subject') || 'networking';
+                let corpus = `=== MIT ADT VLAB CURRICULUM REFERENCE MANUAL - SUBJECT: ${subject.toUpperCase()} ===\n\n`;
+
+                const osLabs = ['cpu_scheduling', 'process_sync', 'deadlock_avoidance', 'page_replacement', 'disk_scheduling'];
+                const netLabs = ['cables_devices', 'modulation', 'net_commands', 'ip_class', 'csma', 'csma_ca', 'subnet', 'vlan', 'routing_protocols', 'routing_dv', 'routing_ls', 'udp', 'tcp', 'dns', 'practice'];
+                const progLabs = ['c_prog', 'cpp_prog', 'java_prog', 'python_prog'];
+                const dbmsLabs = ['sql_queries', 'transactions', 'indexing'];
+
+                const tocLabs = ['dfa_sim', 'nfa_to_dfa', 'regex_thompson', 'cfg_parser', 'pda_stack', 'turing_machine', 'dfa_minimization'];
+                const aiLabs = ['ai_search', 'ai_heuristic', 'ai_csp', 'ai_minimax', 'ai_naive_bayes', 'ai_knn', 'ai_kmeans', 'ai_ann', 'ai_backprop', 'ai_fuzzy', 'ai_genetic', 'ai_expert'];
+                const cloudLabs = ['cloud_virtualization', 'cloud_docker', 'cloud_loadbalancer', 'cloud_autoscaling', 'cloud_storage', 'cloud_cdn', 'cloud_iam', 'cloud_serverless', 'cloud_sla', 'cloud_mapreduce', 'cloud_kubernetes'];
+                const cyberLabs = ['cyber_caesar', 'cyber_vigenere', 'cyber_rsa', 'cyber_aes', 'cyber_hashing', 'cyber_firewall', 'cyber_ids', 'cyber_sql_inject', 'cyber_xss', 'cyber_mitm', 'cyber_steganography', 'cyber_network_scan'];
+
+                let targetKeys = [];
+                if (subject === 'os') targetKeys = osLabs;
+                else if (subject === 'dbms') targetKeys = dbmsLabs;
+                else if (subject === 'programming') targetKeys = progLabs;
+                else if (subject === 'toc') targetKeys = tocLabs;
+                else if (subject === 'ai') targetKeys = aiLabs;
+                else if (subject === 'cloud') targetKeys = cloudLabs;
+                else if (subject === 'cyber') targetKeys = cyberLabs;
+                else targetKeys = netLabs;
+
+                targetKeys.forEach(key => {
+                    const data = window.VLAB_DATA[key];
+                    if (!data) return;
+
+                    corpus += `--- LAB ID: ${key} ---\n`;
+                    corpus += `Title: ${data.title}\n`;
+                    corpus += `Aim: ${data.aim}\n`;
+                    if (data.theory) {
+                        corpus += `Theory Intro: ${data.theory.intro || ''}\n`;
+                        if (data.theory.cards) {
+                            data.theory.cards.forEach((c, idx) => {
+                                corpus += `Theory Concept ${idx + 1}: ${c.title} - ${c.content}\n`;
+                            });
+                        }
+                    }
+                    if (data.procedure) {
+                        corpus += `Procedure steps:\n${data.procedure.join('\n')}\n`;
+                    }
+                    if (data.practice_commands) {
+                        corpus += `Practice CLI commands: ${data.practice_commands.join(', ')}\n`;
+                    }
+                    if (data.practice_questions) {
+                        corpus += `Practice review tasks:\n${data.practice_questions.join('\n')}\n`;
+                    }
+                    if (data.isMultiModule && data.modules) {
+                        corpus += `This is a multi-module lab with ${data.modules.length} modules:\n`;
+                        data.modules.forEach((mod, idx) => {
+                            corpus += `  Module ${idx + 1}: ${mod.title}\n`;
+                            corpus += `    Module Aim: ${mod.aim}\n`;
+                            corpus += `    Module Procedure: ${mod.procedure ? mod.procedure.join(' -> ') : ''}\n`;
+                            if (mod.defaultCode) {
+                                corpus += `    Module Starter Code:\n${mod.defaultCode}\n`;
+                            }
                         });
                     }
-                }
-                if (data.procedure) {
-                    corpus += `Procedure steps:\n${data.procedure.join('\n')}\n`;
-                }
-                if (data.practice_commands) {
-                    corpus += `Practice CLI commands: ${data.practice_commands.join(', ')}\n`;
-                }
-                if (data.practice_questions) {
-                    corpus += `Practice review tasks:\n${data.practice_questions.join('\n')}\n`;
-                }
-                if (data.isMultiModule && data.modules) {
-                    corpus += `This is a multi-module lab with ${data.modules.length} modules:\n`;
-                    data.modules.forEach((mod, idx) => {
-                        corpus += `  Module ${idx+1}: ${mod.title}\n`;
-                        corpus += `    Module Aim: ${mod.aim}\n`;
-                        corpus += `    Module Procedure: ${mod.procedure ? mod.procedure.join(' -> ') : ''}\n`;
-                        if (mod.defaultCode) {
-                            corpus += `    Module Starter Code:\n${mod.defaultCode}\n`;
-                        }
-                    });
-                }
-                corpus += `\n`;
-            });
-            
-            return corpus;
-        };
+                    corpus += `\n`;
+                });
 
-        // Persistent Chat Logic
-        const loadChatHistory = (labId) => {
-            globalChatLogs.innerHTML = `<div class="global-ai-msg ai">Hello! I am your MIT VLab Academic AI Tutor. I can help guide you through configurations, CLI logs, SQL queries, or CPU scheduling concepts. How can I assist you today?</div>`;
-            const savedChat = localStorage.getItem(`vlab_chat_${labId}`);
-            if (savedChat) {
-                try {
-                    const messages = JSON.parse(savedChat);
-                    messages.forEach(m => {
-                        appendGlobalMessage(m.sender, m.text);
-                    });
-                } catch(e) { console.error("Error loading chat", e); }
-            }
-        };
-        window.loadChatHistory = loadChatHistory;
+                return corpus;
+            };
 
-        const saveChatHistory = (labId, sender, text) => {
-            const savedChat = localStorage.getItem(`vlab_chat_${labId}`);
-            let messages = [];
-            if (savedChat) {
-                try { messages = JSON.parse(savedChat); } catch(e) {}
-            }
-            messages.push({ sender, text });
-            if (messages.length > 50) messages.shift();
-            localStorage.setItem(`vlab_chat_${labId}`, JSON.stringify(messages));
-            
-            const user = auth.currentUser;
-            if (user) {
-                setDoc(doc(db, "users", user.uid, "chats", labId), {
-                    messages: messages,
-                    lastUpdated: new Date().toISOString()
-                }, { merge: true }).catch(err => console.error("Cloud chat sync failed", err));
-            }
-        };
-
-        // Voice readback engine
-        let speechEnabled = false;
-        const toggleSpeak = document.getElementById('btnGlobalAiSpeakToggle');
-        if (toggleSpeak) {
-            toggleSpeak.addEventListener('click', () => {
-                speechEnabled = !speechEnabled;
-                toggleSpeak.textContent = speechEnabled ? "🔊 Read: On" : "🔊 Read: Off";
-                toggleSpeak.style.borderColor = speechEnabled ? "var(--primary)" : "var(--border)";
-                if (!speechEnabled && window.speechSynthesis) {
-                    window.speechSynthesis.cancel();
-                }
-            });
-        }
-
-        const speakText = (text) => {
-            if (!speechEnabled || !window.speechSynthesis) return;
-            window.speechSynthesis.cancel();
-            const cleanText = text.replace(/[*#`_\-]/g, '').replace(/AI Tutor:/g, '').substring(0, 300);
-            const utterance = new SpeechSynthesisUtterance(cleanText);
-            window.speechSynthesis.speak(utterance);
-        };
-
-        // Voice recognition engine
-        const btnVoice = document.getElementById('btnGlobalAiVoice');
-        if (btnVoice) {
-            if (window.SpeechRecognition || window.webkitSpeechRecognition) {
-                const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
-                const recognition = new SpeechRec();
-                recognition.continuous = false;
-                recognition.interimResults = false;
-                recognition.lang = 'en-US';
-                
-                recognition.onstart = () => {
-                    btnVoice.textContent = "🔴";
-                    btnVoice.style.background = "#ef4444";
-                };
-                
-                recognition.onend = () => {
-                    btnVoice.textContent = "🎙️";
-                    btnVoice.style.background = "#4b5563";
-                };
-                
-                recognition.onerror = () => {
-                    btnVoice.textContent = "🎙️";
-                    btnVoice.style.background = "#4b5563";
-                };
-                
-                recognition.onresult = (event) => {
-                    const resultText = event.results[0][0].transcript;
-                    globalAiInput.value = resultText;
-                    globalAiInput.focus();
-                };
-                
-                btnVoice.addEventListener('click', () => {
+            // Persistent Chat Logic
+            const loadChatHistory = (labId) => {
+                globalChatLogs.innerHTML = `<div class="global-ai-msg ai">Hello! I am your MIT VLab Academic AI Tutor. I can help guide you through configurations, CLI logs, SQL queries, or CPU scheduling concepts. How can I assist you today?</div>`;
+                const savedChat = localStorage.getItem(`vlab_chat_${labId}`);
+                if (savedChat) {
                     try {
-                        recognition.start();
-                    } catch(e) {
-                        recognition.stop();
+                        const messages = JSON.parse(savedChat);
+                        messages.forEach(m => {
+                            appendGlobalMessage(m.sender, m.text);
+                        });
+                    } catch (e) { console.error("Error loading chat", e); }
+                }
+            };
+            window.loadChatHistory = loadChatHistory;
+
+            const saveChatHistory = (labId, sender, text) => {
+                const savedChat = localStorage.getItem(`vlab_chat_${labId}`);
+                let messages = [];
+                if (savedChat) {
+                    try { messages = JSON.parse(savedChat); } catch (e) { }
+                }
+                messages.push({ sender, text });
+                if (messages.length > 50) messages.shift();
+                localStorage.setItem(`vlab_chat_${labId}`, JSON.stringify(messages));
+
+                const user = auth.currentUser;
+                if (user) {
+                    setDoc(doc(db, "users", user.uid, "chats", labId), {
+                        messages: messages,
+                        lastUpdated: new Date().toISOString()
+                    }, { merge: true }).catch(err => console.error("Cloud chat sync failed", err));
+                }
+            };
+
+            // Voice readback engine
+            let speechEnabled = false;
+            const toggleSpeak = document.getElementById('btnGlobalAiSpeakToggle');
+            if (toggleSpeak) {
+                toggleSpeak.addEventListener('click', () => {
+                    speechEnabled = !speechEnabled;
+                    toggleSpeak.textContent = speechEnabled ? "🔊 Read: On" : "🔊 Read: Off";
+                    toggleSpeak.style.borderColor = speechEnabled ? "var(--primary)" : "var(--border)";
+                    if (!speechEnabled && window.speechSynthesis) {
+                        window.speechSynthesis.cancel();
                     }
                 });
-            } else {
-                btnVoice.style.display = 'none';
             }
-        }
 
-        const executeGlobalChatQuery = async (queryText) => {
-            if (!queryText.trim()) return;
-            const labId = document.getElementById('labSelect').value;
-            
-            appendGlobalMessage('student', queryText);
-            saveChatHistory(labId, 'student', queryText);
-            
-            appendGlobalMessage('ai', 'AI Tutor is writing a response...');
-            
-            const context = getActiveContext();
-            let responseText = "";
-            
-            const key = getApiKey();
-            if (key) {
-                const curriculumCorpus = getCurriculumDataCorpus();
-                const systemPrompt = `You are the MIT VLab Academic AI Tutor. You are trained and data-driven on the entire curriculum of this virtual laboratory platform.
+            const speakText = (text) => {
+                if (!speechEnabled || !window.speechSynthesis) return;
+                window.speechSynthesis.cancel();
+                const cleanText = text.replace(/[*#`_\-]/g, '').replace(/AI Tutor:/g, '').substring(0, 300);
+                const utterance = new SpeechSynthesisUtterance(cleanText);
+                window.speechSynthesis.speak(utterance);
+            };
+
+            // Voice recognition engine
+            const btnVoice = document.getElementById('btnGlobalAiVoice');
+            if (btnVoice) {
+                if (window.SpeechRecognition || window.webkitSpeechRecognition) {
+                    const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+                    const recognition = new SpeechRec();
+                    recognition.continuous = false;
+                    recognition.interimResults = false;
+                    recognition.lang = 'en-US';
+
+                    recognition.onstart = () => {
+                        btnVoice.textContent = "🔴";
+                        btnVoice.style.background = "#ef4444";
+                    };
+
+                    recognition.onend = () => {
+                        btnVoice.textContent = "🎙️";
+                        btnVoice.style.background = "#4b5563";
+                    };
+
+                    recognition.onerror = () => {
+                        btnVoice.textContent = "🎙️";
+                        btnVoice.style.background = "#4b5563";
+                    };
+
+                    recognition.onresult = (event) => {
+                        const resultText = event.results[0][0].transcript;
+                        globalAiInput.value = resultText;
+                        globalAiInput.focus();
+                    };
+
+                    btnVoice.addEventListener('click', () => {
+                        try {
+                            recognition.start();
+                        } catch (e) {
+                            recognition.stop();
+                        }
+                    });
+                } else {
+                    btnVoice.style.display = 'none';
+                }
+            }
+
+            const executeGlobalChatQuery = async (queryText) => {
+                if (!queryText.trim()) return;
+                const labId = document.getElementById('labSelect').value;
+
+                appendGlobalMessage('student', queryText);
+                saveChatHistory(labId, 'student', queryText);
+
+                appendGlobalMessage('ai', 'AI Tutor is writing a response...');
+
+                const context = getActiveContext();
+                let responseText = "";
+
+                const key = getApiKey();
+                if (key) {
+                    const curriculumCorpus = getCurriculumDataCorpus();
+                    const systemPrompt = `You are the MIT VLab Academic AI Tutor. You are trained and data-driven on the entire curriculum of this virtual laboratory platform.
 Use the following Curriculum Reference Manual to guide the student correctly, referencing actual aims, procedures, and concepts from the platform:
 
 ${curriculumCorpus}
@@ -15761,220 +15786,219 @@ Academic Rules:
 1. Provide clear, step-by-step guidance to help the student learn.
 2. Under no circumstances should you print raw solution code directly for the active programming/SQL exercises. Instead, explain the logical building blocks and let the student code it.
 3. Be highly informative, academic, and detailed. Show that you have full knowledge of the curriculum. Keep responses educational and relatively concise.`;
-                responseText = await askGemini(systemPrompt);
-            } else {
-                // Heuristic Offline Evaluation
-                const subject = localStorage.getItem('vlab_current_subject') || 'networking';
-                
-                responseText = localAIEvaluator("", queryText, "");
-                
-                // Subject-Specific Local Heuristics
-                const queryLower = queryText.toLowerCase();
-                if (responseText.includes("Currently in Local Mode")) {
-                    let subjectHelp = "";
-                    if (subject === 'os') {
-                        if (queryLower.includes('scheduling') || queryLower.includes('cpu')) {
-                            subjectHelp = "AI Tutor: CPU Scheduling algorithms decide which process in the ready queue is allocated the CPU. FCFS is non-preemptive and has a convoy effect. SJF (Shortest Job First) is optimal for minimizing average waiting time. Round Robin uses time-quanta slicing for fair CPU sharing.";
-                        } else if (queryLower.includes('deadlock') || queryLower.includes('banker')) {
-                            subjectHelp = "AI Tutor: Banker's algorithm is a deadlock avoidance method that simulates resource allocation for each process. It determines if an allocation is 'safe' by checking if a safe sequence exists where all processes can run to completion.";
-                        } else if (queryLower.includes('page') || queryLower.includes('replacement') || queryLower.includes('fifo') || queryLower.includes('lru')) {
-                            subjectHelp = "AI Tutor: Page replacement algorithms decide which memory page to swap out when a new page is needed. FIFO swaps the oldest page (can experience Belady's anomaly). LRU swaps the page that hasn't been accessed for the longest time.";
-                        } else {
-                            subjectHelp = "AI Tutor (OS Mode): How can I help you with operating system algorithms? Ask about CPU Scheduling, Process Semaphores, Deadlocks, Page Replacements, or Disk Head movements!";
+                    responseText = await askGemini(systemPrompt);
+                } else {
+                    // Heuristic Offline Evaluation
+                    const subject = localStorage.getItem('vlab_current_subject') || 'networking';
+
+                    responseText = localAIEvaluator("", queryText, "");
+
+                    // Subject-Specific Local Heuristics
+                    const queryLower = queryText.toLowerCase();
+                    if (responseText.includes("Currently in Local Mode")) {
+                        let subjectHelp = "";
+                        if (subject === 'os') {
+                            if (queryLower.includes('scheduling') || queryLower.includes('cpu')) {
+                                subjectHelp = "AI Tutor: CPU Scheduling algorithms decide which process in the ready queue is allocated the CPU. FCFS is non-preemptive and has a convoy effect. SJF (Shortest Job First) is optimal for minimizing average waiting time. Round Robin uses time-quanta slicing for fair CPU sharing.";
+                            } else if (queryLower.includes('deadlock') || queryLower.includes('banker')) {
+                                subjectHelp = "AI Tutor: Banker's algorithm is a deadlock avoidance method that simulates resource allocation for each process. It determines if an allocation is 'safe' by checking if a safe sequence exists where all processes can run to completion.";
+                            } else if (queryLower.includes('page') || queryLower.includes('replacement') || queryLower.includes('fifo') || queryLower.includes('lru')) {
+                                subjectHelp = "AI Tutor: Page replacement algorithms decide which memory page to swap out when a new page is needed. FIFO swaps the oldest page (can experience Belady's anomaly). LRU swaps the page that hasn't been accessed for the longest time.";
+                            } else {
+                                subjectHelp = "AI Tutor (OS Mode): How can I help you with operating system algorithms? Ask about CPU Scheduling, Process Semaphores, Deadlocks, Page Replacements, or Disk Head movements!";
+                            }
+                        } else if (subject === 'dbms') {
+                            if (queryLower.includes('sql') || queryLower.includes('select') || queryLower.includes('join')) {
+                                subjectHelp = "AI Tutor: SQL queries fetch relational data. Use SELECT to project columns, WHERE to filter rows, INNER JOIN to match keys, and GROUP BY with HAVING to filter aggregates.";
+                            } else if (queryLower.includes('acid') || queryLower.includes('transaction') || queryLower.includes('concurrency')) {
+                                subjectHelp = "AI Tutor: Database transactions must guarantee ACID properties: Atomicity (all-or-nothing), Consistency (integrity constraints), Isolation (independent concurrent execution), and Durability (permanent saves).";
+                            } else if (queryLower.includes('index') || queryLower.includes('b-tree')) {
+                                subjectHelp = "AI Tutor: A B-Tree index keeps records sorted and allows search, insertion, and deletion in O(log N) operations. Nodes split when capacity is exceeded to remain balanced.";
+                            } else {
+                                subjectHelp = "AI Tutor (DBMS Mode): How can I help you with database concepts? Ask about SQL joins, ACID properties, Transaction rollbacks, or B-Tree visualizers!";
+                            }
+                        } else if (subject === 'networking') {
+                            if (queryLower.includes('subnet') || queryLower.includes('cidr') || queryLower.includes('mask')) {
+                                subjectHelp = "AI Tutor: Subnetting divides a larger network into smaller, efficient subnets. A /24 CIDR prefix represents a 255.255.255.0 mask with 8 host bits, yielding 2^8 - 2 = 254 usable host addresses.";
+                            } else if (queryLower.includes('vlan')) {
+                                subjectHelp = "AI Tutor: A Virtual Local Area Network (VLAN) groups devices on separate physical networks into a single logical broadcast domain, improving security and reducing broadcast traffic.";
+                            } else if (queryLower.includes('dns')) {
+                                subjectHelp = "AI Tutor: The Domain Name System (DNS) translates human-readable domain names (e.g. google.com) to machine-readable IP addresses using a hierarchical distributed database of servers.";
+                            } else {
+                                subjectHelp = "AI Tutor (Networking Mode): How can I help you with networking topologies? Ask about subnet masking, VLAN tagging, Routing tables (OSPF/RIP), DNS resolution, or CSMA collision controls!";
+                            }
+                        } else if (subject === 'ai') {
+                            if (queryLower.includes('search') || queryLower.includes('bfs') || queryLower.includes('dfs') || queryLower.includes('a*')) {
+                                subjectHelp = "AI Tutor: State space search is fundamental in AI. BFS guarantees shortest path by exploring layer-by-layer (FIFO queue). DFS goes deep (LIFO stack) and is not optimal. A* search uses both path cost (g) and heuristic (h) to find the optimal path efficiently (f = g + h).";
+                            } else if (queryLower.includes('minimax') || queryLower.includes('alpha') || queryLower.includes('beta')) {
+                                subjectHelp = "AI Tutor: Minimax is used in game trees for zero-sum games. Max maximizes the score, Min minimizes it. Alpha-beta pruning cuts off branches that cannot influence the final decision, significantly improving performance.";
+                            } else if (queryLower.includes('neuron') || queryLower.includes('backprop') || queryLower.includes('neural')) {
+                                subjectHelp = "AI Tutor: Neural Networks model cognitive logic. A Perceptron is a single-layer classifier. Backpropagation calculates the gradient of the loss function using chain rule calculus, updating weights via Gradient Descent to minimize prediction error.";
+                            } else {
+                                subjectHelp = "AI Tutor (AI Mode): How can I help you with Artificial Intelligence? Ask about Search Algorithms, Game Trees (Minimax), Machine Learning (KNN/Bayes/K-Means), Neural Networks, Fuzzy Logic, or Genetic Algorithms!";
+                            }
+                        } else if (subject === 'cloud') {
+                            if (queryLower.includes('virtualization') || queryLower.includes('vm')) {
+                                subjectHelp = "AI Tutor: Virtualization uses a Hypervisor to run multiple virtual machines on a single physical host, slicing CPU, RAM, and storage into isolated virtual guest OS resources.";
+                            } else if (queryLower.includes('docker') || queryLower.includes('container') || queryLower.includes('kubernetes')) {
+                                subjectHelp = "AI Tutor: Containers isolate applications at the user-space level using OS kernel namespaces. Docker builds container images. Kubernetes orchestrates them across clusters, scaling and healing pods dynamically.";
+                            } else if (queryLower.includes('load') || queryLower.includes('scaling') || queryLower.includes('serverless')) {
+                                subjectHelp = "AI Tutor: Load Balancers distribute traffic across instances. Autoscaling dynamically adjusts cluster sizes based on metrics like CPU usage. Serverless/FaaS executes events on-demand without managing server nodes.";
+                            } else {
+                                subjectHelp = "AI Tutor (Cloud Mode): How can I help you with Cloud Computing? Ask about Virtualization, Containers (Docker/Kubernetes), Load Balancers, Cloud Object Storage, CDNs, IAM Policies, or Serverless functions!";
+                            }
+                        } else if (subject === 'cyber') {
+                            if (queryLower.includes('cipher') || queryLower.includes('caesar') || queryLower.includes('vigenere')) {
+                                subjectHelp = "AI Tutor: Classical cryptography relies on substitution and transposition. Caesar cipher is a simple monoalphabetic shift. Vigenère uses a polyalphabetic key word to vary the shifts dynamically, resisting frequency analysis.";
+                            } else if (queryLower.includes('rsa') || queryLower.includes('aes') || queryLower.includes('encrypt')) {
+                                subjectHelp = "AI Tutor: RSA is public-key (asymmetric) cryptography based on the mathematical difficulty of factoring large prime products. AES is symmetric block cipher using substitution-permutation networks for secure data transmission.";
+                            } else if (queryLower.includes('injection') || queryLower.includes('sql') || queryLower.includes('xss')) {
+                                subjectHelp = "AI Tutor: SQL Injection inserts malicious SQL payloads into input inputs to hijack database queries. Cross-Site Scripting (XSS) injects malicious client scripts to hijack user sessions. Prevent both by sanitizing and validating all inputs!";
+                            } else {
+                                subjectHelp = "AI Tutor (Cyber Mode): How can I help you with Cybersecurity? Ask about Encryptions (RSA/AES), Hashing algorithms, Network Firewalls, Web Attacks (SQLi/XSS), or ARP Poisoning MITM attacks!";
+                            }
                         }
-                    } else if (subject === 'dbms') {
-                        if (queryLower.includes('sql') || queryLower.includes('select') || queryLower.includes('join')) {
-                            subjectHelp = "AI Tutor: SQL queries fetch relational data. Use SELECT to project columns, WHERE to filter rows, INNER JOIN to match keys, and GROUP BY with HAVING to filter aggregates.";
-                        } else if (queryLower.includes('acid') || queryLower.includes('transaction') || queryLower.includes('concurrency')) {
-                            subjectHelp = "AI Tutor: Database transactions must guarantee ACID properties: Atomicity (all-or-nothing), Consistency (integrity constraints), Isolation (independent concurrent execution), and Durability (permanent saves).";
-                        } else if (queryLower.includes('index') || queryLower.includes('b-tree')) {
-                            subjectHelp = "AI Tutor: A B-Tree index keeps records sorted and allows search, insertion, and deletion in O(log N) operations. Nodes split when capacity is exceeded to remain balanced.";
-                        } else {
-                            subjectHelp = "AI Tutor (DBMS Mode): How can I help you with database concepts? Ask about SQL joins, ACID properties, Transaction rollbacks, or B-Tree visualizers!";
+                        if (subjectHelp) {
+                            responseText = subjectHelp + "\n\n(Tip: Save a Gemini API Key in the programming settings (⚙️) to unlock premium live conversational queries across all labs!)";
                         }
-                    } else if (subject === 'networking') {
-                        if (queryLower.includes('subnet') || queryLower.includes('cidr') || queryLower.includes('mask')) {
-                            subjectHelp = "AI Tutor: Subnetting divides a larger network into smaller, efficient subnets. A /24 CIDR prefix represents a 255.255.255.0 mask with 8 host bits, yielding 2^8 - 2 = 254 usable host addresses.";
-                        } else if (queryLower.includes('vlan')) {
-                            subjectHelp = "AI Tutor: A Virtual Local Area Network (VLAN) groups devices on separate physical networks into a single logical broadcast domain, improving security and reducing broadcast traffic.";
-                        } else if (queryLower.includes('dns')) {
-                            subjectHelp = "AI Tutor: The Domain Name System (DNS) translates human-readable domain names (e.g. google.com) to machine-readable IP addresses using a hierarchical distributed database of servers.";
-                        } else {
-                            subjectHelp = "AI Tutor (Networking Mode): How can I help you with networking topologies? Ask about subnet masking, VLAN tagging, Routing tables (OSPF/RIP), DNS resolution, or CSMA collision controls!";
-                        }
-                    } else if (subject === 'ai') {
-                        if (queryLower.includes('search') || queryLower.includes('bfs') || queryLower.includes('dfs') || queryLower.includes('a*')) {
-                            subjectHelp = "AI Tutor: State space search is fundamental in AI. BFS guarantees shortest path by exploring layer-by-layer (FIFO queue). DFS goes deep (LIFO stack) and is not optimal. A* search uses both path cost (g) and heuristic (h) to find the optimal path efficiently (f = g + h).";
-                        } else if (queryLower.includes('minimax') || queryLower.includes('alpha') || queryLower.includes('beta')) {
-                            subjectHelp = "AI Tutor: Minimax is used in game trees for zero-sum games. Max maximizes the score, Min minimizes it. Alpha-beta pruning cuts off branches that cannot influence the final decision, significantly improving performance.";
-                        } else if (queryLower.includes('neuron') || queryLower.includes('backprop') || queryLower.includes('neural')) {
-                            subjectHelp = "AI Tutor: Neural Networks model cognitive logic. A Perceptron is a single-layer classifier. Backpropagation calculates the gradient of the loss function using chain rule calculus, updating weights via Gradient Descent to minimize prediction error.";
-                        } else {
-                            subjectHelp = "AI Tutor (AI Mode): How can I help you with Artificial Intelligence? Ask about Search Algorithms, Game Trees (Minimax), Machine Learning (KNN/Bayes/K-Means), Neural Networks, Fuzzy Logic, or Genetic Algorithms!";
-                        }
-                    } else if (subject === 'cloud') {
-                        if (queryLower.includes('virtualization') || queryLower.includes('vm')) {
-                            subjectHelp = "AI Tutor: Virtualization uses a Hypervisor to run multiple virtual machines on a single physical host, slicing CPU, RAM, and storage into isolated virtual guest OS resources.";
-                        } else if (queryLower.includes('docker') || queryLower.includes('container') || queryLower.includes('kubernetes')) {
-                            subjectHelp = "AI Tutor: Containers isolate applications at the user-space level using OS kernel namespaces. Docker builds container images. Kubernetes orchestrates them across clusters, scaling and healing pods dynamically.";
-                        } else if (queryLower.includes('load') || queryLower.includes('scaling') || queryLower.includes('serverless')) {
-                            subjectHelp = "AI Tutor: Load Balancers distribute traffic across instances. Autoscaling dynamically adjusts cluster sizes based on metrics like CPU usage. Serverless/FaaS executes events on-demand without managing server nodes.";
-                        } else {
-                            subjectHelp = "AI Tutor (Cloud Mode): How can I help you with Cloud Computing? Ask about Virtualization, Containers (Docker/Kubernetes), Load Balancers, Cloud Object Storage, CDNs, IAM Policies, or Serverless functions!";
-                        }
-                    } else if (subject === 'cyber') {
-                        if (queryLower.includes('cipher') || queryLower.includes('caesar') || queryLower.includes('vigenere')) {
-                            subjectHelp = "AI Tutor: Classical cryptography relies on substitution and transposition. Caesar cipher is a simple monoalphabetic shift. Vigenère uses a polyalphabetic key word to vary the shifts dynamically, resisting frequency analysis.";
-                        } else if (queryLower.includes('rsa') || queryLower.includes('aes') || queryLower.includes('encrypt')) {
-                            subjectHelp = "AI Tutor: RSA is public-key (asymmetric) cryptography based on the mathematical difficulty of factoring large prime products. AES is symmetric block cipher using substitution-permutation networks for secure data transmission.";
-                        } else if (queryLower.includes('injection') || queryLower.includes('sql') || queryLower.includes('xss')) {
-                            subjectHelp = "AI Tutor: SQL Injection inserts malicious SQL payloads into input inputs to hijack database queries. Cross-Site Scripting (XSS) injects malicious client scripts to hijack user sessions. Prevent both by sanitizing and validating all inputs!";
-                        } else {
-                            subjectHelp = "AI Tutor (Cyber Mode): How can I help you with Cybersecurity? Ask about Encryptions (RSA/AES), Hashing algorithms, Network Firewalls, Web Attacks (SQLi/XSS), or ARP Poisoning MITM attacks!";
-                        }
-                    }
-                    if (subjectHelp) {
-                        responseText = subjectHelp + "\n\n(Tip: Save a Gemini API Key in the programming settings (⚙️) to unlock premium live conversational queries across all labs!)";
                     }
                 }
-            }
-            
-            // Remove thinking message
-            if (globalChatLogs.lastChild) globalChatLogs.removeChild(globalChatLogs.lastChild);
-            const finalResp = responseText || "Error communicating with AI.";
-            appendGlobalMessage('ai', finalResp);
-            saveChatHistory(labId, 'ai', finalResp);
-            speakText(finalResp);
-        };
-        
-        btnGlobalAiSend.addEventListener('click', () => {
-            const query = globalAiInput.value;
-            globalAiInput.value = "";
-            executeGlobalChatQuery(query);
-        });
-        
-        globalAiInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
+
+                // Remove thinking message
+                if (globalChatLogs.lastChild) globalChatLogs.removeChild(globalChatLogs.lastChild);
+                const finalResp = responseText || "Error communicating with AI.";
+                appendGlobalMessage('ai', finalResp);
+                saveChatHistory(labId, 'ai', finalResp);
+                speakText(finalResp);
+            };
+
+            btnGlobalAiSend.addEventListener('click', () => {
                 const query = globalAiInput.value;
                 globalAiInput.value = "";
                 executeGlobalChatQuery(query);
-            }
-        });
-        
-        // Quick tools triggers
-        document.getElementById('btnGlobalAiExplain').addEventListener('click', () => {
-            const labId = document.getElementById('labSelect').value;
-            const labData = window.VLAB_DATA ? window.VLAB_DATA[labId] : null;
-            const title = labData ? labData.title : 'this lab';
-            executeGlobalChatQuery(`Explain the core theory and learning objectives of ${title} in simple terms with analogies.`);
-        });
-        
-        document.getElementById('btnGlobalAiAudit').addEventListener('click', () => {
-            const subject = localStorage.getItem('vlab_current_subject') || 'networking';
-            if (subject === 'programming') {
-                executeGlobalChatQuery("Audit my current code editor quality, efficiency, name checks, optimizations and show me how to improve it.");
-            } else if (subject === 'dbms') {
-                executeGlobalChatQuery("Check my SQL query syntax and let me know if it matches the schema specifications.");
-            } else {
-                executeGlobalChatQuery("Review my topology design or configuration parameters for errors.");
-            }
-        });
-    }
+            });
+
+            globalAiInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    const query = globalAiInput.value;
+                    globalAiInput.value = "";
+                    executeGlobalChatQuery(query);
+                }
+            });
+
+            // Quick tools triggers
+            document.getElementById('btnGlobalAiExplain').addEventListener('click', () => {
+                const labId = document.getElementById('labSelect').value;
+                const labData = window.VLAB_DATA ? window.VLAB_DATA[labId] : null;
+                const title = labData ? labData.title : 'this lab';
+                executeGlobalChatQuery(`Explain the core theory and learning objectives of ${title} in simple terms with analogies.`);
+            });
+
+            document.getElementById('btnGlobalAiAudit').addEventListener('click', () => {
+                const subject = localStorage.getItem('vlab_current_subject') || 'networking';
+                if (subject === 'programming') {
+                    executeGlobalChatQuery("Audit my current code editor quality, efficiency, name checks, optimizations and show me how to improve it.");
+                } else if (subject === 'dbms') {
+                    executeGlobalChatQuery("Check my SQL query syntax and let me know if it matches the schema specifications.");
+                } else {
+                    executeGlobalChatQuery("Review my topology design or configuration parameters for errors.");
+                }
+            });
+        }
 
 
+        function initPktTracerSim(container) {
+            if (!container) return;
 
-    function initPktTracerSim(container) {
-        if (!container) return;
+            const NODES_POOL = [
+                { label: 'PC1', sub: '192.168.1.10', mac: '00:1A:2B:3C:4D:01', em: '💻' },
+                { label: 'PC2', sub: '192.168.1.11', mac: '00:1A:2B:3C:4D:02', em: '🖥️' },
+                { label: 'PC3', sub: '192.168.1.12', mac: '00:1A:2B:3C:4D:03', em: '🖥️' },
+                { label: 'PC4', sub: '192.168.1.13', mac: '00:1A:2B:3C:4D:04', em: '💻' },
+            ];
 
-        const NODES_POOL = [
-            { label:'PC1',    sub:'192.168.1.10',  mac:'00:1A:2B:3C:4D:01', em:'💻' },
-            { label:'PC2',    sub:'192.168.1.11',  mac:'00:1A:2B:3C:4D:02', em:'🖥️' },
-            { label:'PC3',    sub:'192.168.1.12',  mac:'00:1A:2B:3C:4D:03', em:'🖥️' },
-            { label:'PC4',    sub:'192.168.1.13',  mac:'00:1A:2B:3C:4D:04', em:'💻' },
-        ];
+            const DEVICES = [
+                {
+                    id: 'hub',
+                    label: 'Ethernet Hub',
+                    sub: 'Layer 1 - Broadcasts to ALL ports',
+                    em: '📻',
+                    col: '#d97706',
+                    desc: 'A Hub repeats every signal to ALL connected ports. There is NO filtering — every device receives every packet, creating collisions and shared bandwidth.',
+                    subtypes: [
+                        { id: 'hub_active', label: 'Active Hub (Signal Regenerator)', desc: 'Regenerates electrical pulses, cleans jitter, and broadcasts to all ports.' },
+                        { id: 'hub_passive', label: 'Passive Hub (Wiring Splitter)', desc: 'Pure electrical splitting without amplification; signal degrades over distance.' },
+                        { id: 'hub_managed', label: 'Intelligent / Managed Hub', desc: 'Layer 1 broadcast hub with SNMP management agent and per-port LED monitoring.' }
+                    ]
+                },
+                {
+                    id: 'switch',
+                    label: 'Ethernet Switch',
+                    sub: 'Layer 2 - Unicast forwarding via MAC Table',
+                    em: '🔀',
+                    col: '#2563eb',
+                    desc: 'A Switch learns MAC addresses and forwards frames ONLY to the correct destination port. Eliminates collisions with full-duplex dedicated bandwidth.',
+                    subtypes: [
+                        { id: 'sw_l2_unmanaged', label: 'Layer 2 Unmanaged Switch (Cisco 2960)', desc: 'Plug-and-play L2 switch. Builds dynamic MAC Address Table (00:1A:2B:3C:4D:02 -> Fa0/2). Unicasts matching frames.' },
+                        { id: 'sw_l3_managed', label: 'Layer 3 Managed Switch (Cisco 3850)', desc: 'L2 MAC forwarding + L3 IP routing table. Supports VLAN Tagging (802.1Q), SVIs, and ACL filtering.' },
+                        { id: 'sw_poe', label: 'PoE+ Switch (802.3at / 30W Power)', desc: 'Delivers 30W DC power + Fast/Gigabit data down standard Cat6 twisted pair cables to IP Phones and WAPs.' },
+                        { id: 'sw_industrial', label: 'Industrial Managed Switch (PROFINET)', desc: 'Redundant Ring Protocol (MRP < 10ms recovery) for harsh factory floors.' }
+                    ]
+                },
+                {
+                    id: 'router',
+                    label: 'Network Router',
+                    sub: 'Layer 3 - Routes packets between subnets',
+                    em: '🌐',
+                    col: '#7c3aed',
+                    desc: 'A Router connects different IP networks. It inspects IP headers, decrements TTL, runs routing protocols (RIP/OSPF/EIGRP), and forwards to next-hop.',
+                    subtypes: [
+                        { id: 'rtr_isr', label: 'Branch / Enterprise Router (Cisco 2911)', desc: 'Dual Gigabit interfaces, RIP/OSPF routing, ACLs, and NAT services.' },
+                        { id: 'rtr_core', label: 'Core Backbone Router (Cisco ASR 9000)', desc: 'Multi-terabit BGP routing table, MPLS label switching, and sub-millisecond route lookup.' },
+                        { id: 'rtr_wifi', label: 'Wireless Edge Gateway / Home Router', desc: 'Integrated 4-port L2 switch, Wi-Fi 6 WAP, DHCP Server, NAT Overload (PAT), and SPI Firewall.' }
+                    ]
+                },
+                {
+                    id: 'firewall',
+                    label: 'Security Firewall',
+                    sub: 'Layer 3-7 - Stateful packet inspection & ACLs',
+                    em: '🧱',
+                    col: '#dc2626',
+                    desc: 'A Firewall inspects each packet against security rules. Permitted traffic creates stateful sessions. Blocked traffic gets TCP-Reset or ICMP-Unreachable.',
+                    subtypes: [
+                        { id: 'fw_stateful', label: 'Stateful Inspection Firewall (Cisco ASA)', desc: 'Tracks TCP state machine (SYN -> SYN-ACK -> ESTABLISHED). Dynamically permits return traffic.' },
+                        { id: 'fw_stateless', label: 'Stateless ACL Packet Filter', desc: 'Evaluates individual packets against strict IP/Port Access Control Lists without session memory.' },
+                        { id: 'fw_ngfw', label: 'Next-Gen Firewall (NGFW / App Filter)', desc: 'Deep Packet Inspection (DPI) up to Layer 7. Filters apps (BitTorrent, Social Media) and scans malware.' }
+                    ]
+                },
+                {
+                    id: 'wap',
+                    label: 'Wireless Access Point',
+                    sub: 'IEEE 802.11ax - Wireless bridge to wired LAN',
+                    em: '📡',
+                    col: '#16a34a',
+                    desc: 'A WAP bridges wireless clients to the wired Ethernet LAN. Data travels over RF channels (2.4/5GHz), de-encapsulated from 802.11 to 802.3 Ethernet.',
+                    subtypes: [
+                        { id: 'wap_wifi6', label: 'Wi-Fi 6 Enterprise AP (802.11ax)', desc: 'OFDMA and MU-MIMO multi-user beamforming up to 9.6 Gbps throughput over 2.4GHz / 5GHz.' },
+                        { id: 'wap_mesh', label: 'Wireless Mesh Node (802.11s)', desc: 'Dynamic wireless backhaul routing between mesh nodes without requiring copper drops to every AP.' }
+                    ]
+                },
+                {
+                    id: 'media',
+                    label: 'Transmission Media Bridge',
+                    sub: 'Layer 1 - Signal & Fiber Optic Converters',
+                    em: '⚡',
+                    col: '#0284c7',
+                    desc: 'Converts electrical pulses into light signals or translates between media formats (Single-Mode Fiber, Multi-Mode Fiber, Copper UTP).',
+                    subtypes: [
+                        { id: 'media_smf', label: 'Single-Mode Fiber Converter (1310nm Laser)', desc: 'Converts 802.3 electrical pulses to 1310nm laser pulses over 9µm single-mode glass core (up to 40km).' },
+                        { id: 'media_mmf', label: 'Multi-Mode Fiber Converter (850nm LED)', desc: 'Converts 802.3 electrical pulses to 850nm LED light pulses over 50µm multi-mode glass core (up to 550m).' },
+                        { id: 'media_patch', label: 'Structured Cabling Patch Panel', desc: 'Pass-through TIA-568B punch-down interconnect block for Cat6A gigabit distribution.' }
+                    ]
+                }
+            ];
 
-        const DEVICES = [
-            {
-                id: 'hub',
-                label: 'Ethernet Hub',
-                sub: 'Layer 1 - Broadcasts to ALL ports',
-                em: '📻',
-                col: '#d97706',
-                desc: 'A Hub repeats every signal to ALL connected ports. There is NO filtering — every device receives every packet, creating collisions and shared bandwidth.',
-                subtypes: [
-                    { id: 'hub_active', label: 'Active Hub (Signal Regenerator)', desc: 'Regenerates electrical pulses, cleans jitter, and broadcasts to all ports.' },
-                    { id: 'hub_passive', label: 'Passive Hub (Wiring Splitter)', desc: 'Pure electrical splitting without amplification; signal degrades over distance.' },
-                    { id: 'hub_managed', label: 'Intelligent / Managed Hub', desc: 'Layer 1 broadcast hub with SNMP management agent and per-port LED monitoring.' }
-                ]
-            },
-            {
-                id: 'switch',
-                label: 'Ethernet Switch',
-                sub: 'Layer 2 - Unicast forwarding via MAC Table',
-                em: '🔀',
-                col: '#2563eb',
-                desc: 'A Switch learns MAC addresses and forwards frames ONLY to the correct destination port. Eliminates collisions with full-duplex dedicated bandwidth.',
-                subtypes: [
-                    { id: 'sw_l2_unmanaged', label: 'Layer 2 Unmanaged Switch (Cisco 2960)', desc: 'Plug-and-play L2 switch. Builds dynamic MAC Address Table (00:1A:2B:3C:4D:02 -> Fa0/2). Unicasts matching frames.' },
-                    { id: 'sw_l3_managed', label: 'Layer 3 Managed Switch (Cisco 3850)', desc: 'L2 MAC forwarding + L3 IP routing table. Supports VLAN Tagging (802.1Q), SVIs, and ACL filtering.' },
-                    { id: 'sw_poe', label: 'PoE+ Switch (802.3at / 30W Power)', desc: 'Delivers 30W DC power + Fast/Gigabit data down standard Cat6 twisted pair cables to IP Phones and WAPs.' },
-                    { id: 'sw_industrial', label: 'Industrial Managed Switch (PROFINET)', desc: 'Redundant Ring Protocol (MRP < 10ms recovery) for harsh factory floors.' }
-                ]
-            },
-            {
-                id: 'router',
-                label: 'Network Router',
-                sub: 'Layer 3 - Routes packets between subnets',
-                em: '🌐',
-                col: '#7c3aed',
-                desc: 'A Router connects different IP networks. It inspects IP headers, decrements TTL, runs routing protocols (RIP/OSPF/EIGRP), and forwards to next-hop.',
-                subtypes: [
-                    { id: 'rtr_isr', label: 'Branch / Enterprise Router (Cisco 2911)', desc: 'Dual Gigabit interfaces, RIP/OSPF routing, ACLs, and NAT services.' },
-                    { id: 'rtr_core', label: 'Core Backbone Router (Cisco ASR 9000)', desc: 'Multi-terabit BGP routing table, MPLS label switching, and sub-millisecond route lookup.' },
-                    { id: 'rtr_wifi', label: 'Wireless Edge Gateway / Home Router', desc: 'Integrated 4-port L2 switch, Wi-Fi 6 WAP, DHCP Server, NAT Overload (PAT), and SPI Firewall.' }
-                ]
-            },
-            {
-                id: 'firewall',
-                label: 'Security Firewall',
-                sub: 'Layer 3-7 - Stateful packet inspection & ACLs',
-                em: '🧱',
-                col: '#dc2626',
-                desc: 'A Firewall inspects each packet against security rules. Permitted traffic creates stateful sessions. Blocked traffic gets TCP-Reset or ICMP-Unreachable.',
-                subtypes: [
-                    { id: 'fw_stateful', label: 'Stateful Inspection Firewall (Cisco ASA)', desc: 'Tracks TCP state machine (SYN -> SYN-ACK -> ESTABLISHED). Dynamically permits return traffic.' },
-                    { id: 'fw_stateless', label: 'Stateless ACL Packet Filter', desc: 'Evaluates individual packets against strict IP/Port Access Control Lists without session memory.' },
-                    { id: 'fw_ngfw', label: 'Next-Gen Firewall (NGFW / App Filter)', desc: 'Deep Packet Inspection (DPI) up to Layer 7. Filters apps (BitTorrent, Social Media) and scans malware.' }
-                ]
-            },
-            {
-                id: 'wap',
-                label: 'Wireless Access Point',
-                sub: 'IEEE 802.11ax - Wireless bridge to wired LAN',
-                em: '📡',
-                col: '#16a34a',
-                desc: 'A WAP bridges wireless clients to the wired Ethernet LAN. Data travels over RF channels (2.4/5GHz), de-encapsulated from 802.11 to 802.3 Ethernet.',
-                subtypes: [
-                    { id: 'wap_wifi6', label: 'Wi-Fi 6 Enterprise AP (802.11ax)', desc: 'OFDMA and MU-MIMO multi-user beamforming up to 9.6 Gbps throughput over 2.4GHz / 5GHz.' },
-                    { id: 'wap_mesh', label: 'Wireless Mesh Node (802.11s)', desc: 'Dynamic wireless backhaul routing between mesh nodes without requiring copper drops to every AP.' }
-                ]
-            },
-            {
-                id: 'media',
-                label: 'Transmission Media Bridge',
-                sub: 'Layer 1 - Signal & Fiber Optic Converters',
-                em: '⚡',
-                col: '#0284c7',
-                desc: 'Converts electrical pulses into light signals or translates between media formats (Single-Mode Fiber, Multi-Mode Fiber, Copper UTP).',
-                subtypes: [
-                    { id: 'media_smf', label: 'Single-Mode Fiber Converter (1310nm Laser)', desc: 'Converts 802.3 electrical pulses to 1310nm laser pulses over 9µm single-mode glass core (up to 40km).' },
-                    { id: 'media_mmf', label: 'Multi-Mode Fiber Converter (850nm LED)', desc: 'Converts 802.3 electrical pulses to 850nm LED light pulses over 50µm multi-mode glass core (up to 550m).' },
-                    { id: 'media_patch', label: 'Structured Cabling Patch Panel', desc: 'Pass-through TIA-568B punch-down interconnect block for Cat6A gigabit distribution.' }
-                ]
-            }
-        ];
-
-        container.innerHTML = `
+            container.innerHTML = `
         <style>
             .nsw{font-family:'Outfit',sans-serif;display:flex;flex-direction:column;gap:0;}
             .nst{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
@@ -16036,378 +16060,379 @@ Academic Rules:
             </div>
         </div>`;
 
-        (() => {
-            const cv = document.getElementById('ns-cv');
-            if (!cv) return;
-            const ctx = cv.getContext('2d');
-            let curDev = 'hub';
-            let parts = [], raf = null, nodes = [], cx = 0, cy = 0;
+            (() => {
+                const cv = document.getElementById('ns-cv');
+                if (!cv) return;
+                const ctx = cv.getContext('2d');
+                let curDev = 'hub';
+                let parts = [], raf = null, nodes = [], cx = 0, cy = 0;
 
-            // Build tabs
-            const tabsEl = document.getElementById('ns-tabs');
-            DEVICES.forEach(d => {
-                const t = document.createElement('div');
-                t.className = 'nstb';
-                t.style.setProperty('--tc', d.col);
-                t.style.setProperty('--tb', d.col + '18');
-                t.innerHTML = '<span class="te">' + d.em + '</span><span class="tl">' + d.label + '</span><span class="ts">' + d.id.toUpperCase() + '</span>';
-                t.id = 'nst-' + d.id;
-                t.onclick = () => pick(d.id);
-                tabsEl.appendChild(t);
-            });
+                // Build tabs
+                const tabsEl = document.getElementById('ns-tabs');
+                DEVICES.forEach(d => {
+                    const t = document.createElement('div');
+                    t.className = 'nstb';
+                    t.style.setProperty('--tc', d.col);
+                    t.style.setProperty('--tb', d.col + '18');
+                    t.innerHTML = '<span class="te">' + d.em + '</span><span class="tl">' + d.label + '</span><span class="ts">' + d.id.toUpperCase() + '</span>';
+                    t.id = 'nst-' + d.id;
+                    t.onclick = () => pick(d.id);
+                    tabsEl.appendChild(t);
+                });
 
-            function updateSubtypeDropdown(d) {
-                const subSel = document.getElementById('ns-subtype');
-                if (!subSel) return;
-                subSel.innerHTML = d.subtypes.map(s => `<option value="${s.id}">${s.label}</option>`).join('');
-                subSel.onchange = () => {
-                    const st = d.subtypes.find(x => x.id === subSel.value);
-                    if (st) {
-                        document.getElementById('ns-ip').textContent = st.desc;
+                function updateSubtypeDropdown(d) {
+                    const subSel = document.getElementById('ns-subtype');
+                    if (!subSel) return;
+                    subSel.innerHTML = d.subtypes.map(s => `<option value="${s.id}">${s.label}</option>`).join('');
+                    subSel.onchange = () => {
+                        const st = d.subtypes.find(x => x.id === subSel.value);
+                        if (st) {
+                            document.getElementById('ns-ip').textContent = st.desc;
+                        }
+                        parts = []; draw();
+                    };
+                    if (d.subtypes.length > 0) {
+                        document.getElementById('ns-ip').textContent = d.subtypes[0].desc;
                     }
+                }
+
+                function pick(id) {
+                    curDev = id;
+                    document.querySelectorAll('.nstb').forEach(t => t.classList.remove('act'));
+                    const tab = document.getElementById('nst-' + id);
+                    if (tab) tab.classList.add('act');
+                    const d = DEVICES.find(x => x.id === id);
+                    document.getElementById('ns-ie').textContent = d.em;
+                    document.getElementById('ns-ih').textContent = d.label + ' — ' + d.sub;
+                    document.getElementById('ns-cl').textContent = d.label.toUpperCase() + ' — PACKET FLOW VISUALIZATION';
+                    document.getElementById('ns-tw').style.opacity = id === 'hub' ? '0.4' : '1';
+                    updateSubtypeDropdown(d);
                     parts = []; draw();
-                };
-                if (d.subtypes.length > 0) {
-                    document.getElementById('ns-ip').textContent = d.subtypes[0].desc;
                 }
-            }
 
-            function pick(id) {
-                curDev = id;
-                document.querySelectorAll('.nstb').forEach(t => t.classList.remove('act'));
-                const tab = document.getElementById('nst-' + id);
-                if (tab) tab.classList.add('act');
-                const d = DEVICES.find(x => x.id === id);
-                document.getElementById('ns-ie').textContent = d.em;
-                document.getElementById('ns-ih').textContent = d.label + ' — ' + d.sub;
-                document.getElementById('ns-cl').textContent = d.label.toUpperCase() + ' — PACKET FLOW VISUALIZATION';
-                document.getElementById('ns-tw').style.opacity = id === 'hub' ? '0.4' : '1';
-                updateSubtypeDropdown(d);
-                parts = []; draw();
-            }
+                const gv = id => (document.getElementById(id) || {}).value || '';
+                const gi = (id, def) => parseInt((document.getElementById(id) || {}).value || def);
 
-            const gv = id => (document.getElementById(id) || {}).value || '';
-            const gi = (id, def) => parseInt((document.getElementById(id) || {}).value || def);
+                function resize() { cv.width = cv.offsetWidth || 860; draw(); }
 
-            function resize() { cv.width = cv.offsetWidth || 860; draw(); }
+                function layout() {
+                    const n = Math.min(4, Math.max(2, gi('ns-cnt', 3)));
+                    cx = cv.width / 2; cy = cv.height / 2;
+                    const R = Math.min(cv.width, cv.height) * 0.35;
+                    nodes = NODES_POOL.slice(0, n).map((m, i) => {
+                        const a = (2 * Math.PI / n) * i - Math.PI / 2;
+                        return Object.assign({}, m, { x: cx + R * Math.cos(a), y: cy + R * Math.sin(a), idx: i });
+                    });
+                }
 
-            function layout() {
-                const n = Math.min(4, Math.max(2, gi('ns-cnt', 3)));
-                cx = cv.width / 2; cy = cv.height / 2;
-                const R = Math.min(cv.width, cv.height) * 0.35;
-                nodes = NODES_POOL.slice(0, n).map((m, i) => {
-                    const a = (2 * Math.PI / n) * i - Math.PI / 2;
-                    return Object.assign({}, m, { x: cx + R * Math.cos(a), y: cy + R * Math.sin(a), idx: i });
-                });
-            }
+                function draw() {
+                    layout();
+                    const d = DEVICES.find(x => x.id === curDev) || DEVICES[0];
+                    const si = gi('ns-snd', 0);
+                    const tv = gv('ns-rcv');
+                    const isBc = tv === 'all' || curDev === 'hub';
+                    const W = cv.width, H = cv.height;
+                    ctx.clearRect(0, 0, W, H);
+                    // grid
+                    ctx.strokeStyle = '#e2e8f0'; ctx.lineWidth = 1;
+                    for (let x = 0; x < W; x += 50) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke(); }
+                    for (let y = 0; y < H; y += 50) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); }
 
-            function draw() {
-                layout();
-                const d = DEVICES.find(x => x.id === curDev) || DEVICES[0];
-                const si = gi('ns-snd', 0);
-                const tv = gv('ns-rcv');
-                const isBc = tv === 'all' || curDev === 'hub';
-                const W = cv.width, H = cv.height;
-                ctx.clearRect(0, 0, W, H);
-                // grid
-                ctx.strokeStyle = '#e2e8f0'; ctx.lineWidth = 1;
-                for (let x = 0; x < W; x += 50) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke(); }
-                for (let y = 0; y < H; y += 50) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
-
-                // cables
-                const dash = { hub:[], switch:[], router:[], firewall:[8,4], wap:[3,10], media:[2,6] }[curDev] || [];
-                nodes.forEach(n => {
-                    const active = n.idx === si || isBc || String(n.idx) === String(tv);
-                    ctx.save(); ctx.beginPath(); ctx.moveTo(n.x, n.y); ctx.lineTo(cx, cy);
-                    ctx.strokeStyle = active ? d.col : '#cbd5e1';
-                    ctx.lineWidth = active ? 3 : 1.5;
-                    ctx.globalAlpha = active ? 1.0 : 0.4;
-                    ctx.setLineDash(dash); ctx.stroke(); ctx.restore(); ctx.setLineDash([]);
-                    // port label
-                    if (active) {
-                        const pl = { switch:'Fa0/'+n.idx, router:'Gi0/'+n.idx, hub:'Port'+(n.idx+1), firewall:'Eth'+n.idx, wap:'Assoc'+n.idx, media:'Opt'+n.idx }[curDev] || '';
-                        if (pl) {
-                            const mx = cx + (n.x - cx) * 0.68, my = cy + (n.y - cy) * 0.68;
-                            ctx.font = 'bold 9px monospace'; ctx.fillStyle = '#334155';
-                            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-                            ctx.fillText(pl, mx, my - 9);
+                    // cables
+                    const dash = { hub: [], switch: [], router: [], firewall: [8, 4], wap: [3, 10], media: [2, 6] }[curDev] || [];
+                    nodes.forEach(n => {
+                        const active = n.idx === si || isBc || String(n.idx) === String(tv);
+                        ctx.save(); ctx.beginPath(); ctx.moveTo(n.x, n.y); ctx.lineTo(cx, cy);
+                        ctx.strokeStyle = active ? d.col : '#cbd5e1';
+                        ctx.lineWidth = active ? 3 : 1.5;
+                        ctx.globalAlpha = active ? 1.0 : 0.4;
+                        ctx.setLineDash(dash); ctx.stroke(); ctx.restore(); ctx.setLineDash([]);
+                        // port label
+                        if (active) {
+                            const pl = { switch: 'Fa0/' + n.idx, router: 'Gi0/' + n.idx, hub: 'Port' + (n.idx + 1), firewall: 'Eth' + n.idx, wap: 'Assoc' + n.idx, media: 'Opt' + n.idx }[curDev] || '';
+                            if (pl) {
+                                const mx = cx + (n.x - cx) * 0.68, my = cy + (n.y - cy) * 0.68;
+                                ctx.font = 'bold 9px monospace'; ctx.fillStyle = '#334155';
+                                ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                                ctx.fillText(pl, mx, my - 9);
+                            }
                         }
-                    }
-                });
+                    });
 
-                // central device
-                ctx.save(); ctx.shadowColor = d.col; ctx.shadowBlur = 20;
-                ctx.beginPath(); ctx.arc(cx, cy, 48, 0, Math.PI*2);
-                ctx.fillStyle = d.col + '15'; ctx.fill();
-                ctx.strokeStyle = d.col; ctx.lineWidth = 3; ctx.stroke();
-                ctx.restore();
-                ctx.font = '28px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-                ctx.fillText(d.em, cx, cy - 2);
-                ctx.font = 'bold 11px Outfit, sans-serif'; ctx.fillStyle = '#0f172a';
-                ctx.fillText(d.label, cx, cy + 62);
-                const subSel = document.getElementById('ns-subtype');
-                const subTxt = subSel && subSel.options[subSel.selectedIndex] ? subSel.options[subSel.selectedIndex].text.split('(')[0] : d.sub.split('-')[0];
-                ctx.font = '10px monospace'; ctx.fillStyle = '#64748b';
-                ctx.fillText(subTxt.trim(), cx, cy + 75);
+                    // central device
+                    ctx.save(); ctx.shadowColor = d.col; ctx.shadowBlur = 20;
+                    ctx.beginPath(); ctx.arc(cx, cy, 48, 0, Math.PI * 2);
+                    ctx.fillStyle = d.col + '15'; ctx.fill();
+                    ctx.strokeStyle = d.col; ctx.lineWidth = 3; ctx.stroke();
+                    ctx.restore();
+                    ctx.font = '28px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                    ctx.fillText(d.em, cx, cy - 2);
+                    ctx.font = 'bold 11px Outfit, sans-serif'; ctx.fillStyle = '#0f172a';
+                    ctx.fillText(d.label, cx, cy + 62);
+                    const subSel = document.getElementById('ns-subtype');
+                    const subTxt = subSel && subSel.options[subSel.selectedIndex] ? subSel.options[subSel.selectedIndex].text.split('(')[0] : d.sub.split('-')[0];
+                    ctx.font = '10px monospace'; ctx.fillStyle = '#64748b';
+                    ctx.fillText(subTxt.trim(), cx, cy + 75);
 
-                // nodes
-                nodes.forEach(n => {
-                    const role = n.idx === si ? 'sender' : (isBc ? 'bcast' : (String(n.idx) === String(tv) ? 'target' : 'peer'));
-                    const nc = { sender:'#2563eb', target:'#16a34a', bcast:'#d97706', peer:'#94a3b8' }[role];
-                    const bg = { sender:'#eff6ff', target:'#f0fdf4', bcast:'#fffbeb', peer:'#f8fafc' }[role];
-                    if (role !== 'peer') {
-                        ctx.save(); ctx.shadowColor = nc; ctx.shadowBlur = 15;
-                        ctx.beginPath(); ctx.arc(n.x, n.y, 39, 0, Math.PI*2);
-                        ctx.strokeStyle = nc + '55'; ctx.lineWidth = 3; ctx.stroke(); ctx.restore();
-                    }
-                    ctx.beginPath(); ctx.arc(n.x, n.y, 33, 0, Math.PI*2);
-                    ctx.fillStyle = bg; ctx.fill();
-                    ctx.strokeStyle = nc; ctx.lineWidth = role !== 'peer' ? 2.5 : 1.5; ctx.stroke();
-                    ctx.font = '20px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-                    ctx.fillText(n.em, n.x, n.y - 2);
-                    ctx.font = 'bold 11px Outfit,sans-serif'; ctx.fillStyle = '#0f172a';
-                    ctx.fillText(n.label, n.x, n.y + 46);
-                    ctx.font = '10px monospace'; ctx.fillStyle = '#334155';
-                    ctx.fillText(n.sub, n.x, n.y + 57);
-                    ctx.fillText(n.mac, n.x, n.y + 68);
-                    if (role !== 'peer') {
-                        const tag = { sender:'▶ TX', target:'▶ RX', bcast:'▶ BC' }[role];
-                        ctx.font = 'bold 10px monospace'; ctx.fillStyle = nc;
-                        ctx.fillText(tag, n.x, n.y + 80);
-                    }
-                });
+                    // nodes
+                    nodes.forEach(n => {
+                        const role = n.idx === si ? 'sender' : (isBc ? 'bcast' : (String(n.idx) === String(tv) ? 'target' : 'peer'));
+                        const nc = { sender: '#2563eb', target: '#16a34a', bcast: '#d97706', peer: '#94a3b8' }[role];
+                        const bg = { sender: '#eff6ff', target: '#f0fdf4', bcast: '#fffbeb', peer: '#f8fafc' }[role];
+                        if (role !== 'peer') {
+                            ctx.save(); ctx.shadowColor = nc; ctx.shadowBlur = 15;
+                            ctx.beginPath(); ctx.arc(n.x, n.y, 39, 0, Math.PI * 2);
+                            ctx.strokeStyle = nc + '55'; ctx.lineWidth = 3; ctx.stroke(); ctx.restore();
+                        }
+                        ctx.beginPath(); ctx.arc(n.x, n.y, 33, 0, Math.PI * 2);
+                        ctx.fillStyle = bg; ctx.fill();
+                        ctx.strokeStyle = nc; ctx.lineWidth = role !== 'peer' ? 2.5 : 1.5; ctx.stroke();
+                        ctx.font = '20px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                        ctx.fillText(n.em, n.x, n.y - 2);
+                        ctx.font = 'bold 11px Outfit,sans-serif'; ctx.fillStyle = '#0f172a';
+                        ctx.fillText(n.label, n.x, n.y + 46);
+                        ctx.font = '10px monospace'; ctx.fillStyle = '#334155';
+                        ctx.fillText(n.sub, n.x, n.y + 57);
+                        ctx.fillText(n.mac, n.x, n.y + 68);
+                        if (role !== 'peer') {
+                            const tag = { sender: '▶ TX', target: '▶ RX', bcast: '▶ BC' }[role];
+                            ctx.font = 'bold 10px monospace'; ctx.fillStyle = nc;
+                            ctx.fillText(tag, n.x, n.y + 80);
+                        }
+                    });
 
-                // particles
-                parts.forEach(p => {
-                    const t = p.t;
-                    const px = p.x0 + (p.x1 - p.x0) * t;
-                    const py = p.y0 + (p.y1 - p.y0) * t;
-                    for (let i = 1; i <= 7; i++) {
-                        const tt = Math.max(0, t - i * 0.022);
-                        ctx.save(); ctx.globalAlpha = 0.12 * (8 - i);
-                        ctx.beginPath(); ctx.arc(p.x0+(p.x1-p.x0)*tt, p.y0+(p.y1-p.y0)*tt, 10-i, 0, Math.PI*2);
+                    // particles
+                    parts.forEach(p => {
+                        const t = p.t;
+                        const px = p.x0 + (p.x1 - p.x0) * t;
+                        const py = p.y0 + (p.y1 - p.y0) * t;
+                        for (let i = 1; i <= 7; i++) {
+                            const tt = Math.max(0, t - i * 0.022);
+                            ctx.save(); ctx.globalAlpha = 0.12 * (8 - i);
+                            ctx.beginPath(); ctx.arc(p.x0 + (p.x1 - p.x0) * tt, p.y0 + (p.y1 - p.y0) * tt, 10 - i, 0, Math.PI * 2);
+                            ctx.fillStyle = p.col; ctx.fill(); ctx.restore();
+                        }
+                        ctx.save(); ctx.shadowColor = p.col; ctx.shadowBlur = 15;
+                        ctx.beginPath(); ctx.arc(px, py, 12, 0, Math.PI * 2);
                         ctx.fillStyle = p.col; ctx.fill(); ctx.restore();
-                    }
-                    ctx.save(); ctx.shadowColor = p.col; ctx.shadowBlur = 15;
-                    ctx.beginPath(); ctx.arc(px, py, 12, 0, Math.PI*2);
-                    ctx.fillStyle = p.col; ctx.fill(); ctx.restore();
-                    ctx.font = 'bold 8px monospace'; ctx.fillStyle = '#ffffff';
-                    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-                    ctx.fillText(p.lbl, px, py);
-                });
-            }
-
-            function tick() {
-                parts.forEach(p => { p.t = Math.min(p.t + 0.013, 1.06); });
-                parts = parts.filter(p => p.t < 1.06);
-                draw();
-                raf = parts.length > 0 ? window.requestAnimationFrame(tick) : null;
-            }
-
-            function spawn(x0, y0, x1, y1, col, lbl, delay) {
-                window.setTimeout(function() {
-                    parts.push({ x0:x0, y0:y0, x1:x1, y1:y1, t:0, col:col, lbl:lbl });
-                    if (!raf) raf = window.requestAnimationFrame(tick);
-                }, delay);
-            }
-
-            function stat(t, c) { var e = document.getElementById('ns-st'); if (e) { e.textContent = t; e.style.color = c; } }
-            function badge(t, c) { var e = document.getElementById('ns-lb'); if (e) { e.textContent = t; e.style.color = c; } }
-            function log(msg, col) {
-                col = col || '#2563eb';
-                var el = document.getElementById('ns-log');
-                if (!el) return;
-                var ts = new Date().toTimeString().slice(0, 8);
-                el.innerHTML += '<div><span style="color:#64748b">[' + ts + ']</span> <span style="color:' + col + '">' + msg + '</span></div>';
-                el.scrollTop = el.scrollHeight;
-            }
-
-            window._nsSend = function() {
-                layout();
-                var d  = DEVICES.find(function(x){ return x.id === curDev; }) || DEVICES[0];
-                var subId = gv('ns-subtype');
-                var si = gi('ns-snd', 0);
-                var tv = gv('ns-rcv');
-                var isBc = tv === 'all' || curDev === 'hub';
-                var sN = nodes[si] || nodes[0];
-                var tN = isBc ? null : nodes[parseInt(tv)];
-                document.getElementById('ns-log').innerHTML = '';
-                stat('● TX ACTIVE', d.col); badge('● TRANSMITTING', d.col);
-
-                if (curDev === 'hub') {
-                    if (subId === 'hub_active') {
-                        log('[ACTIVE-HUB] ' + sN.label + ' -> Electrical signal received at Port' + (sN.idx+1), '#d97706');
-                        log('[SIGNAL] Regenerating voltage levels (+5V clean pulse) & removing cable jitter...', '#2563eb');
-                    } else if (subId === 'hub_passive') {
-                        log('[PASSIVE-HUB] ' + sN.label + ' -> Electrical splitting across bus (No amplification)', '#dc2626');
-                        log('[WARNING] Attenuation detected: Signal strength reduced by 3dB across splitters', '#dc2626');
-                    } else {
-                        log('[MANAGED-HUB] ' + sN.label + ' -> Broadcast frame logged by SNMP Agent (Port ' + (sN.idx+1) + ')', '#d97706');
-                        log('[SNMP] Sending RMON MIB MIB-II stat counter update to Management Console...', '#0284c7');
-                    }
-                    spawn(sN.x, sN.y, cx, cy, '#d97706', 'TX', 0);
-                    nodes.filter(function(n){ return n.idx !== si; }).forEach(function(n, i) {
-                        spawn(cx, cy, n.x, n.y, '#d97706', 'BC', 900 + i * 120);
+                        ctx.font = 'bold 8px monospace'; ctx.fillStyle = '#ffffff';
+                        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                        ctx.fillText(p.lbl, px, py);
                     });
-                    window.setTimeout(function() {
-                        log('[HUB] Repeated to ALL ' + (nodes.length-1) + ' connected ports (single shared collision domain)', '#d97706');
-                        log('[ALL] Every PC receives the electrical pulse. NIC checks DstMAC to accept or discard.', '#64748b');
-                        stat('● DONE', '#16a34a'); badge('● DONE', '#16a34a');
-                        window.setTimeout(function(){ stat('● IDLE','#64748b'); badge('● IDLE','#64748b'); }, 2000);
-                    }, 1900);
-
-                } else if (curDev === 'switch') {
-                    if (subId === 'sw_l3_managed') {
-                        log('[L3-SW] ' + sN.label + ' -> Frame received on VLAN 10 (SVI 192.168.1.1)', '#7c3aed');
-                        log('[802.1Q] Tagging frame with VLAN ID 10 -> Inter-VLAN Routing to SVI 20', '#2563eb');
-                    } else if (subId === 'sw_poe') {
-                        log('[PoE+ SW] Negotiated IEEE 802.3at (Class 4 Power: 30.0W DC down Pins 1,2,3,6)', '#16a34a');
-                        log('[PoE+ SW] Power active on Fa0/' + (sN.idx+1) + ' + 1 Gbps Gigabit Ethernet Data', '#16a34a');
-                    } else if (subId === 'sw_industrial') {
-                        log('[PROFINET SW] MRP Ring Health Check OK (<10ms failover recovery guarantee)', '#0284c7');
-                        log('[REALTIME] Industrial Priority Queue #0 processed with 0% frame loss', '#0284c7');
-                    }
-                    log('[ARP] ' + sN.label + ': Who has ' + (tN ? tN.sub : '?') + '? Tell ' + sN.sub, '#2563eb');
-                    spawn(sN.x, sN.y, cx, cy, '#2563eb', 'ARP', 0);
-                    nodes.filter(function(n){ return n.idx !== si; }).forEach(function(n, i) {
-                        spawn(cx, cy, n.x, n.y, '#64748b', 'BC', 900 + i * 90);
-                    });
-                    window.setTimeout(function() {
-                        log('[MAC-TBL] Learned: ' + sN.mac + ' -> Port Fa0/' + (sN.idx+1), '#64748b');
-                        if (tN) {
-                            log('[ARP-REP] ' + tN.label + ' replies: ' + tN.mac + ' is at ' + tN.sub, '#16a34a');
-                            spawn(tN.x, tN.y, cx, cy, '#16a34a', 'REP', 0);
-                            spawn(cx, cy, sN.x, sN.y, '#16a34a', 'REP', 800);
-                        }
-                    }, 1500);
-                    window.setTimeout(function() {
-                        if (tN) {
-                            log('[MAC-TBL] Learned: ' + tN.mac + ' -> Port Fa0/' + (tN.idx+1) + ' (Table Complete)', '#2563eb');
-                            log('[UNICAST] ' + sN.label + ' -> Switch -> ' + tN.label + ' (Zero Collisions / Full Duplex)', '#2563eb');
-                            spawn(sN.x, sN.y, cx, cy, '#2563eb', 'TX', 0);
-                            spawn(cx, cy, tN.x, tN.y, '#16a34a', 'RX', 900);
-                        }
-                    }, 3000);
-                    window.setTimeout(function() {
-                        if (tN) {
-                            spawn(tN.x, tN.y, cx, cy, '#d97706', 'ACK', 0);
-                            spawn(cx, cy, sN.x, sN.y, '#d97706', 'ACK', 900);
-                            log('[ACK] ' + tN.label + ' -> ' + sN.label + ' RTT ~0.4ms OK', '#d97706');
-                        }
-                        stat('● DONE', '#16a34a'); badge('● DONE', '#16a34a');
-                        window.setTimeout(function(){ stat('● IDLE','#64748b'); badge('● IDLE','#64748b'); }, 2500);
-                    }, 4800);
-
-                } else if (curDev === 'router') {
-                    if (subId === 'rtr_core') {
-                        log('[BGP CORE] AS65001 Core BGP Route Lookup (Table size: 920,000 routes)', '#7c3aed');
-                        log('[MPLS] Pushing Label 24012 -> Forwarding over 100Gbps Optical Core Backbone', '#2563eb');
-                    } else if (subId === 'rtr_wifi') {
-                        log('[NAT OVERLOAD] PAT Translation: ' + sN.sub + ':49152 -> 203.0.113.5:54321', '#d97706');
-                        log('[FIREWALL] Outbound SPI Connection Entry tracked in state table', '#16a34a');
-                    }
-                    var dstIP = tN ? tN.sub.replace('192.168.1.', '10.0.0.') : '10.0.0.X';
-                    log('[IP ROUTE] SrcIP: ' + sN.sub + ' DstIP: ' + dstIP + ' TTL: 64 Proto: ICMP', '#7c3aed');
-                    log('[GATEWAY] ' + sN.label + ' sends to Default Gateway (Gi0/' + (sN.idx+1) + ')', '#7c3aed');
-                    spawn(sN.x, sN.y, cx, cy, '#7c3aed', 'PKT', 0);
-                    window.setTimeout(function() {
-                        log('[ROUTER] Route Match: 10.0.0.0/24 via Gi0/' + (tN ? tN.idx+1 : 1) + ' (TTL 64 -> 63)', '#4f46e5');
-                        if (tN) { spawn(cx, cy, tN.x, tN.y, '#4f46e5', 'RX', 0); }
-                    }, 1100);
-                    window.setTimeout(function() {
-                        if (tN) {
-                            log('[DELIVERED] Packet delivered to ' + tN.label + ' (10.0.0.' + (tN.idx+1) + ') Checksum OK', '#16a34a');
-                            spawn(tN.x, tN.y, cx, cy, '#d97706', 'ACK', 0);
-                            spawn(cx, cy, sN.x, sN.y, '#d97706', 'ACK', 900);
-                        }
-                        stat('● DONE', '#16a34a'); badge('● DONE', '#16a34a');
-                        window.setTimeout(function(){ stat('● IDLE','#64748b'); badge('● IDLE','#64748b'); }, 2000);
-                    }, 2800);
-
-                } else if (curDev === 'firewall') {
-                    if (subId === 'fw_stateless') {
-                        log('[STATELESS] ACL Entry: access-list 101 permit ip ' + sN.sub + ' ' + (tN ? tN.sub : 'any'), '#dc2626');
-                        log('[NOTE] Stateless filter does NOT remember session state for return packets', '#dc2626');
-                    } else if (subId === 'fw_ngfw') {
-                        log('[NGFW L7] Deep Packet Inspection (DPI) App: ICMP Echo / HTTP Payload', '#2563eb');
-                        log('[IPS/AV] Signature Scan: Clean (No malware / exploit payloads detected)', '#16a34a');
-                    }
-                    log('[FIREWALL] Inspecting packet: ' + sN.sub + ' -> ' + (tN ? tN.sub : 'ALL'), '#dc2626');
-                    spawn(sN.x, sN.y, cx, cy, '#dc2626', 'PKT', 0);
-                    window.setTimeout(function() {
-                        log('[STATEFUL] Permitted by Rule #1 -> Session table created (TCP Flags: SYN)', '#16a34a');
-                        if (tN) { spawn(cx, cy, tN.x, tN.y, '#16a34a', 'OK', 0); }
-                        else { nodes.filter(function(n){ return n.idx !== si; }).forEach(function(n, i){ spawn(cx, cy, n.x, n.y, '#dc2626', 'OK', i*100); }); }
-                    }, 1100);
-                    window.setTimeout(function() {
-                        log('[RETURN] Stateful Return Traffic MATCHED in Session Table -> Forwarding ACK', '#d97706');
-                        if (tN) { spawn(tN.x, tN.y, cx, cy, '#d97706', 'ACK', 0); spawn(cx, cy, sN.x, sN.y, '#d97706', 'ACK', 900); }
-                        stat('● DONE', '#16a34a'); badge('● DONE', '#16a34a');
-                        window.setTimeout(function(){ stat('● IDLE','#64748b'); badge('● IDLE','#64748b'); }, 2000);
-                    }, 2600);
-
-                } else if (curDev === 'wap') {
-                    if (subId === 'wap_mesh') {
-                        log('[MESH 802.11s] Multi-hop wireless backhaul relay to Gateway Node', '#16a34a');
-                        log('[LINK STATUS] RSSI: -52dBm | SNR: 34dB | Dynamic Channel: 149 (5GHz)', '#2563eb');
-                    } else {
-                        log('[Wi-Fi 6] IEEE 802.11ax OFDMA & MU-MIMO 5GHz Beamforming active', '#16a34a');
-                        log('[ASSOC] ' + sN.label + ' connected at 1.2 Gbps (WPA3-Enterprise Security)', '#16a34a');
-                    }
-                    spawn(sN.x, sN.y, cx, cy, '#16a34a', 'RF', 0);
-                    window.setTimeout(function() {
-                        log('[BRIDGE] De-encapsulating 802.11 Wi-Fi frame -> 802.3 Ethernet frame', '#16a34a');
-                        if (tN) {
-                            log('[UPLINK] Forwarding to wired switch port for ' + tN.label, '#2563eb');
-                            spawn(cx, cy, tN.x, tN.y, '#2563eb', 'TX', 0);
-                        } else {
-                            nodes.filter(function(n){ return n.idx !== si; }).forEach(function(n, i){ spawn(cx, cy, n.x, n.y, '#16a34a', 'TX', i*110); });
-                        }
-                    }, 1100);
-                    window.setTimeout(function() {
-                        if (tN) { spawn(tN.x, tN.y, cx, cy, '#d97706', 'ACK', 0); spawn(cx, cy, sN.x, sN.y, '#16a34a', 'RF', 900); }
-                        log('[OK] Wi-Fi 6 Transmission Complete RTT ~2ms', '#16a34a');
-                        stat('● DONE', '#16a34a'); badge('● DONE', '#16a34a');
-                        window.setTimeout(function(){ stat('● IDLE','#64748b'); badge('● IDLE','#64748b'); }, 2000);
-                    }, 2500);
-
-                } else if (curDev === 'media') {
-                    if (subId === 'media_smf') {
-                        log('[SMF CONVERTER] Translating 802.3 Electrical Signal -> 1310nm Laser Pulse', '#0284c7');
-                        log('[OPTICAL LINK] Single-Mode 9µm Glass Core (Zero dispersion up to 40km)', '#0284c7');
-                    } else if (subId === 'media_mmf') {
-                        log('[MMF CONVERTER] Translating 802.3 Electrical Signal -> 850nm VCSEL Light Pulse', '#0284c7');
-                        log('[OPTICAL LINK] Multi-Mode 50µm Glass Core (Modal dispersion up to 550m)', '#0284c7');
-                    } else {
-                        log('[PATCH PANEL] TIA-568B Structured Copper Interconnect Pass-Through', '#0284c7');
-                        log('[COPPER] Cat6A 10Gbps Shielded Twisted Pair (S/FTP) continuity verified', '#0284c7');
-                    }
-                    spawn(sN.x, sN.y, cx, cy, '#0284c7', 'OPT', 0);
-                    window.setTimeout(function() {
-                        if (tN) {
-                            log('[CONVERTED] Signal converted & delivered to ' + tN.label + ' via high-speed link', '#16a34a');
-                            spawn(cx, cy, tN.x, tN.y, '#16a34a', 'RX', 0);
-                        } else {
-                            nodes.filter(function(n){ return n.idx !== si; }).forEach(function(n, i){ spawn(cx, cy, n.x, n.y, '#0284c7', 'TX', i*110); });
-                        }
-                    }, 1100);
-                    window.setTimeout(function() {
-                        if (tN) { spawn(tN.x, tN.y, cx, cy, '#d97706', 'ACK', 0); spawn(cx, cy, sN.x, sN.y, '#0284c7', 'ACK', 900); }
-                        log('[OK] Transmission Media Converter Pass Complete (Loss < 0.2dB)', '#16a34a');
-                        stat('● DONE', '#16a34a'); badge('● DONE', '#16a34a');
-                        window.setTimeout(function(){ stat('● IDLE','#64748b'); badge('● IDLE','#64748b'); }, 2000);
-                    }, 2500);
                 }
-            };
 
-            ['ns-cnt','ns-snd','ns-rcv'].forEach(function(id) {
-                var el = document.getElementById(id);
-                if (el) el.addEventListener('change', function(){ parts = []; draw(); });
-            });
+                function tick() {
+                    parts.forEach(p => { p.t = Math.min(p.t + 0.013, 1.06); });
+                    parts = parts.filter(p => p.t < 1.06);
+                    draw();
+                    raf = parts.length > 0 ? window.requestAnimationFrame(tick) : null;
+                }
 
-            pick('hub');
-            window.setTimeout(resize, 80);
-            window.addEventListener('resize', resize);
-        })();
-    }
+                function spawn(x0, y0, x1, y1, col, lbl, delay) {
+                    window.setTimeout(function () {
+                        parts.push({ x0: x0, y0: y0, x1: x1, y1: y1, t: 0, col: col, lbl: lbl });
+                        if (!raf) raf = window.requestAnimationFrame(tick);
+                    }, delay);
+                }
 
+                function stat(t, c) { var e = document.getElementById('ns-st'); if (e) { e.textContent = t; e.style.color = c; } }
+                function badge(t, c) { var e = document.getElementById('ns-lb'); if (e) { e.textContent = t; e.style.color = c; } }
+                function log(msg, col) {
+                    col = col || '#2563eb';
+                    var el = document.getElementById('ns-log');
+                    if (!el) return;
+                    var ts = new Date().toTimeString().slice(0, 8);
+                    el.innerHTML += '<div><span style="color:#64748b">[' + ts + ']</span> <span style="color:' + col + '">' + msg + '</span></div>';
+                    el.scrollTop = el.scrollHeight;
+                }
+
+                window._nsSend = function () {
+                    layout();
+                    var d = DEVICES.find(function (x) { return x.id === curDev; }) || DEVICES[0];
+                    var subId = gv('ns-subtype');
+                    var si = gi('ns-snd', 0);
+                    var tv = gv('ns-rcv');
+                    var isBc = tv === 'all' || curDev === 'hub';
+                    var sN = nodes[si] || nodes[0];
+                    var tN = isBc ? null : nodes[parseInt(tv)];
+                    document.getElementById('ns-log').innerHTML = '';
+                    stat('● TX ACTIVE', d.col); badge('● TRANSMITTING', d.col);
+
+                    if (curDev === 'hub') {
+                        if (subId === 'hub_active') {
+                            log('[ACTIVE-HUB] ' + sN.label + ' -> Electrical signal received at Port' + (sN.idx + 1), '#d97706');
+                            log('[SIGNAL] Regenerating voltage levels (+5V clean pulse) & removing cable jitter...', '#2563eb');
+                        } else if (subId === 'hub_passive') {
+                            log('[PASSIVE-HUB] ' + sN.label + ' -> Electrical splitting across bus (No amplification)', '#dc2626');
+                            log('[WARNING] Attenuation detected: Signal strength reduced by 3dB across splitters', '#dc2626');
+                        } else {
+                            log('[MANAGED-HUB] ' + sN.label + ' -> Broadcast frame logged by SNMP Agent (Port ' + (sN.idx + 1) + ')', '#d97706');
+                            log('[SNMP] Sending RMON MIB MIB-II stat counter update to Management Console...', '#0284c7');
+                        }
+                        spawn(sN.x, sN.y, cx, cy, '#d97706', 'TX', 0);
+                        nodes.filter(function (n) { return n.idx !== si; }).forEach(function (n, i) {
+                            spawn(cx, cy, n.x, n.y, '#d97706', 'BC', 900 + i * 120);
+                        });
+                        window.setTimeout(function () {
+                            log('[HUB] Repeated to ALL ' + (nodes.length - 1) + ' connected ports (single shared collision domain)', '#d97706');
+                            log('[ALL] Every PC receives the electrical pulse. NIC checks DstMAC to accept or discard.', '#64748b');
+                            stat('● DONE', '#16a34a'); badge('● DONE', '#16a34a');
+                            window.setTimeout(function () { stat('● IDLE', '#64748b'); badge('● IDLE', '#64748b'); }, 2000);
+                        }, 1900);
+
+                    } else if (curDev === 'switch') {
+                        if (subId === 'sw_l3_managed') {
+                            log('[L3-SW] ' + sN.label + ' -> Frame received on VLAN 10 (SVI 192.168.1.1)', '#7c3aed');
+                            log('[802.1Q] Tagging frame with VLAN ID 10 -> Inter-VLAN Routing to SVI 20', '#2563eb');
+                        } else if (subId === 'sw_poe') {
+                            log('[PoE+ SW] Negotiated IEEE 802.3at (Class 4 Power: 30.0W DC down Pins 1,2,3,6)', '#16a34a');
+                            log('[PoE+ SW] Power active on Fa0/' + (sN.idx + 1) + ' + 1 Gbps Gigabit Ethernet Data', '#16a34a');
+                        } else if (subId === 'sw_industrial') {
+                            log('[PROFINET SW] MRP Ring Health Check OK (<10ms failover recovery guarantee)', '#0284c7');
+                            log('[REALTIME] Industrial Priority Queue #0 processed with 0% frame loss', '#0284c7');
+                        }
+                        log('[ARP] ' + sN.label + ': Who has ' + (tN ? tN.sub : '?') + '? Tell ' + sN.sub, '#2563eb');
+                        spawn(sN.x, sN.y, cx, cy, '#2563eb', 'ARP', 0);
+                        nodes.filter(function (n) { return n.idx !== si; }).forEach(function (n, i) {
+                            spawn(cx, cy, n.x, n.y, '#64748b', 'BC', 900 + i * 90);
+                        });
+                        window.setTimeout(function () {
+                            log('[MAC-TBL] Learned: ' + sN.mac + ' -> Port Fa0/' + (sN.idx + 1), '#64748b');
+                            if (tN) {
+                                log('[ARP-REP] ' + tN.label + ' replies: ' + tN.mac + ' is at ' + tN.sub, '#16a34a');
+                                spawn(tN.x, tN.y, cx, cy, '#16a34a', 'REP', 0);
+                                spawn(cx, cy, sN.x, sN.y, '#16a34a', 'REP', 800);
+                            }
+                        }, 1500);
+                        window.setTimeout(function () {
+                            if (tN) {
+                                log('[MAC-TBL] Learned: ' + tN.mac + ' -> Port Fa0/' + (tN.idx + 1) + ' (Table Complete)', '#2563eb');
+                                log('[UNICAST] ' + sN.label + ' -> Switch -> ' + tN.label + ' (Zero Collisions / Full Duplex)', '#2563eb');
+                                spawn(sN.x, sN.y, cx, cy, '#2563eb', 'TX', 0);
+                                spawn(cx, cy, tN.x, tN.y, '#16a34a', 'RX', 900);
+                            }
+                        }, 3000);
+                        window.setTimeout(function () {
+                            if (tN) {
+                                spawn(tN.x, tN.y, cx, cy, '#d97706', 'ACK', 0);
+                                spawn(cx, cy, sN.x, sN.y, '#d97706', 'ACK', 900);
+                                log('[ACK] ' + tN.label + ' -> ' + sN.label + ' RTT ~0.4ms OK', '#d97706');
+                            }
+                            stat('● DONE', '#16a34a'); badge('● DONE', '#16a34a');
+                            window.setTimeout(function () { stat('● IDLE', '#64748b'); badge('● IDLE', '#64748b'); }, 2500);
+                        }, 4800);
+
+                    } else if (curDev === 'router') {
+                        if (subId === 'rtr_core') {
+                            log('[BGP CORE] AS65001 Core BGP Route Lookup (Table size: 920,000 routes)', '#7c3aed');
+                            log('[MPLS] Pushing Label 24012 -> Forwarding over 100Gbps Optical Core Backbone', '#2563eb');
+                        } else if (subId === 'rtr_wifi') {
+                            log('[NAT OVERLOAD] PAT Translation: ' + sN.sub + ':49152 -> 203.0.113.5:54321', '#d97706');
+                            log('[FIREWALL] Outbound SPI Connection Entry tracked in state table', '#16a34a');
+                        }
+                        var dstIP = tN ? tN.sub.replace('192.168.1.', '10.0.0.') : '10.0.0.X';
+                        log('[IP ROUTE] SrcIP: ' + sN.sub + ' DstIP: ' + dstIP + ' TTL: 64 Proto: ICMP', '#7c3aed');
+                        log('[GATEWAY] ' + sN.label + ' sends to Default Gateway (Gi0/' + (sN.idx + 1) + ')', '#7c3aed');
+                        spawn(sN.x, sN.y, cx, cy, '#7c3aed', 'PKT', 0);
+                        window.setTimeout(function () {
+                            log('[ROUTER] Route Match: 10.0.0.0/24 via Gi0/' + (tN ? tN.idx + 1 : 1) + ' (TTL 64 -> 63)', '#4f46e5');
+                            if (tN) { spawn(cx, cy, tN.x, tN.y, '#4f46e5', 'RX', 0); }
+                        }, 1100);
+                        window.setTimeout(function () {
+                            if (tN) {
+                                log('[DELIVERED] Packet delivered to ' + tN.label + ' (10.0.0.' + (tN.idx + 1) + ') Checksum OK', '#16a34a');
+                                spawn(tN.x, tN.y, cx, cy, '#d97706', 'ACK', 0);
+                                spawn(cx, cy, sN.x, sN.y, '#d97706', 'ACK', 900);
+                            }
+                            stat('● DONE', '#16a34a'); badge('● DONE', '#16a34a');
+                            window.setTimeout(function () { stat('● IDLE', '#64748b'); badge('● IDLE', '#64748b'); }, 2000);
+                        }, 2800);
+
+                    } else if (curDev === 'firewall') {
+                        if (subId === 'fw_stateless') {
+                            log('[STATELESS] ACL Entry: access-list 101 permit ip ' + sN.sub + ' ' + (tN ? tN.sub : 'any'), '#dc2626');
+                            log('[NOTE] Stateless filter does NOT remember session state for return packets', '#dc2626');
+                        } else if (subId === 'fw_ngfw') {
+                            log('[NGFW L7] Deep Packet Inspection (DPI) App: ICMP Echo / HTTP Payload', '#2563eb');
+                            log('[IPS/AV] Signature Scan: Clean (No malware / exploit payloads detected)', '#16a34a');
+                        }
+                        log('[FIREWALL] Inspecting packet: ' + sN.sub + ' -> ' + (tN ? tN.sub : 'ALL'), '#dc2626');
+                        spawn(sN.x, sN.y, cx, cy, '#dc2626', 'PKT', 0);
+                        window.setTimeout(function () {
+                            log('[STATEFUL] Permitted by Rule #1 -> Session table created (TCP Flags: SYN)', '#16a34a');
+                            if (tN) { spawn(cx, cy, tN.x, tN.y, '#16a34a', 'OK', 0); }
+                            else { nodes.filter(function (n) { return n.idx !== si; }).forEach(function (n, i) { spawn(cx, cy, n.x, n.y, '#dc2626', 'OK', i * 100); }); }
+                        }, 1100);
+                        window.setTimeout(function () {
+                            log('[RETURN] Stateful Return Traffic MATCHED in Session Table -> Forwarding ACK', '#d97706');
+                            if (tN) { spawn(tN.x, tN.y, cx, cy, '#d97706', 'ACK', 0); spawn(cx, cy, sN.x, sN.y, '#d97706', 'ACK', 900); }
+                            stat('● DONE', '#16a34a'); badge('● DONE', '#16a34a');
+                            window.setTimeout(function () { stat('● IDLE', '#64748b'); badge('● IDLE', '#64748b'); }, 2000);
+                        }, 2600);
+
+                    } else if (curDev === 'wap') {
+                        if (subId === 'wap_mesh') {
+                            log('[MESH 802.11s] Multi-hop wireless backhaul relay to Gateway Node', '#16a34a');
+                            log('[LINK STATUS] RSSI: -52dBm | SNR: 34dB | Dynamic Channel: 149 (5GHz)', '#2563eb');
+                        } else {
+                            log('[Wi-Fi 6] IEEE 802.11ax OFDMA & MU-MIMO 5GHz Beamforming active', '#16a34a');
+                            log('[ASSOC] ' + sN.label + ' connected at 1.2 Gbps (WPA3-Enterprise Security)', '#16a34a');
+                        }
+                        spawn(sN.x, sN.y, cx, cy, '#16a34a', 'RF', 0);
+                        window.setTimeout(function () {
+                            log('[BRIDGE] De-encapsulating 802.11 Wi-Fi frame -> 802.3 Ethernet frame', '#16a34a');
+                            if (tN) {
+                                log('[UPLINK] Forwarding to wired switch port for ' + tN.label, '#2563eb');
+                                spawn(cx, cy, tN.x, tN.y, '#2563eb', 'TX', 0);
+                            } else {
+                                nodes.filter(function (n) { return n.idx !== si; }).forEach(function (n, i) { spawn(cx, cy, n.x, n.y, '#16a34a', 'TX', i * 110); });
+                            }
+                        }, 1100);
+                        window.setTimeout(function () {
+                            if (tN) { spawn(tN.x, tN.y, cx, cy, '#d97706', 'ACK', 0); spawn(cx, cy, sN.x, sN.y, '#16a34a', 'RF', 900); }
+                            log('[OK] Wi-Fi 6 Transmission Complete RTT ~2ms', '#16a34a');
+                            stat('● DONE', '#16a34a'); badge('● DONE', '#16a34a');
+                            window.setTimeout(function () { stat('● IDLE', '#64748b'); badge('● IDLE', '#64748b'); }, 2000);
+                        }, 2500);
+
+                    } else if (curDev === 'media') {
+                        if (subId === 'media_smf') {
+                            log('[SMF CONVERTER] Translating 802.3 Electrical Signal -> 1310nm Laser Pulse', '#0284c7');
+                            log('[OPTICAL LINK] Single-Mode 9µm Glass Core (Zero dispersion up to 40km)', '#0284c7');
+                        } else if (subId === 'media_mmf') {
+                            log('[MMF CONVERTER] Translating 802.3 Electrical Signal -> 850nm VCSEL Light Pulse', '#0284c7');
+                            log('[OPTICAL LINK] Multi-Mode 50µm Glass Core (Modal dispersion up to 550m)', '#0284c7');
+                        } else {
+                            log('[PATCH PANEL] TIA-568B Structured Copper Interconnect Pass-Through', '#0284c7');
+                            log('[COPPER] Cat6A 10Gbps Shielded Twisted Pair (S/FTP) continuity verified', '#0284c7');
+                        }
+                        spawn(sN.x, sN.y, cx, cy, '#0284c7', 'OPT', 0);
+                        window.setTimeout(function () {
+                            if (tN) {
+                                log('[CONVERTED] Signal converted & delivered to ' + tN.label + ' via high-speed link', '#16a34a');
+                                spawn(cx, cy, tN.x, tN.y, '#16a34a', 'RX', 0);
+                            } else {
+                                nodes.filter(function (n) { return n.idx !== si; }).forEach(function (n, i) { spawn(cx, cy, n.x, n.y, '#0284c7', 'TX', i * 110); });
+                            }
+                        }, 1100);
+                        window.setTimeout(function () {
+                            if (tN) { spawn(tN.x, tN.y, cx, cy, '#d97706', 'ACK', 0); spawn(cx, cy, sN.x, sN.y, '#0284c7', 'ACK', 900); }
+                            log('[OK] Transmission Media Converter Pass Complete (Loss < 0.2dB)', '#16a34a');
+                            stat('● DONE', '#16a34a'); badge('● DONE', '#16a34a');
+                            window.setTimeout(function () { stat('● IDLE', '#64748b'); badge('● IDLE', '#64748b'); }, 2000);
+                        }, 2500);
+                    }
+                };
+
+                ['ns-cnt', 'ns-snd', 'ns-rcv'].forEach(function (id) {
+                    var el = document.getElementById(id);
+                    if (el) el.addEventListener('change', function () { parts = []; draw(); });
+                });
+
+                pick('hub');
+                window.setTimeout(resize, 80);
+                window.addEventListener('resize', resize);
+            })();
+        }
+
+}})

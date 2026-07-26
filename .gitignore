@@ -1,0 +1,10 @@
+node_modules/
+package-lock.json
+*.log
+.DS_Store
+scratch/
+check*.js
+temp*.js
+find_fix.js
+restore_fix.js
+check_braces.py
