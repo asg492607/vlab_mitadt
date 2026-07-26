@@ -355,8 +355,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" integrity="sha384-JcnsjUPPylna1s1fvi1u12X5qjY5OL56iySh75FdtrwhO/SWXgMjoVqcKyIIWOLk" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha384-ZZ1pncU3bQe8y31yfZdMFdSpttDoPmOZg2wguVK9almUodir1PghgT0eY7Mrty8H" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js" integrity="sha384-QQBwnzmpf8eCm7WvgJ/dpvJ51cajsTkfDMgOq5QVBZav9687X5xjlZo8zroLyU3+" crossorigin="anonymous"></script>
-    <script src="vlabData.js?v=48"></script>
-    <script type="module" src="vlab.js?v=48"></script>
+    <script src="vlabData.js?v=49"></script>
+    <script type="module" src="vlab.js?v=49"></script>
     
     <!-- Global AI Tutor Assistant HTML Components -->
     <div id="global-ai-bubble" class="global-ai-bubble" title="Ask MIT VLab AI Tutor">✨</div>
@@ -384,7 +384,7 @@
         // Register PWA Service Worker with auto-update cache invalidation
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=48').then(reg => {
+                navigator.serviceWorker.register('./sw.js?v=49').then(reg => {
                     console.log('Service Worker registered successfully:', reg.scope);
                     reg.update();
                 }).catch(err => {

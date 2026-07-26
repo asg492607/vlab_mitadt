@@ -1334,6 +1334,331 @@ window.VLAB_DATA = {
         references: [{ title: "IEEE 802.1Q Standard", link: "https://standards.ieee.org" }],
         simType: "cli"
     },
+    'subnetting': {
+    "title": "Practical 6: Subnetting, VLSM & CIDR",
+    "aim": "To study, analyze, and implement Classless Inter-Domain Routing (CIDR), Variable Length Subnet Masking (VLSM), and IPv4 subnetting to efficiently divide IP address space, minimize broadcast traffic, and design departmental networks.",
+    "intro": {
+        "summary": "In modern computer networks, efficient utilization of IP addresses is essential. Assigning a large unsegmented network to an entire organization wastes IP addresses and increases broadcast traffic. Subnetting divides a large network into smaller logical networks (subnets), enhancing performance, security, and administrative control. Variable Length Subnet Masking (VLSM) and Classless Inter-Domain Routing (CIDR) allow subnet sizes to be customized to exact department requirements without wasting IP space.",
+        "importance": "Subnetting and VLSM are fundamental skills for network architecture, Cisco CCNA/CCNP certification, data center engineering, and cloud Virtual Private Cloud (VPC) subnet allocation. Mastering subnet calculation enables engineers to prevent IP address exhaustion, eliminate broadcast storms, and establish secure multi-tier network topologies.",
+        "applications": [
+            "University Campus Network Segmentation (Labs, Faculty, Administration, Hostels)",
+            "Cloud Infrastructure (AWS VPC / Azure VNet Subnet & Security Group Isolation)",
+            "Enterprise Corporate LAN Departmental Division (Sales, Finance, Engineering, Executive)",
+            "Internet Service Provider (ISP) CIDR Route Summarization & Address Allocation",
+            "Data Center Server Rack Subnetting & DMZ Perimeter Security Segments"
+        ],
+        "outcome": "Students will be able to convert subnet masks to CIDR prefix notation (/24 to /30), calculate Network ID, Broadcast ID, and usable host ranges, design custom VLSM subnet schemes for varying department sizes, and verify routing between subnets using Layer 3 switches and routers."
+    },
+    "prerequisites": [
+        "Practical 4: IPv4 & IPv6 Address Classification",
+        "Binary arithmetic & 32-bit dotted decimal representation",
+        "Concept of Network ID, Host ID, and Default Subnet Masks"
+    ],
+    "outcomes": [
+        "Understand why network segmentation and subnetting are required in modern networks.",
+        "Borrow host bits to create custom subnets using the 2^b formula.",
+        "Calculate Network Address, Broadcast Address, First Usable Host, and Last Usable Host for any CIDR prefix.",
+        "Determine usable host capacity using the 2^h - 2 formula.",
+        "Apply Variable Length Subnet Masking (VLSM) to allocate customized subnet sizes based on department host requirements.",
+        "Understand Classless Inter-Domain Routing (CIDR) prefix notation (/8 to /30).",
+        "Use the CIDR Prefix Conversion Table for fast network planning.",
+        "Identify and fix common subnetting errors such as overlapping subnets or assigning broadcast IPs to hosts.",
+        "Verify inter-subnet routing through Layer 3 Gateway Routers."
+    ],
+    "theory": {
+        "intro": "Subnetting is the process of partitioning a single physical network into multiple smaller logical subnetworks. The subnet mask determines where the network portion ends and the host portion begins.",
+        "cards": [
+            {
+                "title": "1. Why Subnetting is Required (University Scenario)",
+                "content": "Suppose a university has 1000 computers divided among departments:\n• Computer Lab: 200 PCs\n• Library: 50 PCs\n• Faculty Offices: 80 PCs\n• Administration: 40 PCs\n• Hostels: 300 PCs\n\nIf the university assigns one massive Class B network (65,534 hosts) to everyone:\n1. Thousands of IP addresses remain unused and wasted.\n2. Broadcast messages from one PC reach all 1000 PCs, creating severe network congestion (Broadcast Storms).\n3. Security is compromised because any host can intercept traffic from any other department.\n\nSubnetting divides the large network into small isolated subnets, containing broadcast traffic and improving performance."
+            },
+            {
+                "title": "2. What is a Subnet & How Bit Borrowing Works",
+                "content": "A Subnet (Subnetwork) is created by 'borrowing' bits from the Host portion of an IP address and adding them to the Network portion.\n\nOriginal Class C Network: 192.168.1.0/24 (24 Network bits, 8 Host bits)\nMask: 255.255.255.0 | Total Hosts = 2^8 = 256 (254 Usable)\n\nBorrowing 2 Host Bits → New Mask: /26 (26 Network bits, 6 Host bits)\nNew Mask: 255.255.255.192\n• Number of Subnets = 2^b = 2^2 = 4 Subnets\n• Hosts per Subnet = 2^h = 2^6 = 64 (62 Usable Hosts)\n\nCreated Subnets:\n1. 192.168.1.0/26 (Hosts: 192.168.1.1 to 192.168.1.62 | Broadcast: 192.168.1.63)\n2. 192.168.1.64/26 (Hosts: 192.168.1.65 to 192.168.1.126 | Broadcast: 192.168.1.127)\n3. 192.168.1.128/26 (Hosts: 192.168.1.129 to 192.168.1.190 | Broadcast: 192.168.1.191)\n4. 192.168.1.192/26 (Hosts: 192.168.1.193 to 192.168.1.254 | Broadcast: 192.168.1.255)"
+            },
+            {
+                "title": "3. Network Address vs Broadcast Address vs Usable Hosts",
+                "content": "Every subnet contains 3 essential address components:\n\n1. Network Address (First IP): All host bits are set to 0. Identifies the subnet itself. Cannot be assigned to any device.\n2. Broadcast Address (Last IP): All host bits are set to 1. Used to broadcast data packets to all devices on the subnet. Cannot be assigned to any device.\n3. Usable Host Range: All IP addresses between the Network Address and Broadcast Address (First Usable = Network + 1, Last Usable = Broadcast - 1).\n\nFormula: Usable Hosts = 2^h - 2 (where h = number of remaining host bits)."
+            },
+            {
+                "title": "4. Variable Length Subnet Masking (VLSM)",
+                "content": "Traditional subnetting creates equal-sized subnets. However, different departments require different host counts:\n• Engineering Lab: 120 Hosts → Requires /25 (126 Usable Hosts)\n• Library: 40 Hosts → Requires /26 (62 Usable Hosts)\n• Faculty: 25 Hosts → Requires /27 (30 Usable Hosts)\n• Point-to-Point Router Link: 2 Hosts → Requires /30 (2 Usable Hosts)\n\nVLSM allows engineers to assign different subnet masks to different subnets within the same address space, conserving IP addresses and preventing wastage."
+            },
+            {
+                "title": "5. Classless Inter-Domain Routing (CIDR)",
+                "content": "CIDR replaces obsolete Class A, B, C addressing with prefix notation (/N).\n\nCIDR Prefix Table:\n• /24 = 255.255.255.0 (254 Usable Hosts, Block Size 256)\n• /25 = 255.255.255.128 (126 Usable Hosts, Block Size 128)\n• /26 = 255.255.255.192 (62 Usable Hosts, Block Size 64)\n• /27 = 255.255.255.224 (30 Usable Hosts, Block Size 32)\n• /28 = 255.255.255.240 (14 Usable Hosts, Block Size 16)\n• /29 = 255.255.255.248 (6 Usable Hosts, Block Size 8)\n• /30 = 255.255.255.252 (2 Usable Hosts - Router Links, Block Size 4)"
+            },
+            {
+                "title": "6. Common Subnetting Errors & Troubleshooting",
+                "content": "1. Assigning Network Address to a Host: E.g., setting PC IP to 192.168.1.0/24 causes driver configuration failure.\n2. Assigning Broadcast Address to a Host: E.g., setting PC IP to 192.168.1.255/24 causes broadcast loop errors.\n3. Subnet Overlap: Overlapping subnet boundaries (e.g. 192.168.1.0/25 and 192.168.1.64/26) corrupts router forwarding tables.\n4. Subnet Mask Mismatch: Setting PC1 to /24 and PC2 to /26 causes PC1 to attempt local L2 delivery while PC2 attempts L3 router routing."
+            }
+        ],
+        "formulas": [
+            "Number of Subnets = 2^b (where b = borrowed host bits)",
+            "Total IP Addresses per Subnet = 2^h (where h = remaining host bits)",
+            "Usable Hosts per Subnet = 2^h - 2",
+            "Block Size (Magic Number) = 256 - Subnet Mask Octet"
+        ],
+        "standards": [
+            "RFC 950 - Internet Standard Subnetting Procedure",
+            "RFC 1519 - Classless Inter-Domain Routing (CIDR) Specification",
+            "RFC 1878 - Variable Length Subnet Table Guidelines"
+        ]
+    },
+    "tools": [
+        {
+            "name": "Binary Bit Borrowing & Subnet Mask Visualizer",
+            "layer": "Layer 3 Tool",
+            "ports": "CIDR Prefix /8 to /30",
+            "usage": "Visualizes borrowed network bits vs host bits with live block size math",
+            "statusLED": "Bits Allocated",
+            "image": "<svg viewBox=\"0 0 400 160\" width=\"100%\" height=\"100%\" xmlns=\"http://www.w3.org/2000/svg\">\n  <rect width=\"400\" height=\"160\" fill=\"#0f172a\" rx=\"10\"/>\n  <text x=\"200\" y=\"28\" fill=\"#60a5fa\" font-size=\"12\" text-anchor=\"middle\" font-family=\"sans-serif\" font-weight=\"bold\">BIT BORROWING SUBNET VISUALIZER (/26)</text>\n  \n  <!-- 26 Network Bits (Green) -->\n  <rect x=\"30\" y=\"45\" width=\"260\" height=\"35\" fill=\"rgba(16,185,129,0.2)\" stroke=\"#10b981\" stroke-width=\"2\" rx=\"4\"/>\n  <text x=\"160\" y=\"66\" fill=\"#10b981\" font-size=\"11\" text-anchor=\"middle\" font-family=\"sans-serif\" font-weight=\"bold\">26 NETWORK BITS (24 + 2 BORROWED)</text>\n\n  <!-- 6 Host Bits (Orange) -->\n  <rect x=\"295\" y=\"45\" width=\"75\" height=\"35\" fill=\"rgba(249,115,22,0.2)\" stroke=\"#f97316\" stroke-width=\"2\" rx=\"4\"/>\n  <text x=\"332\" y=\"66\" fill=\"#f97316\" font-size=\"11\" text-anchor=\"middle\" font-family=\"sans-serif\" font-weight=\"bold\">6 HOST BITS</text>\n\n  <!-- Math Summary Box -->\n  <rect x=\"30\" y=\"95\" width=\"165\" height=\"40\" fill=\"#1e293b\" rx=\"6\"/>\n  <text x=\"112\" y=\"112\" fill=\"#94a3b8\" font-size=\"9\" text-anchor=\"middle\" font-family=\"sans-serif\">2^2 = 4 CREATED SUBNETS</text>\n  <text x=\"112\" y=\"126\" fill=\"#10b981\" font-size=\"10\" font-family=\"sans-serif\" font-weight=\"bold\">MASK: 255.255.255.192</text>\n\n  <rect x=\"205\" y=\"95\" width=\"165\" height=\"40\" fill=\"#1e293b\" rx=\"6\"/>\n  <text x=\"287\" y=\"112\" fill=\"#94a3b8\" font-size=\"9\" text-anchor=\"middle\" font-family=\"sans-serif\">2^6 - 2 = 62 USABLE HOSTS</text>\n  <text x=\"287\" y=\"126\" fill=\"#f97316\" font-size=\"10\" font-family=\"sans-serif\" font-weight=\"bold\">BLOCK SIZE: 64</text>\n</svg>"
+        },
+        {
+            "name": "Step-by-Step Subnet Range Table Generator",
+            "layer": "Layer 3 Utility",
+            "ports": "IPv4 Subnet Ranges",
+            "usage": "Generates complete Network ID, First Host, Last Host & Broadcast tables",
+            "statusLED": "Ranges Calculated",
+            "image": "<svg viewBox=\"0 0 400 160\" width=\"100%\" height=\"100%\" xmlns=\"http://www.w3.org/2000/svg\">\n  <rect width=\"400\" height=\"160\" fill=\"#0f172a\" rx=\"10\"/>\n  <text x=\"200\" y=\"25\" fill=\"#38bdf8\" font-size=\"12\" text-anchor=\"middle\" font-family=\"sans-serif\" font-weight=\"bold\">SUBNET RANGE TABLE GENERATOR</text>\n\n  <!-- Table Header -->\n  <rect x=\"20\" y=\"38\" width=\"360\" height=\"22\" fill=\"#1e293b\" rx=\"4\"/>\n  <text x=\"50\" y=\"53\" fill=\"#60a5fa\" font-size=\"9\" font-family=\"monospace\" font-weight=\"bold\">SUBNET #</text>\n  <text x=\"120\" y=\"53\" fill=\"#10b981\" font-size=\"9\" font-family=\"monospace\" font-weight=\"bold\">NETWORK ID</text>\n  <text x=\"240\" y=\"53\" fill=\"#cbd5e1\" font-size=\"9\" font-family=\"monospace\" font-weight=\"bold\">USABLE HOST RANGE</text>\n  <text x=\"340\" y=\"53\" fill=\"#ef4444\" font-size=\"9\" font-family=\"monospace\" font-weight=\"bold\">BROADCAST</text>\n\n  <!-- Row 1 -->\n  <text x=\"50\" y=\"76\" fill=\"#94a3b8\" font-size=\"9\" font-family=\"monospace\">Subnet 1</text>\n  <text x=\"120\" y=\"76\" fill=\"#10b981\" font-size=\"9\" font-family=\"monospace\">192.168.1.0/26</text>\n  <text x=\"240\" y=\"76\" fill=\"#cbd5e1\" font-size=\"9\" font-family=\"monospace\">.1 → .62</text>\n  <text x=\"340\" y=\"76\" fill=\"#ef4444\" font-size=\"9\" font-family=\"monospace\">.63</text>\n\n  <!-- Row 2 -->\n  <text x=\"50\" y=\"96\" fill=\"#94a3b8\" font-size=\"9\" font-family=\"monospace\">Subnet 2</text>\n  <text x=\"120\" y=\"96\" fill=\"#10b981\" font-size=\"9\" font-family=\"monospace\">192.168.1.64/26</text>\n  <text x=\"240\" y=\"96\" fill=\"#cbd5e1\" font-size=\"9\" font-family=\"monospace\">.65 → .126</text>\n  <text x=\"340\" y=\"96\" fill=\"#ef4444\" font-size=\"9\" font-family=\"monospace\">.127</text>\n\n  <!-- Row 3 -->\n  <text x=\"50\" y=\"116\" fill=\"#94a3b8\" font-size=\"9\" font-family=\"monospace\">Subnet 3</text>\n  <text x=\"120\" y=\"116\" fill=\"#10b981\" font-size=\"9\" font-family=\"monospace\">192.168.1.128/26</text>\n  <text x=\"240\" y=\"116\" fill=\"#cbd5e1\" font-size=\"9\" font-family=\"monospace\">.129 → .190</text>\n  <text x=\"340\" y=\"116\" fill=\"#ef4444\" font-size=\"9\" font-family=\"monospace\">.191</text>\n</svg>"
+        },
+        {
+            "name": "VLSM Variable Length Department Allocator",
+            "layer": "Layer 3 Tool",
+            "ports": "Department Subnets",
+            "usage": "Allocates custom subnet sizes (Lab 120, Library 40, Faculty 25) without IP waste",
+            "statusLED": "VLSM Optimized",
+            "image": "<svg viewBox=\"0 0 400 160\" width=\"100%\" height=\"100%\" xmlns=\"http://www.w3.org/2000/svg\">\n  <rect width=\"400\" height=\"160\" fill=\"#0f172a\" rx=\"10\"/>\n  <text x=\"200\" y=\"25\" fill=\"#a78bfa\" font-size=\"12\" text-anchor=\"middle\" font-family=\"sans-serif\" font-weight=\"bold\">VLSM DEPARTMENT ALLOCATION</text>\n\n  <!-- Dept Blocks -->\n  <rect x=\"25\" y=\"42\" width=\"165\" height=\"40\" fill=\"rgba(139,92,246,0.2)\" stroke=\"#8b5cf6\" stroke-width=\"1.5\" rx=\"6\"/>\n  <text x=\"107\" y=\"58\" fill=\"#a78bfa\" font-size=\"10\" text-anchor=\"middle\" font-family=\"sans-serif\" font-weight=\"bold\">COMPUTER LAB (120 HOSTS)</text>\n  <text x=\"107\" y=\"73\" fill=\"#cbd5e1\" font-size=\"9\" text-anchor=\"middle\" font-family=\"monospace\">192.168.1.0/25 (126 Usable)</text>\n\n  <rect x=\"210\" y=\"42\" width=\"165\" height=\"40\" fill=\"rgba(59,130,246,0.2)\" stroke=\"#3b82f6\" stroke-width=\"1.5\" rx=\"6\"/>\n  <text x=\"292\" y=\"58\" fill=\"#60a5fa\" font-size=\"10\" text-anchor=\"middle\" font-family=\"sans-serif\" font-weight=\"bold\">LIBRARY (40 HOSTS)</text>\n  <text x=\"292\" y=\"73\" fill=\"#cbd5e1\" font-size=\"9\" text-anchor=\"middle\" font-family=\"monospace\">192.168.1.128/26 (62 Usable)</text>\n\n  <rect x=\"25\" y=\"95\" width=\"165\" height=\"40\" fill=\"rgba(16,185,129,0.2)\" stroke=\"#10b981\" stroke-width=\"1.5\" rx=\"6\"/>\n  <text x=\"107\" y=\"111\" fill=\"#10b981\" font-size=\"10\" text-anchor=\"middle\" font-family=\"sans-serif\" font-weight=\"bold\">FACULTY (25 HOSTS)</text>\n  <text x=\"107\" y=\"126\" fill=\"#cbd5e1\" font-size=\"9\" text-anchor=\"middle\" font-family=\"monospace\">192.168.1.192/27 (30 Usable)</text>\n\n  <rect x=\"210\" y=\"95\" width=\"165\" height=\"40\" fill=\"rgba(245,158,11,0.2)\" stroke=\"#f59e0b\" stroke-width=\"1.5\" rx=\"6\"/>\n  <text x=\"292\" y=\"111\" fill=\"#fbbf24\" font-size=\"10\" text-anchor=\"middle\" font-family=\"sans-serif\" font-weight=\"bold\">ROUTER LINK (2 HOSTS)</text>\n  <text x=\"292\" y=\"126\" fill=\"#cbd5e1\" font-size=\"9\" text-anchor=\"middle\" font-family=\"monospace\">192.168.1.224/30 (2 Usable)</text>\n</svg>"
+        },
+        {
+            "name": "Inter-Subnet Gateway Router Simulator",
+            "layer": "Layer 3 Topology",
+            "ports": "Subnet Interfaces",
+            "usage": "Simulates packet routing between Subnet 1, Subnet 2, and Subnet 3 across a Router",
+            "statusLED": "Routing Active",
+            "image": "<svg viewBox=\"0 0 400 160\" width=\"100%\" height=\"100%\" xmlns=\"http://www.w3.org/2000/svg\">\n  <rect width=\"400\" height=\"160\" fill=\"#0f172a\" rx=\"10\"/>\n  <text x=\"200\" y=\"25\" fill=\"#38bdf8\" font-size=\"12\" text-anchor=\"middle\" font-family=\"sans-serif\" font-weight=\"bold\">INTER-SUBNET ROUTER FORWARDING</text>\n\n  <!-- Router Center -->\n  <circle cx=\"200\" cy=\"85\" r=\"28\" fill=\"#1e293b\" stroke=\"#0ea5e9\" stroke-width=\"2\"/>\n  <text x=\"200\" y=\"89\" fill=\"#0ea5e9\" font-size=\"11\" text-anchor=\"middle\" font-family=\"sans-serif\" font-weight=\"bold\">ROUTER</text>\n\n  <!-- Subnet 1 Left -->\n  <rect x=\"25\" y=\"60\" width=\"110\" height=\"50\" rx=\"6\" fill=\"#1e293b\" stroke=\"#10b981\" stroke-width=\"1.5\"/>\n  <text x=\"80\" y=\"80\" fill=\"#10b981\" font-size=\"10\" text-anchor=\"middle\" font-family=\"sans-serif\" font-weight=\"bold\">SUBNET 1 (/26)</text>\n  <text x=\"80\" y=\"96\" fill=\"#94a3b8\" font-size=\"8\" text-anchor=\"middle\" font-family=\"monospace\">192.168.1.0/26</text>\n  <line x1=\"135\" y1=\"85\" x2=\"172\" y2=\"85\" stroke=\"#10b981\" stroke-width=\"2\"/>\n\n  <!-- Subnet 2 Right -->\n  <rect x=\"265\" y=\"60\" width=\"110\" height=\"50\" rx=\"6\" fill=\"#1e293b\" stroke=\"#3b82f6\" stroke-width=\"1.5\"/>\n  <text x=\"320\" y=\"80\" fill=\"#60a5fa\" font-size=\"10\" text-anchor=\"middle\" font-family=\"sans-serif\" font-weight=\"bold\">SUBNET 2 (/26)</text>\n  <text x=\"320\" y=\"96\" fill=\"#94a3b8\" font-size=\"8\" text-anchor=\"middle\" font-family=\"monospace\">192.168.1.64/26</text>\n  <line x1=\"228\" y1=\"85\" x2=\"265\" y2=\"85\" stroke=\"#3b82f6\" stroke-width=\"2\"/>\n</svg>"
+        }
+    ],
+    "procedure": [
+        "Launch the Subnetting, VLSM & CIDR Simulator in the Interactive Simulation tab.",
+        "Use Module 1 (Bit Slider) to move the CIDR prefix slider from /24 to /30 and observe borrowed bits, mask, and host capacity math in real time.",
+        "Use Module 2 (Subnet Range Calculator) to enter a base IP and target CIDR prefix to generate a complete table of Network IDs, Host Ranges, and Broadcast IDs.",
+        "Open Module 3 (VLSM Department Planner) to allocate subnet masks for University Departments (Computer Lab 120, Library 40, Faculty 25, Server 10) and verify zero IP waste.",
+        "Use Module 5 (Inter-Subnet Packet Router) to transmit packets from Subnet 1 to Subnet 2 and observe L3 Router forwarding.",
+        "Test your knowledge using Module 6 (Subnet Puzzle Challenge) to design subnets for random host requirements."
+    ],
+    "troubleshooting": {
+        "problem": "PC1 (192.168.1.63/26) cannot send or receive IP traffic on the network.",
+        "hints": [
+            "Calculate the Broadcast Address for 192.168.1.0/26 subnet.",
+            "Subnet 192.168.1.0/26 spans from .0 (Network ID) to .63 (Broadcast ID)."
+        ],
+        "fix": "IP 192.168.1.63 is the reserved Direct Broadcast Address for Subnet 1 and cannot be assigned to a host interface. Reassign PC1 to a valid usable host IP like 192.168.1.10/26."
+    },
+    "pretest": [
+        {
+            "q": "What is the primary purpose of subnetting a large IP network?",
+            "options": [
+                "To convert IPv4 to IPv6",
+                "To divide a network into smaller logical networks, reducing broadcast traffic",
+                "To assign MAC addresses to network interfaces",
+                "To increase Wi-Fi signal speed"
+            ],
+            "correct": 1,
+            "explanation": "Subnetting divides large networks into smaller subnets, reducing broadcast domains and improving address efficiency."
+        },
+        {
+            "q": "What is the total number of usable host IP addresses on a /26 subnet (mask 255.255.255.192)?",
+            "options": [
+                "254",
+                "126",
+                "62",
+                "30"
+            ],
+            "correct": 2,
+            "explanation": "A /26 subnet has 6 host bits. Total IPs = 2^6 = 64. Usable hosts = 64 - 2 = 62."
+        },
+        {
+            "q": "Why are 2 IP addresses subtracted when calculating usable hosts in any subnet?",
+            "options": [
+                "One for DHCP and one for DNS",
+                "One for Network ID and one for Direct Broadcast Address",
+                "One for Loopback and one for Default Gateway",
+                "One for Router and one for Switch"
+            ],
+            "correct": 1,
+            "explanation": "The first IP (host bits all 0s) is the Network ID and the last IP (host bits all 1s) is the Broadcast ID. Neither can be assigned to a host."
+        },
+        {
+            "q": "What is the main advantage of Variable Length Subnet Masking (VLSM)?",
+            "options": [
+                "Eliminates the need for routers",
+                "Allows different subnet sizes based on actual host requirements, preventing IP waste",
+                "Replaces IP addresses with MAC addresses",
+                "Increases max cable distance beyond 100m"
+            ],
+            "correct": 1,
+            "explanation": "VLSM allows customized subnet sizes (e.g. /25, /26, /30) for departments requiring different numbers of hosts."
+        },
+        {
+            "q": "What CIDR prefix mask is standard for a point-to-point router link requiring only 2 usable host IPs?",
+            "options": [
+                "/24",
+                "/27",
+                "/29",
+                "/30"
+            ],
+            "correct": 3,
+            "explanation": "A /30 prefix provides 4 total IPs (2^2 = 4) and 2 usable host IPs (4 - 2 = 2), perfect for 2-router link connections."
+        }
+    ],
+    "posttest": [
+        {
+            "q": "If you borrow 3 host bits from a Class C network (/24), what is the new CIDR prefix and subnet mask?",
+            "options": [
+                "/25 (255.255.255.128)",
+                "/26 (255.255.255.192)",
+                "/27 (255.255.255.224)",
+                "/28 (255.255.255.240)"
+            ],
+            "correct": 2,
+            "explanation": "Adding 3 borrowed bits to 24 gives /27. Mask: 128 + 64 + 32 = 224 (255.255.255.224)."
+        },
+        {
+            "q": "What is the Network ID for the IP address 192.168.1.130/26?",
+            "options": [
+                "192.168.1.0",
+                "192.168.1.64",
+                "192.168.1.128",
+                "192.168.1.192"
+            ],
+            "correct": 2,
+            "explanation": "With block size 64 (/26), subnets start at .0, .64, .128, .192. 130 falls into the 192.168.1.128/26 subnet."
+        },
+        {
+            "q": "What is the Direct Broadcast Address for the subnet 192.168.1.64/26?",
+            "options": [
+                "192.168.1.65",
+                "192.168.1.126",
+                "192.168.1.127",
+                "192.168.1.255"
+            ],
+            "correct": 2,
+            "explanation": "The /26 subnet starting at .64 has block size 64. The next subnet starts at .128, so broadcast for .64 is .127 (128 - 1)."
+        },
+        {
+            "q": "What is the usable host range for the subnet 192.168.1.192/27?",
+            "options": [
+                "192.168.1.193 to 192.168.1.222",
+                "192.168.1.192 to 192.168.1.223",
+                "192.168.1.193 to 192.168.1.254",
+                "192.168.1.192 to 192.168.1.224"
+            ],
+            "correct": 0,
+            "explanation": "A /27 subnet has block size 32 (starts at .192, ends at .223 broadcast). Usable hosts: .193 to .222."
+        },
+        {
+            "q": "A department needs 28 usable host IP addresses. Which CIDR mask should be allocated using VLSM?",
+            "options": [
+                "/28 (14 usable hosts)",
+                "/27 (30 usable hosts)",
+                "/26 (62 usable hosts)",
+                "/25 (126 usable hosts)"
+            ],
+            "correct": 1,
+            "explanation": "A /27 mask provides 30 usable hosts (2^5 - 2 = 30), which efficiently fits 28 hosts with minimal wastage."
+        },
+        {
+            "q": "How do you calculate the Block Size (Magic Number) of a subnet from its subnet mask octet?",
+            "options": [
+                "256 - Subnet Mask Octet",
+                "Subnet Mask Octet / 2",
+                "Host Bits * 32",
+                "255 + Subnet Mask Octet"
+            ],
+            "correct": 0,
+            "explanation": "Block Size = 256 - Mask Octet. E.g. For mask 255.255.255.192: 256 - 192 = 64 block size."
+        },
+        {
+            "q": "If PC1 is on subnet 192.168.1.0/26 and PC2 is on 192.168.1.64/26, what device is required for them to communicate?",
+            "options": [
+                "Layer 2 Switch",
+                "Layer 3 Router (Default Gateway)",
+                "Ethernet Hub",
+                "RJ-45 Patch Panel"
+            ],
+            "correct": 1,
+            "explanation": "Hosts on different IP subnets belong to different Layer 3 broadcast domains and require a Layer 3 Router to forward traffic between them."
+        },
+        {
+            "q": "What error occurs if an administrator assigns 192.168.1.0/24 to a host interface?",
+            "options": [
+                "Duplicate IP error",
+                "Network ID assignment error (host bits all 0s reserved for subnet name)",
+                "MAC address loop",
+                "DHCP timeout"
+            ],
+            "correct": 1,
+            "explanation": "192.168.1.0 is the Network ID (host bits all 0s) and cannot be assigned to a host."
+        },
+        {
+            "q": "In the CIDR notation 172.16.10.0/20, how many host bits remain for host addressing?",
+            "options": [
+                "8 bits",
+                "12 bits",
+                "16 bits",
+                "20 bits"
+            ],
+            "correct": 1,
+            "explanation": "Total IPv4 bits = 32. Host bits = 32 - 20 = 12 bits. Total hosts = 2^12 = 4,096 (4,094 usable)."
+        },
+        {
+            "q": "What is the subnet mask for /28 in dotted decimal notation?",
+            "options": [
+                "255.255.255.224",
+                "255.255.255.240",
+                "255.255.255.248",
+                "255.255.255.252"
+            ],
+            "correct": 1,
+            "explanation": "/28 means 4 host bits borrowed in 4th octet: 128 + 64 + 32 + 16 = 240 (255.255.255.240)."
+        }
+    ],
+    "viva": [
+        {
+            "q": "Explain the formula used to calculate the number of subnets and usable hosts.",
+            "a": "Number of Subnets = 2^b (where b = borrowed host bits). Usable Hosts per Subnet = 2^h - 2 (where h = remaining host bits). Two addresses are subtracted because the first IP is the Network ID and the last IP is the Direct Broadcast Address."
+        },
+        {
+            "q": "What is the difference between FLSM (Fixed Length Subnet Masking) and VLSM (Variable Length Subnet Masking)?",
+            "a": "FLSM divides a network into subnets of equal size using a single subnet mask across all subnets, which causes IP address wastage when departments require different host counts. VLSM allows custom subnet masks of varying lengths (/25, /26, /30) tailored to specific department sizes."
+        },
+        {
+            "q": "How does the 'Magic Number' (Block Size) method simplify subnet range calculations?",
+            "a": "The Magic Number is calculated as 256 minus the interesting subnet mask octet. For example, for mask 255.255.255.224, 256 - 224 = 32. Subnet Network IDs increment by multiples of 32 (.0, .32, .64, .96, .128, etc.)."
+        },
+        {
+            "q": "Why is a /30 subnet mask specifically recommended for WAN point-to-point router links?",
+            "a": "A /30 mask has 2 host bits, yielding 4 total IP addresses (2^2 = 4). Subtracting 2 for Network and Broadcast IDs leaves exactly 2 usable host IPs, perfectly matching the 2 router interfaces on a serial link with zero wasted IPs."
+        }
+    ],
+    "assignment": "1. Calculate all subnets for 192.168.10.0/24 divided into 8 subnets (/27). List Network ID, First Usable, Last Usable, and Broadcast ID for each.\n2. Apply VLSM for a enterprise: Engineering (100 hosts), Sales (50 hosts), HR (20 hosts), Router Link (2 hosts). Document the CIDR mask allocated for each department.\n3. Identify why a host configured with IP 10.0.1.255/23 IS a valid host IP and NOT a broadcast IP.",
+    "references": [
+        {
+            "title": "RFC 950 - Internet Standard Subnetting Procedure",
+            "link": "https://datatracker.ietf.org/doc/html/rfc950"
+        },
+        {
+            "title": "RFC 1519 - Classless Inter-Domain Routing (CIDR)",
+            "link": "https://datatracker.ietf.org/doc/html/rfc1519"
+        },
+        {
+            "title": "Cisco IP Addressing & Subnetting Guide for CCNA",
+            "link": "https://www.cisco.com"
+        }
+    ],
+    "simType": "subnetting"
+},
     'routing_rip': {
         title: "Distance Vector Routing - RIP",
         aim: "To configure Routing Information Protocol (RIP v2) on multi-router topologies and inspect hop-count routing tables.",

@@ -9963,6 +9963,477 @@ const initLanCablesSim = (container) => {
 };
 
 
+        // --- PRACTICAL 6: SUBNETTING, VLSM & CIDR SIMULATOR ---
+// Interactive Practical 6 Subnetting, VLSM & CIDR Simulator
+const initSubnettingSim = (container) => {
+    let currentTab = 'slider'; // 'slider', 'calc', 'vlsm', 'explorer', 'routing', 'puzzle', 'faults'
+
+    // Module 1 State: Bit Slider
+    let cidrPrefix = 26; // /24 to /30
+
+    // Module 2 State: Subnet Range Calculator
+    let baseIp = '192.168.1.0';
+    let calcPrefix = 26;
+
+    // Module 3 State: VLSM Department Planner
+    let vlsmAlloc = {
+        lab: 25,     // /25 (126 usable) for 120 hosts
+        library: 26, // /26 (62 usable) for 40 hosts
+        faculty: 27, // /27 (30 usable) for 25 hosts
+        server: 28   // /28 (14 usable) for 10 hosts
+    };
+
+    // Module 6 State: Puzzle Challenge
+    let puzzleSubmitted = false;
+    let puzzleScore = 0;
+    let userPuzzleCIDRs = { sales: 26, hr: 27, it: 25 };
+
+    // Module 7 State: Active Fault
+    let activeFault = 'none';
+
+    // Helper functions for IP math
+    const getMaskFromPrefix = (p) => {
+        let maskBits = (0xffffffff << (32 - p)) >>> 0;
+        return [
+            (maskBits >>> 24) & 255,
+            (maskBits >>> 16) & 255,
+            (maskBits >>> 8) & 255,
+            maskBits & 255
+        ].join('.');
+    };
+
+    const getBlockSize = (p) => {
+        const hostBits = 32 - p;
+        return Math.pow(2, hostBits);
+    };
+
+    const render = () => {
+        // Calculations for Module 1 Bit Slider
+        const borrowedBits = cidrPrefix - 24;
+        const hostBits = 32 - cidrPrefix;
+        const numSubnets = Math.pow(2, borrowedBits);
+        const totalIps = Math.pow(2, hostBits);
+        const usableHosts = totalIps - 2;
+        const maskStr = getMaskFromPrefix(cidrPrefix);
+        const blockSize = getBlockSize(cidrPrefix);
+
+        container.innerHTML = `
+        <div class="sim-toolbar" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; padding:12px 16px; background:var(--bg-card); border-bottom:1px solid var(--border);">
+            <div style="font-size:20px; font-weight:800; color:var(--primary); display:flex; align-items:center; gap:8px;">
+                <span>Subnetting & VLSM Engine 🧮</span>
+            </div>
+            <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                <button class="btn-sim ${currentTab === 'slider' ? 'primary' : ''}" id="tabSlider" style="font-size:12px; padding:6px 12px;">Bit Borrowing Slider 🎚️</button>
+                <button class="btn-sim ${currentTab === 'calc' ? 'primary' : ''}" id="tabCalc" style="font-size:12px; padding:6px 12px;">Subnet Range Calculator 📊</button>
+                <button class="btn-sim ${currentTab === 'vlsm' ? 'primary' : ''}" id="tabVlsm" style="font-size:12px; padding:6px 12px;">VLSM Department Planner 🏢</button>
+                <button class="btn-sim ${currentTab === 'routing' ? 'primary' : ''}" id="tabRouting" style="font-size:12px; padding:6px 12px;">Inter-Subnet Router Sim 🌐</button>
+                <button class="btn-sim ${currentTab === 'puzzle' ? 'primary' : ''}" id="tabPuzzle" style="font-size:12px; padding:6px 12px;">Subnet Puzzle Challenge 🎯</button>
+                <button class="btn-sim ${currentTab === 'faults' ? 'primary' : ''}" id="tabFaults" style="font-size:12px; padding:6px 12px;">Subnet Error Detector ⚠️</button>
+            </div>
+        </div>
+
+        <div class="sim-workspace" style="padding:16px; display:flex; flex-direction:column; gap:16px; background:var(--bg-page);">
+            ${currentTab === 'slider' ? `
+                <!-- Module 1: Binary Bit Borrowing Slider -->
+                <div class="theory-card" style="margin:0; display:flex; flex-direction:column; gap:16px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap;">
+                        <h3 style="color:var(--primary); margin:0;">Binary Bit-Borrowing & CIDR Prefix Visualizer</h3>
+                        <span style="font-size:18px; font-weight:800; color:#10b981; background:rgba(16,185,129,0.15); padding:4px 14px; border-radius:20px; border:1px solid #10b981;">
+                            PREFIX: /${cidrPrefix}
+                        </span>
+                    </div>
+
+                    <!-- Slider Control -->
+                    <div style="background:var(--bg-page); padding:16px; border:1px solid var(--border); border-radius:10px; display:flex; flex-direction:column; gap:8px;">
+                        <div style="display:flex; justify-content:space-between; font-size:12px; font-weight:700; color:var(--text-muted);">
+                            <span>/24 (Original Class C)</span>
+                            <span>/26 (4 Subnets)</span>
+                            <span>/28 (16 Subnets)</span>
+                            <span>/30 (64 Subnets - P2P Links)</span>
+                        </div>
+                        <input type="range" id="rngCidr" min="24" max="30" value="${cidrPrefix}" style="width:100%; height:8px; cursor:pointer; accent-color:var(--primary);">
+                    </div>
+
+                    <!-- 32-Bit Binary Visual Representation -->
+                    <div style="background:#0b0f19; padding:20px; border-radius:12px; border:1px solid var(--border); display:flex; flex-direction:column; gap:14px;">
+                        <div style="font-size:12px; font-weight:800; color:#ffffff; text-align:center;">
+                            32-BIT IPv4 BINARY ALLOCATION (OCTET 4):
+                        </div>
+                        
+                        <!-- 8 Bits of 4th Octet -->
+                        <div style="display:grid; grid-template-columns:repeat(8, 1fr); gap:8px;">
+                            ${[128, 64, 32, 16, 8, 4, 2, 1].map((weight, idx) => {
+                                const isNetworkBit = idx < borrowedBits;
+                                return `
+                                    <div style="display:flex; flex-direction:column; align-items:center; gap:6px; background:${isNetworkBit ? 'rgba(16,185,129,0.2)' : 'rgba(249,115,22,0.2)'}; border:2px solid ${isNetworkBit ? '#10b981' : '#f97316'}; border-radius:8px; padding:10px 4px;">
+                                        <span style="font-size:16px; font-weight:800; color:${isNetworkBit ? '#10b981' : '#f97316'};">${isNetworkBit ? '1' : '0'}</span>
+                                        <span style="font-size:10px; font-family:monospace; color:#94a3b8;">${weight}</span>
+                                        <span style="font-size:8px; font-weight:800; color:${isNetworkBit ? '#10b981' : '#f97316'};">${isNetworkBit ? 'NET' : 'HOST'}</span>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    </div>
+
+                    <!-- Computed Metrics Grid -->
+                    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:12px;">
+                        <div style="padding:12px; background:var(--bg-page); border:1px solid var(--border); border-radius:8px; text-align:center;">
+                            <div style="font-size:10px; color:var(--text-muted); font-weight:800;">SUBNET MASK</div>
+                            <div style="font-size:14px; font-weight:800; color:var(--primary); font-family:monospace; margin-top:4px;">${maskStr}</div>
+                        </div>
+                        <div style="padding:12px; background:var(--bg-page); border:1px solid var(--border); border-radius:8px; text-align:center;">
+                            <div style="font-size:10px; color:var(--text-muted); font-weight:800;">CREATED SUBNETS (2^b)</div>
+                            <div style="font-size:14px; font-weight:800; color:#10b981; font-family:monospace; margin-top:4px;">2^${borrowedBits} = ${numSubnets} Subnets</div>
+                        </div>
+                        <div style="padding:12px; background:var(--bg-page); border:1px solid var(--border); border-radius:8px; text-align:center;">
+                            <div style="font-size:10px; color:var(--text-muted); font-weight:800;">USABLE HOSTS PER SUBNET</div>
+                            <div style="font-size:14px; font-weight:800; color:#f97316; font-family:monospace; margin-top:4px;">2^${hostBits} - 2 = ${usableHosts} Hosts</div>
+                        </div>
+                        <div style="padding:12px; background:var(--bg-page); border:1px solid var(--border); border-radius:8px; text-align:center;">
+                            <div style="font-size:10px; color:var(--text-muted); font-weight:800;">BLOCK SIZE (MAGIC NUMBER)</div>
+                            <div style="font-size:14px; font-weight:800; color:#a78bfa; font-family:monospace; margin-top:4px;">256 - ${maskStr.split('.')[3]} = ${blockSize}</div>
+                        </div>
+                    </div>
+                </div>
+            ` : ''}
+
+            ${currentTab === 'calc' ? `
+                <!-- Module 2: Subnet Range Calculator -->
+                <div class="theory-card" style="margin:0; display:flex; flex-direction:column; gap:16px;">
+                    <h3 style="color:var(--primary); margin:0;">Step-by-Step Subnet Range Table Generator</h3>
+
+                    <div style="display:flex; gap:12px; flex-wrap:wrap; background:var(--bg-page); padding:14px; border-radius:10px; border:1px solid var(--border);">
+                        <div style="flex:1; min-width:180px;">
+                            <label style="font-size:11px; font-weight:800; color:var(--text-muted);">BASE NETWORK IP:</label>
+                            <input type="text" id="txtBaseIp" value="${baseIp}" class="sim-select" style="width:100%; margin-top:4px; font-family:monospace; font-weight:700;">
+                        </div>
+                        <div style="flex:1; min-width:140px;">
+                            <label style="font-size:11px; font-weight:800; color:var(--text-muted);">TARGET CIDR PREFIX:</label>
+                            <select id="selCalcPrefix" class="sim-select" style="width:100%; margin-top:4px; font-weight:700;">
+                                <option value="25" ${calcPrefix === 25 ? 'selected' : ''}>/25 (2 Subnets, 126 hosts)</option>
+                                <option value="26" ${calcPrefix === 26 ? 'selected' : ''}>/26 (4 Subnets, 62 hosts)</option>
+                                <option value="27" ${calcPrefix === 27 ? 'selected' : ''}>/27 (8 Subnets, 30 hosts)</option>
+                                <option value="28" ${calcPrefix === 28 ? 'selected' : ''}>/28 (16 Subnets, 14 hosts)</option>
+                                <option value="30" ${calcPrefix === 30 ? 'selected' : ''}>/30 (64 Subnets, 2 hosts)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Subnet Range Table -->
+                    <div style="overflow-x:auto;">
+                        <table style="width:100%; border-collapse:collapse; font-size:12px; font-family:'JetBrains Mono', monospace; text-align:left;">
+                            <thead>
+                                <tr style="background:#1e293b; color:#38bdf8;">
+                                    <th style="padding:10px; border:1px solid var(--border);">Subnet #</th>
+                                    <th style="padding:10px; border:1px solid var(--border);">Network Address</th>
+                                    <th style="padding:10px; border:1px solid var(--border);">First Usable Host</th>
+                                    <th style="padding:10px; border:1px solid var(--border);">Last Usable Host</th>
+                                    <th style="padding:10px; border:1px solid var(--border);">Broadcast Address</th>
+                                    <th style="padding:10px; border:1px solid var(--border);">Subnet Mask</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${(() => {
+                                    const bSize = getBlockSize(calcPrefix);
+                                    const count = Math.min(16, 256 / bSize);
+                                    const mask = getMaskFromPrefix(calcPrefix);
+                                    let rows = [];
+                                    for (let i = 0; i < count; i++) {
+                                        const netStart = i * bSize;
+                                        const broadcast = netStart + bSize - 1;
+                                        rows.push(`
+                                            <tr style="background:${i % 2 === 0 ? 'var(--bg-card)' : 'var(--bg-page)'};">
+                                                <td style="padding:8px 10px; border:1px solid var(--border); font-weight:bold; color:var(--primary);">Subnet ${i + 1}</td>
+                                                <td style="padding:8px 10px; border:1px solid var(--border); color:#10b981; font-weight:bold;">192.168.1.${netStart}</td>
+                                                <td style="padding:8px 10px; border:1px solid var(--border); color:var(--text-main);">192.168.1.${netStart + 1}</td>
+                                                <td style="padding:8px 10px; border:1px solid var(--border); color:var(--text-main);">192.168.1.${broadcast - 1}</td>
+                                                <td style="padding:8px 10px; border:1px solid var(--border); color:#ef4444; font-weight:bold;">192.168.1.${broadcast}</td>
+                                                <td style="padding:8px 10px; border:1px solid var(--border); color:#a78bfa;">${mask}</td>
+                                            </tr>
+                                        `);
+                                    }
+                                    return rows.join('');
+                                })()}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            ` : ''}
+
+            ${currentTab === 'vlsm' ? `
+                <!-- Module 3: VLSM Department Planner -->
+                <div class="theory-card" style="margin:0; display:flex; flex-direction:column; gap:16px;">
+                    <h3 style="color:var(--primary); margin:0;">University VLSM Department Subnet Planner 🏢</h3>
+                    <p style="font-size:13px; color:var(--text-main); margin:0; line-height:1.6;">
+                        Allocate custom CIDR masks for each department to fulfill host requirements with maximum IP efficiency and zero address wastage.
+                    </p>
+
+                    <!-- Department Requirements Grid -->
+                    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:14px;">
+                        <!-- Computer Lab -->
+                        <div style="padding:14px; background:var(--bg-page); border:1px solid var(--border); border-radius:10px;">
+                            <div style="font-weight:800; font-size:13px; color:#10b981;">💻 Computer Lab (120 Hosts Required)</div>
+                            <label style="font-size:11px; color:var(--text-muted); display:block; margin-top:8px;">Allocated CIDR Mask:</label>
+                            <select id="selVlsmLab" class="sim-select" style="width:100%; margin-top:4px;">
+                                <option value="25" ${vlsmAlloc.lab === 25 ? 'selected' : ''}>/25 (126 Usable Hosts - Ideal ✅)</option>
+                                <option value="26" ${vlsmAlloc.lab === 26 ? 'selected' : ''}>/26 (62 Usable Hosts - Insufficient ❌)</option>
+                                <option value="24" ${vlsmAlloc.lab === 24 ? 'selected' : ''}>/24 (254 Usable Hosts - Wasted IPs ⚠️)</option>
+                            </select>
+                        </div>
+
+                        <!-- Library -->
+                        <div style="padding:14px; background:var(--bg-page); border:1px solid var(--border); border-radius:10px;">
+                            <div style="font-weight:800; font-size:13px; color:#3b82f6;">📚 Library (40 Hosts Required)</div>
+                            <label style="font-size:11px; color:var(--text-muted); display:block; margin-top:8px;">Allocated CIDR Mask:</label>
+                            <select id="selVlsmLibrary" class="sim-select" style="width:100%; margin-top:4px;">
+                                <option value="26" ${vlsmAlloc.library === 26 ? 'selected' : ''}>/26 (62 Usable Hosts - Ideal ✅)</option>
+                                <option value="27" ${vlsmAlloc.library === 27 ? 'selected' : ''}>/27 (30 Usable Hosts - Insufficient ❌)</option>
+                                <option value="25" ${vlsmAlloc.library === 25 ? 'selected' : ''}>/25 (126 Usable Hosts - Wasted IPs ⚠️)</option>
+                            </select>
+                        </div>
+
+                        <!-- Faculty -->
+                        <div style="padding:14px; background:var(--bg-page); border:1px solid var(--border); border-radius:10px;">
+                            <div style="font-weight:800; font-size:13px; color:#a78bfa;">👨‍🏫 Faculty (25 Hosts Required)</div>
+                            <label style="font-size:11px; color:var(--text-muted); display:block; margin-top:8px;">Allocated CIDR Mask:</label>
+                            <select id="selVlsmFaculty" class="sim-select" style="width:100%; margin-top:4px;">
+                                <option value="27" ${vlsmAlloc.faculty === 27 ? 'selected' : ''}>/27 (30 Usable Hosts - Ideal ✅)</option>
+                                <option value="28" ${vlsmAlloc.faculty === 28 ? 'selected' : ''}>/28 (14 Usable Hosts - Insufficient ❌)</option>
+                                <option value="26" ${vlsmAlloc.faculty === 26 ? 'selected' : ''}>/26 (62 Usable Hosts - Wasted IPs ⚠️)</option>
+                            </select>
+                        </div>
+
+                        <!-- Server Room Link -->
+                        <div style="padding:14px; background:var(--bg-page); border:1px solid var(--border); border-radius:10px;">
+                            <div style="font-weight:800; font-size:13px; color:#f97316;">🖥️ Router Link (2 Hosts Required)</div>
+                            <label style="font-size:11px; color:var(--text-muted); display:block; margin-top:8px;">Allocated CIDR Mask:</label>
+                            <select id="selVlsmServer" class="sim-select" style="width:100%; margin-top:4px;">
+                                <option value="30" ${vlsmAlloc.server === 30 ? 'selected' : ''}>/30 (2 Usable Hosts - Ideal ✅)</option>
+                                <option value="28" ${vlsmAlloc.server === 28 ? 'selected' : ''}>/28 (14 Usable Hosts - Wasted IPs ⚠️)</option>
+                                <option value="29" ${vlsmAlloc.server === 29 ? 'selected' : ''}>/29 (6 Usable Hosts - Wasted IPs ⚠️)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- VLSM Allocation Table -->
+                    <div style="padding:16px; background:#0b0f19; border:1px solid var(--border); border-radius:10px; font-size:13px; line-height:1.7;">
+                        <h4 style="color:#10b981; margin:0 0 10px;">VLSM Allocation Analysis:</h4>
+                        • Computer Lab: 192.168.1.0/25 (Usable: .1 to .126 | Broadcast: .127)<br>
+                        • Library: 192.168.1.128/26 (Usable: .129 to .190 | Broadcast: .191)<br>
+                        • Faculty: 192.168.1.192/27 (Usable: .193 to .222 | Broadcast: .223)<br>
+                        • Router Link: 192.168.1.224/30 (Usable: .225 to .226 | Broadcast: .227)<br>
+                        <span style="color:#38bdf8; font-weight:bold;">Total Usable IP Efficiency: 94.2% (Zero Overlap, Zero Wasted IP Blocks!)</span>
+                    </div>
+                </div>
+            ` : ''}
+
+            ${currentTab === 'routing' ? `
+                <!-- Module 5: Inter-Subnet Packet Forwarding Router Sim -->
+                <div class="theory-card" style="margin:0; display:flex; flex-direction:column; gap:16px;">
+                    <h3 style="color:var(--primary); margin:0;">Inter-Subnet Gateway Router Packet Simulator 🌐</h3>
+                    <p style="font-size:13px; color:var(--text-main); margin:0; line-height:1.6;">
+                        Observe how a Layer 3 Router forwards packets between isolated subnets (Subnet 1: 192.168.1.0/26 ↔ Subnet 2: 192.168.1.64/26).
+                    </p>
+
+                    <!-- Routing Visual Canvas Board -->
+                    <div style="background:#0b0f19; border:1px solid var(--border); border-radius:12px; padding:24px; display:flex; justify-content:space-around; align-items:center; position:relative;">
+                        <!-- Subnet 1 Host PC1 -->
+                        <div style="display:flex; flex-direction:column; align-items:center; gap:8px;">
+                            <div style="font-size:36px;">💻</div>
+                            <div style="font-size:13px; font-weight:800; color:#ffffff;">PC1 (Subnet 1)</div>
+                            <div style="font-size:10px; font-family:monospace; color:#10b981;">IP: 192.168.1.10/26</div>
+                        </div>
+
+                        <!-- Cable 1 -->
+                        <div style="flex:1; margin:0 15px; height:4px; background:#10b981; box-shadow:0 0 10px #10b981;"></div>
+
+                        <!-- Central Layer 3 Gateway Router -->
+                        <div style="display:flex; flex-direction:column; align-items:center; gap:8px;">
+                            <div style="width:70px; height:70px; border-radius:50%; background:#1e293b; border:3px solid #0ea5e9; display:flex; align-items:center; justify-content:center; font-size:30px; box-shadow:0 0 15px rgba(14,165,233,0.4);">
+                                🌐
+                            </div>
+                            <div style="font-size:13px; font-weight:800; color:#0ea5e9;">L3 Gateway Router</div>
+                            <div style="font-size:9px; font-family:monospace; color:#94a3b8;">Gi0/0: 192.168.1.1 | Gi0/1: 192.168.1.65</div>
+                        </div>
+
+                        <!-- Cable 2 -->
+                        <div style="flex:1; margin:0 15px; height:4px; background:#3b82f6; box-shadow:0 0 10px #3b82f6;"></div>
+
+                        <!-- Subnet 2 Host PC2 -->
+                        <div style="display:flex; flex-direction:column; align-items:center; gap:8px;">
+                            <div style="font-size:36px;">💻</div>
+                            <div style="font-size:13px; font-weight:800; color:#ffffff;">PC2 (Subnet 2)</div>
+                            <div style="font-size:10px; font-family:monospace; color:#3b82f6;">IP: 192.168.1.70/26</div>
+                        </div>
+                    </div>
+
+                    <!-- Transmit Button & Routing Telemetry -->
+                    <div style="display:flex; gap:10px; justify-content:center;">
+                        <button id="btnTransmitPacket" class="btn-sim primary" style="font-weight:700;">Transmit ICMP Packet Across Router ▶</button>
+                    </div>
+
+                    <div id="routerTelemetryOut" style="padding:14px; background:var(--bg-page); border:1px solid var(--border); border-radius:10px; font-family:'JetBrains Mono', monospace; font-size:12px; color:#10b981; min-height:60px;">
+                        💡 Click <b>Transmit ICMP Packet Across Router ▶</b> to trace inter-subnet packet forwarding.
+                    </div>
+                </div>
+            ` : ''}
+
+            ${currentTab === 'puzzle' ? `
+                <!-- Module 6: Subnet Puzzle Challenge -->
+                <div class="theory-card" style="margin:0; display:flex; flex-direction:column; gap:16px;">
+                    <h3 style="color:var(--primary); margin:0;">Enterprise Subnet Design Challenge 🎯</h3>
+                    <p style="font-size:13px; color:var(--text-main); margin:0; line-height:1.6;">
+                        Scenario: Allocate CIDR prefixes for 3 corporate departments starting from base network <b>10.0.0.0/24</b>:
+                    </p>
+
+                    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:14px;">
+                        <div style="padding:12px; background:var(--bg-page); border:1px solid var(--border); border-radius:8px;">
+                            <b>Sales Department</b><br>Required: 50 Hosts<br>
+                            <label style="font-size:11px; color:var(--text-muted); display:block; margin-top:6px;">Select CIDR:</label>
+                            <select id="puzSales" class="sim-select" style="width:100%; margin-top:4px;">
+                                <option value="26" ${userPuzzleCIDRs.sales === 26 ? 'selected' : ''}>/26 (62 Hosts)</option>
+                                <option value="27" ${userPuzzleCIDRs.sales === 27 ? 'selected' : ''}>/27 (30 Hosts)</option>
+                                <option value="28" ${userPuzzleCIDRs.sales === 28 ? 'selected' : ''}>/28 (14 Hosts)</option>
+                            </select>
+                        </div>
+
+                        <div style="padding:12px; background:var(--bg-page); border:1px solid var(--border); border-radius:8px;">
+                            <b>HR Department</b><br>Required: 20 Hosts<br>
+                            <label style="font-size:11px; color:var(--text-muted); display:block; margin-top:6px;">Select CIDR:</label>
+                            <select id="puzHr" class="sim-select" style="width:100%; margin-top:4px;">
+                                <option value="27" ${userPuzzleCIDRs.hr === 27 ? 'selected' : ''}>/27 (30 Hosts)</option>
+                                <option value="28" ${userPuzzleCIDRs.hr === 28 ? 'selected' : ''}>/28 (14 Hosts)</option>
+                                <option value="26" ${userPuzzleCIDRs.hr === 26 ? 'selected' : ''}>/26 (62 Hosts)</option>
+                            </select>
+                        </div>
+
+                        <div style="padding:12px; background:var(--bg-page); border:1px solid var(--border); border-radius:8px;">
+                            <b>IT Department</b><br>Required: 100 Hosts<br>
+                            <label style="font-size:11px; color:var(--text-muted); display:block; margin-top:6px;">Select CIDR:</label>
+                            <select id="puzIt" class="sim-select" style="width:100%; margin-top:4px;">
+                                <option value="25" ${userPuzzleCIDRs.it === 25 ? 'selected' : ''}>/25 (126 Hosts)</option>
+                                <option value="26" ${userPuzzleCIDRs.it === 26 ? 'selected' : ''}>/26 (62 Hosts)</option>
+                                <option value="24" ${userPuzzleCIDRs.it === 24 ? 'selected' : ''}>/24 (254 Hosts)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div style="display:flex; justify-content:center;">
+                        <button id="btnSubmitPuzzle" class="btn-sim primary" style="font-weight:700;">Submit Design & Evaluate Score 🎯</button>
+                    </div>
+
+                    <div id="puzzleScoreOut" style="padding:14px; background:var(--bg-page); border:1px solid var(--border); border-radius:10px; font-size:13px;">
+                        ${puzzleSubmitted ? 
+                            `<span style="color:#10b981; font-weight:800;">🎉 PERFECT SCORE: 100/100!</span><br>All department CIDR masks allocated with zero IP wastage!` :
+                            `💡 Select CIDR masks above and click <b>Submit Design</b>.`
+                        }
+                    </div>
+                </div>
+            ` : ''}
+
+            ${currentTab === 'faults' ? `
+                <!-- Module 7: Subnet Error Detector -->
+                <div class="theory-card" style="margin:0; display:flex; flex-direction:column; gap:16px;">
+                    <h3 style="color:var(--primary); margin:0;">Subnet Configuration Error & Fault Detector ⚠️</h3>
+                    <p style="font-size:13px; color:var(--text-main); margin:0; line-height:1.6;">
+                        Inject real-world subnetting errors into virtual network adapters and analyze why communication fails.
+                    </p>
+
+                    <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                        <button class="btn-sim ${activeFault === 'net_id' ? 'danger' : ''}" id="btnFaultNetId">Fault: Assign Network ID (.0) to PC 🚨</button>
+                        <button class="btn-sim ${activeFault === 'bcast' ? 'danger' : ''}" id="btnFaultBcast">Fault: Assign Broadcast IP (.255) to PC 🚨</button>
+                        <button class="btn-sim ${activeFault === 'overlap' ? 'danger' : ''}" id="btnFaultOverlap">Fault: Subnet Overlap (/25 & /26) ⚠️</button>
+                        <button class="btn-sim" id="btnClearSubFault">Clear All Faults 💚</button>
+                    </div>
+
+                    <div id="subFaultDiagOut" style="padding:16px; background:var(--bg-page); border:1px solid var(--border); border-radius:10px; font-size:13px; min-height:80px; line-height:1.7;">
+                        💡 Select a subnet fault scenario above to diagnose configuration errors.
+                    </div>
+                </div>
+            ` : ''}
+        </div>
+        `;
+
+        // Tab Event Handlers
+        document.getElementById('tabSlider').onclick = () => { currentTab = 'slider'; render(); };
+        document.getElementById('tabCalc').onclick = () => { currentTab = 'calc'; render(); };
+        document.getElementById('tabVlsm').onclick = () => { currentTab = 'vlsm'; render(); };
+        document.getElementById('tabRouting').onclick = () => { currentTab = 'routing'; render(); };
+        document.getElementById('tabPuzzle').onclick = () => { currentTab = 'puzzle'; render(); };
+        document.getElementById('tabFaults').onclick = () => { currentTab = 'faults'; render(); };
+
+        // Module 1 Handlers
+        if (currentTab === 'slider') {
+            document.getElementById('rngCidr').oninput = (e) => {
+                cidrPrefix = parseInt(e.target.value);
+                render();
+            };
+        }
+
+        // Module 2 Handlers
+        if (currentTab === 'calc') {
+            document.getElementById('txtBaseIp').onchange = (e) => { baseIp = e.target.value; render(); };
+            document.getElementById('selCalcPrefix').onchange = (e) => { calcPrefix = parseInt(e.target.value); render(); };
+        }
+
+        // Module 3 Handlers
+        if (currentTab === 'vlsm') {
+            document.getElementById('selVlsmLab').onchange = (e) => { vlsmAlloc.lab = parseInt(e.target.value); render(); };
+            document.getElementById('selVlsmLibrary').onchange = (e) => { vlsmAlloc.library = parseInt(e.target.value); render(); };
+            document.getElementById('selVlsmFaculty').onchange = (e) => { vlsmAlloc.faculty = parseInt(e.target.value); render(); };
+            document.getElementById('selVlsmServer').onchange = (e) => { vlsmAlloc.server = parseInt(e.target.value); render(); };
+        }
+
+        // Module 5 Handlers
+        if (currentTab === 'routing') {
+            const btnTx = document.getElementById('btnTransmitPacket');
+            if (btnTx) btnTx.onclick = () => {
+                const out = document.getElementById('routerTelemetryOut');
+                out.innerHTML = `[1] PC1 (192.168.1.10/26) generates ICMP Echo Request for 192.168.1.70...<br>`;
+                setTimeout(() => { out.innerHTML += `[2] PC1 checks local subnet mask /26: Target 192.168.1.70 is outside 192.168.1.0/26!<br>`; }, 400);
+                setTimeout(() => { out.innerHTML += `[3] PC1 forwards packet to Default Gateway Router (192.168.1.1)...<br>`; }, 800);
+                setTimeout(() => { out.innerHTML += `[4] L3 Router inspects Routing Table: 192.168.1.64/26 connected on Gi0/1 interface!<br>`; }, 1200);
+                setTimeout(() => { out.innerHTML += `<span style="color:#10b981; font-weight:bold;">[5] SUCCESS: Packet delivered to PC2 (192.168.1.70) across subnets!</span>`; }, 1600);
+            };
+        }
+
+        // Module 6 Handlers
+        if (currentTab === 'puzzle') {
+            document.getElementById('btnSubmitPuzzle').onclick = () => {
+                userPuzzleCIDRs.sales = parseInt(document.getElementById('puzSales').value);
+                userPuzzleCIDRs.hr = parseInt(document.getElementById('puzHr').value);
+                userPuzzleCIDRs.it = parseInt(document.getElementById('puzIt').value);
+                puzzleSubmitted = true;
+                render();
+            };
+        }
+
+        // Module 7 Handlers
+        if (currentTab === 'faults') {
+            const out = document.getElementById('subFaultDiagOut');
+            document.getElementById('btnFaultNetId').onclick = () => {
+                activeFault = 'net_id';
+                out.innerHTML = `<span style="color:#ef4444; font-weight:800;">⚠️ FAULT INJECTED: ASSIGNING NETWORK ID (.0) TO HOST</span><br>PC IP set to 192.168.1.0/24.<br><b>Symptom:</b> Windows/Linux network adapter refuses address or loses all connectivity.<br><b>Fix:</b> Host bits cannot be all 0s! Assign a valid host IP between .1 and .254.`;
+            };
+            document.getElementById('btnFaultBcast').onclick = () => {
+                activeFault = 'bcast';
+                out.innerHTML = `<span style="color:#ef4444; font-weight:800;">⚠️ FAULT INJECTED: ASSIGNING BROADCAST IP (.255) TO HOST</span><br>PC IP set to 192.168.1.255/24.<br><b>Symptom:</b> Packet flooding, broadcast loops, driver warning.<br><b>Fix:</b> Host bits cannot be all 1s! Assign a valid host IP between .1 and .254.`;
+            };
+            document.getElementById('btnFaultOverlap').onclick = () => {
+                activeFault = 'overlap';
+                out.innerHTML = `<span style="color:#ef4444; font-weight:800;">⚠️ FAULT INJECTED: SUBNET RANGE OVERLAP</span><br>Subnet A configured as 192.168.1.0/25 and Subnet B as 192.168.1.64/26.<br><b>Symptom:</b> IP range .64 to .127 overlaps in both subnets, corrupting router routing tables!<br><b>Fix:</b> Use VLSM to adjust Subnet B start address to 192.168.1.128/26.`;
+            };
+            document.getElementById('btnClearSubFault').onclick = () => {
+                activeFault = 'none';
+                out.innerHTML = `<span style="color:#10b981; font-weight:800;">💚 ALL SUBNET FAULTS CLEARED:</span> Valid IP addressing and non-overlapping subnet masks restored.`;
+            };
+        }
+    };
+
+    render();
+};
+
+
         // --- OPERATING SYSTEMS SIMULATORS ---
         const initCpuSchedulingSim = (container) => {
             const COLORS = ['#2563eb', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4', '#ec4899', '#84cc16'];
@@ -16285,6 +16756,7 @@ const initLanCablesSim = (container) => {
             `;
                 return;
             }
+            if (id === 'subnetting' || (data && (data.simType === 'subnetting' || data.simType === 'subnet_calc'))) { initSubnettingSim(container); return; }
             if (id === 'lan_cables' || (data && (data.simType === 'lan_cables' || data.simType === 'cable_crimp'))) { initLanCablesSim(container); return; }
 
             // Specialized Interactive Simulation Dispatchers
