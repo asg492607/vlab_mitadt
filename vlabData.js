@@ -2362,4 +2362,5 @@ window.VLAB_DATA['routing_ls'] = window.VLAB_DATA['routing_eigrp'];
 window.VLAB_DATA['udp'] = window.VLAB_DATA['udp_tcp'];
 window.VLAB_DATA['tcp'] = window.VLAB_DATA['udp_tcp'];
 window.VLAB_DATA['dns'] = window.VLAB_DATA['dhcp_config'];
+window.VLAB_DATA['vlan'] = window.VLAB_DATA['vlan_sim'];
 
