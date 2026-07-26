@@ -12617,6 +12617,651 @@ const initVlanSim = (container) => {
 
         // --- PRACTICAL 8: DISTANCE VECTOR ROUTING PROTOCOL (RIP) SIMULATOR ---
 // Interactive Practical 8 Distance Vector Routing Protocol (RIP) Simulator
+        // --- PRACTICAL 9: LINK STATE ROUTING PROTOCOL (OSPF) SIMULATOR ---
+const initOspfSim = (container) => {
+    const AC = '#10b981'; // Vibrant emerald green for OSPF
+    container.innerHTML = `
+        <div style="padding:15px; font-family:var(--font-sans); color:var(--text-main); height:100%; display:flex; flex-direction:column; gap:12px; box-sizing:border-box;">
+            <!-- Header Banner -->
+            <div style="background:linear-gradient(135deg, rgba(16,185,129,0.15) 0%, rgba(15,23,42,0.6) 100%); border:1px solid ${AC}; border-radius:12px; padding:12px 18px; display:flex; justify-content:space-between; align-items:center; box-shadow:0 4px 12px rgba(0,0,0,0.15);">
+                <div>
+                    <h3 style="margin:0; color:${AC}; font-size:17px; font-weight:800; display:flex; align-items:center; gap:8px;">
+                        <span>🌿</span> Link State Routing - OSPF Area 0 Simulator
+                    </h3>
+                    <p style="margin:4px 0 0 0; font-size:12px; color:var(--text-muted);">
+                        Dijkstra's SPF Algorithm • Bandwidth Cost Calculation • 7 Neighbor States • DR/BDR Election • Cisco IOS CLI
+                    </p>
+                </div>
+                <div style="display:flex; gap:10px;">
+                    <span style="background:rgba(16,185,129,0.2); color:${AC}; border:1px solid ${AC}; font-size:11px; padding:4px 10px; border-radius:20px; font-weight:700;">Area 0 (Backbone)</span>
+                    <span style="background:rgba(56,189,248,0.2); color:#38bdf8; border:1px solid #38bdf8; font-size:11px; padding:4px 10px; border-radius:20px; font-weight:700;">AD: 110</span>
+                </div>
+            </div>
+
+            <!-- Tab Buttons Navigation -->
+            <div style="display:flex; gap:8px; border-bottom:1px solid var(--border); padding-bottom:6px; overflow-x:auto;">
+                <button class="ospf-tab-btn active" data-tab="spf" style="padding:8px 14px; background:${AC}; color:#fff; border:none; border-radius:6px; font-weight:700; font-size:12px; cursor:pointer; display:flex; align-items:center; gap:6px;">
+                    <span>📍</span> Dijkstra SPF & Cost
+                </button>
+                <button class="ospf-tab-btn" data-tab="states" style="padding:8px 14px; background:var(--bg-card); color:var(--text-main); border:1px solid var(--border); border-radius:6px; font-weight:700; font-size:12px; cursor:pointer; display:flex; align-items:center; gap:6px;">
+                    <span>🤝</span> 7 Neighbor States
+                </button>
+                <button class="ospf-tab-btn" data-tab="dr_election" style="padding:8px 14px; background:var(--bg-card); color:var(--text-main); border:1px solid var(--border); border-radius:6px; font-weight:700; font-size:12px; cursor:pointer; display:flex; align-items:center; gap:6px;">
+                    <span>👑</span> DR / BDR Election
+                </button>
+                <button class="ospf-tab-btn" data-tab="cli" style="padding:8px 14px; background:var(--bg-card); color:var(--text-main); border:1px solid var(--border); border-radius:6px; font-weight:700; font-size:12px; cursor:pointer; display:flex; align-items:center; gap:6px;">
+                    <span>💻</span> Cisco OSPF CLI
+                </button>
+                <button class="ospf-tab-btn" data-tab="lsdb" style="padding:8px 14px; background:var(--bg-card); color:var(--text-main); border:1px solid var(--border); border-radius:6px; font-weight:700; font-size:12px; cursor:pointer; display:flex; align-items:center; gap:6px;">
+                    <span>🌊</span> LSA & LSDB Inspector
+                </button>
+            </div>
+
+            <!-- Tab Content Display Areas -->
+            <div id="ospf-tab-body" style="flex:1; overflow-y:auto;">
+                <!-- Dynamically populated via JS -->
+            </div>
+        </div>
+    `;
+
+    // State Store for OSPF Simulator
+    const state = {
+        activeTab: 'spf',
+        // Link bandwidths for Tab 1 (Dijkstra SPF)
+        links: {
+            r1_r2: 1000, // 1 Gbps -> Cost 1
+            r1_r3: 10,   // 10 Mbps -> Cost 10
+            r2_r4: 1000, // 1 Gbps -> Cost 1
+            r3_r4: 100   // 100 Mbps -> Cost 1
+        },
+        packetAnimating: false,
+        packetPos: 0,
+        currentPath: ['R1', 'R2', 'R4'],
+        // Tab 2 Neighbor State Step Index
+        neighborStep: 0,
+        // Tab 3 DR Election State
+        drPriority: { R1: 1, R2: 255, R3: 100, R4: 1 },
+        drRole: { R1: 'DROther', R2: 'DR', R3: 'BDR', R4: 'DROther' },
+        drFailed: false,
+        // Tab 4 CLI State
+        cliOutput: [
+            "Cisco IOS Software, 2900 Software (C2900-UNIVERSALK9-M), Version 15.7(3)M3",
+            "Router# configure terminal",
+            "Router(config)# router ospf 1",
+            "Router(config-router)# router-id 1.1.1.1",
+            "Router(config-router)# network 192.168.1.0 0.0.0.255 area 0",
+            "Router(config-router)# end",
+            "Router# show ip ospf neighbor",
+            "Neighbor ID     Pri   State           Dead Time   Address         Interface",
+            "2.2.2.2           1   FULL/DR         00:00:36    192.168.1.2     GigabitEthernet0/0",
+            "3.3.3.3           1   FULL/BDR        00:00:34    192.168.1.3     GigabitEthernet0/1"
+        ]
+    };
+
+    // Calculate OSPF cost based on bandwidth (bps) using default 100 Mbps reference bandwidth
+    const calcCost = (bwMbps) => {
+        if (bwMbps >= 1000) return 1;
+        if (bwMbps === 100) return 1;
+        if (bwMbps === 10) return 10;
+        return Math.max(1, Math.round(100 / bwMbps));
+    };
+
+    // Tab 1: Dijkstra SPF & Cost Simulator
+    const renderSpfTab = () => {
+        const costR1R2 = calcCost(state.links.r1_r2);
+        const costR1R3 = calcCost(state.links.r1_r3);
+        const costR2R4 = calcCost(state.links.r2_r4);
+        const costR3R4 = calcCost(state.links.r3_r4);
+
+        const totalPath1 = costR1R2 + costR2R4; // R1 -> R2 -> R4
+        const totalPath2 = costR1R3 + costR3R4; // R1 -> R3 -> R4
+
+        const bestPath = totalPath1 <= totalPath2 ? ['R1', 'R2', 'R4'] : ['R1', 'R3', 'R4'];
+        state.currentPath = bestPath;
+
+        return `
+            <div style="display:grid; grid-template-columns: 1fr 340px; gap:16px; height:100%;">
+                <!-- Left: Network Canvas & Path Selector -->
+                <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:14px; display:flex; flex-direction:column; gap:12px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <h4 style="margin:0; color:${AC}; font-size:14px;">Interactive Mesh Topology & Dijkstra Path Calculation</h4>
+                        <button id="btn-send-ospf-pkt" style="background:${AC}; color:#fff; border:none; padding:6px 14px; border-radius:6px; font-weight:700; font-size:12px; cursor:pointer;">
+                            🚀 Send Data Packet (PC1 ➔ PC2)
+                        </button>
+                    </div>
+
+                    <!-- Topology Canvas -->
+                    <div style="position:relative; width:100%; height:260px; background:#0b0f19; border:1px solid #1e293b; border-radius:10px; overflow:hidden;">
+                        <svg width="100%" height="100%" viewBox="0 0 500 260">
+                            <!-- Link Path 1: R1 -> R2 -> R4 -->
+                            <line x1="100" y1="130" x2="250" y2="70" stroke="${bestPath.includes('R2') ? '#10b981' : '#334155'}" stroke-width="${bestPath.includes('R2') ? '4' : '2'}" />
+                            <line x1="250" y1="70" x2="400" y2="130" stroke="${bestPath.includes('R2') ? '#10b981' : '#334155'}" stroke-width="${bestPath.includes('R2') ? '4' : '2'}" />
+
+                            <!-- Link Path 2: R1 -> R3 -> R4 -->
+                            <line x1="100" y1="130" x2="250" y2="190" stroke="${bestPath.includes('R3') ? '#10b981' : '#334155'}" stroke-width="${bestPath.includes('R3') ? '4' : '2'}" />
+                            <line x1="250" y1="190" x2="400" y2="130" stroke="${bestPath.includes('R3') ? '#10b981' : '#334155'}" stroke-width="${bestPath.includes('R3') ? '4' : '2'}" />
+
+                            <!-- PC Connections -->
+                            <line x1="30" y1="130" x2="100" y2="130" stroke="#64748b" stroke-width="2" stroke-dasharray="4,4"/>
+                            <line x1="400" y1="130" x2="470" y2="130" stroke="#64748b" stroke-width="2" stroke-dasharray="4,4"/>
+
+                            <!-- Link Labels -->
+                            <rect x="150" y="80" width="70" height="20" rx="4" fill="#0f172a" stroke="${bestPath.includes('R2') ? '#10b981' : '#334155'}"/>
+                            <text x="185" y="94" fill="${bestPath.includes('R2') ? '#34d399' : '#94a3b8'}" font-size="10" font-weight="bold" text-anchor="middle">Cost ${costR1R2}</text>
+
+                            <rect x="280" y="80" width="70" height="20" rx="4" fill="#0f172a" stroke="${bestPath.includes('R2') ? '#10b981' : '#334155'}"/>
+                            <text x="315" y="94" fill="${bestPath.includes('R2') ? '#34d399' : '#94a3b8'}" font-size="10" font-weight="bold" text-anchor="middle">Cost ${costR2R4}</text>
+
+                            <rect x="150" y="160" width="70" height="20" rx="4" fill="#0f172a" stroke="${bestPath.includes('R3') ? '#10b981' : '#334155'}"/>
+                            <text x="185" y="174" fill="${bestPath.includes('R3') ? '#34d399' : '#94a3b8'}" font-size="10" font-weight="bold" text-anchor="middle">Cost ${costR1R3}</text>
+
+                            <rect x="280" y="160" width="70" height="20" rx="4" fill="#0f172a" stroke="${bestPath.includes('R3') ? '#10b981' : '#334155'}"/>
+                            <text x="315" y="174" fill="${bestPath.includes('R3') ? '#34d399' : '#94a3b8'}" font-size="10" font-weight="bold" text-anchor="middle">Cost ${costR3R4}</text>
+
+                            <!-- Node R1 -->
+                            <circle cx="100" cy="130" r="22" fill="#1e293b" stroke="#38bdf8" stroke-width="3"/>
+                            <text x="100" y="134" fill="#ffffff" font-size="12" font-weight="bold" text-anchor="middle">R1</text>
+
+                            <!-- Node R2 (Top) -->
+                            <circle cx="250" cy="70" r="22" fill="#1e293b" stroke="${bestPath.includes('R2') ? '#10b981' : '#64748b'}" stroke-width="3"/>
+                            <text x="250" y="74" fill="#ffffff" font-size="12" font-weight="bold" text-anchor="middle">R2</text>
+
+                            <!-- Node R3 (Bottom) -->
+                            <circle cx="250" cy="190" r="22" fill="#1e293b" stroke="${bestPath.includes('R3') ? '#10b981' : '#64748b'}" stroke-width="3"/>
+                            <text x="250" y="194" fill="#ffffff" font-size="12" font-weight="bold" text-anchor="middle">R3</text>
+
+                            <!-- Node R4 -->
+                            <circle cx="400" cy="130" r="22" fill="#1e293b" stroke="#38bdf8" stroke-width="3"/>
+                            <text x="400" y="134" fill="#ffffff" font-size="12" font-weight="bold" text-anchor="middle">R4</text>
+
+                            <!-- PC1 and PC2 -->
+                            <rect x="10" y="115" x="10" y="115" width="30" height="30" rx="4" fill="#334155"/>
+                            <text x="25" y="134" fill="#ffffff" font-size="10" font-weight="bold" text-anchor="middle">PC1</text>
+
+                            <rect x="460" y="115" width="30" height="30" rx="4" fill="#334155"/>
+                            <text x="475" y="134" fill="#ffffff" font-size="10" font-weight="bold" text-anchor="middle">PC2</text>
+
+                            <!-- Animated Packet -->
+                            <circle id="spf-pkt" cx="25" cy="130" r="7" fill="#ef4444" style="display:none; transition: all 0.5s ease-in-out;"/>
+                        </svg>
+                    </div>
+
+                    <!-- Dijkstra Decision Summary -->
+                    <div style="background:rgba(16,185,129,0.1); border:1px solid ${AC}; border-radius:8px; padding:10px; font-size:12px; line-height:1.6;">
+                        <b style="color:${AC};">Dijkstra SPF Result:</b> Selected Path: <span style="font-weight:800; color:#38bdf8;">PC1 ➔ ${bestPath.join(' ➔ ')} ➔ PC2</span><br>
+                        • Path A (R1 ➔ R2 ➔ R4): Cost ${costR1R2} + ${costR2R4} = <b>${totalPath1}</b> ${totalPath1 <= totalPath2 ? '🟢 [SHORTEST]' : '🔴'}<br>
+                        • Path B (R1 ➔ R3 ➔ R4): Cost ${costR1R3} + ${costR3R4} = <b>${totalPath2}</b> ${totalPath2 < totalPath1 ? '🟢 [SHORTEST]' : '🔴'}
+                    </div>
+                </div>
+
+                <!-- Right: Link Bandwidth Configurator Controls -->
+                <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:14px; display:flex; flex-direction:column; gap:12px;">
+                    <h4 style="margin:0; color:${AC}; font-size:14px;">Adjust Link Bandwidth (Cost)</h4>
+                    <p style="margin:0; font-size:11px; color:var(--text-muted); line-height:1.4;">
+                        Formula: <code>Cost = 100 Mbps / Bandwidth</code>. Change link speeds to observe Dijkstra re-routing live!
+                    </p>
+
+                    <!-- Link R1-R2 Speed -->
+                    <div style="background:var(--bg-page); border:1px solid var(--border); border-radius:8px; padding:8px 10px;">
+                        <div style="display:flex; justify-space-between; font-size:11px; font-weight:700; margin-bottom:4px;">
+                            <span>Link R1 ⇹ R2:</span>
+                            <span style="color:#38bdf8;">${state.links.r1_r2} Mbps (Cost ${costR1R2})</span>
+                        </div>
+                        <select class="bw-select" data-link="r1_r2" style="width:100%; padding:4px; background:var(--bg-card); color:var(--text-main); border:1px solid var(--border); border-radius:4px; font-size:11px;">
+                            <option value="1000" ${state.links.r1_r2 === 1000 ? 'selected' : ''}>1 Gbps GigabitEthernet (Cost 1)</option>
+                            <option value="100" ${state.links.r1_r2 === 100 ? 'selected' : ''}>100 Mbps FastEthernet (Cost 1)</option>
+                            <option value="10" ${state.links.r1_r2 === 10 ? 'selected' : ''}>10 Mbps Ethernet (Cost 10)</option>
+                            <option value="1" ${state.links.r1_r2 === 1 ? 'selected' : ''}>1 Mbps WAN Serial (Cost 100)</option>
+                        </select>
+                    </div>
+
+                    <!-- Link R1-R3 Speed -->
+                    <div style="background:var(--bg-page); border:1px solid var(--border); border-radius:8px; padding:8px 10px;">
+                        <div style="display:flex; justify-space-between; font-size:11px; font-weight:700; margin-bottom:4px;">
+                            <span>Link R1 ⇹ R3:</span>
+                            <span style="color:#38bdf8;">${state.links.r1_r3} Mbps (Cost ${costR1R3})</span>
+                        </div>
+                        <select class="bw-select" data-link="r1_r3" style="width:100%; padding:4px; background:var(--bg-card); color:var(--text-main); border:1px solid var(--border); border-radius:4px; font-size:11px;">
+                            <option value="1000" ${state.links.r1_r3 === 1000 ? 'selected' : ''}>1 Gbps GigabitEthernet (Cost 1)</option>
+                            <option value="100" ${state.links.r1_r3 === 100 ? 'selected' : ''}>100 Mbps FastEthernet (Cost 1)</option>
+                            <option value="10" ${state.links.r1_r3 === 10 ? 'selected' : ''}>10 Mbps Ethernet (Cost 10)</option>
+                            <option value="1" ${state.links.r1_r3 === 1 ? 'selected' : ''}>1 Mbps WAN Serial (Cost 100)</option>
+                        </select>
+                    </div>
+
+                    <!-- Link R2-R4 Speed -->
+                    <div style="background:var(--bg-page); border:1px solid var(--border); border-radius:8px; padding:8px 10px;">
+                        <div style="display:flex; justify-space-between; font-size:11px; font-weight:700; margin-bottom:4px;">
+                            <span>Link R2 ⇹ R4:</span>
+                            <span style="color:#38bdf8;">${state.links.r2_r4} Mbps (Cost ${costR2R4})</span>
+                        </div>
+                        <select class="bw-select" data-link="r2_r4" style="width:100%; padding:4px; background:var(--bg-card); color:var(--text-main); border:1px solid var(--border); border-radius:4px; font-size:11px;">
+                            <option value="1000" ${state.links.r2_r4 === 1000 ? 'selected' : ''}>1 Gbps GigabitEthernet (Cost 1)</option>
+                            <option value="100" ${state.links.r2_r4 === 100 ? 'selected' : ''}>100 Mbps FastEthernet (Cost 1)</option>
+                            <option value="10" ${state.links.r2_r4 === 10 ? 'selected' : ''}>10 Mbps Ethernet (Cost 10)</option>
+                            <option value="1" ${state.links.r2_r4 === 1 ? 'selected' : ''}>1 Mbps WAN Serial (Cost 100)</option>
+                        </select>
+                    </div>
+
+                    <!-- Link R3-R4 Speed -->
+                    <div style="background:var(--bg-page); border:1px solid var(--border); border-radius:8px; padding:8px 10px;">
+                        <div style="display:flex; justify-space-between; font-size:11px; font-weight:700; margin-bottom:4px;">
+                            <span>Link R3 ⇹ R4:</span>
+                            <span style="color:#38bdf8;">${state.links.r3_r4} Mbps (Cost ${costR3R4})</span>
+                        </div>
+                        <select class="bw-select" data-link="r3_r4" style="width:100%; padding:4px; background:var(--bg-card); color:var(--text-main); border:1px solid var(--border); border-radius:4px; font-size:11px;">
+                            <option value="1000" ${state.links.r3_r4 === 1000 ? 'selected' : ''}>1 Gbps GigabitEthernet (Cost 1)</option>
+                            <option value="100" ${state.links.r3_r4 === 100 ? 'selected' : ''}>100 Mbps FastEthernet (Cost 1)</option>
+                            <option value="10" ${state.links.r3_r4 === 10 ? 'selected' : ''}>10 Mbps Ethernet (Cost 10)</option>
+                            <option value="1" ${state.links.r3_r4 === 1 ? 'selected' : ''}>1 Mbps WAN Serial (Cost 100)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        `;
+    };
+
+    // Tab 2: OSPF 7 Neighbor Adjacency States Stepper
+    const renderStatesTab = () => {
+        const neighborStatesList = [
+            { step: 1, name: "Down", icon: "🔴", desc: "No Hello packets received from neighbor yet." },
+            { step: 2, name: "Init", icon: "🟡", desc: "Hello packet received from neighbor, but local Router ID not seen in neighbor's Hello." },
+            { step: 3, name: "Two-Way", icon: "🟢", desc: "Bidirectional communication confirmed! Local Router ID seen in neighbor's Hello packet. DR/BDR election happens here." },
+            { step: 4, name: "ExStart", icon: "⚡", desc: "Master / Slave relationship negotiated for Database Description (DBD) sequence numbers." },
+            { step: 5, name: "Exchange", icon: "📦", desc: "Routers exchange DBD summary packets describing contents of their LSDB." },
+            { step: 6, name: "Loading", icon: "⏳", desc: "Routers request detailed LSAs using Link State Request (LSR) and receive Link State Updates (LSU)." },
+            { step: 7, name: "Full", icon: "✅", desc: "LSDB is 100% synchronized! Full adjacency established. Dijkstra SPF computation runs." }
+        ];
+
+        const curState = neighborStatesList[state.neighborStep];
+
+        return `
+            <div style="display:grid; grid-template-columns: 1fr 300px; gap:16px; height:100%;">
+                <!-- Left: Interactive Stepper Visualizer -->
+                <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:16px; display:flex; flex-direction:column; gap:14px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <h4 style="margin:0; color:${AC}; font-size:14px;">OSPF Neighbor Adjacency State Progress (R1 ⇹ R2)</h4>
+                        <div style="display:flex; gap:8px;">
+                            <button id="btn-prev-state" ${state.neighborStep === 0 ? 'disabled' : ''} style="padding:6px 12px; background:var(--bg-page); color:var(--text-main); border:1px solid var(--border); border-radius:6px; cursor:pointer; font-size:12px;">◀ Previous</button>
+                            <button id="btn-next-state" ${state.neighborStep === 6 ? 'disabled' : ''} style="padding:6px 12px; background:${AC}; color:#fff; border:none; border-radius:6px; font-weight:700; cursor:pointer; font-size:12px;">Next Step ▶</button>
+                        </div>
+                    </div>
+
+                    <!-- Visual State Badge Banner -->
+                    <div style="background:#0f172a; border:2px solid ${curState.step === 7 ? '#10b981' : '#38bdf8'}; border-radius:10px; padding:16px; text-align:center;">
+                        <div style="font-size:36px; margin-bottom:6px;">${curState.icon}</div>
+                        <h3 style="margin:0; color:#38bdf8; font-size:20px; font-weight:800;">State ${curState.step} of 7: ${curState.name.toUpperCase()}</h3>
+                        <p style="margin:8px 0 0 0; color:#cbd5e1; font-size:13px; line-height:1.5;">${curState.desc}</p>
+                    </div>
+
+                    <!-- Neighbor Diagram Canvas -->
+                    <div style="background:#0b0f19; border:1px solid #1e293b; border-radius:10px; padding:20px; display:flex; justify-content:space-between; align-items:center;">
+                        <div style="text-align:center;">
+                            <div style="width:60px; height:60px; border-radius:50%; background:#1e293b; border:3px solid #38bdf8; display:flex; align-items:center; justify-content:center; font-weight:800; color:#fff; margin:0 auto 6px auto;">R1</div>
+                            <div style="font-size:11px; color:var(--text-muted);">RID: 1.1.1.1</div>
+                        </div>
+
+                        <div style="flex:1; margin:0 20px; text-align:center; position:relative;">
+                            <div style="height:4px; background:${curState.step === 7 ? '#10b981' : '#334155'}; width:100%; border-radius:2px;"></div>
+                            <div style="margin-top:8px; font-size:11px; font-weight:700; color:${curState.step === 7 ? '#10b981' : '#fbbf24'};">
+                                ${curState.step >= 2 ? 'Multicast Hello (224.0.0.5)' : 'Awaiting Connection...'}
+                            </div>
+                        </div>
+
+                        <div style="text-align:center;">
+                            <div style="width:60px; height:60px; border-radius:50%; background:#1e293b; border:3px solid ${curState.step === 7 ? '#10b981' : '#64748b'}; display:flex; align-items:center; justify-content:center; font-weight:800; color:#fff; margin:0 auto 6px auto;">R2</div>
+                            <div style="font-size:11px; color:var(--text-muted);">RID: 2.2.2.2</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: All 7 States Checklist -->
+                <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:14px; display:flex; flex-direction:column; gap:8px; overflow-y:auto;">
+                    <h4 style="margin:0 0 6px 0; color:${AC}; font-size:13px;">7 State Sequence Checklist</h4>
+                    ${neighborStatesList.map((st, idx) => `
+                        <div style="padding:8px; border-radius:6px; background:${idx === state.neighborStep ? 'rgba(16,185,129,0.15)' : 'var(--bg-page)'}; border:1px solid ${idx === state.neighborStep ? AC : 'var(--border)'}; display:flex; align-items:center; gap:8px;">
+                            <span style="font-size:14px;">${idx < state.neighborStep ? '✅' : idx === state.neighborStep ? st.icon : '⚪'}</span>
+                            <div>
+                                <div style="font-weight:700; font-size:11px; color:${idx === state.neighborStep ? AC : 'var(--text-main)'};">${st.step}. ${st.name}</div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+    };
+
+    // Tab 3: DR / BDR Election Simulator
+    const renderDrTab = () => {
+        return `
+            <div style="display:grid; grid-template-columns: 1fr 320px; gap:16px; height:100%;">
+                <!-- Left: Multi-access Segment Diagram -->
+                <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:16px; display:flex; flex-direction:column; gap:14px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <h4 style="margin:0; color:${AC}; font-size:14px;">Ethernet Broadcast Multi-Access Segment (DR/BDR Election)</h4>
+                        <button id="btn-toggle-dr-fail" style="background:${state.drFailed ? '#10b981' : '#ef4444'}; color:#fff; border:none; padding:6px 12px; border-radius:6px; font-weight:700; font-size:12px; cursor:pointer;">
+                            ${state.drFailed ? '🔄 Restore DR (R2)' : '💥 Fail DR Router (R2)'}
+                        </button>
+                    </div>
+
+                    <!-- Switch Topology Segment Canvas -->
+                    <div style="background:#0b0f19; border:1px solid #1e293b; border-radius:10px; padding:20px; position:relative; height:240px; display:flex; justify-content:center; align-items:center;">
+                        <svg width="100%" height="100%" viewBox="0 0 500 240">
+                            <!-- Central Switch -->
+                            <rect x="210" y="100" width="80" height="40" rx="6" fill="#1e293b" stroke="#38bdf8" stroke-width="2"/>
+                            <text x="250" y="124" fill="#38bdf8" font-size="12" font-weight="bold" text-anchor="middle">SW1</text>
+
+                            <!-- Lines from Switch to 4 Routers -->
+                            <line x1="250" y1="100" x2="100" y2="50" stroke="#64748b" stroke-width="2"/>
+                            <line x1="250" y1="100" x2="400" y2="50" stroke="${state.drFailed ? '#ef4444' : '#10b981'}" stroke-width="3"/>
+                            <line x1="250" y1="140" x2="100" y2="190" stroke="#f59e0b" stroke-width="3"/>
+                            <line x1="250" y1="140" x2="400" y2="190" stroke="#64748b" stroke-width="2"/>
+
+                            <!-- Router 1 (Top Left) -->
+                            <g transform="translate(75, 25)">
+                                <circle cx="25" cy="25" r="22" fill="#1e293b" stroke="#64748b" stroke-width="2"/>
+                                <text x="25" y="29" fill="#fff" font-size="11" font-weight="bold" text-anchor="middle">R1</text>
+                                <rect x="-10" y="52" width="70" height="18" rx="3" fill="#334155"/>
+                                <text x="25" y="64" fill="#cbd5e1" font-size="9" text-anchor="middle">DROther (Pri:1)</text>
+                            </g>
+
+                            <!-- Router 2 (Top Right - DR) -->
+                            <g transform="translate(375, 25)">
+                                <circle cx="25" cy="25" r="22" fill="${state.drFailed ? '#450a0a' : '#1e293b'}" stroke="${state.drFailed ? '#ef4444' : '#10b981'}" stroke-width="3"/>
+                                <text x="25" y="29" fill="#fff" font-size="11" font-weight="bold" text-anchor="middle">R2</text>
+                                <rect x="-10" y="52" width="70" height="18" rx="3" fill="${state.drFailed ? '#ef4444' : '#10b981'}"/>
+                                <text x="25" y="64" fill="#fff" font-size="9" font-weight="bold" text-anchor="middle">${state.drFailed ? 'FAILED ❌' : 'DR 👑 (Pri:255)'}</text>
+                            </g>
+
+                            <!-- Router 3 (Bottom Left - BDR -> Promoted to DR) -->
+                            <g transform="translate(75, 165)">
+                                <circle cx="25" cy="25" r="22" fill="#1e293b" stroke="${state.drFailed ? '#10b981' : '#f59e0b'}" stroke-width="3"/>
+                                <text x="25" y="29" fill="#fff" font-size="11" font-weight="bold" text-anchor="middle">R3</text>
+                                <rect x="-10" y="52" width="70" height="18" rx="3" fill="${state.drFailed ? '#10b981' : '#f59e0b'}"/>
+                                <text x="25" y="64" fill="#fff" font-size="9" font-weight="bold" text-anchor="middle">${state.drFailed ? 'NEW DR 👑' : 'BDR 🛡️ (Pri:100)'}</text>
+                            </g>
+
+                            <!-- Router 4 (Bottom Right) -->
+                            <g transform="translate(375, 165)">
+                                <circle cx="25" cy="25" r="22" fill="#1e293b" stroke="#64748b" stroke-width="2"/>
+                                <text x="25" y="29" fill="#fff" font-size="11" font-weight="bold" text-anchor="middle">R4</text>
+                                <rect x="-10" y="52" width="70" height="18" rx="3" fill="#334155"/>
+                                <text x="25" y="64" fill="#cbd5e1" font-size="9" text-anchor="middle">DROther (Pri:1)</text>
+                            </g>
+                        </svg>
+                    </div>
+
+                    <!-- Election Rule Summary -->
+                    <div style="background:rgba(56,189,248,0.1); border:1px solid #38bdf8; border-radius:8px; padding:10px; font-size:12px; line-height:1.5;">
+                        <b style="color:#38bdf8;">DR/BDR Election Priority Logic:</b><br>
+                        1. Highest OSPF interface priority wins (Default: 1, Configured R2: 255).<br>
+                        2. If priorities tie, highest Router ID (RID) wins.<br>
+                        3. If DR fails, BDR (R3) immediately assumes DR role without network downtime!
+                    </div>
+                </div>
+
+                <!-- Right: Priority Configurator Panel -->
+                <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:14px; display:flex; flex-direction:column; gap:12px;">
+                    <h4 style="margin:0; color:${AC}; font-size:14px;">Router OSPF Priorities</h4>
+                    <p style="margin:0; font-size:11px; color:var(--text-muted);">
+                        Priority range 0 to 255. (Priority 0 means NEVER become DR/BDR).
+                    </p>
+
+                    <!-- R1 Priority -->
+                    <div style="display:flex; justify-content:space-between; align-items:center; background:var(--bg-page); padding:8px; border-radius:6px;">
+                        <span style="font-weight:700; font-size:12px;">R1 (1.1.1.1):</span>
+                        <input class="dr-pri-input" data-router="R1" type="number" value="${state.drPriority.R1}" style="width:60px; padding:4px; background:var(--bg-card); color:var(--text-main); border:1px solid var(--border); border-radius:4px; text-align:center;">
+                    </div>
+
+                    <!-- R2 Priority -->
+                    <div style="display:flex; justify-content:space-between; align-items:center; background:var(--bg-page); padding:8px; border-radius:6px;">
+                        <span style="font-weight:700; font-size:12px;">R2 (2.2.2.2):</span>
+                        <input class="dr-pri-input" data-router="R2" type="number" value="${state.drPriority.R2}" style="width:60px; padding:4px; background:var(--bg-card); color:var(--text-main); border:1px solid var(--border); border-radius:4px; text-align:center;">
+                    </div>
+
+                    <!-- R3 Priority -->
+                    <div style="display:flex; justify-content:space-between; align-items:center; background:var(--bg-page); padding:8px; border-radius:6px;">
+                        <span style="font-weight:700; font-size:12px;">R3 (3.3.3.3):</span>
+                        <input class="dr-pri-input" data-router="R3" type="number" value="${state.drPriority.R3}" style="width:60px; padding:4px; background:var(--bg-card); color:var(--text-main); border:1px solid var(--border); border-radius:4px; text-align:center;">
+                    </div>
+
+                    <!-- R4 Priority -->
+                    <div style="display:flex; justify-content:space-between; align-items:center; background:var(--bg-page); padding:8px; border-radius:6px;">
+                        <span style="font-weight:700; font-size:12px;">R4 (4.4.4.4):</span>
+                        <input class="dr-pri-input" data-router="R4" type="number" value="${state.drPriority.R4}" style="width:60px; padding:4px; background:var(--bg-card); color:var(--text-main); border:1px solid var(--border); border-radius:4px; text-align:center;">
+                    </div>
+                </div>
+            </div>
+        `;
+    };
+
+    // Tab 4: Cisco IOS OSPF CLI Console
+    const renderCliTab = () => {
+        return `
+            <div style="background:#0f172a; border:1px solid #1e293b; border-radius:12px; padding:14px; display:flex; flex-direction:column; gap:10px; height:100%; box-sizing:border-box;">
+                <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #334155; padding-bottom:8px;">
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <span style="color:${AC}; font-weight:800; font-size:13px;">💻 Cisco IOS OSPF Interactive Terminal</span>
+                        <span style="font-size:11px; color:#94a3b8;">(Router1#)</span>
+                    </div>
+                    <div style="display:flex; gap:6px;">
+                        <button class="cli-quick-cmd" data-cmd="show ip ospf neighbor" style="background:#1e293b; color:#38bdf8; border:1px solid #334155; padding:3px 8px; border-radius:4px; font-size:11px; cursor:pointer;">show ip ospf neighbor</button>
+                        <button class="cli-quick-cmd" data-cmd="show ip route" style="background:#1e293b; color:#38bdf8; border:1px solid #334155; padding:3px 8px; border-radius:4px; font-size:11px; cursor:pointer;">show ip route</button>
+                        <button class="cli-quick-cmd" data-cmd="show ip ospf database" style="background:#1e293b; color:#38bdf8; border:1px solid #334155; padding:3px 8px; border-radius:4px; font-size:11px; cursor:pointer;">show ip ospf database</button>
+                    </div>
+                </div>
+
+                <!-- CLI Terminal Output Log -->
+                <div id="ospf-cli-output" style="flex:1; background:#0b0f19; border:1px solid #1e293b; border-radius:8px; padding:12px; font-family:monospace; font-size:12px; color:#34d399; overflow-y:auto; line-height:1.6; min-height:220px;">
+                    ${state.cliOutput.map(line => `<div>${line}</div>`).join('')}
+                </div>
+
+                <!-- CLI Prompt Input -->
+                <div style="display:flex; gap:8px; align-items:center;">
+                    <span style="color:#10b981; font-family:monospace; font-weight:bold; font-size:13px;">Router1#</span>
+                    <input id="ospf-cli-input" type="text" placeholder="Type command e.g. show ip route, show ip ospf neighbor, router ospf 1..." style="flex:1; background:#0b0f19; border:1px solid #334155; color:#ffffff; padding:8px 12px; border-radius:6px; font-family:monospace; font-size:12px; outline:none;">
+                    <button id="btn-send-cli" style="background:${AC}; color:#fff; border:none; padding:8px 16px; border-radius:6px; font-weight:700; font-size:12px; cursor:pointer;">Execute</button>
+                </div>
+            </div>
+        `;
+    };
+
+    // Tab 5: LSA Flooding & LSDB Inspector
+    const renderLsdbTab = () => {
+        return `
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px; height:100%;">
+                <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:14px; display:flex; flex-direction:column; gap:12px;">
+                    <h4 style="margin:0; color:${AC}; font-size:14px;">OSPF Link State Database (LSDB) - Area 0</h4>
+                    <p style="margin:0; font-size:11px; color:var(--text-muted);">
+                        Every router in Area 0 stores an identical LSDB topology database.
+                    </p>
+
+                    <div style="background:#0b0f19; border:1px solid #1e293b; border-radius:8px; padding:12px; font-family:monospace; font-size:11px; color:#38bdf8; line-height:1.6; flex:1; overflow-y:auto;">
+                        <b style="color:#10b981;">OSPF Router Link States (Area 0)</b><br>
+                        Link ID         ADV Router      Age         Seq#       Checksum Link count<br>
+                        1.1.1.1         1.1.1.1         245         0x80000003 0x004a12 3<br>
+                        2.2.2.2         2.2.2.2         189         0x80000005 0x003b88 3<br>
+                        3.3.3.3         3.3.3.3         210         0x80000002 0x002c90 2<br>
+                        4.4.4.4         4.4.4.4         150         0x80000004 0x001d40 2<br><br>
+
+                        <b style="color:#10b981;">Net Link States (Area 0)</b><br>
+                        Link ID         ADV Router      Age         Seq#       Checksum<br>
+                        192.168.1.2     2.2.2.2         189         0x80000001 0x008e10
+                    </div>
+                </div>
+
+                <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:14px; display:flex; flex-direction:column; gap:12px;">
+                    <h4 style="margin:0; color:${AC}; font-size:14px;">LSA Types Summary Guide</h4>
+                    
+                    <div style="display:flex; flex-direction:column; gap:8px;">
+                        <div style="background:var(--bg-page); border-left:3px solid #10b981; padding:8px 10px; border-radius:4px; font-size:12px;">
+                            <b style="color:#10b981;">Type 1: Router LSA</b><br>
+                            Generated by every router. Describes directly connected links and costs. Flooded only within the local area.
+                        </div>
+                        <div style="background:var(--bg-page); border-left:3px solid #38bdf8; padding:8px 10px; border-radius:4px; font-size:12px;">
+                            <b style="color:#38bdf8;">Type 2: Network LSA</b><br>
+                            Generated by the Designated Router (DR) on multi-access networks. Lists all connected routers.
+                        </div>
+                        <div style="background:var(--bg-page); border-left:3px solid #f59e0b; padding:8px 10px; border-radius:4px; font-size:12px;">
+                            <b style="color:#f59e0b;">Type 3: Summary LSA</b><br>
+                            Generated by Area Border Routers (ABR). Advertises subnets from one area to another.
+                        </div>
+                        <div style="background:var(--bg-page); border-left:3px solid #ec4899; padding:8px 10px; border-radius:4px; font-size:12px;">
+                            <b style="color:#ec4899;">Type 5: AS-External LSA</b><br>
+                            Generated by ASBRs. Advertises external routes redistributed into OSPF (e.g. BGP or RIP).
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    };
+
+    // Render Master Container
+    const updateView = () => {
+        const bodyEl = container.querySelector('#ospf-tab-body');
+        if (!bodyEl) return;
+
+        if (state.activeTab === 'spf') bodyEl.innerHTML = renderSpfTab();
+        else if (state.activeTab === 'states') bodyEl.innerHTML = renderStatesTab();
+        else if (state.activeTab === 'dr_election') bodyEl.innerHTML = renderDrTab();
+        else if (state.activeTab === 'cli') bodyEl.innerHTML = renderCliTab();
+        else if (state.activeTab === 'lsdb') bodyEl.innerHTML = renderLsdbTab();
+
+        attachTabListeners();
+    };
+
+    // Attach Event Listeners
+    const attachTabListeners = () => {
+        // Bandwidth Selector Listener (Tab 1)
+        container.querySelectorAll('.bw-select').forEach(sel => {
+            sel.onchange = (e) => {
+                const linkKey = e.target.getAttribute('data-link');
+                const bw = parseInt(e.target.value, 10);
+                state.links[linkKey] = bw;
+                updateView();
+            };
+        });
+
+        // Send Packet Animation (Tab 1)
+        const sendPktBtn = container.querySelector('#btn-send-ospf-pkt');
+        if (sendPktBtn) {
+            sendPktBtn.onclick = () => {
+                const pkt = container.querySelector('#spf-pkt');
+                if (!pkt || state.packetAnimating) return;
+                state.packetAnimating = true;
+                pkt.style.display = 'block';
+
+                const path = state.currentPath;
+                if (path.includes('R2')) {
+                    // Path R1 -> R2 -> R4
+                    pkt.setAttribute('cx', '25'); pkt.setAttribute('cy', '130');
+                    setTimeout(() => { pkt.setAttribute('cx', '100'); pkt.setAttribute('cy', '130'); }, 100);
+                    setTimeout(() => { pkt.setAttribute('cx', '250'); pkt.setAttribute('cy', '70'); }, 600);
+                    setTimeout(() => { pkt.setAttribute('cx', '400'); pkt.setAttribute('cy', '130'); }, 1200);
+                    setTimeout(() => { pkt.setAttribute('cx', '475'); pkt.setAttribute('cy', '130'); }, 1700);
+                    setTimeout(() => { pkt.style.display = 'none'; state.packetAnimating = false; }, 2200);
+                } else {
+                    // Path R1 -> R3 -> R4
+                    pkt.setAttribute('cx', '25'); pkt.setAttribute('cy', '130');
+                    setTimeout(() => { pkt.setAttribute('cx', '100'); pkt.setAttribute('cy', '130'); }, 100);
+                    setTimeout(() => { pkt.setAttribute('cx', '250'); pkt.setAttribute('cy', '190'); }, 600);
+                    setTimeout(() => { pkt.setAttribute('cx', '400'); pkt.setAttribute('cy', '130'); }, 1200);
+                    setTimeout(() => { pkt.setAttribute('cx', '475'); pkt.setAttribute('cy', '130'); }, 1700);
+                    setTimeout(() => { pkt.style.display = 'none'; state.packetAnimating = false; }, 2200);
+                }
+            };
+        }
+
+        // Stepper Listeners (Tab 2)
+        const prevBtn = container.querySelector('#btn-prev-state');
+        const nextBtn = container.querySelector('#btn-next-state');
+        if (prevBtn) {
+            prevBtn.onclick = () => {
+                if (state.neighborStep > 0) { state.neighborStep--; updateView(); }
+            };
+        }
+        if (nextBtn) {
+            nextBtn.onclick = () => {
+                if (state.neighborStep < 6) { state.neighborStep++; updateView(); }
+            };
+        }
+
+        // DR Failure Toggle (Tab 3)
+        const drFailBtn = container.querySelector('#btn-toggle-dr-fail');
+        if (drFailBtn) {
+            drFailBtn.onclick = () => {
+                state.drFailed = !state.drFailed;
+                updateView();
+            };
+        }
+
+        // CLI Commands (Tab 4)
+        const cliInput = container.querySelector('#ospf-cli-input');
+        const execBtn = container.querySelector('#btn-send-cli');
+
+        const executeCli = (cmd) => {
+            if (!cmd.trim()) return;
+            state.cliOutput.push(`Router1# ${cmd}`);
+            const clean = cmd.trim().toLowerCase();
+
+            if (clean === 'show ip route') {
+                state.cliOutput.push("Codes: C - connected, S - static, R - RIP, O - OSPF");
+                state.cliOutput.push("Gateway of last resort is not set");
+                state.cliOutput.push("C    192.168.1.0/24 is directly connected, GigabitEthernet0/0");
+                state.cliOutput.push(`O    192.168.2.0/24 [110/${calcCost(state.links.r1_r2) + calcCost(state.links.r2_r4)}] via 192.168.1.2, 00:14:22, GigabitEthernet0/0`);
+                state.cliOutput.push(`O    10.0.1.0/30 [110/${calcCost(state.links.r1_r3)}] via 10.0.1.2, 00:09:15, GigabitEthernet0/1`);
+            } else if (clean === 'show ip ospf neighbor') {
+                state.cliOutput.push("Neighbor ID     Pri   State           Dead Time   Address         Interface");
+                state.cliOutput.push(`2.2.2.2         ${state.drPriority.R2}   ${state.drFailed ? 'DOWN' : 'FULL/DR'}         00:00:38    192.168.1.2     Gi0/0`);
+                state.cliOutput.push(`3.3.3.3         ${state.drPriority.R3}   ${state.drFailed ? 'FULL/DR' : 'FULL/BDR'}        00:00:35    192.168.1.3     Gi0/1`);
+            } else if (clean === 'show ip ospf database') {
+                state.cliOutput.push("            OSPF Router with ID (1.1.1.1) (Process ID 1)");
+                state.cliOutput.push("                Router Link States (Area 0)");
+                state.cliOutput.push("Link ID         ADV Router      Age         Seq#       Checksum");
+                state.cliOutput.push("1.1.1.1         1.1.1.1         312         0x80000003 0x004a12");
+                state.cliOutput.push("2.2.2.2         2.2.2.2         256         0x80000005 0x003b88");
+            } else if (clean.startsWith('router ospf') || clean.startsWith('router-id') || clean.startsWith('network')) {
+                state.cliOutput.push("OSPF process updated successfully.");
+            } else {
+                state.cliOutput.push(`% Unknown command or incomplete entry: "${cmd}"`);
+            }
+            updateView();
+        };
+
+        if (execBtn && cliInput) {
+            execBtn.onclick = () => executeCli(cliInput.value);
+            cliInput.onkeypress = (e) => { if (e.key === 'Enter') executeCli(cliInput.value); };
+        }
+
+        container.querySelectorAll('.cli-quick-cmd').forEach(btn => {
+            btn.onclick = () => executeCli(btn.getAttribute('data-cmd'));
+        });
+    };
+
+    // Main Tab Switching Buttons Listener
+    container.querySelectorAll('.ospf-tab-btn').forEach(btn => {
+        btn.onclick = () => {
+            container.querySelectorAll('.ospf-tab-btn').forEach(b => {
+                b.classList.remove('active');
+                b.style.background = 'var(--bg-card)';
+                b.style.color = 'var(--text-main)';
+                b.style.border = '1px solid var(--border)';
+            });
+            btn.classList.add('active');
+            btn.style.background = AC;
+            btn.style.color = '#fff';
+            btn.style.border = 'none';
+
+            state.activeTab = btn.getAttribute('data-tab');
+            updateView();
+        };
+    });
+
+    // Initial View Render
+    updateView();
+};
+
+
 const initRipSim = (container) => {
     let currentTab = 'hop_sim'; // 'hop_sim', 'tables', 'infinity', 'cli', 'timers'
 
@@ -17591,6 +18236,7 @@ const initRipSim = (container) => {
             `;
                 return;
             }
+            if (id === 'routing_ospf' || id === 'ospf_sim' || (data && (data.simType === 'ospf_sim' || data.simType === 'routing_ospf'))) { initOspfSim(container); return; }
             if (id === 'routing_rip' || id === 'rip_sim' || (data && (data.simType === 'rip_sim' || data.simType === 'routing_rip'))) { initRipSim(container); return; }
             if (id === 'vlan_sim' || id === 'vlan' || (data && (data.simType === 'vlan_sim' || data.simType === 'vlan_trunking'))) { initVlanSim(container); return; }
             if (id === 'subnetting' || (data && (data.simType === 'subnetting' || data.simType === 'subnet_calc'))) { initSubnettingSim(container); return; }

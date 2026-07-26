@@ -2390,51 +2390,440 @@ window.VLAB_DATA = {
     "simType": "rip_sim"
 },
     'routing_ospf': {
-        title: "Link State Routing - OSPF",
-        aim: "To implement Open Shortest Path First (OSPF Area 0) dynamic routing using Dijkstra's SPF algorithm.",
-        intro: {
-            summary: "OSPF is a high-performance Link-State Interior Gateway Protocol (IGP) widely deployed in enterprise networks for fast convergence.",
-            importance: "OSPF scales efficiently to large multi-area networks using link-state advertisements (LSAs) and Dijkstra's algorithm.",
-            applications: ["Enterprise Campus Core", "Data Center Fabric Routing", "Service Provider Core"],
-            outcome: "Students will configure Single-Area OSPF Area 0, set Router IDs, wildcard masks, and inspect SPF neighbor states."
-        },
-        prerequisites: ["Practical 8: Distance Vector Routing - RIP"],
-        outcomes: [
-            "Configure Single-Area OSPF (Area 0).",
-            "Calculate OSPF cost metric (Cost = Reference Bandwidth / Bandwidth).",
-            "Verify Full OSPF Neighbor Adjacency."
+    "title": "Practical 9: Link State Routing Protocol (OSPF)",
+    "aim": "To understand Link-State dynamic routing principles, configure Open Shortest Path First (OSPF Version 2 Area 0) across a multi-router enterprise network, analyze Hello neighbor discovery, inspect Link State Database (LSDB) synchronization, calculate OSPF Cost metrics using Dijkstra's Shortest Path First (SPF) algorithm, and verify DR/BDR elections.",
+    "intro": {
+        "summary": "As enterprise networks continue to grow in size and complexity, traditional routing protocols such as RIP become inefficient because they use only hop count as their routing metric and exchange complete routing tables periodically. Open Shortest Path First (OSPF) is the industry-standard Link-State Interior Gateway Protocol (IGP) engineered for high scalability and rapid convergence.",
+        "importance": "OSPF is the foundational routing protocol deployed across enterprise campus networks, data centers, cloud infrastructure, and ISPs. Understanding OSPF teaches link cost calculation, Dijkstra's algorithm, LSA flooding, LSDB synchronization, and hierarchical area design.",
+        "applications": [
+            "Enterprise Campus Core & Access Routing",
+            "Cloud Data Center Interconnect Fabric",
+            "Hospital & University Multi-Building Networks",
+            "Internet Service Provider (ISP) Core Routing"
         ],
-        theory: {
-            intro: "OSPF is an open-standard Link-State protocol. It maintains Link-State Advertisements (LSAs) in a topology table and calculates shortest path trees based on Interface Cost (Cost = 10^8 / Bandwidth).",
-            cards: [
-                { title: "Wildcard Mask", content: "Used in OSPF network commands (e.g. 0.0.0.255 for /24 network)." },
-                { title: "Area 0 Backbone", content: "All OSPF non-backbone areas must connect to Backbone Area 0." }
-            ],
-            formulas: ["OSPF Cost = 10^8 / Bandwidth (bps)", "Default Reference Bandwidth = 100 Mbps"],
-            standards: ["RFC 2328 - OSPF Version 2 Specification"]
-        },
-        tools: [
-            { name: "Cisco 2911 Router CLI", layer: "Layer 3 Router", ports: "GigabitEthernet interfaces", usage: "OSPF process & Dijkstra computation", statusLED: "Neighbor FULL State LED" }
-        ],
-        procedure: [
-            "Enter router configuration mode: `router ospf 1`.",
-            "Configure network areas: `network 192.168.1.0 0.0.0.255 area 0`.",
-            "Configure Router ID: `router-id 1.1.1.1`.",
-            "Verify OSPF neighbor status: `show ip ospf neighbor`."
-        ],
-        troubleshooting: {
-            problem: "OSPF neighbor state stuck in INIT / 2-WAY.",
-            hints: ["Check if Hello/Dead timers match on both router ends.", "Ensure Area IDs match (Area 0)."],
-            fix: "Verify wildcard mask and Area ID on interface configuration."
-        },
-        viva: [
-            { q: "What algorithm does OSPF use to calculate shortest paths?", a: "Dijkstra's Shortest Path First (SPF) algorithm." },
-            { q: "What is the administrative distance (AD) of OSPF?", a: "110." }
-        ],
-        assignment: "Configure OSPF Area 0 across 3 routers. Change reference bandwidth and record new interface costs.",
-        references: [{ title: "RFC 2328 - OSPF v2", link: "https://datatracker.ietf.org/doc/html/rfc2328" }],
-        simType: "cli"
+        "outcome": "After completing this practical, students will be able to configure OSPF Version 2 Single-Area 0 on Cisco routers, calculate interface costs, verify OSPF 7 neighbor states, inspect the Link State Database (LSDB), and troubleshoot DR/BDR elections."
     },
+    "prerequisites": [
+        "Practical 6: Subnetting, VLSM & CIDR",
+        "Practical 7: Virtual LANs (VLAN) & Trunking",
+        "Practical 8: Distance Vector Routing Protocol (RIP)"
+    ],
+    "outcomes": [
+        "Explain the operation of Link-State Routing and Open Shortest Path First (OSPF).",
+        "Configure OSPF Version 2 Single-Area (Area 0) using Cisco IOS CLI commands.",
+        "Calculate OSPF metric Cost using the formula: Cost = Reference Bandwidth / Interface Bandwidth.",
+        "Differentiate Distance Vector (RIP) and Link State (OSPF) routing protocols.",
+        "Trace the 7 OSPF neighbor states: Down ➔ Init ➔ Two-Way ➔ ExStart ➔ Exchange ➔ Loading ➔ Full.",
+        "Analyze Link State Advertisements (LSAs) and Link State Database (LSDB) synchronization.",
+        "Demonstrate Dijkstra's Shortest Path First (SPF) algorithm for dynamic path selection.",
+        "Verify Designated Router (DR) and Backup Designated Router (BDR) elections on broadcast networks."
+    ],
+    "theory": {
+        "intro": "Modern enterprise networks demand fast routing convergence, intelligent bandwidth-based path determination, and hierarchical scalability. Open Shortest Path First (OSPF) was developed to overcome the 15-hop limit and periodic table flooding limitations of Distance Vector protocols.",
+        "sections": [
+            {
+                "heading": "1. Introduction to Link State Routing & OSPF",
+                "content": "As corporate and campus networks expand across multiple buildings and data centers, legacy distance vector protocols like RIP become major performance bottlenecks. RIP evaluates paths using only router hop count regardless of whether a link is a 10 Mbps copper wire or a 10 Gbps fiber line. Open Shortest Path First (OSPF) addresses this by evaluating link bandwidth (Cost), flooding incremental Link State Advertisements (LSAs), building a complete network map (LSDB), and running Dijkstra's algorithm to compute the absolute shortest path."
+            },
+            {
+                "heading": "2. Learning Objectives",
+                "content": "By completing this practical, students will master:\n• Link-State routing principles vs Distance Vector.\n• OSPF Router ID (RID) assignment and Hello packet neighbor discovery.\n• Calculating OSPF interface Cost metrics (Cost = Reference Bandwidth / Bandwidth).\n• The 7 OSPF neighbor adjacency states: Down, Init, Two-Way, ExStart, Exchange, Loading, Full.\n• Configuring OSPF Area 0 with router ospf 1, router-id, and network wildcard masks.\n• Verifying LSDB synchronization and troubleshooting DR/BDR elections."
+            },
+            {
+                "heading": "3. Why OSPF is Required",
+                "content": "RIP has severe limitations:\n1. Maximum hop count limit of 15 (16 is unreachable).\n2. Slow convergence timers (30s periodic update, 180s invalid timer).\n3. Periodic full-table updates consume network bandwidth.\n4. Complete ignorance of interface bandwidth or link quality.\nOSPF overcomes all of these by supporting unlimited hops, computing paths based on bandwidth cost, flooding incremental updates only when topology changes, and converging in milliseconds."
+            },
+            {
+                "heading": "4. What is OSPF?",
+                "content": "Open Shortest Path First (OSPF) is an open-standard Link-State Interior Gateway Protocol (IGP) defined in RFC 2328 (OSPFv2 for IPv4) and RFC 5340 (OSPFv3 for IPv6). Instead of relying on neighbors for route calculations, every OSPF router builds an identical topology map called the Link State Database (LSDB) and independently calculates the shortest path tree using Dijkstra's SPF algorithm."
+            },
+            {
+                "heading": "5. Distance Vector vs Link State Routing Comparison",
+                "content": "• Metric: Distance Vector uses Hop Count; Link State uses Bandwidth Cost.\n• Algorithm: Distance Vector uses Bellman-Ford; Link State uses Dijkstra's Shortest Path First (SPF).\n• Updates: Distance Vector sends periodic full table broadcasts; Link State sends incremental LSA floods only on change.\n• Convergence: Distance Vector is slow (minutes); Link State is fast (milliseconds).\n• Scalability: Distance Vector is limited to small LANs (<15 hops); Link State scales to massive enterprise areas.\n• Loop Prevention: Distance Vector uses Split Horizon/Poison Reverse; Link State uses complete LSDB SPF graph calculation."
+            },
+            {
+                "heading": "6. Basic OSPF Terminology",
+                "content": "• Router ID (RID): Unique 32-bit identifier for each OSPF router.\n• Neighbor Router: Adjacent OSPF router connected on a shared link.\n• Link: Router interface connected to a network segment.\n• Link State Advertisement (LSA): Data packet containing interface status and cost.\n• Link State Database (LSDB): Complete network topology map stored by all routers in an area.\n• SPF Tree: Shortest path graph calculated with local router as root node.\n• Cost: Routing metric derived from interface bandwidth.\n• Area: Logical grouping of routers to restrict LSA flooding."
+            },
+            {
+                "heading": "7. OSPF Router ID (RID)",
+                "content": "Every OSPF router requires a unique 32-bit Router ID (formatted as an IP address, e.g., 1.1.1.1). Cisco routers determine the Router ID using the following priority:\n1. Explicitly configured command: router-id 1.1.1.1 under router ospf 1.\n2. Highest IP address among active Loopback interfaces.\n3. Highest IP address among active physical interfaces."
+            },
+            {
+                "heading": "8. OSPF Neighbor Discovery Process",
+                "content": "The step-by-step neighbor formation process:\nStep 1: Routers send periodic Hello Packets to multicast 224.0.0.5.\nStep 2: Discover adjacent OSPF neighbors and verify matching parameters (Area ID, Subnet Mask, Hello/Dead intervals, Authentication).\nStep 3: Establish 2-Way State.\nStep 4: Elect Designated Router (DR) and Backup Designated Router (BDR) on multi-access networks.\nStep 5: Exchange Database Description (DBD) packets.\nStep 6: Request missing LSAs using Link State Request (LSR) and Link State Update (LSU).\nStep 7: Reach FULL Adjacency State and run Dijkstra SPF."
+            },
+            {
+                "heading": "9. Hello Packets & Dead Intervals",
+                "content": "OSPF routers periodically transmit Hello packets (default: every 10 seconds on Ethernet, 30 seconds on Non-Broadcast Multi-Access). If a router fails to receive a Hello packet within the Dead Interval (default: 4 times Hello interval = 40 seconds), the neighbor is declared down."
+            },
+            {
+                "heading": "10. Link State Advertisement (LSA)",
+                "content": "An LSA is a data structure describing the state of a router's links, interface IP addresses, subnet masks, connected neighbors, and metric cost. Whenever an interface goes up or down, the router immediately floods an LSA update to all neighbors."
+            },
+            {
+                "heading": "11. Link State Database (LSDB)",
+                "content": "The LSDB is a repository of all LSAs received from every router within the OSPF area. Because all routers in an area flood and synchronize LSAs, every router possesses an identical LSDB map of the network topology."
+            },
+            {
+                "heading": "12. Dijkstra's Shortest Path First (SPF) Algorithm",
+                "content": "Dijkstra's SPF algorithm takes the LSDB network graph, places the local router at the root node, and calculates the lowest cumulative Cost path to every destination subnet. The resulting shortest-path tree dictates which routes are installed into the main IP routing table."
+            },
+            {
+                "heading": "13. OSPF Cost Metric Formula",
+                "content": "OSPF calculates link metric Cost using interface bandwidth:\nFormula: Cost = Reference Bandwidth / Interface Bandwidth\nDefault Reference Bandwidth = 100,000,000 bps (100 Mbps).\n• 10 Mbps (Ethernet): Cost = 100,000,000 / 10,000,000 = 100\n• 100 Mbps (FastEthernet): Cost = 100,000,000 / 100,000,000 = 1\n• 1 Gbps (GigabitEthernet): Cost = 1 (rounded up from 0.1)\nLower cost represents a faster, preferred path."
+            },
+            {
+                "heading": "14. OSPF Areas & Hierarchical Design",
+                "content": "Large enterprise networks divide routers into logical Areas to isolate LSA flooding, reduce LSDB memory footprint, and speed up SPF execution. All non-backbone areas (e.g., Area 1, Area 2) must connect to Area 0."
+            },
+            {
+                "heading": "15. Backbone Area (Area 0)",
+                "content": "Area 0 (0.0.0.0) is the central core of an OSPF network called the Backbone Area. All inter-area traffic between non-backbone areas must travel through Area 0 to prevent routing loops."
+            },
+            {
+                "heading": "16. Designated Router (DR) & Backup Designated Router (BDR)",
+                "content": "On multi-access broadcast networks (e.g., Ethernet switches with 10 routers), full mesh adjacencies require n*(n-1)/2 connections (45 adjacencies!). OSPF solves this by electing:\n• Designated Router (DR): Central hub router that collects and distributes LSAs.\n• Backup Designated Router (BDR): Standby router that takes over instantly if DR fails.\nElection is based on highest OSPF Priority (default: 1), then highest Router ID."
+            },
+            {
+                "heading": "17. The 7 OSPF Neighbor States",
+                "content": "1. Down: Initial state, no Hello packets received.\n2. Init: Hello received from neighbor, but bidirectional communication not confirmed.\n3. Two-Way: Bidirectional communication confirmed (Router ID seen in neighbor Hello list). DR/BDR election occurs.\n4. ExStart: Master/Slave relationship established for Database Description (DBD) exchange.\n5. Exchange: Routers exchange DBD summary packets listing LSDB contents.\n6. Loading: Routers request detailed LSAs using Link State Request (LSR) and receive Link State Updates (LSU).\n7. Full: LSDB is 100% synchronized. Full adjacency established!"
+            },
+            {
+                "heading": "18. Structure of an OSPF Routing Table",
+                "content": "An OSPF routing table entry contains:\n• Prefix Type: 'O' for Intra-Area, 'O IA' for Inter-Area.\n• Destination Subnet & Mask.\n• Administrative Distance (AD = 110 for OSPF).\n• Metric Cost: Cumulative path cost.\n• Next-Hop IP Address & Outgoing Interface."
+            },
+            {
+                "heading": "19. Cisco IOS Configuration Guide",
+                "content": "Configuring Single-Area OSPF Area 0 on a Cisco router:\nRouter# configure terminal\nRouter(config)# router ospf 1\nRouter(config-router)# router-id 1.1.1.1\nRouter(config-router)# network 192.168.1.0 0.0.0.255 area 0\nRouter(config-router)# network 10.0.1.0 0.0.0.3 area 0\nRouter(config-router)# end"
+            },
+            {
+                "heading": "20. Verification Commands",
+                "content": "• show ip route - Displays IP routing table (OSPF routes marked with 'O').\n• show ip ospf neighbor - Displays OSPF neighbors, state (FULL/DR/BDR), and interface.\n• show ip ospf database - Displays the Link State Database (LSDB).\n• show ip ospf interface - Displays OSPF cost, area, priority, and timer intervals.\n• show ip protocols - Displays active routing process details."
+            },
+            {
+                "heading": "21. Advantages of OSPF",
+                "content": "• Extremely fast convergence (milliseconds).\n• Cost metric accounts for link bandwidth.\n• No hop count limit (supports enterprise scale).\n• Hierarchical area design reduces CPU/memory load.\n• Loop-free routing verified by Dijkstra algorithm.\n• Classless routing (VLSM & CIDR support)."
+            },
+            {
+                "heading": "22. Limitations of OSPF",
+                "content": "• Complex configuration and troubleshooting compared to RIP.\n• Higher CPU and RAM requirements to store LSDB and run SPF calculations.\n• Strict hierarchical area design rules (all non-backbone areas must attach to Area 0)."
+            },
+            {
+                "heading": "23. Real-World Applications",
+                "content": "OSPF is deployed in enterprise campuses, universities, data centers, hospitals, financial institutions, and cloud provider networks."
+            },
+            {
+                "heading": "24. Best Practices",
+                "content": "1. Explicitly configure Router IDs (router-id 1.1.1.1).\n2. Design multi-building networks around Backbone Area 0.\n3. Adjust auto-cost reference-bandwidth 1000 for Gigabit and 10G networks.\n4. Use passive-interface on user LAN ports."
+            },
+            {
+                "heading": "25. Summary",
+                "content": "OSPF is the industry-standard Link-State protocol that calculates shortest path trees based on bandwidth Cost using Dijkstra's algorithm, maintaining rapid convergence and loop-free operation."
+            }
+        ]
+    },
+    "hardware_inspector": [
+        {
+            "id": "cisco_2911_ospf_router",
+            "name": "Cisco 2911 ISR OSPF Enterprise Router",
+            "category": "Layer 3 Link-State Router",
+            "description": "Enterprise Layer 3 router running OSPF Area 0 process, executing Dijkstra's SPF algorithm and maintaining synchronized LSDB tables.",
+            "svg": `<svg viewBox="0 0 400 240" xmlns="http://www.w3.org/2000/svg">
+                <rect x="20" y="40" width="360" height="160" rx="10" fill="#0f172a" stroke="#10b981" stroke-width="3"/>
+                <rect x="35" y="55" width="330" height="40" rx="5" fill="#1e293b"/>
+                <text x="50" y="80" fill="#34d399" font-size="15" font-weight="bold" font-family="monospace">CISCO 2911 ISR [OSPF AREA 0 - FULL]</text>
+                <circle cx="340" cy="75" r="7" fill="#10b981"/>
+                <g transform="translate(40, 110)">
+                    <rect x="0" y="0" width="65" height="40" rx="4" fill="#334155" stroke="#10b981" stroke-width="2"/>
+                    <text x="32" y="25" fill="#ffffff" font-size="10" font-weight="bold" text-anchor="middle">Gi0/0</text>
+                </g>
+                <g transform="translate(120, 110)">
+                    <rect x="0" y="0" width="65" height="40" rx="4" fill="#334155" stroke="#10b981" stroke-width="2"/>
+                    <text x="32" y="25" fill="#ffffff" font-size="10" font-weight="bold" text-anchor="middle">Gi0/1</text>
+                </g>
+                <g transform="translate(200, 110)">
+                    <rect x="0" y="0" width="65" height="40" rx="4" fill="#334155" stroke="#38bdf8" stroke-width="2"/>
+                    <text x="32" y="25" fill="#38bdf8" font-size="10" font-weight="bold" text-anchor="middle">Gi0/2</text>
+                </g>
+                <g transform="translate(280, 110)">
+                    <rect x="0" y="0" width="65" height="40" rx="4" fill="#334155" stroke="#f59e0b" stroke-width="2"/>
+                    <text x="32" y="25" fill="#f59e0b" font-size="10" font-weight="bold" text-anchor="middle">Serial0/0</text>
+                </g>
+                <text x="200" y="185" fill="#cbd5e1" font-size="11" text-anchor="middle">OSPFv2 - Dijkstra SPF Engine (Multicast 224.0.0.5 / 224.0.0.6)</text>
+            </svg>`
+        },
+        {
+            "id": "dijkstra_spf_engine_diagram",
+            "name": "Dijkstra SPF Shortest Path Calculation Engine",
+            "category": "Layer 3 Algorithm & LSDB Graph",
+            "description": "Visual representation of Dijkstra's Shortest Path First (SPF) tree computation evaluating bandwidth Cost metrics across nodes.",
+            "svg": `<svg viewBox="0 0 400 240" xmlns="http://www.w3.org/2000/svg">
+                <rect x="20" y="20" width="360" height="200" rx="8" fill="#0b0f19" stroke="#3b82f6" stroke-width="2"/>
+                <text x="200" y="45" fill="#38bdf8" font-size="14" font-weight="bold" text-anchor="middle">DIJKSTRA SPF GRAPH COMPUTATION [AD = 110]</text>
+                <line x1="30" y1="55" x2="370" y2="55" stroke="#334155" stroke-width="2"/>
+                <circle cx="80" cy="130" r="22" fill="#1e293b" stroke="#38bdf8" stroke-width="2"/>
+                <text x="80" y="134" fill="#ffffff" font-size="11" font-weight="bold" text-anchor="middle">R1</text>
+
+                <circle cx="200" cy="90" r="22" fill="#1e293b" stroke="#10b981" stroke-width="2"/>
+                <text x="200" y="94" fill="#ffffff" font-size="11" font-weight="bold" text-anchor="middle">R2 (1G)</text>
+
+                <circle cx="200" cy="170" r="22" fill="#1e293b" stroke="#ef4444" stroke-width="2"/>
+                <text x="200" y="174" fill="#ffffff" font-size="11" font-weight="bold" text-anchor="middle">R3 (10M)</text>
+
+                <circle cx="320" cy="130" r="22" fill="#1e293b" stroke="#38bdf8" stroke-width="2"/>
+                <text x="320" y="134" fill="#ffffff" font-size="11" font-weight="bold" text-anchor="middle">R4</text>
+
+                <line x1="100" y1="118" x2="180" y2="98" stroke="#10b981" stroke-width="4"/>
+                <text x="135" y="100" fill="#10b981" font-size="10" font-weight="bold">Cost 1</text>
+
+                <line x1="220" y1="98" x2="300" y2="118" stroke="#10b981" stroke-width="4"/>
+                <text x="265" y="100" fill="#10b981" font-size="10" font-weight="bold">Cost 1</text>
+
+                <line x1="100" y1="142" x2="180" y2="162" stroke="#ef4444" stroke-width="2" stroke-dasharray="4,4"/>
+                <text x="135" y="170" fill="#ef4444" font-size="10">Cost 100</text>
+
+                <rect x="30" y="200" width="340" height="15" rx="3" fill="#1e293b"/>
+                <text x="200" y="211" fill="#10b981" font-size="9" text-anchor="middle">Dijkstra selects R1 ➔ R2 ➔ R4 (Total Cost = 2) over R1 ➔ R3 ➔ R4 (Cost = 200)</text>
+            </svg>`
+        }
+    ],
+    "evaluations": [
+        {
+            "id": "ospf_pre_1",
+            "type": "pre",
+            "question": "What metric does OSPF use to calculate the shortest path to a destination network?",
+            "options": [
+                "Hop Count",
+                "Bandwidth Cost",
+                "Delay Metric",
+                "Reliability Weight"
+            ],
+            "answer": "Bandwidth Cost",
+            "explanation": "OSPF uses Cost as its routing metric, calculated as Reference Bandwidth / Interface Bandwidth. Lower cost paths (higher bandwidth) are preferred."
+        },
+        {
+            "id": "ospf_pre_2",
+            "type": "pre",
+            "question": "What algorithm does OSPF run to compute shortest path trees from the LSDB?",
+            "options": [
+                "Bellman-Ford Algorithm",
+                "Dijkstra's Shortest Path First (SPF) Algorithm",
+                "Spanning Tree Algorithm",
+                "Diffusing Update Algorithm (DUAL)"
+            ],
+            "answer": "Dijkstra's Shortest Path First (SPF) Algorithm",
+            "explanation": "OSPF executes Dijkstra's SPF algorithm on the Link State Database (LSDB) to compute loop-free, lowest-cost routing trees."
+        },
+        {
+            "id": "ospf_pre_3",
+            "type": "pre",
+            "question": "What is the mandatory Backbone Area in an OSPF multi-area design?",
+            "options": [
+                "Area 1",
+                "Area 0",
+                "Area 100",
+                "Backbone Area 10"
+            ],
+            "answer": "Area 0",
+            "explanation": "Area 0 (or Area 0.0.0.0) is the mandatory Backbone Area. All non-backbone areas must physically or logically attach to Area 0."
+        },
+        {
+            "id": "ospf_pre_4",
+            "type": "pre",
+            "question": "What IPv4 multicast address is used by OSPF routers to send Hello packets?",
+            "options": [
+                "224.0.0.5",
+                "224.0.0.9",
+                "224.0.0.10",
+                "255.255.255.255"
+            ],
+            "answer": "224.0.0.5",
+            "explanation": "OSPF routers transmit Hello packets and general updates to all OSPF routers using the IPv4 multicast address 224.0.0.5."
+        },
+        {
+            "id": "ospf_pre_5",
+            "type": "pre",
+            "question": "Which OSPF neighbor state indicates that full database synchronization is achieved and adjacency is complete?",
+            "options": [
+                "Two-Way",
+                "ExStart",
+                "Loading",
+                "Full"
+            ],
+            "answer": "Full",
+            "explanation": "The FULL state signifies that neighbor routers have synchronized their Link State Databases (LSDB) completely."
+        },
+        {
+            "id": "ospf_post_1",
+            "type": "post",
+            "question": "What is the Administrative Distance (AD) assigned to OSPF routes in Cisco IOS?",
+            "options": [
+                "90",
+                "110",
+                "120",
+                "170"
+            ],
+            "answer": "110",
+            "explanation": "In Cisco IOS, OSPF has an Administrative Distance of 110 (EIGRP is 90, RIP is 120, Static is 1)."
+        },
+        {
+            "id": "ospf_post_2",
+            "type": "post",
+            "question": "What is the default OSPF Cost for a FastEthernet (100 Mbps) interface using a 100 Mbps reference bandwidth?",
+            "options": [
+                "1",
+                "10",
+                "100",
+                "1000"
+            ],
+            "answer": "1",
+            "explanation": "Cost = Reference Bandwidth (100 Mbps) / Interface Bandwidth (100 Mbps) = 1."
+        },
+        {
+            "id": "ospf_post_3",
+            "type": "post",
+            "question": "What is the primary role of a Designated Router (DR) on a broadcast Ethernet segment?",
+            "options": [
+                "To block all broadcast traffic",
+                "To serve as the central point for receiving and flooding LSAs, reducing full-mesh adjacencies",
+                "To assign IP addresses via DHCP",
+                "To encrypt all OSPF packets"
+            ],
+            "answer": "To serve as the central point for receiving and flooding LSAs, reducing full-mesh adjacencies",
+            "explanation": "The DR collects LSAs from all routers on the multi-access segment and redistributes them, reducing n*(n-1)/2 adjacencies to n-1."
+        },
+        {
+            "id": "ospf_post_4",
+            "type": "post",
+            "question": "How do routers determine the Designated Router (DR) on a broadcast network by default?",
+            "options": [
+                "Highest OSPF interface Priority, then highest Router ID",
+                "Lowest IP address on physical interface",
+                "Fastest CPU clock speed",
+                "Random selection"
+            ],
+            "answer": "Highest OSPF interface Priority, then highest Router ID",
+            "explanation": "The router with the highest OSPF interface priority (default: 1) is elected DR. Ties are broken by selecting the highest Router ID."
+        },
+        {
+            "id": "ospf_post_5",
+            "type": "post",
+            "question": "What multicast address do non-DR routers use to send Link State Updates (LSU) to the DR and BDR?",
+            "options": [
+                "224.0.0.5",
+                "224.0.0.6",
+                "224.0.0.9",
+                "224.0.0.10"
+            ],
+            "answer": "224.0.0.6",
+            "explanation": "DROther routers send LSA updates to the DR and BDR using the AllDRouters multicast address 224.0.0.6."
+        },
+        {
+            "id": "ospf_post_6",
+            "type": "post",
+            "question": "Which Cisco command displays OSPF neighbor adjacencies, interface roles (DR/BDR), and neighbor states?",
+            "options": [
+                "show ip ospf neighbor",
+                "show ip ospf database",
+                "show ip route ospf",
+                "debug ip ospf hello"
+            ],
+            "answer": "show ip ospf neighbor",
+            "explanation": "show ip ospf neighbor displays neighbor Router IDs, priority, current state (e.g. FULL/DR, FULL/BDR), and interface."
+        },
+        {
+            "id": "ospf_post_7",
+            "type": "post",
+            "question": "What wildcard mask is used in an OSPF network command to match a 255.255.255.0 (/24) subnet exactly?",
+            "options": [
+                "0.0.0.0",
+                "0.0.0.255",
+                "255.255.255.0",
+                "0.0.255.255"
+            ],
+            "answer": "0.0.0.255",
+            "explanation": "Wildcard mask is the inverse of the subnet mask. For /24 (255.255.255.0), the inverse wildcard mask is 0.0.0.255."
+        },
+        {
+            "id": "ospf_post_8",
+            "type": "post",
+            "question": "What happens when an OSPF Hello packet is received with mismatched Hello/Dead intervals or mismatched Area IDs?",
+            "options": [
+                "The routers form a partial adjacency",
+                "The neighbor relationship fails and cannot reach Two-Way or Full state",
+                "The router automatically changes its timers to match",
+                "OSPF converts to RIP"
+            ],
+            "answer": "The neighbor relationship fails and cannot reach Two-Way or Full state",
+            "explanation": "Mismatched Hello/Dead timers, Area IDs, or subnet masks cause OSPF neighbor discovery to fail."
+        },
+        {
+            "id": "ospf_post_9",
+            "type": "post",
+            "question": "What is the purpose of the passive-interface command in OSPF configuration?",
+            "options": [
+                "Stops sending OSPF Hello packets out the specified interface while continuing to advertise its connected subnet",
+                "Shuts down the physical port",
+                "Disables IPv4 routing",
+                "Forces the interface to become DR"
+            ],
+            "answer": "Stops sending OSPF Hello packets out the specified interface while continuing to advertise its connected subnet",
+            "explanation": "passive-interface suppresses Hello packets on LAN interfaces facing user PCs, conserving bandwidth and securing the network."
+        },
+        {
+            "id": "ospf_post_10",
+            "type": "post",
+            "question": "What Cisco command displays the contents of the local router's Link State Database (LSDB)?",
+            "options": [
+                "show ip ospf database",
+                "show ip route ospf",
+                "show ip ospf lsdb",
+                "debug ip ospf lsdb"
+            ],
+            "answer": "show ip ospf database",
+            "explanation": "show ip ospf database lists all LSA entries (Router LSAs, Network LSAs, Summary LSAs) stored in the router's LSDB."
+        }
+    ],
+    "viva": [
+        {
+            "q": "What is Link-State routing and how does OSPF differ from RIP?",
+            "a": "Link-State routing builds a complete topology map (LSDB) of the network by flooding LSAs. OSPF computes paths using Dijkstra's SPF algorithm based on bandwidth Cost, offering millisecond convergence, whereas RIP uses simple hop count (max 15) and slow 30-second periodic updates."
+        },
+        {
+            "q": "How is OSPF metric Cost calculated and how can network admins customize it?",
+            "a": "Cost = Reference Bandwidth / Interface Bandwidth (default reference = 100 Mbps). Admins can customize path selection by changing interface cost (ip ospf cost <value>) or raising the reference bandwidth (auto-cost reference-bandwidth 1000)."
+        },
+        {
+            "q": "Explain the 7 OSPF neighbor states in sequence.",
+            "a": "1. Down (no Hello received).\n2. Init (Hello received).\n3. Two-Way (bidirectional Hello confirmed, DR/BDR elected).\n4. ExStart (Master/Slave chosen for DBD exchange).\n5. Exchange (DBD summary packets exchanged).\n6. Loading (LSR and LSU packets request and receive missing LSAs).\n7. Full (LSDB fully synchronized, adjacency complete)."
+        },
+        {
+            "q": "Why are Designated Routers (DR) and Backup Designated Routers (BDR) elected on Ethernet networks?",
+            "a": "On multi-access broadcast networks, full mesh adjacencies create excessive LSA flooding. The DR acts as the central hub collecting and distributing LSAs, reducing adjacencies from n*(n-1)/2 to n-1. The BDR provides instant redundancy."
+        },
+        {
+            "q": "Why must all non-backbone OSPF areas connect to Backbone Area 0?",
+            "a": "OSPF uses a strict two-tier hierarchical design where Area 0 acts as the central backbone hub. Routing all inter-area traffic through Area 0 prevents routing loops between areas."
+        }
+    ],
+    "assignment": "1. Configure OSPF Single-Area 0 across a 3-router triangle topology (R1 ⇹ R2 ⇹ R3).\n2. Assign explicit Router IDs (R1: 1.1.1.1, R2: 2.2.2.2, R3: 3.3.3.3).\n3. Issue show ip ospf neighbor and verify that all adjacencies reach FULL state.\n4. Change R2 GigabitEthernet interface cost to 50 (ip ospf cost 50) and observe how Dijkstra's algorithm dynamically re-routes traffic via R3.",
+    "references": [
+        {
+            "title": "RFC 2328 - OSPF Version 2 Specification",
+            "link": "https://datatracker.ietf.org/doc/html/rfc2328"
+        },
+        {
+            "title": "RFC 5340 - OSPF for IPv6 (OSPFv3)",
+            "link": "https://datatracker.ietf.org/doc/html/rfc5340"
+        },
+        {
+            "title": "Cisco IOS OSPF Design & Configuration Guide",
+            "link": "https://www.cisco.com"
+        }
+    ],
+    "simType": "ospf_sim"
+},
     'routing_eigrp': {
         title: "Dynamic Routing - EIGRP",
         aim: "To configure Cisco Enhanced Interior Gateway Routing Protocol (EIGRP AS 100) using DUAL algorithm.",
@@ -2728,4 +3117,6 @@ window.VLAB_DATA['dns'] = window.VLAB_DATA['dhcp_config'];
 window.VLAB_DATA['vlan'] = window.VLAB_DATA['vlan_sim'];
 window.VLAB_DATA['rip_sim'] = window.VLAB_DATA['routing_rip'];
 window.VLAB_DATA['rip'] = window.VLAB_DATA['routing_rip'];
+window.VLAB_DATA['ospf_sim'] = window.VLAB_DATA['routing_ospf'];
+window.VLAB_DATA['ospf'] = window.VLAB_DATA['routing_ospf'];
 
