@@ -218,6 +218,130 @@ window.VLAB_DATA = {
             ],
             fix: "Ensure a CAT6 Straight-Through cable is connected between PC1 NIC and Switch Port Fa0/1, and assign valid IP 192.168.1.11/24 to PC2."
         },
+        pretest: [
+            {
+                q: "What is the primary operational difference between an Ethernet Hub and a Layer-2 Switch?",
+                options: [
+                    "A Hub forwards frames using MAC addresses, while a Switch broadcasts to all ports.",
+                    "A Hub operates at Layer 1 and broadcasts signals to ALL connected ports, whereas a Switch operates at Layer 2 and forwards frames ONLY to the destination port.",
+                    "A Switch operates at Layer 3 and routes packets, while a Hub operates at Layer 2.",
+                    "There is no difference; Hub and Switch are identical devices."
+                ],
+                correct: 1,
+                answer: 1,
+                explanation: "Hubs are Layer-1 devices that repeat electrical signals to all ports (shared collision domain). Switches are Layer-2 devices that learn MAC addresses to unicast frames (zero collision domain)."
+            },
+            {
+                q: "Which OSI Layers does a Network Interface Card (NIC) operate at?",
+                options: [
+                    "Layer 7 (Application Layer)",
+                    "Layer 4 (Transport Layer)",
+                    "Layer 1 (Physical) & Layer 2 (Data Link)",
+                    "Layer 3 (Network Layer)"
+                ],
+                correct: 2,
+                answer: 2,
+                explanation: "The NIC handles physical signaling (Layer 1) and frames data with 48-bit MAC hardware addresses (Layer 2)."
+            },
+            {
+                q: "How many bits are contained in a standard Ethernet MAC address?",
+                options: [
+                    "32 bits (4 bytes)",
+                    "48 bits (6 bytes)",
+                    "64 bits (8 bytes)",
+                    "128 bits (16 bytes)"
+                ],
+                correct: 1,
+                answer: 1,
+                explanation: "An Ethernet MAC address is a 48-bit (6-byte) hexadecimal hardware address."
+            },
+            {
+                q: "Which cable pinout configuration connects two SIMILAR networking devices directly (e.g. PC to PC)?",
+                options: [
+                    "Straight-Through Cable",
+                    "Crossover Cable",
+                    "Rollover Console Cable",
+                    "Coaxial BNC Cable"
+                ],
+                correct: 1,
+                answer: 1,
+                explanation: "A Crossover cable swaps Pins 1&3 and Pins 2&6 to connect transmit (Tx) to receive (Rx) between similar MDI devices."
+            },
+            {
+                q: "What is the maximum standard segment length for CAT6 copper twisted pair cabling?",
+                options: [
+                    "50 meters (164 feet)",
+                    "100 meters (328 feet)",
+                    "500 meters (1640 feet)",
+                    "1000 meters (3280 feet)"
+                ],
+                correct: 1,
+                answer: 1,
+                explanation: "Standard TIA/EIA-568 Ethernet copper cable segments are limited to 100 meters (90m solid horizontal + 10m patch cables)."
+            }
+        ],
+        posttest: [
+            {
+                q: "A technician connects a Router GigabitEthernet port directly to a PC NIC without Auto-MDIX. Which cable type is required?",
+                options: [
+                    "Straight-Through Cable",
+                    "Crossover Cable",
+                    "Single-Mode Fiber Cable",
+                    "Rollover Console Cable"
+                ],
+                correct: 1,
+                answer: 1,
+                explanation: "Routers and PC NICs are both MDI devices (transmit on Pins 1 & 2). Connecting them directly requires a Crossover cable to map Tx to Rx."
+            },
+            {
+                q: "Which fiber optic cable type utilizes a thin 9-micron core and laser light for long-distance campus links (up to 40 km)?",
+                options: [
+                    "Multi-Mode Fiber (MMF)",
+                    "Single-Mode Fiber (SMF)",
+                    "Cat6A Shielded Twisted Pair",
+                    "Thick Coaxial Cable"
+                ],
+                correct: 1,
+                answer: 1,
+                explanation: "Single-Mode Fiber (SMF) has a 9-micron core and uses laser light to eliminate modal dispersion over long distances up to 40 km."
+            },
+            {
+                q: "In the MAC address 00:1A:2B:3C:4D:5E, what do the first 24 bits (00:1A:2B) represent?",
+                options: [
+                    "The IP Subnet Mask",
+                    "The Organizationally Unique Identifier (OUI) assigned to the manufacturer",
+                    "The NIC product serial number",
+                    "The VLAN Identification tag"
+                ],
+                correct: 1,
+                answer: 1,
+                explanation: "The first 24 bits (3 bytes) of a MAC address are the OUI (Organizationally Unique Identifier) assigned by IEEE to the hardware manufacturer."
+            },
+            {
+                q: "What occurs when two PCs connected to an Ethernet Hub transmit data simultaneously?",
+                options: [
+                    "The Hub buffers both frames and forwards them sequentially.",
+                    "A data collision occurs, corrupting the signals and triggering a Jam Signal.",
+                    "The Hub routes the packets using IP addresses.",
+                    "The Hub automatically switches to full-duplex mode."
+                ],
+                correct: 1,
+                answer: 1,
+                explanation: "Hubs operate in half-duplex on a single collision domain. Simultaneous transmission causes a collision, corrupting data and sending a Jam signal."
+            },
+            {
+                q: "Which layer of the OSI model does a Cisco 2911 Router operate at, and what header info does it inspect?",
+                options: [
+                    "Layer 1 — Inspects electrical voltage levels",
+                    "Layer 2 — Inspects Source MAC addresses",
+                    "Layer 3 — Inspects Destination IP addresses and TTL",
+                    "Layer 4 — Inspects TCP Port numbers"
+                ],
+                correct: 2,
+                answer: 2,
+                explanation: "Routers operate at Layer 3 (Network Layer). They inspect Destination IP addresses in packet headers and decrement Time-To-Live (TTL) before routing."
+            }
+        ],
         viva: [
             { q: "What is the primary difference between a Hub and a Switch?", a: "A Hub is a Layer-1 device that broadcasts incoming electrical signals to ALL ports, creating a single shared collision domain. A Switch is a Layer-2 device that reads MAC addresses and forwards frames ONLY to the destination port, providing dedicated bandwidth per port and zero collisions." },
             { q: "Which OSI layer does a Router operate at, and how does it differ from a Switch?", a: "A Router operates at Layer 3 (Network Layer) and routes packets between DIFFERENT networks using IP addresses. A Switch operates at Layer 2 (Data Link Layer) and forwards frames within the SAME local network using MAC addresses." },

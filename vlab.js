@@ -7520,14 +7520,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         `).join('');
 
         let submitBtn;
-        if (prefix === 'post') {
-            container.innerHTML = html;
-            submitBtn = document.getElementById('submit-post');
-        } else {
-            html += `<button class="btn-sim primary" style="margin-top:24px; width:100%;" id="submit-${prefix}">Submit Final Answers</button>`;
-            container.innerHTML = html;
-            submitBtn = document.getElementById(`submit-${prefix}`);
-        }
+        html += `<button class="btn-sim primary" style="margin-top:24px; width:100%;" id="submit-${prefix}">Submit Assessment Answers</button>`;
+        container.innerHTML = html;
+        submitBtn = document.getElementById(`submit-${prefix}`);
 
         // Interactive selection feedback
         container.querySelectorAll('.mcq-option').forEach(opt => {
@@ -7548,12 +7543,17 @@ document.addEventListener('DOMContentLoaded', async () => {
                 questions.forEach((q, i) => {
                     const selected = container.querySelector(`input[name="${prefix}-q${i}"]:checked`);
                     const status = document.getElementById(`${prefix}-q${i}`).querySelector('.mcq-status');
+                    const targetAnswer = q.correct !== undefined ? q.correct : q.answer;
                     if (status) {
                         status.style.display = 'block';
-                        if (selected && parseInt(selected.value) === q.correct) {
-                            correctCount++; status.textContent = 'Correct Answer ✓'; status.style.color = 'var(--success)';
+                        if (selected && parseInt(selected.value) === targetAnswer) {
+                            correctCount++;
+                            status.textContent = 'Correct Answer ✓';
+                            status.style.color = 'var(--success)';
                         } else {
-                            status.textContent = `Incorrect. Correct: ${q.options[q.correct]}`; status.style.color = 'var(--danger)';
+                            const correctText = q.options && q.options[targetAnswer] ? q.options[targetAnswer] : `Option ${targetAnswer + 1}`;
+                            status.textContent = `Incorrect ✗. Correct Answer: ${correctText}`;
+                            status.style.color = 'var(--danger)';
                         }
                     }
                 });
