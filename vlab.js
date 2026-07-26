@@ -16285,6 +16285,7 @@ const initLanCablesSim = (container) => {
             `;
                 return;
             }
+            if (id === 'lan_cables' || (data && (data.simType === 'lan_cables' || data.simType === 'cable_crimp'))) { initLanCablesSim(container); return; }
 
             // Specialized Interactive Simulation Dispatchers
             if (data.simType === 'dfa_sim') { initDfaSim(container); return; }
@@ -16377,7 +16378,7 @@ const initLanCablesSim = (container) => {
                 <div class="sim-title" style="flex:1; text-align:center; font-weight:800; font-size:18px; color:var(--primary);">${data.title}</div>
                 <div class="sim-options">
                     <select id="simType" class="sim-select">
-                        <option value="collision">CSMA/CD</option>
+                        <option value="lan_eth">LAN Ethernet Frame Transmission</option>
                         <option value="csma_ca">CSMA/CA</option>
                     </select>
                 </div>
