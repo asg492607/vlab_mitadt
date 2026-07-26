@@ -14814,189 +14814,188 @@ const initDynamicNatSim = (container) => {
         // --- PRACTICAL 2: NETWORK COMMUNICATION MODELS (OSI & TCP/IP) ---
 // --- PRACTICAL 2: NETWORK COMMUNICATION MODELS (OSI & TCP/IP) DIGITAL TWIN SIMULATOR ---
 const initOsiTcpipSim = (container) => {
-    const AC = '#38bdf8'; // Sky Blue
+    const AC = '#38bdf8'; // Sky Blue primary accent
     container.innerHTML = `
-        <div style="padding:15px; font-family:var(--font-sans); color:var(--text-main); height:100%; display:flex; flex-direction:column; gap:12px; box-sizing:border-box;">
-            <div style="background:linear-gradient(135deg, rgba(56,189,248,0.15) 0%, rgba(15,23,42,0.6) 100%); border:1px solid ${AC}; border-radius:12px; padding:12px 18px; display:flex; justify-content:space-between; align-items:center;">
+        <div style="padding:16px; font-family:var(--font-sans); color:var(--text-main); height:100%; display:flex; flex-direction:column; gap:14px; box-sizing:border-box;">
+            
+            <!-- Top Control Bar -->
+            <div style="background:linear-gradient(135deg, rgba(15,23,42,0.9) 0%, rgba(30,41,59,0.9) 100%); border:1px solid rgba(56,189,248,0.3); border-radius:12px; padding:14px 20px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; box-shadow:0 8px 20px rgba(0,0,0,0.2);">
                 <div>
-                    <h3 style="margin:0; color:${AC}; font-size:17px; font-weight:800; display:flex; align-items:center; gap:8px;">
+                    <h3 style="margin:0; color:${AC}; font-size:18px; font-weight:800; display:flex; align-items:center; gap:10px;">
                         <span>🌐</span> Digital Twin of Network Communication (OSI & TCP/IP)
                     </h3>
                     <p style="margin:4px 0 0 0; font-size:12px; color:var(--text-muted);">
-                        "From Bits to Browser – Understanding How Data Travels Across a Network" • 11 Interactive Digital Twin Modules
+                        "From Bits to Browser – Real-Time End-to-End Visual Packet Journey & Layer Encapsulation Engine"
                     </p>
                 </div>
+                
+                <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+                    <button id="osi-btn-play" style="background:${AC}; color:#0f172a; border:none; padding:8px 16px; border-radius:8px; font-weight:800; font-size:12px; cursor:pointer; display:flex; align-items:center; gap:6px; box-shadow:0 4px 12px rgba(56,189,248,0.3);">
+                        ▶ Play Simulation
+                    </button>
+                    <button id="osi-btn-pause" style="background:#334155; color:#fff; border:1px solid var(--border); padding:8px 14px; border-radius:8px; font-weight:700; font-size:12px; cursor:pointer;">
+                        ⏸ Pause
+                    </button>
+                    <button id="osi-btn-reset" style="background:#334155; color:#fff; border:1px solid var(--border); padding:8px 14px; border-radius:8px; font-weight:700; font-size:12px; cursor:pointer;">
+                        🔄 Reset
+                    </button>
+                    <select id="osi-speed-select" style="background:#1e293b; color:#fff; border:1px solid var(--border); padding:7px 10px; border-radius:8px; font-size:12px; font-weight:bold;">
+                        <option value="1">1x Speed</option>
+                        <option value="2">2x Speed</option>
+                        <option value="4">4x Speed</option>
+                    </select>
+                </div>
             </div>
 
-            <!-- Tab Buttons -->
-            <div style="display:flex; gap:6px; border-bottom:1px solid var(--border); padding-bottom:8px; overflow-x:auto;">
-                <button id="p2-tab-1" class="p2-tab-btn" style="background:${AC}; color:#0f172a; border:none; padding:6px 12px; border-radius:6px; font-weight:800; font-size:11px; cursor:pointer;">
-                    1. OSI Layer Explorer
-                </button>
-                <button id="p2-tab-2" class="p2-tab-btn" style="background:var(--bg-alt); color:var(--text-main); border:1px solid var(--border); padding:6px 12px; border-radius:6px; font-weight:700; font-size:11px; cursor:pointer;">
-                    2. L1 Physical
-                </button>
-                <button id="p2-tab-3" class="p2-tab-btn" style="background:var(--bg-alt); color:var(--text-main); border:1px solid var(--border); padding:6px 12px; border-radius:6px; font-weight:700; font-size:11px; cursor:pointer;">
-                    3. L2 Data Link
-                </button>
-                <button id="p2-tab-4" class="p2-tab-btn" style="background:var(--bg-alt); color:var(--text-main); border:1px solid var(--border); padding:6px 12px; border-radius:6px; font-weight:700; font-size:11px; cursor:pointer;">
-                    4. L3 Network
-                </button>
-                <button id="p2-tab-5" class="p2-tab-btn" style="background:var(--bg-alt); color:var(--text-main); border:1px solid var(--border); padding:6px 12px; border-radius:6px; font-weight:700; font-size:11px; cursor:pointer;">
-                    5. L4 Transport
-                </button>
-                <button id="p2-tab-6" class="p2-tab-btn" style="background:var(--bg-alt); color:var(--text-main); border:1px solid var(--border); padding:6px 12px; border-radius:6px; font-weight:700; font-size:11px; cursor:pointer;">
-                    6. L5 Session
-                </button>
-                <button id="p2-tab-7" class="p2-tab-btn" style="background:var(--bg-alt); color:var(--text-main); border:1px solid var(--border); padding:6px 12px; border-radius:6px; font-weight:700; font-size:11px; cursor:pointer;">
-                    7. L6 Presentation
-                </button>
-                <button id="p2-tab-8" class="p2-tab-btn" style="background:var(--bg-alt); color:var(--text-main); border:1px solid var(--border); padding:6px 12px; border-radius:6px; font-weight:700; font-size:11px; cursor:pointer;">
-                    8. L7 Application
-                </button>
-                <button id="p2-tab-9" class="p2-tab-btn" style="background:var(--bg-alt); color:var(--text-main); border:1px solid var(--border); padding:6px 12px; border-radius:6px; font-weight:700; font-size:11px; cursor:pointer;">
-                    9. Encapsulation
-                </button>
-                <button id="p2-tab-10" class="p2-tab-btn" style="background:var(--bg-alt); color:var(--text-main); border:1px solid var(--border); padding:6px 12px; border-radius:6px; font-weight:700; font-size:11px; cursor:pointer;">
-                    10. End-to-End Flow
-                </button>
-                <button id="p2-tab-11" class="p2-tab-btn" style="background:var(--bg-alt); color:var(--text-main); border:1px solid var(--border); padding:6px 12px; border-radius:6px; font-weight:700; font-size:11px; cursor:pointer;">
-                    11. Fault Diagnoser
-                </button>
+            <!-- Main Interactive 2D Canvas Stage -->
+            <div style="background:#0b0f19; border-radius:12px; border:1px solid rgba(56,189,248,0.2); position:relative; min-height:280px; padding:15px; overflow:hidden; display:flex; flex-direction:column; justify-content:space-between; box-shadow:inset 0 0 30px rgba(0,0,0,0.5);">
+                <canvas id="osiCanvas" style="position:absolute; top:0; left:0; width:100%; height:100%; z-index:1;"></canvas>
+
+                <!-- Status Banner -->
+                <div style="position:relative; z-index:2; display:flex; justify-content:space-between; align-items:center;">
+                    <div id="osi-status-text" style="background:rgba(15,23,42,0.85); border:1px solid ${AC}; color:${AC}; padding:6px 14px; border-radius:20px; font-size:12px; font-weight:800; backdrop-filter:blur(4px);">
+                        Ready: Click 'Play Simulation' to watch data flow from Browser to Google Server
+                    </div>
+                    <div id="osi-phase-badge" style="background:rgba(16,185,129,0.2); border:1px solid #10b981; color:#10b981; padding:6px 14px; border-radius:20px; font-size:11px; font-weight:800;">
+                        Layer State: Idle
+                    </div>
+                </div>
+
+                <!-- Network Devices Row (Canvas Overlay Elements) -->
+                <div style="position:relative; z-index:2; display:grid; grid-template-columns: repeat(5, 1fr); gap:12px; margin-top:140px; text-align:center;">
+                    
+                    <!-- Client PC -->
+                    <div id="node-client" class="osi-node-card" style="background:rgba(30,41,59,0.85); border:2px solid #38bdf8; border-radius:10px; padding:10px; transition:all 0.3s;">
+                        <div style="font-size:26px;">💻</div>
+                        <div style="font-size:12px; font-weight:800; color:#fff;">Student PC</div>
+                        <div style="font-size:10px; color:#38bdf8; font-family:monospace;">192.168.1.10</div>
+                        <div style="font-size:9px; color:var(--text-muted); margin-top:2px;">MAC: 00:1A:2B:3C:4D:5E</div>
+                    </div>
+
+                    <!-- L2 Switch -->
+                    <div id="node-switch" class="osi-node-card" style="background:rgba(30,41,59,0.85); border:2px solid #f59e0b; border-radius:10px; padding:10px; transition:all 0.3s;">
+                        <div style="font-size:26px;">🔀</div>
+                        <div style="font-size:12px; font-weight:800; color:#fff;">L2 Switch</div>
+                        <div style="font-size:10px; color:#f59e0b; font-family:monospace;">VLAN 10</div>
+                        <div style="font-size:9px; color:var(--text-muted); margin-top:2px;">MAC Table Learning</div>
+                    </div>
+
+                    <!-- L3 Router -->
+                    <div id="node-router" class="osi-node-card" style="background:rgba(30,41,59,0.85); border:2px solid #10b981; border-radius:10px; padding:10px; transition:all 0.3s;">
+                        <div style="font-size:26px;">🌐</div>
+                        <div style="font-size:12px; font-weight:800; color:#fff;">Edge Router</div>
+                        <div style="font-size:10px; color:#10b981; font-family:monospace;">GW: 192.168.1.1</div>
+                        <div style="font-size:9px; color:var(--text-muted); margin-top:2px;">IP Route Lookup</div>
+                    </div>
+
+                    <!-- Cloud WAN -->
+                    <div id="node-cloud" class="osi-node-card" style="background:rgba(30,41,59,0.85); border:2px solid #a855f7; border-radius:10px; padding:10px; transition:all 0.3s;">
+                        <div style="font-size:26px;">☁️</div>
+                        <div style="font-size:12px; font-weight:800; color:#fff;">Internet Cloud</div>
+                        <div style="font-size:10px; color:#a855f7; font-family:monospace;">WAN Core</div>
+                        <div style="font-size:9px; color:var(--text-muted); margin-top:2px;">BGP Global Routing</div>
+                    </div>
+
+                    <!-- Target Web Server -->
+                    <div id="node-server" class="osi-node-card" style="background:rgba(30,41,59,0.85); border:2px solid #ec4899; border-radius:10px; padding:10px; transition:all 0.3s;">
+                        <div style="font-size:26px;">🖥️</div>
+                        <div style="font-size:12px; font-weight:800; color:#fff;">Google Server</div>
+                        <div style="font-size:10px; color:#ec4899; font-family:monospace;">142.250.183.206</div>
+                        <div style="font-size:9px; color:var(--text-muted); margin-top:2px;">Port 443 (HTTPS)</div>
+                    </div>
+                </div>
             </div>
 
-            <!-- MODULE CONTENT PANELS -->
-            <div id="p2-panel-container" style="flex:1; overflow-y:auto;">
-                <!-- 1. OSI Layer Explorer -->
-                <div id="p2-panel-1" class="p2-panel" style="display:grid; grid-template-columns: 240px 1fr; gap:16px; height:100%;">
-                    <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:10px; padding:12px; display:flex; flex-direction:column; gap:6px;">
-                        <h4 style="margin:0 0 6px 0; color:${AC}; font-size:12px;">Click Layer to Inspect:</h4>
-                        <button class="layer-item-btn" data-layer="7" style="padding:8px; background:#ec4899; color:#fff; border:none; border-radius:6px; font-weight:bold; cursor:pointer; text-align:left;">Layer 7: Application</button>
-                        <button class="layer-item-btn" data-layer="6" style="padding:8px; background:#a855f7; color:#fff; border:none; border-radius:6px; font-weight:bold; cursor:pointer; text-align:left;">Layer 6: Presentation</button>
-                        <button class="layer-item-btn" data-layer="5" style="padding:8px; background:#8b5cf6; color:#fff; border:none; border-radius:6px; font-weight:bold; cursor:pointer; text-align:left;">Layer 5: Session</button>
-                        <button class="layer-item-btn" data-layer="4" style="padding:8px; background:#3b82f6; color:#fff; border:none; border-radius:6px; font-weight:bold; cursor:pointer; text-align:left;">Layer 4: Transport</button>
-                        <button class="layer-item-btn" data-layer="3" style="padding:8px; background:#10b981; color:#fff; border:none; border-radius:6px; font-weight:bold; cursor:pointer; text-align:left;">Layer 3: Network</button>
-                        <button class="layer-item-btn" data-layer="2" style="padding:8px; background:#f59e0b; color:#fff; border:none; border-radius:6px; font-weight:bold; cursor:pointer; text-align:left;">Layer 2: Data Link</button>
-                        <button class="layer-item-btn" data-layer="1" style="padding:8px; background:#ef4444; color:#fff; border:none; border-radius:6px; font-weight:bold; cursor:pointer; text-align:left;">Layer 1: Physical</button>
-                    </div>
-
-                    <div id="layer-inspect-details" style="background:var(--bg-card); border:1px solid var(--border); border-radius:10px; padding:16px; font-size:13px; line-height:1.7;">
-                        Select a layer on the left to inspect its Purpose, Responsibilities, PDU, Hardware Devices, Protocols, and Real-World Example!
-                    </div>
-                </div>
-
-                <!-- 2. Physical Layer -->
-                <div id="p2-panel-2" class="p2-panel" style="display:none; flex-direction:column; gap:12px;">
-                    <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:10px; padding:14px;">
-                        <h4 style="margin:0 0 10px 0; color:#ef4444;">Layer 1 Physical Simulation: Bit Signaling & Transmission Media</h4>
-                        <div style="display:flex; gap:10px; margin-bottom:12px;">
-                            <button id="btn-phy-copper" style="padding:6px 12px; background:#ef4444; color:#fff; border:none; border-radius:6px; font-weight:bold; cursor:pointer;">Copper UTP Cable (Voltage)</button>
-                            <button id="btn-phy-fiber" style="padding:6px 12px; background:#38bdf8; color:#0f172a; border:none; border-radius:6px; font-weight:bold; cursor:pointer;">Fiber Optic (Light Pulses)</button>
-                            <button id="btn-phy-wifi" style="padding:6px 12px; background:#a855f7; color:#fff; border:none; border-radius:6px; font-weight:bold; cursor:pointer;">Wireless Radio (RF Waves)</button>
+            <!-- Bottom Inspector & Header Visualizer Grid -->
+            <div style="display:grid; grid-template-columns: 320px 1fr; gap:14px; flex:1;">
+                
+                <!-- 7-Layer Live Header Encapsulation Inspector -->
+                <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:14px; display:flex; flex-direction:column; gap:8px; box-shadow:0 4px 12px rgba(0,0,0,0.05);">
+                    <h4 style="margin:0; color:${AC}; font-size:14px; font-weight:800; display:flex; align-items:center; gap:6px;">
+                        <span>📦</span> Live PDU & Encapsulation Inspector
+                    </h4>
+                    <p style="margin:0; font-size:11px; color:var(--text-muted);">Watch headers assemble down sender stack & disassemble up receiver stack:</p>
+                    
+                    <div style="display:flex; flex-direction:column; gap:5px; margin-top:4px;">
+                        <div id="pdu-l7" class="pdu-layer-box" style="padding:6px 10px; background:rgba(236,72,153,0.1); border:1px solid #ec4899; border-radius:6px; font-size:11px; color:#ec4899; font-family:monospace;">
+                            <b>L7 Application:</b> HTTP GET /index.html
                         </div>
-                        <div id="phy-sim-output" style="background:#0b0f19; border:1px solid #334155; border-radius:8px; padding:12px; font-family:monospace; font-size:12px; color:#ef4444;">
-                            Bits: 01010110 01100101 01101100 01101100 01101111 (Transmitting over Copper Cable)
+                        <div id="pdu-l6" class="pdu-layer-box" style="padding:6px 10px; background:rgba(168,85,247,0.1); border:1px solid #a855f7; border-radius:6px; font-size:11px; color:#a855f7; font-family:monospace;">
+                            <b>L6 Presentation:</b> TLS 1.3 Encrypted Payload
                         </div>
-                    </div>
-                </div>
-
-                <!-- 3. Data Link Layer -->
-                <div id="p2-panel-3" class="p2-panel" style="display:none; flex-direction:column; gap:12px;">
-                    <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:10px; padding:14px;">
-                        <h4 style="margin:0 0 10px 0; color:#f59e0b;">Layer 2 Data Link Simulation: MAC Addressing & Switch Frame Forwarding</h4>
-                        <div style="background:#0b0f19; border:1px solid #334155; border-radius:8px; padding:12px; font-family:monospace; font-size:11px; color:#f59e0b; line-height:1.6;">
-                            [Ethernet Header: Src MAC: 00:1A:2B:3C:4D:5E ➔ Dst MAC: 00:80:C8:11:22:33 | EtherType: 0x0800 IPv4 | CRC Trailer: 0x9F41]
+                        <div id="pdu-l5" class="pdu-layer-box" style="padding:6px 10px; background:rgba(139,92,246,0.1); border:1px solid #8b5cf6; border-radius:6px; font-size:11px; color:#8b5cf6; font-family:monospace;">
+                            <b>L5 Session:</b> Session ID #98412 Active
+                        </div>
+                        <div id="pdu-l4" class="pdu-layer-box" style="padding:6px 10px; background:rgba(59,130,246,0.1); border:1px solid #3b82f6; border-radius:6px; font-size:11px; color:#3b82f6; font-family:monospace;">
+                            <b>L4 Transport:</b> TCP Src: 54321 ➔ Dst: 443 [SYN]
+                        </div>
+                        <div id="pdu-l3" class="pdu-layer-box" style="padding:6px 10px; background:rgba(16,185,129,0.1); border:1px solid #10b981; border-radius:6px; font-size:11px; color:#10b981; font-family:monospace;">
+                            <b>L3 Network:</b> IP Src: 192.168.1.10 ➔ Dst: 142.250.183.206
+                        </div>
+                        <div id="pdu-l2" class="pdu-layer-box" style="padding:6px 10px; background:rgba(245,158,11,0.1); border:1px solid #f59e0b; border-radius:6px; font-size:11px; color:#f59e0b; font-family:monospace;">
+                            <b>L2 Data Link:</b> MAC Src: 00:1A:2B ➔ Dst: 00:80:C8
+                        </div>
+                        <div id="pdu-l1" class="pdu-layer-box" style="padding:6px 10px; background:rgba(239,68,68,0.1); border:1px solid #ef4444; border-radius:6px; font-size:11px; color:#ef4444; font-family:monospace;">
+                            <b>L1 Physical:</b> ⚡ 01010110 01100101 (Bits)
                         </div>
                     </div>
                 </div>
 
-                <!-- 4. Network Layer -->
-                <div id="p2-panel-4" class="p2-panel" style="display:none; flex-direction:column; gap:12px;">
-                    <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:10px; padding:14px;">
-                        <h4 style="margin:0 0 10px 0; color:#10b981;">Layer 3 Network Simulation: IP Addressing & Router Routing Table Lookup</h4>
-                        <div style="background:#0b0f19; border:1px solid #334155; border-radius:8px; padding:12px; font-family:monospace; font-size:11px; color:#10b981; line-height:1.6;">
-                            [IP Packet Header: Src IP: 192.168.1.10 ➔ Dst IP: 142.250.183.206 | TTL: 64 | Protocol: 6 (TCP)]<br>
-                            Router Table: 142.250.0.0/16 ➔ Next-Hop Gateway 203.0.113.1 via interface Gi0/1
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 5. Transport Layer -->
-                <div id="p2-panel-5" class="p2-panel" style="display:none; flex-direction:column; gap:12px;">
-                    <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:10px; padding:14px;">
-                        <h4 style="margin:0 0 10px 0; color:#3b82f6;">Layer 4 Transport Simulation: TCP 3-Way Handshake vs UDP Datagram</h4>
-                        <div style="background:#0b0f19; border:1px solid #334155; border-radius:8px; padding:12px; font-family:monospace; font-size:11px; color:#3b82f6; line-height:1.6;">
-                            TCP Segment: Src Port: 54321 ➔ Dst Port: 443 | Flags: [SYN, ACK] | Seq: 100 | Ack: 301 | Window Size: 64240
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 6. Session Layer -->
-                <div id="p2-panel-6" class="p2-panel" style="display:none; flex-direction:column; gap:12px;">
-                    <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:10px; padding:14px;">
-                        <h4 style="margin:0 0 10px 0; color:#8b5cf6;">Layer 5 Session Simulation: Dialogue Control & Session State</h4>
-                        <div style="background:#0b0f19; border:1px solid #334155; border-radius:8px; padding:12px; font-size:12px; color:#8b5cf6;">
-                            Session ID #98412 Active | Checkpoint: 1024 KB Synced | State: ESTABLISHED
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 7. Presentation Layer -->
-                <div id="p2-panel-7" class="p2-panel" style="display:none; flex-direction:column; gap:12px;">
-                    <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:10px; padding:14px;">
-                        <h4 style="margin:0 0 10px 0; color:#a855f7;">Layer 6 Presentation Simulation: Encoding, Compression & SSL/TLS Encryption</h4>
-                        <div style="background:#0b0f19; border:1px solid #334155; border-radius:8px; padding:12px; font-size:12px; color:#a855f7;">
-                            UTF-8 Encoded ➔ TLS 1.3 Cipher Suite: TLS_AES_256_GCM_SHA384 (Encrypted Payload)
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 8. Application Layer -->
-                <div id="p2-panel-8" class="p2-panel" style="display:none; flex-direction:column; gap:12px;">
-                    <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:10px; padding:14px;">
-                        <h4 style="margin:0 0 10px 0; color:#ec4899;">Layer 7 Application Simulation: HTTP, DNS, FTP, DHCP Request Generator</h4>
-                        <div style="background:#0b0f19; border:1px solid #334155; border-radius:8px; padding:12px; font-family:monospace; font-size:11px; color:#ec4899;">
-                            GET /index.html HTTP/1.1<br>Host: www.google.com<br>User-Agent: Chrome/120.0
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 9. Encapsulation -->
-                <div id="p2-panel-9" class="p2-panel" style="display:none; flex-direction:column; gap:12px;">
-                    <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:10px; padding:14px;">
-                        <h4 style="margin:0 0 10px 0; color:${AC};">Header Encapsulation & Decapsulation Mechanics</h4>
-                        <div style="background:#0b0f19; border:1px solid #334155; border-radius:8px; padding:14px; font-family:monospace; font-size:11px; line-height:1.8;">
-                            [Ethernet Header] + [IP Header] + [TCP Header] + [HTTP Data Payload] + [CRC Trailer]
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 10. End-to-End Flow -->
-                <div id="p2-panel-10" class="p2-panel" style="display:none; flex-direction:column; gap:12px;">
-                    <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:10px; padding:14px;">
-                        <h4 style="margin:0 0 10px 0; color:${AC};">End-to-End Digital Twin: Opening https://www.google.com</h4>
-                        <button id="btn-trigger-full-flow" style="background:${AC}; color:#0f172a; border:none; padding:8px 16px; border-radius:6px; font-weight:800; font-size:12px; cursor:pointer;">
-                            🚀 Execute Complete Data Transmission Flow
+                <!-- Interactive Layer Explorer & Diagnostic Tools -->
+                <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:14px; display:flex; flex-direction:column; gap:10px;">
+                    
+                    <!-- Sub-Module Tabs -->
+                    <div style="display:flex; gap:6px; border-bottom:1px solid var(--border); padding-bottom:8px;">
+                        <button id="tab-sub-explorer" class="sub-tab-btn" style="background:${AC}; color:#0f172a; border:none; padding:6px 12px; border-radius:6px; font-weight:800; font-size:11px; cursor:pointer;">
+                            🔍 Layer Explorer
                         </button>
-                        <div id="full-flow-status" style="margin-top:10px; background:#0b0f19; border:1px solid #334155; border-radius:8px; padding:12px; font-size:12px; color:#38bdf8;">
-                            Click the button above to simulate full browser packet journey.
+                        <button id="tab-sub-encap" class="sub-tab-btn" style="background:var(--bg-alt); color:var(--text-main); border:1px solid var(--border); padding:6px 12px; border-radius:6px; font-weight:700; font-size:11px; cursor:pointer;">
+                            🧩 Encapsulation Structure
+                        </button>
+                        <button id="tab-sub-fault" class="sub-tab-btn" style="background:var(--bg-alt); color:var(--text-main); border:1px solid var(--border); padding:6px 12px; border-radius:6px; font-weight:700; font-size:11px; cursor:pointer;">
+                            🛠️ Fault Diagnoser
+                        </button>
+                    </div>
+
+                    <!-- Panel: Layer Explorer -->
+                    <div id="sub-panel-explorer" style="display:flex; flex-direction:column; gap:10px; height:100%;">
+                        <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                            <button class="layer-pick-btn" data-layer="7" style="padding:6px 10px; background:#ec4899; color:#fff; border:none; border-radius:6px; font-size:11px; font-weight:bold; cursor:pointer;">L7 Application</button>
+                            <button class="layer-pick-btn" data-layer="6" style="padding:6px 10px; background:#a855f7; color:#fff; border:none; border-radius:6px; font-size:11px; font-weight:bold; cursor:pointer;">L6 Presentation</button>
+                            <button class="layer-pick-btn" data-layer="5" style="padding:6px 10px; background:#8b5cf6; color:#fff; border:none; border-radius:6px; font-size:11px; font-weight:bold; cursor:pointer;">L5 Session</button>
+                            <button class="layer-pick-btn" data-layer="4" style="padding:6px 10px; background:#3b82f6; color:#fff; border:none; border-radius:6px; font-size:11px; font-weight:bold; cursor:pointer;">L4 Transport</button>
+                            <button class="layer-pick-btn" data-layer="3" style="padding:6px 10px; background:#10b981; color:#fff; border:none; border-radius:6px; font-size:11px; font-weight:bold; cursor:pointer;">L3 Network</button>
+                            <button class="layer-pick-btn" data-layer="2" style="padding:6px 10px; background:#f59e0b; color:#fff; border:none; border-radius:6px; font-size:11px; font-weight:bold; cursor:pointer;">L2 Data Link</button>
+                            <button class="layer-pick-btn" data-layer="1" style="padding:6px 10px; background:#ef4444; color:#fff; border:none; border-radius:6px; font-size:11px; font-weight:bold; cursor:pointer;">L1 Physical</button>
+                        </div>
+                        <div id="layer-explorer-box" style="background:#0b0f19; border:1px solid #334155; border-radius:8px; padding:12px; font-size:12px; line-height:1.7; flex:1;">
+                            <b style="color:${AC};">Select a layer above to view its purpose, responsibilities, protocols, devices, PDU, and real-world example!</b>
                         </div>
                     </div>
-                </div>
 
-                <!-- 11. Fault Diagnoser -->
-                <div id="p2-panel-11" class="p2-panel" style="display:none; flex-direction:column; gap:12px;">
-                    <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:10px; padding:14px;">
-                        <h4 style="margin:0 0 10px 0; color:${AC};">Layer-wise Network Fault Diagnoser</h4>
-                        <select id="p2-fault-select" class="eval-box" style="font-weight:bold; margin-bottom:10px;">
-                            <option value="l1">Layer 1 Physical: Cable Disconnected / Link Down</option>
-                            <option value="l2">Layer 2 Data Link: ARP Resolution Failure / MAC Table Error</option>
-                            <option value="l3">Layer 3 Network: Invalid Subnet IP / Router Unreachable</option>
-                            <option value="l4">Layer 4 Transport: Firewall Blocking TCP Port 443</option>
+                    <!-- Panel: Encapsulation Structure -->
+                    <div id="sub-panel-encap" style="display:none; flex-direction:column; gap:10px;">
+                        <div style="background:#0b0f19; border:1px solid #334155; border-radius:8px; padding:14px; font-family:monospace; font-size:11px; line-height:1.8;">
+                            <div style="color:#ec4899;">[Application Data: HTTP GET /index.html]</div>
+                            <div style="color:#3b82f6; margin-top:4px;">+ [TCP Header: SrcPort 54321, DstPort 443, Seq 100, Ack 0]</div>
+                            <div style="color:#10b981; margin-top:4px;">+ [IP Header: SrcIP 192.168.1.10, DstIP 142.250.183.206, TTL 64]</div>
+                            <div style="color:#f59e0b; margin-top:4px;">+ [Ethernet Header: SrcMAC 00:1A:2B:3C:4D:5E, DstMAC 00:80:C8:11:22:33 | FCS CRC32]</div>
+                            <div style="color:#ef4444; margin-top:4px;">➔ Transmitted as 101010110011001010110110001101100 (Physical Bits)</div>
+                        </div>
+                    </div>
+
+                    <!-- Panel: Fault Diagnoser -->
+                    <div id="sub-panel-fault" style="display:none; flex-direction:column; gap:10px;">
+                        <select id="fault-injector-select" style="background:#0b0f19; color:#fff; border:1px solid var(--border); padding:8px; border-radius:6px; font-size:12px; font-weight:bold;">
+                            <option value="none">-- Select Fault Scenario to Inject --</option>
+                            <option value="l1">Layer 1 Physical: Ethernet Cable Unplugged / Link Cut</option>
+                            <option value="l2">Layer 2 Data Link: Switch MAC Address Learning Mismatch</option>
+                            <option value="l3">Layer 3 Network: Subnet Mismatch / Gateway Unreachable</option>
+                            <option value="l4">Layer 4 Transport: Stateful Firewall Blocking Port 443</option>
                             <option value="l7">Layer 7 Application: DNS Domain Resolution Failure</option>
                         </select>
-                        <div id="p2-fault-box" style="background:#0b0f19; border:1px solid #334155; border-radius:8px; padding:12px; font-size:12px; line-height:1.7;">
-                            Select a scenario to isolate the broken layer.
+                        <div id="fault-diagnoser-box" style="background:#0b0f19; border:1px solid #334155; border-radius:8px; padding:12px; font-size:12px; line-height:1.7;">
+                            Select a scenario above to test layer-wise fault isolation logic!
                         </div>
                     </div>
                 </div>
@@ -15004,76 +15003,272 @@ const initOsiTcpipSim = (container) => {
         </div>
     `;
 
-    // Tab Switcher
-    const tabs = container.querySelectorAll('.p2-tab-btn');
-    const panels = container.querySelectorAll('.p2-panel');
+    // ----------------------------------------------------
+    // ANIMATED CANVAS & SIMULATION LOGIC ENGINE
+    // ----------------------------------------------------
+    const canvas = container.querySelector('#osiCanvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
 
-    tabs.forEach((tab, index) => {
-        tab.onclick = () => {
-            tabs.forEach(t => { t.style.background = 'var(--bg-alt)'; t.style.color = 'var(--text-main)'; });
-            panels.forEach(p => p.style.display = 'none');
+    let animId = null;
+    let isRunning = false;
+    let animProgress = 0; // 0 to 1
+    let animSpeed = 1;
+    let currentStep = 0; // 0: Client->Switch, 1: Switch->Router, 2: Router->Cloud, 3: Cloud->Server, 4: Response Server->Client
 
-            tab.style.background = AC;
-            tab.style.color = '#0f172a';
-            const panel = container.querySelector(`#p2-panel-${index + 1}`);
-            if (panel) {
-                panel.style.display = (index === 0) ? 'grid' : 'flex';
+    const resizeCanvas = () => {
+        canvas.width = canvas.parentElement.clientWidth;
+        canvas.height = canvas.parentElement.clientHeight;
+    };
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
+    const nodes = [
+        { id: 'client', label: 'Client PC', xRatio: 0.1, yRatio: 0.5, color: '#38bdf8' },
+        { id: 'switch', label: 'L2 Switch', xRatio: 0.3, yRatio: 0.5, color: '#f59e0b' },
+        { id: 'router', label: 'Edge Router', xRatio: 0.5, yRatio: 0.5, color: '#10b981' },
+        { id: 'cloud', label: 'Cloud WAN', xRatio: 0.7, yRatio: 0.5, color: '#a855f7' },
+        { id: 'server', label: 'Google Server', xRatio: 0.9, yRatio: 0.5, color: '#ec4899' }
+    ];
+
+    const drawCanvas = () => {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Draw Links between nodes
+        ctx.lineWidth = 3;
+        for (let i = 0; i < nodes.length - 1; i++) {
+            const n1 = nodes[i];
+            const n2 = nodes[i + 1];
+            const x1 = n1.xRatio * canvas.width;
+            const y1 = n1.yRatio * canvas.height - 20;
+            const x2 = n2.xRatio * canvas.width;
+            const y2 = n2.yRatio * canvas.height - 20;
+
+            ctx.strokeStyle = 'rgba(56, 189, 248, 0.25)';
+            ctx.setLineDash([6, 6]);
+            ctx.beginPath();
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y2);
+            ctx.stroke();
+            ctx.setLineDash([]);
+        }
+
+        // Draw Traveling Glowing Packet Pulse
+        if (isRunning) {
+            let startNodeIdx = currentStep;
+            let endNodeIdx = currentStep + 1;
+            let isReturn = false;
+
+            if (currentStep >= 4) {
+                isReturn = true;
+                startNodeIdx = 4 - (currentStep - 4);
+                endNodeIdx = startNodeIdx - 1;
             }
-            if (index === 10) updateP2Fault();
-        };
-    });
 
-    // Layer Explorer Details Logic
-    const layerBtns = container.querySelectorAll('.layer-item-btn');
-    const detailsBox = container.querySelector('#layer-inspect-details');
+            if (startNodeIdx >= 0 && startNodeIdx < nodes.length && endNodeIdx >= 0 && endNodeIdx < nodes.length) {
+                const n1 = nodes[startNodeIdx];
+                const n2 = nodes[endNodeIdx];
+                const x1 = n1.xRatio * canvas.width;
+                const y1 = n1.yRatio * canvas.height - 20;
+                const x2 = n2.xRatio * canvas.width;
+                const y2 = n2.yRatio * canvas.height - 20;
 
-    const layerInfo = {
-        "7": "<h3 style='color:#ec4899;'>Layer 7: Application Layer</h3><b>Purpose:</b> Direct interface between software applications and network services.<br><b>Responsibilities:</b> Web browsing, email, file transfer, DNS resolution.<br><b>PDU:</b> Data<br><b>Devices:</b> Workstations, Web Servers, API Gateways.<br><b>Protocols:</b> HTTP, HTTPS, DNS, DHCP, FTP, SMTP, SSH.<br><b>Real-World Example:</b> Browser sending HTTP GET request for www.google.com.",
-        "6": "<h3 style='color:#a855f7;'>Layer 6: Presentation Layer</h3><b>Purpose:</b> Translates, formats, compresses, and encrypts data for network syntax compatibility.<br><b>Responsibilities:</b> SSL/TLS encryption, UTF-8 encoding, JPEG/MPEG compression.<br><b>PDU:</b> Data<br><b>Devices:</b> Host OS, Encryption Gateways.<br><b>Protocols:</b> SSL/TLS, ASCII, MIME, JPEG.<br><b>Real-World Example:</b> Encrypting web data using TLS 1.3 before transmission.",
-        "5": "<h3 style='color:#8b5cf6;'>Layer 5: Session Layer</h3><b>Purpose:</b> Establishes, maintains, synchronizes, and terminates session dialogues.<br><b>Responsibilities:</b> Session checkpointing, authentication, dialogue control.<br><b>PDU:</b> Data<br><b>Devices:</b> Application Servers, Workstations.<br><b>Protocols:</b> NetBIOS, RPC, SOCKS, PPTP.<br><b>Real-World Example:</b> Maintaining active session tokens during e-commerce checkout.",
-        "4": "<h3 style='color:#3b82f6;'>Layer 4: Transport Layer</h3><b>Purpose:</b> Manages process-to-process communication between host applications.<br><b>Responsibilities:</b> Segmentation, port multiplexing, error recovery, flow control.<br><b>PDU:</b> Segment (TCP) / Datagram (UDP)<br><b>Devices:</b> Stateful Firewalls, Load Balancers.<br><b>Protocols:</b> TCP, UDP.<br><b>Real-World Example:</b> TCP executing 3-Way Handshake on port 443.",
-        "3": "<h3 style='color:#10b981;'>Layer 3: Network Layer</h3><b>Purpose:</b> Manages logical IP addressing and routes packets across networks.<br><b>Responsibilities:</b> Packet forwarding, logical IP addressing, routing path selection.<br><b>PDU:</b> Packet<br><b>Devices:</b> Routers, Layer 3 Switches.<br><b>Protocols:</b> IPv4, IPv6, ICMP, ARP, OSPF, BGP.<br><b>Real-World Example:</b> Router forwarding packets using IPv4 destination address.",
-        "2": "<h3 style='color:#f59e0b;'>Layer 2: Data Link Layer</h3><b>Purpose:</b> Provides node-to-node frame delivery across local physical medium.<br><b>Responsibilities:</b> Hardware MAC addressing, framing, error detection (CRC).<br><b>PDU:</b> Frame<br><b>Devices:</b> Layer 2 Switches, NICs, Bridges.<br><b>Protocols:</b> Ethernet (802.3), Wi-Fi MAC (802.11), 802.1Q VLAN.<br><b>Real-World Example:</b> Switch forwarding Ethernet frame to destination MAC address.",
-        "1": "<h3 style='color:#ef4444;'>Layer 1: Physical Layer</h3><b>Purpose:</b> Transmits raw bit streams through physical or wireless media.<br><b>Responsibilities:</b> Bit signaling, voltage levels, data rates, physical connectors.<br><b>PDU:</b> Bits<br><b>Devices:</b> Hubs, Cables (UTP/Fiber), Transceivers.<br><b>Protocols:</b> 1000BASE-T Ethernet, DSL, 802.11 PHY.<br><b>Real-World Example:</b> Transmitting electrical pulses through Cat6 UTP cable."
+                const currentX = x1 + (x2 - x1) * animProgress;
+                const currentY = y1 + (y2 - y1) * animProgress;
+
+                // Glowing outer pulse ring
+                ctx.beginPath();
+                ctx.arc(currentX, currentY, 14, 0, Math.PI * 2);
+                ctx.fillStyle = isReturn ? 'rgba(16, 185, 129, 0.4)' : 'rgba(56, 189, 248, 0.4)';
+                ctx.fill();
+
+                // Inner core packet ball
+                ctx.beginPath();
+                ctx.arc(currentX, currentY, 7, 0, Math.PI * 2);
+                ctx.fillStyle = isReturn ? '#10b981' : '#38bdf8';
+                ctx.fill();
+
+                // Packet Tag Text
+                ctx.fillStyle = '#ffffff';
+                ctx.font = 'bold 10px monospace';
+                ctx.textAlign = 'center';
+                ctx.fillText(isReturn ? 'HTTP/200 OK' : 'HTTP/GET', currentX, currentY - 18);
+            }
+        }
     };
 
-    layerBtns.forEach(b => {
-        b.onclick = () => {
-            const l = b.getAttribute('data-layer');
-            if (detailsBox && layerInfo[l]) {
-                detailsBox.innerHTML = layerInfo[l];
-            }
-        };
-    });
+    const updateAnimation = () => {
+        if (!isRunning) return;
 
-    // Module 10 End-to-End Trigger
-    const flowBtn = container.querySelector('#btn-trigger-full-flow');
-    const flowStatus = container.querySelector('#full-flow-status');
-    if (flowBtn && flowStatus) {
-        flowBtn.onclick = () => {
-            flowStatus.innerHTML = '<b style="color:#ec4899;">1. Browser HTTP GET Request Generated ➔ SSL/TLS Encryption (L7-L6)</b>';
-            setTimeout(() => { flowStatus.innerHTML = '<b style="color:#3b82f6;">2. TCP 3-Way Handshake on Port 443 ➔ Segmented (L4)</b>'; }, 800);
-            setTimeout(() => { flowStatus.innerHTML = '<b style="color:#10b981;">3. IPv4 Header Added (192.168.1.10 ➔ 142.250.183.206) (L3)</b>'; }, 1600);
-            setTimeout(() => { flowStatus.innerHTML = '<b style="color:#f59e0b;">4. Ethernet Frame MAC Header Added ➔ Bits on Cable (L2-L1)</b>'; }, 2400);
-            setTimeout(() => { flowStatus.innerHTML = '<b style="color:#38bdf8;">5. Switches & Routers Forward Packet ➔ Server Decapsulates Payload! 🟢</b>'; }, 3200);
+        animProgress += 0.015 * animSpeed;
+        if (animProgress >= 1) {
+            animProgress = 0;
+            currentStep++;
+            if (currentStep > 7) {
+                currentStep = 0;
+            }
+            updateStatusUI();
+        }
+
+        drawCanvas();
+        animId = requestAnimationFrame(updateAnimation);
+    };
+
+    const updateStatusUI = () => {
+        const statusEl = container.querySelector('#osi-status-text');
+        const badgeEl = container.querySelector('#osi-phase-badge');
+
+        const stepMsgs = [
+            "Step 1/8: Student PC ➔ L2 Switch (L7 HTTP Data ➔ Encapsulated into L2 Frame)",
+            "Step 2/8: L2 Switch ➔ Edge Router (MAC Address Table Inspection)",
+            "Step 3/8: Edge Router ➔ Cloud WAN (L3 IP Routing Table Best-Path Lookup)",
+            "Step 4/8: Cloud WAN ➔ Google Web Server (BGP Routing Across Global Internet)",
+            "Step 5/8: Google Web Server (Decapsulating L1-L7 Stack ➔ Processing Request)",
+            "Step 6/8: Google Web Server ➔ Cloud WAN (Returning HTTP 200 OK Response)",
+            "Step 7/8: Cloud WAN ➔ Edge Router (WAN Packet Ingress)",
+            "Step 8/8: Edge Router ➔ Student PC (Decapsulated HTTP Webpage Rendered! 🟢)"
+        ];
+
+        const stepBadges = [
+            "L7-L1 Encapsulation",
+            "L2 Frame Switch Forwarding",
+            "L3 IP Route Lookup",
+            "WAN Global BGP Transport",
+            "L1-L7 Decapsulation at Server",
+            "Server Response Encapsulation",
+            "WAN Return Journey",
+            "Client Decapsulation & Render Complete!"
+        ];
+
+        if (statusEl) statusEl.textContent = stepMsgs[currentStep] || "Simulation Running...";
+        if (badgeEl) badgeEl.textContent = stepBadges[currentStep] || "Active Flow";
+
+        // Highlight Active Node Cards
+        container.querySelectorAll('.osi-node-card').forEach(card => card.style.boxShadow = 'none');
+        const activeNodeIds = ['node-client', 'node-switch', 'node-router', 'node-cloud', 'node-server'];
+        const activeIdx = Math.min(currentStep, 4);
+        const activeCard = container.querySelector('#' + activeNodeIds[activeIdx]);
+        if (activeCard) {
+            activeCard.style.boxShadow = '0 0 20px rgba(56, 189, 248, 0.6)';
+        }
+    };
+
+    // Button Controls
+    const btnPlay = container.querySelector('#osi-btn-play');
+    const btnPause = container.querySelector('#osi-btn-pause');
+    const btnReset = container.querySelector('#osi-btn-reset');
+    const speedSelect = container.querySelector('#osi-speed-select');
+
+    if (btnPlay) {
+        btnPlay.onclick = () => {
+            if (!isRunning) {
+                isRunning = true;
+                updateAnimation();
+                updateStatusUI();
+            }
         };
     }
 
-    // Module 11 Fault Diagnoser
-    const faultSelect = container.querySelector('#p2-fault-select');
-    const faultBox = container.querySelector('#p2-fault-box');
-    const updateP2Fault = () => {
-        if (!faultSelect || !faultBox) return;
-        const v = faultSelect.value;
-        if (v === 'l1') faultBox.innerHTML = `<b style="color:#ef4444;">Layer 1 Physical: Cable Disconnected</b><br>Link light OFF. Replace cable and verify physical interface.`;
-        else if (v === 'l2') faultBox.innerHTML = `<b style="color:#f59e0b;">Layer 2 Data Link: ARP Failure</b><br>MAC address unresolved. Clear ARP cache (arp -d) and verify switch port.`;
-        else if (v === 'l3') faultBox.innerHTML = `<b style="color:#10b981;">Layer 3 Network: Invalid Gateway</b><br>Destination Host Unreachable. Check IP address and default router setting.`;
-        else if (v === 'l4') faultBox.innerHTML = `<b style="color:#3b82f6;">Layer 4 Transport: Port Blocked</b><br>TCP SYN Timeout. Update firewall rules to permit port 443 outbound.`;
-        else if (v === 'l7') faultBox.innerHTML = `<b style="color:#ec4899;">Layer 7 Application: DNS Fail</b><br>Domain name unresolved. Check DNS server IP (8.8.8.8) configuration.`;
-    };
-    if (faultSelect) faultSelect.onchange = updateP2Fault;
-};
+    if (btnPause) {
+        btnPause.onclick = () => {
+            isRunning = false;
+            if (animId) cancelAnimationFrame(animId);
+            const statusEl = container.querySelector('#osi-status-text');
+            if (statusEl) statusEl.textContent = "Paused: Click 'Play' to resume simulation flow.";
+        };
+    }
 
+    if (btnReset) {
+        btnReset.onclick = () => {
+            isRunning = false;
+            if (animId) cancelAnimationFrame(animId);
+            animProgress = 0;
+            currentStep = 0;
+            drawCanvas();
+            const statusEl = container.querySelector('#osi-status-text');
+            if (statusEl) statusEl.textContent = "Ready: Click 'Play Simulation' to watch data flow from Browser to Google Server";
+            const badgeEl = container.querySelector('#osi-phase-badge');
+            if (badgeEl) badgeEl.textContent = "Layer State: Idle";
+            container.querySelectorAll('.osi-node-card').forEach(card => card.style.boxShadow = 'none');
+        };
+    }
+
+    if (speedSelect) {
+        speedSelect.onchange = () => {
+            animSpeed = parseFloat(speedSelect.value) || 1;
+        };
+    }
+
+    // Sub-Tab Switcher Logic
+    const subBtns = container.querySelectorAll('.sub-tab-btn');
+    const pExplorer = container.querySelector('#sub-panel-explorer');
+    const pEncap = container.querySelector('#sub-panel-encap');
+    const pFault = container.querySelector('#sub-panel-fault');
+
+    if (subBtns.length >= 3) {
+        subBtns[0].onclick = () => {
+            subBtns.forEach(b => { b.style.background = 'var(--bg-alt)'; b.style.color = 'var(--text-main)'; });
+            subBtns[0].style.background = AC; subBtns[0].style.color = '#0f172a';
+            pExplorer.style.display = 'flex'; pEncap.style.display = 'none'; pFault.style.display = 'none';
+        };
+        subBtns[1].onclick = () => {
+            subBtns.forEach(b => { b.style.background = 'var(--bg-alt)'; b.style.color = 'var(--text-main)'; });
+            subBtns[1].style.background = AC; subBtns[1].style.color = '#0f172a';
+            pExplorer.style.display = 'none'; pEncap.style.display = 'flex'; pFault.style.display = 'none';
+        };
+        subBtns[2].onclick = () => {
+            subBtns.forEach(b => { b.style.background = 'var(--bg-alt)'; b.style.color = 'var(--text-main)'; });
+            subBtns[2].style.background = AC; subBtns[2].style.color = '#0f172a';
+            pExplorer.style.display = 'none'; pEncap.style.display = 'none'; pFault.style.display = 'flex';
+        };
+    }
+
+    // Layer Pick Details Info
+    const layerInfoMap = {
+        "7": "<h4 style='color:#ec4899; margin:0 0 6px 0;'>Layer 7: Application Layer</h4><b>Purpose:</b> Direct interface between software applications and network services.<br><b>Responsibilities:</b> Web browsing, email, file transfer, DNS resolution.<br><b>PDU:</b> Data<br><b>Devices:</b> Workstations, Web Servers, API Gateways.<br><b>Protocols:</b> HTTP, HTTPS, DNS, DHCP, FTP, SMTP, SSH.<br><b>Real-World Example:</b> Browser sending HTTP GET request for www.google.com.",
+        "6": "<h4 style='color:#a855f7; margin:0 0 6px 0;'>Layer 6: Presentation Layer</h4><b>Purpose:</b> Translates, formats, compresses, and encrypts data for network syntax compatibility.<br><b>Responsibilities:</b> SSL/TLS encryption, UTF-8 encoding, JPEG/MPEG compression.<br><b>PDU:</b> Data<br><b>Devices:</b> Host OS, Encryption Gateways.<br><b>Protocols:</b> SSL/TLS, ASCII, MIME, JPEG.<br><b>Real-World Example:</b> Encrypting web data using TLS 1.3 before transmission.",
+        "5": "<h4 style='color:#8b5cf6; margin:0 0 6px 0;'>Layer 5: Session Layer</h4><b>Purpose:</b> Establishes, maintains, synchronizes, and terminates session dialogues.<br><b>Responsibilities:</b> Session checkpointing, authentication, dialogue control.<br><b>PDU:</b> Data<br><b>Devices:</b> Application Servers, Workstations.<br><b>Protocols:</b> NetBIOS, RPC, SOCKS, PPTP.<br><b>Real-World Example:</b> Maintaining active session tokens during e-commerce checkout.",
+        "4": "<h4 style='color:#3b82f6; margin:0 0 6px 0;'>Layer 4: Transport Layer</h4><b>Purpose:</b> Manages process-to-process communication between host applications.<br><b>Responsibilities:</b> Segmentation, port multiplexing, error recovery, flow control.<br><b>PDU:</b> Segment (TCP) / Datagram (UDP)<br><b>Devices:</b> Stateful Firewalls, Load Balancers.<br><b>Protocols:</b> TCP, UDP.<br><b>Real-World Example:</b> TCP executing 3-Way Handshake on port 443.",
+        "3": "<h4 style='color:#10b981; margin:0 0 6px 0;'>Layer 3: Network Layer</h4><b>Purpose:</b> Manages logical IP addressing and routes packets across networks.<br><b>Responsibilities:</b> Packet forwarding, logical IP addressing, routing path selection.<br><b>PDU:</b> Packet<br><b>Devices:</b> Routers, Layer 3 Switches.<br><b>Protocols:</b> IPv4, IPv6, ICMP, ARP, OSPF, BGP.<br><b>Real-World Example:</b> Router forwarding packets using IPv4 destination address.",
+        "2": "<h4 style='color:#f59e0b; margin:0 0 6px 0;'>Layer 2: Data Link Layer</h4><b>Purpose:</b> Provides node-to-node frame delivery across local physical medium.<br><b>Responsibilities:</b> Hardware MAC addressing, framing, error detection (CRC).<br><b>PDU:</b> Frame<br><b>Devices:</b> Layer 2 Switches, NICs, Bridges.<br><b>Protocols:</b> Ethernet (802.3), Wi-Fi MAC (802.11), 802.1Q VLAN.<br><b>Real-World Example:</b> Switch forwarding Ethernet frame to destination MAC address.",
+        "1": "<h4 style='color:#ef4444; margin:0 0 6px 0;'>Layer 1: Physical Layer</h4><b>Purpose:</b> Transmits raw bit streams through physical or wireless media.<br><b>Responsibilities:</b> Bit signaling, voltage levels, data rates, physical connectors.<br><b>PDU:</b> Bits<br><b>Devices:</b> Hubs, Cables (UTP/Fiber), Transceivers.<br><b>Protocols:</b> 1000BASE-T Ethernet, DSL, 802.11 PHY.<br><b>Real-World Example:</b> Transmitting electrical pulses through Cat6 UTP cable."
+    };
+
+    container.querySelectorAll('.layer-pick-btn').forEach(btn => {
+        btn.onclick = () => {
+            const layerNum = btn.getAttribute('data-layer');
+            const box = container.querySelector('#layer-explorer-box');
+            if (box && layerInfoMap[layerNum]) {
+                box.innerHTML = layerInfoMap[layerNum];
+            }
+        };
+    });
+
+    // Fault Injector Select Logic
+    const faultSelect = container.querySelector('#fault-injector-select');
+    const faultBox = container.querySelector('#fault-diagnoser-box');
+    if (faultSelect && faultBox) {
+        faultSelect.onchange = () => {
+            const val = faultSelect.value;
+            if (val === 'l1') {
+                faultBox.innerHTML = `<b style="color:#ef4444;">Layer 1 Physical: Cable Disconnected</b><br>Symptom: Link light OFF. Physical bit signals cannot travel. Resolution: Check physical Cat6 cable & NIC interface status.`;
+            } else if (val === 'l2') {
+                faultBox.innerHTML = `<b style="color:#f59e0b;">Layer 2 Data Link: ARP Resolution Failure</b><br>Symptom: MAC address 00:00:00:00:00:00. Switch drops frame. Resolution: Run 'arp -a' and verify MAC address table mapping.`;
+            } else if (val === 'l3') {
+                faultBox.innerHTML = `<b style="color:#10b981;">Layer 3 Network: Subnet Mismatch / Gateway Unreachable</b><br>Symptom: Destination Host Unreachable. Resolution: Verify IP address (192.168.1.10/24) and default router gateway.`;
+            } else if (val === 'l4') {
+                faultBox.innerHTML = `<b style="color:#3b82f6;">Layer 4 Transport: Stateful Firewall Blocked Port 443</b><br>Symptom: TCP SYN Connection Timeout. Resolution: Permit outbound TCP port 443 rules on firewall.`;
+            } else if (val === 'l7') {
+                faultBox.innerHTML = `<b style="color:#ec4899;">Layer 7 Application: DNS Domain Resolution Failure</b><br>Symptom: Cannot resolve 'www.google.com'. Resolution: Test primary DNS server (8.8.8.8) reachability via nslookup.`;
+            } else {
+                faultBox.innerHTML = "Select a scenario above to test layer-wise fault isolation logic!";
+            }
+        };
+    }
+
+    // Initial render
+    drawCanvas();
+};
 const initRipSim = (container) => {
     let currentTab = 'hop_sim'; // 'hop_sim', 'tables', 'infinity', 'cli', 'timers'
 
