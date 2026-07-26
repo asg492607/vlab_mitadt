@@ -65,6 +65,7 @@
                         <li class="nav-item" data-section="simulation"><span class="nav-icon">⚙️</span> Interactive Simulation</li>
                         <li class="nav-item" data-section="experiment"><span class="nav-icon">🧪</span> Cisco Packet Tracer Lab</li>
                         <li class="nav-item" data-section="troubleshooting"><span class="nav-icon">🔧</span> Troubleshooting Challenge</li>
+                        <li class="nav-item" data-section="pretest"><span class="nav-icon">📝</span> Pre-Test Evaluation</li>
                         <li class="nav-item" data-section="posttest"><span class="nav-icon">📊</span> Post-Test Evaluation</li>
                         <li class="nav-item" data-section="viva"><span class="nav-icon">🎙️</span> Viva Voce Questions</li>
                         <li class="nav-item" data-section="assignment"><span class="nav-icon">📜</span> Mini-Assignment Tasks</li>
@@ -181,6 +182,13 @@
                         </div>
                     </section>
 
+
+                    <section id="section-pretest" class="content-section">
+                        <h1 class="section-title">📝 Pre-Test Evaluation</h1>
+                        <div class="section-body" id="pretest-body">
+                            <!-- Pretest injected via JS -->
+                        </div>
+                    </section>
 
                     <section id="section-posttest" class="content-section">
                         <h1 class="section-title">📊 Post-Test Evaluation</h1>
@@ -355,8 +363,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" integrity="sha384-JcnsjUPPylna1s1fvi1u12X5qjY5OL56iySh75FdtrwhO/SWXgMjoVqcKyIIWOLk" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha384-ZZ1pncU3bQe8y31yfZdMFdSpttDoPmOZg2wguVK9almUodir1PghgT0eY7Mrty8H" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js" integrity="sha384-QQBwnzmpf8eCm7WvgJ/dpvJ51cajsTkfDMgOq5QVBZav9687X5xjlZo8zroLyU3+" crossorigin="anonymous"></script>
-    <script src="vlabData.js?v=56"></script>
-    <script type="module" src="vlab.js?v=56"></script>
+    <script src="vlabData.js?v=57"></script>
+    <script type="module" src="vlab.js?v=57"></script>
     
     <!-- Global AI Tutor Assistant HTML Components -->
     <div id="global-ai-bubble" class="global-ai-bubble" title="Ask MIT VLab AI Tutor">✨</div>
@@ -384,7 +392,7 @@
         // Register PWA Service Worker with auto-update cache invalidation
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=56').then(reg => {
+                navigator.serviceWorker.register('./sw.js?v=57').then(reg => {
                     console.log('Service Worker registered successfully:', reg.scope);
                     reg.update();
                 }).catch(err => {

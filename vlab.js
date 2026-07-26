@@ -7324,8 +7324,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             const setBody = (id, html) => {
                 const sec = document.getElementById(id);
                 if (sec) {
-                    const body = sec.querySelector('.section-body');
-                    if (body) body.innerHTML = html;
+                    let body = sec.querySelector('.section-body');
+                    if (body) {
+                        body.innerHTML = html;
+                    } else {
+                        sec.innerHTML = `<h1 class="section-title">${data.title || ''}</h1><div class="section-body">${html}</div>`;
+                    }
                 }
             };
 
