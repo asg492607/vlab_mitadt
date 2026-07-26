@@ -11952,6 +11952,7 @@ const initSubnettingSim = (container) => {
 // Interactive Practical 7 Virtual LANs & Trunking Simulator
 // Interactive Practical 7 Virtual LANs & Trunking Simulator
 // Interactive Practical 7 Virtual LANs & Trunking Simulator with HTML5 Canvas Packet Animations
+// Interactive Practical 7 Virtual LANs & Trunking Simulator with Dynamic Canvas Packet Animations
 const initVlanSim = (container) => {
     let currentTab = 'msg_tester'; // Default Tab 1: 'msg_tester'
 
@@ -11985,12 +11986,11 @@ const initVlanSim = (container) => {
     };
 
     const pcMap = {
-        pc1: { label: 'PC1 (VLAN 10)', ip: '192.168.10.10', vlan: 10, dept: 'Accounts', color: '#3b82f6', pos: { x: 120, y: 190 } },
-        pc2: { label: 'PC2 (VLAN 10)', ip: '192.168.10.20', vlan: 10, dept: 'Accounts', color: '#3b82f6', pos: { x: 300, y: 190 } },
-        pc3: { label: 'PC3 (VLAN 20)', ip: '192.168.20.10', vlan: 20, dept: 'Sales', color: '#10b981', pos: { x: 480, y: 190 } },
-        pc4: { label: 'PC4 (VLAN 20)', ip: '192.168.20.20', vlan: 20, dept: 'Sales', color: '#10b981', pos: { x: 660, y: 190 } }
+        pc1: { label: 'PC1 (VLAN 10)', ip: '192.168.10.10', vlan: 10, dept: 'Accounts', color: '#3b82f6', cardId: 'card-pc1' },
+        pc2: { label: 'PC2 (VLAN 10)', ip: '192.168.10.20', vlan: 10, dept: 'Accounts', color: '#3b82f6', cardId: 'card-pc2' },
+        pc3: { label: 'PC3 (VLAN 20)', ip: '192.168.20.10', vlan: 20, dept: 'Sales', color: '#10b981', cardId: 'card-pc3' },
+        pc4: { label: 'PC4 (VLAN 20)', ip: '192.168.20.20', vlan: 20, dept: 'Sales', color: '#10b981', cardId: 'card-pc4' }
     };
-    const switchPos = { x: 390, y: 55 };
 
     const render = () => {
         if (aniReqId) {
@@ -12022,7 +12022,7 @@ const initVlanSim = (container) => {
                         <div>
                             <h3 style="color:var(--primary); margin:0;">Dynamic 4-PC Animated Data Transfer & Isolation Tester</h3>
                             <p style="font-size:12px; color:var(--text-muted); margin:4px 0 0;">
-                                Watch animated packet data traveling across the switch and observe live delivery vs VLAN isolation blocks!
+                                Select sender and receiver PCs and watch animated packet data travel across the switch in real time!
                             </p>
                         </div>
                         <div style="display:flex; align-items:center; gap:8px; background:var(--bg-page); padding:8px 14px; border:1px solid var(--border); border-radius:10px;">
@@ -12033,12 +12033,12 @@ const initVlanSim = (container) => {
                         </div>
                     </div>
 
-                    <!-- 4-PC Visual Switch Topology Board with Overlay Canvas -->
-                    <div id="vlanCanvasContainer" style="background:#0b0f19; border-radius:12px; border:1px solid var(--border); position:relative; min-height:260px; overflow:hidden;">
-                        <canvas id="vlanPacketCanvas" width="780" height="260" style="position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:5;"></canvas>
+                    <!-- 4-PC Visual Switch Topology Board with Dynamic Overlay Canvas -->
+                    <div id="vlanCanvasContainer" style="background:#0b0f19; border-radius:12px; border:1px solid var(--border); position:relative; min-height:280px; padding:20px; overflow:hidden;">
+                        <canvas id="vlanPacketCanvas" style="position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:10;"></canvas>
 
                         <!-- Top Switch UI -->
-                        <div style="position:absolute; top:15px; left:50%; transform:translateX(-50%); padding:10px 24px; background:#1e293b; border:2px solid #3b82f6; border-radius:10px; display:flex; align-items:center; gap:12px; box-shadow:0 0 15px rgba(59,130,246,0.3); z-index:2;">
+                        <div id="card-switch" style="position:relative; width:max-content; margin:0 auto 50px auto; padding:10px 24px; background:#1e293b; border:2px solid #3b82f6; border-radius:10px; display:flex; align-items:center; gap:12px; box-shadow:0 0 15px rgba(59,130,246,0.3); z-index:2;">
                             <span style="font-size:26px;">🔀</span>
                             <div>
                                 <div style="font-size:13px; font-weight:800; color:#ffffff;">Core Layer-2 Catalyst Switch</div>
@@ -12049,36 +12049,36 @@ const initVlanSim = (container) => {
                         </div>
 
                         <!-- 4 PCs Row -->
-                        <div style="position:absolute; bottom:15px; width:100%; display:grid; grid-template-columns:repeat(4, 1fr); gap:12px; padding:0 20px; z-index:2;">
+                        <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:16px; width:100%; position:relative; z-index:2;">
                             <!-- PC1 -->
-                            <div id="card-pc1" style="padding:10px; background:#1e293b; border:2px solid ${pcMap.pc1.color}; border-radius:10px; display:flex; flex-direction:column; align-items:center; gap:4px; text-align:center;">
-                                <div style="font-size:24px;">💻</div>
-                                <div style="font-size:12px; font-weight:800; color:#ffffff;">PC1</div>
-                                <span style="font-size:9px; padding:2px 6px; border-radius:8px; background:rgba(59,130,246,0.2); color:#38bdf8; font-weight:bold;">VLAN 10</span>
+                            <div id="card-pc1" style="padding:12px; background:#1e293b; border:2px solid ${pcMap.pc1.color}; border-radius:10px; display:flex; flex-direction:column; align-items:center; gap:4px; text-align:center; box-shadow:0 0 12px ${pcMap.pc1.color}33;">
+                                <div style="font-size:28px;">💻</div>
+                                <div style="font-size:13px; font-weight:800; color:#ffffff;">PC1</div>
+                                <span style="font-size:9px; padding:2px 8px; border-radius:8px; background:rgba(59,130,246,0.2); color:#38bdf8; font-weight:bold;">VLAN 10</span>
                                 <div style="font-size:8px; color:#94a3b8; font-family:monospace;">192.168.10.10</div>
                             </div>
 
                             <!-- PC2 -->
-                            <div id="card-pc2" style="padding:10px; background:#1e293b; border:2px solid ${pcMap.pc2.color}; border-radius:10px; display:flex; flex-direction:column; align-items:center; gap:4px; text-align:center;">
-                                <div style="font-size:24px;">💻</div>
-                                <div style="font-size:12px; font-weight:800; color:#ffffff;">PC2</div>
-                                <span style="font-size:9px; padding:2px 6px; border-radius:8px; background:rgba(59,130,246,0.2); color:#38bdf8; font-weight:bold;">VLAN 10</span>
+                            <div id="card-pc2" style="padding:12px; background:#1e293b; border:2px solid ${pcMap.pc2.color}; border-radius:10px; display:flex; flex-direction:column; align-items:center; gap:4px; text-align:center; box-shadow:0 0 12px ${pcMap.pc2.color}33;">
+                                <div style="font-size:28px;">💻</div>
+                                <div style="font-size:13px; font-weight:800; color:#ffffff;">PC2</div>
+                                <span style="font-size:9px; padding:2px 8px; border-radius:8px; background:rgba(59,130,246,0.2); color:#38bdf8; font-weight:bold;">VLAN 10</span>
                                 <div style="font-size:8px; color:#94a3b8; font-family:monospace;">192.168.10.20</div>
                             </div>
 
                             <!-- PC3 -->
-                            <div id="card-pc3" style="padding:10px; background:#1e293b; border:2px solid ${pcMap.pc3.color}; border-radius:10px; display:flex; flex-direction:column; align-items:center; gap:4px; text-align:center;">
-                                <div style="font-size:24px;">💻</div>
-                                <div style="font-size:12px; font-weight:800; color:#ffffff;">PC3</div>
-                                <span style="font-size:9px; padding:2px 6px; border-radius:8px; background:rgba(16,185,129,0.2); color:#34d399; font-weight:bold;">VLAN 20</span>
+                            <div id="card-pc3" style="padding:12px; background:#1e293b; border:2px solid ${pcMap.pc3.color}; border-radius:10px; display:flex; flex-direction:column; align-items:center; gap:4px; text-align:center; box-shadow:0 0 12px ${pcMap.pc3.color}33;">
+                                <div style="font-size:28px;">💻</div>
+                                <div style="font-size:13px; font-weight:800; color:#ffffff;">PC3</div>
+                                <span style="font-size:9px; padding:2px 8px; border-radius:8px; background:rgba(16,185,129,0.2); color:#34d399; font-weight:bold;">VLAN 20</span>
                                 <div style="font-size:8px; color:#94a3b8; font-family:monospace;">192.168.20.10</div>
                             </div>
 
                             <!-- PC4 -->
-                            <div id="card-pc4" style="padding:10px; background:#1e293b; border:2px solid ${pcMap.pc4.color}; border-radius:10px; display:flex; flex-direction:column; align-items:center; gap:4px; text-align:center;">
-                                <div style="font-size:24px;">💻</div>
-                                <div style="font-size:12px; font-weight:800; color:#ffffff;">PC4</div>
-                                <span style="font-size:9px; padding:2px 6px; border-radius:8px; background:rgba(16,185,129,0.2); color:#34d399; font-weight:bold;">VLAN 20</span>
+                            <div id="card-pc4" style="padding:12px; background:#1e293b; border:2px solid ${pcMap.pc4.color}; border-radius:10px; display:flex; flex-direction:column; align-items:center; gap:4px; text-align:center; box-shadow:0 0 12px ${pcMap.pc4.color}33;">
+                                <div style="font-size:28px;">💻</div>
+                                <div style="font-size:13px; font-weight:800; color:#ffffff;">PC4</div>
+                                <span style="font-size:9px; padding:2px 8px; border-radius:8px; background:rgba(16,185,129,0.2); color:#34d399; font-weight:bold;">VLAN 20</span>
                                 <div style="font-size:8px; color:#94a3b8; font-family:monospace;">192.168.20.20</div>
                             </div>
                         </div>
@@ -12316,41 +12316,67 @@ const initVlanSim = (container) => {
         document.getElementById('tabCli').onclick = () => { currentTab = 'cli'; render(); };
         document.getElementById('tabFaults').onclick = () => { currentTab = 'faults'; render(); };
 
-        // Helper function for static topology lines on Tab 1 Canvas
-        const drawStaticTopologyLines = (ctx) => {
-            ctx.clearRect(0, 0, 780, 260);
-            ctx.lineWidth = 2;
+        // Helper function for dynamic element positions using getBoundingClientRect
+        const getRelativePos = (containerId, elemId) => {
+            const c = document.getElementById(containerId);
+            const e = document.getElementById(elemId);
+            if (!c || !e) return { x: 0, y: 0 };
+            const cR = c.getBoundingClientRect();
+            const eR = e.getBoundingClientRect();
+            return {
+                x: (eR.left + eR.width / 2) - cR.left,
+                y: (eR.top + eR.height / 2) - cR.top
+            };
+        };
+
+        const drawStaticTopology = (ctx, canvas) => {
+            const container = document.getElementById('vlanCanvasContainer');
+            if (!container || !canvas) return;
+
+            const cRect = container.getBoundingClientRect();
+            canvas.width = cRect.width;
+            canvas.height = cRect.height;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const swPos = getRelativePos('vlanCanvasContainer', 'card-switch');
             
-            // Lines from 4 PCs to Switch
-            Object.keys(pcMap).forEach(key => {
+            // Connect lines from Switch to each PC
+            ['pc1', 'pc2', 'pc3', 'pc4'].forEach(key => {
                 const pc = pcMap[key];
-                ctx.strokeStyle = pc.color + '66';
+                const pPos = getRelativePos('vlanCanvasContainer', pc.cardId);
+
                 ctx.beginPath();
-                ctx.moveTo(pc.pos.x, pc.pos.y);
-                ctx.lineTo(switchPos.x, switchPos.y);
+                ctx.moveTo(pPos.x, pPos.y);
+                ctx.lineTo(swPos.x, swPos.y);
+                ctx.lineWidth = 3;
+                ctx.strokeStyle = pc.color + '88';
+                ctx.setLineDash([6, 4]);
                 ctx.stroke();
+                ctx.setLineDash([]);
             });
         };
 
-        // Draw initial lines if on Tab 1
+        // Tab 1 Dynamic Canvas Init & Animation Handlers
         if (currentTab === 'msg_tester') {
             setTimeout(() => {
-                const cvs = document.getElementById('vlanPacketCanvas');
-                if (cvs) {
-                    const ctx = cvs.getContext('2d');
-                    drawStaticTopologyLines(ctx);
+                const canvas = document.getElementById('vlanPacketCanvas');
+                if (canvas) {
+                    const ctx = canvas.getContext('2d');
+                    drawStaticTopology(ctx, canvas);
                 }
-            }, 50);
+            }, 60);
 
             document.getElementById('selMsgSrc').onchange = (e) => { msgSrc = e.target.value; render(); };
             document.getElementById('selMsgDst').onchange = (e) => { msgDst = e.target.value; render(); };
             document.getElementById('chkIsoMode').onchange = (e) => { isVlanIsolated = e.target.checked; render(); };
 
-            // Canvas Packet Animation
+            // Dynamic Packet Transfer Animation
             document.getElementById('btnSendDynamicMsg').onclick = () => {
-                const cvs = document.getElementById('vlanPacketCanvas');
-                if (!cvs || isMsgAnimating) return;
-                const ctx = cvs.getContext('2d');
+                const canvas = document.getElementById('vlanPacketCanvas');
+                const container = document.getElementById('vlanCanvasContainer');
+                if (!canvas || !container || isMsgAnimating) return;
+                const ctx = canvas.getContext('2d');
 
                 const sObj = pcMap[msgSrc];
                 const dObj = pcMap[msgDst];
@@ -12367,83 +12393,97 @@ const initVlanSim = (container) => {
 
                 out.innerHTML = `[1] ${sObj.label} (${sObj.ip}) generating IP datagram...<br>`;
 
-                // Animation Timeline
+                const sPos = getRelativePos('vlanCanvasContainer', sObj.cardId);
+                const dPos = getRelativePos('vlanCanvasContainer', dObj.cardId);
+                const swPos = getRelativePos('vlanCanvasContainer', 'card-switch');
+
                 let startTime = performance.now();
-                const duration1 = 800; // Leg 1: PC -> Switch
-                const duration2 = 800; // Leg 2: Switch -> PC / Blocked
+                const dur1 = 900; // Leg 1: PC -> Switch
+                const dur2 = 900; // Leg 2: Switch -> PC or Blocked Burst
 
                 const animate = (time) => {
                     const elapsed = time - startTime;
-                    drawStaticTopologyLines(ctx);
+                    drawStaticTopology(ctx, canvas);
 
-                    if (elapsed < duration1) {
+                    if (elapsed < dur1) {
                         // Leg 1: Sender -> Switch
-                        const prog = elapsed / duration1;
-                        const curX = sObj.pos.x + (switchPos.x - sObj.pos.x) * prog;
-                        const curY = sObj.pos.y + (switchPos.y - sObj.pos.y) * prog;
+                        const prog = elapsed / dur1;
+                        const curX = sPos.x + (swPos.x - sPos.x) * prog;
+                        const curY = sPos.y + (swPos.y - sPos.y) * prog;
 
-                        // Draw moving packet
+                        // Draw glowing moving packet
                         ctx.fillStyle = sObj.color;
                         ctx.shadowColor = sObj.color;
-                        ctx.shadowBlur = 12;
+                        ctx.shadowBlur = 15;
                         ctx.beginPath();
-                        ctx.arc(curX, curY, 9, 0, Math.PI * 2);
+                        ctx.arc(curX, curY, 11, 0, Math.PI * 2);
                         ctx.fill();
                         ctx.shadowBlur = 0;
 
-                        // Packet Label
+                        // Inner core
                         ctx.fillStyle = '#ffffff';
-                        ctx.font = 'bold 9px monospace';
+                        ctx.beginPath();
+                        ctx.arc(curX, curY, 5, 0, Math.PI * 2);
+                        ctx.fill();
+
+                        // Label
+                        ctx.fillStyle = '#ffffff';
+                        ctx.font = 'bold 10px monospace';
                         ctx.textAlign = 'center';
-                        ctx.fillText(`VLAN ${sObj.vlan}`, curX, curY - 14);
+                        ctx.fillText(`VLAN ${sObj.vlan}`, curX, curY - 16);
 
                         aniReqId = requestAnimationFrame(animate);
-                    } else if (elapsed < duration1 + duration2) {
+                    } else if (elapsed < dur1 + dur2) {
                         // Leg 2: Switch -> Receiver OR Blocked Burst
-                        const leg2Elapsed = elapsed - duration1;
-                        const prog = leg2Elapsed / duration2;
+                        const leg2Elapsed = elapsed - dur1;
+                        const prog = leg2Elapsed / dur2;
 
                         if (willSucceed) {
                             // Move from Switch to Receiver
-                            const curX = switchPos.x + (dObj.pos.x - switchPos.x) * prog;
-                            const curY = switchPos.y + (dObj.pos.y - switchPos.y) * prog;
+                            const curX = swPos.x + (dPos.x - swPos.x) * prog;
+                            const curY = swPos.y + (dPos.y - swPos.y) * prog;
 
                             ctx.fillStyle = '#10b981';
                             ctx.shadowColor = '#10b981';
-                            ctx.shadowBlur = 15;
+                            ctx.shadowBlur = 18;
                             ctx.beginPath();
-                            ctx.arc(curX, curY, 9, 0, Math.PI * 2);
+                            ctx.arc(curX, curY, 11, 0, Math.PI * 2);
                             ctx.fill();
                             ctx.shadowBlur = 0;
 
                             ctx.fillStyle = '#ffffff';
-                            ctx.font = 'bold 9px monospace';
+                            ctx.beginPath();
+                            ctx.arc(curX, curY, 5, 0, Math.PI * 2);
+                            ctx.fill();
+
+                            ctx.fillStyle = '#ffffff';
+                            ctx.font = 'bold 10px monospace';
                             ctx.textAlign = 'center';
-                            ctx.fillText(`DATA`, curX, curY - 14);
+                            ctx.fillText(`DATA OK`, curX, curY - 16);
 
                             aniReqId = requestAnimationFrame(animate);
                         } else {
-                            // Blocked Flash at Switch Port
-                            const radius = 15 + Math.sin(prog * Math.PI * 4) * 10;
+                            // Blocked Flash Burst at Switch Port
+                            const radius = 20 + Math.sin(prog * Math.PI * 6) * 14;
                             ctx.fillStyle = 'rgba(239, 68, 68, 0.4)';
                             ctx.strokeStyle = '#ef4444';
-                            ctx.lineWidth = 3;
+                            ctx.lineWidth = 4;
                             ctx.beginPath();
-                            ctx.arc(switchPos.x, switchPos.y, radius, 0, Math.PI * 2);
+                            ctx.arc(swPos.x, swPos.y, radius, 0, Math.PI * 2);
                             ctx.fill();
                             ctx.stroke();
 
                             ctx.fillStyle = '#ef4444';
-                            ctx.font = 'bold 12px sans-serif';
+                            ctx.font = 'bold 14px sans-serif';
                             ctx.textAlign = 'center';
-                            ctx.fillText('💥 BLOCKED BY VLAN ISOLATION!', switchPos.x, switchPos.y - 25);
+                            ctx.fillText('💥 BLOCKED BY VLAN ISOLATION!', swPos.x, swPos.y - 30);
 
                             aniReqId = requestAnimationFrame(animate);
                         }
                     } else {
-                        // Animation Finish
+                        // Animation Complete
                         isMsgAnimating = false;
-                        drawStaticTopologyLines(ctx);
+                        drawStaticTopology(ctx, canvas);
 
                         if (willSucceed) {
                             out.innerHTML = `[1] ${sObj.label} (${sObj.ip}) generated packet.<br>[2] Switch received frame on VLAN ${sObj.vlan} port.<br><span style="color:#10b981; font-weight:bold;">[3] 🟢 COMMUNICATION SUCCESSFUL!</span><br>Both <b>${sObj.label}</b> and <b>${dObj.label}</b> belong to the SAME Layer 2 Broadcast Domain (<b>VLAN ${sObj.vlan} - ${sObj.dept}</b>). Switch delivered packet directly!`;
