@@ -3645,270 +3645,213 @@ window.VLAB_DATA = {
         "simType": "eigrp_sim"
     },
     "static_routing": {
-        "title": "Static Routing Configuration",
-        "aim": "To configure static default routes and manual next-hop IP routing entries across multi-hop networks.",
-        "intro": {
-            "summary": "Static routing involves manual entry of destination network paths into a router's routing table, offering complete administrative control.",
-            "importance": "Static routes are secure, resource-light, and critical for default routes leading to an ISP gateway.",
-            "applications": [
-                "Stub Network Connectivity",
-                "ISP Default Gateway Route",
-                "Secure Out-of-Band Management"
-            ],
-            "outcome": "Students will add static routes with next-hop IP addresses and configure default routes (`0.0.0.0/0`)."
-        },
-        "prerequisites": [
-            "Practical 4: IPv4 Address Classification",
-            "Practical 1: Introduction to Networking Tools"
+    "title": "Practical 11: Static Routing Configuration",
+    "aim": "To understand the fundamental principles of Layer 3 packet forwarding, examine routing table structures, manually configure static and default routes using Cisco IOS CLI commands, observe hop-by-hop next-hop forwarding decisions, and troubleshoot missing return routes.",
+    "intro": {
+        "summary": "In computer networks, communication between devices located on different subnets requires a router. To make forwarding decisions, every router maintains a Routing Table. Static Routing is the foundational method where network administrators manually define explicit paths for destination subnets, offering complete control, high security, and low CPU overhead.",
+        "importance": "Static routing introduces core IP forwarding concepts before dynamic routing protocols are explored. It is essential for configuring default gateways (Gateway of Last Resort), connecting branch offices, securing stub networks, and providing floating backup routes.",
+        "applications": [
+            "Branch Office Internet Access (Default Routes)",
+            "Stub Network Point-to-Point Interconnects",
+            "High-Security Network Backbones (Zero Route Advertisements)",
+            "Floating Backup Paths for Enterprise WAN Links"
         ],
-        "outcomes": [
-            "Configure manual static routes (`ip route <net> <mask> <next-hop>`).",
-            "Configure default static routes (`ip route 0.0.0.0 0.0.0.0 <next-hop>`).",
-            "Inspect routing table code indicators ('S' for Static, 'C' for Connected)."
-        ],
-        "theory": {
-            "intro": "Static routing involves manually entering routing paths into a router's routing table. It is resource-efficient and secure, but requires manual updates when network topology changes.",
-            "cards": [
-                {
-                    "title": "Next-Hop Address",
-                    "content": "Specifies the IP address of the adjacent router interface."
-                },
-                {
-                    "title": "Default Static Route",
-                    "content": "`ip route 0.0.0.0 0.0.0.0 <next-hop>` matches all unmatched destination traffic."
-                }
-            ],
-            "formulas": [
-                "Static Route AD = 1",
-                "Default Route Matching = 0-bit prefix length (/0)"
-            ],
-            "standards": [
-                "RFC 1812 - Requirements for IP Version 4 Routers"
-            ]
-        },
-        "tools": [
+        "outcome": "After completing this practical, students will be able to configure static routes using Cisco ip route syntax, set up Default Routes (0.0.0.0/0), verify packet forwarding using show ip route and traceroute, and resolve asymmetric routing faults."
+    },
+    "prerequisites": [
+        "Practical 4: IPv4 & IPv6 Address Classification",
+        "Practical 6: Subnetting, VLSM & CIDR"
+    ],
+    "outcomes": [
+        "Explain how routers evaluate destination IP addresses and make forwarding decisions.",
+        "Differentiate between Static Routing and Dynamic Routing protocols.",
+        "Read and interpret Cisco IOS Routing Table entries ('C' for Connected, 'S' for Static).",
+        "Configure Static Routes using next-hop IP addresses and exit interfaces.",
+        "Configure Default Routes (0.0.0.0 0.0.0.0) as the Gateway of Last Resort.",
+        "Trace hop-by-hop packet forwarding across multi-router topologies.",
+        "Troubleshoot common static routing errors (missing return routes, wrong next-hop IPs)."
+    ],
+    "theory": {
+        "intro": "Routing is the process of selecting paths in a network along which to send network traffic. Static routing requires administrators to manually enter every destination subnet into the router's routing table, serving as the foundation of IP network engineering.",
+        "sections": [
             {
-                "name": "Cisco Router CLI",
-                "layer": "Layer 3 Router",
-                "ports": "Serial / Gigabit Interfaces",
-                "usage": "Manual route insertion",
-                "statusLED": "Active Route Added"
-            }
-        ],
-        "procedure": [
-            "Access Router R1 configuration mode.",
-            "Add static route to remote network 192.168.2.0/24: `ip route 192.168.2.0 255.255.255.0 10.0.0.2`.",
-            "Configure default gateway route: `ip route 0.0.0.0 0.0.0.0 10.0.0.2`.",
-            "Verify static route entry denoted by 'S' in `show ip route`."
-        ],
-        "troubleshooting": {
-            "problem": "Static route entry does not appear in `show ip route`.",
-            "hints": [
-                "Check if the exit interface / next-hop IP is in UP/UP state."
-            ],
-            "fix": "Ensure next-hop interface is configured and pingable."
-        },
-        "viva": [
-            {
-                "q": "What is the Administrative Distance of a static route pointing to a next-hop IP?",
-                "a": "1."
+                "heading": "1. Introduction to Static Routing",
+                "content": "Every device connected to an IP network relies on routers to reach remote subnets beyond its local broadcast domain. Routers consult an internal data structure called a Routing Table to forward packets toward their destination. In Static Routing, network administrators explicitly program destination networks, subnet masks, and next-hop router addresses. Because static routes do not generate routing protocol traffic, they conserve link bandwidth and system resources."
             },
             {
-                "q": "When should a Default Route (0.0.0.0 0.0.0.0) be configured?",
-                "a": "On stub networks connecting to an ISP, where all external internet traffic must be forwarded out a single egress link."
-            }
-        ],
-        "assignment": "Configure static routes between 3 branch offices. Verify reachability using ping and traceroute.",
-        "references": [
-            {
-                "title": "RFC 1812 - Router Requirements",
-                "link": "https://datatracker.ietf.org/doc/html/rfc1812"
-            }
-        ],
-        "simType": "cli",
-        "evaluations": [
-            {
-                "type": "pre",
-                "question": "What is a static route in computer networking?",
-                "options": [
-                    "A route dynamically learned via OSPF",
-                    "A manually configured route entered by a network administrator",
-                    "A route created by DHCP",
-                    "A multicast broadcast route"
-                ],
-                "answer": "A manually configured route entered by a network administrator",
-                "explanation": "Static routes are manually configured by admins using the ip route command."
+                "heading": "2. Learning Objectives",
+                "content": "By completing this practical, students will master:\n• Layer 3 IP packet forwarding mechanics.\n• Constructing and reading Routing Tables.\n• Configuring static routes using ip route <prefix> <mask;> <next-hop>.\n• Setting Default Routes (ip route 0.0.0.0 0.0.0.0 <next-hop>).\n• Differentiating Directly Connected ('C') and Static ('S') routes.\n• Using show ip route, ping, and traceroute for verification."
             },
             {
-                "type": "pre",
-                "question": "What is the default Administrative Distance (AD) of a statically configured route in Cisco IOS?",
-                "options": [
-                    "0",
-                    "1",
-                    "90",
-                    "110"
-                ],
-                "answer": "1",
-                "explanation": "In Cisco IOS, static routes have an Administrative Distance of 1 (Connected is 0)."
+                "heading": "3. What is Routing?",
+                "content": "Routing is the Layer 3 process of examining an incoming IP packet's destination address, looking up a matching network entry in the routing table, and forwarding the packet out the appropriate egress interface toward the next-hop router or end host."
             },
             {
-                "type": "pre",
-                "question": "What static route destination prefix matches ALL unknown IP addresses (Default Route)?",
-                "options": [
-                    "0.0.0.0 0.0.0.0",
-                    "255.255.255.255 255.255.255.255",
-                    "127.0.0.1 255.0.0.0",
-                    "192.168.1.0 255.255.255.0"
-                ],
-                "answer": "0.0.0.0 0.0.0.0",
-                "explanation": "Default route 0.0.0.0 0.0.0.0 (quad-zero) acts as gateway of last resort."
+                "heading": "4. Why Routing is Required",
+                "content": "Host computers on distinct subnets (e.g. PC1 on 192.168.1.0/24 and PC2 on 192.168.2.0/24) cannot communicate directly via Layer 2 switch broadcasts. Routers act as Layer 3 gateways that interconnect these subnets and forward traffic across network boundaries."
             },
             {
-                "type": "pre",
-                "question": "Which Cisco CLI command configures a static route to network 192.168.2.0/24 via next-hop 10.0.0.2?",
-                "options": [
-                    "route add 192.168.2.0 10.0.0.2",
-                    "ip route 192.168.2.0 255.255.255.0 10.0.0.2",
-                    "router static 192.168.2.0 10.0.0.2",
-                    "set route 192.168.2.0/24 10.0.0.2"
-                ],
-                "answer": "ip route 192.168.2.0 255.255.255.0 10.0.0.2",
-                "explanation": "Syntax: ip route <prefix> <mask> <next-hop-ip>."
+                "heading": "5. What is Static Routing?",
+                "content": "Static Routing is a non-dynamic routing method where every route is manually configured into the router by an administrator. Unlike RIP, OSPF, or EIGRP, static routes never expire, do not flood neighbor advertisements, and remain fixed until manually altered."
             },
             {
-                "type": "pre",
-                "question": "What is a Floating Static Route?",
-                "options": [
-                    "A static route with a higher Administrative Distance used as a backup path",
-                    "A route that changes IP addresses continuously",
-                    "A wireless route",
-                    "A multicast route"
-                ],
-                "answer": "A floating static route is a backup static route configured with a higher Administrative Distance (e.g. 130) so it remains inactive until the primary route fails.",
-                "explanation": "Floating static routes act as backup paths by using higher AD values."
+                "heading": "6. Characteristics of Static Routing",
+                "content": "• Manual Configuration: Administrators define every path explicitly.\n• Predictable Behavior: Traffic always follows the exact specified path.\n• Resource Efficiency: Zero CPU usage for route calculations and zero bandwidth overhead for updates.\n• Security: No route advertisements are broadcast over the wire."
             },
             {
-                "type": "post",
-                "question": "What character code identifies a static route in the Cisco IOS `show ip route` output?",
-                "options": [
-                    "C",
-                    "S",
-                    "R",
-                    "O"
-                ],
-                "answer": "S",
-                "explanation": "'S' represents Static routes in Cisco routing tables."
+                "heading": "7. Structure of a Routing Table",
+                "content": "An IP Routing Table entry contains:\n1. Route Source Code: 'C' (Connected), 'S' (Static), 'S*' (Default Static).\n2. Destination Subnet & Prefix Mask.\n3. Administrative Distance (AD = 1 for Static) and Metric (0).\n4. Next-Hop IP Address.\n5. Outgoing Egress Interface (e.g. GigabitEthernet0/0)."
             },
             {
-                "type": "post",
-                "question": "Why are static routes considered more secure than dynamic routing protocols?",
-                "options": [
-                    "They encrypt data automatically",
-                    "They do not transmit routing update advertisements across the network",
-                    "They run at 10 Gbps",
-                    "They require passwords"
-                ],
-                "answer": "They do not transmit routing update advertisements across the network",
-                "explanation": "Static routes generate zero routing update traffic, eliminating advertisement vulnerabilities."
+                "heading": "8. Directly Connected Networks ('C')",
+                "content": "When a router interface is assigned an IP address and brought up (no shutdown), the router automatically adds the connected subnet to its routing table with code 'C'. No static route is required for directly connected networks."
             },
             {
-                "type": "post",
-                "question": "What is a primary disadvantage of static routing in large enterprise networks?",
-                "options": [
-                    "High CPU usage",
-                    "Lack of scalability and manual reconfiguration required upon link failure",
-                    "Slow packet forwarding",
-                    "High bandwidth consumption"
-                ],
-                "answer": "Lack of scalability and manual reconfiguration required upon link failure",
-                "explanation": "Static routes cannot automatically re-route around link failures."
+                "heading": "9. Next-Hop Address",
+                "content": "The Next-Hop Address is the IP address of the adjacent router's ingress interface on the shared link. When a router matches a static route, it rewrites the Layer 2 MAC header and transmits the packet to the Next-Hop IP."
             },
             {
-                "type": "post",
-                "question": "What command configures a Default Static Route via exit interface GigabitEthernet0/0?",
-                "options": [
-                    "ip route 0.0.0.0 0.0.0.0 GigabitEthernet0/0",
-                    "ip default-gateway GigabitEthernet0/0",
-                    "default-route GigabitEthernet0/0",
-                    "route 0.0.0.0 Gi0/0"
-                ],
-                "answer": "ip route 0.0.0.0 0.0.0.0 GigabitEthernet0/0",
-                "explanation": "Default static route specifies quad-zero prefix/mask pointing to exit interface."
+                "heading": "10. Default Route (Gateway of Last Resort)",
+                "content": "A Default Route uses destination 0.0.0.0 and mask 0.0.0.0 (quad-zero). It matches ALL IP packets that do not have a specific match in the routing table, acting as the Gateway of Last Resort for Internet traffic."
             },
             {
-                "type": "post",
-                "question": "What is recursive route lookup in static routing?",
-                "options": [
-                    "Resolving a next-hop IP address through multiple routing table lookups until an exit interface is found",
-                    "A routing loop",
-                    "DNS name lookup",
-                    "ARP broadcast"
-                ],
-                "answer": "Resolving a next-hop IP address through multiple routing table lookups until an exit interface is found",
-                "explanation": "Recursive lookup evaluates next-hop IP to find connected exit interface."
+                "heading": "11. Cisco IOS Configuration Commands",
+                "content": "Configuring a Static Route:\nRouter(config)# ip route 192.168.2.0 255.255.255.0 10.0.0.2\n\nConfiguring a Default Route:\nRouter(config)# ip route 0.0.0.0 0.0.0.0 10.0.0.2"
             },
             {
-                "type": "post",
-                "question": "How do you configure a Floating Static Route with Administrative Distance 130?",
-                "options": [
-                    "ip route 192.168.2.0 255.255.255.0 10.0.0.2 130",
-                    "ip route 192.168.2.0 255.255.255.0 10.0.0.2 ad=130",
-                    "set floating 130 192.168.2.0",
-                    "ip route float 130 192.168.2.0"
-                ],
-                "answer": "ip route 192.168.2.0 255.255.255.0 10.0.0.2 130",
-                "explanation": "Appending metric number (130) sets explicit Administrative Distance."
+                "heading": "12. Verification Commands",
+                "content": "• show ip route - Displays full IP routing table.\n• show running-config - Verifies static route configuration lines.\n• show ip interface brief - Verifies interface status (Up/Up).\n• ping <target-ip> - Tests end-to-end IP reachability.\n• traceroute <target-ip> - Traces hop-by-hop router path."
             },
             {
-                "type": "post",
-                "question": "What happens if the exit interface of a static route goes down?",
-                "options": [
-                    "The static route is removed from the active IP routing table",
-                    "The router crashes",
-                    "The static route stays active forever",
-                    "Packets loop infinitely"
-                ],
-                "answer": "The static route is removed from the active IP routing table",
-                "explanation": "If the associated interface goes DOWN, Cisco IOS removes the static route from active routing table."
+                "heading": "13. Packet Forwarding Process Step-by-Step",
+                "content": "1. PC1 encapsulates data with Source IP 192.168.1.10 and Dest IP 192.168.2.10, sending it to Default Gateway Router A.\n2. Router A receives packet on Gi0/0, inspects Dest IP 192.168.2.10, and finds static route 192.168.2.0/24 via 10.0.0.2.\n3. Router A forwards packet out Gi0/1 to Router B (10.0.0.2).\n4. Router B inspects Dest IP, matches directly connected network 192.168.2.0/24 Gi0/0, and delivers packet to PC2.\n5. CRITICAL: Router B MUST have a return static route to 192.168.1.0/24 via Router A, or return traffic will be dropped!"
             },
             {
-                "type": "post",
-                "question": "Which command displays the gateway of last resort and active static routes?",
-                "options": [
-                    "show ip route",
-                    "show ip static",
-                    "show interface status",
-                    "show ip protocols"
-                ],
-                "answer": "show ip route",
-                "explanation": "`show ip route` lists active routes and gateway of last resort."
+                "heading": "14. Static Routing vs Dynamic Routing Comparison",
+                "content": "• Configuration: Static is manual per router; Dynamic is automatic.\n• Maintenance: Static requires manual updates when topology changes; Dynamic adapts automatically.\n• Resource Overhead: Static has zero CPU/RAM/bandwidth load; Dynamic requires CPU for SPF/Bellman-Ford and network updates.\n• Security: Static is higher (no wire advertisements); Dynamic requires protocol authentication.\n• Scalability: Static is best for small/stub networks; Dynamic scales to large enterprise networks."
             },
             {
-                "type": "post",
-                "question": "What is a Summary Static Route?",
-                "options": [
-                    "Combining multiple specific subnet static routes into a single aggregate static route",
-                    "A route to loopback 0",
-                    "A route to DNS server",
-                    "A broadcast route"
-                ],
-                "answer": "Combining multiple specific subnet static routes into a single aggregate static route",
-                "explanation": "Summary static route aggregates multiple contiguous subnets into one entry."
+                "heading": "15. Advantages of Static Routing",
+                "content": "• Minimal router CPU and memory consumption.\n• Zero network bandwidth overhead (no update broadcasts).\n• Complete control over traffic paths.\n• Enhanced security."
             },
             {
-                "type": "post",
-                "question": "When is static routing preferred over dynamic routing?",
-                "options": [
-                    "Stub networks with a single exit path and hub-and-spoke WAN connections",
-                    "Global ISP backbone networks",
-                    "1,000 router mesh campus networks",
-                    "Data center fabrics"
-                ],
-                "answer": "Stub networks with a single exit path and hub-and-spoke WAN connections",
-                "explanation": "Stub networks with one gateway ideal for static default routing."
+                "heading": "16. Limitations of Static Routing",
+                "content": "• High administrative burden as network size grows.\n• Human configuration errors are common.\n• Cannot automatically re-route around link or router failures."
+            },
+            {
+                "heading": "17. Real-World Applications",
+                "content": "Used for connecting branch offices to central corporate headquarters, default routes facing ISPs, stub networks, and floating backup WAN links."
+            },
+            {
+                "heading": "18. Best Practices",
+                "content": "1. Always configure matching RETURN routes on remote routers to prevent asymmetric black-holing.\n2. Document static routes in network diagrams.\n3. Use Default Routes (0.0.0.0/0) on stub branch routers facing single edge connections."
+            },
+            {
+                "heading": "19. Common Configuration Errors",
+                "content": "• Missing return route on destination router.\n• Typographical error in next-hop IP address.\n• Inverted subnet mask (e.g., using wildcard mask instead of netmask).\n• Next-hop interface administratively down."
+            },
+            {
+                "heading": "20. Summary",
+                "content": "Static routing establishes predictable, manual paths across network routers using the ip route command, serving as an indispensable foundation for default gateways and enterprise WAN connectivity."
             }
         ]
     },
+    "hardware_inspector": [
+        {
+            "id": "cisco_2911_static_router",
+            "name": "Cisco 2911 ISR Static Forwarding Router",
+            "category": "Layer 3 Manual Forwarding Engine",
+            "description": "Enterprise Layer 3 router executing manual static route lookups and forwarding packets out GigabitEthernet interfaces without protocol overhead.",
+            "svg": `<svg viewBox="0 0 400 240" xmlns="http://www.w3.org/2000/svg">
+                <rect x="20" y="40" width="360" height="160" rx="10" fill="#0f172a" stroke="#38bdf8" stroke-width="3"/>
+                <rect x="35" y="55" width="330" height="40" rx="5" fill="#1e293b"/>
+                <text x="50" y="80" fill="#38bdf8" font-size="15" font-weight="bold" font-family="monospace">CISCO 2911 ISR [STATIC ROUTE ENGINE]</text>
+                <circle cx="340" cy="75" r="7" fill="#38bdf8"/>
+                <g transform="translate(40, 110)">
+                    <rect x="0" y="0" width="65" height="40" rx="4" fill="#334155" stroke="#10b981" stroke-width="2"/>
+                    <text x="32" y="25" fill="#ffffff" font-size="10" font-weight="bold" text-anchor="middle">Gi0/0 (C)</text>
+                </g>
+                <g transform="translate(120, 110)">
+                    <rect x="0" y="0" width="65" height="40" rx="4" fill="#334155" stroke="#38bdf8" stroke-width="2"/>
+                    <text x="32" y="25" fill="#ffffff" font-size="10" font-weight="bold" text-anchor="middle">Gi0/1 (S)</text>
+                </g>
+                <g transform="translate(200, 110)">
+                    <rect x="0" y="0" width="65" height="40" rx="4" fill="#334155" stroke="#f59e0b" stroke-width="2"/>
+                    <text x="32" y="25" fill="#f59e0b" font-size="10" font-weight="bold" text-anchor="middle">Gi0/2 (S*)</text>
+                </g>
+                <g transform="translate(280, 110)">
+                    <rect x="0" y="0" width="65" height="40" rx="4" fill="#334155" stroke="#64748b" stroke-width="2"/>
+                    <text x="32" y="25" fill="#cbd5e1" font-size="10" font-weight="bold" text-anchor="middle">Serial0/0</text>
+                </g>
+                <text x="200" y="185" fill="#cbd5e1" font-size="11" text-anchor="middle">Static Routing Table (AD = 1, Metric = 0)</text>
+            </svg>`
+        },
+        {
+            "id": "routing_table_lookup_diagram",
+            "name": "Routing Table Lookup & Next-Hop Forwarding Engine",
+            "category": "Layer 3 Routing Table Lookup",
+            "description": "Visual breakdown of a static route entry matching a destination IP and resolving the egress next-hop router interface.",
+            "svg": `<svg viewBox="0 0 400 240" xmlns="http://www.w3.org/2000/svg">
+                <rect x="20" y="20" width="360" height="200" rx="8" fill="#0b0f19" stroke="#38bdf8" stroke-width="2"/>
+                <text x="200" y="45" fill="#38bdf8" font-size="14" font-weight="bold" text-anchor="middle">IP ROUTING TABLE LOOKUP ENGINE [AD = 1]</text>
+                <line x1="30" y1="55" x2="370" y2="55" stroke="#334155" stroke-width="2"/>
+
+                <rect x="40" y="70" width="320" height="35" rx="5" fill="#1e293b" stroke="#10b981" stroke-width="1.5"/>
+                <text x="50" y="92" fill="#34d399" font-size="11" font-weight="bold" font-family="monospace">C 192.168.1.0/24 is directly connected, Gi0/0</text>
+
+                <rect x="40" y="115" width="320" height="35" rx="5" fill="#1e293b" stroke="#38bdf8" stroke-width="2"/>
+                <text x="50" y="137" fill="#38bdf8" font-size="11" font-weight="bold" font-family="monospace">S 192.168.2.0/24 [1/0] via 10.0.0.2, Gi0/1</text>
+
+                <rect x="40" y="160" width="320" height="35" rx="5" fill="#1e293b" stroke="#f59e0b" stroke-width="1.5"/>
+                <text x="50" y="182" fill="#fbbf24" font-size="11" font-weight="bold" font-family="monospace">S* 0.0.0.0/0 [1/0] via 203.0.113.1 (Default)</text>
+            </svg>`
+        }
+    ],
+    "troubleshooting": {
+        "problem": "Static Route Configured but End-to-End Ping Fails (Asymmetric Routing / Missing Return Route)",
+        "hints": [
+            "Verify if the local router has a static route to the destination network.",
+            "Check if the REMOTE destination router has a RETURN static route back to the source network.",
+            "Verify if the next-hop IP address is directly reachable and on the same subnet as the local interface.",
+            "Check if the egress interface is administratively down (shutdown)."
+        ],
+        "fix": "Execute 'show ip route' on BOTH local and remote routers to ensure bidirectional static routes exist. Fix any mistyped next-hop IP addresses and issue 'no shutdown' on interconnecting interfaces."
+    },
+    "viva": [
+        {
+            "q": "What is Static Routing and how does it differ from Dynamic Routing?",
+            "a": "Static Routing requires network administrators to manually enter route entries into the routing table. Unlike dynamic protocols (RIP, OSPF, EIGRP), static routes generate zero network advertisement traffic, consume minimal CPU/RAM, but require manual updates when network topology changes."
+        },
+        {
+            "q": "What is the Administrative Distance (AD) of a Static Route and a Directly Connected route in Cisco IOS?",
+            "a": "Directly Connected routes ('C') have an Administrative Distance of 0. Static routes ('S') have a default Administrative Distance of 1."
+        },
+        {
+            "q": "What is a Default Route (Gateway of Last Resort) and what is its prefix representation?",
+            "a": "A Default Route matches all destination IP addresses that do not have a specific match in the routing table. It uses the quad-zero destination prefix and subnet mask 0.0.0.0 0.0.0.0."
+        },
+        {
+            "q": "Why is a return route mandatory when configuring static routes between two routers?",
+            "a": "IP communication is bidirectional. Even if Router A correctly forwards a packet to Router B, Router B must have a routing table entry to send the return packet back to Router A's source subnet. Without a return route, return traffic is dropped."
+        },
+        {
+            "q": "What is a Floating Static Route?",
+            "a": "A Floating Static Route is a backup static route configured with a higher Administrative Distance (e.g. ip route 192.168.2.0 255.255.255.0 10.0.0.2 130). It remains inactive in topology memory until the primary route fails."
+        }
+    ],
+    "assignment": "1. Configure static routes between Router A and Router B (192.168.1.0/24 ⇹ 10.0.0.0/30 ⇹ 192.168.2.0/24).\n2. Execute ip route 192.168.2.0 255.255.255.0 10.0.0.2 on Router A and return route ip route 192.168.1.0 255.255.255.0 10.0.0.1 on Router B.\n3. Verify bidirectional ping from PC1 (192.168.1.10) to PC2 (192.168.2.10).\n4. Remove Router B's return route (no ip route ...) and observe ping failure due to missing return path.",
+    "references": [
+        {
+            "title": "Cisco IP Routing: Static Routes Configuration Guide",
+            "link": "https://www.cisco.com"
+        },
+        {
+            "title": "RFC 1812 - Requirements for IPv4 Routers",
+            "link": "https://datatracker.ietf.org/doc/html/rfc1812"
+        }
+    ],
+    "simType": "static_routing_sim"
+},
     "udp_tcp": {
         "title": "UDP & TCP Transport Protocols",
         "aim": "To analyze 3-way handshake (SYN, SYN-ACK, ACK), TCP windowing, sequence numbers, and UDP connectionless header frames.",
@@ -11498,3 +11441,4 @@ window.VLAB_DATA['ospf_sim'] = window.VLAB_DATA['routing_ospf'];
 window.VLAB_DATA['ospf'] = window.VLAB_DATA['routing_ospf'];
 window.VLAB_DATA['eigrp_sim'] = window.VLAB_DATA['routing_eigrp'];
 window.VLAB_DATA['eigrp'] = window.VLAB_DATA['routing_eigrp'];
+window.VLAB_DATA['static_routing_sim'] = window.VLAB_DATA['static_routing'];

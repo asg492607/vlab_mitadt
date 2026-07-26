@@ -13766,6 +13766,516 @@ const initOspfSim = (container) => {
 };
 
 
+        // --- PRACTICAL 11: STATIC ROUTING CONFIGURATION SIMULATOR ---
+const initStaticRoutingSim = (container) => {
+    const AC = '#38bdf8'; // Bright sky blue for Static Routing
+    container.innerHTML = `
+        <div style="padding:15px; font-family:var(--font-sans); color:var(--text-main); height:100%; display:flex; flex-direction:column; gap:12px; box-sizing:border-box;">
+            <!-- Header Banner -->
+            <div style="background:linear-gradient(135deg, rgba(56,189,248,0.15) 0%, rgba(15,23,42,0.6) 100%); border:1px solid ${AC}; border-radius:12px; padding:12px 18px; display:flex; justify-content:space-between; align-items:center; box-shadow:0 4px 12px rgba(0,0,0,0.15);">
+                <div>
+                    <h3 style="margin:0; color:${AC}; font-size:17px; font-weight:800; display:flex; align-items:center; gap:8px;">
+                        <span>📌</span> Static Routing Configuration Simulator
+                    </h3>
+                    <p style="margin:4px 0 0 0; font-size:12px; color:var(--text-muted);">
+                        Manual Route Entry • Hop-by-Hop Table Lookup • Next-Hop Resolution • Default Routes (0.0.0.0/0) • Cisco CLI
+                    </p>
+                </div>
+                <div style="display:flex; gap:10px;">
+                    <span style="background:rgba(56,189,248,0.2); color:${AC}; border:1px solid ${AC}; font-size:11px; padding:4px 10px; border-radius:20px; font-weight:700;">Manual Routes</span>
+                    <span style="background:rgba(16,185,129,0.2); color:#10b981; border:1px solid #10b981; font-size:11px; padding:4px 10px; border-radius:20px; font-weight:700;">AD: 1</span>
+                </div>
+            </div>
+
+            <!-- Tab Buttons Navigation -->
+            <div style="display:flex; gap:8px; border-bottom:1px solid var(--border); padding-bottom:6px; overflow-x:auto;">
+                <button class="static-tab-btn active" data-tab="journey" style="padding:8px 14px; background:${AC}; color:#0f172a; border:none; border-radius:6px; font-weight:700; font-size:12px; cursor:pointer; display:flex; align-items:center; gap:6px;">
+                    <span>🚀</span> Packet Journey & Lookup
+                </button>
+                <button class="static-tab-btn" data-tab="table_builder" style="padding:8px 14px; background:var(--bg-card); color:var(--text-main); border:1px solid var(--border); border-radius:6px; font-weight:700; font-size:12px; cursor:pointer; display:flex; align-items:center; gap:6px;">
+                    <span>📍</span> Route Table & Builder
+                </button>
+                <button class="static-tab-btn" data-tab="default_route" style="padding:8px 14px; background:var(--bg-card); color:var(--text-main); border:1px solid var(--border); border-radius:6px; font-weight:700; font-size:12px; cursor:pointer; display:flex; align-items:center; gap:6px;">
+                    <span>🌐</span> Default Route (0.0.0.0/0)
+                </button>
+                <button class="static-tab-btn" data-tab="cli" style="padding:8px 14px; background:var(--bg-card); color:var(--text-main); border:1px solid var(--border); border-radius:6px; font-weight:700; font-size:12px; cursor:pointer; display:flex; align-items:center; gap:6px;">
+                    <span>💻</span> Cisco Static CLI
+                </button>
+                <button class="static-tab-btn" data-tab="failover_cmp" style="padding:8px 14px; background:var(--bg-card); color:var(--text-main); border:1px solid var(--border); border-radius:6px; font-weight:700; font-size:12px; cursor:pointer; display:flex; align-items:center; gap:6px;">
+                    <span>🔄</span> Static vs Dynamic Comparison
+                </button>
+            </div>
+
+            <!-- Tab Content Display Areas -->
+            <div id="static-tab-body" style="flex:1; overflow-y:auto;">
+                <!-- Dynamically populated via JS -->
+            </div>
+        </div>
+    `;
+
+    // State Store for Static Routing Simulator
+    const state = {
+        activeTab: 'journey',
+        hasReturnRoute: true,
+        packetAnimating: false,
+        activeHop: 0,
+        // Custom Static Routes List
+        customRoutes: [
+            { dest: "192.168.1.0", mask: "255.255.255.0", nextHop: "Direct", type: "C", iface: "Gi0/0" },
+            { dest: "10.0.0.0", mask: "255.255.255.252", nextHop: "Direct", type: "C", iface: "Gi0/1" },
+            { dest: "192.168.2.0", mask: "255.255.255.0", nextHop: "10.0.0.2", type: "S", iface: "Gi0/1" }
+        ],
+        // CLI State
+        cliOutput: [
+            "Cisco IOS Software, 2900 Software (C2900-UNIVERSALK9-M), Version 15.7(3)M3",
+            "RouterA# configure terminal",
+            "RouterA(config)# ip route 192.168.2.0 255.255.255.0 10.0.0.2",
+            "RouterA(config)# end",
+            "RouterA# show ip route",
+            "Codes: C - connected, S - static, R - RIP, M - mobile, B - BGP",
+            "Gateway of last resort is not set",
+            "C    192.168.1.0/24 is directly connected, GigabitEthernet0/0",
+            "C    10.0.0.0/30 is directly connected, GigabitEthernet0/1",
+            "S    192.168.2.0/24 [1/0] via 10.0.0.2, GigabitEthernet0/1"
+        ]
+    };
+
+    // Tab 1: Hop-by-Hop Packet Journey & Lookup Visualizer
+    const renderJourneyTab = () => {
+        return `
+            <div style="display:grid; grid-template-columns: 1fr 340px; gap:16px; height:100%;">
+                <!-- Left: Canvas & Packet Tracer Controls -->
+                <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:14px; display:flex; flex-direction:column; gap:12px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <h4 style="margin:0; color:${AC}; font-size:14px;">Packet Forwarding Journey: PC1 (192.168.1.10) ➔ PC2 (192.168.2.10)</h4>
+                        <div style="display:flex; gap:8px;">
+                            <button id="btn-toggle-return-route" style="background:${state.hasReturnRoute ? '#ef4444' : '#10b981'}; color:#fff; border:none; padding:6px 12px; border-radius:6px; font-weight:700; font-size:12px; cursor:pointer;">
+                                ${state.hasReturnRoute ? '💥 Remove Return Route (Router B)' : '🔄 Add Return Route (Router B)'}
+                            </button>
+                            <button id="btn-send-static-pkt" style="background:${AC}; color:#0f172a; border:none; padding:6px 14px; border-radius:6px; font-weight:800; font-size:12px; cursor:pointer;">
+                                🚀 Send Ping Packet
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Topology Canvas -->
+                    <div style="position:relative; width:100%; height:240px; background:#0b0f19; border:1px solid #1e293b; border-radius:10px; overflow:hidden;">
+                        <svg width="100%" height="100%" viewBox="0 0 500 240">
+                            <!-- Link Lines -->
+                            <line x1="60" y1="120" x2="160" y2="120" stroke="#64748b" stroke-width="3"/>
+                            <line x1="160" y1="120" x2="340" y2="120" stroke="#38bdf8" stroke-width="4"/>
+                            <line x1="340" y1="120" x2="440" y2="120" stroke="#64748b" stroke-width="3"/>
+
+                            <!-- Subnet Annotations -->
+                            <rect x="70" y="85" width="80" height="18" rx="3" fill="#0f172a" stroke="#334155"/>
+                            <text x="110" y="97" fill="#cbd5e1" font-size="9" text-anchor="middle">192.168.1.0/24</text>
+
+                            <rect x="210" y="85" width="80" height="18" rx="3" fill="#0f172a" stroke="#38bdf8"/>
+                            <text x="250" y="97" fill="#38bdf8" font-size="9" font-weight="bold" text-anchor="middle">10.0.0.0/30</text>
+
+                            <rect x="350" y="85" width="80" height="18" rx="3" fill="#0f172a" stroke="#334155"/>
+                            <text x="390" y="97" fill="#cbd5e1" font-size="9" text-anchor="middle">192.168.2.0/24</text>
+
+                            <!-- PC1 -->
+                            <rect x="30" y="105" width="30" height="30" rx="4" fill="#334155"/>
+                            <text x="45" y="124" fill="#ffffff" font-size="10" font-weight="bold" text-anchor="middle">PC1</text>
+                            <text x="45" y="150" fill="#cbd5e1" font-size="9" text-anchor="middle">192.168.1.10</text>
+
+                            <!-- Router A -->
+                            <circle cx="160" cy="120" r="22" fill="#1e293b" stroke="#38bdf8" stroke-width="3"/>
+                            <text x="160" y="124" fill="#ffffff" font-size="11" font-weight="bold" text-anchor="middle">R-A</text>
+                            <text x="160" y="155" fill="#38bdf8" font-size="9" text-anchor="middle">Gi0/1: 10.0.0.1</text>
+
+                            <!-- Router B -->
+                            <circle cx="340" cy="120" r="22" fill="#1e293b" stroke="${state.hasReturnRoute ? '#38bdf8' : '#ef4444'}" stroke-width="3"/>
+                            <text x="340" y="124" fill="#ffffff" font-size="11" font-weight="bold" text-anchor="middle">R-B</text>
+                            <text x="340" y="155" fill="${state.hasReturnRoute ? '#38bdf8' : '#ef4444'}" font-size="9" text-anchor="middle">Gi0/1: 10.0.0.2</text>
+
+                            <!-- PC2 -->
+                            <rect x="440" y="105" width="30" height="30" rx="4" fill="#334155"/>
+                            <text x="455" y="124" fill="#ffffff" font-size="10" font-weight="bold" text-anchor="middle">PC2</text>
+                            <text x="455" y="150" fill="#cbd5e1" font-size="9" text-anchor="middle">192.168.2.10</text>
+
+                            <!-- Animated Packet -->
+                            <circle id="static-pkt" cx="45" cy="120" r="7" fill="#38bdf8" style="display:none; transition: all 0.5s ease-in-out;"/>
+                        </svg>
+                    </div>
+
+                    <!-- Hop Status Alert -->
+                    <div style="background:${state.hasReturnRoute ? 'rgba(56,189,248,0.1)' : 'rgba(239,68,68,0.15)'}; border:1px solid ${state.hasReturnRoute ? AC : '#ef4444'}; border-radius:8px; padding:10px; font-size:12px; line-height:1.5;">
+                        <b style="color:${state.hasReturnRoute ? AC : '#ef4444'};">Forwarding Status: ${state.hasReturnRoute ? 'BIDIRECTIONAL ROUTE COMPLETE 🟢' : 'MISSING RETURN ROUTE ERROR ⚠️'}</b><br>
+                        ${state.hasReturnRoute ? 
+                            'Router A forwards outbound ping to 192.168.2.0/24 via 10.0.0.2. Router B has return route to 192.168.1.0/24 via 10.0.0.1. <b>Ping Success (0% loss)</b>!' : 
+                            'Outbound packet reaches PC2, BUT Router B lacks a route to 192.168.1.0/24! Return ICMP echo-reply is dropped! <b>Request Timed Out (100% loss)</b>.'}
+                    </div>
+                </div>
+
+                <!-- Right: Active Router Routing Table Lookup Inspector -->
+                <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:14px; display:flex; flex-direction:column; gap:12px;">
+                    <h4 style="margin:0; color:${AC}; font-size:14px;">Router A Active Routing Table</h4>
+
+                    <div style="background:#0b0f19; border:1px solid #1e293b; border-radius:8px; padding:10px; font-family:monospace; font-size:11px; color:#38bdf8; line-height:1.6; overflow-y:auto; flex:1;">
+                        <b style="color:#10b981;">Codes: C - connected, S - static</b><br><br>
+
+                        <div style="padding:4px; border-radius:4px; background:var(--bg-card); margin-bottom:4px;">
+                            <span style="color:#10b981; font-weight:bold;">C 192.168.1.0/24</span> is directly connected, Gi0/0
+                        </div>
+
+                        <div style="padding:4px; border-radius:4px; background:var(--bg-card); margin-bottom:4px;">
+                            <span style="color:#10b981; font-weight:bold;">C 10.0.0.0/30</span> is directly connected, Gi0/1
+                        </div>
+
+                        <div style="padding:6px; border-radius:4px; background:rgba(56,189,248,0.2); border:1px solid ${AC}; margin-bottom:4px;">
+                            <span style="color:${AC}; font-weight:bold;">S 192.168.2.0/24 [1/0]</span> via 10.0.0.2, Gi0/1<br>
+                            <span style="font-size:10px; color:#cbd5e1;">➔ Matched for Dest IP 192.168.2.10</span>
+                        </div>
+                    </div>
+
+                    <div style="background:var(--bg-page); border:1px solid var(--border); border-radius:8px; padding:8px; font-size:11px; color:var(--text-muted);">
+                        <b>Next-Hop Rule:</b> Router A strips Layer 2 Ethernet header, matches destination IP to static route 192.168.2.0/24, rewrites MAC destination header to 10.0.0.2, and transmits out Gi0/1.
+                    </div>
+                </div>
+            </div>
+        `;
+    };
+
+    // Tab 2: Live Routing Table & Route Builder
+    const renderTableBuilderTab = () => {
+        return `
+            <div style="display:grid; grid-template-columns: 1fr 340px; gap:16px; height:100%;">
+                <!-- Left: Active Routing Table Display -->
+                <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:14px; display:flex; flex-direction:column; gap:12px;">
+                    <h4 style="margin:0; color:${AC}; font-size:14px;">Router A Live IP Routing Table</h4>
+
+                    <div style="background:#0b0f19; border:1px solid #1e293b; border-radius:8px; padding:12px; font-family:monospace; font-size:11px; color:#38bdf8; flex:1; overflow-y:auto; line-height:1.6;">
+                        <div style="border-bottom:1px solid #334155; padding-bottom:6px; margin-bottom:8px; font-weight:bold; color:#cbd5e1;">
+                            Type  Destination Subnet     Subnet Mask       Next-Hop / Egress
+                        </div>
+                        ${state.customRoutes.map((r, idx) => `
+                            <div style="display:flex; justify-content:space-between; padding:6px; border-radius:4px; background:${r.type === 'S' ? 'rgba(56,189,248,0.15)' : 'var(--bg-card)'}; margin-bottom:6px; border-left:3px solid ${r.type === 'S' ? AC : '#10b981'};">
+                                <div>
+                                    <b style="color:${r.type === 'S' ? AC : '#10b981'};">[${r.type}]</b> 
+                                    <b>${r.dest}</b> / ${r.mask}
+                                </div>
+                                <div style="color:#cbd5e1;">
+                                    ${r.nextHop} (${r.iface})
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+
+                <!-- Right: Static Route Generator Controls -->
+                <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:14px; display:flex; flex-direction:column; gap:10px;">
+                    <h4 style="margin:0; color:${AC}; font-size:14px;">Add New Static Route</h4>
+                    <p style="margin:0; font-size:11px; color:var(--text-muted);">
+                        Enter target network parameters to generate and install the Cisco IOS command.
+                    </p>
+
+                    <label style="font-size:11px; font-weight:bold;">Destination Network:
+                        <input id="new-route-dest" type="text" value="172.16.1.0" style="width:100%; padding:6px; background:var(--bg-page); color:var(--text-main); border:1px solid var(--border); border-radius:4px; font-family:monospace; margin-top:3px;">
+                    </label>
+
+                    <label style="font-size:11px; font-weight:bold;">Subnet Mask:
+                        <input id="new-route-mask" type="text" value="255.255.255.0" style="width:100%; padding:6px; background:var(--bg-page); color:var(--text-main); border:1px solid var(--border); border-radius:4px; font-family:monospace; margin-top:3px;">
+                    </label>
+
+                    <label style="font-size:11px; font-weight:bold;">Next-Hop IP Address:
+                        <input id="new-route-nexthop" type="text" value="10.0.0.2" style="width:100%; padding:6px; background:var(--bg-page); color:var(--text-main); border:1px solid var(--border); border-radius:4px; font-family:monospace; margin-top:3px;">
+                    </label>
+
+                    <button id="btn-add-static-route" style="background:${AC}; color:#0f172a; border:none; padding:8px; border-radius:6px; font-weight:800; cursor:pointer; margin-top:6px;">
+                        ➕ Add Route to Table
+                    </button>
+
+                    <!-- Generated Command Preview -->
+                    <div style="background:#0f172a; border:1px solid #334155; border-radius:6px; padding:8px; font-family:monospace; font-size:11px; color:#34d399; margin-top:6px;">
+                        <b>Generated CLI Command:</b><br>
+                        <span id="cli-cmd-preview">ip route 172.16.1.0 255.255.255.0 10.0.0.2</span>
+                    </div>
+                </div>
+            </div>
+        `;
+    };
+
+    // Tab 3: Default Route (0.0.0.0/0) Gateway of Last Resort Visualizer
+    const renderDefaultRouteTab = () => {
+        return `
+            <div style="display:grid; grid-template-columns: 1fr 320px; gap:16px; height:100%;">
+                <!-- Left: Gateway of Last Resort Diagram -->
+                <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:14px; display:flex; flex-direction:column; gap:12px;">
+                    <h4 style="margin:0; color:${AC}; font-size:14px;">Gateway of Last Resort (0.0.0.0/0 Quad-Zero Default Route)</h4>
+
+                    <div style="background:#0b0f19; border:1px solid #1e293b; border-radius:10px; padding:20px; position:relative; height:240px; display:flex; justify-content:center; align-items:center;">
+                        <svg width="100%" height="100%" viewBox="0 0 480 220">
+                            <!-- Branch LAN -->
+                            <rect x="20" y="90" width="70" height="40" rx="6" fill="#1e293b" stroke="#334155" stroke-width="2"/>
+                            <text x="55" y="114" fill="#ffffff" font-size="11" font-weight="bold" text-anchor="middle">Branch LAN</text>
+
+                            <!-- Branch Router -->
+                            <line x1="90" y1="110" x2="180" y2="110" stroke="#38bdf8" stroke-width="3"/>
+                            <circle cx="200" cy="110" r="22" fill="#1e293b" stroke="#38bdf8" stroke-width="3"/>
+                            <text x="200" y="114" fill="#ffffff" font-size="11" font-weight="bold" text-anchor="middle">R-Edge</text>
+
+                            <!-- ISP Gateway -->
+                            <line x1="222" y1="110" x2="330" y2="110" stroke="#f59e0b" stroke-width="4"/>
+                            <circle cx="350" cy="110" r="22" fill="#1e293b" stroke="#f59e0b" stroke-width="3"/>
+                            <text x="350" y="114" fill="#ffffff" font-size="11" font-weight="bold" text-anchor="middle">ISP-GW</text>
+
+                            <!-- Cloud Internet -->
+                            <line x1="372" y1="110" x2="430" y2="110" stroke="#f59e0b" stroke-width="3" stroke-dasharray="4,4"/>
+                            <path d="M 430 110 Q 450 90, 470 110 Q 450 130, 430 110" fill="#334155" stroke="#f59e0b" stroke-width="2"/>
+                            <text x="450" y="114" fill="#fbbf24" font-size="10" font-weight="bold" text-anchor="middle">Internet</text>
+
+                            <!-- Default Route Banner -->
+                            <rect x="130" y="150" width="140" height="22" rx="4" fill="#0f172a" stroke="#f59e0b"/>
+                            <text x="200" y="165" fill="#fbbf24" font-size="10" font-weight="bold" text-anchor="middle">ip route 0.0.0.0 0.0.0.0 ISP-GW</text>
+                        </svg>
+                    </div>
+
+                    <div style="background:rgba(245,158,11,0.1); border:1px solid #f59e0b; border-radius:8px; padding:10px; font-size:12px; line-height:1.5;">
+                        <b style="color:#f59e0b;">Quad-Zero Wildcard Rule (0.0.0.0 0.0.0.0):</b><br>
+                        When an edge router receives a packet for an unknown Internet IP (e.g. 8.8.8.8 or 142.250.183.206), it matches the default route 0.0.0.0/0 and forwards the packet out to the ISP gateway.
+                    </div>
+                </div>
+
+                <!-- Right: Cisco IOS Default Route Inspector -->
+                <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:14px; display:flex; flex-direction:column; gap:12px;">
+                    <h4 style="margin:0; color:${AC}; font-size:14px;">Gateway of Last Resort Entry</h4>
+
+                    <div style="background:#0b0f19; border:1px solid #1e293b; border-radius:8px; padding:12px; font-family:monospace; font-size:11px; color:#fbbf24; line-height:1.6; flex:1;">
+                        Router# show ip route<br><br>
+                        <b style="color:#10b981;">Gateway of last resort is 203.0.113.1 to network 0.0.0.0</b><br><br>
+
+                        C 192.168.1.0/24 is directly connected, Gi0/0<br>
+                        C 203.0.113.0/30 is directly connected, Gi0/1<br>
+                        <b style="color:#fbbf24;">S* 0.0.0.0/0 [1/0] via 203.0.113.1, Gi0/1</b>
+                    </div>
+                </div>
+            </div>
+        `;
+    };
+
+    // Tab 4: Cisco IOS Static Routing CLI Terminal
+    const renderCliTab = () => {
+        return `
+            <div style="background:#0f172a; border:1px solid #1e293b; border-radius:12px; padding:14px; display:flex; flex-direction:column; gap:10px; height:100%; box-sizing:border-box;">
+                <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #334155; padding-bottom:8px;">
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <span style="color:${AC}; font-weight:800; font-size:13px;">💻 Cisco IOS Static Routing Interactive Terminal</span>
+                        <span style="font-size:11px; color:#94a3b8;">(RouterA#)</span>
+                    </div>
+                    <div style="display:flex; gap:6px;">
+                        <button class="cli-quick-cmd" data-cmd="show ip route" style="background:#1e293b; color:#38bdf8; border:1px solid #334155; padding:3px 8px; border-radius:4px; font-size:11px; cursor:pointer;">show ip route</button>
+                        <button class="cli-quick-cmd" data-cmd="show ip interface brief" style="background:#1e293b; color:#38bdf8; border:1px solid #334155; padding:3px 8px; border-radius:4px; font-size:11px; cursor:pointer;">show ip int brief</button>
+                        <button class="cli-quick-cmd" data-cmd="ping 192.168.2.10" style="background:#1e293b; color:#38bdf8; border:1px solid #334155; padding:3px 8px; border-radius:4px; font-size:11px; cursor:pointer;">ping 192.168.2.10</button>
+                    </div>
+                </div>
+
+                <div id="static-cli-output" style="flex:1; background:#0b0f19; border:1px solid #1e293b; border-radius:8px; padding:12px; font-family:monospace; font-size:12px; color:#38bdf8; overflow-y:auto; line-height:1.6; min-height:220px;">
+                    ${state.cliOutput.map(line => `<div>${line}</div>`).join('')}
+                </div>
+
+                <div style="display:flex; gap:8px; align-items:center;">
+                    <span style="color:#38bdf8; font-family:monospace; font-weight:bold; font-size:13px;">RouterA#</span>
+                    <input id="static-cli-input" type="text" placeholder="Type command e.g. ip route 192.168.2.0 255.255.255.0 10.0.0.2, show ip route..." style="flex:1; background:#0b0f19; border:1px solid #334155; color:#ffffff; padding:8px 12px; border-radius:6px; font-family:monospace; font-size:12px; outline:none;">
+                    <button id="btn-send-static-cli" style="background:${AC}; color:#0f172a; border:none; padding:8px 16px; border-radius:6px; font-weight:800; font-size:12px; cursor:pointer;">Execute</button>
+                </div>
+            </div>
+        `;
+    };
+
+    // Tab 5: Static vs Dynamic Routing Failover Comparison
+    const renderFailoverCmpTab = () => {
+        return `
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px; height:100%;">
+                <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:14px; display:flex; flex-direction:column; gap:12px;">
+                    <h4 style="margin:0; color:${AC}; font-size:14px;">Static Routing (Manual Admin Updates Required)</h4>
+
+                    <div style="background:rgba(239,68,68,0.1); border-left:3px solid #ef4444; padding:10px; border-radius:6px; font-size:12px; line-height:1.5;">
+                        <b style="color:#ef4444;">Link Failure Scenario:</b><br>
+                        When a link fails in a static network, the static route remains fixed or is dropped without alternative paths. <b>No automatic failover occurs</b> until an administrator manually changes the ip route configuration.
+                    </div>
+                </div>
+
+                <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:14px; display:flex; flex-direction:column; gap:12px;">
+                    <h4 style="margin:0; color:${AC}; font-size:14px;">Dynamic Protocols (RIP / OSPF / EIGRP)</h4>
+
+                    <div style="background:rgba(16,185,129,0.1); border-left:3px solid #10b981; padding:10px; border-radius:6px; font-size:12px; line-height:1.5;">
+                        <b style="color:#10b981;">Automatic Failover Scenario:</b><br>
+                        Dynamic protocols exchange periodic or triggered advertisements. When a link fails, routers automatically calculate alternative shortest paths (SPF / DUAL) and update routing tables in milliseconds without human intervention.
+                    </div>
+                </div>
+            </div>
+        `;
+    };
+
+    // Master View Update
+    const updateView = () => {
+        const bodyEl = container.querySelector('#static-tab-body');
+        if (!bodyEl) return;
+
+        if (state.activeTab === 'journey') bodyEl.innerHTML = renderJourneyTab();
+        else if (state.activeTab === 'table_builder') bodyEl.innerHTML = renderTableBuilderTab();
+        else if (state.activeTab === 'default_route') bodyEl.innerHTML = renderDefaultRouteTab();
+        else if (state.activeTab === 'cli') bodyEl.innerHTML = renderCliTab();
+        else if (state.activeTab === 'failover_cmp') bodyEl.innerHTML = renderFailoverCmpTab();
+
+        attachTabListeners();
+    };
+
+    // Attach Event Listeners
+    const attachTabListeners = () => {
+        // Return Route Toggle (Tab 1)
+        const toggleBtn = container.querySelector('#btn-toggle-return-route');
+        if (toggleBtn) {
+            toggleBtn.onclick = () => {
+                state.hasReturnRoute = !state.hasReturnRoute;
+                updateView();
+            };
+        }
+
+        // Packet Animation (Tab 1)
+        const sendPktBtn = container.querySelector('#btn-send-static-pkt');
+        if (sendPktBtn) {
+            sendPktBtn.onclick = () => {
+                const pkt = container.querySelector('#static-pkt');
+                if (!pkt || state.packetAnimating) return;
+                state.packetAnimating = true;
+                pkt.style.display = 'block';
+
+                if (state.hasReturnRoute) {
+                    // Successful round trip
+                    pkt.setAttribute('cx', '45'); pkt.setAttribute('cy', '120');
+                    setTimeout(() => { pkt.setAttribute('cx', '160'); pkt.setAttribute('cy', '120'); }, 100);
+                    setTimeout(() => { pkt.setAttribute('cx', '340'); pkt.setAttribute('cy', '120'); }, 600);
+                    setTimeout(() => { pkt.setAttribute('cx', '455'); pkt.setAttribute('cy', '120'); }, 1100);
+                    // Return journey
+                    setTimeout(() => { pkt.setAttribute('cx', '340'); pkt.setAttribute('cy', '120'); }, 1600);
+                    setTimeout(() => { pkt.setAttribute('cx', '160'); pkt.setAttribute('cy', '120'); }, 2100);
+                    setTimeout(() => { pkt.setAttribute('cx', '45'); pkt.setAttribute('cy', '120'); }, 2600);
+                    setTimeout(() => { pkt.style.display = 'none'; state.packetAnimating = false; }, 3000);
+                } else {
+                    // Outbound arrives, but return is dropped at Router B!
+                    pkt.setAttribute('cx', '45'); pkt.setAttribute('cy', '120');
+                    setTimeout(() => { pkt.setAttribute('cx', '160'); pkt.setAttribute('cy', '120'); }, 100);
+                    setTimeout(() => { pkt.setAttribute('cx', '340'); pkt.setAttribute('cy', '120'); }, 600);
+                    setTimeout(() => { pkt.setAttribute('cx', '455'); pkt.setAttribute('cy', '120'); }, 1100);
+                    // Return dropped at Router B
+                    setTimeout(() => { pkt.setAttribute('cx', '340'); pkt.setAttribute('cy', '120'); pkt.setAttribute('fill', '#ef4444'); }, 1600);
+                    setTimeout(() => { pkt.style.display = 'none'; pkt.setAttribute('fill', '#38bdf8'); state.packetAnimating = false; }, 2200);
+                }
+            };
+        }
+
+        // Route Builder Controls (Tab 2)
+        const addBtn = container.querySelector('#btn-add-static-route');
+        const destIn = container.querySelector('#new-route-dest');
+        const maskIn = container.querySelector('#new-route-mask');
+        const hopIn = container.querySelector('#new-route-nexthop');
+        const previewEl = container.querySelector('#cli-cmd-preview');
+
+        const updatePreview = () => {
+            if (previewEl && destIn && maskIn && hopIn) {
+                previewEl.textContent = `ip route ${destIn.value.trim()} ${maskIn.value.trim()} ${hopIn.value.trim()}`;
+            }
+        };
+
+        if (destIn && maskIn && hopIn) {
+            destIn.oninput = updatePreview;
+            maskIn.oninput = updatePreview;
+            hopIn.oninput = updatePreview;
+        }
+
+        if (addBtn && destIn && maskIn && hopIn) {
+            addBtn.onclick = () => {
+                const dest = destIn.value.trim();
+                const mask = maskIn.value.trim();
+                const nextHop = hopIn.value.trim();
+
+                if (dest && mask && nextHop) {
+                    state.customRoutes.push({
+                        dest, mask, nextHop, type: 'S', iface: 'Gi0/1'
+                    });
+                    state.cliOutput.push(`RouterA(config)# ip route ${dest} ${mask} ${nextHop}`);
+                    updateView();
+                }
+            };
+        }
+
+        // CLI Terminal (Tab 4)
+        const cliInput = container.querySelector('#static-cli-input');
+        const execBtn = container.querySelector('#btn-send-static-cli');
+
+        const executeCli = (cmd) => {
+            if (!cmd.trim()) return;
+            state.cliOutput.push(`RouterA# ${cmd}`);
+            const clean = cmd.trim().toLowerCase();
+
+            if (clean === 'show ip route') {
+                state.cliOutput.push("Codes: C - connected, S - static, S* - candidate default");
+                state.cliOutput.push("Gateway of last resort is not set");
+                state.customRoutes.forEach(r => {
+                    state.cliOutput.push(`${r.type}    ${r.dest}/${r.mask === '255.255.255.0' ? '24' : '30'} [1/0] via ${r.nextHop}, ${r.iface}`);
+                });
+            } else if (clean === 'show ip interface brief') {
+                state.cliOutput.push("Interface                  IP-Address      OK? Method Status                Protocol");
+                state.cliOutput.push("GigabitEthernet0/0         192.168.1.1     YES manual up                    up");
+                state.cliOutput.push("GigabitEthernet0/1         10.0.0.1        YES manual up                    up");
+            } else if (clean.startsWith('ping')) {
+                if (state.hasReturnRoute) {
+                    state.cliOutput.push("Type escape sequence to abort.");
+                    state.cliOutput.push("Sending 5, 100-byte ICMP Echos to 192.168.2.10, timeout is 2 seconds:");
+                    state.cliOutput.push("!!!!!");
+                    state.cliOutput.push("Success rate is 100 percent (5/5), round-trip min/avg/max = 1/2/4 ms");
+                } else {
+                    state.cliOutput.push("Type escape sequence to abort.");
+                    state.cliOutput.push("Sending 5, 100-byte ICMP Echos to 192.168.2.10, timeout is 2 seconds:");
+                    state.cliOutput.push(".....");
+                    state.cliOutput.push("Success rate is 0 percent (0/5)");
+                }
+            } else if (clean.startsWith('ip route')) {
+                state.cliOutput.push("Static route installed successfully.");
+            } else {
+                state.cliOutput.push(`% Unknown command: "${cmd}"`);
+            }
+            updateView();
+        };
+
+        if (execBtn && cliInput) {
+            execBtn.onclick = () => executeCli(cliInput.value);
+            cliInput.onkeypress = (e) => { if (e.key === 'Enter') executeCli(cliInput.value); };
+        }
+
+        container.querySelectorAll('.cli-quick-cmd').forEach(btn => {
+            btn.onclick = () => executeCli(btn.getAttribute('data-cmd'));
+        });
+    };
+
+    // Main Tab Switching Listener
+    container.querySelectorAll('.static-tab-btn').forEach(btn => {
+        btn.onclick = () => {
+            container.querySelectorAll('.static-tab-btn').forEach(b => {
+                b.classList.remove('active');
+                b.style.background = 'var(--bg-card)';
+                b.style.color = 'var(--text-main)';
+                b.style.border = '1px solid var(--border)';
+            });
+            btn.classList.add('active');
+            btn.style.background = AC;
+            btn.style.color = '#0f172a';
+            btn.style.border = 'none';
+
+            state.activeTab = btn.getAttribute('data-tab');
+            updateView();
+        };
+    });
+
+    // Initial Render
+    updateView();
+};
+
+
 const initRipSim = (container) => {
     let currentTab = 'hop_sim'; // 'hop_sim', 'tables', 'infinity', 'cli', 'timers'
 
@@ -18740,6 +19250,7 @@ const initRipSim = (container) => {
             `;
                 return;
             }
+            if (id === 'static_routing' || id === 'static_routing_sim' || (data && (data.simType === 'static_routing_sim' || data.simType === 'static_routing'))) { initStaticRoutingSim(container); return; }
             if (id === 'routing_eigrp' || id === 'eigrp_sim' || (data && (data.simType === 'eigrp_sim' || data.simType === 'routing_eigrp'))) { initEigrpSim(container); return; }
             if (id === 'routing_ospf' || id === 'ospf_sim' || (data && (data.simType === 'ospf_sim' || data.simType === 'routing_ospf'))) { initOspfSim(container); return; }
             if (id === 'routing_rip' || id === 'rip_sim' || (data && (data.simType === 'rip_sim' || data.simType === 'routing_rip'))) { initRipSim(container); return; }
