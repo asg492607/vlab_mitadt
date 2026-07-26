@@ -218,7 +218,7 @@ window.VLAB_DATA = {
             ],
             fix: "Ensure a CAT6 Straight-Through cable is connected between PC1 NIC and Switch Port Fa0/1, and assign valid IP 192.168.1.11/24 to PC2."
         },
-        pretest: [
+        posttest: [
             {
                 q: "What is the primary operational difference between an Ethernet Hub and a Layer-2 Switch?",
                 options: [
@@ -278,9 +278,7 @@ window.VLAB_DATA = {
                 correct: 1,
                 answer: 1,
                 explanation: "Standard TIA/EIA-568 Ethernet copper cable segments are limited to 100 meters (90m solid horizontal + 10m patch cables)."
-            }
-        ],
-        posttest: [
+            },
             {
                 q: "A technician connects a Router GigabitEthernet port directly to a PC NIC without Auto-MDIX. Which cable type is required?",
                 options: [
