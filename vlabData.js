@@ -141,13 +141,62 @@ window.VLAB_DATA = {
             ]
         },
         tools: [
-            { name: "Cisco 2911 Enterprise Router", layer: "Layer 3 (Network)", ports: "3x GE 10/100/1000, 2x HWIC Serial slots, 1x Console RJ-45", usage: "Inter-VLAN routing, WAN interconnection, NAT, and DHCP service hosting", statusLED: "Green (Link UP), Amber (Boot/Fault)" },
-            { name: "Cisco 2960 Enterprise Switch", layer: "Layer 2 (Data Link)", ports: "24x FastEthernet 10/100, 2x Gigabit SFP Fiber Uplinks", usage: "Dedicated port aggregation, MAC table forwarding, and VLAN creation", statusLED: "Green (Solid = Link, Flashing = Activity)" },
-            { name: "Ethernet Hub (Multiport Repeater)", layer: "Layer 1 (Physical)", ports: "8x FastEthernet RJ-45", usage: "Broadcast signal repetition across all connected nodes (Legacy)", statusLED: "Solid Green Power, Flashing Collision Amber" },
-            { name: "Network Interface Card (NIC)", layer: "Layer 1 & Layer 2", ports: "RJ-45 Copper / SFP Fiber", usage: "Provides 48-bit MAC hardware address and converts data into serial signals", statusLED: "Green (Link UP), Amber (1000Mbps Speed)" },
-            { name: "CAT6 Twisted Pair Cable (RJ-45)", layer: "Layer 1 (Physical)", ports: "8P8C Modular RJ-45 Connector", usage: "Transmits electrical signals up to 100 meters at 1 Gbps / 10 Gbps", statusLED: "8-Pin Continuity LED" },
-            { name: "Single-Mode / Multi-Mode Fiber Optic", layer: "Layer 1 (Physical)", ports: "LC, SC, ST Connectors", usage: "High-speed light transmission for campus backbones and data centers", statusLED: "Laser / LED Optical Tx/Rx" },
-            { name: "Stateful Hardware Firewall", layer: "Layer 3 to Layer 7", ports: "WAN, LAN, DMZ Gigabit Ports", usage: "Inspects packets and enforces access control rules to block malicious traffic", statusLED: "Green (Active Rule Match)" }
+            {
+                name: "Cisco 2911 Enterprise Router",
+                layer: "Layer 3 (Network)",
+                ports: "3x GE 10/100/1000, 2x HWIC Serial slots, 1x Console RJ-45",
+                usage: "Inter-VLAN routing, WAN interconnection, NAT, and DHCP service hosting",
+                statusLED: "Green (Link UP), Amber (Boot/Fault)",
+                image: `<svg viewBox="0 0 380 120" style="width:100%; height:100%;"><rect x="10" y="20" width="360" height="80" rx="8" fill="#1e293b" stroke="#475569" stroke-width="2"/><rect x="25" y="32" width="90" height="24" rx="4" fill="#0f172a"/><text x="70" y="48" fill="#38bdf8" font-size="10" font-family="sans-serif" font-weight="bold" text-anchor="middle">CISCO 2911</text><rect x="130" y="32" width="225" height="56" rx="4" fill="#0f172a" stroke="#334155"/><rect x="140" y="42" width="22" height="16" rx="2" fill="#334155" stroke="#64748b"/><text x="151" y="54" fill="#94a3b8" font-size="7" font-family="monospace" text-anchor="middle">GE0/0</text><rect x="168" y="42" width="22" height="16" rx="2" fill="#334155" stroke="#64748b"/><text x="179" y="54" fill="#94a3b8" font-size="7" font-family="monospace" text-anchor="middle">GE0/1</text><rect x="196" y="42" width="22" height="16" rx="2" fill="#334155" stroke="#64748b"/><text x="207" y="54" fill="#94a3b8" font-size="7" font-family="monospace" text-anchor="middle">GE0/2</text><rect x="230" y="40" width="55" height="40" rx="3" fill="#1e293b" stroke="#3b82f6"/><text x="257" y="63" fill="#60a5fa" font-size="8" font-family="monospace" text-anchor="middle">HWIC-1T</text><rect x="292" y="40" width="55" height="40" rx="3" fill="#1e293b" stroke="#3b82f6"/><text x="319" y="63" fill="#60a5fa" font-size="8" font-family="monospace" text-anchor="middle">HWIC-2T</text><circle cx="35" cy="75" r="4" fill="#22c55e"/><circle cx="48" cy="75" r="4" fill="#22c55e"/><circle cx="61" cy="75" r="4" fill="#f59e0b"/><text x="75" y="78" fill="#94a3b8" font-size="8" font-family="monospace">PWR/SYS</text></svg>`
+            },
+            {
+                name: "Cisco 2960 Enterprise Switch",
+                layer: "Layer 2 (Data Link)",
+                ports: "24x FastEthernet 10/100, 2x Gigabit SFP Fiber Uplinks",
+                usage: "Dedicated port aggregation, MAC table forwarding, and VLAN creation",
+                statusLED: "Green (Solid = Link, Flashing = Activity)",
+                image: `<svg viewBox="0 0 380 120" style="width:100%; height:100%;"><rect x="10" y="25" width="360" height="70" rx="6" fill="#1e293b" stroke="#475569" stroke-width="2"/><rect x="20" y="35" width="70" height="18" rx="3" fill="#0f172a"/><text x="55" y="47" fill="#38bdf8" font-size="9" font-family="sans-serif" font-weight="bold" text-anchor="middle">CISCO 2960</text><g fill="#334155" stroke="#64748b"><rect x="100" y="35" width="14" height="12" rx="1"/><rect x="118" y="35" width="14" height="12" rx="1"/><rect x="136" y="35" width="14" height="12" rx="1"/><rect x="154" y="35" width="14" height="12" rx="1"/><rect x="172" y="35" width="14" height="12" rx="1"/><rect x="190" y="35" width="14" height="12" rx="1"/><rect x="208" y="35" width="14" height="12" rx="1"/><rect x="226" y="35" width="14" height="12" rx="1"/><rect x="244" y="35" width="14" height="12" rx="1"/><rect x="262" y="35" width="14" height="12" rx="1"/><rect x="280" y="35" width="14" height="12" rx="1"/><rect x="298" y="35" width="14" height="12" rx="1"/><rect x="100" y="52" width="14" height="12" rx="1"/><rect x="118" y="52" width="14" height="12" rx="1"/><rect x="136" y="52" width="14" height="12" rx="1"/><rect x="154" y="52" width="14" height="12" rx="1"/><rect x="172" y="52" width="14" height="12" rx="1"/><rect x="190" y="52" width="14" height="12" rx="1"/><rect x="208" y="52" width="14" height="12" rx="1"/><rect x="226" y="52" width="14" height="12" rx="1"/><rect x="244" y="52" width="14" height="12" rx="1"/><rect x="262" y="52" width="14" height="12" rx="1"/><rect x="280" y="52" width="14" height="12" rx="1"/><rect x="298" y="52" width="14" height="12" rx="1"/></g><rect x="322" y="35" width="18" height="28" rx="2" fill="#0284c7" stroke="#38bdf8"/><rect x="344" y="35" width="18" height="28" rx="2" fill="#0284c7" stroke="#38bdf8"/><text x="342" y="75" fill="#38bdf8" font-size="7" font-family="monospace" text-anchor="middle">SFP UPLINKS</text><circle cx="107" cy="31" r="2" fill="#22c55e"/><circle cx="125" cy="31" r="2" fill="#22c55e"/><circle cx="161" cy="31" r="2" fill="#22c55e"/><circle cx="215" cy="31" r="2" fill="#22c55e"/><circle cx="269" cy="31" r="2" fill="#22c55e"/></svg>`
+            },
+            {
+                name: "Ethernet Hub (Multiport Repeater)",
+                layer: "Layer 1 (Physical)",
+                ports: "8x FastEthernet RJ-45",
+                usage: "Broadcast signal repetition across all connected nodes (Legacy)",
+                statusLED: "Solid Green Power, Flashing Collision Amber",
+                image: `<svg viewBox="0 0 380 120" style="width:100%; height:100%;"><rect x="30" y="30" width="320" height="60" rx="8" fill="#334155" stroke="#64748b" stroke-width="2"/><text x="50" y="52" fill="#f59e0b" font-size="11" font-family="sans-serif" font-weight="bold">8-PORT ETHERNET HUB</text><g fill="#1e293b" stroke="#94a3b8"><rect x="160" y="45" width="16" height="16" rx="2"/><rect x="182" y="45" width="16" height="16" rx="2"/><rect x="204" y="45" width="16" height="16" rx="2"/><rect x="226" y="45" width="16" height="16" rx="2"/><rect x="248" y="45" width="16" height="16" rx="2"/><rect x="270" y="45" width="16" height="16" rx="2"/><rect x="292" y="45" width="16" height="16" rx="2"/><rect x="314" y="45" width="16" height="16" rx="2"/></g><circle cx="50" cy="72" r="3" fill="#22c55e"/><text x="58" y="75" fill="#cbd5e1" font-size="8" font-family="monospace">PWR</text><circle cx="90" cy="72" r="3" fill="#f59e0b"/><text x="98" y="75" fill="#f59e0b" font-size="8" font-family="monospace">COL</text></svg>`
+            },
+            {
+                name: "Network Interface Card (NIC)",
+                layer: "Layer 1 & Layer 2",
+                ports: "RJ-45 Copper / SFP Fiber",
+                usage: "Provides 48-bit MAC hardware address and converts data into serial signals",
+                statusLED: "Green (Link UP), Amber (1000Mbps Speed)",
+                image: `<svg viewBox="0 0 380 120" style="width:100%; height:100%;"><rect x="50" y="20" width="260" height="75" rx="6" fill="#15803d" stroke="#166534" stroke-width="2"/><rect x="25" y="10" width="20" height="95" rx="2" fill="#94a3b8" stroke="#64748b"/><rect x="30" y="40" width="24" height="28" rx="3" fill="#334155" stroke="#475569"/><rect x="34" y="46" width="16" height="16" fill="#0f172a"/><g fill="#eab308"><rect x="60" y="90" width="6" height="10"/><rect x="70" y="90" width="6" height="10"/><rect x="80" y="90" width="6" height="10"/><rect x="90" y="90" width="6" height="10"/><rect x="100" y="90" width="6" height="10"/><rect x="110" y="90" width="6" height="10"/><rect x="120" y="90" width="6" height="10"/><rect x="130" y="90" width="6" height="10"/></g><rect x="160" y="35" width="50" height="40" rx="4" fill="#1e293b" stroke="#334155"/><text x="185" y="58" fill="#94a3b8" font-size="8" font-family="monospace" text-anchor="middle">REALTEK</text><circle cx="27" cy="32" r="3" fill="#22c55e"/><circle cx="27" cy="74" r="3" fill="#eab308"/></svg>`
+            },
+            {
+                name: "CAT6 Twisted Pair Cable (RJ-45)",
+                layer: "Layer 1 (Physical)",
+                ports: "8P8C Modular RJ-45 Connector",
+                usage: "Transmits electrical signals up to 100 meters at 1 Gbps / 10 Gbps",
+                statusLED: "8-Pin Continuity LED",
+                image: `<svg viewBox="0 0 380 120" style="width:100%; height:100%;"><path d="M 20 60 Q 80 20 160 60 T 300 60 L 330 60" fill="none" stroke="#2563eb" stroke-width="16" stroke-linecap="round"/><path d="M 20 60 Q 80 20 160 60 T 300 60 L 330 60" fill="none" stroke="#1d4ed8" stroke-width="4" stroke-linecap="round"/><rect x="325" y="42" width="35" height="36" rx="4" fill="rgba(255,255,255,0.7)" stroke="#cbd5e1" stroke-width="2"/><g fill="#d97706"><rect x="330" y="46" width="3" height="10"/><rect x="335" y="46" width="3" height="10"/><rect x="340" y="46" width="3" height="10"/><rect x="345" y="46" width="3" height="10"/><rect x="350" y="46" width="3" height="10"/><rect x="355" y="46" width="3" height="10"/></g><text x="180" y="105" fill="#2563eb" font-size="11" font-family="sans-serif" font-weight="bold" text-anchor="middle">CAT6 UTP 4-PAIR TWISTED CABLE</text></svg>`
+            },
+            {
+                name: "Single-Mode / Multi-Mode Fiber Optic",
+                layer: "Layer 1 (Physical)",
+                ports: "LC, SC, ST Connectors",
+                usage: "High-speed light transmission for campus backbones and data centers",
+                statusLED: "Laser / LED Optical Tx/Rx",
+                image: `<svg viewBox="0 0 380 120" style="width:100%; height:100%;"><path d="M 30 45 L 290 45" stroke="#06b6d4" stroke-width="10" stroke-linecap="round"/><path d="M 30 75 L 290 75" stroke="#3b82f6" stroke-width="10" stroke-linecap="round"/><rect x="285" y="35" width="40" height="20" rx="3" fill="#2563eb" stroke="#1d4ed8"/><rect x="285" y="65" width="40" height="20" rx="3" fill="#2563eb" stroke="#1d4ed8"/><rect x="325" y="41" width="15" height="8" rx="1" fill="#f8fafc" stroke="#cbd5e1"/><rect x="325" y="71" width="15" height="8" rx="1" fill="#f8fafc" stroke="#cbd5e1"/><circle cx="345" cy="45" r="4" fill="#22c55e"/><circle cx="345" cy="75" r="4" fill="#ef4444"/><text x="180" y="105" fill="#0284c7" font-size="11" font-family="sans-serif" font-weight="bold" text-anchor="middle">DUPLEX LC FIBER OPTIC PATCH CORD</text></svg>`
+            },
+            {
+                name: "Stateful Hardware Firewall",
+                layer: "Layer 3 to Layer 7",
+                ports: "WAN, LAN, DMZ Gigabit Ports",
+                usage: "Inspects packets and enforces access control rules to block malicious traffic",
+                statusLED: "Green (Active Rule Match)",
+                image: `<svg viewBox="0 0 380 120" style="width:100%; height:100%;"><rect x="20" y="25" width="340" height="70" rx="8" fill="#991b1b" stroke="#7f1d1d" stroke-width="2"/><rect x="35" y="38" width="90" height="22" rx="4" fill="#450a0a"/><text x="80" y="53" fill="#fca5a5" font-size="10" font-family="sans-serif" font-weight="bold" text-anchor="middle">SECURITY ASA</text><g fill="#450a0a" stroke="#7f1d1d"><rect x="150" y="45" width="22" height="18" rx="2"/><text x="161" y="58" fill="#fca5a5" font-size="7" font-family="monospace" text-anchor="middle">WAN</text><rect x="180" y="45" width="22" height="18" rx="2"/><text x="191" y="58" fill="#fca5a5" font-size="7" font-family="monospace" text-anchor="middle">LAN</text><rect x="210" y="45" width="22" height="18" rx="2"/><text x="221" y="58" fill="#fca5a5" font-size="7" font-family="monospace" text-anchor="middle">DMZ</text></g><path d="M 285 40 L 305 32 L 325 40 L 325 60 Q 305 78 285 60 Z" fill="#dc2626" stroke="#fca5a5" stroke-width="2"/><circle cx="45" cy="72" r="4" fill="#22c55e"/><text x="56" y="75" fill="#fca5a5" font-size="8" font-family="monospace">PROTECTED</text></svg>`
+            }
         ],
         procedure: [
             "Step 1: Inspect the workspace canvas and identify the Cisco 2911 Router, Cisco 2960 Switch, Server, and Client Workstations.",

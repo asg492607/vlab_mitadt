@@ -7374,15 +7374,19 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             // 5. Tools Inspector
             if (data.tools && Array.isArray(data.tools)) {
-                let toolsHtml = `<div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:16px;">`;
+                let toolsHtml = `<div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap:18px;">`;
                 data.tools.forEach(t => {
+                    const imgHtml = t.image ? `<div style="width:100%; height:160px; background:#ffffff; border-radius:12px; border:1px solid #e2e8f0; margin-bottom:14px; display:flex; align-items:center; justify-content:center; overflow:hidden; padding:12px; box-shadow:inset 0 2px 4px rgba(0,0,0,0.02);">${t.image}</div>` : '';
                     toolsHtml += `
-                        <div class="theory-card" style="margin:0;">
-                            <div style="font-weight:800; font-size:15px; color:var(--primary);">${t.name}</div>
-                            <div style="font-size:12px; color:var(--text-muted); margin-top:4px;"><b>Layer:</b> ${t.layer}</div>
-                            <div style="font-size:12px; color:var(--text-muted); margin-top:2px;"><b>Ports:</b> ${t.ports}</div>
-                            <div style="font-size:12px; color:var(--text-muted); margin-top:2px;"><b>Usage:</b> ${t.usage}</div>
-                            <div style="font-size:12px; margin-top:6px;"><span style="color:var(--success); font-weight:700;">🟢 LED Status: ${t.statusLED}</span></div>
+                        <div class="theory-card" style="margin:0; display:flex; flex-direction:column; justify-content:space-between; box-shadow:0 4px 6px -1px rgba(0,0,0,0.05);">
+                            <div>
+                                ${imgHtml}
+                                <div style="font-weight:800; font-size:16px; color:var(--primary);">${t.name}</div>
+                                <div style="font-size:12px; color:var(--text-muted); margin-top:6px;"><b>Layer:</b> ${t.layer}</div>
+                                <div style="font-size:12px; color:var(--text-muted); margin-top:3px;"><b>Ports:</b> ${t.ports}</div>
+                                <div style="font-size:12px; color:var(--text-muted); margin-top:3px; line-height:1.5;"><b>Usage:</b> ${t.usage}</div>
+                            </div>
+                            <div style="font-size:12px; margin-top:10px; padding-top:10px; border-top:1px dashed #e2e8f0;"><span style="color:var(--success); font-weight:700;">🟢 LED Status: ${t.statusLED}</span></div>
                         </div>
                     `;
                 });
