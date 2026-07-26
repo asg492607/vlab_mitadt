@@ -20652,20 +20652,21 @@ student@mitadt-os:~$ </div>
             } else {
                 optionsHtml = `
                 <option value="intro_tools">1. Introduction to Networking Tools, Devices & Media</option>
-                <option value="net_commands">2. Network Commands & CLI Utilities</option>
-                <option value="topologies">3. Network Topologies (Bus, Star, Ring, Mesh, Tree)</option>
-                <option value="ip_class">4. IPv4 & IPv6 Address Classification</option>
-                <option value="lan_cables">5. LAN Setup & Cabling (Straight/Crossover)</option>
-                <option value="subnetting">6. Subnetting, VLSM & CIDR</option>
-                <option value="vlan">7. Virtual LANs (VLAN) & Trunking</option>
-                <option value="routing_rip">8. Distance Vector Routing Protocol (RIP)</option>
-                <option value="routing_ospf">9. Link State Routing Protocol (OSPF)</option>
-                <option value="routing_eigrp">10. Dynamic Routing Protocol (EIGRP)</option>
-                <option value="static_routing">11. Static Routing Configuration</option>
-                <option value="udp_tcp">12. UDP & TCP Transport Protocols</option>
-                <option value="dhcp_config">13. DHCP Configuration & IP Pools</option>
-                <option value="static_nat">14. Static Network Address Translation (NAT)</option>
-                <option value="dynamic_nat">15. Dynamic NAT & PAT Overload</option>
+                <option value="osi_tcpip">2. Network Communication Models (OSI & TCP/IP)</option>
+                <option value="net_commands">3. Network Commands & CLI Utilities</option>
+                <option value="topologies">4. Network Topologies (Bus, Star, Ring, Mesh, Tree)</option>
+                <option value="ip_class">5. IPv4 & IPv6 Address Classification</option>
+                <option value="lan_cables">6. LAN Setup & Cabling (Straight/Crossover)</option>
+                <option value="subnetting">7. Subnetting, VLSM & CIDR</option>
+                <option value="vlan">8. Virtual LANs (VLAN) & Trunking</option>
+                <option value="routing_rip">9. Distance Vector Routing Protocol (RIP)</option>
+                <option value="routing_ospf">10. Link State Routing Protocol (OSPF)</option>
+                <option value="routing_eigrp">11. Dynamic Routing Protocol (EIGRP)</option>
+                <option value="static_routing">12. Static Routing Configuration</option>
+                <option value="udp_tcp">13. UDP & TCP Transport Protocols</option>
+                <option value="dhcp_config">14. DHCP Configuration & IP Pools</option>
+                <option value="static_nat">15. Static Network Address Translation (NAT)</option>
+                <option value="dynamic_nat">16. Dynamic NAT & PAT Overload</option>
                 <option value="practice" style="display:none;">Practice Sandbox Lab</option>
             `;
                 const crumbs = document.querySelectorAll('.breadcrumb .crumb');
@@ -20679,7 +20680,7 @@ student@mitadt-os:~$ </div>
 
         // Sanitize initial lab variable by active subject track to prevent cross-subject loading bugs
         const osLabs = ['cpu_scheduling', 'process_sync', 'deadlock_avoidance', 'page_replacement', 'disk_scheduling'];
-        const netLabs = ['intro_tools', 'net_commands', 'topologies', 'ip_class', 'lan_cables', 'subnetting', 'vlan', 'routing_rip', 'routing_ospf', 'routing_eigrp', 'static_routing', 'udp_tcp', 'dhcp_config', 'static_nat', 'dynamic_nat', 'practice'];
+        const netLabs = ['intro_tools', 'osi_tcpip', 'net_commands', 'topologies', 'ip_class', 'lan_cables', 'subnetting', 'vlan', 'routing_rip', 'routing_ospf', 'routing_eigrp', 'static_routing', 'udp_tcp', 'dhcp_config', 'static_nat', 'dynamic_nat', 'practice'];
         const progLabs = ['c_prog', 'cpp_prog', 'java_prog', 'python_prog', 'asm_prog'];
         const dbmsLabs = ['sql_queries', 'transactions', 'indexing'];
         const tocLabs = ['dfa_sim', 'nfa_to_dfa', 'regex_thompson', 'cfg_parser', 'pda_stack', 'turing_machine', 'dfa_minimization'];
