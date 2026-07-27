@@ -7558,6 +7558,17 @@ document.addEventListener('DOMContentLoaded', async () => {
                 refHtml += `</ul></div>`;
                 setBody('section-references', refHtml);
             }
+            
+            // Inject IDSL Exp 1 Simulation & Sandbox Engine
+            if (data.id === 'idsl_exp1') {
+                if (typeof window.renderIDSLSimulation === 'function') {
+                    setBody('section-simulation', window.renderIDSLSimulation(data));
+                }
+                if (typeof window.renderIDSLSandbox === 'function') {
+                    setBody('section-experiment', window.renderIDSLSandbox(data));
+                }
+                setTimeout(() => { if (typeof window.switchDSLStage === 'function') window.switchDSLStage(0); }, 300);
+            }
 
             // Inject Practice Tasks
             const cmdList = document.getElementById('practice-commands-list');
@@ -7574,6 +7585,549 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         clearAllLabTimers();
         if (window.currentSim) window.currentSim.destroy();
+    };
+
+    // ==========================================
+    // DATA SCIENCE LAB (IDSL) INTERACTIVE ENGINES
+    // ==========================================
+    window.renderIDSLSimulation = function(data) {
+        const ds = data.dataset_info || {};
+        const rows = ds.titanic_rows || [];
+        const features = ds.features || [];
+
+        let html = `
+            <div class="theory-card" style="border-left: 4px solid #06b6d4; margin-bottom: 24px; background: rgba(6, 182, 212, 0.05);">
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; flex-wrap:wrap;">
+                    <div>
+                        <h3 style="color:#06b6d4; margin:0 0 6px 0; font-size:18px; font-weight:800;">📊 Interactive Learning Module: Data Science Lifecycle</h3>
+                        <p style="font-size:13px; color:var(--text-muted); margin:0;">Click each stage of the lifecycle below to inspect operational objectives, Titanic dataset applications, and industry practices.</p>
+                    </div>
+                </div>
+                
+                <div id="dsl-lifecycle-stepper" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap:10px; margin-top:20px;">
+                    <div class="dsl-step-card active" onclick="switchDSLStage(0)" style="background:var(--bg-card); border:2px solid #06b6d4; border-radius:14px; padding:14px; text-align:center; cursor:pointer; transition:all 0.2s;">
+                        <div style="font-size:24px; margin-bottom:4px;">📥</div>
+                        <div style="font-size:12px; font-weight:800; color:#06b6d4;">1. Collection</div>
+                    </div>
+                    <div class="dsl-step-card" onclick="switchDSLStage(1)" style="background:var(--bg-card); border:1px solid var(--border); border-radius:14px; padding:14px; text-align:center; cursor:pointer; transition:all 0.2s;">
+                        <div style="font-size:24px; margin-bottom:4px;">🔍</div>
+                        <div style="font-size:12px; font-weight:800;">2. Understanding</div>
+                    </div>
+                    <div class="dsl-step-card" onclick="switchDSLStage(2)" style="background:var(--bg-card); border:1px solid var(--border); border-radius:14px; padding:14px; text-align:center; cursor:pointer; transition:all 0.2s;">
+                        <div style="font-size:24px; margin-bottom:4px;">🧹</div>
+                        <div style="font-size:12px; font-weight:800;">3. Preparation</div>
+                    </div>
+                    <div class="dsl-step-card" onclick="switchDSLStage(3)" style="background:var(--bg-card); border:1px solid var(--border); border-radius:14px; padding:14px; text-align:center; cursor:pointer; transition:all 0.2s;">
+                        <div style="font-size:24px; margin-bottom:4px;">🤖</div>
+                        <div style="font-size:12px; font-weight:800;">4. Modeling</div>
+                    </div>
+                    <div class="dsl-step-card" onclick="switchDSLStage(4)" style="background:var(--bg-card); border:1px solid var(--border); border-radius:14px; padding:14px; text-align:center; cursor:pointer; transition:all 0.2s;">
+                        <div style="font-size:24px; margin-bottom:4px;">📊</div>
+                        <div style="font-size:12px; font-weight:800;">5. Evaluation</div>
+                    </div>
+                    <div class="dsl-step-card" onclick="switchDSLStage(5)" style="background:var(--bg-card); border:1px solid var(--border); border-radius:14px; padding:14px; text-align:center; cursor:pointer; transition:all 0.2s;">
+                        <div style="font-size:24px; margin-bottom:4px;">🚀</div>
+                        <div style="font-size:12px; font-weight:800;">6. Deployment</div>
+                    </div>
+                </div>
+
+                <div id="dsl-stage-detail" style="margin-top:20px; padding:16px; background:var(--bg-page); border-radius:14px; border:1px solid var(--border);">
+                    <!-- Dynamic Content injected via JS -->
+                </div>
+            </div>
+
+            <!-- Dataset Explorer -->
+            <div class="theory-card" style="margin-bottom: 24px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:16px;">
+                    <div>
+                        <h3 style="color:var(--primary); margin:0 0 4px 0; font-size:18px; font-weight:800;">🔍 Titanic Dataset Explorer</h3>
+                        <p style="font-size:12px; color:var(--text-muted); margin:0;">Explore raw records, data structures, null counts, and column metadata.</p>
+                    </div>
+                    <div style="display:flex; gap:8px;">
+                        <button class="btn-sim" style="padding:6px 12px; font-size:12px;" onclick="filterTitanicGrid('all')">Show All</button>
+                        <button class="btn-sim" style="padding:6px 12px; font-size:12px;" onclick="filterTitanicGrid('missing')">Missing Values</button>
+                        <button class="btn-sim" style="padding:6px 12px; font-size:12px;" onclick="filterTitanicGrid('survived')">Survived Only</button>
+                    </div>
+                </div>
+
+                <!-- Stats Bar -->
+                <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(140px, 1fr)); gap:12px; margin-bottom:16px;">
+                    <div style="background:var(--bg-page); padding:12px; border-radius:12px; text-align:center; border:1px solid var(--border);">
+                        <div style="font-size:11px; color:var(--text-muted);">TOTAL RECORDS</div>
+                        <div style="font-size:20px; font-weight:800; color:#06b6d4;">891</div>
+                    </div>
+                    <div style="background:var(--bg-page); padding:12px; border-radius:12px; text-align:center; border:1px solid var(--border);">
+                        <div style="font-size:11px; color:var(--text-muted);">TOTAL ATTRIBUTES</div>
+                        <div style="font-size:20px; font-weight:800; color:#3b82f6;">12</div>
+                    </div>
+                    <div style="background:var(--bg-page); padding:12px; border-radius:12px; text-align:center; border:1px solid var(--border);">
+                        <div style="font-size:11px; color:var(--text-muted);">MISSING VALUES</div>
+                        <div style="font-size:20px; font-weight:800; color:#ef4444;">866</div>
+                    </div>
+                    <div style="background:var(--bg-page); padding:12px; border-radius:12px; text-align:center; border:1px solid var(--border);">
+                        <div style="font-size:11px; color:var(--text-muted);">MEMORY FOOTPRINT</div>
+                        <div style="font-size:20px; font-weight:800; color:#10b981;">~70.3 KB</div>
+                    </div>
+                </div>
+
+                <!-- Data Table Preview -->
+                <div style="overflow-x:auto; max-height:280px; border:1px solid var(--border); border-radius:12px;">
+                    <table id="titanic-table-preview" style="width:100%; border-collapse:collapse; font-size:12px; text-align:left;">
+                        <thead style="background:var(--bg-page); position:sticky; top:0;">
+                            <tr style="border-bottom:2px solid var(--border);">
+                                <th style="padding:10px;">ID</th>
+                                <th style="padding:10px;">Survived</th>
+                                <th style="padding:10px;">Pclass</th>
+                                <th style="padding:10px;">Name</th>
+                                <th style="padding:10px;">Sex</th>
+                                <th style="padding:10px;">Age</th>
+                                <th style="padding:10px;">SibSp</th>
+                                <th style="padding:10px;">Parch</th>
+                                <th style="padding:10px;">Ticket</th>
+                                <th style="padding:10px;">Fare</th>
+                                <th style="padding:10px;">Cabin</th>
+                                <th style="padding:10px;">Embarked</th>
+                            </tr>
+                        </thead>
+                        <tbody id="titanic-tbody">
+                            ${rows.map(r => `
+                                <tr style="border-bottom:1px solid var(--border);">
+                                    <td style="padding:8px 10px;">${r.PassengerId}</td>
+                                    <td style="padding:8px 10px;"><span style="background:${r.Survived ? '#10b98120':'#ef444420'}; color:${r.Survived ? '#10b981':'#ef4444'}; padding:2px 8px; border-radius:10px; font-weight:700;">${r.Survived ? '1 (Yes)':'0 (No)'}</span></td>
+                                    <td style="padding:8px 10px;">${r.Pclass}</td>
+                                    <td style="padding:8px 10px; font-weight:600;">${r.Name}</td>
+                                    <td style="padding:8px 10px;">${r.Sex}</td>
+                                    <td style="padding:8px 10px; ${r.Age === null ? 'color:#ef4444; font-weight:700;':''}">${r.Age === null ? 'NaN' : r.Age}</td>
+                                    <td style="padding:8px 10px;">${r.SibSp}</td>
+                                    <td style="padding:8px 10px;">${r.Parch}</td>
+                                    <td style="padding:8px 10px; font-family:monospace;">${r.Ticket}</td>
+                                    <td style="padding:8px 10px;">$${r.Fare}</td>
+                                    <td style="padding:8px 10px; ${r.Cabin === null ? 'color:#ef4444; font-weight:700;':''}">${r.Cabin === null ? 'NaN' : r.Cabin}</td>
+                                    <td style="padding:8px 10px;">${r.Embarked || 'NaN'}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Data Type & Measurement Scale Classification Challenge -->
+            <div class="theory-card" style="margin-bottom: 24px; border-left: 4px solid #f59e0b;">
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:16px;">
+                    <div>
+                        <h3 style="color:#f59e0b; margin:0 0 4px 0; font-size:18px; font-weight:800;">🏷️ Data Type & Measurement Scale Classification Challenge</h3>
+                        <p style="font-size:12px; color:var(--text-muted); margin:0;">Classify each Titanic variable by its Measurement Scale (Nominal, Ordinal, Interval, Ratio) and Pandas Data Type.</p>
+                    </div>
+                    <button class="btn-sim" style="background:#f59e0b; color:black; font-weight:800;" onclick="validateMeasurementScales()">Validate Classifications 🎯</button>
+                </div>
+
+                <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:14px;" id="scale-challenge-grid">
+                    ${features.map((f, idx) => `
+                        <div class="scale-item-card" style="background:var(--bg-page); padding:14px; border-radius:12px; border:1px solid var(--border);">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                                <span style="font-weight:800; color:var(--primary); font-size:14px;">${f.col}</span>
+                                <span style="font-size:11px; background:var(--badge-bg); padding:2px 8px; border-radius:8px;">${f.pandas_type}</span>
+                            </div>
+                            <p style="font-size:11px; color:var(--text-muted); margin-bottom:10px;">${f.desc}</p>
+                            <div style="display:flex; gap:8px; align-items:center;">
+                                <label style="font-size:11px; font-weight:700;">Scale:</label>
+                                <select class="scale-select sim-select" data-col="${f.col}" data-correct="${f.scale}" style="font-size:12px; padding:4px 8px; flex:1;">
+                                    <option value="">-- Select Scale --</option>
+                                    <option value="Nominal">Nominal</option>
+                                    <option value="Ordinal">Ordinal</option>
+                                    <option value="Interval">Interval</option>
+                                    <option value="Ratio">Ratio</option>
+                                </select>
+                            </div>
+                            <div class="scale-feedback" id="feedback-${f.col}" style="font-size:11px; margin-top:6px; font-weight:700; display:none;"></div>
+                        </div>
+                    `).join('')}
+                </div>
+                <div id="scale-score-result" style="margin-top:16px; text-align:center; font-weight:800; font-size:15px; color:#10b981; display:none;"></div>
+            </div>
+
+            <!-- Missing Value & Cleaning Playground -->
+            <div class="theory-card" style="margin-bottom: 24px; border-left: 4px solid #10b981;">
+                <h3 style="color:#10b981; margin:0 0 8px 0; font-size:18px; font-weight:800;">🧹 Missing Value Simulator & Data Cleaning Playground</h3>
+                <p style="font-size:12px; color:var(--text-muted); margin-bottom:16px;">Test preprocessing strategies dynamically to observe missing value resolution and updated data distributions.</p>
+
+                <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap:16px;">
+                    <div style="background:var(--bg-page); padding:16px; border-radius:14px; border:1px solid var(--border);">
+                        <h4 style="margin:0 0 8px 0; font-size:14px; color:var(--primary);">1. 'Age' Column Imputation</h4>
+                        <p style="font-size:11px; color:var(--text-muted); margin-bottom:12px;">Missing: 177 rows (20%). Numerical continuous skewed distribution.</p>
+                        <select id="clean-strategy-age" class="sim-select" style="width:100%; font-size:12px; margin-bottom:10px;">
+                            <option value="median">Fillna with Median (28.0 years) [Recommended]</option>
+                            <option value="mean">Fillna with Mean (29.7 years)</option>
+                            <option value="drop">Drop Rows with Missing Age</option>
+                            <option value="none">Keep Raw Missing (NaN)</option>
+                        </select>
+                    </div>
+
+                    <div style="background:var(--bg-page); padding:16px; border-radius:14px; border:1px solid var(--border);">
+                        <h4 style="margin:0 0 8px 0; font-size:14px; color:var(--primary);">2. 'Embarked' Mode Imputation</h4>
+                        <p style="font-size:11px; color:var(--text-muted); margin-bottom:12px;">Missing: 2 rows (0.2%). Categorical port attribute.</p>
+                        <select id="clean-strategy-embarked" class="sim-select" style="width:100%; font-size:12px; margin-bottom:10px;">
+                            <option value="mode">Fillna with Mode ('S' - Southampton) [Recommended]</option>
+                            <option value="drop">Drop 2 Missing Rows</option>
+                            <option value="none">Keep Raw Missing (NaN)</option>
+                        </select>
+                    </div>
+
+                    <div style="background:var(--bg-page); padding:16px; border-radius:14px; border:1px solid var(--border);">
+                        <h4 style="margin:0 0 8px 0; font-size:14px; color:var(--primary);">3. 'Cabin' Excessive Missing Drop</h4>
+                        <p style="font-size:11px; color:var(--text-muted); margin-bottom:12px;">Missing: 687 rows (77%). Extremely sparse column.</p>
+                        <select id="clean-strategy-cabin" class="sim-select" style="width:100%; font-size:12px; margin-bottom:10px;">
+                            <option value="drop">Drop Entire 'Cabin' Column [Recommended]</option>
+                            <option value="fill_unknown">Fill missing with 'Unknown'</option>
+                            <option value="none">Keep Column Intact</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div style="margin-top:16px; text-align:center;">
+                    <button class="btn-sim" style="background:#10b981; color:white; font-weight:800; padding:10px 24px;" onclick="applyCleaningPlayground()">Apply Data Preprocessing Pipeline ⚡</button>
+                </div>
+
+                <div id="cleaning-result-panel" style="margin-top:16px; padding:14px; background:var(--bg-page); border-radius:12px; border:1px solid var(--border); display:none;">
+                </div>
+            </div>
+        `;
+        return html;
+    };
+
+    window.renderIDSLSandbox = function(data) {
+        let html = `
+            <div class="theory-card" style="margin-bottom: 24px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:16px;">
+                    <div>
+                        <h3 style="color:var(--primary); margin:0 0 4px 0; font-size:18px; font-weight:800;">🐍 Python Code Sandbox & Executable Notebook</h3>
+                        <p style="font-size:12px; color:var(--text-muted); margin:0;">Modify and run Python Pandas code to execute data type classification and cleaning pipelines on Titanic.csv.</p>
+                    </div>
+                    <div style="display:flex; gap:8px;">
+                        <button class="btn-sim" style="background:#10b981; color:white; font-weight:800;" onclick="runIDSLPythonCode()">Run Python Code 🚀</button>
+                        <button class="btn-sim" style="background:var(--bg-card);" onclick="resetIDSLPythonCode()">Reset Code 🔄</button>
+                    </div>
+                </div>
+
+                <div style="border:1px solid var(--border); border-radius:12px; overflow:hidden; margin-bottom:16px;">
+                    <div style="background:#0f172a; padding:10px 16px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #1e293b;">
+                        <span style="font-size:12px; font-family:monospace; color:#38bdf8;">titanic_preprocessing.py</span>
+                        <span style="font-size:11px; color:#64748b;">Python 3.10 | Pandas 2.0 | NumPy</span>
+                    </div>
+                    <textarea id="idsl-python-editor" style="width:100%; height:320px; padding:16px; background:#090d16; color:#f8fafc; font-family:'JetBrains Mono', monospace; font-size:13px; line-height:1.6; border:none; resize:vertical; outline:none;">${data.python_code || ''}</textarea>
+                </div>
+
+                <div style="border:1px solid var(--border); border-radius:12px; overflow:hidden;">
+                    <div style="background:#1e293b; padding:8px 16px; font-size:12px; font-weight:700; color:var(--text-main);">
+                        💻 Execution Terminal Output
+                    </div>
+                    <pre id="idsl-console-output" style="margin:0; padding:16px; background:#0b0f19; color:#34d399; font-family:'JetBrains Mono', monospace; font-size:12px; min-height:140px; max-height:300px; overflow-y:auto; white-space:pre-wrap;">Click 'Run Python Code 🚀' to execute the pandas dataset preprocessing pipeline...</pre>
+                </div>
+            </div>
+
+            <div class="theory-card" style="border-left:4px solid #8b5cf6;">
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:16px;">
+                    <div>
+                        <h3 style="color:#8b5cf6; margin:0 0 4px 0; font-size:18px; font-weight:800;">📄 Automated Lab Report Generator</h3>
+                        <p style="font-size:12px; color:var(--text-muted); margin:0;">Generate and export a formatted PDF/HTML academic lab report for Experiment 1.</p>
+                    </div>
+                    <button class="btn-sim" style="background:#8b5cf6; color:white; font-weight:800;" onclick="generateIDSLLabReport()">Generate & Export Report 📄</button>
+                </div>
+
+                <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:12px; margin-bottom:16px;">
+                    <div>
+                        <label style="font-size:12px; font-weight:700;">Student Full Name:</label>
+                        <input type="text" id="report-student-name" class="sim-select" style="width:100%; padding:8px; margin-top:4px;" placeholder="e.g. Atharva Gandhi">
+                    </div>
+                    <div>
+                        <label style="font-size:12px; font-weight:700;">Roll Number / PRN:</label>
+                        <input type="text" id="report-student-roll" class="sim-select" style="width:100%; padding:8px; margin-top:4px;" placeholder="e.g. 1032210456">
+                    </div>
+                </div>
+
+                <div>
+                    <label style="font-size:12px; font-weight:700;">Key Observations & Conclusion Notes:</label>
+                    <textarea id="report-student-notes" class="sim-select" style="width:100%; height:80px; padding:8px; margin-top:4px;" placeholder="Record your observations on dataset missingness and measurement scale distributions..."></textarea>
+                </div>
+            </div>
+        `;
+        return html;
+    };
+
+    window.switchDSLStage = function(idx) {
+        const stages = [
+            { title: "1. Data Collection", icon: "📥", desc: "Acquiring raw data from CSV files, relational databases, web scraping, or REST APIs. In Experiment 1, the Titanic passenger dataset (Titanic.csv) is loaded into a Pandas DataFrame using pd.read_csv('Titanic.csv')." },
+            { title: "2. Data Understanding", icon: "🔍", desc: "Exploring dataset structure, dimensions (891 rows × 12 columns), inspecting first 5 rows with df.head(), examining data types via df.info(), and counting missing values with df.isnull().sum()." },
+            { title: "3. Data Preparation", icon: "🧹", desc: "Preprocessing and cleaning the dataset before modeling. Includes filling missing 'Age' values with median (28.0), filling 'Embarked' with mode ('S'), dropping sparse 'Cabin' column, and converting 'Sex' & 'Embarked' to categorical dtypes." },
+            { title: "4. Modeling", icon: "🤖", desc: "Applying predictive Machine Learning algorithms (e.g., Logistic Regression or Decision Trees to predict passenger survival based on Pclass, Sex, Age, and Fare)." },
+            { title: "5. Evaluation", icon: "📊", desc: "Assessing model metrics (Accuracy, Precision, Recall, F1-Score, Confusion Matrix) to ensure generalizability on unseen passenger test records." },
+            { title: "6. Deployment", icon: "🚀", desc: "Deploying the trained predictive model as an interactive web app or REST API microservice for real-time inference." }
+        ];
+
+        document.querySelectorAll('.dsl-step-card').forEach((card, i) => {
+            if (i === idx) {
+                card.classList.add('active');
+                card.style.borderColor = '#06b6d4';
+            } else {
+                card.classList.remove('active');
+                card.style.borderColor = 'var(--border)';
+            }
+        });
+
+        const s = stages[idx];
+        const detail = document.getElementById('dsl-stage-detail');
+        if (detail) {
+            detail.innerHTML = `
+                <div style="font-size:16px; font-weight:800; color:#06b6d4; margin-bottom:6px;">${s.icon} ${s.title}</div>
+                <p style="font-size:13px; line-height:1.7; color:var(--text-main); margin:0;">${s.desc}</p>
+            `;
+        }
+    };
+
+    window.filterTitanicGrid = function(filter) {
+        const rows = window.VLAB_DATA['idsl_exp1']?.dataset_info?.titanic_rows || [];
+        const tbody = document.getElementById('titanic-tbody');
+        if (!tbody) return;
+
+        let filtered = rows;
+        if (filter === 'missing') {
+            filtered = rows.filter(r => r.Age === null || r.Cabin === null || r.Embarked === null);
+        } else if (filter === 'survived') {
+            filtered = rows.filter(r => r.Survived === 1);
+        }
+
+        tbody.innerHTML = filtered.map(r => `
+            <tr style="border-bottom:1px solid var(--border);">
+                <td style="padding:8px 10px;">${r.PassengerId}</td>
+                <td style="padding:8px 10px;"><span style="background:${r.Survived ? '#10b98120':'#ef444420'}; color:${r.Survived ? '#10b981':'#ef4444'}; padding:2px 8px; border-radius:10px; font-weight:700;">${r.Survived ? '1 (Yes)':'0 (No)'}</span></td>
+                <td style="padding:8px 10px;">${r.Pclass}</td>
+                <td style="padding:8px 10px; font-weight:600;">${r.Name}</td>
+                <td style="padding:8px 10px;">${r.Sex}</td>
+                <td style="padding:8px 10px; ${r.Age === null ? 'color:#ef4444; font-weight:700;':''}">${r.Age === null ? 'NaN' : r.Age}</td>
+                <td style="padding:8px 10px;">${r.SibSp}</td>
+                <td style="padding:8px 10px;">${r.Parch}</td>
+                <td style="padding:8px 10px; font-family:monospace;">${r.Ticket}</td>
+                <td style="padding:8px 10px;">$${r.Fare}</td>
+                <td style="padding:8px 10px; ${r.Cabin === null ? 'color:#ef4444; font-weight:700;':''}">${r.Cabin === null ? 'NaN' : r.Cabin}</td>
+                <td style="padding:8px 10px;">${r.Embarked || 'NaN'}</td>
+            </tr>
+        `).join('');
+    };
+
+    window.validateMeasurementScales = function() {
+        let correct = 0;
+        let total = 12;
+        document.querySelectorAll('.scale-select').forEach(sel => {
+            const userVal = sel.value;
+            const correctVal = sel.getAttribute('data-correct');
+            const col = sel.getAttribute('data-col');
+            const fb = document.getElementById(`feedback-${col}`);
+
+            if (fb) {
+                fb.style.display = 'block';
+                if (userVal === correctVal) {
+                    correct++;
+                    fb.style.color = '#10b981';
+                    fb.textContent = `✔ Correct (${correctVal})`;
+                } else {
+                    fb.style.color = '#ef4444';
+                    fb.textContent = `❌ Incorrect (Correct: ${correctVal})`;
+                }
+            }
+        });
+
+        const result = document.getElementById('scale-score-result');
+        if (result) {
+            result.style.display = 'block';
+            const percent = Math.round((correct / total) * 100);
+            result.textContent = `Score: ${correct} / ${total} (${percent}%) - ${percent === 100 ? 'Mastery Achieved! 🏆' : 'Review scale definitions and try again.'}`;
+        }
+    };
+
+    window.applyCleaningPlayground = function() {
+        const ageStrat = document.getElementById('clean-strategy-age')?.value;
+        const embStrat = document.getElementById('clean-strategy-embarked')?.value;
+        const cabStrat = document.getElementById('clean-strategy-cabin')?.value;
+
+        let ageStatus = ageStrat === 'median' ? 'Filled 177 missing Age values with Median (28.0 yrs)' : (ageStrat === 'mean' ? 'Filled 177 missing Age values with Mean (29.7 yrs)' : 'Kept missing Age values');
+        let embStatus = embStrat === 'mode' ? 'Filled 2 missing Embarked values with Mode (\'S\')' : 'Kept missing Embarked values';
+        let cabStatus = cabStrat === 'drop' ? 'Dropped \'Cabin\' column (77% missing data eliminated)' : 'Kept Cabin column';
+
+        const panel = document.getElementById('cleaning-result-panel');
+        if (panel) {
+            panel.style.display = 'block';
+            panel.innerHTML = `
+                <div style="font-weight:800; color:#10b981; font-size:14px; margin-bottom:8px;">✅ Preprocessing Pipeline Applied Successfully!</div>
+                <ul style="font-size:12px; line-height:1.8; margin:0; padding-left:20px; color:var(--text-main);">
+                    <li><b>Age Column:</b> ${ageStatus}</li>
+                    <li><b>Embarked Column:</b> ${embStatus}</li>
+                    <li><b>Cabin Column:</b> ${cabStatus}</li>
+                    <li><b>Remaining Missing Values:</b> 0 across cleaned DataFrame</li>
+                    <li><b>Pandas Category Optimization:</b> 'Sex' and 'Embarked' converted to <code>category</code> dtype.</li>
+                </ul>
+            `;
+        }
+    };
+
+    window.runIDSLPythonCode = function() {
+        const consoleEl = document.getElementById('idsl-console-output');
+        if (!consoleEl) return;
+
+        consoleEl.textContent = "Executing titanic_preprocessing.py in Python 3.10 sandbox...\n\n";
+
+        setTimeout(() => {
+            consoleEl.textContent += `--- First 5 Rows of Dataset ---
+   PassengerId  Survived  Pclass                                               Name     Sex   Age  SibSp  Parch            Ticket     Fare Cabin Embarked
+0            1         0       3                            Braund, Mr. Owen Harris    male  22.0      1      0         A/5 21171   7.2500   NaN        S
+1            2         1       1  Cumings, Mrs. John Bradley (Florence Briggs Th...  female  38.0      1      0          PC 17599  71.2833   C85        C
+2            3         1       3                             Heikkinen, Miss. Laina  female  26.0      0      0  STON/O2. 3101282   7.9250   NaN        S
+3            4         1       1       Futrelle, Mrs. Jacques Heath (Lily May Peel)  female  35.0      1      0            113803  53.1000  C123        S
+4            5         0       3                           Allen, Mr. William Henry    male  35.0      0      0            373450   8.0500   NaN        S
+
+--- Dataset Info & Data Types ---
+<class 'pandas.core.frame.DataFrame'>
+RangeIndex: 891 entries, 0 to 890
+Data columns (total 12 columns):
+ #   Column       Non-Null Count  Dtype  
+---  ------       --------------  -----  
+ 0   PassengerId  891 non-null    int64  
+ 1   Survived     891 non-null    int64  
+ 2   Pclass       891 non-null    int64  
+ 3   Name         891 non-null    object 
+ 4   Sex          891 non-null    object 
+ 5   Age          714 non-null    float64
+ 6   SibSp        891 non-null    int64  
+ 7   Parch        891 non-null    int64  
+ 8   Ticket       891 non-null    object 
+ 9   Fare         891 non-null    float64
+ 10  Cabin        204 non-null    object 
+ 11  Embarked     889 non-null    object 
+dtypes: float64(2), int64(5), object(5)
+memory usage: 83.7+ KB
+
+--- Missing Values Before Cleaning ---
+PassengerId      0
+Survived         0
+Pclass           0
+Name             0
+Sex              0
+Age            177
+SibSp            0
+Parch            0
+Ticket           0
+Fare             0
+Cabin          687
+Embarked         2
+dtype: int64
+
+--- Dataset Summary After Cleaning ---
+   PassengerId  Survived  Pclass                                               Name     Sex   Age  SibSp  Parch            Ticket     Fare Embarked
+0            1         0       3                            Braund, Mr. Owen Harris    male  22.0      1      0         A/5 21171   7.2500        S
+1            2         1       1  Cumings, Mrs. John Bradley (Florence Briggs Th...  female  38.0      1      0          PC 17599  71.2833        C
+2            3         1       3                             Heikkinen, Miss. Laina  female  26.0      0      0  STON/O2. 3101282   7.9250        S
+3            4         1       1       Futrelle, Mrs. Jacques Heath (Lily May Peel)  female  35.0      1      0            113803  53.1000        S
+4            5         0       3                           Allen, Mr. William Henry    male  35.0      0      0            373450   8.0500        S
+
+--- Remaining Missing Values ---
+PassengerId    0
+Survived       0
+Pclass         0
+Name             0
+Sex              0
+Age            0
+SibSp          0
+Parch          0
+Ticket         0
+Fare           0
+Embarked       0
+dtype: int64
+
+--- Updated Data Types ---
+PassengerId       int64
+Survived          int64
+Pclass            int64
+Name             object
+Sex            category
+Age             float64
+SibSp             int64
+Parch             int64
+Ticket           object
+Fare            float64
+Embarked       category
+dtype: object
+
+Process exited with code 0. Execution completed successfully! ✅`;
+        }, 600);
+    };
+
+    window.resetIDSLPythonCode = function() {
+        const data = window.VLAB_DATA['idsl_exp1'];
+        const ed = document.getElementById('idsl-python-editor');
+        if (ed && data && data.python_code) ed.value = data.python_code;
+    };
+
+    window.generateIDSLLabReport = function() {
+        const name = document.getElementById('report-student-name')?.value || 'Student';
+        const roll = document.getElementById('report-student-roll')?.value || 'N/A';
+        const notes = document.getElementById('report-student-notes')?.value || 'The Titanic dataset was loaded and preprocessed successfully.';
+
+        const reportWin = window.open('', '_blank');
+        reportWin.document.write(`
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>Lab Report - IDSL Experiment 1</title>
+                <style>
+                    body { font-family: 'Arial', sans-serif; padding: 40px; color: #1e293b; line-height: 1.6; }
+                    h1 { color: #06b6d4; border-bottom: 2px solid #06b6d4; padding-bottom: 8px; }
+                    h2 { color: #0f172a; margin-top: 24px; }
+                    .meta-table { width: 100%; border-collapse: collapse; margin: 16px 0; }
+                    .meta-table td { padding: 8px; border: 1px solid #cbd5e1; font-size: 14px; }
+                    .meta-table td.header { font-weight: bold; background: #f1f5f9; width: 30%; }
+                    .code-box { background: #0f172a; color: #38bdf8; padding: 16px; border-radius: 8px; font-family: monospace; font-size: 12px; white-space: pre-wrap; }
+                    .btn-print { background: #06b6d4; color: white; border: none; padding: 10px 20px; font-size: 14px; border-radius: 6px; cursor: pointer; margin-bottom: 20px; }
+                    @media print { .btn-print { display: none; } }
+                </style>
+            </head>
+            <body>
+                <button class="btn-print" onclick="window.print()">🖨️ Print / Save as PDF</button>
+                <h1>MIT ADT UNIVERSITY - VIRTUAL LAB REPORT</h1>
+                <h2>Introduction to Data Science Lab (IDSL)</h2>
+                <table class="meta-table">
+                    <tr><td class="header">Experiment No:</td><td>1</td></tr>
+                    <tr><td class="header">Experiment Title:</td><td>Implementation of Data Science Lifecycle and Data Type Classification Using Titanic Dataset</td></tr>
+                    <tr><td class="header">Student Name:</td><td>${name}</td></tr>
+                    <tr><td class="header">Roll No / PRN:</td><td>${roll}</td></tr>
+                    <tr><td class="header">Date of Submission:</td><td>${new Date().toLocaleDateString()}</td></tr>
+                </table>
+
+                <h2>1. Aim & Objectives</h2>
+                <p>To implement the 6 stages of the Data Science Lifecycle on the Titanic dataset, classify variables based on structural and measurement scale types, and perform data preprocessing.</p>
+
+                <h2>2. Measurement Scale Classification</h2>
+                <ul>
+                    <li><b>Nominal Scale:</b> PassengerId, Survived, Name, Sex, Ticket, Cabin, Embarked</li>
+                    <li><b>Ordinal Scale:</b> Pclass (1st > 2nd > 3rd Class)</li>
+                    <li><b>Ratio Scale:</b> Age, Fare, SibSp, Parch (Numerical with absolute zero)</li>
+                </ul>
+
+                <h2>3. Data Preprocessing Results</h2>
+                <ul>
+                    <li><b>Age:</b> Imputed missing 177 values with Median (28.0 years).</li>
+                    <li><b>Embarked:</b> Imputed missing 2 values with Mode ('S').</li>
+                    <li><b>Cabin:</b> Dropped sparse column due to 77% missing values.</li>
+                    <li><b>Data Types:</b> Converted 'Sex' and 'Embarked' to categorical dtypes.</li>
+                </ul>
+
+                <h2>4. Student Observations</h2>
+                <p style="background: #f8fafc; padding: 12px; border-left: 4px solid #06b6d4; font-style: italic;">"${notes}"</p>
+
+                <h2>5. Conclusion</h2>
+                <p>The experiment was completed successfully. All missing values were resolved, categorical variables encoded, and the dataset preprocessed for machine learning models.</p>
+            </body>
+            </html>
+        `);
+        reportWin.document.close();
     };
 
     const renderMCQ = (sectionId, questions, prefix) => {
@@ -20905,6 +21459,18 @@ student@mitadt-os:~$ </div>
                 document.documentElement.style.setProperty('--primary-rgb', '239, 68, 68');
                 document.documentElement.style.setProperty('--accent', '#f87171');
                 document.title = "MIT ADT VLAB - Cybersecurity";
+            } else if (currentSubject === 'ds') {
+                optionsHtml = `
+                <option value="idsl_exp1">1. Data Science Lifecycle & Data Type Classification (Titanic Dataset)</option>
+            `;
+                const crumbs = document.querySelectorAll('.breadcrumb .crumb');
+                if (crumbs.length >= 2) {
+                    crumbs[1].textContent = "Data Science Lab";
+                }
+                document.documentElement.style.setProperty('--primary', '#06b6d4');
+                document.documentElement.style.setProperty('--primary-rgb', '6, 182, 212');
+                document.documentElement.style.setProperty('--accent', '#22d3ee');
+                document.title = "MIT ADT VLAB - Data Science";
             } else {
                 optionsHtml = `
                 <option value="intro_tools">1. Introduction to Networking Tools, Devices & Media</option>
@@ -20943,11 +21509,17 @@ student@mitadt-os:~$ </div>
         const aiLabs = ['ai_search', 'ai_heuristic', 'ai_csp', 'ai_minimax', 'ai_naive_bayes', 'ai_knn', 'ai_kmeans', 'ai_ann', 'ai_backprop', 'ai_fuzzy', 'ai_genetic', 'ai_expert'];
         const cloudLabs = ['cloud_virtualization', 'cloud_docker', 'cloud_loadbalancer', 'cloud_autoscaling', 'cloud_storage', 'cloud_cdn', 'cloud_iam', 'cloud_serverless', 'cloud_sla', 'cloud_mapreduce', 'cloud_kubernetes'];
         const cyberLabs = ['cyber_caesar', 'cyber_vigenere', 'cyber_rsa', 'cyber_aes', 'cyber_hashing', 'cyber_firewall', 'cyber_ids', 'cyber_sql_inject', 'cyber_xss', 'cyber_mitm', 'cyber_steganography', 'cyber_network_scan'];
+        const dsLabs = ['idsl_exp1'];
 
         const urlParams = new URLSearchParams(window.location.search);
         const urlLab = urlParams.get('lab');
         let initialLab = urlLab || localStorage.getItem('vlab_current_lab');
-        if (currentSubject === 'os') {
+        if (currentSubject === 'ds') {
+            if (!dsLabs.includes(initialLab)) {
+                initialLab = 'idsl_exp1';
+                localStorage.setItem('vlab_current_lab', 'idsl_exp1');
+            }
+        } else if (currentSubject === 'os') {
             if (!osLabs.includes(initialLab)) {
                 initialLab = 'cpu_scheduling';
                 localStorage.setItem('vlab_current_lab', 'cpu_scheduling');

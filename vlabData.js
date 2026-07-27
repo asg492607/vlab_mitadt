@@ -14421,3 +14421,225 @@ window.VLAB_DATA = {
 
 window.VLAB_DATA['communication_models'] = window.VLAB_DATA['osi_tcpip'];
 window.VLAB_DATA['osi_tcpip_sim'] = window.VLAB_DATA['osi_tcpip'];
+
+window.VLAB_DATA['idsl_exp1'] = {
+    title: "Experiment 1: Implementation of the Data Science Lifecycle and Data Type Classification Using the Titanic Dataset",
+    experiment_info: {
+        number: 1,
+        subject: "Introduction to Data Science Lab (IDSL)",
+        unit: "Unit 1: Fundamentals of Data Science & Preprocessing",
+        difficulty: "Beginner",
+        duration: "60–90 Minutes",
+        dataset: "Titanic Passenger Dataset (Kaggle)",
+        language: "Python 3.x (Pandas, NumPy)"
+    },
+    aim: "To understand and implement the Data Science Lifecycle using the Titanic dataset while classifying dataset attributes based on structural and measurement-scale data types and performing basic data preprocessing.",
+    prerequisites: [
+        "Python Programming Fundamentals (Variables, Data Types, Control Structures, Functions)",
+        "Pandas Library Fundamentals (DataFrames, Series, File Reading, Indexing)",
+        "NumPy Library Basics (Array operations, missing value indicators)",
+        "Basic concepts of CSV File Formats & Tabular Data Structures"
+    ],
+    outcomes: [
+        "Understand and visualize the 6 key stages of the Data Science Lifecycle (Collection, Understanding, Preparation, Modeling, Evaluation, Deployment).",
+        "Differentiate clearly between Structured (Tabular CSV), Semi-Structured (JSON/XML), and Unstructured (Text/Audio/Images) data types.",
+        "Classify dataset variables using measurement scales (Nominal, Ordinal, Interval, and Ratio).",
+        "Identify missing, corrupt, or inconsistent values across tabular dataset columns.",
+        "Apply standard data cleaning techniques: Median imputation for continuous skewed data, Mode imputation for categorical data, and feature dropping for sparse attributes.",
+        "Convert categorical variables to appropriate Pandas categorical data types to optimize memory usage and downstream ML compatibility."
+    ],
+    theory: {
+        intro: "Data Science is an interdisciplinary field that extracts meaningful business insights and predictive knowledge from complex structured and unstructured data using automated algorithms, statistics, and machine learning.",
+        cards: [
+            {
+                title: "Section 1: Data Science Lifecycle Steps",
+                content: "1. Data Collection: Import and read datasets from files, APIs, databases, or web scraping.\n2. Data Understanding: Explore dataset shape, statistics, data types, and null value distributions.\n3. Data Preparation: Clean missing values, encode categorical variables, scale features, and handle outliers.\n4. Modeling: Apply Machine Learning algorithms (Linear/Logistic Regression, Decision Trees, Clustering).\n5. Evaluation: Evaluate model performance using metrics (Accuracy, Precision, Recall, RMSE).\n6. Deployment: Integrate trained model into production API pipelines or business dashboards."
+            },
+            {
+                title: "Section 2: Classification Based on Data Structure",
+                content: "• Structured Data: Tabular format with fixed rows & columns (e.g. Titanic CSV, SQL databases).\n• Semi-Structured Data: Schema-less hierarchical formats (e.g. JSON API responses, XML docs, NoSQL documents).\n• Unstructured Data: Non-tabular raw content without predefined data models (e.g. Images, Audio, Video, PDF text)."
+            },
+            {
+                title: "Section 3: Measurement Scales of Data Attributes",
+                content: "• Nominal Scale: Categorical data without any natural ordering (e.g., Sex, Embarked, Passenger Name, Ticket Number, Survived status).\n• Ordinal Scale: Categorical data with a clear logical order or ranking (e.g., Pclass: 1st Class > 2nd Class > 3rd Class).\n• Interval Scale: Quantitative numerical data with equal intervals but NO true absolute zero point (e.g., Temperature in Celsius/Fahrenheit, Calendar Year).\n• Ratio Scale: Quantitative numerical data with equal intervals AND a true meaningful zero point (e.g., Age, Fare, SibSp, Parch)."
+            }
+        ]
+    },
+    dataset_info: {
+        name: "Titanic: Machine Learning from Disaster",
+        source: "Kaggle Dataset Archive",
+        records: 891,
+        columns: 12,
+        features: [
+            { col: "PassengerId", desc: "Unique numerical ID for each passenger", pandas_type: "int64", scale: "Nominal", missing: 0 },
+            { col: "Survived", desc: "Survival status (0 = No, 1 = Yes)", pandas_type: "int64", scale: "Nominal", missing: 0 },
+            { col: "Pclass", desc: "Ticket/Passenger Class (1 = 1st, 2 = 2nd, 3 = 3rd)", pandas_type: "int64", scale: "Ordinal", missing: 0 },
+            { col: "Name", desc: "Full passenger name including title", pandas_type: "object", scale: "Nominal", missing: 0 },
+            { col: "Sex", desc: "Passenger gender (male / female)", pandas_type: "object", scale: "Nominal", missing: 0 },
+            { col: "Age", desc: "Age of passenger in years", pandas_type: "float64", scale: "Ratio", missing: 177 },
+            { col: "SibSp", desc: "Number of siblings/spouses aboard", pandas_type: "int64", scale: "Ratio", missing: 0 },
+            { col: "Parch", desc: "Number of parents/children aboard", pandas_type: "int64", scale: "Ratio", missing: 0 },
+            { col: "Ticket", desc: "Ticket number alphanumeric code", pandas_type: "object", scale: "Nominal", missing: 0 },
+            { col: "Fare", desc: "Passenger ticket fare price", pandas_type: "float64", scale: "Ratio", missing: 0 },
+            { col: "Cabin", desc: "Cabin room allocation number", pandas_type: "object", scale: "Nominal", missing: 687 },
+            { col: "Embarked", desc: "Port of embarkation (C = Cherbourg, Q = Queenstown, S = Southampton)", pandas_type: "object", scale: "Nominal", missing: 2 }
+        ],
+        titanic_rows: [
+            { PassengerId: 1, Survived: 0, Pclass: 3, Name: "Braund, Mr. Owen Harris", Sex: "male", Age: 22.0, SibSp: 1, Parch: 0, Ticket: "A/5 21171", Fare: 7.2500, Cabin: null, Embarked: "S" },
+            { PassengerId: 2, Survived: 1, Pclass: 1, Name: "Cumings, Mrs. John Bradley (Florence Briggs Thayer)", Sex: "female", Age: 38.0, SibSp: 1, Parch: 0, Ticket: "PC 17599", Fare: 71.2833, Cabin: "C85", Embarked: "C" },
+            { PassengerId: 3, Survived: 1, Pclass: 3, Name: "Heikkinen, Miss. Laina", Sex: "female", Age: 26.0, SibSp: 0, Parch: 0, Ticket: "STON/O2. 3101282", Fare: 7.9250, Cabin: null, Embarked: "S" },
+            { PassengerId: 4, Survived: 1, Pclass: 1, Name: "Futrelle, Mrs. Jacques Heath (Lily May Peel)", Sex: "female", Age: 35.0, SibSp: 1, Parch: 0, Ticket: "113803", Fare: 53.1000, Cabin: "C123", Embarked: "S" },
+            { PassengerId: 5, Survived: 0, Pclass: 3, Name: "Allen, Mr. William Henry", Sex: "male", Age: 35.0, SibSp: 0, Parch: 0, Ticket: "373450", Fare: 8.0500, Cabin: null, Embarked: "S" },
+            { PassengerId: 6, Survived: 0, Pclass: 3, Name: "Moran, Mr. James", Sex: "male", Age: null, SibSp: 0, Parch: 0, Ticket: "330877", Fare: 8.4583, Cabin: null, Embarked: "Q" },
+            { PassengerId: 7, Survived: 0, Pclass: 1, Name: "McCarthy, Mr. Timothy J", Sex: "male", Age: 54.0, SibSp: 0, Parch: 0, Ticket: "17463", Fare: 51.8625, Cabin: "E46", Embarked: "S" },
+            { PassengerId: 8, Survived: 0, Pclass: 3, Name: "Palsson, Master. Gosta Leonard", Sex: "male", Age: 2.0, SibSp: 3, Parch: 1, Ticket: "349909", Fare: 21.0750, Cabin: null, Embarked: "S" },
+            { PassengerId: 9, Survived: 1, Pclass: 3, Name: "Johnson, Mrs. Oscar W (Elisabeth Vilhelmina Berg)", Sex: "female", Age: 27.0, SibSp: 0, Parch: 2, Ticket: "347742", Fare: 11.1333, Cabin: null, Embarked: "S" },
+            { PassengerId: 10, Survived: 1, Pclass: 2, Name: "Nasser, Mrs. Nicholas (Adele Achem)", Sex: "female", Age: 14.0, SibSp: 1, Parch: 0, Ticket: "237736", Fare: 30.0708, Cabin: null, Embarked: "C" }
+        ]
+    },
+    procedure: [
+        "Step 1: Import required Python libraries (import pandas as pd, import numpy as np).",
+        "Step 2: Load the Titanic dataset using df = pd.read_csv('Titanic.csv').",
+        "Step 3: Inspect the first 5 records using df.head() and check non-null counts using df.info().",
+        "Step 4: Perform structural classification (verify that the dataset is Structured tabular CSV).",
+        "Step 5: Perform measurement scale classification for each column (Nominal, Ordinal, Interval, Ratio).",
+        "Step 6: Identify missing values across all columns using df.isnull().sum().",
+        "Step 7: Perform data preprocessing & missing value imputation:\n  • Fill missing 'Age' values with median: df['Age'].fillna(df['Age'].median(), inplace=True)\n  • Fill missing 'Embarked' values with mode: df['Embarked'].fillna(df['Embarked'].mode()[0], inplace=True)\n  • Drop 'Cabin' column due to excessive missingness: df.drop('Cabin', axis=1, inplace=True)",
+        "Step 8: Convert categorical columns 'Sex' and 'Embarked' to Pandas category data types using astype('category').",
+        "Step 9: Strip potential trailing whitespace from column names using df.columns = df.columns.str.strip().",
+        "Step 10: Verify the cleaned dataset structure and confirm 0 remaining missing values using df.isnull().sum()."
+    ],
+    python_code: `# Importing necessary libraries
+import pandas as pd  # Data manipulation and analysis
+import numpy as np   # Numerical computing
+
+# 1. DATA COLLECTION
+# Load the Titanic dataset
+df = pd.read_csv("Titanic.csv")
+
+print("--- First 5 Rows of Dataset ---")
+print(df.head())
+
+# 2. DATA TYPE CLASSIFICATION & STRUCTURE
+print("\\n--- Dataset Info & Data Types ---")
+print(df.info())
+
+# Measurement Scale-based Classification dictionary
+measurement_scale = {
+    'PassengerId': 'Nominal',
+    'Survived': 'Nominal',
+    'Pclass': 'Ordinal',
+    'Name': 'Nominal',
+    'Sex': 'Nominal',
+    'Age': 'Ratio',
+    'SibSp': 'Ratio',
+    'Parch': 'Ratio',
+    'Ticket': 'Nominal',
+    'Fare': 'Ratio',
+    'Cabin': 'Nominal',
+    'Embarked': 'Nominal'
+}
+
+column_info = pd.DataFrame({
+    'Column Name': df.columns,
+    'Pandas Data Type': df.dtypes.values,
+    'Measurement Scale': [measurement_scale[col] for col in df.columns]
+})
+
+print("\\n--- Measurement Scale Classification Table ---")
+print(column_info)
+
+# 3. DATA PREPROCESSING
+print("\\n--- Missing Values Before Cleaning ---")
+print(df.isnull().sum())
+
+# Impute Age with median
+df['Age'].fillna(df['Age'].median(), inplace=True)
+
+# Impute Embarked with mode
+df['Embarked'].fillna(df['Embarked'].mode()[0], inplace=True)
+
+# Drop Cabin due to high missing rate
+df.drop('Cabin', axis=1, inplace=True)
+
+# Convert categorical columns
+df['Sex'] = df['Sex'].astype('category')
+df['Embarked'] = df['Embarked'].astype('category')
+
+# Clean column headers
+df.columns = df.columns.str.strip()
+
+print("\\n--- Dataset Summary After Cleaning ---")
+print(df.head())
+
+print("\\n--- Remaining Missing Values ---")
+print(df.isnull().sum())
+
+print("\\n--- Updated Data Types ---")
+print(df.dtypes)
+`,
+    pretest: [
+        {
+            q: "Which step of the Data Science Lifecycle involves handling missing values and feature encoding?",
+            options: ["Data Collection", "Data Preparation", "Modeling", "Deployment"],
+            answer: 1,
+            explanation: "Data Preparation involves cleaning data, handling missing values, encoding categories, and feature engineering before model training."
+        },
+        {
+            q: "What type of data structure does the Titanic CSV dataset represent?",
+            options: ["Semi-Structured Data", "Unstructured Data", "Structured Data", "Hierarchical Graph Data"],
+            answer: 2,
+            explanation: "CSV files with fixed tabular rows and columns represent Structured Data."
+        },
+        {
+            q: "Which measurement scale does the 'Pclass' attribute (1st, 2nd, 3rd) belong to?",
+            options: ["Nominal Scale", "Ordinal Scale", "Interval Scale", "Ratio Scale"],
+            answer: 1,
+            explanation: "Pclass represents categories with a clear inherent order (1st Class > 2nd Class > 3rd Class), making it an Ordinal scale."
+        },
+        {
+            q: "Why is the Median preferred over Mean when imputing missing values in the 'Age' column?",
+            options: ["Mean cannot be calculated on float numbers", "Median is robust against extreme outliers and skewed distributions", "Pandas fillna() only supports median", "Mean turns all values to integers"],
+            answer: 1,
+            explanation: "Median is robust to skewed numerical distributions and outliers, whereas mean can be biased by extreme values."
+        }
+    ],
+    posttest: [
+        {
+            q: "What measurement scale does 'Fare' (ticket price in USD) belong to?",
+            options: ["Nominal", "Ordinal", "Interval", "Ratio"],
+            answer: 3,
+            explanation: "Fare is quantitative continuous data with a meaningful absolute zero (0 USD = free ticket), making it a Ratio scale."
+        },
+        {
+            q: "Why is the 'Cabin' column dropped during preprocessing of the Titanic dataset?",
+            options: ["Cabin contains non-English text", "Cabin has an excessive percentage (~77%) of missing values", "Cabin causes infinite loops in pandas", "Cabin values are integers"],
+            answer: 1,
+            explanation: "Over 77% of Cabin values are missing, making imputation unreliable and dropping the column the optimal strategy."
+        },
+        {
+            q: "Which Pandas method is used to convert string columns like 'Sex' to categorical types?",
+            options: ["df['Sex'].to_category()", "df['Sex'].astype('category')", "df['Sex'].convert('category')", "df['Sex'].encode()"],
+            answer: 1,
+            explanation: "df['Sex'].astype('category') converts a column to Pandas categorical data type."
+        }
+    ],
+    viva: [
+        {
+            q: "What is the difference between Nominal and Ordinal measurement scales?",
+            a: "Nominal scale classifies data into distinct categories with NO inherent rank or order (e.g. Gender: male/female, Port: Cherbourg/Southampton). Ordinal scale classifies data into categories that have a natural, meaningful rank or sequence (e.g. Pclass: 1st > 2nd > 3rd)."
+        },
+        {
+            q: "Why is Age considered a Ratio scale rather than an Interval scale?",
+            a: "Age has a true, non-arbitrary absolute zero point (0 years = birth). Multiplication and ratios are meaningful (e.g., a 40-year-old is twice as old as a 20-year-old). Interval scales (like temperature in °C) lack a true zero."
+        },
+        {
+            q: "Explain why 'Cabin' was dropped while 'Age' and 'Embarked' were imputed.",
+            a: "'Cabin' has 687 missing values out of 891 records (~77% missing data). Imputing such a vast majority creates artificial bias. 'Age' has 177 missing values (~20%), which can be safely imputed with the median. 'Embarked' has only 2 missing values (~0.2%), which can be imputed with the mode."
+        },
+        {
+            q: "What are the advantages of converting text columns like 'Sex' to Pandas 'category' dtypes?",
+            a: "1. Significantly reduces memory usage by storing unique categories as integer codes under the hood.\n2. Improves performance during grouping, filtering, and sorting operations.\n3. Prevents invalid string entries from being injected into downstream machine learning pipelines."
+        }
+    ]
+};

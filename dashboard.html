@@ -469,6 +469,10 @@
                                 <div style="font-size: 32px; margin-bottom: 6px;">🛡️</div>
                                 <div style="font-size: 11px; font-weight: 800;">SECURITY SENTINEL</div>
                             </div>
+                            <div class="badge-item" id="badge-ds" title="Complete Titanic Data Science Lifecycle & Classification" style="opacity:0.3; background: var(--badge-bg); border: 1px solid var(--card-border); padding: 12px; border-radius: 12px; text-align: center; flex: 1; min-width: 100px; transition: all 0.3s;">
+                                <div style="font-size: 32px; margin-bottom: 6px;">📊</div>
+                                <div style="font-size: 11px; font-weight: 800;">DATA SCIENTIST</div>
+                            </div>
                         </div>
                     </div>
                     
@@ -538,6 +542,9 @@
                 { id: 'dhcp_config', num: 'P14', name: 'DHCP Configuration & IP Pools', category: 'Network Services' },
                 { id: 'static_nat', num: 'P15', name: 'Static NAT 1:1 Mapping', category: 'Network Address Translation' },
                 { id: 'dynamic_nat', num: 'P16', name: 'Dynamic NAT & PAT Overload', category: 'Network Address Translation' }
+            ],
+            ds: [
+                { id: 'idsl_exp1', num: 'EXP 1', name: 'Data Science Lifecycle & Data Type Classification (Titanic Dataset)', category: 'Lifecycle & Preprocessing' }
             ]
         };
 
@@ -571,13 +578,24 @@
 
             // Practice lab mode is supported for Computer Networks topology building
             const practiceCard = document.getElementById('cardPractice');
-            if (practiceCard) practiceCard.style.display = 'block';
-            document.getElementById('mode-selection-container').style.display = 'grid';
+            if (subject === 'ds') {
+                if (practiceCard) practiceCard.style.display = 'none';
+                setMainPath('vlab');
+                document.getElementById('mode-selection-container').style.display = 'none';
+            } else {
+                if (practiceCard) practiceCard.style.display = 'block';
+                document.getElementById('mode-selection-container').style.display = 'grid';
+            }
 
             renderLabs(subject);
 
-            // Primary color scheme for Computer Networks
+            // Color scheme handling
             let accentColor = '#2563eb';
+            let accentHover = '#1d4ed8';
+            if (subject === 'ds') {
+                accentColor = '#06b6d4';
+                accentHover = '#0891b2';
+            }
             document.documentElement.style.setProperty('--primary-accent', accentColor);
             
             let styleTag = document.getElementById('subject-dynamic-style');
@@ -802,7 +820,8 @@
             if (!grid) return;
 
             const defaultSubjects = [
-                { code: 'networking', icon: '🌐', name: 'Computer Networks (CN)', desc: '15 Practical Labs: Packet Tracer, Topologies, Subnetting, VLANs, RIP, OSPF, EIGRP, NAT & DHCP.' }
+                { code: 'networking', icon: '🌐', name: 'Computer Networks (CN)', desc: '15 Practical Labs: Packet Tracer, Topologies, Subnetting, VLANs, RIP, OSPF, EIGRP, NAT & DHCP.' },
+                { code: 'ds', icon: '📊', name: 'Introduction to Data Science Lab (IDSL)', desc: 'Experiment 1: Titanic Data Science Lifecycle, Data Type Classification, Interactive Cleaners & Python Sandbox.' }
             ];
 
             const mergedMap = new Map();
@@ -869,6 +888,7 @@
             let ripDone = false, ospfDone = false, eigrpDone = false;
             let vlanDone = false;
             let natDone = false, dhcpDone = false;
+            let dsDone = false;
 
             document.querySelectorAll('.lab-card').forEach(card => {
                 const id = card.getAttribute('data-id');
@@ -903,6 +923,7 @@
                             if (labId === 'vlan') vlanDone = true;
                             if (labId === 'dhcp_config') dhcpDone = true;
                             if (labId === 'static_nat' || labId === 'dynamic_nat') natDone = true;
+                            if (labId.startsWith('idsl_')) dsDone = true;
                         }
                     } catch(e){}
                 }
@@ -925,6 +946,7 @@
             updateBadgeEl('badge-routing', ripDone || ospfDone || eigrpDone);
             updateBadgeEl('badge-vlan', vlanDone);
             updateBadgeEl('badge-security', natDone || dhcpDone);
+            updateBadgeEl('badge-ds', dsDone);
         }
 
         // Register PWA Service Worker
