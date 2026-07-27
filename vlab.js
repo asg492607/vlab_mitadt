@@ -7560,7 +7560,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
             
             // Inject IDSL Exp 1 Simulation & Sandbox Engine
-            if (data.id === 'idsl_exp1') {
+            if (id === 'idsl_exp1' || (data && data.id === 'idsl_exp1')) {
                 if (typeof window.renderIDSLSimulation === 'function') {
                     setBody('section-simulation', window.renderIDSLSimulation(data));
                 }
@@ -20853,6 +20853,15 @@ const initRipSim = (container) => {
             `;
                 return;
             }
+
+            if (id === 'idsl_exp1' || (data && (data.simType === 'idsl_exp1' || data.id === 'idsl_exp1'))) {
+                if (typeof window.renderIDSLSimulation === 'function') {
+                    container.innerHTML = window.renderIDSLSimulation(data);
+                    setTimeout(() => { if (typeof window.switchDSLStage === 'function') window.switchDSLStage(0); }, 200);
+                }
+                return;
+            }
+
             if (id === 'osi_tcpip' || id === 'osi_tcpip_sim' || id === 'communication_models' || (data && (data.simType === 'osi_tcpip_sim' || data.simType === 'osi_tcpip'))) { initOsiTcpipSim(container); return; }
             if (id === 'udp_tcp' || id === 'udp_tcp_sim' || (data && (data.simType === 'udp_tcp_sim' || data.simType === 'udp_tcp'))) { initUdpTcpSim(container); return; }
             if (id === 'dhcp_config' || id === 'dhcp_config_sim' || (data && (data.simType === 'dhcp_config_sim' || data.simType === 'dhcp_config'))) { initDhcpSim(container); return; }

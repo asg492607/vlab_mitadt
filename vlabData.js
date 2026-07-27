@@ -14423,6 +14423,8 @@ window.VLAB_DATA['communication_models'] = window.VLAB_DATA['osi_tcpip'];
 window.VLAB_DATA['osi_tcpip_sim'] = window.VLAB_DATA['osi_tcpip'];
 
 window.VLAB_DATA['idsl_exp1'] = {
+    id: "idsl_exp1",
+    simType: "idsl_exp1",
     title: "Experiment 1: Implementation of the Data Science Lifecycle and Data Type Classification Using the Titanic Dataset",
     experiment_info: {
         number: 1,
