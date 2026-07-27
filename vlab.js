@@ -7294,6 +7294,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const loadLab = (id) => {
         let data = window.VLAB_DATA[id];
+        if (typeof updateSidebarAndSectionLabels === 'function') {
+            updateSidebarAndSectionLabels(currentSubject);
+        }
 
         // Handle Practice Lab (Sandbox) Metadata
         if (id === 'practice') {
@@ -21507,6 +21510,59 @@ student@mitadt-os:~$ </div>
                 document.title = "MIT ADT VLAB - Computer Networks";
             }
             labSelectEl.innerHTML = optionsHtml;
+            updateSidebarAndSectionLabels(currentSubject);
+        }
+
+        function updateSidebarAndSectionLabels(subject) {
+            const toolsNav = document.querySelector('.nav-item[data-section="tools"]');
+            const expNav = document.querySelector('.nav-item[data-section="experiment"]');
+            const tbNav = document.querySelector('.nav-item[data-section="troubleshooting"]');
+
+            const toolsSec = document.querySelector('#section-tools .section-title');
+            const expSec = document.querySelector('#section-experiment .section-title');
+            const tbSec = document.querySelector('#section-troubleshooting .section-title');
+
+            if (subject === 'ds') {
+                if (toolsNav) toolsNav.innerHTML = `<span class="nav-icon">🧰</span> Data Science Tools & Stack`;
+                if (expNav) expNav.innerHTML = `<span class="nav-icon">🐍</span> Python Code Sandbox`;
+                if (tbNav) tbNav.innerHTML = `<span class="nav-icon">🧹</span> Data Cleaning Playground`;
+
+                if (toolsSec) toolsSec.textContent = `🧰 Data Science Tools & Libraries Inspector`;
+                if (expSec) expSec.textContent = `🐍 Python Code Sandbox & Executable Notebook`;
+                if (tbSec) tbSec.textContent = `🧹 Data Cleaning & Preprocessing Playground`;
+            } else if (subject === 'os') {
+                if (toolsNav) toolsNav.innerHTML = `<span class="nav-icon">⚙️</span> OS Kernel Diagnostics`;
+                if (expNav) expNav.innerHTML = `<span class="nav-icon">🖥️</span> OS Process Simulator`;
+                if (tbNav) tbNav.innerHTML = `<span class="nav-icon">🔧</span> Deadlock & Sync Challenge`;
+
+                if (toolsSec) toolsSec.textContent = `⚙️ OS Diagnostics & Kernel Inspector`;
+                if (expSec) expSec.textContent = `🖥️ Operating System Simulator`;
+                if (tbSec) tbSec.textContent = `🔧 Deadlock & Synchronization Challenge`;
+            } else if (subject === 'programming') {
+                if (toolsNav) toolsNav.innerHTML = `<span class="nav-icon">🧰</span> Language Compiler & Tools`;
+                if (expNav) expNav.innerHTML = `<span class="nav-icon">💻</span> Interactive IDE Sandbox`;
+                if (tbNav) tbNav.innerHTML = `<span class="nav-icon">🐛</span> Code Debugging Challenge`;
+
+                if (toolsSec) toolsSec.textContent = `🧰 Language Compilers & Tools Inspector`;
+                if (expSec) expSec.textContent = `💻 Interactive IDE Sandbox`;
+                if (tbSec) tbSec.textContent = `🐛 Code Debugging Challenge`;
+            } else if (subject === 'cyber') {
+                if (toolsNav) toolsNav.innerHTML = `<span class="nav-icon">🛡️</span> Security & Crypto Tools`;
+                if (expNav) expNav.innerHTML = `<span class="nav-icon">🔐</span> Security Attack Sandbox`;
+                if (tbNav) tbNav.innerHTML = `<span class="nav-icon">🚨</span> Threat Mitigation Challenge`;
+
+                if (toolsSec) toolsSec.textContent = `🛡️ Security & Cryptography Tools`;
+                if (expSec) expSec.textContent = `🔐 Security Attack & Defence Sandbox`;
+                if (tbSec) tbSec.textContent = `🚨 Threat Mitigation Challenge`;
+            } else {
+                if (toolsNav) toolsNav.innerHTML = `<span class="nav-icon">🛠️</span> Hardware Tools Inspector`;
+                if (expNav) expNav.innerHTML = `<span class="nav-icon">🧪</span> Cisco Packet Tracer Lab`;
+                if (tbNav) tbNav.innerHTML = `<span class="nav-icon">🔧</span> Troubleshooting Challenge`;
+
+                if (toolsSec) toolsSec.textContent = `🛠️ Hardware & Tools Inspector`;
+                if (expSec) expSec.textContent = `🏗️ Cisco Packet Tracer Lab`;
+                if (tbSec) tbSec.textContent = `🔧 Troubleshooting Challenge`;
+            }
         }
 
         // Sanitize initial lab variable by active subject track to prevent cross-subject loading bugs
