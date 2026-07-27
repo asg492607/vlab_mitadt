@@ -14498,6 +14498,7 @@ window.VLAB_DATA['idsl_exp1'] = {
             { PassengerId: 9, Survived: 1, Pclass: 3, Name: "Johnson, Mrs. Oscar W (Elisabeth Vilhelmina Berg)", Sex: "female", Age: 27.0, SibSp: 0, Parch: 2, Ticket: "347742", Fare: 11.1333, Cabin: null, Embarked: "S" },
             { PassengerId: 10, Survived: 1, Pclass: 2, Name: "Nasser, Mrs. Nicholas (Adele Achem)", Sex: "female", Age: 14.0, SibSp: 1, Parch: 0, Ticket: "237736", Fare: 30.0708, Cabin: null, Embarked: "C" }
         ]
+    },
     troubleshooting: {
         problem: "Dataset Quality Fault: Missing Values & Mixed Data Type Overhead",
         hints: [
