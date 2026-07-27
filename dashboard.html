@@ -469,10 +469,6 @@
                                 <div style="font-size: 32px; margin-bottom: 6px;">🛡️</div>
                                 <div style="font-size: 11px; font-weight: 800;">SECURITY SENTINEL</div>
                             </div>
-                            <div class="badge-item" id="badge-ds" title="Complete Python, Pandas & EDA Data Science labs" style="opacity:0.3; background: var(--badge-bg); border: 1px solid var(--card-border); padding: 12px; border-radius: 12px; text-align: center; flex: 1; min-width: 100px; transition: all 0.3s;">
-                                <div style="font-size: 32px; margin-bottom: 6px;">📊</div>
-                                <div style="font-size: 11px; font-weight: 800;">DATA SCIENTIST</div>
-                            </div>
                         </div>
                     </div>
                     
@@ -542,18 +538,6 @@
                 { id: 'dhcp_config', num: 'P14', name: 'DHCP Configuration & IP Pools', category: 'Network Services' },
                 { id: 'static_nat', num: 'P15', name: 'Static NAT 1:1 Mapping', category: 'Network Address Translation' },
                 { id: 'dynamic_nat', num: 'P16', name: 'Dynamic NAT & PAT Overload', category: 'Network Address Translation' }
-            ],
-            ds: [
-                { id: 'ds_intro', num: 'P1', name: 'Introduction to Data Science & Python Environment', category: 'Environment Setup' },
-                { id: 'ds_numpy', num: 'P2', name: 'Numerical Computing with NumPy', category: 'Array Processing' },
-                { id: 'ds_pandas', num: 'P3', name: 'Data Wrangling & Analysis with Pandas', category: 'Data Manipulation' },
-                { id: 'ds_cleaning', num: 'P4', name: 'Data Cleaning & Preprocessing', category: 'Data Preparation' },
-                { id: 'ds_viz', num: 'P5', name: 'Data Visualization with Matplotlib & Seaborn', category: 'Visual Analytics' },
-                { id: 'ds_eda', num: 'P6', name: 'Exploratory Data Analysis (EDA)', category: 'Exploratory Analysis' },
-                { id: 'ds_stats', num: 'P7', name: 'Statistical Inference & Hypothesis Testing', category: 'Applied Statistics' },
-                { id: 'ds_feature', num: 'P8', name: 'Feature Engineering & Scaling', category: 'Feature Extraction' },
-                { id: 'ds_regression', num: 'P9', name: 'Linear & Logistic Regression Models', category: 'Predictive Modeling' },
-                { id: 'ds_clustering', num: 'P10', name: 'Unsupervised Clustering & Classification', category: 'Machine Learning' }
             ]
         };
 
@@ -587,24 +571,13 @@
 
             // Practice lab mode is supported for Computer Networks topology building
             const practiceCard = document.getElementById('cardPractice');
-            if (subject === 'ds') {
-                if (practiceCard) practiceCard.style.display = 'none';
-                setMainPath('vlab');
-                document.getElementById('mode-selection-container').style.display = 'none';
-            } else {
-                if (practiceCard) practiceCard.style.display = 'block';
-                document.getElementById('mode-selection-container').style.display = 'grid';
-            }
+            if (practiceCard) practiceCard.style.display = 'block';
+            document.getElementById('mode-selection-container').style.display = 'grid';
 
             renderLabs(subject);
 
-            // Color scheme handling
+            // Primary color scheme for Computer Networks
             let accentColor = '#2563eb';
-            let accentHover = '#1d4ed8';
-            if (subject === 'ds') {
-                accentColor = '#06b6d4';
-                accentHover = '#0891b2';
-            }
             document.documentElement.style.setProperty('--primary-accent', accentColor);
             
             let styleTag = document.getElementById('subject-dynamic-style');
@@ -829,8 +802,7 @@
             if (!grid) return;
 
             const defaultSubjects = [
-                { code: 'networking', icon: '🌐', name: 'Computer Networks (CN)', desc: '15 Practical Labs: Packet Tracer, Topologies, Subnetting, VLANs, RIP, OSPF, EIGRP, NAT & DHCP.' },
-                { code: 'ds', icon: '📊', name: 'Introduction to Data Science (DS)', desc: '10 Practical Labs: Python Data Wrangling, Pandas, NumPy, Data Cleaning, EDA, Visualization, Feature Engineering & Statistical Modeling.' }
+                { code: 'networking', icon: '🌐', name: 'Computer Networks (CN)', desc: '15 Practical Labs: Packet Tracer, Topologies, Subnetting, VLANs, RIP, OSPF, EIGRP, NAT & DHCP.' }
             ];
 
             const mergedMap = new Map();
@@ -897,7 +869,6 @@
             let ripDone = false, ospfDone = false, eigrpDone = false;
             let vlanDone = false;
             let natDone = false, dhcpDone = false;
-            let dsDone = false;
 
             document.querySelectorAll('.lab-card').forEach(card => {
                 const id = card.getAttribute('data-id');
@@ -932,7 +903,6 @@
                             if (labId === 'vlan') vlanDone = true;
                             if (labId === 'dhcp_config') dhcpDone = true;
                             if (labId === 'static_nat' || labId === 'dynamic_nat') natDone = true;
-                            if (labId.startsWith('ds_')) dsDone = true;
                         }
                     } catch(e){}
                 }
@@ -955,7 +925,6 @@
             updateBadgeEl('badge-routing', ripDone || ospfDone || eigrpDone);
             updateBadgeEl('badge-vlan', vlanDone);
             updateBadgeEl('badge-security', natDone || dhcpDone);
-            updateBadgeEl('badge-ds', dsDone);
         }
 
         // Register PWA Service Worker

@@ -20944,17 +20944,10 @@ student@mitadt-os:~$ </div>
         const cloudLabs = ['cloud_virtualization', 'cloud_docker', 'cloud_loadbalancer', 'cloud_autoscaling', 'cloud_storage', 'cloud_cdn', 'cloud_iam', 'cloud_serverless', 'cloud_sla', 'cloud_mapreduce', 'cloud_kubernetes'];
         const cyberLabs = ['cyber_caesar', 'cyber_vigenere', 'cyber_rsa', 'cyber_aes', 'cyber_hashing', 'cyber_firewall', 'cyber_ids', 'cyber_sql_inject', 'cyber_xss', 'cyber_mitm', 'cyber_steganography', 'cyber_network_scan'];
 
-        const dsLabs = ['ds_intro', 'ds_numpy', 'ds_pandas', 'ds_cleaning', 'ds_viz', 'ds_eda', 'ds_stats', 'ds_feature', 'ds_regression', 'ds_clustering'];
-
         const urlParams = new URLSearchParams(window.location.search);
         const urlLab = urlParams.get('lab');
         let initialLab = urlLab || localStorage.getItem('vlab_current_lab');
-        if (currentSubject === 'ds') {
-            if (!dsLabs.includes(initialLab)) {
-                initialLab = 'ds_intro';
-                localStorage.setItem('vlab_current_lab', 'ds_intro');
-            }
-        } else if (currentSubject === 'os') {
+        if (currentSubject === 'os') {
             if (!osLabs.includes(initialLab)) {
                 initialLab = 'cpu_scheduling';
                 localStorage.setItem('vlab_current_lab', 'cpu_scheduling');
