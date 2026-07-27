@@ -14498,7 +14498,16 @@ window.VLAB_DATA['idsl_exp1'] = {
             { PassengerId: 9, Survived: 1, Pclass: 3, Name: "Johnson, Mrs. Oscar W (Elisabeth Vilhelmina Berg)", Sex: "female", Age: 27.0, SibSp: 0, Parch: 2, Ticket: "347742", Fare: 11.1333, Cabin: null, Embarked: "S" },
             { PassengerId: 10, Survived: 1, Pclass: 2, Name: "Nasser, Mrs. Nicholas (Adele Achem)", Sex: "female", Age: 14.0, SibSp: 1, Parch: 0, Ticket: "237736", Fare: 30.0708, Cabin: null, Embarked: "C" }
         ]
+    troubleshooting: {
+        problem: "Dataset Quality Fault: Missing Values & Mixed Data Type Overhead",
+        hints: [
+            "Inspect 'Age' (177 nulls) and 'Embarked' (2 nulls) for missing value gaps.",
+            "Identify high-sparsity column 'Cabin' (687 nulls - 77% missing data).",
+            "Verify memory usage overhead when categorical string columns ('Sex', 'Embarked') are stored as plain 'object' dtypes instead of 'category'."
+        ],
+        fix: "1. Impute missing 'Age' with median (28.0) and 'Embarked' with mode ('S').\n2. Drop sparse 'Cabin' column.\n3. Cast 'Sex' & 'Embarked' to category dtype using df['col'].astype('category')."
     },
+    assignment: "1. Load the Titanic dataset using Pandas (df = pd.read_csv('Titanic.csv')).\n2. Calculate summary statistics for 'Age' and 'Fare' using df[['Age', 'Fare']].describe().\n3. Determine the survival rates by Pclass (1st, 2nd, 3rd) using df.groupby('Pclass')['Survived'].mean() * 100.\n4. Document your observations on how Pclass and Sex affected survival rates in the response box below.",
     procedure: [
         "Step 1: Import required Python libraries (import pandas as pd, import numpy as np).",
         "Step 2: Load the Titanic dataset using df = pd.read_csv('Titanic.csv').",

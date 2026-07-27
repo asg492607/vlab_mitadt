@@ -7973,94 +7973,52 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
 
     window.runIDSLPythonCode = function() {
+        const editor = document.getElementById('idsl-python-editor');
         const consoleEl = document.getElementById('idsl-console-output');
         if (!consoleEl) return;
 
-        consoleEl.textContent = "Executing titanic_preprocessing.py in Python 3.10 sandbox...\n\n";
+        const code = editor ? editor.value : '';
+        consoleEl.textContent = "Executing titanic_preprocessing.py in Python 3.10 kernel...\n\n";
 
         setTimeout(() => {
-            consoleEl.textContent += `--- First 5 Rows of Dataset ---
-   PassengerId  Survived  Pclass                                               Name     Sex   Age  SibSp  Parch            Ticket     Fare Cabin Embarked
-0            1         0       3                            Braund, Mr. Owen Harris    male  22.0      1      0         A/5 21171   7.2500   NaN        S
-1            2         1       1  Cumings, Mrs. John Bradley (Florence Briggs Th...  female  38.0      1      0          PC 17599  71.2833   C85        C
-2            3         1       3                             Heikkinen, Miss. Laina  female  26.0      0      0  STON/O2. 3101282   7.9250   NaN        S
-3            4         1       1       Futrelle, Mrs. Jacques Heath (Lily May Peel)  female  35.0      1      0            113803  53.1000  C123        S
-4            5         0       3                           Allen, Mr. William Henry    male  35.0      0      0            373450   8.0500   NaN        S
+            let out = "";
+            let ageCleaned = code.includes(".fillna(") || code.includes("median");
+            let cabinDropped = code.includes(".drop(") || code.includes("Cabin");
+            let encodedCat = code.includes("category") || code.includes("astype");
 
---- Dataset Info & Data Types ---
-<class 'pandas.core.frame.DataFrame'>
-RangeIndex: 891 entries, 0 to 890
-Data columns (total 12 columns):
- #   Column       Non-Null Count  Dtype  
----  ------       --------------  -----  
- 0   PassengerId  891 non-null    int64  
- 1   Survived     891 non-null    int64  
- 2   Pclass       891 non-null    int64  
- 3   Name         891 non-null    object 
- 4   Sex          891 non-null    object 
- 5   Age          714 non-null    float64
- 6   SibSp        891 non-null    int64  
- 7   Parch        891 non-null    int64  
- 8   Ticket       891 non-null    object 
- 9   Fare         891 non-null    float64
- 10  Cabin        204 non-null    object 
- 11  Embarked     889 non-null    object 
-dtypes: float64(2), int64(5), object(5)
-memory usage: 83.7+ KB
+            if (code.includes("df.head()") || code.includes("head()")) {
+                out += `--- First 5 Rows of Dataset ---\n`;
+                if (!cabinDropped) {
+                    out += `   PassengerId  Survived  Pclass                                               Name     Sex   Age  SibSp  Parch            Ticket     Fare Cabin Embarked\n0            1         0       3                            Braund, Mr. Owen Harris    male  22.0      1      0         A/5 21171   7.2500   NaN        S\n1            2         1       1  Cumings, Mrs. John Bradley (Florence Briggs Th...  female  38.0      1      0          PC 17599  71.2833   C85        C\n2            3         1       3                             Heikkinen, Miss. Laina  female  26.0      0      0  STON/O2. 3101282   7.9250   NaN        S\n3            4         1       1       Futrelle, Mrs. Jacques Heath (Lily May Peel)  female  35.0      1      0            113803  53.1000  C123        S\n4            5         0       3                           Allen, Mr. William Henry    male  35.0      0      0            373450   8.0500   NaN        S\n\n`;
+                } else {
+                    out += `   PassengerId  Survived  Pclass                                               Name     Sex   Age  SibSp  Parch            Ticket     Fare Embarked\n0            1         0       3                            Braund, Mr. Owen Harris    male  22.0      1      0         A/5 21171   7.2500        S\n1            2         1       1  Cumings, Mrs. John Bradley (Florence Briggs Th...  female  38.0      1      0          PC 17599  71.2833        C\n2            3         1       3                             Heikkinen, Miss. Laina  female  26.0      0      0  STON/O2. 3101282   7.9250        S\n3            4         1       1       Futrelle, Mrs. Jacques Heath (Lily May Peel)  female  35.0      1      0            113803  53.1000        S\n4            5         0       3                           Allen, Mr. William Henry    male  35.0      0      0            373450   8.0500        S\n\n`;
+                }
+            }
 
---- Missing Values Before Cleaning ---
-PassengerId      0
-Survived         0
-Pclass           0
-Name             0
-Sex              0
-Age            177
-SibSp            0
-Parch            0
-Ticket           0
-Fare             0
-Cabin          687
-Embarked         2
-dtype: int64
+            if (code.includes("df.info()") || code.includes("info()")) {
+                out += `--- Dataset Info & Data Types ---\n<class 'pandas.core.frame.DataFrame'>\nRangeIndex: 891 entries, 0 to 890\nData columns (total ${cabinDropped ? 11 : 12} columns):\n`;
+                out += `dtypes: float64(2), int64(5), ${encodedCat ? 'category(2), object(2)' : 'object(5)'}\nmemory usage: ${encodedCat ? '70.3 KB' : '83.7 KB'}\n\n`;
+            }
 
---- Dataset Summary After Cleaning ---
-   PassengerId  Survived  Pclass                                               Name     Sex   Age  SibSp  Parch            Ticket     Fare Embarked
-0            1         0       3                            Braund, Mr. Owen Harris    male  22.0      1      0         A/5 21171   7.2500        S
-1            2         1       1  Cumings, Mrs. John Bradley (Florence Briggs Th...  female  38.0      1      0          PC 17599  71.2833        C
-2            3         1       3                             Heikkinen, Miss. Laina  female  26.0      0      0  STON/O2. 3101282   7.9250        S
-3            4         1       1       Futrelle, Mrs. Jacques Heath (Lily May Peel)  female  35.0      1      0            113803  53.1000        S
-4            5         0       3                           Allen, Mr. William Henry    male  35.0      0      0            373450   8.0500        S
+            if (code.includes("describe()") || code.includes("describe")) {
+                out += `--- Summary Statistics (df.describe) ---\n        PassengerId    Survived      Pclass         Age       SibSp       Parch        Fare\ncount    891.000000  891.000000  891.000000  ${ageCleaned ? '891.000000' : '714.000000'}  891.000000  891.000000  891.000000\nmean     446.000000    0.383838    2.308642   ${ageCleaned ? '29.361582' : '29.699118'}    0.523008    0.381594   32.204208\nstd      257.353842    0.486592    0.836071   ${ageCleaned ? '13.019697' : '14.526497'}    1.102743    0.806057   49.693429\nmin        1.000000    0.000000    1.000000    0.420000    0.000000    0.000000    0.000000\n50%      446.000000    0.000000    3.000000   28.000000    0.000000    0.000000   14.454200\nmax      891.000000    1.000000    3.000000   80.000000    8.000000    6.000000  512.329200\n\n`;
+            }
 
---- Remaining Missing Values ---
-PassengerId    0
-Survived       0
-Pclass         0
-Name             0
-Sex              0
-Age            0
-SibSp          0
-Parch          0
-Ticket         0
-Fare           0
-Embarked       0
-dtype: int64
+            if (code.includes("isnull().sum()") || code.includes("isnull")) {
+                out += `--- Missing Values Summary ---\n`;
+                out += `PassengerId      0\nSurvived         0\nPclass           0\nName             0\nSex              0\nAge            ${ageCleaned ? 0 : 177}\nSibSp            0\nParch            0\nTicket           0\nFare             0\n${cabinDropped ? '' : 'Cabin          687\n'}Embarked         ${ageCleaned ? 0 : 2}\ndtype: int64\n\n`;
+            }
 
---- Updated Data Types ---
-PassengerId       int64
-Survived          int64
-Pclass            int64
-Name             object
-Sex            category
-Age             float64
-SibSp             int64
-Parch             int64
-Ticket           object
-Fare            float64
-Embarked       category
-dtype: object
+            if (code.includes("groupby")) {
+                out += `--- Groupby Survival Rates ---\nPclass\n1    62.96%\n2    47.28%\n3    24.24%\nName: Survived, dtype: float64\n\n`;
+            }
 
-Process exited with code 0. Execution completed successfully! ✅`;
-        }, 600);
+            if (!out) {
+                out = `Code executed successfully.\nOutput:\n${code.split('\n').filter(l => l.trim().startsWith('print')).join('\n') || 'All statements executed without errors.'}\n\n`;
+            }
+
+            consoleEl.textContent += out + "Process exited with code 0. Execution completed successfully! ✅";
+        }, 400);
     };
 
     window.resetIDSLPythonCode = function() {
