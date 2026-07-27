@@ -457,17 +457,17 @@
                                 <div style="font-size: 32px; margin-bottom: 6px;">🌐</div>
                                 <div style="font-size: 11px; font-weight: 800;">NET MASTER</div>
                             </div>
-                            <div class="badge-item" id="badge-os" title="Complete CPU scheduling and deadlocks" style="opacity:0.3; background: var(--badge-bg); border: 1px solid var(--card-border); padding: 12px; border-radius: 12px; text-align: center; flex: 1; min-width: 100px; transition: all 0.3s;">
-                                <div style="font-size: 32px; margin-bottom: 6px;">💻</div>
-                                <div style="font-size: 11px; font-weight: 800;">SYSTEMS GURU</div>
+                            <div class="badge-item" id="badge-routing" title="Complete Dynamic Routing (RIP, OSPF, EIGRP) labs" style="opacity:0.3; background: var(--badge-bg); border: 1px solid var(--card-border); padding: 12px; border-radius: 12px; text-align: center; flex: 1; min-width: 100px; transition: all 0.3s;">
+                                <div style="font-size: 32px; margin-bottom: 6px;">⚡</div>
+                                <div style="font-size: 11px; font-weight: 800;">ROUTING EXPERT</div>
                             </div>
-                            <div class="badge-item" id="badge-prog" title="Complete C/C++ or Python labs" style="opacity:0.3; background: var(--badge-bg); border: 1px solid var(--card-border); padding: 12px; border-radius: 12px; text-align: center; flex: 1; min-width: 100px; transition: all 0.3s;">
-                                <div style="font-size: 32px; margin-bottom: 6px;">🚀</div>
-                                <div style="font-size: 11px; font-weight: 800;">CODE STAR</div>
+                            <div class="badge-item" id="badge-vlan" title="Complete VLAN & Switch configuration labs" style="opacity:0.3; background: var(--badge-bg); border: 1px solid var(--card-border); padding: 12px; border-radius: 12px; text-align: center; flex: 1; min-width: 100px; transition: all 0.3s;">
+                                <div style="font-size: 32px; margin-bottom: 6px;">🔀</div>
+                                <div style="font-size: 11px; font-weight: 800;">SWITCHING PRO</div>
                             </div>
-                            <div class="badge-item" id="badge-cyber" title="Complete RSA and SQL injection labs" style="opacity:0.3; background: var(--badge-bg); border: 1px solid var(--card-border); padding: 12px; border-radius: 12px; text-align: center; flex: 1; min-width: 100px; transition: all 0.3s;">
-                                <div style="font-size: 32px; margin-bottom: 6px;">🔐</div>
-                                <div style="font-size: 11px; font-weight: 800;">CYBER SHIELD</div>
+                            <div class="badge-item" id="badge-security" title="Complete NAT, DHCP & Security labs" style="opacity:0.3; background: var(--badge-bg); border: 1px solid var(--card-border); padding: 12px; border-radius: 12px; text-align: center; flex: 1; min-width: 100px; transition: all 0.3s;">
+                                <div style="font-size: 32px; margin-bottom: 6px;">🛡️</div>
+                                <div style="font-size: 11px; font-weight: 800;">SECURITY SENTINEL</div>
                             </div>
                         </div>
                     </div>
@@ -569,44 +569,15 @@
             document.getElementById('subject-view').style.display = 'none';
             document.getElementById('subject-dashboard-view').style.display = 'block';
 
-            // Practice lab mode is only relevant/supported for Computer Networks topology building
+            // Practice lab mode is supported for Computer Networks topology building
             const practiceCard = document.getElementById('cardPractice');
-            if (subject === 'os' || subject === 'programming' || subject === 'dbms' || subject === 'toc' || subject === 'ai' || subject === 'cloud' || subject === 'cyber') {
-                if (practiceCard) practiceCard.style.display = 'none';
-                setMainPath('vlab');
-                document.getElementById('mode-selection-container').style.display = 'none';
-            } else {
-                if (practiceCard) practiceCard.style.display = 'block';
-                document.getElementById('mode-selection-container').style.display = 'grid';
-            }
+            if (practiceCard) practiceCard.style.display = 'block';
+            document.getElementById('mode-selection-container').style.display = 'grid';
 
             renderLabs(subject);
 
-            // Change color scheme and apply dynamic style adjustments
+            // Primary color scheme for Computer Networks
             let accentColor = '#2563eb';
-            let accentHover = '#1d4ed8';
-            if (subject === 'os') {
-                accentColor = '#a855f7';
-                accentHover = '#9333ea';
-            } else if (subject === 'programming') {
-                accentColor = '#10b981';
-                accentHover = '#059669';
-            } else if (subject === 'dbms') {
-                accentColor = '#f59e0b';
-                accentHover = '#d97706';
-            } else if (subject === 'toc') {
-                accentColor = '#0d9488';
-                accentHover = '#0f766e';
-            } else if (subject === 'ai') {
-                accentColor = '#f97316';
-                accentHover = '#ea6c0a';
-            } else if (subject === 'cloud') {
-                accentColor = '#0ea5e9';
-                accentHover = '#0284c7';
-            } else if (subject === 'cyber') {
-                accentColor = '#ef4444';
-                accentHover = '#dc2626';
-            }
             document.documentElement.style.setProperty('--primary-accent', accentColor);
             
             let styleTag = document.getElementById('subject-dynamic-style');
@@ -831,14 +802,7 @@
             if (!grid) return;
 
             const defaultSubjects = [
-                { code: 'networking', icon: '🌐', name: 'Computer Networks (CN)', desc: '15 Practical Labs: Packet Tracer, Topologies, Subnetting, VLANs, RIP, OSPF, EIGRP, NAT & DHCP.' },
-                { code: 'os', icon: '💻', name: 'Operating Systems (OS)', desc: '5 Practical Labs: CPU Scheduling, Semaphores, Banker\'s Algorithm, Page Replacement, Disk Scheduling.' },
-                { code: 'programming', icon: '🚀', name: 'Computer Programming', desc: '5 Practical Labs: C, C++, Java, Python, and x86 NASM Assembly.' },
-                { code: 'dbms', icon: '🗄️', name: 'Database Management Systems (DBMS)', desc: '3 Practical Labs: Relational Schemas, Transactions, and B-Tree Indexing.' },
-                { code: 'toc', icon: '🧮', name: 'Theory of Computation (TOC)', desc: '7 Practical Labs: DFA, NFA, Regex, Parsing, PDA, Turing Machine.' },
-                { code: 'ai', icon: '🤖', name: 'Artificial Intelligence (AI)', desc: '12 Practical Labs: Search, CSP, Minimax, Naive Bayes, KNN, K-Means, Neural Nets.' },
-                { code: 'cloud', icon: '☁️', name: 'Cloud Computing', desc: '11 Practical Labs: Virtualization, Docker, Load Balancing, Auto-Scaling, Kubernetes.' },
-                { code: 'cyber', icon: '🔐', name: 'Cybersecurity & Cryptography', desc: '12 Practical Labs: RSA, AES, Firewalls, SQL Injection, XSS, MITM.' }
+                { code: 'networking', icon: '🌐', name: 'Computer Networks (CN)', desc: '15 Practical Labs: Packet Tracer, Topologies, Subnetting, VLANs, RIP, OSPF, EIGRP, NAT & DHCP.' }
             ];
 
             const mergedMap = new Map();
@@ -902,9 +866,9 @@
 
         function updateProgressUI() {
             let csmaDone = false, subnetDone = false;
-            let cpuDone = false, deadlockDone = false;
-            let cDone = false, pythonDone = false, asmDone = false;
-            let rsaDone = false, sqliDone = false;
+            let ripDone = false, ospfDone = false, eigrpDone = false;
+            let vlanDone = false;
+            let natDone = false, dhcpDone = false;
 
             document.querySelectorAll('.lab-card').forEach(card => {
                 const id = card.getAttribute('data-id');
@@ -931,15 +895,14 @@
                     try {
                         const state = JSON.parse(localStorage.getItem(key));
                         if (state.completed) {
-                            if (labId === 'csma') csmaDone = true;
-                            if (labId === 'subnet') subnetDone = true;
-                            if (labId === 'cpu_scheduling') cpuDone = true;
-                            if (labId === 'deadlock_avoidance') deadlockDone = true;
-                            if (labId === 'c_prog') cDone = true;
-                            if (labId === 'python_prog') pythonDone = true;
-                            if (labId === 'asm_prog') asmDone = true;
-                            if (labId === 'cyber_rsa') rsaDone = true;
-                            if (labId === 'cyber_sql_inject') sqliDone = true;
+                            if (labId === 'osi_tcpip' || labId === 'intro_tools') csmaDone = true;
+                            if (labId === 'subnetting' || labId === 'ip_class') subnetDone = true;
+                            if (labId === 'routing_rip') ripDone = true;
+                            if (labId === 'routing_ospf') ospfDone = true;
+                            if (labId === 'routing_eigrp') eigrpDone = true;
+                            if (labId === 'vlan') vlanDone = true;
+                            if (labId === 'dhcp_config') dhcpDone = true;
+                            if (labId === 'static_nat' || labId === 'dynamic_nat') natDone = true;
                         }
                     } catch(e){}
                 }
@@ -959,9 +922,9 @@
             };
 
             updateBadgeEl('badge-net', csmaDone && subnetDone);
-            updateBadgeEl('badge-os', cpuDone && deadlockDone);
-            updateBadgeEl('badge-prog', cDone || pythonDone || asmDone);
-            updateBadgeEl('badge-cyber', rsaDone && sqliDone);
+            updateBadgeEl('badge-routing', ripDone || ospfDone || eigrpDone);
+            updateBadgeEl('badge-vlan', vlanDone);
+            updateBadgeEl('badge-security', natDone || dhcpDone);
         }
 
         // Register PWA Service Worker
