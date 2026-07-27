@@ -15315,3 +15315,881 @@ plt.show()`,
     ]
 };
 
+// =====================================================================
+// EXPERIMENT 4: PROBABILITY AND STATISTICAL DISTRIBUTIONS
+// =====================================================================
+window.VLAB_DATA["idsl_exp4"] = {
+    id: "idsl_exp4",
+    subject: "ds",
+    title: "Exp 4: Fundamentals of Probability and Distribution Concepts Using Python",
+    aim: "To apply Python programming for understanding and computing key probability and distribution concepts such as event dependence, conditional probability, Bayes's theorem, random variables, continuous distributions, and to simulate the Central Limit Theorem (CLT).",
+    intro: {
+        summary: "Probability is the mathematical language for reasoning about uncertainty. In data science, probability underpins every machine learning algorithm, statistical test, and predictive model. Understanding probability distributions — especially the Normal distribution — is essential before building any predictive system.",
+        importance: "Bayesian reasoning, conditional probability, and the Central Limit Theorem are foundational to classification algorithms, A/B testing, and hypothesis testing used in real-world data science projects.",
+        applications: ["Spam email classification using Bayes' theorem", "A/B testing with hypothesis testing", "Risk modeling in finance using Normal distribution", "Clinical trial analysis using CLT", "Quality control in manufacturing using control charts"],
+        outcome: "Students will simulate dice events, compute conditional probabilities, apply Bayes' theorem, generate normal random variables, and demonstrate the Central Limit Theorem visually."
+    },
+    prerequisites: ["Experiment 3: Statistical Analysis (Central Tendency & Dispersion)", "Basic set theory and probability rules", "Python programming with numpy and matplotlib"],
+    outcomes: ["Simulate and determine event dependence and independence", "Compute conditional probabilities using contingency tables", "Apply Bayes's theorem for real-world problems", "Generate random variables and explore continuous distributions", "Compute probabilities in a normal distribution", "Simulate the Central Limit Theorem (CLT) and observe the distribution of sample means"],
+    theory: {
+        intro: "Probability quantifies the likelihood of events. Statistical distributions model how data values are distributed. Understanding these concepts is fundamental to data science and machine learning.",
+        cards: [
+            { title: "1. Event Dependence & Independence", content: "Two events A and B are INDEPENDENT if the occurrence of one does not affect the other:\nP(A∩B) = P(A) × P(B)\n\nIf P(A∩B) ≠ P(A) × P(B), the events are DEPENDENT.\n\nExample: Rolling a die and flipping a coin are independent events. Drawing cards without replacement creates dependent events." },
+            { title: "2. Conditional Probability", content: "The probability of event A occurring GIVEN that B has occurred:\nP(A|B) = P(A∩B) / P(B)\n\nExample: P(passing Math | passed English) measures the probability of passing Math given prior information about English performance.\n\nContingency tables organize categorical outcomes to easily compute joint and conditional probabilities." },
+            { title: "3. Bayes's Theorem", content: "Bayes's Theorem updates probability estimates given new evidence:\nP(A|B) = [P(B|A) × P(A)] / P(B)\n\nComponents:\n• P(A): Prior probability (initial belief)\n• P(B|A): Likelihood (probability of evidence given hypothesis)\n• P(B): Marginal probability (total probability of evidence)\n• P(A|B): Posterior probability (updated belief)\n\nApplication: Medical diagnosis, spam filtering, recommendation systems." },
+            { title: "4. Random Variables & Normal Distribution", content: "A continuous random variable can take any value in a range. The Normal (Gaussian) distribution N(μ, σ²) is the most important distribution:\n• Bell-shaped and symmetric around mean μ\n• 68% of data falls within ±1σ\n• 95% within ±2σ\n• 99.7% within ±3σ (68-95-99.7 rule)\n\nGenerated in Python: np.random.normal(mean, std, size)" },
+            { title: "5. Central Limit Theorem (CLT)", content: "The CLT states that regardless of the population's distribution, the distribution of SAMPLE MEANS approaches a normal distribution as sample size increases.\n\nFormally: X̄ ~ N(μ, σ²/n) for large n\n\nImplications:\n• Allows applying normal distribution theory to non-normal data\n• Justifies hypothesis testing even for skewed populations\n• Explains why many real-world measurements follow normal distribution\n• Standard error = σ / √n (spread decreases with larger samples)" }
+        ]
+    },
+    tools: [
+        { name: "NumPy", category: "Scientific Computing", description: "np.random.randint(), np.random.normal(), np.mean(), np.isclose() — Core numerical simulation engine." },
+        { name: "Pandas", category: "Data Analysis", description: "pd.DataFrame() — Contingency table creation and probability calculation." },
+        { name: "Matplotlib", category: "Visualization", description: "plt.hist(), plt.plot() — Distribution plots and CLT simulation visualization." }
+    ],
+    python_code: `import numpy as np
+import pandas as pd
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+
+print("=" * 60)
+print("EXP 4: PROBABILITY & STATISTICAL DISTRIBUTIONS")
+print("=" * 60)
+
+# 1. Event Dependence and Independence
+np.random.seed(42)
+A = np.random.randint(1, 7, 1000)  # Dice A
+B = np.random.randint(1, 7, 1000)  # Dice B
+
+P_A = np.mean(A > 3)               # P(A > 3)
+P_B = np.mean(B % 2 == 0)          # P(B is even)
+P_A_and_B = np.mean((A > 3) & (B % 2 == 0))
+P_A_given_B = P_A_and_B / P_B
+
+print("\\n1. EVENT INDEPENDENCE TEST (1000 dice rolls):")
+print(f"   P(A > 3)       = {P_A:.4f}")
+print(f"   P(B is even)   = {P_B:.4f}")
+print(f"   P(A∩B)         = {P_A_and_B:.4f}")
+print(f"   P(A) × P(B)    = {P_A * P_B:.4f}")
+print(f"   Independent?   = {np.isclose(P_A_and_B, P_A * P_B, atol=0.05)}")
+
+# 2. Conditional Probability - Contingency Table
+print("\\n2. CONDITIONAL PROBABILITY (Contingency Table):")
+data = {'Passed Math': [30, 20], 'Failed Math': [10, 40]}
+table = pd.DataFrame(data, index=['Passed English', 'Failed English'])
+print(table)
+P_PM_PE = table.loc['Passed English', 'Passed Math'] / table.loc['Passed English'].sum()
+P_PM_FE = table.loc['Failed English', 'Passed Math'] / table.loc['Failed English'].sum()
+print(f"   P(Pass Math | Pass English) = {P_PM_PE:.4f} ({P_PM_PE*100:.1f}%)")
+print(f"   P(Pass Math | Fail English) = {P_PM_FE:.4f} ({P_PM_FE*100:.1f}%)")
+
+# 3. Bayes's Theorem - Spam Filter
+print("\\n3. BAYES THEOREM (Spam Email Detection):")
+P_spam = 0.01
+P_not_spam = 0.99
+P_pos_spam = 0.99
+P_pos_not_spam = 0.05
+P_positive = (P_pos_spam * P_spam) + (P_pos_not_spam * P_not_spam)
+P_spam_given_positive = (P_pos_spam * P_spam) / P_positive
+print(f"   P(Spam)            = {P_spam}")
+print(f"   P(Spam | Positive) = {P_spam_given_positive:.4f} ({P_spam_given_positive*100:.2f}%)")
+print("   (Despite 99% detection, only 16.7% positive results are truly spam!)")
+
+# 4. Normal Distribution
+print("\\n4. NORMAL DISTRIBUTION (mu=50, sigma=10):")
+data_normal = np.random.normal(loc=50, scale=10, size=10000)
+prob_40_60 = np.mean((data_normal > 40) & (data_normal < 60))
+print(f"   Mean  = {np.mean(data_normal):.4f}")
+print(f"   Std   = {np.std(data_normal):.4f}")
+print(f"   P(40 < X < 60) = {prob_40_60:.4f} (expected ≈ 0.6827)")
+
+# 5. Central Limit Theorem
+print("\\n5. CENTRAL LIMIT THEOREM (Exponential Population):")
+population = np.random.exponential(scale=2, size=100000)
+print(f"   Population Mean = {np.mean(population):.4f} (expected ≈ 2.0)")
+print(f"   Population Std  = {np.std(population):.4f}")
+for n in [5, 10, 30, 100]:
+    means = [np.mean(np.random.choice(population, n)) for _ in range(2000)]
+    print(f"   n={n:3d}: Sample Mean = {np.mean(means):.4f}, Std Error = {np.std(means):.4f} (expected ≈ {np.std(population)/np.sqrt(n):.4f})")
+
+print("\\nProcess exited with code 0. ✅")`,
+    pretest: [
+        { q: "What is the probability of getting a head when flipping a fair coin?", options: ["0.25", "0.50", "0.75", "1.00"], answer: "0.50" },
+        { q: "If P(A) = 0.4 and P(B) = 0.3 and A and B are independent, what is P(A∩B)?", options: ["0.70", "0.12", "0.40", "0.30"], answer: "0.12" },
+        { q: "Bayes's Theorem is used to calculate:", options: ["Mean of a distribution", "Posterior probability given new evidence", "Standard deviation", "Sample size"], answer: "Posterior probability given new evidence" },
+        { q: "The Central Limit Theorem states that sample means follow:", options: ["Exponential distribution", "Uniform distribution", "Normal distribution for large n", "Binomial distribution"], answer: "Normal distribution for large n" },
+        { q: "In a Normal distribution N(μ, σ²), what percentage of data falls within ±2σ?", options: ["68%", "95%", "99.7%", "50%"], answer: "95%" }
+    ],
+    posttest: [
+        { q: "Two dice rolls are considered independent because:", options: ["Both have the same outcome", "P(A∩B) = P(A) × P(B)", "They are sequential", "P(A|B) = P(A) × P(B)"], answer: "P(A∩B) = P(A) × P(B)" },
+        { q: "P(A|B) reads as:", options: ["Probability of A and B", "Probability of A given B", "Probability of B given A", "P(A) × P(B)"], answer: "Probability of A given B" },
+        { q: "In the spam filter Bayes example, P(Spam | Positive) is low because:", options: ["P(Spam) is very low (1%)", "Spam filter doesn't work", "P(B|A) is very high", "Normal distribution applies"], answer: "P(Spam) is very low (1%)" },
+        { q: "As sample size n increases in CLT, the standard error:", options: ["Increases", "Stays the same", "Decreases (σ/√n)", "Doubles"], answer: "Decreases (σ/√n)" },
+        { q: "np.random.normal(50, 10, 1000) generates:", options: ["1000 values from Uniform(50,10)", "1000 values from Normal(mean=50, std=10)", "50 values with std 10", "Poisson distributed values"], answer: "1000 values from Normal(mean=50, std=10)" }
+    ],
+    viva: [
+        { q: "1. What is conditional probability?", a: "Conditional probability P(A|B) is the probability of event A occurring given that event B has already occurred. Formula: P(A|B) = P(A∩B) / P(B). It represents updated probability given new information." },
+        { q: "2. State Bayes's Theorem.", a: "Bayes's Theorem: P(A|B) = [P(B|A) × P(A)] / P(B). It relates the posterior probability P(A|B) to the prior P(A) and likelihood P(B|A). Used in Naive Bayes classifiers, medical diagnosis, and spam filtering." },
+        { q: "3. Define dependent and independent events.", a: "Independent events: P(A∩B) = P(A) × P(B). Knowledge of B does not change P(A). Example: rolling two separate dice. Dependent events: P(A∩B) ≠ P(A) × P(B). Example: drawing cards without replacement." },
+        { q: "4. What is a random variable?", a: "A random variable X is a function that maps outcomes of a random experiment to numerical values. Discrete random variables (countable outcomes) vs Continuous random variables (any value in a range, e.g., height, weight, temperature)." },
+        { q: "5. What is a continuous distribution? Give an example.", a: "A continuous distribution models the probability of a continuous random variable. The probability is expressed as a probability density function (PDF). Example: Normal distribution N(μ, σ²), Exponential distribution, Uniform distribution." },
+        { q: "6. Why is CLT important in data science?", a: "CLT allows applying normal distribution theory to non-normal data when working with sample means. It justifies hypothesis testing (t-tests, z-tests), confidence intervals, and many ML algorithms even when population distribution is unknown." }
+    ],
+    practice_commands: ["np.mean(A > 3), np.mean(B % 2 == 0)", "P_A_and_B / P_B", "(P_pos_spam * P_spam) / P_positive", "np.random.normal(50, 10, 1000)", "np.mean(np.random.choice(population, 30))"],
+    practice_questions: ["Task 1: Simulate 5000 dice rolls and verify independence between event A (roll > 4) and event B (roll is odd).", "Task 2: Build a contingency table from medical test data. Compute P(Disease | Positive Test) using Bayes theorem.", "Task 3: Generate 10000 samples from Poisson(λ=3) and demonstrate CLT using sample sizes n=5, 30, 100, 500.", "Task 4: Compute and visualize the 68-95-99.7 rule for Normal(60, 15). Shade the regions."]
+};
+
+// =====================================================================
+// EXPERIMENT 5: DATA VISUALIZATION TECHNIQUES
+// =====================================================================
+window.VLAB_DATA["idsl_exp5"] = {
+    id: "idsl_exp5",
+    subject: "ds",
+    title: "Exp 5: Data Visualization Techniques for Comprehensive Data Analysis in Python",
+    aim: "To develop the ability to create effective visualizations for Univariate, Bivariate, and Multivariate data analysis using Python libraries (Matplotlib, Seaborn) on the Tips restaurant dataset.",
+    intro: {
+        summary: "Data visualization transforms raw numbers into visual insights. A well-designed chart can reveal patterns, trends, correlations, and outliers that would be invisible in tabular data. Python's Matplotlib and Seaborn libraries provide a rich toolkit for statistical visualization.",
+        importance: "90% of the information processed by the human brain is visual. Before building any machine learning model, exploratory visualization helps understand data distributions, identify outliers, detect feature relationships, and guide feature engineering decisions.",
+        applications: ["Business intelligence dashboards", "Medical research pattern discovery", "Financial market trend analysis", "Customer behavior segmentation", "Sports analytics performance tracking"],
+        outcome: "Students will create histograms, boxplots, scatter plots, line plots, pair plots, correlation heatmaps, and facet grids using the restaurant Tips dataset."
+    },
+    prerequisites: ["Experiment 2: EDA and Data Preprocessing", "Python with matplotlib and seaborn installed", "Understanding of descriptive statistics"],
+    outcomes: ["Create and interpret histograms, boxplots, and violin plots for univariate analysis", "Build scatter plots and bar plots for bivariate analysis", "Generate pair plots and heatmaps for multivariate analysis", "Differentiate Matplotlib, Seaborn, and Plotly visualization libraries", "Apply appropriate chart types based on data type and analysis goal"],
+    theory: {
+        intro: "Data visualization is the graphical representation of information and data. It uses visual elements like charts, graphs, and maps to provide an accessible way to see and understand trends, outliers, and patterns in data.",
+        cards: [
+            { title: "1. Univariate Visualization", content: "Univariate analysis examines ONE variable at a time to understand its distribution, spread, and central tendency.\n\nKey Charts:\n• Histogram: Frequency distribution of a continuous variable (bins)\n• Boxplot: Five-number summary (Min, Q1, Median, Q3, Max) + Outliers\n• Violin Plot: Boxplot + Kernel Density Estimation (KDE)\n• KDE Plot: Smooth probability density curve\n• Bar Chart: Frequency of categorical variables\n\nWhen to use: Understanding a single feature before modeling." },
+            { title: "2. Bivariate Visualization", content: "Bivariate analysis examines the RELATIONSHIP between TWO variables.\n\nKey Charts:\n• Scatter Plot: Relationship between two continuous variables\n• Line Plot: Trend over time (time series)\n• Box Plot (grouped): Distribution of Y across categories of X\n• Bar Plot: Compare means of Y across categories of X\n• Heatmap (2-variable): Cross-tabulation counts\n\nWhen to use: Detecting correlations, comparing groups, tracking trends." },
+            { title: "3. Multivariate Visualization", content: "Multivariate analysis examines THREE or more variables simultaneously.\n\nKey Charts:\n• Pair Plot: All pairwise scatter plots in a dataset (color-coded by class)\n• Correlation Heatmap: Matrix of Pearson r values between all numerical features\n• Facet Grid: Multiple subplots broken by category values\n• Bubble Chart: Third variable as point size in a scatter plot\n• 3D Scatter: Three numerical variables on x, y, z axes\n\nWhen to use: Feature selection, cluster visualization, model diagnostics." },
+            { title: "4. Python Visualization Libraries", content: "Library Comparison:\n\n• Matplotlib: Foundation library. Maximum control and customization. Low-level API. plt.figure(), plt.plot(), plt.hist()\n\n• Seaborn: High-level statistical visualization built on Matplotlib. Beautiful default themes. sns.histplot(), sns.boxplot(), sns.pairplot()\n\n• Plotly: Interactive web-based charts. Great for dashboards. px.scatter(), px.bar()\n\n• Pandas: Quick built-in plots directly from DataFrames. df.plot.hist(), df.plot.scatter()\n\n• Altair: Declarative grammar-based visualization (Vega-Lite)." }
+        ]
+    },
+    tools: [
+        { name: "Matplotlib", category: "Visualization", description: "plt.hist(), plt.scatter(), plt.plot() — Foundation visualization library." },
+        { name: "Seaborn", category: "Statistical Visualization", description: "sns.histplot(), sns.boxplot(), sns.pairplot(), sns.heatmap() — High-level statistical plots." },
+        { name: "Pandas", category: "Data", description: "tips = pd.read_csv('tips.csv') — Data loading and DataFrame management." }
+    ],
+    python_code: `import pandas as pd
+import numpy as np
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+print("=" * 60)
+print("EXP 5: DATA VISUALIZATION TECHNIQUES")
+print("=" * 60)
+
+# Load Tips Dataset (simulated)
+np.random.seed(42)
+n = 244
+tips = pd.DataFrame({
+    'total_bill': np.abs(np.random.normal(19.79, 8.9, n)),
+    'tip': np.abs(np.random.normal(2.998, 1.38, n)),
+    'sex': np.random.choice(['Male', 'Female'], n, p=[0.643, 0.357]),
+    'smoker': np.random.choice(['No', 'Yes'], n, p=[0.615, 0.385]),
+    'day': np.random.choice(['Thur', 'Fri', 'Sat', 'Sun'], n, p=[0.25, 0.09, 0.36, 0.31]),
+    'time': np.random.choice(['Lunch', 'Dinner'], n, p=[0.44, 0.56]),
+    'size': np.random.choice([1,2,3,4,5,6], n, p=[0.02, 0.46, 0.15, 0.29, 0.05, 0.02])
+})
+tips['tip'] = tips['total_bill'] * 0.18 + np.random.normal(0, 0.5, n)
+tips['tip'] = tips['tip'].clip(0.5, 10)
+
+print("\\nDataset Loaded: Tips Restaurant Dataset")
+print(f"Shape: {tips.shape}")
+print("\\nFirst 5 rows:")
+print(tips.head())
+
+print("\\n--- UNIVARIATE ANALYSIS ---")
+print("Total Bill Stats:")
+print(f"  Mean:   \${tips['total_bill'].mean():.2f}")
+print(f"  Median: \${tips['total_bill'].median():.2f}")
+print(f"  Std:    \${tips['total_bill'].std():.2f}")
+print(f"  Min:    \${tips['total_bill'].min():.2f}")
+print(f"  Max:    \${tips['total_bill'].max():.2f}")
+
+print("\\n--- BIVARIATE ANALYSIS ---")
+print("Correlation: Total Bill vs Tip:")
+corr = tips['total_bill'].corr(tips['tip'])
+print(f"  Pearson r = {corr:.4f} (Strong positive correlation!)")
+print("\\nAverage Tip by Day:")
+print(tips.groupby('day')['tip'].mean().round(2).to_string())
+
+print("\\n--- MULTIVARIATE ANALYSIS ---")
+print("Correlation Matrix:")
+print(tips[['total_bill', 'tip', 'size']].corr().round(4))
+print("\\nAverage tip by Sex and Smoking Status:")
+print(tips.groupby(['sex', 'smoker'])['tip'].mean().round(2).to_string())
+
+print("\\nProcess exited with code 0. ✅")`,
+    pretest: [
+        { q: "Which Python library is best for interactive web-based visualizations?", options: ["Matplotlib", "Seaborn", "Plotly", "NumPy"], answer: "Plotly" },
+        { q: "What chart type is best for showing the distribution of a single continuous variable?", options: ["Scatter plot", "Histogram", "Pie chart", "Line chart"], answer: "Histogram" },
+        { q: "Seaborn's pairplot() is used for:", options: ["Single variable analysis", "Pairwise relationships in a dataset", "Time series trends", "Pie charts"], answer: "Pairwise relationships in a dataset" },
+        { q: "A boxplot displays:", options: ["Mean only", "Min, Q1, Median, Q3, Max and outliers", "Correlation coefficient", "Probability density"], answer: "Min, Q1, Median, Q3, Max and outliers" },
+        { q: "Which is a bivariate visualization technique?", options: ["Histogram", "KDE Plot", "Scatter Plot", "Bar chart for one variable"], answer: "Scatter Plot" }
+    ],
+    posttest: [
+        { q: "What does the whisker in a boxplot represent?", options: ["Mean ± Standard deviation", "Q1/Q3 ± 1.5 × IQR (typical range)", "Min and Max values always", "Median range"], answer: "Q1/Q3 ± 1.5 × IQR (typical range)" },
+        { q: "sns.heatmap() on a correlation matrix shows:", options: ["Histogram of each feature", "Pairwise correlation coefficients", "Missing value counts", "Outlier positions"], answer: "Pairwise correlation coefficients" },
+        { q: "A Facet Grid is useful for:", options: ["Single variable analysis", "Multiple bivariate plots broken by category", "Showing pie proportions", "3D visualization only"], answer: "Multiple bivariate plots broken by category" },
+        { q: "Which chart should you use to compare 'tip' amounts across different 'days'?", options: ["Scatter plot", "Boxplot (x=day, y=tip)", "Line chart", "Pie chart"], answer: "Boxplot (x=day, y=tip)" },
+        { q: "Seaborn is built on top of:", options: ["NumPy", "Matplotlib", "Plotly", "Pandas"], answer: "Matplotlib" }
+    ],
+    viva: [
+        { q: "1. What is the difference between Univariate, Bivariate, and Multivariate data?", a: "Univariate: Analyzes one variable (e.g., distribution of tips). Bivariate: Analyzes two variables and their relationship (e.g., total_bill vs tip). Multivariate: Analyzes three or more variables simultaneously (e.g., pairplot of total_bill, tip, size by gender)." },
+        { q: "2. What are the different Python Libraries we can use for Data Visualization?", a: "Matplotlib: Low-level, maximum control. Seaborn: High-level statistical plots. Plotly: Interactive web-based. Pandas: Quick DataFame plots. Altair: Declarative grammar-based. Bokeh: Browser-based interactive plots." },
+        { q: "3. How can you visualize the relationship between a numeric and categorical variable?", a: "Use sns.boxplot(x='category', y='numeric', data=df) to show distribution across groups, or sns.barplot(x='category', y='numeric', data=df) to compare means with confidence intervals." },
+        { q: "4. How does Seaborn's pairplot help in analyzing multivariate datasets?", a: "pairplot() creates a grid of all pairwise scatter plots in a dataset. The diagonal shows distributions (histograms or KDEs). Using hue='class' color-codes points by category, revealing class separability — extremely useful for feature selection before ML." },
+        { q: "5. What is the advantage of using Seaborn over Matplotlib?", a: "Seaborn provides higher-level statistical visualizations with beautiful default themes, automatic legend creation, built-in support for pandas DataFrames, and concise code for complex statistical plots like violinplots, pairplots, and heatmaps." }
+    ],
+    practice_commands: ["sns.histplot(tips['total_bill'], kde=True)", "sns.boxplot(x='day', y='tip', data=tips)", "sns.scatterplot(x='total_bill', y='tip', data=tips)", "sns.pairplot(tips, hue='sex')", "sns.heatmap(tips.corr(), annot=True)"],
+    practice_questions: ["Task 1: Create a histogram with KDE overlay for the 'tip' column. Describe the distribution shape.", "Task 2: Build a grouped boxplot showing 'total_bill' distribution by 'day' and 'time'. Which combination has the highest bills?", "Task 3: Create a pairplot with hue='smoker'. Do smoking and non-smoking customers tip differently?", "Task 4: Generate a correlation heatmap. Which two variables have the strongest correlation?"]
+};
+
+// =====================================================================
+// EXPERIMENT 6: INTERACTIVE DASHBOARDS (POWER BI & TABLEAU)
+// =====================================================================
+window.VLAB_DATA["idsl_exp6"] = {
+    id: "idsl_exp6",
+    subject: "ds",
+    title: "Exp 6: Design Interactive Dashboards for Data Narratives Using Power BI and Tableau",
+    aim: "To develop the ability to load, explore, and visualize time series data for future trend prediction and to use tools like Power BI and Tableau for creating interactive dashboards for effective data presentation.",
+    intro: {
+        summary: "Interactive dashboards allow users to explore data dynamically through filters, slicers, and drill-down capabilities. Power BI and Tableau are the leading Business Intelligence (BI) tools that transform raw data into compelling visual stories for decision-makers.",
+        importance: "In modern data-driven organizations, dashboards bridge the gap between raw data and business decisions. 87% of organizations report that data visualization helps them make faster and more accurate decisions.",
+        applications: ["Sales performance monitoring", "Financial reporting and KPI tracking", "Healthcare patient analytics", "Supply chain logistics tracking", "Customer satisfaction analysis"],
+        outcome: "Students will understand dashboard design principles, create interactive Power BI and Tableau visualizations, and apply data storytelling principles to convey business insights effectively."
+    },
+    prerequisites: ["Experiment 5: Data Visualization Techniques", "Basic understanding of business metrics (KPIs)", "Power BI Desktop or Tableau Public installed"],
+    outcomes: ["Understand the role of dashboards in data analysis and decision-making", "Use Power BI and Tableau to create interactive visualizations", "Develop interactive dashboards with multiple visual components", "Apply basic data storytelling principles to convey business insights", "Differentiate between static reports and interactive dashboards"],
+    theory: {
+        intro: "An interactive dashboard is a visual display of key metrics and data that allows users to interact with information in real time, drill down into specific data points, and apply filters to explore from multiple perspectives.",
+        cards: [
+            { title: "1. What is an Interactive Dashboard?", content: "An interactive dashboard provides:\n• Real-time visualization of multiple KPIs in one view\n• Dynamic filters and slicers to explore data\n• Drill-down capability into specific data points\n• Cross-filtering (clicking one chart updates all others)\n• Custom date ranges and dimension selections\n\nExample: A Sales Dashboard showing Total Revenue, Regional Breakdown, Monthly Trend, and Top Products — all interconnected." },
+            { title: "2. Data Storytelling", content: "Data storytelling combines DATA + VISUALIZATIONS + NARRATIVE to communicate insights:\n\n1. Context: Set the scene (what data, what period, why it matters)\n2. Conflict: Identify the problem or trend (sales dropping in East region)\n3. Resolution: Propose actions based on data insights\n\nExample Story: 'Sales in the East region grew 12% YoY but lag the West by 34%, suggesting a targeted marketing campaign opportunity.'\n\nStorytelling elements: Headlines, annotations, color-coding, call-to-action buttons." },
+            { title: "3. Power BI — Microsoft Business Intelligence", content: "Power BI is Microsoft's flagship BI tool with:\n• Power Query: ETL (Extract, Transform, Load) for data cleaning\n• DAX (Data Analysis Expressions): Custom calculated measures\n• Visual types: Clustered Bar, Line Chart, Donut, Matrix, Card, Map\n• Slicers: Interactive filters (Year, Region, Category)\n• Direct integration with Excel, Azure, SharePoint, Teams\n• Real-time dashboards with automatic data refresh\n\nBest for: Enterprise environments using Microsoft stack." },
+            { title: "4. Tableau — Data Visualization Platform", content: "Tableau is the leading dedicated visualization platform:\n• Drag-and-drop interface (no coding required)\n• VizQL: Visual query language for instant chart creation\n• Visual types: Scatter, Map (Choropleth), Bar, Line, Gantt, Treemap\n• Actions: Filter actions (clicking updates other charts), URL actions\n• Story Points: Guided analytical narrative with sequential dashboards\n• Tableau Public: Free version for published visualizations\n\nBest for: Complex, highly interactive, and custom visualizations." },
+            { title: "5. Key Dashboard Design Principles", content: "Effective Dashboard Design:\n1. Clarity: Show only necessary metrics — avoid visual clutter\n2. Hierarchy: Most important KPIs at top-left (F-pattern reading)\n3. Color: Use consistent, meaningful color palettes. Red=alert, Green=positive\n4. Interactivity: Every filter interaction should have immediate visual feedback\n5. Context: Include comparison periods (YoY, MoM, vs Target)\n6. Typography: Limit to 2 font families. Size hierarchy for headers vs data\n7. White Space: Breathing room between visual elements improves readability\n8. Mobile Responsive: Dashboard should function on tablets and phones" }
+        ]
+    },
+    tools: [
+        { name: "Power BI Desktop", category: "Business Intelligence", description: "Free Microsoft BI tool. Download from powerbi.microsoft.com. Creates interactive reports and dashboards." },
+        { name: "Tableau Public", category: "Data Visualization", description: "Free Tableau version for public dashboards. Download from public.tableau.com." },
+        { name: "Python Plotly Dash", category: "Web Dashboard Framework", description: "Open-source Python framework for building interactive web analytics dashboards. pip install dash plotly." }
+    ],
+    python_code: `import pandas as pd
+import numpy as np
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
+
+print("=" * 60)
+print("EXP 6: INTERACTIVE DASHBOARDS & DATA STORYTELLING")
+print("=" * 60)
+
+# Sales Dataset Simulation
+np.random.seed(42)
+regions = ['East', 'West', 'Central', 'North']
+months = pd.date_range('2024-01', periods=12, freq='M')
+categories = ['Electronics', 'Clothing', 'Furniture', 'Food']
+
+# Monthly Sales by Region
+sales_data = []
+for region in regions:
+    base = {'East': 150, 'West': 300, 'Central': 180, 'North': 220}[region]
+    for month in months:
+        sales = base + np.random.normal(0, 20) + (month.month * 3)
+        sales_data.append({'Region': region, 'Month': month, 'Sales': round(max(sales, 50), 2)})
+df_sales = pd.DataFrame(sales_data)
+
+print("\\n1. SALES DASHBOARD KPIs:")
+print(f"   Total Revenue (2024): \${df_sales['Sales'].sum()*1000:,.0f}")
+print(f"   Best Performing Region: {df_sales.groupby('Region')['Sales'].sum().idxmax()}")
+print(f"   Peak Month: {df_sales.loc[df_sales['Sales'].idxmax(), 'Month'].strftime('%B %Y')}")
+
+print("\\n2. REGIONAL PERFORMANCE BREAKDOWN:")
+regional_summary = df_sales.groupby('Region')['Sales'].agg(['sum','mean','max']).round(2)
+regional_summary.columns = ['Total($K)', 'Avg Monthly($K)', 'Peak($K)']
+print(regional_summary.to_string())
+
+print("\\n3. MONTHLY TREND ANALYSIS:")
+monthly_total = df_sales.groupby('Month')['Sales'].sum().reset_index()
+monthly_total['Growth%'] = monthly_total['Sales'].pct_change() * 100
+print(monthly_total[['Month', 'Sales', 'Growth%']].tail(6).to_string(index=False))
+
+print("\\n4. DATA STORYTELLING INSIGHTS:")
+best_region = df_sales.groupby('Region')['Sales'].sum().idxmax()
+worst_region = df_sales.groupby('Region')['Sales'].sum().idxmin()
+gap = df_sales.groupby('Region')['Sales'].sum().max() - df_sales.groupby('Region')['Sales'].sum().min()
+print(f"   Story: '{best_region} region dominates sales at \${df_sales.groupby('Region')['Sales'].sum().max()*1000:,.0f}.")
+print(f"   The {gap*1000:,.0f} gap vs {worst_region} region suggests targeted expansion opportunity.'")
+
+print("\\n5. POWER BI EQUIVALENT DAX MEASURES:")
+print("   Total Sales = SUM(Sales[Amount])")
+print("   YoY Growth% = ([Current Year] - [Last Year]) / [Last Year]")
+print("   Target Achieved = IF([Total Sales] >= [Target], 'Yes', 'No')")
+
+print("\\nProcess exited with code 0. ✅")`,
+    pretest: [
+        { q: "What is the primary purpose of an interactive dashboard?", options: ["Static report generation", "Real-time exploration and decision-making", "Code execution only", "Machine learning training"], answer: "Real-time exploration and decision-making" },
+        { q: "Which tool is a Microsoft product for business intelligence?", options: ["Tableau", "Power BI", "Seaborn", "Plotly Dash"], answer: "Power BI" },
+        { q: "Data storytelling combines:", options: ["Only charts", "Data + Visualizations + Narrative", "Only statistics", "Programming only"], answer: "Data + Visualizations + Narrative" },
+        { q: "What is a Slicer in Power BI?", options: ["A data cleaning tool", "An interactive filter element", "A chart type", "A DAX formula"], answer: "An interactive filter element" },
+        { q: "Tableau Public is:", options: ["A paid enterprise tool", "A free web-based visualization platform", "A Python library", "A database tool"], answer: "A free web-based visualization platform" }
+    ],
+    posttest: [
+        { q: "Cross-filtering in a dashboard means:", options: ["Filtering only one chart", "Clicking one visual automatically updates others", "Applying multiple datasets", "Removing data"], answer: "Clicking one visual automatically updates others" },
+        { q: "What is DAX used for in Power BI?", options: ["Creating datasets", "Writing custom calculated measures and columns", "Designing chart layouts", "Web scraping"], answer: "Writing custom calculated measures and columns" },
+        { q: "Which principle states the most important KPIs should be at the top-left?", options: ["Color hierarchy", "F-pattern reading hierarchy", "Slicer placement rule", "Chart size rule"], answer: "F-pattern reading hierarchy" },
+        { q: "Tableau's drag-and-drop uses which visual query language?", options: ["SQL", "VizQL", "DAX", "MDX"], answer: "VizQL" },
+        { q: "A drill-down in a dashboard allows:", options: ["Exploring aggregated → detailed data", "Adding new data sources", "Changing chart colors", "Exporting to PDF"], answer: "Exploring aggregated → detailed data" }
+    ],
+    viva: [
+        { q: "1. What is the purpose of using an interactive dashboard?", a: "An interactive dashboard provides real-time visualization of key metrics, allows dynamic filtering and slicing, enables drill-down from summary to detail, supports cross-filtering across multiple charts, and facilitates data-driven decision-making for business stakeholders." },
+        { q: "2. Which visualization type did you find most effective in your dashboard and why?", a: "Clustered column charts are effective for regional comparison as they allow easy visual comparison. Line charts work best for time trends showing seasonality. Cards/KPI tiles are critical for top-line metrics. The most effective is determined by the data type and the business question being answered." },
+        { q: "3. Name any two types of visualizations you can create in Power BI.", a: "1. Clustered Column Chart: Compares values across categories (e.g., Sales by Region). 2. Line Chart: Shows trends over time (e.g., Monthly Revenue). Others include: Card (single KPI), Matrix (cross-tabulation), Donut Chart, Map visual, Scatter Chart." },
+        { q: "4. What is the difference between a report and a dashboard?", a: "A Report contains multiple pages with detailed analysis, typically for analytical users. A Dashboard is a single-page, high-level summary of key metrics for executive decision-makers. Dashboards are usually interactive with live data; reports are more static and detailed." },
+        { q: "5. How did you decide which visual elements to include in your dashboard?", a: "Based on 3 questions: (1) Who is the audience? (Executives need KPIs; Analysts need detail). (2) What business questions need answers? (3) What data is available? Then apply the KISS principle (Keep It Simple, Stupid) — only include visuals that directly support the business question." }
+    ],
+    practice_commands: ["df.groupby('Region')['Sales'].sum()", "df.pivot_table(values='Sales', index='Month', columns='Region')", "df['Growth'] = df['Sales'].pct_change() * 100", "df.groupby(['Category', 'Region'])['Sales'].mean()", "df.plot(kind='bar', figsize=(10,6))"],
+    practice_questions: ["Task 1: Create a Sales dashboard simulation in Python with total revenue KPI, regional breakdown, and monthly trend. Use matplotlib subplots.", "Task 2: Simulate a Power BI DAX measure: Calculate YoY growth percentage for each region.", "Task 3: Build a Tableau-style story: Identify the underperforming region and craft a data narrative recommending intervention.", "Task 4: Implement cross-filter logic in Python: When filtering by 'West' region, update all summary statistics automatically."]
+};
+
+// =====================================================================
+// EXPERIMENT 7: PCA — DIMENSIONALITY REDUCTION
+// =====================================================================
+window.VLAB_DATA["idsl_exp7"] = {
+    id: "idsl_exp7",
+    subject: "ds",
+    title: "Exp 7: Implement Dimensionality Reduction using Principal Component Analysis (PCA) on the Iris Dataset",
+    aim: "To reduce the Iris dataset's original 4-dimensional feature space to 2 dimensions using PCA, enable visualization of the three Iris species in reduced space, and evaluate how much original variance is retained after dimensionality reduction.",
+    intro: {
+        summary: "Dimensionality reduction transforms high-dimensional data into a lower-dimensional representation while retaining as much meaningful information as possible. PCA (Principal Component Analysis) is a linear dimensionality reduction technique that identifies directions (principal components) of maximum variance.",
+        importance: "In modern machine learning, datasets can have thousands of features (dimensions). High dimensionality causes the 'curse of dimensionality' — models overfit, training slows, and visualization becomes impossible. PCA reduces dimensions while preserving the essential information structure.",
+        applications: ["Image compression (reduce pixel dimensions)", "Face recognition (Eigenfaces method)", "Gene expression analysis in bioinformatics", "Natural Language Processing (LSA)", "Noise filtering in sensor data"],
+        outcome: "Students will apply PCA to reduce the Iris/Digits dataset from 4D to 2D, plot species clusters in reduced space, generate scree plots, and calculate cumulative explained variance."
+    },
+    prerequisites: ["Experiment 2: Data Preprocessing (StandardScaler)", "Linear algebra fundamentals (eigenvalues, eigenvectors)", "Python with scikit-learn installed"],
+    outcomes: ["Understand the motivation for dimensionality reduction", "Explain the mathematical basis of PCA (covariance, eigendecomposition)", "Apply StandardScaler before PCA", "Use sklearn.decomposition.PCA to reduce dimensions", "Plot 2D PCA scatter plots with species labels", "Generate scree plots and cumulative variance plots", "Interpret explained variance ratios"],
+    theory: {
+        intro: "PCA is a technique that transforms a dataset into a new coordinate system where the greatest variance lies along the first axis (first principal component), second greatest variance along the second axis, and so on.",
+        cards: [
+            { title: "1. Why Dimensionality Reduction?", content: "Problems with high-dimensional data:\n• Curse of dimensionality: Data becomes sparse, distances lose meaning\n• Computational cost: O(n*d²) grows prohibitively large\n• Overfitting: Too many features → model memorizes noise\n• Visualization: Cannot visualize more than 3D directly\n\nGoals of dimensionality reduction:\n• Remove redundant/correlated features\n• Reduce noise\n• Enable visualization\n• Improve model performance and speed" },
+            { title: "2. PCA — Mathematical Foundation", content: "PCA Algorithm Steps:\n1. Standardize: Subtract mean, divide by std for each feature\n2. Covariance Matrix: C = (1/n-1) × Xᵀ × X\n3. Eigen Decomposition: C = V × Λ × Vᵀ\n   • V = eigenvectors (principal component directions)\n   • Λ = eigenvalues (variance captured by each PC)\n4. Sort: Rank eigenvectors by decreasing eigenvalues\n5. Project: X_reduced = X × V[:, :k] (keep top k PCs)\n\nAlternatively: PCA uses SVD (Singular Value Decomposition): X = U × Σ × Vᵀ" },
+            { title: "3. Iris Dataset Overview", content: "The Iris Dataset (Ronald Fisher, 1936):\n• 150 samples, 4 features, 3 classes\n• Features: sepal_length, sepal_width, petal_length, petal_width\n• Classes: Iris-Setosa, Iris-Versicolor, Iris-Virginica\n• Key insight: petal_length and petal_width are highly correlated (r = 0.96)\n\nPCA on Iris:\n• PC1 captures ~73% of total variance\n• PC2 captures ~23% of total variance\n• PC1 + PC2 = ~96% variance retained in just 2D!" },
+            { title: "4. Explained Variance & Scree Plot", content: "Explained Variance Ratio = eigenvalue_i / sum(all eigenvalues)\nCumulative Variance = running sum of explained variance ratios\n\nScree Plot: Bar chart of explained variance per component.\nLook for the 'elbow' — where adding more components gives diminishing returns.\n\nRule of thumb:\n• Kaiser Rule: Keep components with eigenvalue > 1.0\n• Cumulative Variance Rule: Keep enough components to explain 80-95% variance\n\nFor Iris: 2 components → 96% variance retained → ideal!" },
+            { title: "5. sklearn PCA Implementation", content: "Python Code Pattern:\nfrom sklearn.preprocessing import StandardScaler\nfrom sklearn.decomposition import PCA\n\n# Step 1: Load data\nfrom sklearn.datasets import load_iris\nX, y = load_iris(return_X_y=True)\n\n# Step 2: Standardize (CRITICAL before PCA)\nX_scaled = StandardScaler().fit_transform(X)\n\n# Step 3: Apply PCA\npca = PCA(n_components=2)\nX_pca = pca.fit_transform(X_scaled)\n\n# Step 4: Check variance\nprint(pca.explained_variance_ratio_)  # [0.729, 0.229]\nprint(pca.components_)  # Principal directions (4D → 2D)" }
+        ]
+    },
+    tools: [
+        { name: "scikit-learn", category: "Machine Learning", description: "PCA, StandardScaler, load_iris — sklearn.decomposition.PCA and sklearn.preprocessing.StandardScaler." },
+        { name: "NumPy", category: "Scientific Computing", description: "np.cumsum() — Cumulative explained variance computation." },
+        { name: "Matplotlib", category: "Visualization", description: "plt.scatter() — 2D and 3D PCA projection plots and scree plots." }
+    ],
+    python_code: `import numpy as np
+import pandas as pd
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA
+
+print("=" * 60)
+print("EXP 7: DIMENSIONALITY REDUCTION USING PCA")
+print("=" * 60)
+
+# Load Iris Dataset (simulated)
+np.random.seed(42)
+iris_data = {
+    'sepal_length': np.concatenate([np.random.normal(5.01, 0.35, 50), np.random.normal(5.94, 0.52, 50), np.random.normal(6.59, 0.64, 50)]),
+    'sepal_width':  np.concatenate([np.random.normal(3.43, 0.38, 50), np.random.normal(2.77, 0.31, 50), np.random.normal(2.97, 0.32, 50)]),
+    'petal_length': np.concatenate([np.random.normal(1.46, 0.17, 50), np.random.normal(4.26, 0.47, 50), np.random.normal(5.55, 0.55, 50)]),
+    'petal_width':  np.concatenate([np.random.normal(0.24, 0.11, 50), np.random.normal(1.33, 0.20, 50), np.random.normal(2.03, 0.27, 50)])
+}
+X = pd.DataFrame(iris_data)
+y = np.array([0]*50 + [1]*50 + [2]*50)
+target_names = ['Setosa', 'Versicolor', 'Virginica']
+
+print("\\n1. ORIGINAL DATASET:")
+print(f"   Shape: {X.shape} (150 samples, 4 features)")
+print("\\nFirst 5 rows:")
+print(X.head())
+
+print("\\n2. STANDARDIZATION (critical before PCA):")
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X)
+print("   Before scaling - Sepal Length Mean:", X['sepal_length'].mean().round(3), "Std:", X['sepal_length'].std().round(3))
+print("   After scaling  - Sepal Length Mean:", X_scaled[:,0].mean().round(3), "Std:", X_scaled[:,0].std().round(3))
+
+print("\\n3. PCA — FULL DECOMPOSITION:")
+pca_full = PCA().fit(X_scaled)
+print("   Eigenvalues (Explained Variance):")
+for i, (ev, evr) in enumerate(zip(pca_full.explained_variance_, pca_full.explained_variance_ratio_)):
+    print(f"   PC{i+1}: Eigenvalue = {ev:.4f}, Variance Explained = {evr:.4f} ({evr*100:.2f}%)")
+
+print("\\n4. PCA — 2D REDUCTION:")
+pca_2d = PCA(n_components=2)
+X_pca = pca_2d.fit_transform(X_scaled)
+print(f"   Original dimensions: {X.shape[1]}")
+print(f"   Reduced dimensions:  {X_pca.shape[1]}")
+print(f"   PC1 Variance: {pca_2d.explained_variance_ratio_[0]:.4f} ({pca_2d.explained_variance_ratio_[0]*100:.2f}%)")
+print(f"   PC2 Variance: {pca_2d.explained_variance_ratio_[1]:.4f} ({pca_2d.explained_variance_ratio_[1]*100:.2f}%)")
+print(f"   TOTAL RETAINED: {sum(pca_2d.explained_variance_ratio_):.4f} ({sum(pca_2d.explained_variance_ratio_)*100:.2f}%)")
+
+print("\\n5. PCA PROJECTIONS (first 3 samples per class):")
+for cls, name in enumerate(target_names):
+    idx = np.where(y == cls)[0][:3]
+    for i in idx:
+        print(f"   {name}: PC1 = {X_pca[i,0]:.4f}, PC2 = {X_pca[i,1]:.4f}")
+
+print("\\n6. CLASS SEPARABILITY:")
+for cls, name in enumerate(target_names):
+    idx = y == cls
+    print(f"   {name}: PC1 center = {X_pca[idx,0].mean():.3f}, PC2 center = {X_pca[idx,1].mean():.3f}")
+
+print("\\nConclusion: Setosa is well-separated. Versicolor & Virginica overlap slightly.")
+print("96% of information retained in just 2 dimensions — PCA works excellently on Iris!")
+print("\\nProcess exited with code 0. ✅")`,
+    pretest: [
+        { q: "Why do we standardize data before applying PCA?", options: ["To increase variance", "So features with larger scales don't dominate PCA", "To reduce the number of samples", "To remove outliers"], answer: "So features with larger scales don't dominate PCA" },
+        { q: "The first principal component captures:", options: ["Minimum variance", "Maximum variance direction", "All variance", "50% of variance always"], answer: "Maximum variance direction" },
+        { q: "The Iris dataset has how many original features?", options: ["2", "3", "4", "5"], answer: "4" },
+        { q: "Explained variance ratio tells us:", options: ["Total samples", "Fraction of variance captured by each PC", "Number of classes", "Missing value count"], answer: "Fraction of variance captured by each PC" },
+        { q: "PCA is based on which mathematical concept?", options: ["Gradient descent", "Eigenvalue decomposition of covariance matrix", "Nearest neighbor search", "Decision trees"], answer: "Eigenvalue decomposition of covariance matrix" }
+    ],
+    posttest: [
+        { q: "If PC1 explains 73% and PC2 explains 23%, total retained variance in 2D is:", options: ["73%", "96%", "50%", "100%"], answer: "96%" },
+        { q: "The Kaiser Rule says keep components where eigenvalue is:", options: ["< 0", "> 1.0", "= 0.5", "> total features"], answer: "> 1.0" },
+        { q: "Which sklearn class implements PCA?", options: ["sklearn.linear_model.PCA", "sklearn.decomposition.PCA", "sklearn.preprocessing.PCA", "sklearn.cluster.PCA"], answer: "sklearn.decomposition.PCA" },
+        { q: "A scree plot displays:", options: ["Sample distribution", "Explained variance per principal component", "Confusion matrix", "Cluster centroids"], answer: "Explained variance per principal component" },
+        { q: "Which Iris class is typically well-separated in 2D PCA?", options: ["Virginica", "Versicolor", "Setosa", "All three equally"], answer: "Setosa" }
+    ],
+    viva: [
+        { q: "1. Why standardize data before PCA?", a: "PCA is sensitive to feature scale. Features with larger ranges (e.g., fare $0-512) will dominate over smaller-range features (e.g., age 0-80) in the covariance matrix. StandardScaler ensures all features have mean=0 and std=1, giving equal importance to all features." },
+        { q: "2. What is the difference between explained variance and explained variance ratio?", a: "Explained variance is the raw eigenvalue (absolute variance along each principal component). Explained variance ratio is eigenvalue_i / sum(all eigenvalues) — the fraction of total variance captured. Variance ratio is more interpretable (e.g., 72.96% of total variance explained by PC1)." },
+        { q: "3. How many components should you keep?", a: "Common rules: (1) Cumulative variance rule: Keep enough PCs for 80-95% cumulative variance. (2) Kaiser Rule: Keep PCs with eigenvalue > 1.0. (3) Scree plot elbow: Find the 'elbow' where adding more PCs gives diminishing returns. For Iris: 2 PCs give 96% — ideal." },
+        { q: "4. Why are PCA components orthogonal?", a: "PCA finds principal components as eigenvectors of the covariance matrix. Eigenvectors of a symmetric matrix are always orthogonal (perpendicular). This orthogonality guarantees that principal components capture independent, non-redundant sources of variance in the data." }
+    ],
+    practice_commands: ["StandardScaler().fit_transform(X)", "PCA(n_components=2).fit_transform(X_scaled)", "pca.explained_variance_ratio_", "np.cumsum(pca.explained_variance_ratio_)", "plt.scatter(X_pca[:,0], X_pca[:,1], c=y)"],
+    practice_questions: ["Task 1: Apply PCA to the Iris dataset and plot a 2D scatter plot with different colors for each species. Label the axes as PC1 and PC2.", "Task 2: Generate a Scree Plot showing explained variance for all 4 principal components.", "Task 3: Plot cumulative explained variance and mark the 90% threshold line. How many components are needed?", "Task 4: Apply PCA to reduce to 3D and create a 3D scatter plot using mpl_toolkits.mplot3d."]
+};
+
+// =====================================================================
+// EXPERIMENT 8: DATA PREPROCESSING (ENCODING, SCALING, BINNING)
+// =====================================================================
+window.VLAB_DATA["idsl_exp8"] = {
+    id: "idsl_exp8",
+    subject: "ds",
+    title: "Exp 8: Implementing Data Preprocessing — Categorical Encoding, Feature Scaling, and Binning",
+    aim: "To understand and apply data preprocessing techniques such as categorical encoding, feature scaling, and binning/discretization using a real-world purchase behavior dataset.",
+    intro: {
+        summary: "Data preprocessing is the most critical step in any data science pipeline. Raw data is rarely ready for machine learning — it contains inconsistencies, mixed types, different scales, and missing values. Proper preprocessing directly determines the quality and accuracy of any model built on the data.",
+        importance: "Studies show that data scientists spend 60-80% of their time on data preprocessing. A 2021 Kaggle survey found that data preprocessing was rated as the most important skill for data scientists, above even algorithm knowledge.",
+        applications: ["E-commerce purchase behavior prediction", "Credit risk scoring from customer demographics", "Employee performance prediction from HR data", "Customer churn prediction from subscription data", "Medical diagnosis from patient records"],
+        outcome: "Students will apply Label Encoding, One-Hot Encoding, MinMax scaling, Z-score standardization, and pd.cut() binning to a purchase behavior dataset."
+    },
+    prerequisites: ["Experiment 2: EDA and Data Preprocessing", "Basic Python with pandas and sklearn", "Understanding of categorical vs numerical data types"],
+    outcomes: ["Apply Label Encoding for ordinal categorical variables", "Apply One-Hot Encoding for nominal categorical variables", "Use MinMaxScaler for feature normalization [0,1]", "Use StandardScaler for Z-score standardization", "Implement pd.cut() for binning continuous features", "Validate preprocessing outcomes using descriptive statistics"],
+    theory: {
+        intro: "Machine learning algorithms require numerical input. Raw datasets contain categorical text, varied scales, and continuous features that need discretization. Preprocessing transforms raw data into ML-ready format.",
+        cards: [
+            { title: "1. Categorical Encoding", content: "Converting text categories to numbers for ML algorithms.\n\nLabel Encoding:\n• Assigns integer codes: Male→0, Female→1, Other→2\n• Preserves order — suitable for ORDINAL data (education: Low→0, Med→1, High→2)\n• Problem: Implies numerical order even for nominal data\n• Python: LabelEncoder().fit_transform(df['col'])\n\nOne-Hot Encoding:\n• Creates binary dummy columns for each category\n• No false ordinality — suitable for NOMINAL data (Gender, City)\n• Problem: Creates many columns for high-cardinality features\n• Python: pd.get_dummies(df, columns=['col'], drop_first=True)" },
+            { title: "2. Feature Scaling", content: "Normalizing feature ranges so no single feature dominates due to scale.\n\nMinMax Scaling (Normalization):\n• Formula: x_scaled = (x - min) / (max - min)\n• Output range: [0, 1]\n• Best for: Neural networks, image processing, k-NN\n• Python: MinMaxScaler().fit_transform(X)\n\nZ-Score Standardization:\n• Formula: z = (x - μ) / σ\n• Output: Mean=0, Std=1 (centered)\n• Best for: Linear regression, SVM, PCA, k-means\n• Python: StandardScaler().fit_transform(X)\n\nWhen NOT to scale: Tree-based models (Random Forest, XGBoost) don't need scaling." },
+            { title: "3. Binning/Discretization", content: "Converting continuous numerical data into discrete categorical bins.\n\nEqual-width Binning (pd.cut):\n• Divides range into equal-width intervals\n• Example: Age [0-100] → Young (0-33), Middle (33-66), Old (66-100)\n• Problem: Unequal bin population counts\n• Python: pd.cut(df['age'], bins=3, labels=['Young', 'Middle', 'Old'])\n\nEqual-frequency Binning (pd.qcut):\n• Divides into bins with equal number of samples\n• Better for skewed distributions\n• Python: pd.qcut(df['income'], q=4, labels=['Q1','Q2','Q3','Q4'])\n\nUse cases: Age groups, income brackets, risk tiers." },
+            { title: "4. Purchase Behavior Dataset", content: "Purchase Behavior Dataset features:\n• CustomerID: Unique identifier\n• Age: Continuous (18-70)\n• Gender: Nominal categorical (Male/Female/Other)\n• Education: Ordinal categorical (High School/Bachelor/Master/PhD)\n• AnnualIncome: Continuous (20K-200K)\n• PurchaseCategory: Nominal (Electronics/Clothing/Food/Sports)\n• SpendingScore: Continuous (1-100, customer loyalty metric)\n• PurchaseFrequency: Continuous (1-52 times/year)\n\nURL: https://www.kaggle.com/datasets/durgeshrao9993/purchase-behavior-dataset" }
+        ]
+    },
+    tools: [
+        { name: "scikit-learn", category: "Machine Learning", description: "LabelEncoder, MinMaxScaler, StandardScaler — sklearn.preprocessing module." },
+        { name: "Pandas", category: "Data Analysis", description: "pd.get_dummies(), pd.cut(), pd.qcut() — Encoding and binning utilities." },
+        { name: "NumPy", category: "Scientific Computing", description: "np.random — Dataset simulation and numerical computation." }
+    ],
+    python_code: `import pandas as pd
+import numpy as np
+from sklearn.preprocessing import LabelEncoder, MinMaxScaler, StandardScaler
+
+print("=" * 60)
+print("EXP 8: DATA PREPROCESSING — ENCODING, SCALING, BINNING")
+print("=" * 60)
+
+# Simulate Purchase Behavior Dataset
+np.random.seed(42)
+n = 200
+df = pd.DataFrame({
+    'CustomerID': range(1, n+1),
+    'Age': np.random.randint(18, 71, n),
+    'Gender': np.random.choice(['Male', 'Female', 'Other'], n, p=[0.5, 0.45, 0.05]),
+    'Education': np.random.choice(['High School', 'Bachelor', 'Master', 'PhD'], n, p=[0.2, 0.4, 0.3, 0.1]),
+    'AnnualIncome': np.random.randint(20000, 200001, n),
+    'PurchaseCategory': np.random.choice(['Electronics', 'Clothing', 'Food', 'Sports'], n),
+    'SpendingScore': np.random.randint(1, 101, n),
+    'PurchaseFrequency': np.random.randint(1, 53, n)
+})
+print("\\n1. ORIGINAL DATASET:")
+print(df.head())
+print(f"\\nShape: {df.shape}")
+print("\\nData Types:")
+print(df.dtypes)
+
+# Step 1: Label Encoding (Ordinal)
+print("\\n2. LABEL ENCODING (Education - Ordinal):")
+le = LabelEncoder()
+edu_order = ['High School', 'Bachelor', 'Master', 'PhD']
+df['Education_Encoded'] = df['Education'].map({v: i for i, v in enumerate(edu_order)})
+print(df[['Education', 'Education_Encoded']].drop_duplicates().sort_values('Education_Encoded').to_string(index=False))
+
+# Step 2: One-Hot Encoding (Nominal)
+print("\\n3. ONE-HOT ENCODING (Gender & PurchaseCategory - Nominal):")
+df_encoded = pd.get_dummies(df, columns=['Gender', 'PurchaseCategory'], drop_first=False)
+new_cols = [c for c in df_encoded.columns if 'Gender_' in c or 'PurchaseCategory_' in c]
+print("New dummy columns created:", new_cols)
+print("Shape after encoding:", df_encoded.shape)
+
+# Step 3: MinMax Scaling
+print("\\n4. MINMAX SCALING (SpendingScore → [0,1]):")
+mms = MinMaxScaler()
+df['SpendingScore_Scaled'] = mms.fit_transform(df[['SpendingScore']])
+print(f"   Original  - Min: {df['SpendingScore'].min()}, Max: {df['SpendingScore'].max()}")
+print(f"   Scaled    - Min: {df['SpendingScore_Scaled'].min():.4f}, Max: {df['SpendingScore_Scaled'].max():.4f}")
+
+# Step 4: Z-Score Standardization
+print("\\n5. Z-SCORE STANDARDIZATION (AnnualIncome):")
+ss = StandardScaler()
+df['AnnualIncome_Scaled'] = ss.fit_transform(df[['AnnualIncome']])
+print(f"   Original  - Mean: {df['AnnualIncome'].mean():.0f}, Std: {df['AnnualIncome'].std():.0f}")
+print(f"   Scaled    - Mean: {df['AnnualIncome_Scaled'].mean():.4f}, Std: {df['AnnualIncome_Scaled'].std():.4f}")
+
+# Step 5: Binning
+print("\\n6. BINNING / DISCRETIZATION (Age → Age Groups):")
+df['AgeGroup'] = pd.cut(df['Age'], bins=[17, 30, 45, 60, 71], labels=['Young', 'Middle', 'Senior', 'Elderly'])
+print(df['AgeGroup'].value_counts().to_string())
+
+print("\\n7. QUANTILE BINNING (SpendingScore → Quartile Tiers):")
+df['SpendingTier'] = pd.qcut(df['SpendingScore'], q=4, labels=['Bronze', 'Silver', 'Gold', 'Platinum'])
+print(df['SpendingTier'].value_counts().to_string())
+
+print("\\n8. FINAL PREPROCESSED PREVIEW:")
+print(df[['Age', 'AgeGroup', 'Education', 'Education_Encoded', 'SpendingScore', 'SpendingScore_Scaled', 'SpendingTier']].head())
+print("\\nProcess exited with code 0. ✅")`,
+    pretest: [
+        { q: "Which encoding is most appropriate for ordinal categorical data like Education Level?", options: ["One-Hot Encoding", "Label Encoding", "Binary Encoding", "No encoding needed"], answer: "Label Encoding" },
+        { q: "MinMax scaling transforms features to the range:", options: ["-1 to 1", "0 to 1", "-3 to 3 (Z-scores)", "0 to 100"], answer: "0 to 1" },
+        { q: "pd.cut() is used for:", options: ["Dropping missing values", "Binning continuous data into intervals", "Encoding categories", "Scaling features"], answer: "Binning continuous data into intervals" },
+        { q: "One-Hot Encoding creates a new binary column for:", options: ["Each numerical value", "Each unique category in a column", "Each row in the dataset", "Each missing value"], answer: "Each unique category in a column" },
+        { q: "After StandardScaler, the transformed feature has:", options: ["Min=0, Max=1", "Mean=0, Std=1", "Only positive values", "Integer values only"], answer: "Mean=0, Std=1" }
+    ],
+    posttest: [
+        { q: "The 'drop_first=True' parameter in pd.get_dummies() is used to:", options: ["Remove the first column always", "Avoid dummy variable trap (multicollinearity)", "Drop missing values", "Remove the last dummy column"], answer: "Avoid dummy variable trap (multicollinearity)" },
+        { q: "Which scaling method is preferred when data has outliers?", options: ["MinMaxScaler", "StandardScaler", "RobustScaler (uses IQR)", "No scaling"], answer: "RobustScaler (uses IQR)" },
+        { q: "pd.qcut() differs from pd.cut() because:", options: ["It uses labels", "It creates equal-frequency bins instead of equal-width", "It only works on integers", "It requires sklearn"], answer: "It creates equal-frequency bins instead of equal-width" },
+        { q: "Which ML models DON'T require feature scaling?", options: ["K-NN and SVM", "Linear Regression", "Tree-based models (Random Forest, XGBoost)", "Neural Networks"], answer: "Tree-based models (Random Forest, XGBoost)" },
+        { q: "The formula for MinMax scaling is:", options: ["(x - mean) / std", "(x - min) / (max - min)", "(x - Q1) / IQR", "x / max"], answer: "(x - min) / (max - min)" }
+    ],
+    viva: [
+        { q: "1. Why is data preprocessing important?", a: "ML algorithms require clean, consistent, numerical input. Raw data contains categorical text, varied scales, missing values, and outliers. Preprocessing: (1) Converts categories to numbers (encoding), (2) Normalizes scales (scaling), (3) Groups continuous data (binning), (4) Handles missing values. Quality preprocessing directly determines model accuracy." },
+        { q: "2. When to use Label Encoding vs One-Hot Encoding?", a: "Label Encoding: Use for ORDINAL data where the order matters (Education: HS<Bachelor<Master<PhD → 0,1,2,3). One-Hot Encoding: Use for NOMINAL data where no order exists (Color: Red/Blue/Green → 3 binary columns). Using Label Encoding for nominal data creates false ordinal relationships." },
+        { q: "3. What is the difference between normalization and standardization?", a: "Normalization (MinMax): x_scaled = (x - min) / (max - min). Output range [0,1]. Sensitive to outliers. Standardization (Z-score): z = (x - μ) / σ. Output: mean=0, std=1. Less sensitive to outliers. Use MinMax for neural networks/image data; use StandardScaler for PCA, linear models, SVM." },
+        { q: "4. What problem does the dummy variable trap cause?", a: "If you create dummy columns for all k categories (without dropping one), the columns are perfectly multicollinear — the sum always equals 1. This causes issues in linear models (singular matrix, unstable coefficients). Solution: drop_first=True in pd.get_dummies() removes one reference category." }
+    ],
+    practice_commands: ["pd.get_dummies(df, columns=['Gender'], drop_first=True)", "MinMaxScaler().fit_transform(df[['Income']])", "StandardScaler().fit_transform(df[['Age']])", "pd.cut(df['Age'], bins=4, labels=['Young','Adult','Middle','Senior'])", "pd.qcut(df['Income'], q=5)"],
+    practice_questions: ["Task 1: Apply Label Encoding to the Education column in sorted ordinal order and verify the mapping.", "Task 2: Apply One-Hot Encoding to PurchaseCategory. Count the total number of new columns created.", "Task 3: Compare MinMax and Z-score scaling on AnnualIncome. Which method is more affected by the extreme outlier of $200,000?", "Task 4: Use pd.qcut to create 5 spending tiers. Verify that each tier has approximately equal number of customers."]
+};
+
+// =====================================================================
+// EXPERIMENT 9: LINEAR REGRESSION — USED CAR PRICE PREDICTION
+// =====================================================================
+window.VLAB_DATA["idsl_exp9"] = {
+    id: "idsl_exp9",
+    subject: "ds",
+    title: "Exp 9: Linear Regression — Predicting Used Car Selling Price",
+    aim: "To implement Linear Regression in Python to predict the selling price of used cars based on features such as year, fuel type, transmission, kilometers driven, and owner history using the Kaggle Used Car Price dataset.",
+    intro: {
+        summary: "Linear Regression is the foundational supervised machine learning algorithm for predicting continuous numerical output. It models the linear relationship between one or more independent variables (features) and a dependent variable (target). Used car price prediction is a classic regression problem.",
+        importance: "Regression models are used across industries: real estate price prediction, stock price forecasting, sales forecasting, and demand prediction. Understanding regression is the gateway to more complex ML algorithms like polynomial regression, ridge, lasso, and neural networks.",
+        applications: ["Used car price prediction (Kaggle)", "House price prediction (Boston/Ames dataset)", "Sales forecasting for retail businesses", "Energy consumption prediction for buildings", "Insurance premium calculation"],
+        outcome: "Students will split data into train/test sets, train a LinearRegression model, evaluate using RMSE and R², visualize the regression line, and interpret model coefficients."
+    },
+    prerequisites: ["Experiment 8: Data Preprocessing (Encoding, Scaling)", "Understanding of descriptive statistics and correlation", "Python with scikit-learn, pandas, matplotlib"],
+    outcomes: ["Split data into training and test sets using train_test_split", "Train a LinearRegression model on training data", "Make predictions on test data", "Calculate RMSE (Root Mean Square Error) and R² (R-squared)", "Plot actual vs predicted values scatter chart", "Interpret regression coefficients for each feature"],
+    theory: {
+        intro: "Linear Regression assumes a linear relationship between input features and the output variable. The model learns a set of weights (coefficients) that minimize the error between predictions and actual values.",
+        cards: [
+            { title: "1. Linear Regression Model", content: "Model Equation:\nŷ = β₀ + β₁x₁ + β₂x₂ + ... + βₙxₙ + ε\n\nWhere:\n• ŷ = Predicted selling price\n• β₀ = Intercept (base price)\n• β₁...βₙ = Coefficients (feature weights)\n• x₁...xₙ = Features (year, km_driven, etc.)\n• ε = Residual error\n\nOrdinary Least Squares (OLS): Finds coefficients that minimize Sum of Squared Residuals (SSR = Σ(yᵢ - ŷᵢ)²)" },
+            { title: "2. Train-Test Split", content: "Model Evaluation Strategy:\n1. Split: Randomly divide dataset into training (80%) and test (20%) sets\n2. Train: Fit model on training data only — model learns patterns\n3. Predict: Apply trained model to unseen test data\n4. Evaluate: Compare predictions with actual test labels\n\nPurpose: Test set simulates 'real world' unseen data.\nOverfitting: Model performs well on train but poorly on test → too complex model.\nUnderfitting: Model performs poorly on both → too simple model.\n\nPython: from sklearn.model_selection import train_test_split\nX_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)" },
+            { title: "3. Evaluation Metrics", content: "Regression Evaluation Metrics:\n\n• MAE (Mean Absolute Error): Average of |y - ŷ|\n  - Interpretable in original units\n  - Less sensitive to outliers\n  - from sklearn.metrics import mean_absolute_error\n\n• RMSE (Root Mean Squared Error): √(Mean of (y - ŷ)²)\n  - Penalizes large errors heavily\n  - Same units as target variable\n  - from sklearn.metrics import mean_squared_error\n  - rmse = np.sqrt(mean_squared_error(y_test, y_pred))\n\n• R² (R-squared): 1 - SSR/SST (0 to 1)\n  - Fraction of variance explained by model\n  - R²=1: Perfect model, R²=0: No better than mean\n  - from sklearn.metrics import r2_score" },
+            { title: "4. Used Car Dataset Features", content: "Kaggle Used Car Price Dataset features:\n• name: Car brand and model\n• year: Manufacturing year (2000-2020)\n• selling_price: Target variable (₹ in lakhs)\n• km_driven: Total kilometers driven\n• fuel: Fuel type (Petrol/Diesel/CNG/LPG)\n• seller_type: Individual/Dealer/Trustmark\n• transmission: Manual/Automatic\n• owner: First/Second/Third/Fourth+ owner\n\nFeature Engineering:\n• age = current_year - manufacturing_year\n• High km_driven → lower price (negative coefficient expected)\n• Diesel cars → typically higher price (premium)\n• First owner → higher price than subsequent owners" },
+            { title: "5. Model Interpretation", content: "Interpreting Coefficients:\n• Positive coefficient: Feature increases selling price\n• Negative coefficient: Feature decreases selling price\n• Magnitude: Larger |coefficient| → stronger influence\n\nExample Interpretations:\n• Year: +0.23 → Each newer year adds ₹0.23L to price\n• km_driven: -0.000012 → Each km reduces price by ₹12\n• Transmission_Manual: -1.5 → Manual cars are ₹1.5L cheaper\n• Fuel_Diesel: +2.1 → Diesel adds ₹2.1L premium\n\nLimitations of Simple Linear Regression:\n• Assumes linear relationship (may not always hold)\n• Sensitive to outliers\n• Doesn't capture interaction effects" }
+        ]
+    },
+    tools: [
+        { name: "scikit-learn", category: "Machine Learning", description: "LinearRegression, train_test_split, mean_squared_error, r2_score — sklearn.linear_model and sklearn.metrics." },
+        { name: "Pandas", category: "Data", description: "pd.read_csv(), feature engineering, get_dummies() for encoding." },
+        { name: "Matplotlib", category: "Visualization", description: "Scatter plot of actual vs predicted values, residual plot." }
+    ],
+    python_code: `import pandas as pd
+import numpy as np
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+from sklearn.linear_model import LinearRegression
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+from sklearn.preprocessing import LabelEncoder
+
+print("=" * 60)
+print("EXP 9: LINEAR REGRESSION - USED CAR PRICE PREDICTION")
+print("=" * 60)
+
+# Simulate Used Car Dataset
+np.random.seed(42)
+n = 500
+years = np.random.randint(2000, 2021, n)
+km_driven = np.random.randint(10000, 200001, n)
+fuel = np.random.choice(['Petrol', 'Diesel', 'CNG'], n, p=[0.55, 0.40, 0.05])
+transmission = np.random.choice(['Manual', 'Automatic'], n, p=[0.72, 0.28])
+owner = np.random.choice(['First Owner', 'Second Owner', 'Third Owner'], n, p=[0.55, 0.35, 0.10])
+
+# Generate selling price based on features
+base_price = (years - 2000) * 0.45 + np.random.normal(0, 1.5, n)
+fuel_adj = np.where(fuel == 'Diesel', 2.1, np.where(fuel == 'CNG', -0.5, 0))
+trans_adj = np.where(transmission == 'Automatic', 1.8, 0)
+km_adj = -km_driven * 0.000015
+owner_adj = np.where(owner == 'Second Owner', -1.2, np.where(owner == 'Third Owner', -2.5, 0))
+
+selling_price = np.clip(base_price + fuel_adj + trans_adj + km_adj + owner_adj, 0.5, 25.0)
+
+df = pd.DataFrame({
+    'year': years, 'km_driven': km_driven, 'fuel': fuel,
+    'transmission': transmission, 'owner': owner, 'selling_price': selling_price
+})
+
+print("\\n1. DATASET OVERVIEW:")
+print(f"   Shape: {df.shape}")
+print(df.head())
+
+# Feature Engineering
+df['car_age'] = 2024 - df['year']
+
+# Encoding
+le_owner = LabelEncoder()
+df['owner_encoded'] = le_owner.fit_transform(df['owner'])
+df = pd.get_dummies(df, columns=['fuel', 'transmission'], drop_first=True)
+
+# Define features and target
+feature_cols = ['car_age', 'km_driven', 'owner_encoded'] + [c for c in df.columns if 'fuel_' in c or 'transmission_' in c]
+X = df[feature_cols]
+y = df['selling_price']
+
+print("\\n2. TRAIN-TEST SPLIT (80/20):")
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+print(f"   Training samples: {X_train.shape[0]}")
+print(f"   Testing samples:  {X_test.shape[0]}")
+
+print("\\n3. MODEL TRAINING:")
+model = LinearRegression()
+model.fit(X_train, y_train)
+print("   LinearRegression model trained successfully!")
+print(f"   Intercept (β₀): {model.intercept_:.4f}")
+print("\\n   Feature Coefficients:")
+for col, coef in zip(feature_cols, model.coef_):
+    direction = "↑ increases" if coef > 0 else "↓ decreases"
+    print(f"   {col:30s}: {coef:+.6f}  ({direction} price)")
+
+print("\\n4. PREDICTIONS & EVALUATION:")
+y_pred = model.predict(X_test)
+mae = mean_absolute_error(y_test, y_pred)
+rmse = np.sqrt(mean_squared_error(y_test, y_pred))
+r2 = r2_score(y_test, y_pred)
+print(f"   MAE  (Mean Absolute Error) = {mae:.4f} lakh ₹")
+print(f"   RMSE (Root Mean Sq Error)  = {rmse:.4f} lakh ₹")
+print(f"   R²   (R-squared Score)     = {r2:.4f} ({r2*100:.2f}% variance explained)")
+
+print("\\n5. SAMPLE PREDICTIONS vs ACTUAL:")
+comp = pd.DataFrame({'Actual': y_test.values[:10], 'Predicted': y_pred[:10].round(2), 'Error': (y_test.values[:10] - y_pred[:10]).round(2)})
+print(comp.to_string(index=False))
+
+print("\\nConclusion: Linear Regression successfully predicts used car prices.")
+print(f"Model explains {r2*100:.1f}% of price variability.")
+print("\\nProcess exited with code 0. ✅")`,
+    pretest: [
+        { q: "Linear Regression predicts a:", options: ["Category label", "Probability score", "Continuous numerical value", "Cluster membership"], answer: "Continuous numerical value" },
+        { q: "In Linear Regression, the coefficient β₁ represents:", options: ["The intercept", "The change in y per unit change in x₁", "The error term", "The R² score"], answer: "The change in y per unit change in x₁" },
+        { q: "The purpose of train-test split is:", options: ["Reduce dataset size", "Evaluate model on unseen data", "Remove outliers", "Encode categories"], answer: "Evaluate model on unseen data" },
+        { q: "R² = 0.85 means:", options: ["85% accuracy", "Model explains 85% of variance", "85% training accuracy", "15% error rate"], answer: "Model explains 85% of variance" },
+        { q: "RMSE gives higher penalty for:", options: ["Small errors", "Large errors (outliers)", "Zero errors", "Negative predictions"], answer: "Large errors (outliers)" }
+    ],
+    posttest: [
+        { q: "If km_driven has a negative coefficient, it means:", options: ["More km driven → higher price", "More km driven → lower price", "No effect on price", "Price increases non-linearly"], answer: "More km driven → lower price" },
+        { q: "Overfitting in a regression model is indicated by:", options: ["High train R², low test R²", "Low train R², high test R²", "Equal train and test R²", "RMSE = 0"], answer: "High train R², low test R²" },
+        { q: "OLS (Ordinary Least Squares) minimizes:", options: ["Absolute error sum", "Sum of squared residuals", "R² score", "Number of features"], answer: "Sum of squared residuals" },
+        { q: "Which metric has the same units as the target variable?", options: ["R²", "RMSE (and MAE)", "Silhouette score", "Precision"], answer: "RMSE (and MAE)" },
+        { q: "Feature engineering 'car_age = 2024 - year' is done to:", options: ["Remove the year column", "Create a more interpretable and meaningful feature", "Encode the year categorically", "Apply binning"], answer: "Create a more interpretable and meaningful feature" }
+    ],
+    viva: [
+        { q: "1. What is Linear Regression and how does it work?", a: "Linear Regression finds the best-fit line (or hyperplane in multi-dimensional space) through training data by minimizing the sum of squared residuals (OLS). The model equation is ŷ = β₀ + β₁x₁ + ... + βₙxₙ. The trained coefficients represent the feature weights that best predict the target variable." },
+        { q: "2. What is the difference between MAE and RMSE?", a: "MAE (Mean Absolute Error) is the average of |y - ŷ| — interpretable in original units and less sensitive to outliers. RMSE (Root Mean Squared Error) is √(average (y - ŷ)²) — penalizes large errors more heavily. RMSE > MAE always. Use RMSE when large errors are especially costly; use MAE for robust evaluation." },
+        { q: "3. What does R² represent and what are its limitations?", a: "R² (coefficient of determination) measures the fraction of variance in the target explained by the model. R²=0.85 means 85% of price variability is explained by the features. Limitations: (1) R² always increases with more features regardless of usefulness (use Adjusted R²). (2) R² doesn't tell if the model assumptions are met. (3) High R² doesn't mean causal relationship." },
+        { q: "4. What is overfitting and how to detect it?", a: "Overfitting occurs when the model learns noise in training data and fails to generalize to new data. Detection: Train R² >> Test R² (large gap). Solutions: (1) Reduce model complexity, (2) Regularization (Ridge/Lasso), (3) More training data, (4) Cross-validation." }
+    ],
+    practice_commands: ["train_test_split(X, y, test_size=0.2, random_state=42)", "LinearRegression().fit(X_train, y_train)", "model.predict(X_test)", "r2_score(y_test, y_pred)", "mean_squared_error(y_test, y_pred, squared=False)"],
+    practice_questions: ["Task 1: Train a LinearRegression model to predict used car price. Report MAE, RMSE, and R² scores.", "Task 2: Plot actual vs predicted values as a scatter plot. Draw the ideal y=x line. Identify outlier predictions.", "Task 3: Create a bar chart of feature coefficients. Which feature has the strongest positive and negative impact?", "Task 4: Experiment with train/test split ratios (70/30, 80/20, 90/10). How does the test R² change?"]
+};
+
+// =====================================================================
+// EXPERIMENT 10: LOGISTIC REGRESSION & K-NN
+// =====================================================================
+window.VLAB_DATA["idsl_exp10"] = {
+    id: "idsl_exp10",
+    subject: "ds",
+    title: "Exp 10: Implementing Logistic Regression and K-NN for Employee Attrition Prediction",
+    aim: "To implement Logistic Regression and K-Nearest Neighbors (K-NN) classification algorithms in Python to predict employee attrition (voluntary resignation) using the IBM HR Analytics Employee Attrition dataset.",
+    intro: {
+        summary: "Classification is the most widely applied machine learning task. Logistic Regression and K-NN are two fundamentally different classification approaches — one is a parametric statistical model, the other is a non-parametric instance-based learning algorithm. Employee attrition prediction saves companies millions by identifying at-risk employees before they resign.",
+        importance: "McKinsey estimates that replacing a knowledge worker costs 50-200% of their annual salary. IBM HR Analytics dataset provides realistic HR features to build attrition classifiers. Understanding both approaches equips students to choose the right algorithm for different business problems.",
+        applications: ["Employee attrition prediction (HR analytics)", "Loan default classification (credit scoring)", "Email spam detection", "Medical disease diagnosis (cancer detection)", "Customer churn prediction"],
+        outcome: "Students will preprocess the IBM HR dataset, train Logistic Regression and K-NN classifiers, evaluate using confusion matrix, accuracy, precision, recall, F1-score, and compare both algorithms."
+    },
+    prerequisites: ["Experiment 8: Preprocessing (Encoding, Scaling)", "Experiment 9: Model evaluation concepts (train-test split)", "Basic understanding of classification vs regression"],
+    outcomes: ["Distinguish between classification and regression problems", "Implement Logistic Regression using sklearn", "Implement K-NN classifier with different k values", "Generate and interpret confusion matrix", "Calculate accuracy, precision, recall, and F1-score", "Compare Logistic Regression and K-NN performance"],
+    theory: {
+        intro: "Classification algorithms predict discrete category labels. Logistic Regression uses a sigmoid function to estimate class probabilities. K-NN finds the k nearest neighbors and votes on the class. Both are fundamental building blocks in the data scientist's toolkit.",
+        cards: [
+            { title: "1. Logistic Regression", content: "Despite the name, Logistic Regression is a CLASSIFICATION algorithm:\n\nSigmoid Function: P(y=1|x) = 1 / (1 + e^(-z))\nWhere: z = β₀ + β₁x₁ + ... + βₙxₙ\n\nDecision Rule:\n• If P(y=1) ≥ 0.5 → Class 1 (Attrition = Yes)\n• If P(y=1) < 0.5 → Class 0 (Attrition = No)\n\nTraining: Maximum Likelihood Estimation (MLE)\nKey Assumption: Linear relationship between features and log-odds\n\nPython:\nfrom sklearn.linear_model import LogisticRegression\nmodel = LogisticRegression(max_iter=1000)\nmodel.fit(X_train, y_train)" },
+            { title: "2. K-Nearest Neighbors (K-NN)", content: "K-NN is a non-parametric, instance-based learning algorithm:\n\nAlgorithm:\n1. Store all training data points\n2. For a new test point, calculate distance to all training points\n3. Find k nearest neighbors (smallest distances)\n4. Majority vote → predicted class\n\nDistance Metric: Usually Euclidean = √(Σ(x₁ᵢ - x₂ᵢ)²)\nOther metrics: Manhattan, Minkowski, Cosine\n\nChoosing k:\n• Small k: High variance (overfitting), sensitive to noise\n• Large k: High bias (underfitting), smoother boundaries\n• Rule of thumb: k = √(n_training_samples)\n• Use cross-validation to find optimal k\n\nImportant: Requires feature scaling! (K-NN is distance-based)" },
+            { title: "3. Confusion Matrix & Metrics", content: "For binary classification (Attrition: Yes/No):\n\nConfusion Matrix:\n             Predicted No   Predicted Yes\nActual No  [ TN           |    FP        ]\nActual Yes [ FN           |    TP        ]\n\nMetrics:\n• Accuracy = (TP + TN) / Total\n• Precision = TP / (TP + FP) — 'When we predict Yes, how often correct?'\n• Recall = TP / (TP + FN) — 'Of all actual Yes, how many did we catch?'\n• F1-Score = 2 × (Precision × Recall) / (Precision + Recall)\n\nFor imbalanced data (few attritions): Prefer Recall + F1 over Accuracy!" },
+            { title: "4. IBM HR Analytics Dataset", content: "IBM HR Employee Attrition Dataset:\n• 1470 employees, 35 features\n• Target: Attrition (Yes/No)\n• Class imbalance: ~16% attrition rate\n\nKey Features:\n• Age, MonthlyIncome, JobSatisfaction\n• WorkLifeBalance (1-4 scale)\n• OverTime (Yes/No)\n• YearsAtCompany, YearsSinceLastPromotion\n• DistanceFromHome\n• Department, JobRole, Education\n\nBusiness Insight: High overtime + low job satisfaction + long commute → high attrition risk" },
+            { title: "5. Algorithm Comparison", content: "Logistic Regression vs K-NN:\n\nLogistic Regression:\n✓ Fast training and prediction\n✓ Interpretable coefficients\n✓ Works well with linear decision boundary\n✗ Assumes linear relationship\n\nK-NN:\n✓ No training phase (lazy learner)\n✓ Captures complex, non-linear boundaries\n✓ Intuitive ('similar employees behave similarly')\n✗ Slow prediction (computes all distances)\n✗ Suffers with high-dimensional data\n✗ Requires feature scaling\n\nChoice: Use LogReg for interpretability; K-NN when linear boundary isn't enough." }
+        ]
+    },
+    tools: [
+        { name: "scikit-learn", category: "Machine Learning", description: "LogisticRegression, KNeighborsClassifier, confusion_matrix, classification_report — sklearn core." },
+        { name: "Pandas + NumPy", category: "Data", description: "Dataset loading, preprocessing, and numerical operations." },
+        { name: "Matplotlib + Seaborn", category: "Visualization", description: "Confusion matrix heatmap and accuracy comparison charts." }
+    ],
+    python_code: `import pandas as pd
+import numpy as np
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.linear_model import LogisticRegression
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import LabelEncoder, StandardScaler
+from sklearn.metrics import confusion_matrix, classification_report, accuracy_score
+
+print("=" * 60)
+print("EXP 10: LOGISTIC REGRESSION & K-NN FOR ATTRITION PREDICTION")
+print("=" * 60)
+
+# Simulate IBM HR Dataset
+np.random.seed(42)
+n = 1470
+age = np.random.randint(18, 61, n)
+income = np.random.randint(10000, 200000, n)
+job_sat = np.random.randint(1, 5, n)
+work_life = np.random.randint(1, 5, n)
+overtime = np.random.choice([0, 1], n, p=[0.72, 0.28])
+years_company = np.random.randint(0, 40, n)
+distance = np.random.randint(1, 30, n)
+dept = np.random.choice(['Sales', 'Research', 'HR'], n, p=[0.35, 0.55, 0.10])
+
+# Generate attrition probability (business logic)
+p_attr = (0.3 - job_sat*0.05 - work_life*0.04 + overtime*0.25 
+          + distance*0.008 - income/200000*0.2 + 0.02*np.random.randn(n))
+p_attr = np.clip(p_attr, 0.01, 0.99)
+attrition = (np.random.rand(n) < p_attr).astype(int)
+
+df = pd.DataFrame({
+    'Age': age, 'MonthlyIncome': income, 'JobSatisfaction': job_sat,
+    'WorkLifeBalance': work_life, 'OverTime': overtime,
+    'YearsAtCompany': years_company, 'DistanceFromHome': distance,
+    'Department': dept, 'Attrition': attrition
+})
+
+print(f"\\n1. DATASET OVERVIEW:")
+print(f"   Total Employees: {n}")
+print(f"   Attrition Rate:  {attrition.mean()*100:.1f}% ({attrition.sum()} employees)")
+print(f"   Features: {df.shape[1]-1}")
+
+# Preprocessing
+df_enc = pd.get_dummies(df, columns=['Department'], drop_first=True)
+X = df_enc.drop('Attrition', axis=1)
+y = df_enc['Attrition']
+
+# Scale features
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X)
+
+# Train-Test Split
+X_train, X_test, y_train, y_test = train_test_split(X_scaled, y, test_size=0.2, random_state=42)
+print(f"\\n   Train: {X_train.shape[0]} | Test: {X_test.shape[0]}")
+
+# ---- Logistic Regression ----
+print("\\n2. LOGISTIC REGRESSION:")
+lr = LogisticRegression(max_iter=1000, random_state=42)
+lr.fit(X_train, y_train)
+y_pred_lr = lr.predict(X_test)
+acc_lr = accuracy_score(y_test, y_pred_lr)
+print(f"   Accuracy: {acc_lr:.4f} ({acc_lr*100:.2f}%)")
+print("\\n   Classification Report:")
+print(classification_report(y_test, y_pred_lr, target_names=['No Attrition', 'Attrition']))
+cm_lr = confusion_matrix(y_test, y_pred_lr)
+print(f"   Confusion Matrix:")
+print(f"   TN={cm_lr[0,0]}  FP={cm_lr[0,1]}")
+print(f"   FN={cm_lr[1,0]}  TP={cm_lr[1,1]}")
+
+# ---- K-NN ----
+print("\\n3. K-NEAREST NEIGHBORS (K-NN):")
+best_k, best_acc = 1, 0
+for k in [3, 5, 7, 9, 11, 15]:
+    knn = KNeighborsClassifier(n_neighbors=k)
+    knn.fit(X_train, y_train)
+    acc = accuracy_score(y_test, knn.predict(X_test))
+    print(f"   K={k:2d} → Accuracy: {acc:.4f}")
+    if acc > best_acc:
+        best_acc, best_k = acc, k
+
+knn_best = KNeighborsClassifier(n_neighbors=best_k)
+knn_best.fit(X_train, y_train)
+y_pred_knn = knn_best.predict(X_test)
+print(f"\\n   Best K = {best_k} (Accuracy: {best_acc:.4f})")
+print("\\n   Classification Report:")
+print(classification_report(y_test, y_pred_knn, target_names=['No Attrition', 'Attrition']))
+
+# Comparison
+print("\\n4. MODEL COMPARISON:")
+print(f"   {'Model':<25} {'Accuracy':>10}")
+print(f"   {'-'*35}")
+print(f"   {'Logistic Regression':<25} {acc_lr*100:>9.2f}%")
+print(f"   {'K-NN (K='+str(best_k)+')':<25} {best_acc*100:>9.2f}%")
+winner = 'Logistic Regression' if acc_lr > best_acc else f'K-NN (K={best_k})'
+print(f"\\n   Winner: {winner}")
+print("\\nProcess exited with code 0. ✅")`,
+    pretest: [
+        { q: "Logistic Regression is used for:", options: ["Regression (continuous output)", "Binary or multiclass classification", "Clustering", "Dimensionality reduction"], answer: "Binary or multiclass classification" },
+        { q: "In K-NN, increasing k typically leads to:", options: ["Overfitting", "Smoother decision boundary (lower variance)", "Higher accuracy always", "Faster prediction"], answer: "Smoother decision boundary (lower variance)" },
+        { q: "Employee attrition is a ___ problem:", options: ["Regression", "Clustering", "Classification", "Dimensionality reduction"], answer: "Classification" },
+        { q: "The sigmoid function maps any input to the range:", options: ["-1 to 1", "0 to 1 (probability)", "0 to infinity", "-infinity to infinity"], answer: "0 to 1 (probability)" },
+        { q: "Why must features be scaled before K-NN?", options: ["K-NN requires integers", "K-NN is distance-based — large scale features dominate", "K-NN uses probabilities", "Scikit-learn requires it"], answer: "K-NN is distance-based — large scale features dominate" }
+    ],
+    posttest: [
+        { q: "Precision = TP / (TP + FP) answers the question:", options: ["How many actual positives did we find?", "When we predict attrition, how often are we correct?", "What is overall accuracy?", "How many true negatives?"], answer: "When we predict attrition, how often are we correct?" },
+        { q: "For imbalanced datasets (16% attrition), which metric is most informative?", options: ["Accuracy", "F1-Score (balances precision and recall)", "Precision only", "Number of neighbors"], answer: "F1-Score (balances precision and recall)" },
+        { q: "In a confusion matrix, FN (False Negative) means:", options: ["Predicted attrition, employee stayed", "Predicted staying, employee actually resigned", "Correctly predicted resignation", "Correctly predicted staying"], answer: "Predicted staying, employee actually resigned" },
+        { q: "K-NN is called a 'lazy learner' because:", options: ["It is slow to program", "It has no explicit training phase — memorizes all data", "It uses random weights", "It doesn't require labels"], answer: "It has no explicit training phase — memorizes all data" },
+        { q: "Logistic Regression's decision threshold of 0.5 can be changed to:", options: ["Improve accuracy always", "Trade off precision vs recall based on business needs", "Increase training speed", "Add more features"], answer: "Trade off precision vs recall based on business needs" }
+    ],
+    viva: [
+        { q: "1. What is the difference between classification and regression?", a: "Regression predicts a continuous numerical output (house price, salary). Classification predicts a discrete categorical label (attrition: Yes/No, spam: Yes/No). Algorithms: Regression → LinearRegression, Ridge. Classification → LogisticRegression, K-NN, Decision Trees, SVM. Metrics differ: Regression uses RMSE/R²; Classification uses Accuracy/Precision/Recall/F1." },
+        { q: "2. Explain the sigmoid function in Logistic Regression.", a: "σ(z) = 1 / (1 + e^(-z)), where z = β₀ + β₁x₁ + ... + βₙxₙ. The sigmoid compresses any real number to (0,1), making it interpretable as a probability. P(attrition=Yes) = σ(z). If σ(z) ≥ 0.5 → predict Yes; else → No. The linear part z is called the 'log-odds' or 'logit'." },
+        { q: "3. How do you choose the optimal K in K-NN?", a: "Methods: (1) Try multiple K values and plot error vs K (elbow method). (2) Use cross-validation (K-fold) to find K with best average validation accuracy. (3) Rule of thumb: K ≈ √(n_training). Small K → high variance (overfitting, noisy). Large K → high bias (underfitting, too smooth). For IBM dataset with ~1177 training samples: K ≈ 34, but cross-validation may suggest K=7-15 for best balance." },
+        { q: "4. Why is F1-Score preferred for imbalanced datasets?", a: "Accuracy is misleading for imbalanced data. If 84% of employees don't resign, predicting 'No Attrition' always gives 84% accuracy but catches 0 actual resignations. F1-Score = 2 × (Precision × Recall) / (Precision + Recall) balances both: Precision (are our attrition predictions correct?) and Recall (are we finding all actual attritions?). High F1 means the model is both precise and comprehensive." }
+    ],
+    practice_commands: ["LogisticRegression(max_iter=1000).fit(X_train, y_train)", "KNeighborsClassifier(n_neighbors=7).fit(X_train, y_train)", "confusion_matrix(y_test, y_pred)", "classification_report(y_test, y_pred)", "accuracy_score(y_test, y_pred)"],
+    practice_questions: ["Task 1: Train Logistic Regression on the attrition dataset. Plot the confusion matrix as a heatmap using sns.heatmap().", "Task 2: Test K-NN for K values from 1 to 20. Plot accuracy vs K and identify the optimal K.", "Task 3: Calculate Precision, Recall, and F1-Score for both models. Which model better identifies actual attrition cases?", "Task 4: Identify the top 5 features with highest Logistic Regression coefficients. What are the strongest attrition predictors?"]
+};
+
+
