@@ -22353,6 +22353,14 @@ const initRipSim = (container) => {
                 return;
             }
 
+            if (id === 'idsl_exp3' || (data && (data.simType === 'idsl_exp3' || data.id === 'idsl_exp3'))) {
+                if (typeof window.renderIDSL3Simulation === 'function') {
+                    container.innerHTML = window.renderIDSL3Simulation(data);
+                    setTimeout(() => { if (typeof window.switchIDSL3Stage === 'function') window.switchIDSL3Stage(0); }, 200);
+                }
+                return;
+            }
+
             if (id === 'osi_tcpip' || id === 'osi_tcpip_sim' || id === 'communication_models' || (data && (data.simType === 'osi_tcpip_sim' || data.simType === 'osi_tcpip'))) { initOsiTcpipSim(container); return; }
             if (id === 'udp_tcp' || id === 'udp_tcp_sim' || (data && (data.simType === 'udp_tcp_sim' || data.simType === 'udp_tcp'))) { initUdpTcpSim(container); return; }
             if (id === 'dhcp_config' || id === 'dhcp_config_sim' || (data && (data.simType === 'dhcp_config_sim' || data.simType === 'dhcp_config'))) { initDhcpSim(container); return; }
@@ -22442,7 +22450,12 @@ const initRipSim = (container) => {
             if (data.simType === 'cyber_steganography') { initCyberSteganographySim(container); return; }
             if (data.simType === 'cyber_network_scan') { initCyberNetworkScanSim(container); return; }
 
-            // Fallback: Protocol Canvas Simulator (CSMA/CD / CSMA/CA)
+            // Fallback: Protocol Canvas Simulator (CSMA/CD / CSMA/CA) - Only for Networking
+            const curSub = localStorage.getItem('vlab_current_subject') || 'networking';
+            if (curSub !== 'networking' || (data && data.simType && data.simType.startsWith('idsl_'))) {
+                return;
+            }
+
             if (window.currentSim) {
                 window.currentSim.destroy();
                 window.currentSim = null;
