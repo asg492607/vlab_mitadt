@@ -7583,6 +7583,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 qList.innerHTML = data.practice_questions.map((q, i) => `<div class="theory-card"><strong>Task ${i + 1}:</strong><p>${q}</p></div>`).join('');
             }
 
+            if (typeof window.updateManualAndCertificateViews === 'function') {
+                window.updateManualAndCertificateViews();
+            }
             content.style.opacity = '1';
         }, 200);
 
@@ -8096,10 +8099,110 @@ sys.stderr = io.StringIO()
         if (ed && data && data.python_code) ed.value = data.python_code;
     };
 
+    window.updateManualAndCertificateViews = function() {
+        const labSelect = document.getElementById('labSelect');
+        const labId = labSelect ? labSelect.value : 'idsl_exp1';
+        const stateKey = getStateKey(labId);
+        const state = JSON.parse(localStorage.getItem(`vlab_state_${stateKey}`) || '{}');
+        const isCompleted = !!(state.posttest || state.completed);
+
+        const manualNav = document.querySelector('.nav-item[data-section="manual"]');
+        const certNav = document.querySelector('.nav-item[data-section="certificate"]');
+
+        if (isCompleted) {
+            if (manualNav) manualNav.innerHTML = `<span class="nav-icon">📄</span> Lab Manual PDF ✅`;
+            if (certNav) certNav.innerHTML = `<span class="nav-icon">🏆</span> Completion Certificate ✅`;
+        } else {
+            if (manualNav) manualNav.innerHTML = `<span class="nav-icon">📄</span> Lab Manual PDF 🔒`;
+            if (certNav) certNav.innerHTML = `<span class="nav-icon">🏆</span> Completion Certificate 🔒`;
+        }
+
+        const manualBody = document.getElementById('manual-body');
+        if (manualBody) {
+            if (!isCompleted) {
+                manualBody.innerHTML = `
+                    <div class="theory-card" style="text-align:center; padding:40px; border-left:4px solid #f59e0b;">
+                        <div style="font-size:48px; margin-bottom:12px;">🔒</div>
+                        <h3 style="color:#f59e0b; margin-bottom:8px; font-weight:800;">Lab Manual PDF Generator Locked</h3>
+                        <p style="font-size:13px; color:var(--text-muted); max-width:520px; margin:0 auto 16px auto; line-height:1.6;">
+                            Complete the <b>Post-Test Evaluation</b> to unlock and download your official laboratory report containing your recorded terminal execution logs and preprocessed data statistics.
+                        </p>
+                        <button class="btn-sim primary" onclick="document.querySelector('.nav-item[data-section=\\'posttest\\']').click()">Go to Post-Test Evaluation 📝</button>
+                    </div>
+                `;
+            } else {
+                manualBody.innerHTML = `
+                    <div class="theory-card" style="border-left:4px solid #10b981; margin-bottom:20px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+                            <div>
+                                <h3 style="color:#10b981; margin:0 0 4px 0; font-size:18px; font-weight:800;">📄 Automated Lab Manual PDF Generator</h3>
+                                <p style="font-size:12px; color:var(--text-muted); margin:0;">Generate and download your official, formatted experiment report complete with live terminal logs.</p>
+                            </div>
+                            <button class="btn-sim primary" style="background:#06b6d4; font-weight:800;" onclick="generateIDSLLabReport()">Download Official Lab Manual PDF 📄</button>
+                        </div>
+                    </div>
+
+                    <div class="theory-card" style="margin-bottom:20px;">
+                        <h4 style="color:var(--primary); margin-bottom:12px;">Student Identification & Report Notes</h4>
+                        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:14px; margin-bottom:14px;">
+                            <div>
+                                <label style="font-size:12px; font-weight:700; display:block; margin-bottom:4px;">Full Student Name:</label>
+                                <input type="text" id="report-student-name" class="sim-select" style="width:100%; font-size:13px;" value="${localStorage.getItem('vlab_user_name') || ''}" placeholder="Enter full name...">
+                            </div>
+                            <div>
+                                <label style="font-size:12px; font-weight:700; display:block; margin-bottom:4px;">Roll No / PRN:</label>
+                                <input type="text" id="report-student-roll" class="sim-select" style="width:100%; font-size:13px;" placeholder="e.g. 2024010592">
+                            </div>
+                        </div>
+                        <div>
+                            <label style="font-size:12px; font-weight:700; display:block; margin-bottom:4px;">Student Observation Notes & Key Findings:</label>
+                            <textarea id="report-student-notes" style="width:100%; height:100px; padding:10px; background:var(--bg-page); border:1px solid var(--border); border-radius:8px; color:var(--text-main); font-family:inherit; font-size:13px;" placeholder="Document your key observations during the Titanic dataset preprocessing and measurement scale classification..."></textarea>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        const certBody = document.getElementById('certificate-body');
+        if (certBody) {
+            if (!isCompleted) {
+                certBody.innerHTML = `
+                    <div class="theory-card" style="text-align:center; padding:40px; border-left:4px solid #f59e0b;">
+                        <div style="font-size:48px; margin-bottom:12px;">🔒</div>
+                        <h3 style="color:#f59e0b; margin-bottom:8px; font-weight:800;">Completion Certificate Locked</h3>
+                        <p style="font-size:13px; color:var(--text-muted); max-width:520px; margin:0 auto 16px auto; line-height:1.6;">
+                            Complete the <b>Post-Test Evaluation</b> to claim and download your verified Virtual Laboratory Completion Certificate.
+                        </p>
+                        <button class="btn-sim primary" onclick="document.querySelector('.nav-item[data-section=\\'posttest\\']').click()">Go to Post-Test Evaluation 📝</button>
+                    </div>
+                `;
+            } else {
+                certBody.innerHTML = `
+                    <div class="theory-card" style="border-left:4px solid #10b981; margin-bottom:20px; text-align:center; padding:30px;">
+                        <div style="font-size:48px; margin-bottom:10px;">🏆</div>
+                        <h2 style="color:#10b981; font-weight:800; margin-bottom:6px;">Congratulations! Experiment Completed</h2>
+                        <p style="font-size:13px; color:var(--text-muted); max-width:500px; margin:0 auto 16px auto;">You have successfully satisfied all requirements and assessments for this laboratory experiment.</p>
+                        <button class="btn-sim primary" style="background:#10b981; font-weight:800; padding:12px 24px; font-size:14px;" onclick="document.getElementById('certModal').style.display = 'flex';">View & Print Completion Certificate 📜</button>
+                    </div>
+                `;
+            }
+        }
+    };
+
     window.generateIDSLLabReport = function() {
-        const name = document.getElementById('report-student-name')?.value || 'Student';
+        const name = document.getElementById('report-student-name')?.value || localStorage.getItem('vlab_user_name') || 'Student';
         const roll = document.getElementById('report-student-roll')?.value || 'N/A';
-        const notes = document.getElementById('report-student-notes')?.value || 'The Titanic dataset was loaded and preprocessed successfully.';
+        const notes = document.getElementById('report-student-notes')?.value || 'The Titanic dataset was loaded, explored, and preprocessed successfully.';
+
+        // Capture live terminal output log from Python Sandbox
+        const consoleEl = document.getElementById('idsl-console-output');
+        const consoleOutput = consoleEl ? consoleEl.textContent.trim() : 'No console output logged during sandbox session.';
+
+        const labSelect = document.getElementById('labSelect');
+        const labId = labSelect ? labSelect.value : 'idsl_exp1';
+        const stateKey = getStateKey(labId);
+        const state = JSON.parse(localStorage.getItem(`vlab_state_${stateKey}`) || '{}');
+        const postScore = state.posttestScore !== undefined ? `${state.posttestScore}%` : 'Completed';
 
         const reportWin = window.open('', '_blank');
         reportWin.document.write(`
@@ -8108,52 +8211,59 @@ sys.stderr = io.StringIO()
             <head>
                 <title>Lab Report - IDSL Experiment 1</title>
                 <style>
-                    body { font-family: 'Arial', sans-serif; padding: 40px; color: #1e293b; line-height: 1.6; }
-                    h1 { color: #06b6d4; border-bottom: 2px solid #06b6d4; padding-bottom: 8px; }
-                    h2 { color: #0f172a; margin-top: 24px; }
+                    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 40px; color: #0f172a; line-height: 1.6; background: #fff; }
+                    h1 { color: #0891b2; border-bottom: 3px solid #0891b2; padding-bottom: 8px; font-size: 24px; margin-bottom: 4px; }
+                    .subtitle { font-size: 14px; color: #475569; margin-bottom: 20px; font-weight: 600; }
+                    h2 { color: #1e293b; margin-top: 24px; font-size: 18px; border-left: 4px solid #0891b2; padding-left: 10px; }
                     .meta-table { width: 100%; border-collapse: collapse; margin: 16px 0; }
-                    .meta-table td { padding: 8px; border: 1px solid #cbd5e1; font-size: 14px; }
-                    .meta-table td.header { font-weight: bold; background: #f1f5f9; width: 30%; }
-                    .code-box { background: #0f172a; color: #38bdf8; padding: 16px; border-radius: 8px; font-family: monospace; font-size: 12px; white-space: pre-wrap; }
-                    .btn-print { background: #06b6d4; color: white; border: none; padding: 10px 20px; font-size: 14px; border-radius: 6px; cursor: pointer; margin-bottom: 20px; }
+                    .meta-table td { padding: 10px; border: 1px solid #cbd5e1; font-size: 13px; }
+                    .meta-table td.header { font-weight: bold; background: #f8fafc; width: 30%; color: #334155; }
+                    .code-box { background: #090d16; color: #38bdf8; padding: 16px; border-radius: 8px; font-family: 'JetBrains Mono', Consolas, monospace; font-size: 12px; white-space: pre-wrap; margin-top: 10px; border: 1px solid #1e293b; max-height: 350px; overflow-y: auto; }
+                    .btn-print { background: #0891b2; color: white; border: none; padding: 10px 20px; font-size: 14px; font-weight: bold; border-radius: 6px; cursor: pointer; margin-bottom: 20px; }
                     @media print { .btn-print { display: none; } }
                 </style>
             </head>
             <body>
-                <button class="btn-print" onclick="window.print()">🖨️ Print / Save as PDF</button>
-                <h1>MIT ADT UNIVERSITY - VIRTUAL LAB REPORT</h1>
-                <h2>Introduction to Data Science Lab (IDSL)</h2>
+                <button class="btn-print" onclick="window.print()">🖨️ Print / Save Official PDF Report</button>
+                <h1>MIT ADT UNIVERSITY — VIRTUAL LABORATORY REPORT</h1>
+                <div class="subtitle">School of Computing Technologies • Department of Computer Science & Engineering</div>
+                
                 <table class="meta-table">
-                    <tr><td class="header">Experiment No:</td><td>1</td></tr>
-                    <tr><td class="header">Experiment Title:</td><td>Implementation of Data Science Lifecycle and Data Type Classification Using Titanic Dataset</td></tr>
+                    <tr><td class="header">Subject / Lab Track:</td><td>Introduction to Data Science Lab (IDSL)</td></tr>
+                    <tr><td class="header">Experiment No:</td><td>Experiment 1</td></tr>
+                    <tr><td class="header">Experiment Title:</td><td>Implementation of Data Science Lifecycle & Data Type Classification Using Titanic Dataset</td></tr>
                     <tr><td class="header">Student Name:</td><td>${name}</td></tr>
                     <tr><td class="header">Roll No / PRN:</td><td>${roll}</td></tr>
-                    <tr><td class="header">Date of Submission:</td><td>${new Date().toLocaleDateString()}</td></tr>
+                    <tr><td class="header">Assessment Score:</td><td><b>${postScore}</b></td></tr>
+                    <tr><td class="header">Date of Submission:</td><td>${new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</td></tr>
                 </table>
 
                 <h2>1. Aim & Objectives</h2>
-                <p>To implement the 6 stages of the Data Science Lifecycle on the Titanic dataset, classify variables based on structural and measurement scale types, and perform data preprocessing.</p>
+                <p>To understand and implement the Data Science Lifecycle using the Titanic dataset, classify attributes into structural and measurement scales, and execute data cleaning routines.</p>
 
                 <h2>2. Measurement Scale Classification</h2>
                 <ul>
                     <li><b>Nominal Scale:</b> PassengerId, Survived, Name, Sex, Ticket, Cabin, Embarked</li>
-                    <li><b>Ordinal Scale:</b> Pclass (1st > 2nd > 3rd Class)</li>
-                    <li><b>Ratio Scale:</b> Age, Fare, SibSp, Parch (Numerical with absolute zero)</li>
+                    <li><b>Ordinal Scale:</b> Pclass (1st Class > 2nd Class > 3rd Class)</li>
+                    <li><b>Ratio Scale:</b> Age, Fare, SibSp, Parch (Continuous / discrete numerical with meaningful zero)</li>
                 </ul>
 
-                <h2>3. Data Preprocessing Results</h2>
+                <h2>3. Data Preprocessing & Cleaning Actions</h2>
                 <ul>
-                    <li><b>Age:</b> Imputed missing 177 values with Median (28.0 years).</li>
-                    <li><b>Embarked:</b> Imputed missing 2 values with Mode ('S').</li>
-                    <li><b>Cabin:</b> Dropped sparse column due to 77% missing values.</li>
-                    <li><b>Data Types:</b> Converted 'Sex' and 'Embarked' to categorical dtypes.</li>
+                    <li><b>Age Column:</b> Missing values (177 rows) filled using Median (28.0 years) to handle skewness.</li>
+                    <li><b>Embarked Column:</b> Missing values (2 rows) filled using Mode ('S' - Southampton).</li>
+                    <li><b>Cabin Column:</b> Dropped due to excessive missingness (~77%).</li>
+                    <li><b>Categorical Casting:</b> 'Sex' and 'Embarked' cast to Pandas <code>category</code> dtypes.</li>
                 </ul>
 
-                <h2>4. Student Observations</h2>
-                <p style="background: #f8fafc; padding: 12px; border-left: 4px solid #06b6d4; font-style: italic;">"${notes}"</p>
+                <h2>4. Recorded Python Sandbox Terminal Execution Log</h2>
+                <div class="code-box">${consoleOutput}</div>
 
-                <h2>5. Conclusion</h2>
-                <p>The experiment was completed successfully. All missing values were resolved, categorical variables encoded, and the dataset preprocessed for machine learning models.</p>
+                <h2>5. Student Observations & Synthesis</h2>
+                <p style="background: #f8fafc; padding: 14px; border-left: 4px solid #0891b2; font-style: italic; border-radius: 4px;">"${notes}"</p>
+
+                <h2>6. Verification & Conclusion</h2>
+                <p>The experiment was executed successfully in the Virtual Laboratory environment. All preprocessing steps were verified, and assessment post-test criteria were satisfied.</p>
             </body>
             </html>
         `);
@@ -8265,6 +8375,13 @@ sys.stderr = io.StringIO()
                         const labData = window.VLAB_DATA[labId] || { title: "Custom Experiment" };
                         const currentModData = labData.isMultiModule ? labData.modules[window.currentModuleIndex] : labData;
 
+                        const stateKey = getStateKey(labId);
+                        const state = JSON.parse(localStorage.getItem(`vlab_state_${stateKey}`) || '{}');
+                        state.posttest = true;
+                        state.completed = true;
+                        state.posttestScore = scorePercent;
+                        localStorage.setItem(`vlab_state_${stateKey}`, JSON.stringify(state));
+
                         syncProgress(labId, {
                             posttest: true,
                             posttestScore: scorePercent,
@@ -8272,15 +8389,23 @@ sys.stderr = io.StringIO()
                             feedback: feedback
                         });
 
-                        document.getElementById('cert-user-name').textContent = localStorage.getItem('vlab_user_name') || 'Atharva Gandhi';
-                        document.getElementById('cert-lab-name').textContent = labData.isMultiModule ? `${labData.title} - ${currentModData.title}` : labData.title;
-                        document.getElementById('cert-date').textContent = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+                        if (typeof updateManualAndCertificateViews === 'function') {
+                            updateManualAndCertificateViews();
+                        }
 
-                        // Auto-generate report in background and prompt user
+                        const certUser = document.getElementById('cert-user-name');
+                        if (certUser) certUser.textContent = localStorage.getItem('vlab_user_name') || 'Atharva Gandhi';
+                        const certLab = document.getElementById('cert-lab-name');
+                        if (certLab) certLab.textContent = labData.isMultiModule ? `${labData.title} - ${currentModData.title}` : labData.title;
+                        const certDate = document.getElementById('cert-date');
+                        if (certDate) certDate.textContent = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+
                         console.log("Auto-capturing simulation state for report...");
+                        alert(`🎉 Congratulations! Post-Test Completed with Score: ${scorePercent}%. Lab Manual PDF & Certificate are now UNLOCKED! 🔓`);
 
                         setTimeout(() => {
-                            document.getElementById('certModal').style.display = 'flex';
+                            const certM = document.getElementById('certModal');
+                            if (certM) certM.style.display = 'flex';
                         }, 1000);
                     } else {
                         alert(`Section Complete! Accuracy: ${scorePercent}%`);
@@ -8309,6 +8434,12 @@ sys.stderr = io.StringIO()
 
             // 2. Stop any running simulation engines to free up resources
             if (window.currentSim) { window.currentSim.isRunning = false; }
+
+            if (sid === 'manual' || sid === 'certificate') {
+                if (typeof updateManualAndCertificateViews === 'function') {
+                    updateManualAndCertificateViews();
+                }
+            }
 
 
             // 4. Activate target section
