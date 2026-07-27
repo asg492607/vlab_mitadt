@@ -14727,3 +14727,281 @@ print(df.dtypes)
         }
     ]
 };
+
+window.VLAB_DATA['idsl_exp2'] = {
+    id: "idsl_exp2",
+    simType: "idsl_exp2",
+    title: "Experiment 2: Exploratory Data Analysis and Data Preprocessing Using Python on Titanic Dataset",
+    experiment_info: {
+        number: 2,
+        subject: "Introduction to Data Science Lab (IDSL)",
+        unit: "Unit 1: Fundamentals of Data Science & Preprocessing",
+        difficulty: "Intermediate",
+        duration: "60–90 Minutes",
+        dataset: "Titanic Passenger Dataset (train.csv / Kaggle)",
+        language: "Python 3.x (Pandas, NumPy, Matplotlib, Seaborn, Scikit-Learn)"
+    },
+    aim: "To perform Exploratory Data Analysis (EDA) and apply key data preprocessing techniques including handling missing data, detecting and treating outliers using the IQR method, feature scaling via StandardScaler, and encoding categorical variables using One-Hot Encoding on the Titanic dataset.",
+    prerequisites: [
+        "Python 3.x Basics (Data structures, control flow, functions)",
+        "Pandas & NumPy Data Wrangling Libraries",
+        "Basic Exploratory Data Analysis (EDA) Concepts",
+        "Descriptive Statistics (Mean, Median, Mode, Quartiles, Standard Deviation)"
+    ],
+    outcomes: [
+        "Perform Exploratory Data Analysis (EDA) on real-world tabular datasets using Python.",
+        "Identify missing values and apply appropriate imputation techniques (Median for continuous, Mode for categorical, Column Dropping for sparse attributes).",
+        "Detect outliers visually using Boxplots and treat them using the Interquartile Range (IQR) capping method.",
+        "Apply Z-score standardization (StandardScaler) to numerical features like Age and Fare.",
+        "Encode nominal categorical variables into numerical dummy variables using One-Hot Encoding (pd.get_dummies).",
+        "Validate clean DataFrame outputs ready for machine learning algorithms."
+    ],
+    theory: {
+        intro: "Exploratory Data Analysis (EDA) and Data Preprocessing are indispensable stages in building reliable Machine Learning models. Raw real-world datasets often contain missing entries, noisy outliers, unscaled features, and string categorical attributes that cannot be directly fed into mathematical algorithms.",
+        cards: [
+            {
+                title: "1. Exploratory Data Analysis (EDA)",
+                content: "EDA is the process of analyzing datasets to summarize their main statistical characteristics, discover patterns, spot anomalies, and test hypotheses using summary statistics and visualization tools (histograms, boxplots, heatmaps)."
+            },
+            {
+                title: "2. Missing Value Imputation",
+                content: "• Mean Imputation: Used for normally distributed numerical data.\n• Median Imputation: Preferred for skewed numerical distributions (e.g., Age) because it is robust against outliers.\n• Mode Imputation: Used for categorical attributes (e.g., Embarked) by filling nulls with the most frequent value.\n• Column Dropping: Applied when an attribute has extreme missingness (e.g., Cabin with >75% nulls)."
+            },
+            {
+                title: "3. Outlier Detection & Treatment via IQR Method",
+                content: "An outlier is an observation point that lies an abnormal distance from other values in a random sample.\n• Interquartile Range (IQR) = Q3 (75th percentile) - Q1 (25th percentile)\n• Lower Boundary = Q1 - 1.5 * IQR\n• Upper Boundary = Q3 + 1.5 * IQR\nValues falling beyond boundaries are capped (Winsorization) or removed to prevent model distortion."
+            },
+            {
+                title: "4. Feature Scaling (Standardization vs. Normalization)",
+                content: "• Standardization (Z-score Scaling): Transforms data to have Mean = 0 and Std = 1 using z = (x - μ) / σ. Crucial for algorithms sensitive to variance like SVM, KNN, and Linear Regression.\n• Normalization (Min-Max Scaling): Rescales feature values to a fixed range between 0 and 1 using x_scaled = (x - min) / (max - min)."
+            },
+            {
+                title: "5. Encoding Categorical Variables",
+                content: "• One-Hot Encoding: Converts nominal categorical features (e.g., Sex: male/female, Embarked: S/C/Q) into binary indicator columns (0 or 1), preventing false ordinal assumptions.\n• Label Encoding: Assigns unique integers to ordinal categories where order matters (e.g., Low=0, Medium=1, High=2)."
+            }
+        ]
+    },
+    tools: [
+        {
+            name: "Pandas (DataFrame Operations)",
+            category: "Data Manipulation Library",
+            description: "Enables fast tabular operations, head(), info(), isnull().sum(), fillna(), drop(), and pd.get_dummies() encoding routines.",
+            svg: `<svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="16" fill="#0f172a"/><rect x="20" y="20" width="60" height="60" rx="8" fill="#1e293b" stroke="#06b6d4" stroke-width="2"/><path d="M20 40H80M20 60H80M40 20V80M60 20V80" stroke="#06b6d4" stroke-width="1.5" stroke-dasharray="2 2"/><circle cx="30" cy="30" r="5" fill="#38bdf8"/><circle cx="50" cy="50" r="5" fill="#34d399"/><circle cx="70" cy="70" r="5" fill="#f43f5e"/></svg>`
+        },
+        {
+            name: "NumPy & Scikit-Learn Preprocessing",
+            category: "Scientific & Scaling Engine",
+            description: "Provides np.where() array capping and StandardScaler / MinMaxScaler classes for Z-score feature transformation.",
+            svg: `<svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="16" fill="#0f172a"/><path d="M30 25L50 15L70 25L70 45L50 55L30 45Z" stroke="#4f46e5" stroke-width="3" fill="#4f46e520"/><path d="M30 45L50 55L70 45L70 65L50 75L30 65Z" stroke="#818cf8" stroke-width="3" fill="#818cf820"/><path d="M50 15V75M30 25L70 45M70 25L30 45" stroke="#a5b4fc" stroke-width="1.5"/></svg>`
+        },
+        {
+            name: "Matplotlib & Seaborn Visualizer",
+            category: "Exploratory Plotting Package",
+            description: "Generates boxplots for outlier detection, correlation heatmaps, histogram distributions, and countplots.",
+            svg: `<svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="16" fill="#0f172a"/><rect x="25" y="55" width="10" height="25" rx="3" fill="#f43f5e"/><rect x="40" y="35" width="10" height="45" rx="3" fill="#10b981"/><rect x="55" y="45" width="10" height="35" rx="3" fill="#38bdf8"/><rect x="70" y="25" width="10" height="55" rx="3" fill="#f59e0b"/><path d="M20 78H80" stroke="#475569" stroke-width="2"/></svg>`
+        },
+        {
+            name: "Pyodide WASM Kernel (Python 3.11)",
+            category: "Client-Side Execution Kernel",
+            description: "Executes real Python 3.11 CPython code locally inside the web browser with Pandas and NumPy preloaded.",
+            svg: `<svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="16" fill="#0f172a"/><path d="M48 20C32 20 33 27 33 27L33 34H49V36H27C27 36 20 36 20 52C20 68 25 67 25 67H30V60C30 52 38 52 38 52H54C54 52 61 52 61 44V28C61 28 62 20 48 20Z" fill="#38bdf8"/><path d="M52 80C68 80 67 73 67 73L67 66H51V64H73C73 64 80 64 80 48C80 32 75 33 75 33H70V40C70 48 62 48 62 48H46C46 46 39 48 39 56V72C39 72 38 80 52 80Z" fill="#facc15"/><circle cx="42" cy="27" r="3" fill="#0f172a"/><circle cx="58" cy="73" r="3" fill="#0f172a"/></svg>`
+        }
+    ],
+    dataset_info: {
+        name: "Kaggle Titanic Dataset (train.csv)",
+        source: "Kaggle Dataset Archive",
+        records: 891,
+        columns: 12,
+        features: [
+            { col: "PassengerId", desc: "Unique identifier for each passenger", pandas_type: "int64", missing: 0 },
+            { col: "Survived", desc: "Survival (0 = No, 1 = Yes)", pandas_type: "int64", missing: 0 },
+            { col: "Pclass", desc: "Ticket class (1 = 1st, 2 = 2nd, 3 = 3rd)", pandas_type: "int64", missing: 0 },
+            { col: "Name", desc: "Name of the passenger", pandas_type: "object", missing: 0 },
+            { col: "Sex", desc: "Gender (male / female)", pandas_type: "object", missing: 0 },
+            { col: "Age", desc: "Age in years", pandas_type: "float64", missing: 177 },
+            { col: "SibSp", desc: "# of siblings/spouses aboard", pandas_type: "int64", missing: 0 },
+            { col: "Parch", desc: "# of parents/children aboard", pandas_type: "int64", missing: 0 },
+            { col: "Ticket", desc: "Ticket number", pandas_type: "object", missing: 0 },
+            { col: "Fare", desc: "Passenger fare price", pandas_type: "float64", missing: 0 },
+            { col: "Cabin", desc: "Cabin number", pandas_type: "object", missing: 687 },
+            { col: "Embarked", desc: "Port of Embarkation (C = Cherbourg, Q = Queenstown, S = Southampton)", pandas_type: "object", missing: 2 }
+        ],
+        titanic_rows: [
+            { PassengerId: 1, Survived: 0, Pclass: 3, Name: "Braund, Mr. Owen Harris", Sex: "male", Age: 22.0, SibSp: 1, Parch: 0, Ticket: "A/5 21171", Fare: 7.2500, Cabin: null, Embarked: "S" },
+            { PassengerId: 2, Survived: 1, Pclass: 1, Name: "Cumings, Mrs. John Bradley (Florence Briggs Thayer)", Sex: "female", Age: 38.0, SibSp: 1, Parch: 0, Ticket: "PC 17599", Fare: 71.2833, Cabin: "C85", Embarked: "C" },
+            { PassengerId: 3, Survived: 1, Pclass: 3, Name: "Heikkinen, Miss. Laina", Sex: "female", Age: 26.0, SibSp: 0, Parch: 0, Ticket: "STON/O2. 3101282", Fare: 7.9250, Cabin: null, Embarked: "S" },
+            { PassengerId: 4, Survived: 1, Pclass: 1, Name: "Futrelle, Mrs. Jacques Heath (Lily May Peel)", Sex: "female", Age: 35.0, SibSp: 1, Parch: 0, Ticket: "113803", Fare: 53.1000, Cabin: "C123", Embarked: "S" },
+            { PassengerId: 5, Survived: 0, Pclass: 3, Name: "Allen, Mr. William Henry", Sex: "male", Age: 35.0, SibSp: 0, Parch: 0, Ticket: "373450", Fare: 8.0500, Cabin: null, Embarked: "S" },
+            { PassengerId: 6, Survived: 0, Pclass: 3, Name: "Moran, Mr. James", Sex: "male", Age: null, SibSp: 0, Parch: 0, Ticket: "330877", Fare: 8.4583, Cabin: null, Embarked: "Q" },
+            { PassengerId: 7, Survived: 0, Pclass: 1, Name: "McCarthy, Mr. Timothy J", Sex: "male", Age: 54.0, SibSp: 0, Parch: 0, Ticket: "17463", Fare: 51.8625, Cabin: "E46", Embarked: "S" },
+            { PassengerId: 8, Survived: 0, Pclass: 3, Name: "Palsson, Master. Gosta Leonard", Sex: "male", Age: 2.0, SibSp: 3, Parch: 1, Ticket: "349909", Fare: 21.0750, Cabin: null, Embarked: "S" },
+            { PassengerId: 9, Survived: 1, Pclass: 3, Name: "Johnson, Mrs. Oscar W (Elisabeth Vilhelmina Berg)", Sex: "female", Age: 27.0, SibSp: 0, Parch: 2, Ticket: "347742", Fare: 11.1333, Cabin: null, Embarked: "S" },
+            { PassengerId: 10, Survived: 1, Pclass: 2, Name: "Nasser, Mrs. Nicholas (Adele Achem)", Sex: "female", Age: 14.0, SibSp: 1, Parch: 0, Ticket: "237736", Fare: 30.0708, Cabin: null, Embarked: "C" }
+        ]
+    },
+    procedure: [
+        "Step 1: Import necessary Python libraries (pandas, numpy, matplotlib, seaborn, sklearn).",
+        "Step 2: Load the Titanic dataset (train.csv / Titanic.csv) into a pandas DataFrame.",
+        "Step 3: Display the first few rows (df.head()) and basic structure (df.info(), df.shape).",
+        "Step 4: Identify missing values using df.isnull().sum() and handle them using median/mode imputation or column dropping.",
+        "Step 5: Visualize outliers using Boxplots and treat them using the IQR method (capping/removal).",
+        "Step 6: Apply standardization (StandardScaler Z-score) to Age and Fare numerical features.",
+        "Step 7: Encode categorical variables using one-hot encoding (pd.get_dummies) for nominal features (Sex, Embarked).",
+        "Step 8: Display the final cleaned DataFrame and validate its shape and structure for ML modeling."
+    ],
+    python_code: `# Importing all required libraries
+import pandas as pd                    # For data manipulation
+import numpy as np                     # For numerical operations
+import matplotlib.pyplot as plt        # For visualization
+import seaborn as sns                  # For better-looking plots
+from sklearn.preprocessing import MinMaxScaler, StandardScaler, LabelEncoder
+
+# 1. Load Dataset
+df = pd.read_csv("Titanic.csv")  # Load Titanic dataset
+print("Dataset Loaded Successfully\\n")
+
+# Display first few rows
+print("First 5 rows:")
+print(df.head())
+
+# Shape of dataset (rows, columns)
+print("\\nShape of dataset:", df.shape)
+
+# Data types and non-null counts
+print("\\nInfo about dataset:")
+print(df.info())
+
+# 2. Handling Missing Data
+print("\\nMissing values in each column:")
+print(df.isnull().sum())
+
+# Filling missing 'Age' with median
+df['Age'].fillna(df['Age'].median(), inplace=True)
+
+# Filling missing 'Embarked' with mode
+df['Embarked'].fillna(df['Embarked'].mode()[0], inplace=True)
+
+# Drop 'Cabin' due to high % of missing values
+df.drop('Cabin', axis=1, inplace=True)
+
+# Check again for missing values
+print("\\nMissing values after handling:")
+print(df.isnull().sum())
+
+# 3. Detecting and Handling Outliers
+Q1 = df['Fare'].quantile(0.25)
+Q3 = df['Fare'].quantile(0.75)
+IQR = Q3 - Q1
+
+# Define outlier boundaries
+lower_bound = Q1 - 1.5 * IQR
+upper_bound = Q3 + 1.5 * IQR
+
+# Cap Fare outliers
+df['Fare'] = np.where(df['Fare'] > upper_bound, upper_bound,
+                      np.where(df['Fare'] < lower_bound, lower_bound, df['Fare']))
+
+print("\\nFare outliers capped using IQR method.")
+
+# 4. Feature Scaling
+scaler = StandardScaler()
+df[['Age', 'Fare']] = scaler.fit_transform(df[['Age', 'Fare']])
+
+print("\\nScaled Age and Fare (first 5 rows):")
+print(df[['Age', 'Fare']].head())
+
+# 5. Encoding Categorical Variables
+df = pd.get_dummies(df, columns=['Sex', 'Embarked'], drop_first=True)
+
+print("\\nData after encoding:")
+print(df.head())
+print("\\nFinal dataset shape:", df.shape)`,
+    pretest: [
+        {
+            q: "What is the primary purpose of Exploratory Data Analysis (EDA)?",
+            options: ["To deploy models to production web servers", "To summarize dataset characteristics, spot anomalies, and understand underlying distributions", "To write database schemas", "To compile Python bytecode"],
+            answer: 1,
+            explanation: "EDA helps understand dataset structure, detect outliers, check missing values, and guide preprocessing decisions."
+        },
+        {
+            q: "Why is the Median preferred over the Mean for imputing missing values in a skewed feature like 'Age'?",
+            options: ["Mean cannot handle decimal values", "Median is robust against extreme outliers and distribution skewness", "Median always equals zero", "Pandas fillna() only supports median"],
+            answer: 1,
+            explanation: "The median represents the 50th percentile and is not pulled by extreme values, unlike the mean."
+        },
+        {
+            q: "In the IQR method for outlier detection, what is the formula for the Upper Boundary (Upper Fence)?",
+            options: ["Q1 - 1.5 * IQR", "Q3 + 1.5 * IQR", "Mean + 2 * Std", "Median + IQR"],
+            answer: 1,
+            explanation: "Upper Boundary = Q3 + 1.5 * IQR. Values above this limit are classified as outliers."
+        },
+        {
+            q: "What is the result of applying Z-score Standardization (StandardScaler) on a numerical feature?",
+            options: ["Rescales values strictly between 0 and 1", "Transforms feature distribution to have Mean = 0 and Standard Deviation = 1", "Converts numbers into text labels", "Removes all negative numbers"],
+            answer: 1,
+            explanation: "StandardScaler transforms data to z = (x - μ) / σ, yielding Mean = 0 and Std = 1."
+        }
+    ],
+    posttest: [
+        {
+            q: "Why do we apply One-Hot Encoding to nominal features like 'Sex' (male/female) and 'Embarked' (S/C/Q)?",
+            options: ["To reduce the number of dataset rows", "To convert string categories into binary indicator vectors without introducing false numerical order", "To double the memory consumption", "To calculate standard deviation"],
+            answer: 1,
+            explanation: "One-Hot Encoding creates binary 0/1 columns, avoiding false ordinal relationships (e.g. Female=0, Male=1 implying Male > Female)."
+        },
+        {
+            q: "What happens if feature scaling is NOT applied before training distance-based algorithms like KNN or SVM?",
+            options: ["Features with larger numerical ranges (e.g., Fare: 0-512) will dominate distance calculations over smaller ranges (e.g., Age: 0-80)", "The dataset will be deleted", "Model training speed increases by 1000%", "Missing values will automatically be filled"],
+            answer: 0,
+            explanation: "Unscaled high-magnitude features disproportionately dominate distance metrics, skewing model learning."
+        },
+        {
+            q: "When should Label Encoding be used instead of One-Hot Encoding?",
+            options: ["When features are nominal with no order", "When features are ordinal with an inherent logical ranking (e.g., Low, Medium, High)", "When features contain missing null values", "When features are continuous floating-point numbers"],
+            answer: 1,
+            explanation: "Label Encoding preserves ordinal hierarchy by mapping ordered categories to integers (0, 1, 2)."
+        },
+        {
+            q: "Which technique caps extreme values at boundary limits rather than removing the entire data row?",
+            options: ["Winsorization / Outlier Capping", "Min-Max Scaling", "Mean Imputation", "Dropna()"],
+            answer: 0,
+            explanation: "Capping (Winsorization) replaces extreme values exceeding fences with the boundary value itself, preserving row count."
+        },
+        {
+            q: "If a column like 'Cabin' has over 75% missing values, what is the best preprocessing practice?",
+            options: ["Fill all nulls with zero", "Drop the sparse column from the dataset", "Duplicate the column 3 times", "Convert to float"],
+            answer: 1,
+            explanation: "Columns with excessive missingness (>70-80%) inject too much artificial noise if imputed, so dropping them is standard practice."
+        }
+    ],
+    viva: [
+        {
+            q: "1. What is EDA and why is it important?",
+            a: "Exploratory Data Analysis (EDA) is the preliminary process of analyzing datasets to summarize their statistical characteristics, discover hidden patterns, spot anomalies, and visualize feature relationships. It is crucial because it informs data cleaning, feature engineering, and model selection decisions."
+        },
+        {
+            q: "2. Why is median better than mean for handling missing values in age?",
+            a: "The 'Age' column often exhibits a skewed distribution with potential outliers (e.g. infants or elderly passengers). The Mean is sensitive to extreme values and shifts the center, whereas the Median represents the exact 50th percentile and is robust against outlier distortion."
+        },
+        {
+            q: "3. Explain the IQR method for outlier detection.",
+            a: "The Interquartile Range (IQR) measures statistical dispersion between the 25th percentile (Q1) and 75th percentile (Q3): IQR = Q3 - Q1. Outlier boundaries are defined as Lower Fence = Q1 - 1.5 * IQR and Upper Fence = Q3 + 1.5 * IQR. Values outside these fences are identified as outliers."
+        },
+        {
+            q: "4. What is the difference between standardization and normalization?",
+            a: "Standardization (Z-score) rescales data to have a Mean of 0 and Standard Deviation of 1 using z = (x - μ) / σ (unbounded range). Normalization (Min-Max) rescales data to a fixed range between 0 and 1 using x_scaled = (x - min) / (max - min)."
+        },
+        {
+            q: "5. Why do we use one-hot encoding?",
+            a: "One-Hot Encoding converts nominal categorical variables (like Sex: male/female or Embarked: S/C/Q) into separate binary columns (0 or 1). This prevents machine learning models from assuming a non-existent numerical order or priority among categories."
+        },
+        {
+            q: "6. What happens if we don’t scale features before applying ML algorithms?",
+            a: "Distance-based algorithms (like KNN, SVM, K-Means) and gradient descent-based models (like Linear/Logistic Regression) will be biased toward features with larger numerical magnitudes (e.g. Fare: $0-$512 vs. Age: 0-80 years), leading to poor model performance."
+        },
+        {
+            q: "7. When should we use label encoding?",
+            a: "Label Encoding should be used when the categorical feature is ORDINAL, meaning its categories possess a natural, logical order or rank (e.g. Pclass: 1st=1, 2nd=2, 3rd=3 or Education: High School=0, Bachelors=1, PhD=2)."
+        }
+    ]
+};

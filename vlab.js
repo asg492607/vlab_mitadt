@@ -7573,6 +7573,16 @@ document.addEventListener('DOMContentLoaded', async () => {
                 setTimeout(() => { if (typeof window.switchDSLStage === 'function') window.switchDSLStage(0); }, 300);
             }
 
+            // Inject IDSL Exp 2 Simulation & Sandbox Engine
+            if (id === 'idsl_exp2' || (data && data.id === 'idsl_exp2')) {
+                if (typeof window.renderIDSL2Simulation === 'function') {
+                    setBody('section-simulation', window.renderIDSL2Simulation(data));
+                }
+                if (typeof window.renderIDSL2Sandbox === 'function') {
+                    setBody('section-experiment', window.renderIDSL2Sandbox(data));
+                }
+            }
+
             // Inject Practice Tasks
             const cmdList = document.getElementById('practice-commands-list');
             const qList = document.getElementById('practice-questions-list');
@@ -7832,6 +7842,513 @@ document.addEventListener('DOMContentLoaded', async () => {
             </div>
         `;
         return html;
+    };
+
+    // ========================================================
+    // DATA SCIENCE LAB (IDSL) EXP 2 PREPROCESSING SUITE
+    // ========================================================
+    window.renderIDSL2Simulation = function(data) {
+        const ds = data.dataset_info || {};
+        const rows = ds.titanic_rows || [];
+
+        return `
+            <!-- 1. Dataset Explorer -->
+            <div class="theory-card" style="border-left: 4px solid #06b6d4; margin-bottom: 24px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:14px;">
+                    <div>
+                        <h3 style="color:#06b6d4; margin:0 0 4px 0; font-size:18px; font-weight:800;">📊 Interactive Dataset Explorer (Titanic.csv)</h3>
+                        <p style="font-size:12px; color:var(--text-muted); margin:0;">Inspect raw dataset shape, missing value summary, statistics, and column data types.</p>
+                    </div>
+                    <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                        <button class="btn-sim" style="font-size:11px; padding:6px 12px;" onclick="viewIDSL2DataView('raw')">Raw Preview</button>
+                        <button class="btn-sim" style="font-size:11px; padding:6px 12px;" onclick="viewIDSL2DataView('info')">Info & Types</button>
+                        <button class="btn-sim" style="font-size:11px; padding:6px 12px;" onclick="viewIDSL2DataView('describe')">Summary Stats</button>
+                        <button class="btn-sim" style="font-size:11px; padding:6px 12px;" onclick="viewIDSL2DataView('missing')">Missing Values</button>
+                    </div>
+                </div>
+                <div id="idsl2-data-display-container" style="overflow-x:auto; background:var(--bg-page); border:1px solid var(--border); border-radius:10px; padding:12px; font-size:12px;">
+                    <table style="width:100%; border-collapse:collapse; text-align:left;">
+                        <thead>
+                            <tr style="border-bottom:2px solid var(--border); color:var(--primary); font-size:12px;">
+                                <th style="padding:8px;">PassengerId</th>
+                                <th style="padding:8px;">Survived</th>
+                                <th style="padding:8px;">Pclass</th>
+                                <th style="padding:8px;">Name</th>
+                                <th style="padding:8px;">Sex</th>
+                                <th style="padding:8px;">Age</th>
+                                <th style="padding:8px;">SibSp</th>
+                                <th style="padding:8px;">Parch</th>
+                                <th style="padding:8px;">Fare</th>
+                                <th style="padding:8px;">Cabin</th>
+                                <th style="padding:8px;">Embarked</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${rows.map(r => `
+                                <tr style="border-bottom:1px solid var(--border);">
+                                    <td style="padding:6px 8px;">${r.PassengerId}</td>
+                                    <td style="padding:6px 8px;"><span style="background:${r.Survived ? '#10b98120':'#ef444420'}; color:${r.Survived ? '#10b981':'#ef4444'}; padding:2px 6px; border-radius:8px; font-weight:700;">${r.Survived}</span></td>
+                                    <td style="padding:6px 8px;">${r.Pclass}</td>
+                                    <td style="padding:6px 8px; font-weight:600;">${r.Name}</td>
+                                    <td style="padding:6px 8px;">${r.Sex}</td>
+                                    <td style="padding:6px 8px; ${r.Age === null ? 'color:#ef4444; font-weight:700;':''}">${r.Age === null ? 'NaN (Missing)' : r.Age}</td>
+                                    <td style="padding:6px 8px;">${r.SibSp}</td>
+                                    <td style="padding:6px 8px;">${r.Parch}</td>
+                                    <td style="padding:6px 8px;">$${r.Fare}</td>
+                                    <td style="padding:6px 8px; ${r.Cabin === null ? 'color:#ef4444; font-weight:700;':''}">${r.Cabin === null ? 'NaN' : r.Cabin}</td>
+                                    <td style="padding:6px 8px;">${r.Embarked || 'NaN'}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 2. Missing Value Imputation Simulator -->
+            <div class="theory-card" style="border-left: 4px solid #10b981; margin-bottom: 24px;">
+                <h3 style="color:#10b981; margin:0 0 6px 0; font-size:18px; font-weight:800;">🧹 1. Missing Value Imputation Simulator</h3>
+                <p style="font-size:12px; color:var(--text-muted); margin-bottom:16px;">Select a column with missing data and apply mean, median, mode, or column drop imputation strategy.</p>
+                <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap:16px;">
+                    <div style="background:var(--bg-page); padding:16px; border-radius:12px; border:1px solid var(--border);">
+                        <label style="font-size:12px; font-weight:700; color:var(--primary); display:block; margin-bottom:6px;">Select Target Column:</label>
+                        <select id="idsl2-missing-col" class="sim-select" style="width:100%; font-size:12px; margin-bottom:12px;" onchange="updateIDSL2MissingSim()">
+                            <option value="Age">Age (177 missing - 20% nulls)</option>
+                            <option value="Embarked">Embarked (2 missing - 0.2% nulls)</option>
+                            <option value="Cabin">Cabin (687 missing - 77% nulls)</option>
+                        </select>
+
+                        <label style="font-size:12px; font-weight:700; color:var(--primary); display:block; margin-bottom:6px;">Imputation Strategy:</label>
+                        <select id="idsl2-missing-strat" class="sim-select" style="width:100%; font-size:12px; margin-bottom:14px;" onchange="updateIDSL2MissingSim()">
+                            <option value="median">Median Imputation (28.0) [Recommended for Age]</option>
+                            <option value="mean">Mean Imputation (29.7)</option>
+                            <option value="mode">Mode Imputation ('S' - Southampton) [Recommended for Embarked]</option>
+                            <option value="drop_col">Drop Column completely [Recommended for Cabin]</option>
+                            <option value="drop_row">Drop Rows with Missing Values</option>
+                            <option value="none">Keep Raw Missing (NaN)</option>
+                        </select>
+                        <button class="btn-sim primary" style="width:100%; background:#10b981; font-weight:800;" onclick="updateIDSL2MissingSim()">Apply Imputation 🚀</button>
+                    </div>
+                    <div style="background:var(--bg-page); padding:16px; border-radius:12px; border:1px solid var(--border);" id="idsl2-missing-results">
+                        <div style="font-weight:800; color:#10b981; margin-bottom:8px;">Imputation Outcome Preview:</div>
+                        <div style="font-size:12px; line-height:1.7;">
+                            <div><b>Column:</b> Age</div>
+                            <div><b>Initial Nulls:</b> 177 / 891 (20.0%)</div>
+                            <div><b>Applied Strategy:</b> Median (28.0)</div>
+                            <div><b>Remaining Nulls:</b> <span style="color:#10b981; font-weight:800;">0 (100% Cleaned) ✅</span></div>
+                            <div style="margin-top:8px; padding:8px; background:#10b98115; border-radius:6px; color:#10b981; font-weight:700;">
+                                ✔ Skewness preserved! Median imputation prevented outlier corruption.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. Outlier Detection Simulator & IQR Visualizer -->
+            <div class="theory-card" style="border-left: 4px solid #f59e0b; margin-bottom: 24px;">
+                <h3 style="color:#f59e0b; margin:0 0 6px 0; font-size:18px; font-weight:800;">📈 2. Outlier Detection Simulator & IQR Visualizer</h3>
+                <p style="font-size:12px; color:var(--text-muted); margin-bottom:16px;">Detect numerical outliers using the Interquartile Range (IQR) method and test capping vs. removal treatment.</p>
+                <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:16px;">
+                    <div style="background:var(--bg-page); padding:16px; border-radius:12px; border:1px solid var(--border);">
+                        <label style="font-size:12px; font-weight:700; display:block; margin-bottom:4px;">Target Numerical Feature:</label>
+                        <select id="idsl2-outlier-col" class="sim-select" style="width:100%; font-size:12px; margin-bottom:10px;" onchange="updateIDSL2OutlierSim()">
+                            <option value="Fare">Fare (Ticket Price - High Right Skew)</option>
+                            <option value="Age">Age (Passenger Age)</option>
+                        </select>
+
+                        <label style="font-size:12px; font-weight:700; display:block; margin-bottom:4px;">IQR Multiplier (Fence Threshold):</label>
+                        <div style="display:flex; gap:10px; align-items:center; margin-bottom:12px;">
+                            <input type="range" id="idsl2-iqr-multiplier" min="1.0" max="3.0" step="0.5" value="1.5" style="flex:1;" oninput="document.getElementById('iqr-val-disp').textContent = this.value + 'x'; updateIDSL2OutlierSim();">
+                            <span id="iqr-val-disp" style="font-weight:800; color:#f59e0b; font-size:13px; min-width:35px;">1.5x</span>
+                        </div>
+
+                        <label style="font-size:12px; font-weight:700; display:block; margin-bottom:4px;">Outlier Treatment Action:</label>
+                        <select id="idsl2-outlier-action" class="sim-select" style="width:100%; font-size:12px; margin-bottom:12px;" onchange="updateIDSL2OutlierSim()">
+                            <option value="cap">Cap Outliers (Winsorize at Upper Boundary) [Recommended]</option>
+                            <option value="remove">Remove Outlier Rows</option>
+                            <option value="none">No Treatment (Keep Outliers)</option>
+                        </select>
+                    </div>
+
+                    <div style="background:var(--bg-page); padding:16px; border-radius:12px; border:1px solid var(--border);" id="idsl2-iqr-stats-card">
+                        <div style="font-size:13px; font-weight:800; color:#f59e0b; margin-bottom:8px;">📊 IQR Statistical Boundaries ('Fare'):</div>
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; font-size:11px; margin-bottom:10px;">
+                            <div style="background:var(--card-bg); padding:6px; border-radius:6px;"><b>Q1 (25%):</b> $7.91</div>
+                            <div style="background:var(--card-bg); padding:6px; border-radius:6px;"><b>Median (50%):</b> $14.45</div>
+                            <div style="background:var(--card-bg); padding:6px; border-radius:6px;"><b>Q3 (75%):</b> $31.00</div>
+                            <div style="background:var(--card-bg); padding:6px; border-radius:6px;"><b>IQR:</b> $23.09</div>
+                            <div style="background:var(--card-bg); padding:6px; border-radius:6px; grid-column:span 2;"><b>Upper Fence (Q3 + 1.5*IQR):</b> <span style="color:#ef4444; font-weight:800;">$65.63</span></div>
+                        </div>
+                        <div id="idsl2-outlier-count-status" style="font-size:12px; font-weight:700; color:#ef4444; background:#ef444415; padding:8px; border-radius:6px;">
+                            ⚠️ Detected 116 Outlier Passengers exceeding $65.63 upper fence!
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4. Feature Scaling Simulator -->
+            <div class="theory-card" style="border-left: 4px solid #3b82f6; margin-bottom: 24px;">
+                <h3 style="color:#3b82f6; margin:0 0 6px 0; font-size:18px; font-weight:800;">⚖️ 3. Feature Scaling Simulator</h3>
+                <p style="font-size:12px; color:var(--text-muted); margin-bottom:16px;">Compare Z-score Standardization (StandardScaler) vs. Normalization (MinMaxScaler).</p>
+                <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap:16px;">
+                    <div style="background:var(--bg-page); padding:16px; border-radius:12px; border:1px solid var(--border);">
+                        <label style="font-size:12px; font-weight:700; display:block; margin-bottom:4px;">Target Feature:</label>
+                        <select id="idsl2-scale-col" class="sim-select" style="width:100%; font-size:12px; margin-bottom:10px;" onchange="updateIDSL2ScalingSim()">
+                            <option value="both">Age & Fare (Combined Numerical Matrix)</option>
+                            <option value="Age">Age (0.42 to 80.0 years)</option>
+                            <option value="Fare">Fare ($0.0 to $512.32 USD)</option>
+                        </select>
+
+                        <label style="font-size:12px; font-weight:700; display:block; margin-bottom:4px;">Scaling Algorithm:</label>
+                        <select id="idsl2-scale-algo" class="sim-select" style="width:100%; font-size:12px; margin-bottom:12px;" onchange="updateIDSL2ScalingSim()">
+                            <option value="standard">StandardScaler (Z-Score: Mean=0, Std=1) [Recommended]</option>
+                            <option value="minmax">MinMaxScaler (Rescale to [0, 1])</option>
+                            <option value="robust">RobustScaler (Median & IQR scaling)</option>
+                            <option value="none">No Scaling (Original Values)</option>
+                        </select>
+                    </div>
+
+                    <div style="background:var(--bg-page); padding:16px; border-radius:12px; border:1px solid var(--border);" id="idsl2-scaled-preview-box">
+                        <div style="font-weight:800; color:#3b82f6; margin-bottom:6px;">Scaled Output Preview (First 4 Rows):</div>
+                        <div style="font-family:monospace; font-size:11px; background:#0b0f19; color:#38bdf8; padding:10px; border-radius:8px; white-space:pre;">Age_scaled  Fare_scaled
+0   -0.5657     -0.5024
+1    0.6638      0.7868
+2   -0.2583     -0.4888
+3    0.4333      0.4207</div>
+                        <div style="font-size:11px; color:var(--text-muted); margin-top:8px;">✔ Mean transformed to <b>0.00</b>, Standard Deviation to <b>1.00</b>.</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 5. Categorical Encoding Simulator -->
+            <div class="theory-card" style="border-left: 4px solid #a855f7; margin-bottom: 24px;">
+                <h3 style="color:#a855f7; margin:0 0 6px 0; font-size:18px; font-weight:800;">🏷️ 4. Categorical Feature Encoding Simulator</h3>
+                <p style="font-size:12px; color:var(--text-muted); margin-bottom:16px;">Convert string categories into numerical vectors using One-Hot Encoding vs. Label Encoding.</p>
+                <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap:16px;">
+                    <div style="background:var(--bg-page); padding:16px; border-radius:12px; border:1px solid var(--border);">
+                        <label style="font-size:12px; font-weight:700; display:block; margin-bottom:4px;">Categorical Attribute:</label>
+                        <select id="idsl2-encode-col" class="sim-select" style="width:100%; font-size:12px; margin-bottom:10px;" onchange="updateIDSL2EncodingSim()">
+                            <option value="Sex">Sex (male / female - Nominal)</option>
+                            <option value="Embarked">Embarked (C / Q / S - Nominal)</option>
+                            <option value="both">Sex & Embarked Combined</option>
+                        </select>
+
+                        <label style="font-size:12px; font-weight:700; display:block; margin-bottom:4px;">Encoding Technique:</label>
+                        <select id="idsl2-encode-type" class="sim-select" style="width:100%; font-size:12px; margin-bottom:12px;" onchange="updateIDSL2EncodingSim()">
+                            <option value="onehot">One-Hot Encoding (pd.get_dummies, drop_first=True) [Recommended]</option>
+                            <option value="label">Label Encoding (0, 1, 2 Integer Mapping)</option>
+                        </select>
+                    </div>
+
+                    <div style="background:var(--bg-page); padding:16px; border-radius:12px; border:1px solid var(--border);" id="idsl2-encoded-preview-box">
+                        <div style="font-weight:800; color:#a855f7; margin-bottom:6px;">Encoded Columns Result Matrix:</div>
+                        <div style="font-family:monospace; font-size:11px; background:#0b0f19; color:#c084fc; padding:10px; border-radius:8px; white-space:pre;">Sex_male  Embarked_Q  Embarked_S
+0         1           0           1
+1         0           0           0
+2         0           0           1
+3         0           0           1</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 6. Interactive Visualization Studio -->
+            <div class="theory-card" style="border-left: 4px solid #ec4899; margin-bottom: 24px;">
+                <h3 style="color:#ec4899; margin:0 0 6px 0; font-size:18px; font-weight:800;">🎨 5. Exploratory Visualization Studio</h3>
+                <p style="font-size:12px; color:var(--text-muted); margin-bottom:16px;">Generate exploratory statistical graphs to visually inspect distributions and correlation relationships.</p>
+                
+                <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px;">
+                    <button class="btn-sim" style="background:#ec4899; color:white; font-weight:800;" onclick="renderIDSL2Chart('histogram')">Age Histogram 📊</button>
+                    <button class="btn-sim" style="background:#f59e0b; color:white; font-weight:800;" onclick="renderIDSL2Chart('boxplot')">Fare Boxplot 📦</button>
+                    <button class="btn-sim" style="background:#10b981; color:white; font-weight:800;" onclick="renderIDSL2Chart('countplot')">Sex Survival Countplot 👥</button>
+                    <button class="btn-sim" style="background:#3b82f6; color:white; font-weight:800;" onclick="renderIDSL2Chart('correlation')">Correlation Heatmap 🌡️</button>
+                </div>
+
+                <div id="idsl2-chart-container" style="background:#0b0f19; border:1px solid #1e293b; border-radius:12px; padding:20px; text-align:center; min-height:220px; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+                    <div style="font-size:14px; font-weight:700; color:#ec4899; margin-bottom:12px;">📊 Age Distribution Histogram (Kernel Density Estimate)</div>
+                    <svg width="100%" height="160" viewBox="0 0 500 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M40 130 Q100 120 160 40 T280 110 T400 128 T460 130" stroke="#ec4899" stroke-width="3" fill="none"/>
+                        <path d="M40 130 Q100 120 160 40 T280 110 T400 128 T460 130 V130 H40 Z" fill="#ec489930"/>
+                        <line x1="40" y1="130" x2="460" y2="130" stroke="#475569" stroke-width="2"/>
+                        <text x="40" y="148" fill="#94a3b8" font-size="10">0 yrs</text>
+                        <text x="160" y="148" fill="#94a3b8" font-size="10">28 yrs (Median)</text>
+                        <text x="280" y="148" fill="#94a3b8" font-size="10">50 yrs</text>
+                        <text x="440" y="148" fill="#94a3b8" font-size="10">80 yrs</text>
+                    </svg>
+                </div>
+            </div>
+        `;
+    };
+
+    window.renderIDSL2Sandbox = function(data) {
+        return `
+            <div class="theory-card" style="border-left:4px solid #10b981; margin-bottom:24px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:12px;">
+                    <div>
+                        <h3 style="color:#10b981; margin:0 0 4px 0; font-size:18px; font-weight:800;">🐍 Real Python 3.11 WASM Preprocessing Sandbox</h3>
+                        <p style="font-size:12px; color:var(--text-muted); margin:0;">Execute real pandas, numpy, and sklearn preprocessing pipeline code using CPython WASM compiler.</p>
+                    </div>
+                    <div style="display:flex; gap:10px;">
+                        <button class="btn-sim" style="background:#10b981; color:white; font-weight:800;" onclick="runIDSLPythonCode()">Run Python Code 🚀</button>
+                        <button class="btn-sim" style="background:var(--border); color:var(--text-main);" onclick="resetIDSLPythonCode()">Reset Code 🔄</button>
+                    </div>
+                </div>
+
+                <div style="position:relative; margin-bottom:16px;">
+                    <textarea id="idsl-python-editor" style="width:100%; height:320px; padding:14px; background:#090d16; color:#38bdf8; font-family:'JetBrains Mono', monospace; font-size:12.5px; border:1px solid #1e293b; border-radius:10px; line-height:1.5; outline:none; resize:vertical;">${data.python_code || ''}</textarea>
+                </div>
+
+                <div style="background:#0b0f19; border-radius:10px; border:1px solid #1e293b; overflow:hidden;">
+                    <div style="padding:8px 14px; background:#1e293b; color:#94a3b8; font-size:11px; font-weight:800; display:flex; justify-content:space-between;">
+                        <span>TERMINAL OUTPUT (sys.stdout)</span>
+                        <span style="color:#10b981;">CPython 3.11 Kernel Active</span>
+                    </div>
+                    <pre id="idsl-console-output" style="margin:0; padding:16px; background:#0b0f19; color:#34d399; font-family:'JetBrains Mono', monospace; font-size:12px; min-height:140px; max-height:300px; overflow-y:auto; white-space:pre-wrap;">Click 'Run Python Code 🚀' to execute the pandas dataset preprocessing pipeline...</pre>
+                </div>
+            </div>
+        `;
+    };
+
+    window.viewIDSL2DataView = function(mode) {
+        const container = document.getElementById('idsl2-data-display-container');
+        if (!container) return;
+
+        const ds = window.VLAB_DATA['idsl_exp2']?.dataset_info || {};
+        const rows = ds.titanic_rows || [];
+
+        if (mode === 'raw') {
+            container.innerHTML = `
+                <table style="width:100%; border-collapse:collapse; text-align:left;">
+                    <thead><tr style="border-bottom:2px solid var(--border); color:var(--primary); font-size:12px;"><th style="padding:6px;">PassengerId</th><th style="padding:6px;">Survived</th><th style="padding:6px;">Pclass</th><th style="padding:6px;">Name</th><th style="padding:6px;">Sex</th><th style="padding:6px;">Age</th><th style="padding:6px;">Fare</th><th style="padding:6px;">Cabin</th><th style="padding:6px;">Embarked</th></tr></thead>
+                    <tbody>${rows.map(r => `<tr style="border-bottom:1px solid var(--border);"><td style="padding:6px;">${r.PassengerId}</td><td style="padding:6px;">${r.Survived}</td><td style="padding:6px;">${r.Pclass}</td><td style="padding:6px;">${r.Name}</td><td style="padding:6px;">${r.Sex}</td><td style="padding:6px;">${r.Age === null ? 'NaN' : r.Age}</td><td style="padding:6px;">$${r.Fare}</td><td style="padding:6px;">${r.Cabin || 'NaN'}</td><td style="padding:6px;">${r.Embarked || 'NaN'}</td></tr>`).join('')}</tbody>
+                </table>
+            `;
+        } else if (mode === 'info') {
+            container.innerHTML = `
+                <div style="font-family:monospace; color:#38bdf8; font-size:12px; line-height:1.7;">
+                    &lt;class 'pandas.core.frame.DataFrame'&gt;<br>
+                    RangeIndex: 891 entries, 0 to 890<br>
+                    Data columns (total 12 columns):<br>
+                    #   Column       Non-Null Count  Dtype  <br>
+                    --- ------       --------------  -----  <br>
+                    0   PassengerId  891 non-null    int64  <br>
+                    1   Survived     891 non-null    int64  <br>
+                    2   Pclass       891 non-null    int64  <br>
+                    3   Name         891 non-null    object <br>
+                    4   Sex          891 non-null    object <br>
+                    5   Age          714 non-null    float64 (177 nulls)<br>
+                    6   SibSp        891 non-null    int64  <br>
+                    7   Parch        891 non-null    int64  <br>
+                    8   Ticket       891 non-null    object <br>
+                    9   Fare         891 non-null    float64<br>
+                    10  Cabin        204 non-null    object (687 nulls)<br>
+                    11  Embarked     889 non-null    object (2 nulls)  <br>
+                    dtypes: float64(2), int64(5), object(5)<br>
+                    memory usage: 83.7+ KB
+                </div>
+            `;
+        } else if (mode === 'describe') {
+            container.innerHTML = `
+                <div style="font-family:monospace; color:#38bdf8; font-size:11px; white-space:pre;">
+        PassengerId    Survived      Pclass         Age       SibSp       Parch        Fare
+count    891.000000  891.000000  891.000000  714.000000  891.000000  891.000000  891.000000
+mean     446.000000    0.383838    2.308642   29.699118    0.523008    0.381594   32.204208
+std      257.353842    0.486592    0.836071   14.526497    1.102743    0.806057   49.693429
+min        1.000000    0.000000    1.000000    0.420000    0.000000    0.000000    0.000000
+25%      223.500000    0.000000    2.000000   20.125000    0.000000    0.000000    7.910400
+50%      446.000000    0.000000    3.000000   28.000000    0.000000    0.000000   14.454200
+75%      668.500000    1.000000    3.000000   38.000000    1.000000    0.000000   31.000000
+max      891.000000    1.000000    3.000000   80.000000    8.000000    6.000000  512.329200
+                </div>
+            `;
+        } else if (mode === 'missing') {
+            container.innerHTML = `
+                <div style="font-family:monospace; color:#ef4444; font-size:12px; line-height:1.8;">
+                    <b>Missing Values Count (df.isnull().sum()):</b><br>
+                    Age         177  (20.0% Missing)<br>
+                    Cabin       687  (77.1% Missing)<br>
+                    Embarked      2  ( 0.2% Missing)<br>
+                    All other columns: 0 missing
+                </div>
+            `;
+        }
+    };
+
+    window.updateIDSL2MissingSim = function() {
+        const col = document.getElementById('idsl2-missing-col')?.value || 'Age';
+        const strat = document.getElementById('idsl2-missing-strat')?.value || 'median';
+        const res = document.getElementById('idsl2-missing-results');
+        if (!res) return;
+
+        let totalNulls = col === 'Age' ? 177 : (col === 'Cabin' ? 687 : 2);
+        let remNulls = (strat === 'none') ? totalNulls : 0;
+        let stratName = strat === 'median' ? 'Median (28.0)' : (strat === 'mean' ? 'Mean (29.7)' : (strat === 'mode' ? "Mode ('S')" : (strat === 'drop_col' ? 'Drop Column' : 'Drop Rows')));
+
+        res.innerHTML = `
+            <div style="font-weight:800; color:#10b981; margin-bottom:8px;">Imputation Outcome Preview:</div>
+            <div style="font-size:12px; line-height:1.7;">
+                <div><b>Target Column:</b> ${col}</div>
+                <div><b>Initial Missing Count:</b> ${totalNulls} / 891 (${((totalNulls/891)*100).toFixed(1)}%)</div>
+                <div><b>Applied Strategy:</b> ${stratName}</div>
+                <div><b>Remaining Nulls:</b> <span style="color:${remNulls === 0 ? '#10b981':'#ef4444'}; font-weight:800;">${remNulls} (${remNulls === 0 ? '100% Cleaned' : 'Unchanged'}) ${remNulls === 0 ? '✅':'⚠️'}</span></div>
+                <div style="margin-top:8px; padding:8px; background:#10b98115; border-radius:6px; color:#10b981; font-weight:700;">
+                    ${strat === 'median' ? '✔ Median imputation preserved underlying distribution without outlier distortion!' : (strat === 'drop_col' ? '✔ Dropped sparse column with >75% missing entries!' : '✔ Missing values resolved successfully!')}
+                </div>
+            </div>
+        `;
+    };
+
+    window.updateIDSL2OutlierSim = function() {
+        const col = document.getElementById('idsl2-outlier-col')?.value || 'Fare';
+        const mult = parseFloat(document.getElementById('idsl2-iqr-multiplier')?.value || '1.5');
+        const act = document.getElementById('idsl2-outlier-action')?.value || 'cap';
+        const card = document.getElementById('idsl2-iqr-stats-card');
+        if (!card) return;
+
+        let q1 = col === 'Fare' ? 7.91 : 20.12;
+        let q3 = col === 'Fare' ? 31.00 : 38.00;
+        let iqr = q3 - q1;
+        let upper = (q3 + mult * iqr).toFixed(2);
+        let outlierCount = col === 'Fare' ? Math.round(116 / (mult/1.5)) : Math.round(42 / (mult/1.5));
+
+        card.innerHTML = `
+            <div style="font-size:13px; font-weight:800; color:#f59e0b; margin-bottom:8px;">📊 IQR Statistical Boundaries ('${col}'):</div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; font-size:11px; margin-bottom:10px;">
+                <div style="background:var(--card-bg); padding:6px; border-radius:6px;"><b>Q1 (25%):</b> $${q1}</div>
+                <div style="background:var(--card-bg); padding:6px; border-radius:6px;"><b>Q3 (75%):</b> $${q3}</div>
+                <div style="background:var(--card-bg); padding:6px; border-radius:6px;"><b>IQR:</b> $${iqr.toFixed(2)}</div>
+                <div style="background:var(--card-bg); padding:6px; border-radius:6px;"><b>Multiplier:</b> ${mult}x</div>
+                <div style="background:var(--card-bg); padding:6px; border-radius:6px; grid-column:span 2;"><b>Upper Fence (Q3 + ${mult}*IQR):</b> <span style="color:#ef4444; font-weight:800;">$${upper}</span></div>
+            </div>
+            <div id="idsl2-outlier-count-status" style="font-size:12px; font-weight:700; color:${act === 'cap' ? '#10b981' : '#ef4444'}; background:${act === 'cap' ? '#10b98115' : '#ef444415'}; padding:8px; border-radius:6px;">
+                ${act === 'cap' ? `✔ Capped ${outlierCount} extreme outlier values to upper boundary limit of $${upper}!` : `⚠️ Detected ${outlierCount} Outlier records exceeding $${upper}!`}
+            </div>
+        `;
+    };
+
+    window.updateIDSL2ScalingSim = function() {
+        const algo = document.getElementById('idsl2-scale-algo')?.value || 'standard';
+        const box = document.getElementById('idsl2-scaled-preview-box');
+        if (!box) return;
+
+        if (algo === 'standard') {
+            box.innerHTML = `
+                <div style="font-weight:800; color:#3b82f6; margin-bottom:6px;">StandardScaler Output Preview (Z-score):</div>
+                <div style="font-family:monospace; font-size:11px; background:#0b0f19; color:#38bdf8; padding:10px; border-radius:8px; white-space:pre;">Age_scaled  Fare_scaled
+0   -0.5657     -0.5024
+1    0.6638      0.7868
+2   -0.2583     -0.4888
+3    0.4333      0.4207</div>
+                <div style="font-size:11px; color:var(--text-muted); margin-top:8px;">✔ Transformed to <b>Mean = 0.00</b> and <b>Std Dev = 1.00</b>.</div>
+            `;
+        } else if (algo === 'minmax') {
+            box.innerHTML = `
+                <div style="font-weight:800; color:#3b82f6; margin-bottom:6px;">MinMaxScaler Output Preview ([0, 1] Range):</div>
+                <div style="font-family:monospace; font-size:11px; background:#0b0f19; color:#38bdf8; padding:10px; border-radius:8px; white-space:pre;">Age_minmax  Fare_minmax
+0    0.271170    0.014151
+1    0.472229    0.139136
+2    0.321438    0.015469
+3    0.434531    0.103644</div>
+                <div style="font-size:11px; color:var(--text-muted); margin-top:8px;">✔ Rescaled feature bounds between <b>Min = 0.0</b> and <b>Max = 1.0</b>.</div>
+            `;
+        } else {
+            box.innerHTML = `
+                <div style="font-weight:800; color:#3b82f6; margin-bottom:6px;">Original Unscaled Values:</div>
+                <div style="font-family:monospace; font-size:11px; background:#0b0f19; color:#38bdf8; padding:10px; border-radius:8px; white-space:pre;">Age    Fare
+0  22.0   7.2500
+1  38.0  71.2833
+2  26.0   7.9250
+3  35.0  53.1000</div>
+            `;
+        }
+    };
+
+    window.updateIDSL2EncodingSim = function() {
+        const type = document.getElementById('idsl2-encode-type')?.value || 'onehot';
+        const box = document.getElementById('idsl2-encoded-preview-box');
+        if (!box) return;
+
+        if (type === 'onehot') {
+            box.innerHTML = `
+                <div style="font-weight:800; color:#a855f7; margin-bottom:6px;">One-Hot Encoded Result (pd.get_dummies):</div>
+                <div style="font-family:monospace; font-size:11px; background:#0b0f19; color:#c084fc; padding:10px; border-radius:8px; white-space:pre;">Sex_male  Embarked_Q  Embarked_S
+0         1           0           1
+1         0           0           0
+2         0           0           1
+3         0           0           1</div>
+                <div style="font-size:11px; color:var(--text-muted); margin-top:8px;">✔ Converted nominal categories into binary 0/1 indicator columns.</div>
+            `;
+        } else {
+            box.innerHTML = `
+                <div style="font-weight:800; color:#a855f7; margin-bottom:6px;">Label Encoded Result (Integer Mapping):</div>
+                <div style="font-family:monospace; font-size:11px; background:#0b0f19; color:#c084fc; padding:10px; border-radius:8px; white-space:pre;">Sex_Code  Embarked_Code
+0         1              2  (male -> 1, S -> 2)
+1         0              0  (female -> 0, C -> 0)
+2         0              2  (female -> 0, S -> 2)
+3         0              2  (female -> 0, S -> 2)</div>
+            `;
+        }
+    };
+
+    window.renderIDSL2Chart = function(chartType) {
+        const container = document.getElementById('idsl2-chart-container');
+        if (!container) return;
+
+        if (chartType === 'histogram') {
+            container.innerHTML = `
+                <div style="font-size:14px; font-weight:700; color:#ec4899; margin-bottom:12px;">📊 Age Distribution Histogram (Kernel Density Estimate)</div>
+                <svg width="100%" height="160" viewBox="0 0 500 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M40 130 Q100 120 160 40 T280 110 T400 128 T460 130" stroke="#ec4899" stroke-width="3" fill="none"/>
+                    <path d="M40 130 Q100 120 160 40 T280 110 T400 128 T460 130 V130 H40 Z" fill="#ec489930"/>
+                    <line x1="40" y1="130" x2="460" y2="130" stroke="#475569" stroke-width="2"/>
+                    <text x="40" y="148" fill="#94a3b8" font-size="10">0 yrs</text>
+                    <text x="160" y="148" fill="#94a3b8" font-size="10">28 yrs (Median)</text>
+                    <text x="280" y="148" fill="#94a3b8" font-size="10">50 yrs</text>
+                    <text x="440" y="148" fill="#94a3b8" font-size="10">80 yrs</text>
+                </svg>
+            `;
+        } else if (chartType === 'boxplot') {
+            container.innerHTML = `
+                <div style="font-size:14px; font-weight:700; color:#f59e0b; margin-bottom:12px;">📦 Fare Feature Boxplot (Outlier Fences Highlighted)</div>
+                <svg width="100%" height="160" viewBox="0 0 500 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <line x1="80" y1="80" x2="160" y2="80" stroke="#f59e0b" stroke-width="2"/>
+                    <rect x="160" y="50" width="120" height="60" fill="#f59e0b20" stroke="#f59e0b" stroke-width="2"/>
+                    <line x1="220" y1="50" x2="220" y2="110" stroke="#10b981" stroke-width="3"/>
+                    <line x1="280" y1="80" x2="360" y2="80" stroke="#f59e0b" stroke-width="2"/>
+                    <circle cx="400" cy="80" r="4" fill="#ef4444"/>
+                    <circle cx="430" cy="80" r="4" fill="#ef4444"/>
+                    <circle cx="460" cy="80" r="4" fill="#ef4444"/>
+                    <line x1="80" y1="65" x2="80" y2="95" stroke="#f59e0b" stroke-width="2"/>
+                    <line x1="360" y1="65" x2="360" y2="95" stroke="#ef4444" stroke-width="2"/>
+                    <text x="75" y="125" fill="#94a3b8" font-size="10">Q1 ($7.91)</text>
+                    <text x="200" y="125" fill="#10b981" font-size="10">Median ($14.45)</text>
+                    <text x="270" y="125" fill="#94a3b8" font-size="10">Q3 ($31.00)</text>
+                    <text x="345" y="125" fill="#ef4444" font-size="10">Upper Fence ($65.63)</text>
+                    <text x="420" y="125" fill="#ef4444" font-size="10">Outliers ($512)</text>
+                </svg>
+            `;
+        } else if (chartType === 'countplot') {
+            container.innerHTML = `
+                <div style="font-size:14px; font-weight:700; color:#10b981; margin-bottom:12px;">👥 Survival Distribution Countplot by Gender (Sex)</div>
+                <svg width="100%" height="160" viewBox="0 0 500 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="100" y="40" width="50" height="90" fill="#ef4444" rx="4"/>
+                    <rect x="160" y="85" width="50" height="45" fill="#10b981" rx="4"/>
+                    <rect x="290" y="95" width="50" height="35" fill="#ef4444" rx="4"/>
+                    <rect x="350" y="30" width="50" height="100" fill="#10b981" rx="4"/>
+                    <line x1="60" y1="130" x2="440" y2="130" stroke="#475569" stroke-width="2"/>
+                    <text x="125" y="148" fill="#94a3b8" font-size="11">Male (81% Died)</text>
+                    <text x="315" y="148" fill="#94a3b8" font-size="11">Female (74% Survived)</text>
+                </svg>
+            `;
+        } else if (chartType === 'correlation') {
+            container.innerHTML = `
+                <div style="font-size:14px; font-weight:700; color:#3b82f6; margin-bottom:12px;">🌡️ Feature Correlation Heatmap Matrix</div>
+                <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:6px; width:280px; margin:0 auto; font-size:10px; font-weight:700; color:white; font-family:monospace;">
+                    <div style="background:#3b82f6; padding:10px; border-radius:4px;">Survived<br>1.00</div>
+                    <div style="background:#ef4444; padding:10px; border-radius:4px;">Pclass<br>-0.34</div>
+                    <div style="background:#10b981; padding:10px; border-radius:4px;">Fare<br>+0.26</div>
+                    <div style="background:#64748b; padding:10px; border-radius:4px;">Age<br>-0.08</div>
+                </div>
+            `;
+        }
     };
 
     window.switchDSLStage = function(idx) {
