@@ -7830,32 +7830,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <pre id="idsl-console-output" style="margin:0; padding:16px; background:#0b0f19; color:#34d399; font-family:'JetBrains Mono', monospace; font-size:12px; min-height:140px; max-height:300px; overflow-y:auto; white-space:pre-wrap;">Click 'Run Python Code 🚀' to execute the pandas dataset preprocessing pipeline...</pre>
                 </div>
             </div>
-
-            <div class="theory-card" style="border-left:4px solid #8b5cf6;">
-                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:16px;">
-                    <div>
-                        <h3 style="color:#8b5cf6; margin:0 0 4px 0; font-size:18px; font-weight:800;">📄 Automated Lab Report Generator</h3>
-                        <p style="font-size:12px; color:var(--text-muted); margin:0;">Generate and export a formatted PDF/HTML academic lab report for Experiment 1.</p>
-                    </div>
-                    <button class="btn-sim" style="background:#8b5cf6; color:white; font-weight:800;" onclick="generateIDSLLabReport()">Generate & Export Report 📄</button>
-                </div>
-
-                <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:12px; margin-bottom:16px;">
-                    <div>
-                        <label style="font-size:12px; font-weight:700;">Student Full Name:</label>
-                        <input type="text" id="report-student-name" class="sim-select" style="width:100%; padding:8px; margin-top:4px;" placeholder="e.g. Atharva Gandhi">
-                    </div>
-                    <div>
-                        <label style="font-size:12px; font-weight:700;">Roll Number / PRN:</label>
-                        <input type="text" id="report-student-roll" class="sim-select" style="width:100%; padding:8px; margin-top:4px;" placeholder="e.g. 1032210456">
-                    </div>
-                </div>
-
-                <div>
-                    <label style="font-size:12px; font-weight:700;">Key Observations & Conclusion Notes:</label>
-                    <textarea id="report-student-notes" class="sim-select" style="width:100%; height:80px; padding:8px; margin-top:4px;" placeholder="Record your observations on dataset missingness and measurement scale distributions..."></textarea>
-                </div>
-            </div>
         `;
         return html;
     };
