@@ -14467,6 +14467,78 @@ window.VLAB_DATA['idsl_exp1'] = {
             }
         ]
     },
+    tools: [
+        {
+            name: "Pandas (Data Wrangling Engine)",
+            category: "Data Manipulation & DataFrames",
+            description: "High-performance Python data analysis toolkit. Provides DataFrame objects, indexing, slice manipulation, missing data handling, and tabular CSV I/O capabilities.",
+            svg: `<svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect width="100" height="100" rx="16" fill="#0f172a"/>
+                <rect x="20" y="20" width="60" height="60" rx="8" fill="#1e293b" stroke="#06b6d4" stroke-width="2"/>
+                <path d="M20 40H80M20 60H80M40 20V80M60 20V80" stroke="#06b6d4" stroke-width="1.5" stroke-dasharray="2 2"/>
+                <circle cx="30" cy="30" r="5" fill="#38bdf8"/>
+                <circle cx="50" cy="50" r="5" fill="#34d399"/>
+                <circle cx="70" cy="70" r="5" fill="#f43f5e"/>
+            </svg>`
+        },
+        {
+            name: "NumPy (Scientific & Matrix Math)",
+            category: "N-Dimensional Array Computation",
+            description: "Fundamental library for scientific computing in Python. Supports fast vector operations, linear algebra, random number generators, and multi-dimensional matrices.",
+            svg: `<svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect width="100" height="100" rx="16" fill="#0f172a"/>
+                <path d="M30 25L50 15L70 25L70 45L50 55L30 45Z" stroke="#4f46e5" stroke-width="3" fill="#4f46e520"/>
+                <path d="M30 45L50 55L70 45L70 65L50 75L30 65Z" stroke="#818cf8" stroke-width="3" fill="#818cf820"/>
+                <path d="M50 15V75M30 25L70 45M70 25L30 45" stroke="#a5b4fc" stroke-width="1.5"/>
+            </svg>`
+        },
+        {
+            name: "Pyodide WASM Kernel",
+            category: "Client-Side CPython 3.11 Runtime",
+            description: "Python 3.11 compiled to WebAssembly. Executes real Python, Pandas, and NumPy code 100% locally inside student web browsers without server latency.",
+            svg: `<svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect width="100" height="100" rx="16" fill="#0f172a"/>
+                <path d="M48 20C32 20 33 27 33 27L33 34H49V36H27C27 36 20 36 20 52C20 68 25 67 25 67H30V60C30 52 38 52 38 52H54C54 52 61 52 61 44V28C61 28 62 20 48 20Z" fill="#38bdf8"/>
+                <path d="M52 80C68 80 67 73 67 73L67 66H51V64H73C73 64 80 64 80 48C80 32 75 33 75 33H70V40C70 48 62 48 62 48H46C46 46 39 48 39 56V72C39 72 38 80 52 80Z" fill="#facc15"/>
+                <circle cx="42" cy="27" r="3" fill="#0f172a"/>
+                <circle cx="58" cy="73" r="3" fill="#0f172a"/>
+            </svg>`
+        },
+        {
+            name: "Matplotlib & Seaborn Visualizer",
+            category: "Exploratory Data Graphics",
+            description: "2D statistical plotting engine for generating distribution histograms, correlation heatmaps, box plots, and survival rate breakdown bar charts.",
+            svg: `<svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect width="100" height="100" rx="16" fill="#0f172a"/>
+                <rect x="25" y="55" width="10" height="25" rx="3" fill="#f43f5e"/>
+                <rect x="40" y="35" width="10" height="45" rx="3" fill="#10b981"/>
+                <rect x="55" y="45" width="10" height="35" rx="3" fill="#38bdf8"/>
+                <rect x="70" y="25" width="10" height="55" rx="3" fill="#f59e0b"/>
+                <path d="M20 78H80" stroke="#475569" stroke-width="2"/>
+            </svg>`
+        },
+        {
+            name: "Scikit-Learn Preprocessing API",
+            category: "Feature Encoding & Scaling",
+            description: "Industry-standard Machine Learning library providing SimpleImputer, OneHotEncoder, StandardScaler, and LabelEncoder tools for ML readiness.",
+            svg: `<svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect width="100" height="100" rx="16" fill="#0f172a"/>
+                <circle cx="30" cy="50" r="12" fill="#f97316"/>
+                <circle cx="70" cy="30" r="10" fill="#06b6d4"/>
+                <circle cx="70" cy="70" r="10" fill="#a855f7"/>
+                <path d="M40 45L61 34M40 55L61 66" stroke="#e2e8f0" stroke-width="2"/>
+            </svg>`
+        },
+        {
+            name: "Kaggle Tabular Dataset Repository",
+            category: "Benchmark Dataset Sources",
+            description: "Global repository hosting benchmark CSV datasets (e.g. Titanic: Machine Learning from Disaster - 891 rows, 12 features for predictive binary classification).",
+            svg: `<svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect width="100" height="100" rx="16" fill="#0f172a"/>
+                <path d="M30 25V75M30 50L65 25M30 50L65 75" stroke="#20beff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>`
+        }
+    ],
     dataset_info: {
         name: "Titanic: Machine Learning from Disaster",
         source: "Kaggle Dataset Archive",
