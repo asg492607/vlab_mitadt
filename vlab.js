@@ -7492,8 +7492,16 @@ document.addEventListener('DOMContentLoaded', async () => {
                 setBody('section-procedure', `<ol style="padding-left:20px; line-height:2;">${data.procedure.map(s => `<li>${s}</li>`).join('')}</ol>`);
             }
 
-            // 8. Troubleshooting
-            const tbData = data.troubleshooting || {
+            // 8. Troubleshooting / Data Cleaning Playground
+            const defaultTroubleshooting = (currentSubject === 'ds') ? {
+                problem: "Data Preprocessing & Quality Fault Scenario",
+                hints: [
+                    "Inspect 'Age' (177 nulls) and 'Embarked' (2 nulls) for missing value gaps.",
+                    "Identify extreme right-skewed outliers in the 'Fare' feature (ticket prices up to $512).",
+                    "Verify memory overhead when string categories ('Sex', 'Embarked') are not encoded into numerical 0/1 vectors for machine learning."
+                ],
+                fix: "1. Impute missing 'Age' with median (28.0) and 'Embarked' with mode ('S').\n2. Apply IQR capping on 'Fare' outliers (Q3 + 1.5*IQR = $65.63).\n3. Apply StandardScaler (Z-score) on numerical features and pd.get_dummies() on nominal attributes."
+            } : {
                 problem: "Routing Adjacency & Packet Delivery Fault Scenario",
                 hints: [
                     "Inspect interface IP addresses and subnet masks.",
@@ -7502,6 +7510,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 ],
                 fix: "Verify physical cabling, ensure matching protocol parameters (AS / Area / Subnet mask), and check routing table using show ip route."
             };
+            const tbData = data.troubleshooting || defaultTroubleshooting;
             let tbHtml = `
                 <div class="theory-card" style="border-left:4px solid var(--danger); margin-bottom:16px;">
                     <h3 style="color:var(--danger); margin-bottom:8px;">⚠️ Fault Scenario</h3>

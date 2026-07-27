@@ -14849,6 +14849,15 @@ window.VLAB_DATA['idsl_exp2'] = {
         "Step 7: Encode categorical variables using one-hot encoding (pd.get_dummies) for nominal features (Sex, Embarked).",
         "Step 8: Display the final cleaned DataFrame and validate its shape and structure for ML modeling."
     ],
+    troubleshooting: {
+        problem: "Data Preprocessing & Quality Fault Scenario",
+        hints: [
+            "Inspect 'Age' (177 nulls) and 'Embarked' (2 nulls) for missing value gaps.",
+            "Identify extreme right-skewed outliers in the 'Fare' feature (ticket prices up to $512).",
+            "Verify memory overhead when string categories ('Sex', 'Embarked') are not encoded into numerical 0/1 vectors for machine learning."
+        ],
+        fix: "1. Impute missing 'Age' with median (28.0) and 'Embarked' with mode ('S').\n2. Apply IQR capping on 'Fare' outliers (Q3 + 1.5*IQR = $65.63).\n3. Apply StandardScaler (Z-score) on numerical features and pd.get_dummies() on nominal attributes."
+    },
     python_code: `# Importing all required libraries
 import pandas as pd                    # For data manipulation
 import numpy as np                     # For numerical operations
