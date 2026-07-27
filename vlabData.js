@@ -15014,3 +15014,304 @@ print("\\nFinal dataset shape:", df.shape)`,
         }
     ]
 };
+
+window.VLAB_DATA['idsl_exp3'] = {
+    id: "idsl_exp3",
+    simType: "idsl_exp3",
+    title: "Experiment 3: Statistical Analysis of Data using Python: Central Tendency, Dispersion, Correlation, and Simpson’s Paradox",
+    experiment_info: {
+        number: 3,
+        subject: "Introduction to Data Science Lab (IDSL)",
+        unit: "Unit 2: Descriptive Statistics & Exploratory Data Analysis",
+        difficulty: "Intermediate",
+        duration: "60–90 Minutes",
+        dataset: "Titanic Passenger Dataset (Seaborn / Kaggle)",
+        language: "Python 3.x (Pandas, NumPy, Seaborn, Matplotlib)"
+    },
+    aim: "To perform statistical analysis on a dataset using Python by computing measures of central tendency, dispersion, correlation, and to illustrate Simpson's Paradox using suitable visualizations on the Titanic dataset.",
+    prerequisites: [
+        "Python Basics (Variables, Functions, Data Structures)",
+        "Pandas DataFrames & Series Operations (describe, mean, median, mode, quantile, groupby)",
+        "NumPy Numerical Computation Basics (var, std, min, max)",
+        "Data Visualization Fundamentals (Seaborn barplot, catplot, heatmap, Matplotlib)"
+    ],
+    outcomes: [
+        "Calculate measures of central tendency: Mean, Median, and Mode.",
+        "Analyze data dispersion: Range, Quartiles, Variance, Standard Deviation, and Interquartile Range (IQR).",
+        "Compute and interpret Pearson correlation between numerical variables (e.g. Age vs Fare).",
+        "Illustrate and explain the concept of Simpson's Paradox using grouped demographic breakdowns.",
+        "Interpret statistical visualizations (Histograms, Boxplots, Scatter plots, Catplots, Correlation Heatmaps).",
+        "Draw data-driven conclusions from statistical summaries."
+    ],
+    theory: {
+        intro: "Statistical analysis provides foundational quantitative summaries that describe data distributions, evaluate variability, measure linear relationships between attributes, and reveal subtle group-level paradoxes such as Simpson's Paradox.",
+        cards: [
+            {
+                title: "1. Measures of Central Tendency",
+                content: "• Mean (μ): Arithmetic average of all observations: μ = Σx / N. Sensitive to extreme outliers.\n• Median: Middle value (50th percentile) when data is sorted. Robust against extreme skewness and outliers.\n• Mode: Most frequently occurring value in a dataset. Applicable to both numerical and categorical variables."
+            },
+            {
+                title: "2. Measures of Dispersion",
+                content: "• Range = Max - Min: Overall spread between extreme observations.\n• Five-Number Summary: [Min, Q1 (25%), Median (50%), Q3 (75%), Max].\n• Variance (σ²): Average of squared differences from the mean: σ² = Σ(x - μ)² / N.\n• Standard Deviation (σ): Square root of variance (√σ²), expressing variability in original measurement units.\n• Interquartile Range (IQR) = Q3 - Q1: Middle 50% spread, robust against extreme values."
+            },
+            {
+                title: "3. Pearson Correlation Coefficient (r)",
+                content: "Measures the strength and direction of linear relationship between two continuous variables (-1.0 to +1.0):\n• r = +1.0: Perfect positive linear correlation.\n• r = 0.0: No linear relationship.\n• r = -1.0: Perfect negative linear correlation.\nFormula: r = Σ((x - x̄)(y - ȳ)) / (√(Σ(x - x̄)²) * √(Σ(y - ȳ)²))"
+            },
+            {
+                title: "4. Simpson's Paradox",
+                content: "Simpson's Paradox occurs when a statistical trend or association present across multiple sub-groups disappears or completely reverses when the data is aggregated into a single combined population. On the Titanic dataset, female survival appears much higher overall (74.2% vs 18.9%), but breaking down survival rates across Passenger Classes (1st, 2nd, 3rd Pclass) reveals how socio-economic class heavily confounded overall survival trends."
+            },
+            {
+                title: "5. Real-World Applications",
+                content: "• Clinical Drug Testing: Preventing false conclusions due to confounding age/gender demographics (Simpson's Paradox).\n• Financial Risk & Portfolio Management: Measuring asset volatility using Standard Deviation and Variance.\n• E-Commerce & Marketing: Analyzing customer spending correlation with age and income."
+            }
+        ]
+    },
+    tools: [
+        {
+            name: "Pandas Statistical Engine",
+            category: "Descriptive Statistics & Aggregations",
+            description: "Provides built-in mean(), median(), mode(), describe(), var(), std(), quantile(), and groupby() statistical methods.",
+            svg: `<svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="16" fill="#0f172a"/><rect x="20" y="20" width="60" height="60" rx="8" fill="#1e293b" stroke="#06b6d4" stroke-width="2"/><path d="M20 40H80M20 60H80M40 20V80M60 20V80" stroke="#06b6d4" stroke-width="1.5" stroke-dasharray="2 2"/><circle cx="30" cy="30" r="5" fill="#38bdf8"/><circle cx="50" cy="50" r="5" fill="#34d399"/><circle cx="70" cy="70" r="5" fill="#f43f5e"/></svg>`
+        },
+        {
+            name: "NumPy & SciPy Math Library",
+            category: "Scientific & Matrix Calculations",
+            description: "High-performance C-accelerated array operations for computing variance, standard deviation, percentile rankings, and correlation matrices.",
+            svg: `<svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="16" fill="#0f172a"/><path d="M30 25L50 15L70 25L70 45L50 55L30 45Z" stroke="#4f46e5" stroke-width="3" fill="#4f46e520"/><path d="M30 45L50 55L70 45L70 65L50 75L30 65Z" stroke="#818cf8" stroke-width="3" fill="#818cf820"/><path d="M50 15V75M30 25L70 45M70 25L30 45" stroke="#a5b4fc" stroke-width="1.5"/></svg>`
+        },
+        {
+            name: "Seaborn & Matplotlib Visualization",
+            category: "Statistical Graphics Studio",
+            description: "Renders statistical plots: sns.barplot, sns.catplot, sns.boxplot, sns.heatmap, and sns.scatterplot for visual trend analysis.",
+            svg: `<svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="16" fill="#0f172a"/><rect x="25" y="55" width="10" height="25" rx="3" fill="#f43f5e"/><rect x="40" y="35" width="10" height="45" rx="3" fill="#10b981"/><rect x="55" y="45" width="10" height="35" rx="3" fill="#38bdf8"/><rect x="70" y="25" width="10" height="55" rx="3" fill="#f59e0b"/><path d="M20 78H80" stroke="#475569" stroke-width="2"/></svg>`
+        },
+        {
+            name: "Pyodide WASM Kernel (Python 3.11)",
+            category: "Client-Side Python Engine",
+            description: "Executes real Python 3.11 code directly in your browser with pre-installed Pandas, NumPy, Seaborn, and Matplotlib.",
+            svg: `<svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="16" fill="#0f172a"/><path d="M48 20C32 20 33 27 33 27L33 34H49V36H27C27 36 20 36 20 52C20 68 25 67 25 67H30V60C30 52 38 52 38 52H54C54 52 61 52 61 44V28C61 28 62 20 48 20Z" fill="#38bdf8"/><path d="M52 80C68 80 67 73 67 73L67 66H51V64H73C73 64 80 64 80 48C80 32 75 33 75 33H70V40C70 48 62 48 62 48H46C46 46 39 48 39 56V72C39 72 38 80 52 80Z" fill="#facc15"/><circle cx="42" cy="27" r="3" fill="#0f172a"/><circle cx="58" cy="73" r="3" fill="#0f172a"/></svg>`
+        }
+    ],
+    dataset_info: {
+        name: "Seaborn Built-in Titanic Dataset",
+        source: "Seaborn / Kaggle Dataset Repository",
+        records: 891,
+        columns: 15,
+        features: [
+            { col: "survived", desc: "Survival (0 = No, 1 = Yes)", pandas_type: "int64", scale: "Nominal", missing: 0 },
+            { col: "pclass", desc: "Passenger Class (1 = 1st, 2 = 2nd, 3 = 3rd)", pandas_type: "int64", scale: "Ordinal", missing: 0 },
+            { col: "sex", desc: "Gender (male / female)", pandas_type: "object", scale: "Nominal", missing: 0 },
+            { col: "age", desc: "Age in years", pandas_type: "float64", scale: "Ratio", missing: 177 },
+            { col: "sibsp", desc: "# of siblings / spouses aboard", pandas_type: "int64", scale: "Ratio", missing: 0 },
+            { col: "parch", desc: "# of parents / children aboard", pandas_type: "int64", scale: "Ratio", missing: 0 },
+            { col: "fare", desc: "Passenger fare price", pandas_type: "float64", scale: "Ratio", missing: 0 },
+            { col: "embarked", desc: "Port of Embarkation (C, Q, S)", pandas_type: "object", scale: "Nominal", missing: 2 },
+            { col: "class", desc: "Ticket class category (First, Second, Third)", pandas_type: "category", scale: "Ordinal", missing: 0 },
+            { col: "who", desc: "Man, Woman, or Child indicator", pandas_type: "object", scale: "Nominal", missing: 0 },
+            { col: "adult_male", desc: "Boolean flag for adult males", pandas_type: "bool", scale: "Nominal", missing: 0 },
+            { col: "deck", desc: "Cabin deck code (A-G)", pandas_type: "category", scale: "Nominal", missing: 688 },
+            { col: "embark_town", desc: "Full embarkation port town name", pandas_type: "object", scale: "Nominal", missing: 2 },
+            { col: "alive", desc: "Survival text indicator (yes / no)", pandas_type: "object", scale: "Nominal", missing: 0 },
+            { col: "alone", desc: "Boolean flag for solo travelers", pandas_type: "bool", scale: "Nominal", missing: 0 }
+        ],
+        titanic_rows: [
+            { survived: 0, pclass: 3, sex: "male", age: 22.0, sibsp: 1, parch: 0, fare: 7.2500, embarked: "S", class: "Third", who: "man", adult_male: true, deck: null, embark_town: "Southampton", alive: "no", alone: false },
+            { survived: 1, pclass: 1, sex: "female", age: 38.0, sibsp: 1, parch: 0, fare: 71.2833, embarked: "C", class: "First", who: "woman", adult_male: false, deck: "C", embark_town: "Cherbourg", alive: "yes", alone: false },
+            { survived: 1, pclass: 3, sex: "female", age: 26.0, sibsp: 0, parch: 0, fare: 7.9250, embarked: "S", class: "Third", who: "woman", adult_male: false, deck: null, embark_town: "Southampton", alive: "yes", alone: true },
+            { survived: 1, pclass: 1, sex: "female", age: 35.0, sibsp: 1, parch: 0, fare: 53.1000, embarked: "S", class: "First", who: "woman", adult_male: false, deck: "C", embark_town: "Southampton", alive: "yes", alone: false },
+            { survived: 0, pclass: 3, sex: "male", age: 35.0, sibsp: 0, parch: 0, fare: 8.0500, embarked: "S", class: "Third", who: "man", adult_male: true, deck: null, embark_town: "Southampton", alive: "no", alone: true },
+            { survived: 0, pclass: 3, sex: "male", age: null, sibsp: 0, parch: 0, fare: 8.4583, embarked: "Q", class: "Third", who: "man", adult_male: true, deck: null, embark_town: "Queenstown", alive: "no", alone: true },
+            { survived: 0, pclass: 1, sex: "male", age: 54.0, sibsp: 0, parch: 0, fare: 51.8625, embarked: "S", class: "First", who: "man", adult_male: true, deck: "E", embark_town: "Southampton", alive: "no", alone: true },
+            { survived: 0, pclass: 3, sex: "male", age: 2.0, sibsp: 3, parch: 1, fare: 21.0750, embarked: "S", class: "Third", who: "child", adult_male: false, deck: null, embark_town: "Southampton", alive: "no", alone: false },
+            { survived: 1, pclass: 3, sex: "female", age: 27.0, sibsp: 0, parch: 2, fare: 11.1333, embarked: "S", class: "Third", who: "woman", adult_male: false, deck: null, embark_town: "Southampton", alive: "yes", alone: false },
+            { survived: 1, pclass: 2, sex: "female", age: 14.0, sibsp: 1, parch: 0, fare: 30.0708, embarked: "C", class: "Second", who: "child", adult_male: false, deck: null, embark_town: "Cherbourg", alive: "yes", alone: false }
+        ]
+    },
+    procedure: [
+        "Step 1: Install & import required libraries (import pandas as pd, import numpy as np, import seaborn as sns, import matplotlib.pyplot as plt).",
+        "Step 2: Load the Titanic dataset using titanic = sns.load_dataset('titanic').",
+        "Step 3: Explore dataset shape (titanic.shape), column index (titanic.columns), and data types (titanic.dtypes).",
+        "Step 4: Compute measures of central tendency for 'age' and 'fare': mean(), median(), and mode().values.",
+        "Step 5: Compute measures of dispersion for 'age' and 'fare': Range (max - min), describe() five-number summary, var(), std(), and IQR (Q3 - Q1).",
+        "Step 6: Calculate Pearson Correlation between numerical variables using titanic[['age', 'fare']].corr().",
+        "Step 7: Illustrate Simpson's Paradox by calculating overall survival rate vs gender breakdown (groupby('sex')) vs class & gender subgrouping (groupby(['pclass', 'sex'])).",
+        "Step 8: Generate statistical visualizations using sns.barplot(x='sex', y='survived') and sns.catplot(x='pclass', y='survived', hue='sex', kind='bar').",
+        "Step 9: Interpret results and record observations in the experiment report."
+    ],
+    troubleshooting: {
+        problem: "Statistical Anomaly: Skewed Distributions & Simpson's Paradox Confounding",
+        hints: [
+            "Observe the significant gap between Mean Fare ($32.20) and Median Fare ($14.45), indicating strong right-skewness caused by high ticket prices.",
+            "Compare Standard Deviation vs IQR for Fare (Std Dev = $49.69, IQR = $23.09) to recognize outlier sensitivity.",
+            "Verify Simpson's Paradox: Notice how female survival drops from 96.8% in 1st class down to 50.0% in 3rd class when controlling for Pclass."
+        ],
+        fix: "1. Use Median ($14.45) and IQR ($23.09) instead of Mean and Std Dev for skewed features like Fare.\n2. Always disaggregate data into subgroups (e.g., groupby(['pclass', 'sex'])) to uncover hidden confounding variables and avoid Simpson's Paradox errors."
+    },
+    python_code: `# Experiment 3: Statistical Analysis of Data using Python
+import pandas as pd
+import numpy as np
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+# 1. Load Titanic dataset
+titanic = sns.load_dataset('titanic')
+
+# Basic information
+print("Shape:", titanic.shape)
+print("Columns:", titanic.columns)
+print("\nData Types:")
+print(titanic.dtypes)
+print("\nFirst 5 Rows:")
+print(titanic.head())
+
+# 2. Central Tendency for 'age' and 'fare'
+print("\n--- CENTRAL TENDENCY ---")
+print("Age - Mean:", titanic['age'].mean())
+print("Age - Median:", titanic['age'].median())
+print("Age - Mode:", titanic['age'].mode().values)
+
+print("\nFare - Mean:", titanic['fare'].mean())
+print("Fare - Median:", titanic['fare'].median())
+print("Fare - Mode:", titanic['fare'].mode().values)
+
+# 3. Dispersion of Data
+print("\n--- MEASURES OF DISPERSION ---")
+print("Age Range:", titanic['age'].max() - titanic['age'].min())
+print("Fare Range:", titanic['fare'].max() - titanic['fare'].min())
+
+print("\nFive-Number Summary:")
+print(titanic[['age', 'fare']].describe())
+
+print("\nVariance:")
+print("Age Variance:", titanic['age'].var())
+print("Fare Variance:", titanic['fare'].var())
+
+print("\nStandard Deviation:")
+print("Age Std Dev:", titanic['age'].std())
+print("Fare Std Dev:", titanic['fare'].std())
+
+# Interquartile Range (IQR)
+iqr_age = titanic['age'].quantile(0.75) - titanic['age'].quantile(0.25)
+iqr_fare = titanic['fare'].quantile(0.75) - titanic['fare'].quantile(0.25)
+print("\nIQR:")
+print("Age IQR:", iqr_age)
+print("Fare IQR:", iqr_fare)
+
+# 4. Correlation (Pearson Correlation)
+print("\n--- CORRELATION MATRIX ---")
+print(titanic[['age', 'fare']].corr())
+
+# 5. Simpson's Paradox Example
+print("\n--- SIMPSON'S PARADOX BREAKDOWN ---")
+print("Overall survival rate:", titanic['survived'].mean())
+print("\nSurvival rate by gender:")
+print(titanic.groupby('sex')['survived'].mean())
+
+print("\nSurvival rate by class and gender:")
+print(titanic.groupby(['pclass', 'sex'])['survived'].mean())
+
+# 6. Visualization
+plt.figure(figsize=(8, 4))
+sns.barplot(x='sex', y='survived', data=titanic)
+plt.title('Survival Rate by Gender')
+plt.show()
+
+sns.catplot(x='pclass', y='survived', hue='sex', kind='bar', data=titanic)
+plt.title('Survival by Class and Gender')
+plt.show()`,
+    pretest: [
+        {
+            q: "Which measure of central tendency is most robust against extreme numerical outliers?",
+            options: ["Mean", "Median", "Variance", "Standard Deviation"],
+            answer: 1,
+            explanation: "The Median represents the exact 50th percentile of sorted data and is unaffected by extreme values, unlike the Mean."
+        },
+        {
+            q: "How is the Interquartile Range (IQR) calculated?",
+            options: ["Max - Min", "Q3 - Q1", "Standard Deviation / Mean", "Q3 + Q1"],
+            answer: 1,
+            explanation: "IQR is the distance between the 75th percentile (Q3) and 25th percentile (Q1): IQR = Q3 - Q1."
+        },
+        {
+            q: "What does a Pearson correlation coefficient r of +0.096 between Age and Fare indicate?",
+            options: ["Strong negative correlation", "Perfect positive correlation", "Very weak positive linear relationship", "Quadratic relationship"],
+            answer: 2,
+            explanation: "An r value close to 0 (0.096) indicates a very weak positive linear relationship between Age and Fare."
+        },
+        {
+            q: "What is Simpson's Paradox?",
+            options: ["When mean equals median in a normal distribution", "When a trend in subgroups disappears or reverses when groups are combined", "When standard deviation is zero", "When sample size is too small"],
+            answer: 1,
+            explanation: "Simpson's Paradox occurs when an apparent relationship in aggregated data reverses or vanishes upon controlling for confounding variables."
+        }
+    ],
+    posttest: [
+        {
+            q: "What is the relationship between Variance (σ²) and Standard Deviation (σ)?",
+            options: ["Standard Deviation is Variance squared", "Standard Deviation is the square root of Variance (σ = √σ²)", "They are always equal", "Variance is always zero"],
+            answer: 1,
+            explanation: "Standard Deviation is the principal square root of Variance, returning variability units to the original measurement scale."
+        },
+        {
+            q: "Why is Mean Fare ($32.20) significantly higher than Median Fare ($14.45) in the Titanic dataset?",
+            options: ["Calculation error", "Distribution is right-skewed with a few luxury 1st-class ticket prices", "Fare has negative values", "Pandas mean() excludes 3rd class"],
+            answer: 1,
+            explanation: "Luxury 1st class fares (up to $512) pull the arithmetic Mean upward, while the Median remains at $14.45."
+        },
+        {
+            q: "In the Simpson's Paradox demonstration, what is the survival rate for 1st class female passengers?",
+            options: ["18.89%", "50.00%", "96.80%", "36.88%"],
+            answer: 2,
+            explanation: "1st class female passengers had a 96.80% survival rate, compared to 50.00% for 3rd class females."
+        },
+        {
+            q: "Which Seaborn function generates a categorical barplot with subgroup hues?",
+            options: ["sns.heatmap()", "sns.catplot()", "sns.kdeplot()", "sns.pairplot()"],
+            answer: 1,
+            explanation: "sns.catplot() with kind='bar' and hue='sex' creates grouped multi-panel categorical bar charts."
+        }
+    ],
+    viva: [
+        {
+            q: "1. What is the central tendency? Name its measures.",
+            a: "Central tendency describes the center or typical value of a probability distribution or dataset. Its primary measures are the Mean (arithmetic average), Median (middle value), and Mode (most frequent value)."
+        },
+        {
+            q: "2. What is dispersion in a dataset?",
+            a: "Dispersion measures the spread, variability, or scatter of data points around the central tendency. Key measures include Range (Max - Min), Quartiles (Q1, Q2, Q3), Variance (σ²), Standard Deviation (σ), and Interquartile Range (IQR)."
+        },
+        {
+            q: "3. Define correlation. Which method did we use in this analysis?",
+            a: "Correlation measures the strength and direction of a linear relationship between two continuous numerical variables. In this experiment, we used Pearson Correlation Coefficient (r = +0.096 between Age and Fare)."
+        },
+        {
+            q: "4. What is Simpson's Paradox?",
+            a: "Simpson's Paradox is a statistical phenomenon where a trend or association that appears across different sub-groups disappears or reverses when the groups are aggregated together, caused by hidden confounding variables."
+        },
+        {
+            q: "5. How did you handle missing values in the Titanic dataset?",
+            a: "Missing continuous values like 'age' (177 missing) can be imputed using median imputation (28.0) or dropped for specific pairwise correlation calculations. Categorical missing values like 'embarked' are imputed with mode ('S')."
+        },
+        {
+            q: "6. How is the Interquartile Range (IQR) calculated in Python?",
+            a: "In Python, IQR is calculated by finding the difference between the 75th percentile (Q3) and 25th percentile (Q1) using Pandas: iqr = df['col'].quantile(0.75) - df['col'].quantile(0.25)."
+        }
+    ],
+    practice_commands: [
+        "titanic['age'].mean(), titanic['age'].median(), titanic['age'].mode()",
+        "titanic[['age', 'fare']].describe()",
+        "titanic['fare'].var(), titanic['fare'].std()",
+        "titanic['age'].quantile(0.75) - titanic['age'].quantile(0.25)",
+        "titanic[['age', 'fare']].corr()",
+        "titanic.groupby(['pclass', 'sex'])['survived'].mean()"
+    ],
+    practice_questions: [
+        "Task 1: Compute the Mean, Median, and Mode for the 'fare' and 'age' columns. Compare the gap between Mean and Median for both features.",
+        "Task 2: Calculate the Range, Variance, Standard Deviation, and Interquartile Range (IQR) for 'fare'. Explain why Fare has a large standard deviation.",
+        "Task 3: Compute the Pearson correlation matrix between 'age', 'fare', 'sibsp', and 'parch'. Identify which two features have the strongest correlation.",
+        "Task 4: Replicate the Simpson's Paradox analysis by calculating survival rates grouped by 'embark_town' and 'sex'. Document any trend reversals observed."
+    ]
+};
+
