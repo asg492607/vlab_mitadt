@@ -22123,6 +22123,7 @@ student@mitadt-os:~$ </div>
             } else if (currentSubject === 'ds') {
                 optionsHtml = `
                 <option value="idsl_exp1">1. Data Science Lifecycle & Data Type Classification (Titanic Dataset)</option>
+                <option value="idsl_exp2">2. Exploratory Data Analysis & Data Preprocessing (Titanic Dataset)</option>
             `;
                 const crumbs = document.querySelectorAll('.breadcrumb .crumb');
                 if (crumbs.length >= 2) {
@@ -22223,7 +22224,7 @@ student@mitadt-os:~$ </div>
         const aiLabs = ['ai_search', 'ai_heuristic', 'ai_csp', 'ai_minimax', 'ai_naive_bayes', 'ai_knn', 'ai_kmeans', 'ai_ann', 'ai_backprop', 'ai_fuzzy', 'ai_genetic', 'ai_expert'];
         const cloudLabs = ['cloud_virtualization', 'cloud_docker', 'cloud_loadbalancer', 'cloud_autoscaling', 'cloud_storage', 'cloud_cdn', 'cloud_iam', 'cloud_serverless', 'cloud_sla', 'cloud_mapreduce', 'cloud_kubernetes'];
         const cyberLabs = ['cyber_caesar', 'cyber_vigenere', 'cyber_rsa', 'cyber_aes', 'cyber_hashing', 'cyber_firewall', 'cyber_ids', 'cyber_sql_inject', 'cyber_xss', 'cyber_mitm', 'cyber_steganography', 'cyber_network_scan'];
-        const dsLabs = ['idsl_exp1'];
+        const dsLabs = ['idsl_exp1', 'idsl_exp2'];
 
         const urlParams = new URLSearchParams(window.location.search);
         const urlLab = urlParams.get('lab');
