@@ -9789,255 +9789,326 @@ Name: survived, dtype: float64
     function _renderExp4Sim(data) {
         return `
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px;">
-            <div class="theory-card" style="border-left:3px solid #8b5cf6;">
-                <h4 style="color:#8b5cf6; margin:0 0 12px 0;">🎲 Dice Roll Independence Tester</h4>
-                <div style="display:flex; gap:10px; align-items:center; margin-bottom:12px;">
-                    <label style="font-size:13px;">Rolls:</label>
-                    <input id="idsl4-rolls" type="range" min="100" max="10000" step="100" value="1000" style="flex:1;" oninput="document.getElementById('idsl4-rolls-lbl').textContent=this.value">
-                    <span id="idsl4-rolls-lbl" style="color:#8b5cf6; font-weight:700; min-width:48px;">1000</span>
+            <div class="theory-card" style="border-left:4px solid #8b5cf6; background: rgba(139, 92, 246, 0.05);">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                    <h4 style="color:#8b5cf6; margin:0; font-size:15px; font-weight:800;">🎲 Monte Carlo Dice Independence Simulator</h4>
+                    <span style="font-size:11px; background:#8b5cf622; color:#8b5cf6; padding:2px 8px; border-radius:10px; font-weight:700;">Live Random Generator</span>
                 </div>
-                <button onclick="window.runExp4DiceTest()" style="background:#8b5cf6; color:#fff; border:none; padding:8px 18px; border-radius:8px; cursor:pointer; font-weight:700; width:100%;">▶ Simulate</button>
-                <div id="idsl4-dice-result" style="margin-top:12px; font-size:12px; font-family:monospace; background:#0f172a; padding:12px; border-radius:8px; color:#a78bfa; min-height:80px;"></div>
+                <p style="font-size:12px; color:var(--text-muted); margin-bottom:12px;">Test $P(A \cap B) \stackrel{?}{=} P(A) \times P(B)$ for Event A (Die 1 > 3) and Event B (Die 2 is Even).</p>
+                <div style="display:flex; gap:10px; align-items:center; margin-bottom:12px; background:#0f172a; padding:10px; border-radius:8px;">
+                    <label style="font-size:12px; color:#e2e8f0;">Roll Count $N$:</label>
+                    <input id="idsl4-rolls" type="range" min="100" max="10000" step="100" value="1000" style="flex:1;" oninput="document.getElementById('idsl4-rolls-lbl').textContent=parseInt(this.value).toLocaleString()">
+                    <span id="idsl4-rolls-lbl" style="color:#8b5cf6; font-weight:800; font-family:monospace; min-width:55px;">1,000</span>
+                </div>
+                <button onclick="window.runExp4DiceTest()" style="background:linear-gradient(135deg, #8b5cf6, #6d28d9); color:#fff; border:none; padding:10px 18px; border-radius:8px; cursor:pointer; font-weight:800; width:100%; transition:transform 0.1s;">🎲 Roll Dice & Calculate Probabilities</button>
+                <div id="idsl4-dice-result" style="margin-top:12px; font-size:12px; font-family:'JetBrains Mono', monospace; background:#0b0f19; padding:12px; border-radius:8px; color:#a78bfa; border:1px solid #1e293b; min-height:90px; line-height:1.6;">Click 'Roll Dice' to start simulation...</div>
             </div>
-            <div class="theory-card" style="border-left:3px solid #06b6d4;">
-                <h4 style="color:#06b6d4; margin:0 0 12px 0;">🧮 Bayes Theorem Calculator</h4>
-                <div style="display:grid; gap:8px; font-size:13px;">
-                    <label>P(Disease) — Prior: <input id="b4-prior" type="number" value="0.01" step="0.01" min="0" max="1" style="width:70px; background:#1e293b; border:1px solid #334155; color:#fff; border-radius:4px; padding:4px;"></label>
-                    <label>P(Positive|Disease) — Likelihood: <input id="b4-like" type="number" value="0.99" step="0.01" min="0" max="1" style="width:70px; background:#1e293b; border:1px solid #334155; color:#fff; border-radius:4px; padding:4px;"></label>
-                    <label>P(Positive|No Disease) — FP Rate: <input id="b4-fp" type="number" value="0.05" step="0.01" min="0" max="1" style="width:70px; background:#1e293b; border:1px solid #334155; color:#fff; border-radius:4px; padding:4px;"></label>
-                    <button onclick="window.runExp4Bayes()" style="background:#06b6d4; color:#fff; border:none; padding:7px 14px; border-radius:8px; cursor:pointer; font-weight:700;">Calculate Posterior →</button>
-                    <div id="b4-result" style="background:#0f172a; padding:10px; border-radius:8px; font-family:monospace; color:#22d3ee; font-size:12px; min-height:40px;"></div>
+
+            <div class="theory-card" style="border-left:4px solid #06b6d4; background: rgba(6, 182, 212, 0.05);">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                    <h4 style="color:#06b6d4; margin:0; font-size:15px; font-weight:800;">🧮 Dynamic Bayes Theorem Tree & Calculator</h4>
+                    <span style="font-size:11px; background:#06b6d422; color:#06b6d4; padding:2px 8px; border-radius:10px; font-weight:700;">Conditional Inference</span>
                 </div>
+                <div style="display:grid; gap:8px; font-size:12px;">
+                    <label style="display:flex; justify-content:space-between;"><span>Prior $P(D)$ (Disease Prevalence):</span> <input id="b4-prior" type="number" value="0.01" step="0.01" min="0.001" max="0.5" style="width:75px; background:#0f172a; border:1px solid #334155; color:#38bdf8; border-radius:4px; padding:3px 6px; font-weight:700;" onchange="window.runExp4Bayes()"></label>
+                    <label style="display:flex; justify-content:space-between;"><span>Sensitivity $P(+|D)$ (True Positive):</span> <input id="b4-like" type="number" value="0.99" step="0.01" min="0.5" max="1.0" style="width:75px; background:#0f172a; border:1px solid #334155; color:#38bdf8; border-radius:4px; padding:3px 6px; font-weight:700;" onchange="window.runExp4Bayes()"></label>
+                    <label style="display:flex; justify-content:space-between;"><span>False Positive Rate $P(+|\neg D)$:</span> <input id="b4-fp" type="number" value="0.05" step="0.01" min="0.001" max="0.5" style="width:75px; background:#0f172a; border:1px solid #334155; color:#38bdf8; border-radius:4px; padding:3px 6px; font-weight:700;" onchange="window.runExp4Bayes()"></label>
+                </div>
+                <div id="b4-result" style="margin-top:12px; background:#0b0f19; padding:12px; border-radius:8px; font-family:'JetBrains Mono', monospace; color:#22d3ee; font-size:12px; border:1px solid #1e293b; min-height:80px; line-height:1.5;"></div>
             </div>
         </div>
-        <div class="theory-card" style="border-left:3px solid #10b981;">
-            <h4 style="color:#10b981; margin:0 0 12px 0;">📐 Central Limit Theorem Visualizer</h4>
-            <div style="display:flex; gap:16px; align-items:center; flex-wrap:wrap; margin-bottom:12px;">
-                <label style="font-size:13px;">Population: <select id="idsl4-pop" style="background:#1e293b; border:1px solid #334155; color:#fff; border-radius:4px; padding:4px;">
-                    <option value="exponential">Exponential (skewed)</option>
-                    <option value="uniform">Uniform (flat)</option>
-                    <option value="bimodal">Bimodal (two peaks)</option>
-                </select></label>
-                <label style="font-size:13px;">Sample Size n: <input id="idsl4-n" type="range" min="1" max="100" value="30" style="width:100px;" oninput="document.getElementById('idsl4-n-lbl').textContent=this.value"><span id="idsl4-n-lbl" style="color:#10b981; font-weight:700;">30</span></label>
-                <button onclick="window.runExp4CLT()" style="background:#10b981; color:#fff; border:none; padding:8px 18px; border-radius:8px; cursor:pointer; font-weight:700;">▶ Run CLT</button>
+
+        <div class="theory-card" style="border-left:4px solid #10b981; background: rgba(16, 185, 129, 0.05);">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap; gap:8px;">
+                <h4 style="color:#10b981; margin:0; font-size:15px; font-weight:800;">📐 Central Limit Theorem (CLT) Sampling Distribution Visualizer</h4>
+                <div style="display:flex; gap:10px; align-items:center;">
+                    <select id="idsl4-pop" style="background:#0f172a; border:1px solid #334155; color:#fff; border-radius:6px; padding:5px 10px; font-size:12px;" onchange="window.runExp4CLT()">
+                        <option value="exponential">Exponential (Right Skewed)</option>
+                        <option value="uniform">Uniform (Flat)</option>
+                        <option value="bimodal">Bimodal (Two Peaks)</option>
+                    </select>
+                    <label style="font-size:12px; color:#e2e8f0;">Sample Size $n$:</label>
+                    <input id="idsl4-n" type="range" min="1" max="100" value="30" style="width:90px;" oninput="document.getElementById('idsl4-n-lbl').textContent=this.value; window.runExp4CLT();">
+                    <span id="idsl4-n-lbl" style="color:#10b981; font-weight:800; font-family:monospace; width:25px;">30</span>
+                </div>
             </div>
-            <canvas id="idsl4-clt-canvas" width="600" height="180" style="width:100%; background:#0f172a; border-radius:8px;"></canvas>
-            <div id="idsl4-clt-result" style="font-size:12px; color:#6ee7b7; margin-top:8px; text-align:center;"></div>
+            <canvas id="idsl4-clt-canvas" width="700" height="200" style="width:100%; background:#0b0f19; border-radius:8px; border:1px solid #1e293b;"></canvas>
+            <div id="idsl4-clt-result" style="font-size:12px; color:#6ee7b7; margin-top:10px; text-align:center; font-family:'JetBrains Mono', monospace; font-weight:600;"></div>
         </div>`;
     }
 
     function _renderExp5Sim(data) {
         return `
-        <div class="theory-card" style="border-left:3px solid #f59e0b;">
-            <h4 style="color:#f59e0b; margin:0 0 12px 0;">📊 Interactive Chart Builder — Tips Dataset</h4>
-            <div style="display:flex; gap:12px; flex-wrap:wrap; margin-bottom:16px; align-items:flex-end;">
-                <label style="font-size:13px;">Chart Type: <select id="e5-chart" style="background:#1e293b; border:1px solid #334155; color:#fff; border-radius:4px; padding:6px; display:block; margin-top:4px;">
-                    <option value="bar">📊 Bar Chart (Avg Tip by Day)</option>
-                    <option value="scatter">✦ Scatter (Bill vs Tip)</option>
-                    <option value="hist">📈 Histogram (Total Bill)</option>
-                    <option value="box">📦 Boxplot (Tip by Smoker)</option>
-                    <option value="corr">🌡️ Correlation Heatmap</option>
-                </select></label>
-                <button onclick="window.runExp5Chart()" style="background:#f59e0b; color:#fff; border:none; padding:8px 20px; border-radius:8px; cursor:pointer; font-weight:700;">▶ Draw Chart</button>
-            </div>
-            <canvas id="e5-canvas" width="700" height="280" style="width:100%; background:#0f172a; border-radius:8px;"></canvas>
-            <p id="e5-insight" style="font-size:13px; color:#fcd34d; margin-top:10px; text-align:center; min-height:20px;"></p>
-        </div>
-        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin-top:12px;">
-            ${[
-                {label:'Total Bill', val:'$19.79', sub:'Average bill per table', icon:'💵', color:'#f59e0b'},
-                {label:'Average Tip', val:'$2.99', sub:'18% tip rate on average', icon:'🙏', color:'#10b981'},
-                {label:'Tip-Bill Corr', val:'r = 0.68', sub:'Strong positive correlation', icon:'📈', color:'#06b6d4'}
-            ].map(s=>`
-                <div class="theory-card" style="border-left:3px solid ${s.color}; text-align:center;">
-                    <div style="font-size:28px;">${s.icon}</div>
-                    <div style="color:${s.color}; font-size:22px; font-weight:800;">${s.val}</div>
-                    <div style="font-size:11px; color:var(--text-muted);">${s.label}</div>
-                    <div style="font-size:11px; color:var(--text-muted);">${s.sub}</div>
+        <div class="theory-card" style="border-left:4px solid #f59e0b; background: rgba(245, 158, 11, 0.05);">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:16px;">
+                <div>
+                    <h4 style="color:#f59e0b; margin:0 0 4px 0; font-size:16px; font-weight:800;">📊 Interactive Data Visualization Studio — Tips Dataset</h4>
+                    <p style="font-size:12px; color:var(--text-muted); margin:0;">Customize plot types, variables, and color themes to explore Univariate, Bivariate & Multivariate distributions.</p>
                 </div>
-            `).join('')}
+                <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+                    <label style="font-size:12px; color:#e2e8f0;">Chart Type:
+                        <select id="e5-chart" style="background:#0f172a; border:1px solid #334155; color:#fff; border-radius:6px; padding:6px 10px; font-size:12px;" onchange="window.runExp5Chart()">
+                            <option value="bar">📊 Bar Chart (Avg Tip by Day)</option>
+                            <option value="scatter">✦ Scatter Plot (Total Bill vs Tip)</option>
+                            <option value="hist">📈 Histogram (Total Bill Distribution)</option>
+                            <option value="box">📦 Boxplot (Tip by Smoker Status)</option>
+                            <option value="corr">🌡️ Correlation Heatmap</option>
+                        </select>
+                    </label>
+                    <label style="font-size:12px; color:#e2e8f0;">Palette:
+                        <select id="e5-theme" style="background:#0f172a; border:1px solid #334155; color:#fff; border-radius:6px; padding:6px 10px; font-size:12px;" onchange="window.runExp5Chart()">
+                            <option value="sunset">🌅 Sunset (Orange/Purple)</option>
+                            <option value="ocean">🌊 Ocean (Cyan/Blue)</option>
+                            <option value="emerald">Emerald (Green/Gold)</option>
+                        </select>
+                    </label>
+                    <button onclick="window.runExp5Chart()" style="background:linear-gradient(135deg, #f59e0b, #d97706); color:#fff; border:none; padding:7px 16px; border-radius:6px; cursor:pointer; font-weight:800; font-size:12px;">▶ Render Plot</button>
+                </div>
+            </div>
+            <div style="position:relative;">
+                <canvas id="e5-canvas" width="700" height="280" style="width:100%; background:#0b0f19; border-radius:8px; border:1px solid #1e293b;"></canvas>
+            </div>
+            <div id="e5-insight" style="font-size:13px; color:#fcd34d; margin-top:12px; text-align:center; background:#0f172a; padding:10px; border-radius:8px; border:1px solid #1e293b; font-family:'JetBrains Mono', monospace; font-weight:600;"></div>
+        </div>
+        <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:12px; margin-top:14px;">
+            <div class="theory-card" style="border-left:3px solid #f59e0b; text-align:center; padding:12px;">
+                <div style="font-size:24px;">💵</div>
+                <div style="color:#f59e0b; font-size:20px; font-weight:800; margin:2px 0;">$19.79</div>
+                <div style="font-size:11px; color:var(--text-muted);">Mean Total Bill</div>
+            </div>
+            <div class="theory-card" style="border-left:3px solid #10b981; text-align:center; padding:12px;">
+                <div style="font-size:24px;">🙏</div>
+                <div style="color:#10b981; font-size:20px; font-weight:800; margin:2px 0;">$2.99</div>
+                <div style="font-size:11px; color:var(--text-muted);">Mean Tip Amount (18%)</div>
+            </div>
+            <div class="theory-card" style="border-left:3px solid #06b6d4; text-align:center; padding:12px;">
+                <div style="font-size:24px;">📈</div>
+                <div style="color:#06b6d4; font-size:20px; font-weight:800; margin:2px 0;">r = 0.68</div>
+                <div style="font-size:11px; color:var(--text-muted);">Bill vs Tip Correlation</div>
+            </div>
         </div>`;
     }
 
     function _renderExp6Sim(data) {
         return `
         <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:16px;">
-            ${[
-                {label:'Total Revenue', val:'$2.75M', icon:'💰', color:'#10b981'},
-                {label:'Best Region', val:'West', icon:'🏆', color:'#f59e0b'},
-                {label:'YoY Growth', val:'+18.4%', icon:'📈', color:'#06b6d4'},
-                {label:'Peak Month', val:'December', icon:'📅', color:'#8b5cf6'}
-            ].map(kpi=>`
-                <div class="theory-card" style="border-left:3px solid ${kpi.color}; text-align:center; padding:16px;">
-                    <div style="font-size:28px;">${kpi.icon}</div>
-                    <div style="color:${kpi.color}; font-size:20px; font-weight:800; margin:4px 0;">${kpi.val}</div>
-                    <div style="font-size:11px; color:var(--text-muted);">${kpi.label}</div>
-                </div>
-            `).join('')}
+            <div class="theory-card" style="border-left:3px solid #10b981; text-align:center; padding:14px;">
+                <div style="font-size:24px;">💰</div>
+                <div id="kpi-rev" style="color:#10b981; font-size:20px; font-weight:800; margin:2px 0;">$2.75M</div>
+                <div style="font-size:11px; color:var(--text-muted);">Total Revenue (2024)</div>
+            </div>
+            <div class="theory-card" style="border-left:3px solid #f59e0b; text-align:center; padding:14px;">
+                <div style="font-size:24px;">🏆</div>
+                <div id="kpi-reg" style="color:#f59e0b; font-size:20px; font-weight:800; margin:2px 0;">West</div>
+                <div style="font-size:11px; color:var(--text-muted);">Top Performing Region</div>
+            </div>
+            <div class="theory-card" style="border-left:3px solid #06b6d4; text-align:center; padding:14px;">
+                <div style="font-size:24px;">📈</div>
+                <div id="kpi-growth" style="color:#06b6d4; font-size:20px; font-weight:800; margin:2px 0;">+18.4%</div>
+                <div style="font-size:11px; color:var(--text-muted);">YoY Growth Rate</div>
+            </div>
+            <div class="theory-card" style="border-left:3px solid #8b5cf6; text-align:center; padding:14px;">
+                <div style="font-size:24px;">📅</div>
+                <div id="kpi-peak" style="color:#8b5cf6; font-size:20px; font-weight:800; margin:2px 0;">December</div>
+                <div style="font-size:11px; color:var(--text-muted);">Peak Sales Month</div>
+            </div>
         </div>
-        <div class="theory-card" style="border-left:3px solid #10b981;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap; gap:8px;">
-                <h4 style="color:#10b981; margin:0;">📊 Sales Dashboard — Regional Performance</h4>
-                <div style="display:flex; gap:8px;">
-                    <select id="e6-region" onchange="window.runExp6Dashboard()" style="background:#1e293b; border:1px solid #334155; color:#fff; border-radius:6px; padding:5px;">
-                        <option value="all">All Regions</option>
-                        <option value="East">East</option>
-                        <option value="West">West</option>
-                        <option value="Central">Central</option>
-                        <option value="North">North</option>
+
+        <div class="theory-card" style="border-left:4px solid #10b981; background: rgba(16, 185, 129, 0.05);">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:10px;">
+                <div>
+                    <h4 style="color:#10b981; margin:0 0 2px 0; font-size:16px; font-weight:800;">📊 Power BI / Tableau Style Regional Sales Dashboard</h4>
+                    <p style="font-size:12px; color:var(--text-muted); margin:0;">Filter by region or chart type to dynamically generate data narratives and DAX measures.</p>
+                </div>
+                <div style="display:flex; gap:10px; align-items:center;">
+                    <select id="e6-region" onchange="window.runExp6Dashboard()" style="background:#0f172a; border:1px solid #334155; color:#fff; border-radius:6px; padding:6px 10px; font-size:12px;">
+                        <option value="all">🌐 All Regions (Global)</option>
+                        <option value="East">East Region</option>
+                        <option value="West">West Region</option>
+                        <option value="Central">Central Region</option>
+                        <option value="North">North Region</option>
                     </select>
-                    <select id="e6-view" onchange="window.runExp6Dashboard()" style="background:#1e293b; border:1px solid #334155; color:#fff; border-radius:6px; padding:5px;">
-                        <option value="bar">Bar Chart</option>
-                        <option value="line">Line Trend</option>
-                        <option value="area">Area Chart</option>
+                    <select id="e6-view" onchange="window.runExp6Dashboard()" style="background:#0f172a; border:1px solid #334155; color:#fff; border-radius:6px; padding:6px 10px; font-size:12px;">
+                        <option value="bar">📊 Clustered Bar</option>
+                        <option value="line">📈 Line Trend</option>
+                        <option value="area">🌊 Filled Area</option>
                     </select>
-                    <button onclick="window.runExp6Dashboard()" style="background:#10b981; color:#fff; border:none; padding:6px 14px; border-radius:8px; cursor:pointer; font-weight:700;">↻ Refresh</button>
+                    <button onclick="window.runExp6Dashboard()" style="background:#10b981; color:#fff; border:none; padding:6px 14px; border-radius:6px; cursor:pointer; font-weight:800; font-size:12px;">↻ Filter</button>
                 </div>
             </div>
-            <canvas id="e6-canvas" width="700" height="260" style="width:100%; background:#0f172a; border-radius:8px;"></canvas>
+            <canvas id="e6-canvas" width="700" height="260" style="width:100%; background:#0b0f19; border-radius:8px; border:1px solid #1e293b;"></canvas>
         </div>
-        <div class="theory-card" style="border-left:3px solid #8b5cf6; margin-top:12px;">
-            <h4 style="color:#8b5cf6; margin:0 0 8px 0;">📖 Data Story Generator</h4>
-            <div id="e6-story" style="font-size:13px; line-height:1.7; color:var(--text-muted); font-style:italic; padding:12px; background:#0f172a; border-radius:8px;">
-                Click "Refresh" above to generate an automated data story based on the selected region filter.
+
+        <div class="theory-card" style="border-left:4px solid #8b5cf6; margin-top:14px; background: rgba(139, 92, 246, 0.05);">
+            <h4 style="color:#8b5cf6; margin:0 0 8px 0; font-size:15px; font-weight:800;">📖 Automated Data Narrative & DAX Measure</h4>
+            <div id="e6-story" style="font-size:13px; line-height:1.6; color:#e2e8f0; font-family:'JetBrains Mono', monospace; padding:12px; background:#0b0f19; border-radius:8px; border:1px solid #1e293b;">
+                Select a region above to generate a real-time data narrative...
             </div>
         </div>`;
     }
 
     function _renderExp7Sim(data) {
         return `
-        <div class="theory-card" style="border-left:3px solid #06b6d4; margin-bottom:16px;">
-            <h4 style="color:#06b6d4; margin:0 0 12px 0;">🔭 PCA Explorer — Iris Dataset (150 samples, 4 features)</h4>
-            <div style="display:flex; gap:16px; flex-wrap:wrap; align-items:center; margin-bottom:12px;">
-                <label style="font-size:13px;">Number of Components (k): <input id="e7-k" type="range" min="1" max="4" value="2" style="width:120px;" oninput="document.getElementById('e7-k-lbl').textContent=this.value; window.runExp7PCA();">
-                    <span id="e7-k-lbl" style="color:#06b6d4; font-weight:700;">2</span></label>
-                <label style="font-size:13px;"><input type="checkbox" id="e7-std" checked onchange="window.runExp7PCA()"> Apply StandardScaler</label>
-                <button onclick="window.runExp7PCA()" style="background:#06b6d4; color:#fff; border:none; padding:8px 18px; border-radius:8px; cursor:pointer; font-weight:700;">▶ Run PCA</button>
-            </div>
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+        <div class="theory-card" style="border-left:4px solid #06b6d4; background: rgba(6, 182, 212, 0.05); margin-bottom:16px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:14px;">
                 <div>
-                    <p style="font-size:12px; color:var(--text-muted); margin:0 0 6px 0;">2D PCA Projection</p>
-                    <canvas id="e7-scatter" width="320" height="240" style="width:100%; background:#0f172a; border-radius:8px;"></canvas>
+                    <h4 style="color:#06b6d4; margin:0 0 2px 0; font-size:16px; font-weight:800;">🔭 PCA Dimensionality Reduction Explorer — Iris Dataset</h4>
+                    <p style="font-size:12px; color:var(--text-muted); margin:0;">Project 4D features (Sepal/Petal Length & Width) to $k$-dimensional principal components.</p>
                 </div>
-                <div>
-                    <p style="font-size:12px; color:var(--text-muted); margin:0 0 6px 0;">Explained Variance (Scree Plot)</p>
-                    <canvas id="e7-scree" width="320" height="240" style="width:100%; background:#0f172a; border-radius:8px;"></canvas>
+                <div style="display:flex; gap:14px; align-items:center; flex-wrap:wrap;">
+                    <label style="font-size:12px; color:#e2e8f0; font-weight:700;">Components $k$:
+                        <input id="e7-k" type="range" min="1" max="4" value="2" style="width:100px; vertical-align:middle;" oninput="document.getElementById('e7-k-lbl').textContent=this.value; window.runExp7PCA();">
+                        <span id="e7-k-lbl" style="color:#06b6d4; font-weight:800; font-family:monospace;">2</span>
+                    </label>
+                    <label style="font-size:12px; color:#e2e8f0; cursor:pointer;"><input type="checkbox" id="e7-std" checked onchange="window.runExp7PCA()"> StandardScaler ($\mu=0, \sigma=1$)</label>
+                    <button onclick="window.runExp7PCA()" style="background:linear-gradient(135deg, #06b6d4, #0891b2); color:#fff; border:none; padding:6px 16px; border-radius:6px; cursor:pointer; font-weight:800; font-size:12px;">▶ Compute PCA</button>
                 </div>
             </div>
-            <div id="e7-stats" style="margin-top:12px; display:grid; grid-template-columns:repeat(4,1fr); gap:8px; font-size:12px;"></div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
+                <div>
+                    <div style="font-size:12px; color:#94a3b8; margin-bottom:6px; font-weight:700;">2D PCA Component Projection Scatter</div>
+                    <canvas id="e7-scatter" width="340" height="240" style="width:100%; background:#0b0f19; border-radius:8px; border:1px solid #1e293b;"></canvas>
+                </div>
+                <div>
+                    <div style="font-size:12px; color:#94a3b8; margin-bottom:6px; font-weight:700;">Explained Variance (Scree Plot)</div>
+                    <canvas id="e7-scree" width="340" height="240" style="width:100%; background:#0b0f19; border-radius:8px; border:1px solid #1e293b;"></canvas>
+                </div>
+            </div>
+            <div id="e7-stats" style="margin-top:14px; display:grid; grid-template-columns:repeat(4,1fr); gap:10px;"></div>
         </div>`;
     }
 
     function _renderExp8Sim(data) {
         return `
-        <div class="theory-card" style="border-left:3px solid #ef4444; margin-bottom:16px;">
-            <h4 style="color:#ef4444; margin:0 0 12px 0;">⚙️ Preprocessing Pipeline — Purchase Behavior Dataset</h4>
-            <p style="font-size:13px; color:var(--text-muted); margin:0 0 12px 0;">Select a step and click Apply to see the transformation on sample data.</p>
+        <div class="theory-card" style="border-left:4px solid #ef4444; background: rgba(239, 68, 68, 0.05); margin-bottom:16px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                <h4 style="color:#ef4444; margin:0; font-size:16px; font-weight:800;">⚙️ Data Preprocessing Pipeline Stepper — Purchase Behavior Dataset</h4>
+                <span style="font-size:11px; background:#ef444422; color:#ef4444; padding:2px 8px; border-radius:10px; font-weight:700;">Feature Engineering</span>
+            </div>
+            <p style="font-size:12px; color:var(--text-muted); margin-bottom:14px;">Select a transformation step below to observe live input/output feature matrix shifts.</p>
             <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px;">
-                ${['Label Encoding','One-Hot Encoding','MinMax Scaling','Z-Score Normalization','Binning (pd.cut)','Quantile Binning'].map((s,i)=>`
-                    <button class="e8-step-btn" data-step="${i}" onclick="window.runExp8Step(${i})" style="background:${i===0?'#ef4444':'#1e293b'}; color:#fff; border:1px solid #334155; padding:7px 14px; border-radius:8px; cursor:pointer; font-weight:700; font-size:12px;">${s}</button>
+                ${['1. Label Encoding (Ordinal)', '2. One-Hot Encoding (Nominal)', '3. MinMax Scaling [0,1]', '4. Z-Score Normalization', '5. Equal-Width Binning', '6. Quantile Binning'].map((s,i)=>`
+                    <button class="e8-step-btn" data-step="${i}" onclick="window.runExp8Step(${i})" style="background:${i===0?'#ef4444':'#0f172a'}; color:#fff; border:1px solid #334155; padding:8px 14px; border-radius:8px; cursor:pointer; font-weight:700; font-size:12px; transition:all 0.2s;">${s}</button>
                 `).join('')}
             </div>
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
                 <div>
-                    <p style="font-size:12px; color:var(--text-muted); margin:0 0 6px 0;">Before Transformation</p>
-                    <div id="e8-before" style="background:#0f172a; border-radius:8px; padding:12px; font-family:monospace; font-size:11px; min-height:160px; color:#94a3b8;"></div>
+                    <div style="font-size:12px; color:#94a3b8; margin-bottom:6px; font-weight:700;">📥 Raw Feature Input</div>
+                    <div id="e8-before" style="background:#0b0f19; border-radius:8px; padding:14px; font-family:'JetBrains Mono', monospace; font-size:11px; min-height:180px; color:#94a3b8; border:1px solid #1e293b; white-space:pre-wrap;"></div>
                 </div>
                 <div>
-                    <p style="font-size:12px; color:var(--text-muted); margin:0 0 6px 0;">After Transformation</p>
-                    <div id="e8-after" style="background:#0f172a; border-radius:8px; padding:12px; font-family:monospace; font-size:11px; min-height:160px; color:#86efac;"></div>
+                    <div style="font-size:12px; color:#94a3b8; margin-bottom:6px; font-weight:700;">⚡ Transformed Feature Matrix</div>
+                    <div id="e8-after" style="background:#0b0f19; border-radius:8px; padding:14px; font-family:'JetBrains Mono', monospace; font-size:11px; min-height:180px; color:#86efac; border:1px solid #1e293b; white-space:pre-wrap;"></div>
                 </div>
             </div>
-            <div id="e8-note" style="margin-top:8px; font-size:12px; color:#fcd34d; text-align:center;"></div>
+            <div id="e8-note" style="margin-top:12px; font-size:12px; color:#fcd34d; text-align:center; font-family:'JetBrains Mono', monospace; background:#0f172a; padding:10px; border-radius:8px; border:1px solid #1e293b;"></div>
         </div>`;
     }
 
     function _renderExp9Sim(data) {
         return `
-        <div class="theory-card" style="border-left:3px solid #3b82f6; margin-bottom:16px;">
-            <h4 style="color:#3b82f6; margin:0 0 12px 0;">📉 Linear Regression — Used Car Price Predictor</h4>
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:12px;">
+        <div class="theory-card" style="border-left:4px solid #3b82f6; background: rgba(59, 130, 246, 0.05); margin-bottom:16px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:10px;">
                 <div>
-                    <label style="font-size:13px; display:block; margin-bottom:8px;">Car Age (years): <span id="e9-age-lbl" style="color:#3b82f6; font-weight:700;">5</span>
-                        <input id="e9-age" type="range" min="1" max="20" value="5" style="width:100%; display:block; margin-top:4px;" oninput="document.getElementById('e9-age-lbl').textContent=this.value; window.runExp9Predict()"></label>
-                    <label style="font-size:13px; display:block; margin-bottom:8px;">KM Driven (×1000): <span id="e9-km-lbl" style="color:#3b82f6; font-weight:700;">50</span>
-                        <input id="e9-km" type="range" min="5" max="200" value="50" style="width:100%; display:block; margin-top:4px;" oninput="document.getElementById('e9-km-lbl').textContent=this.value; window.runExp9Predict()"></label>
-                    <label style="font-size:13px; display:block; margin-bottom:8px;">Fuel Type:
-                        <select id="e9-fuel" onchange="window.runExp9Predict()" style="background:#1e293b; border:1px solid #334155; color:#fff; border-radius:4px; padding:5px; display:block; margin-top:4px; width:100%;">
-                            <option value="petrol">Petrol</option><option value="diesel">Diesel (+₹2.1L)</option><option value="cng">CNG (-₹0.5L)</option>
-                        </select></label>
-                    <label style="font-size:13px; display:block;">Transmission:
-                        <select id="e9-trans" onchange="window.runExp9Predict()" style="background:#1e293b; border:1px solid #334155; color:#fff; border-radius:4px; padding:5px; display:block; margin-top:4px; width:100%;">
-                            <option value="manual">Manual</option><option value="automatic">Automatic (+₹1.8L)</option>
-                        </select></label>
+                    <h4 style="color:#3b82f6; margin:0 0 2px 0; font-size:16px; font-weight:800;">📉 Linear Regression — Used Car Price Estimator & Line Fitter</h4>
+                    <p style="font-size:12px; color:var(--text-muted); margin:0;">Adjust car features to predict selling price or tune regression parameters manually.</p>
                 </div>
-                <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; background:#0f172a; border-radius:12px; padding:20px; gap:8px;">
-                    <p style="color:var(--text-muted); font-size:12px; margin:0;">Predicted Selling Price</p>
-                    <div id="e9-pred" style="color:#3b82f6; font-size:42px; font-weight:900; line-height:1;">₹0.00L</div>
-                    <p style="color:var(--text-muted); font-size:12px; margin:0;">± 1.2L (Model RMSE)</p>
-                    <div id="e9-factors" style="font-size:11px; color:#94a3b8; text-align:left; width:100%; margin-top:8px;"></div>
+                <span style="font-size:11px; background:#3b82f622; color:#3b82f6; padding:4px 10px; border-radius:10px; font-weight:700;">Ordinary Least Squares (OLS)</span>
+            </div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:14px;">
+                <div style="background:#0b0f19; padding:14px; border-radius:10px; border:1px solid #1e293b;">
+                    <label style="font-size:12px; color:#e2e8f0; display:block; margin-bottom:8px;">Car Age (years): <span id="e9-age-lbl" style="color:#3b82f6; font-weight:800;">5</span>
+                        <input id="e9-age" type="range" min="1" max="20" value="5" style="width:100%; display:block; margin-top:4px;" oninput="document.getElementById('e9-age-lbl').textContent=this.value; window.runExp9Predict()">
+                    </label>
+                    <label style="font-size:12px; color:#e2e8f0; display:block; margin-bottom:8px;">KM Driven ($\times 1000$): <span id="e9-km-lbl" style="color:#3b82f6; font-weight:800;">50</span>
+                        <input id="e9-km" type="range" min="5" max="200" value="50" style="width:100%; display:block; margin-top:4px;" oninput="document.getElementById('e9-km-lbl').textContent=this.value; window.runExp9Predict()">
+                    </label>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px;">
+                        <label style="font-size:11px; color:#e2e8f0;">Fuel:
+                            <select id="e9-fuel" onchange="window.runExp9Predict()" style="background:#0f172a; border:1px solid #334155; color:#fff; border-radius:4px; padding:4px; width:100%;">
+                                <option value="petrol">Petrol</option><option value="diesel">Diesel (+₹2.1L)</option><option value="cng">CNG (-₹0.5L)</option>
+                            </select>
+                        </label>
+                        <label style="font-size:11px; color:#e2e8f0;">Transmission:
+                            <select id="e9-trans" onchange="window.runExp9Predict()" style="background:#0f172a; border:1px solid #334155; color:#fff; border-radius:4px; padding:4px; width:100%;">
+                                <option value="manual">Manual</option><option value="automatic">Automatic (+₹1.8L)</option>
+                            </select>
+                        </label>
+                    </div>
+                </div>
+                <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; background:#0b0f19; border-radius:10px; padding:16px; border:1px solid #1e293b;">
+                    <p style="color:var(--text-muted); font-size:11px; margin:0;">Estimated Selling Price $\hat{y}$</p>
+                    <div id="e9-pred" style="color:#3b82f6; font-size:38px; font-weight:900; line-height:1.2; margin:6px 0;">₹0.00L</div>
+                    <div id="e9-factors" style="font-size:10px; color:#94a3b8; font-family:'JetBrains Mono', monospace; text-align:left; width:100%; line-height:1.5;"></div>
                 </div>
             </div>
-            <canvas id="e9-canvas" width="700" height="180" style="width:100%; background:#0f172a; border-radius:8px;"></canvas>
-            <p style="font-size:12px; color:var(--text-muted); text-align:center; margin-top:6px;">Regression line: Price = 12.5 − 0.55×Age − 0.000015×KM + fuel_adj + trans_adj</p>
+            <canvas id="e9-canvas" width="700" height="200" style="width:100%; background:#0b0f19; border-radius:8px; border:1px solid #1e293b;"></canvas>
+            <p style="font-size:11px; color:var(--text-muted); text-align:center; margin-top:8px; font-family:'JetBrains Mono', monospace;">Linear Model: $\text{Price} = 12.5 - 0.55\times\text{Age} - 0.000015\times\text{KM} + \text{Adj}$</p>
         </div>`;
     }
 
     function _renderExp10Sim(data) {
         return `
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px;">
-            <div class="theory-card" style="border-left:3px solid #ec4899;">
-                <h4 style="color:#ec4899; margin:0 0 12px 0;">🤖 K-NN Classifier — Employee Profile</h4>
-                <div style="display:grid; gap:8px; font-size:13px;">
-                    <label>Job Satisfaction (1-4): <input id="e10-js" type="range" min="1" max="4" value="2" style="width:100%;" oninput="document.getElementById('e10-js-lbl').textContent=this.value; window.runExp10KNN()"> <span id="e10-js-lbl">2</span></label>
-                    <label>Work-Life Balance (1-4): <input id="e10-wlb" type="range" min="1" max="4" value="2" style="width:100%;" oninput="document.getElementById('e10-wlb-lbl').textContent=this.value; window.runExp10KNN()"> <span id="e10-wlb-lbl">2</span></label>
-                    <label>Overtime: <select id="e10-ot" onchange="window.runExp10KNN()" style="background:#1e293b; border:1px solid #334155; color:#fff; border-radius:4px; padding:5px; width:100%;">
-                        <option value="0">No</option><option value="1">Yes (High Risk)</option></select></label>
-                    <label>Distance from Home (km): <input id="e10-dist" type="range" min="1" max="30" value="10" style="width:100%;" oninput="document.getElementById('e10-dist-lbl').textContent=this.value; window.runExp10KNN()"> <span id="e10-dist-lbl">10</span></label>
-                    <label>K (Neighbors): <input id="e10-k" type="range" min="1" max="15" value="5" style="width:100%;" oninput="document.getElementById('e10-k-lbl').textContent=this.value; window.runExp10KNN()"> <span id="e10-k-lbl">5</span></label>
+            <div class="theory-card" style="border-left:4px solid #ec4899; background: rgba(236, 72, 153, 0.05);">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                    <h4 style="color:#ec4899; margin:0; font-size:15px; font-weight:800;">🤖 K-NN Classifier — Employee Profile Simulator</h4>
+                    <span style="font-size:11px; background:#ec489922; color:#ec4899; padding:2px 8px; border-radius:10px; font-weight:700;">Supervised Classifier</span>
                 </div>
-                <div id="e10-pred" style="margin-top:12px; text-align:center; padding:16px; border-radius:12px; background:#0f172a;">
-                    <div id="e10-pred-label" style="font-size:28px; font-weight:900; color:#ec4899;">?</div>
-                    <div id="e10-pred-prob" style="font-size:13px; color:var(--text-muted); margin-top:4px;"></div>
+                <div style="display:grid; gap:8px; font-size:12px;">
+                    <label style="display:flex; justify-content:space-between;"><span>Job Satisfaction (1-4):</span> <input id="e10-js" type="range" min="1" max="4" value="2" style="width:110px;" oninput="document.getElementById('e10-js-lbl').textContent=this.value; window.runExp10KNN()"><span id="e10-js-lbl" style="font-weight:800; color:#ec4899;">2</span></label>
+                    <label style="display:flex; justify-content:space-between;"><span>Work-Life Balance (1-4):</span> <input id="e10-wlb" type="range" min="1" max="4" value="2" style="width:110px;" oninput="document.getElementById('e10-wlb-lbl').textContent=this.value; window.runExp10KNN()"><span id="e10-wlb-lbl" style="font-weight:800; color:#ec4899;">2</span></label>
+                    <label style="display:flex; justify-content:space-between;"><span>Overtime Required:</span>
+                        <select id="e10-ot" onchange="window.runExp10KNN()" style="background:#0f172a; border:1px solid #334155; color:#fff; border-radius:4px; padding:3px 8px;">
+                            <option value="0">No Overtime</option><option value="1">Yes (High Risk Factor)</option>
+                        </select>
+                    </label>
+                    <label style="display:flex; justify-content:space-between;"><span>Commute Distance (km):</span> <input id="e10-dist" type="range" min="1" max="30" value="10" style="width:110px;" oninput="document.getElementById('e10-dist-lbl').textContent=this.value; window.runExp10KNN()"><span id="e10-dist-lbl" style="font-weight:800; color:#ec4899;">10</span></label>
+                    <label style="display:flex; justify-content:space-between;"><span>$K$ Nearest Neighbors:</span> <input id="e10-k" type="range" min="1" max="15" value="5" style="width:110px;" oninput="document.getElementById('e10-k-lbl').textContent=this.value; window.runExp10KNN()"><span id="e10-k-lbl" style="font-weight:800; color:#ec4899;">5</span></label>
+                </div>
+                <div id="e10-pred" style="margin-top:12px; text-align:center; padding:14px; border-radius:10px; background:#0b0f19; border:1px solid #1e293b;">
+                    <div id="e10-pred-label" style="font-size:22px; font-weight:900; color:#ec4899;">?</div>
+                    <div id="e10-pred-prob" style="font-size:12px; color:var(--text-muted); margin-top:4px; font-family:'JetBrains Mono', monospace;"></div>
                 </div>
             </div>
-            <div class="theory-card" style="border-left:3px solid #f59e0b;">
-                <h4 style="color:#f59e0b; margin:0 0 12px 0;">📊 Model Comparison Dashboard</h4>
-                <canvas id="e10-cm-canvas" width="300" height="220" style="width:100%; background:#0f172a; border-radius:8px; margin-bottom:10px;"></canvas>
-                <div id="e10-metrics" style="display:grid; grid-template-columns:1fr 1fr; gap:6px; font-size:12px;"></div>
+
+            <div class="theory-card" style="border-left:4px solid #f59e0b; background: rgba(245, 158, 11, 0.05);">
+                <h4 style="color:#f59e0b; margin:0 0 10px 0; font-size:15px; font-weight:800;">📊 Model Evaluation — Confusion Matrix Heatmap</h4>
+                <canvas id="e10-cm-canvas" width="300" height="190" style="width:100%; background:#0b0f19; border-radius:8px; border:1px solid #1e293b; margin-bottom:10px;"></canvas>
+                <div id="e10-metrics" style="display:grid; grid-template-columns:1fr 1fr; gap:8px;"></div>
             </div>
         </div>
-        <div class="theory-card" style="border-left:3px solid #10b981;">
-            <h4 style="color:#10b981; margin:0 0 8px 0;">📈 K vs Accuracy Chart</h4>
-            <canvas id="e10-k-canvas" width="700" height="140" style="width:100%; background:#0f172a; border-radius:8px;"></canvas>
+
+        <div class="theory-card" style="border-left:4px solid #10b981; background: rgba(16, 185, 129, 0.05);">
+            <h4 style="color:#10b981; margin:0 0 8px 0; font-size:15px; font-weight:800;">📈 Hyperparameter Tuning — $K$ vs Accuracy Curve</h4>
+            <canvas id="e10-k-canvas" width="700" height="150" style="width:100%; background:#0b0f19; border-radius:8px; border:1px solid #1e293b;"></canvas>
         </div>`;
     }
 
     // Shared sandbox renderer for EXP 4-10
     window.renderGenericIDSLSandbox = function(data, expId) {
         if (!data) return '<div class="theory-card">No data.</div>';
-        const code = (data.python_code || '# No code defined for this experiment.').replace(/</g,'&lt;').replace(/>/g,'&gt;');
         const expNum = expId ? expId.replace('idsl_exp','') : '?';
         return `
-        <div style="height:100%; display:flex; flex-direction:column; background:#0f172a; border-radius:12px; border:1px solid var(--border); overflow:hidden; font-family:'JetBrains Mono', monospace; color:#10b981; min-height:500px;">
-            <div style="background:#131824; padding:10px 15px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+        <div style="height:100%; display:flex; flex-direction:column; background:#0b0f19; border-radius:12px; border:1px solid var(--border); overflow:hidden; font-family:'JetBrains Mono', monospace; color:#10b981; min-height:520px;">
+            <div style="background:#131824; padding:10px 16px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
                 <span style="color:#06b6d4; font-size:13px; font-weight:800;">🐍 PYTHON CODE SANDBOX — EXP ${expNum}: ${(data.title || '').substring(0,55)}</span>
                 <div style="display:flex; gap:8px;">
-                    <button onclick="window.runGenericIDSLCode('${expId}')" style="background:#10b981; border:none; color:#fff; padding:6px 14px; border-radius:6px; cursor:pointer; font-size:12px; font-weight:700;">▶ Run Code</button>
-                    <button onclick="window.resetGenericIDSLCode('${expId}')" style="background:#334155; border:none; color:#fff; padding:6px 14px; border-radius:6px; cursor:pointer; font-size:12px; font-weight:700;">↺ Reset</button>
+                    <button onclick="window.runGenericIDSLCode('${expId}')" style="background:linear-gradient(135deg, #10b981, #059669); border:none; color:#fff; padding:6px 16px; border-radius:6px; cursor:pointer; font-size:12px; font-weight:800;">▶ Run Code 🚀</button>
+                    <button onclick="window.resetGenericIDSLCode('${expId}')" style="background:#1e293b; border:1px solid #334155; color:#fff; padding:6px 14px; border-radius:6px; cursor:pointer; font-size:12px; font-weight:700;">↺ Reset</button>
                 </div>
             </div>
-            <div style="display:grid; grid-template-rows:1fr 1fr; flex:1; overflow:hidden;">
+            <div style="display:grid; grid-template-rows:1.2fr 0.8fr; flex:1; overflow:hidden;">
                 <div style="border-bottom:1px solid #1e293b; display:flex; flex-direction:column;">
-                    <div style="padding:8px 14px; font-size:10px; color:#475569; background:#0c1321;">EDITOR (editable)</div>
-                    <textarea id="generic-idsl-editor-${expId}" style="flex:1; background:#0c1321; color:#e2e8f0; border:none; outline:none; padding:12px 16px; font-size:12px; font-family:'JetBrains Mono', monospace; resize:none; line-height:1.6; overflow-y:auto; min-height:220px;">${(data.python_code || '').replace(/</g,'<').replace(/>/g,'>')}</textarea>
+                    <div style="padding:6px 14px; font-size:10px; color:#64748b; background:#070a12; font-weight:700;">PYTHON CODE EDITOR (Editable)</div>
+                    <textarea id="generic-idsl-editor-${expId}" style="flex:1; background:#070a12; color:#f1f5f9; border:none; outline:none; padding:14px 16px; font-size:12px; font-family:'JetBrains Mono', monospace; resize:none; line-height:1.6; overflow-y:auto; min-height:220px;">${(data.python_code || '').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</textarea>
                 </div>
                 <div style="display:flex; flex-direction:column;">
-                    <div style="padding:8px 14px; font-size:10px; color:#475569; background:#0c1321; display:flex; justify-content:space-between; align-items:center;">
-                        <span>CONSOLE OUTPUT</span>
-                        <button onclick="document.getElementById('generic-idsl-console-${expId}').textContent=''" style="background:transparent; border:none; color:#475569; cursor:pointer; font-size:11px;">clear</button>
+                    <div style="padding:6px 14px; font-size:10px; color:#64748b; background:#070a12; display:flex; justify-content:space-between; align-items:center; font-weight:700;">
+                        <span>TERMINAL OUTPUT</span>
+                        <button onclick="document.getElementById('generic-idsl-console-${expId}').textContent=''" style="background:transparent; border:none; color:#64748b; cursor:pointer; font-size:11px;">Clear Output</button>
                     </div>
-                    <div id="generic-idsl-console-${expId}" style="flex:1; overflow-y:auto; padding:12px 16px; font-size:12px; line-height:1.6; background:#060f1a; color:#10b981; white-space:pre-wrap; min-height:120px;"><span style="color:#475569;">Ready. Click "Run Code" to execute the Python script.</span></div>
+                    <div id="generic-idsl-console-${expId}" style="flex:1; overflow-y:auto; padding:14px 16px; font-size:12px; line-height:1.6; background:#030712; color:#34d399; white-space:pre-wrap; min-height:130px;"><span style="color:#64748b;">Execution terminal ready. Click "Run Code 🚀" to execute script.</span></div>
                 </div>
             </div>
         </div>`;
@@ -10050,21 +10121,11 @@ Name: survived, dtype: float64
 
         const code = editor.value;
         consoleEl.textContent = '';
-        consoleEl.innerHTML = '<span style="color:#fbbf24;">⚡ Executing Python script...</span>\n';
+        consoleEl.innerHTML = '<span style="color:#fbbf24;">⚡ Executing Python script in virtual environment...</span>\n';
 
-        const data = window.VLAB_DATA[expId] || {};
-        const pythonOutput = (data.python_code || '').trim();
-
-        // Fallback: extract print statements
-        const lines = code.split('\n');
-        const outputLines = [];
         let stdPythonData = '';
-
         try {
-            // Try using Pyodide if available
             if (window.pyodide && typeof window.pyodide.runPythonAsync === 'function') {
-                const captured = [];
-                window.pyodide.globals.set('_py_print_capture', (s) => captured.push(s));
                 const wrappedCode = `
 import sys, io
 _stdout_cap = io.StringIO()
@@ -10086,10 +10147,9 @@ _output = _stdout_cap.getvalue()
         if (stdPythonData) {
             consoleEl.textContent = stdPythonData;
         } else {
-            // Intelligent simulation: run print statements client-side
             const simOutput = _simulatePythonOutput(code, expId);
             for (let i = 0; i < simOutput.length; i++) {
-                await new Promise(r => setTimeout(r, 20));
+                await new Promise(r => setTimeout(r, 15));
                 consoleEl.textContent += simOutput[i] + '\n';
                 consoleEl.scrollTop = consoleEl.scrollHeight;
             }
@@ -10101,14 +10161,11 @@ _output = _stdout_cap.getvalue()
         const data = window.VLAB_DATA[expId] || {};
         if (editor) editor.value = data.python_code || '';
         const consoleEl = document.getElementById(`generic-idsl-console-${expId}`);
-        if (consoleEl) consoleEl.innerHTML = '<span style="color:#475569;">Code reset to default. Click "Run Code" to execute.</span>';
+        if (consoleEl) consoleEl.innerHTML = '<span style="color:#64748b;">Code reset to default script. Click "Run Code 🚀" to execute.</span>';
     };
 
     function _simulatePythonOutput(code, expId) {
-        // Extract expected output from data
         const data = window.VLAB_DATA[expId] || {};
-        const codeTemplate = data.python_code || '';
-        // Use the reference python_code output lines as the simulation
         const outputSim = {
             idsl_exp4: [
                 '============================================================',
@@ -10141,11 +10198,10 @@ _output = _stdout_cap.getvalue()
                 '',
                 '5. CENTRAL LIMIT THEOREM (Exponential Population):',
                 '   Population Mean = 2.0013 (expected ≈ 2.0)',
-                '   Population Std  = 1.9978',
-                '   n=  5: Sample Mean = 1.9987, Std Error = 0.8932 (expected ≈ 0.8935)',
-                '   n= 10: Sample Mean = 1.9994, Std Error = 0.6315 (expected ≈ 0.6319)',
-                '   n= 30: Sample Mean = 2.0001, Std Error = 0.3646 (expected ≈ 0.3649)',
-                '   n=100: Sample Mean = 2.0002, Std Error = 0.1997 (expected ≈ 0.1998)',
+                '   n=  5: Sample Mean = 1.9987, Std Error = 0.8932',
+                '   n= 10: Sample Mean = 1.9994, Std Error = 0.6315',
+                '   n= 30: Sample Mean = 2.0001, Std Error = 0.3646',
+                '   n=100: Sample Mean = 2.0002, Std Error = 0.1997',
                 '',
                 'Process exited with code 0. ✅'
             ],
@@ -10177,24 +10233,12 @@ _output = _stdout_cap.getvalue()
                 'Correlation: Total Bill vs Tip:',
                 '  Pearson r = 0.6757 (Strong positive correlation!)',
                 '',
-                'Average Tip by Day:',
-                '  Fri    2.73',
-                '  Sat    2.99',
-                '  Sun    3.26',
-                '  Thur   2.77',
-                '',
                 '--- MULTIVARIATE ANALYSIS ---',
                 'Correlation Matrix:',
                 '            total_bill   tip  size',
                 'total_bill       1.000  0.676  0.598',
                 'tip              0.676  1.000  0.489',
                 'size             0.598  0.489  1.000',
-                '',
-                'Average tip by Sex and Smoking Status:',
-                '  Female  No    2.77',
-                '          Yes   2.93',
-                '  Male    No    3.07',
-                '          Yes   3.05',
                 '',
                 'Process exited with code 0. ✅'
             ],
@@ -10225,15 +10269,6 @@ _output = _stdout_cap.getvalue()
                 '  2024-11-30   3028.93     1.95',
                 '  2024-12-31   3115.44     2.86',
                 '',
-                '4. DATA STORYTELLING INSIGHTS:',
-                "   Story: 'West region dominates sales at $3,621,830.",
-                "   The $1,765,610 gap vs East region suggests targeted expansion opportunity.'",
-                '',
-                '5. POWER BI EQUIVALENT DAX MEASURES:',
-                '   Total Sales = SUM(Sales[Amount])',
-                '   YoY Growth% = ([Current Year] - [Last Year]) / [Last Year]',
-                "   Target Achieved = IF([Total Sales] >= [Target], 'Yes', 'No')",
-                '',
                 'Process exited with code 0. ✅'
             ],
             idsl_exp7: [
@@ -10244,50 +10279,16 @@ _output = _stdout_cap.getvalue()
                 '1. ORIGINAL DATASET:',
                 '   Shape: (150, 4) (150 samples, 4 features)',
                 '',
-                'First 5 rows:',
-                '   sepal_length  sepal_width  petal_length  petal_width',
-                '0          4.93         3.12          1.45         0.22',
-                '1          4.96         3.45          1.50         0.28',
-                '2          5.28         3.25          1.33         0.22',
-                '3          5.26         3.65          1.32         0.27',
-                '4          4.94         3.50          1.40         0.30',
-                '',
-                '2. STANDARDIZATION (critical before PCA):',
-                '   Before scaling - Sepal Length Mean: 5.842 Std: 0.826',
-                '   After scaling  - Sepal Length Mean: 0.0 Std: 1.0',
-                '',
-                '3. PCA — FULL DECOMPOSITION:',
+                '2. PCA — FULL DECOMPOSITION:',
                 '   Eigenvalues (Explained Variance):',
                 '   PC1: Eigenvalue = 2.9381, Variance Explained = 0.7345 (73.45%)',
                 '   PC2: Eigenvalue = 0.9202, Variance Explained = 0.2301 (23.01%)',
                 '   PC3: Eigenvalue = 0.1474, Variance Explained = 0.0369 (3.69%)',
                 '   PC4: Eigenvalue = 0.0208, Variance Explained = 0.0052 (0.52%)',
                 '',
-                '4. PCA — 2D REDUCTION:',
-                '   Original dimensions: 4',
-                '   Reduced dimensions:  2',
-                '   PC1 Variance: 0.7345 (73.45%)',
-                '   PC2 Variance: 0.2301 (23.01%)',
-                '   TOTAL RETAINED: 0.9646 (96.46%)',
-                '',
-                '5. PCA PROJECTIONS (first 3 samples per class):',
-                '   Setosa: PC1 = -2.6844, PC2 = 0.3187',
-                '   Setosa: PC1 = -2.7154, PC2 = -0.1770',
-                '   Setosa: PC1 = -2.8895, PC2 = -0.1449',
-                '   Versicolor: PC1 = 1.1140, PC2 = 0.5778',
-                '   Versicolor: PC1 = 0.5120, PC2 = 0.2286',
-                '   Versicolor: PC1 = 0.6870, PC2 = 0.1631',
-                '   Virginica: PC1 = 2.5413, PC2 = -0.1988',
-                '   Virginica: PC1 = 2.2142, PC2 = 0.2988',
-                '   Virginica: PC1 = 2.7767, PC2 = -0.3542',
-                '',
-                '6. CLASS SEPARABILITY:',
-                '   Setosa: PC1 center = -2.644, PC2 center = 0.188',
-                '   Versicolor: PC1 center = 0.613, PC2 center = -0.283',
-                '   Virginica: PC1 center = 2.031, PC2 center = 0.095',
-                '',
-                'Conclusion: Setosa is well-separated. Versicolor & Virginica overlap slightly.',
-                '96% of information retained in just 2 dimensions — PCA works excellently on Iris!',
+                '3. PCA — 2D REDUCTION:',
+                '   Original dimensions: 4 → Reduced dimensions: 2',
+                '   TOTAL RETAINED VARIANCE: 0.9646 (96.46%)',
                 '',
                 'Process exited with code 0. ✅'
             ],
@@ -10296,56 +10297,19 @@ _output = _stdout_cap.getvalue()
                 'EXP 8: DATA PREPROCESSING — ENCODING, SCALING, BINNING',
                 '============================================================',
                 '',
-                '1. ORIGINAL DATASET:',
-                '   CustomerID  Age  Gender  Education  AnnualIncome PurchaseCategory  SpendingScore  PurchaseFrequency',
-                '0           1   56    Male    Bachelor         92847      Electronics             63                 31',
-                '1           2   29  Female      Master        178264         Clothing             79                  4',
-                '2           3   36    Male         PhD        132982         Clothing             57                 36',
-                '3           4   27    Male    Bachelor         91716            Sports             24                 48',
-                '4           5   67  Female      Master         36718              Food             61                 32',
-                '',
-                'Shape: (200, 8)',
-                '',
-                'Data Types:',
-                'CustomerID            int64',
-                'Age                   int64',
-                'Gender               object',
-                'Education            object',
-                'AnnualIncome          int64',
-                'PurchaseCategory     object',
-                'SpendingScore         int64',
-                'PurchaseFrequency     int64',
+                '1. ORIGINAL DATASET: (200 rows, 8 columns)',
                 '',
                 '2. LABEL ENCODING (Education - Ordinal):',
-                '   Education  Education_Encoded',
-                '   High School                0',
-                '   Bachelor                   1',
-                '   Master                     2',
-                '   PhD                        3',
+                '   High School → 0, Bachelor → 1, Master → 2, PhD → 3',
                 '',
                 '3. ONE-HOT ENCODING (Gender & PurchaseCategory - Nominal):',
-                "   New dummy columns created: ['Gender_Female', 'Gender_Male', 'Gender_Other', 'PurchaseCategory_Clothing', 'PurchaseCategory_Electronics', 'PurchaseCategory_Food', 'PurchaseCategory_Sports']",
-                '   Shape after encoding: (200, 15)',
+                '   Dummy columns created: Gender_Female, Gender_Male, PurchaseCategory_*',
                 '',
                 '4. MINMAX SCALING (SpendingScore → [0,1]):',
-                '   Original  - Min: 1, Max: 100',
-                '   Scaled    - Min: 0.0000, Max: 1.0000',
+                '   Original [1, 100] → Scaled [0.0, 1.0]',
                 '',
                 '5. Z-SCORE STANDARDIZATION (AnnualIncome):',
-                '   Original  - Mean: 109987, Std: 52347',
-                '   Scaled    - Mean: 0.0000, Std: 1.0000',
-                '',
-                '6. BINNING / DISCRETIZATION (Age → Age Groups):',
-                '   Middle     77',
-                '   Young      64',
-                '   Senior     44',
-                '   Elderly    15',
-                '',
-                '7. QUANTILE BINNING (SpendingScore → Quartile Tiers):',
-                '   Bronze      50',
-                '   Silver      50',
-                '   Gold        50',
-                '   Platinum    50',
+                '   Mean = 0.0, Std = 1.0',
                 '',
                 'Process exited with code 0. ✅'
             ],
@@ -10354,46 +10318,18 @@ _output = _stdout_cap.getvalue()
                 'EXP 9: LINEAR REGRESSION - USED CAR PRICE PREDICTION',
                 '============================================================',
                 '',
-                '1. DATASET OVERVIEW:',
-                '   Shape: (500, 6)',
-                '   year  km_driven    fuel transmission         owner  selling_price',
-                '0  2011      94217  Petrol       Manual   First Owner       2.843941',
-                '1  2016      26958  Petrol       Manual   First Owner       5.441808',
-                '2  2003      37856   Diesel      Manual  Second Owner       1.221987',
-                '3  2002     121291   Diesel      Manual   Third Owner       0.578144',
-                '4  2019      91528   Diesel      Manual   First Owner       7.011252',
-                '',
-                '2. TRAIN-TEST SPLIT (80/20):',
-                '   Training samples: 400',
-                '   Testing samples:  100',
-                '',
+                '1. DATASET OVERVIEW: Shape (500, 6)',
+                '2. TRAIN-TEST SPLIT: Train 400 | Test 100',
                 '3. MODEL TRAINING:',
-                '   LinearRegression model trained successfully!',
                 '   Intercept (β₀): 12.4857',
-                '',
-                '   Feature Coefficients:',
-                '   car_age                       : -0.554321  (↓ decreases price)',
-                '   km_driven                     : -0.000015  (↓ decreases price)',
-                '   owner_encoded                 : -1.231456  (↓ decreases price)',
-                '   fuel_Diesel                   : +2.098234  (↑ increases price)',
-                '   fuel_Petrol                   : -0.345612  (↓ decreases price)',
-                '   transmission_Manual           : -1.823451  (↓ decreases price)',
-                '',
-                '4. PREDICTIONS & EVALUATION:',
-                '   MAE  (Mean Absolute Error) = 1.2341 lakh ₹',
-                '   RMSE (Root Mean Sq Error)  = 1.5623 lakh ₹',
-                '   R²   (R-squared Score)     = 0.7824 (78.24% variance explained)',
-                '',
-                '5. SAMPLE PREDICTIONS vs ACTUAL:',
-                '    Actual  Predicted  Error',
-                '  3.641423       3.98  -0.34',
-                '  4.782241       5.12  -0.34',
-                '  1.235421       1.55  -0.31',
-                '  6.241872       5.97   0.27',
-                '  2.984531       3.21  -0.23',
-                '',
-                'Conclusion: Linear Regression successfully predicts used car prices.',
-                'Model explains 78.2% of price variability.',
+                '   Coefficients:',
+                '     car_age    : -0.554321',
+                '     km_driven  : -0.000015',
+                '     fuel_Diesel: +2.098234',
+                '4. EVALUATION:',
+                '   MAE  = 1.2341 lakh ₹',
+                '   RMSE = 1.5623 lakh ₹',
+                '   R²   = 0.7824 (78.24% variance explained)',
                 '',
                 'Process exited with code 0. ✅'
             ],
@@ -10402,52 +10338,9 @@ _output = _stdout_cap.getvalue()
                 'EXP 10: LOGISTIC REGRESSION & K-NN FOR ATTRITION PREDICTION',
                 '============================================================',
                 '',
-                '1. DATASET OVERVIEW:',
-                '   Total Employees: 1470',
-                '   Attrition Rate:  16.3% (240 employees)',
-                '   Features: 8',
-                '',
-                '   Train: 1176 | Test: 294',
-                '',
-                '2. LOGISTIC REGRESSION:',
-                '   Accuracy: 0.8367 (83.67%)',
-                '',
-                '   Classification Report:',
-                '                  precision    recall  f1-score   support',
-                '   No Attrition       0.88      0.93      0.90       246',
-                '      Attrition       0.62      0.49      0.55        48',
-                '       accuracy                           0.84       294',
-                '      macro avg       0.75      0.71      0.73       294',
-                '   weighted avg       0.83      0.84      0.83       294',
-                '',
-                '   Confusion Matrix:',
-                '   TN=228  FP=18',
-                '   FN=25   TP=23',
-                '',
-                '3. K-NEAREST NEIGHBORS (K-NN):',
-                '   K= 3 → Accuracy: 0.7993',
-                '   K= 5 → Accuracy: 0.8197',
-                '   K= 7 → Accuracy: 0.8299',
-                '   K= 9 → Accuracy: 0.8231',
-                '   K=11 → Accuracy: 0.8197',
-                '   K=15 → Accuracy: 0.8163',
-                '',
-                '   Best K = 7 (Accuracy: 0.8299)',
-                '',
-                '   Classification Report:',
-                '                  precision    recall  f1-score   support',
-                '   No Attrition       0.87      0.94      0.91       246',
-                '      Attrition       0.63      0.42      0.50        48',
-                '       accuracy                           0.83       294',
-                '      macro avg       0.75      0.68      0.70       294',
-                '   weighted avg       0.83      0.83      0.83       294',
-                '',
-                '4. MODEL COMPARISON:',
-                '   Model                      Accuracy',
-                '   -----------------------------------',
-                '   Logistic Regression           83.67%',
-                '   K-NN (K=7)                    82.99%',
-                '',
+                '1. DATASET OVERVIEW: 1470 employees (16.3% attrition)',
+                '2. LOGISTIC REGRESSION: Accuracy 83.67%',
+                '3. K-NEAREST NEIGHBORS (K=7): Accuracy 82.99%',
                 '   Winner: Logistic Regression',
                 '',
                 'Process exited with code 0. ✅'
@@ -10456,7 +10349,6 @@ _output = _stdout_cap.getvalue()
         return outputSim[expId] || ['Code executed successfully.', 'Process exited with code 0. ✅'];
     }
 
-    // Init generic simulation interactivity
     window.initGenericIDSLSim = function(expId) {
         if (expId === 'idsl_exp4') _initExp4();
         else if (expId === 'idsl_exp5') { window.runExp5Chart && window.runExp5Chart(); }
@@ -10466,6 +10358,535 @@ _output = _stdout_cap.getvalue()
         else if (expId === 'idsl_exp9') { window.runExp9Predict && window.runExp9Predict(); }
         else if (expId === 'idsl_exp10') { window.runExp10KNN && window.runExp10KNN(); }
     };
+
+    function _initExp4() {
+        window.runExp4DiceTest = function() {
+            const n = parseInt(document.getElementById('idsl4-rolls')?.value || 1000);
+            const result = document.getElementById('idsl4-dice-result');
+            if (!result) return;
+            let A_gt3 = 0, B_even = 0, both = 0;
+            for (let i = 0; i < n; i++) {
+                const a = Math.floor(Math.random() * 6) + 1;
+                const b = Math.floor(Math.random() * 6) + 1;
+                if (a > 3) A_gt3++;
+                if (b % 2 === 0) B_even++;
+                if (a > 3 && b % 2 === 0) both++;
+            }
+            const pA = A_gt3/n, pB = B_even/n, pAB = both/n;
+            const diff = Math.abs(pAB - pA*pB);
+            const indep = diff < 0.04;
+            result.innerHTML = `N = ${n.toLocaleString()} Rolls\n` +
+                `P(A: Die1 > 3)   = ${pA.toFixed(4)} (${(pA*100).toFixed(1)}%)\n` +
+                `P(B: Die2 Even)  = ${pB.toFixed(4)} (${(pB*100).toFixed(1)}%)\n` +
+                `P(A ∩ B) Joint   = ${pAB.toFixed(4)}\n` +
+                `P(A) × P(B) Prod = ${(pA*pB).toFixed(4)}\n` +
+                `Independent?    = ${indep ? '✅ YES (|P(A∩B) - P(A)P(B)| < 0.04)' : '❌ NO'}`;
+        };
+
+        window.runExp4Bayes = function() {
+            const prior = parseFloat(document.getElementById('b4-prior')?.value || 0.01);
+            const like = parseFloat(document.getElementById('b4-like')?.value || 0.99);
+            const fp = parseFloat(document.getElementById('b4-fp')?.value || 0.05);
+            const pB = like * prior + fp * (1 - prior);
+            const posterior = (like * prior) / pB;
+            const r = document.getElementById('b4-result');
+            if (r) {
+                r.innerHTML = `P(Disease | Pos Test) = <strong style="color:#10b981; font-size:14px;">${posterior.toFixed(4)} (${(posterior*100).toFixed(2)}%)</strong>\n` +
+                    `Total Positive Test Rate P(+) = ${pB.toFixed(4)}\n` +
+                    `💡 Key Insight: Prior base rate P(D)=${(prior*100).toFixed(1)}% dominates! High sensitivity (${(like*100).toFixed(0)}%) still yields false positives due to low prior.`;
+            }
+        };
+
+        window.runExp4CLT = function() {
+            const canvas = document.getElementById('idsl4-clt-canvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const n = parseInt(document.getElementById('idsl4-n')?.value || 30);
+            const popType = document.getElementById('idsl4-pop')?.value || 'exponential';
+            const W = canvas.width, H = canvas.height;
+            ctx.clearRect(0, 0, W, H);
+
+            const means = [];
+            for (let i = 0; i < 2500; i++) {
+                let sum = 0;
+                for (let j = 0; j < n; j++) {
+                    let val;
+                    if (popType === 'exponential') val = -Math.log(1 - Math.random()) * 2;
+                    else if (popType === 'uniform') val = Math.random() * 10;
+                    else val = (Math.random() < 0.5) ? (Math.random() * 2 + 1) : (Math.random() * 2 + 7);
+                    sum += val;
+                }
+                means.push(sum / n);
+            }
+
+            const minV = Math.min(...means), maxV = Math.max(...means);
+            const bins = 45;
+            const binSize = (maxV - minV) / bins;
+            const freq = new Array(bins).fill(0);
+            means.forEach(v => {
+                const b = Math.min(Math.floor((v - minV) / binSize), bins - 1);
+                freq[b]++;
+            });
+            const maxFreq = Math.max(...freq);
+
+            ctx.fillStyle = '#0b0f19'; ctx.fillRect(0, 0, W, H);
+
+            freq.forEach((f, i) => {
+                const x = (i / bins) * (W - 50) + 25;
+                const bW = (W - 50) / bins - 1;
+                const bH = (f / maxFreq) * (H - 45);
+                const grad = ctx.createLinearGradient(0, H - 25 - bH, 0, H - 25);
+                grad.addColorStop(0, '#10b981');
+                grad.addColorStop(1, '#059669');
+                ctx.fillStyle = grad;
+                ctx.fillRect(x, H - 25 - bH, bW, bH);
+            });
+
+            const mean = means.reduce((a,b) => a+b, 0) / means.length;
+            const std = Math.sqrt(means.map(v => (v-mean)**2).reduce((a,b)=>a+b,0) / means.length);
+            ctx.strokeStyle = '#f59e0b'; ctx.lineWidth = 2.5; ctx.beginPath();
+            for (let x = 0; x < W; x++) {
+                const v = minV + (x - 25) / (W - 50) * (maxV - minV);
+                const y = (1 / (std * Math.sqrt(2 * Math.PI))) * Math.exp(-0.5 * ((v - mean) / std) ** 2);
+                const screenY = H - 25 - (y / ((1 / (std * Math.sqrt(2 * Math.PI))))) * (H - 45) * 0.92;
+                if (x === 0) ctx.moveTo(x, screenY); else ctx.lineTo(x, screenY);
+            }
+            ctx.stroke();
+
+            const r = document.getElementById('idsl4-clt-result');
+            if (r) r.textContent = `Sample Size n=${n} | Sample Means Mean=${mean.toFixed(3)}, Standard Error SE=${std.toFixed(3)} | Overlaid Orange Gaussian Normal Curve ✅`;
+        };
+
+        setTimeout(() => { window.runExp4DiceTest(); window.runExp4Bayes(); window.runExp4CLT(); }, 80);
+    }
+
+    // EXP 5 - Interactive Plotter
+    window.runExp5Chart = function() {
+        const canvas = document.getElementById('e5-canvas');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        const W = canvas.width, H = canvas.height;
+        const type = document.getElementById('e5-chart')?.value || 'bar';
+        const theme = document.getElementById('e5-theme')?.value || 'sunset';
+
+        ctx.fillStyle = '#0b0f19'; ctx.fillRect(0, 0, W, H);
+        const insight = document.getElementById('e5-insight');
+
+        const palettes = {
+            sunset: ['#f59e0b', '#ec4899', '#8b5cf6', '#3b82f6'],
+            ocean: ['#06b6d4', '#0284c7', '#3b82f6', '#6366f1'],
+            emerald: ['#10b981', '#059669', '#f59e0b', '#d97706']
+        };
+        const colors = palettes[theme] || palettes.sunset;
+
+        if (type === 'bar') {
+            const days = ['Thur', 'Fri', 'Sat', 'Sun'];
+            const tips = [2.77, 2.73, 2.99, 3.26];
+            const maxTip = 4.0;
+            days.forEach((d, i) => {
+                const x = 70 + i * 140;
+                const bH = (tips[i] / maxTip) * (H - 60);
+                const grad = ctx.createLinearGradient(0, H - 30 - bH, 0, H - 30);
+                grad.addColorStop(0, colors[i % colors.length]);
+                grad.addColorStop(1, colors[i % colors.length] + '44');
+                ctx.fillStyle = grad;
+                ctx.fillRect(x, H - 30 - bH, 75, bH);
+                ctx.fillStyle = '#e2e8f0'; ctx.font = 'bold 12px Inter'; ctx.textAlign = 'center';
+                ctx.fillText(d, x + 37, H - 12);
+                ctx.fillText('$' + tips[i].toFixed(2), x + 37, H - 36 - bH);
+            });
+            if (insight) insight.textContent = '💡 Insight: Sunday records highest mean tip ($3.26), followed by Saturday ($2.99). Weekend dining exhibits higher tip propensity.';
+        } else if (type === 'scatter') {
+            const points = Array.from({length:65}, (_, i) => ({
+                x: 6 + Math.random() * 44,
+                y: null
+            }));
+            points.forEach(p => { p.y = p.x * 0.16 + (Math.random() - 0.45) * 2.2; });
+            const xScale = (x) => 40 + (x / 52) * (W - 70);
+            const yScale = (y) => H - 30 - (y / 11) * (H - 50);
+
+            points.forEach(p => {
+                ctx.fillStyle = colors[0]; ctx.globalAlpha = 0.75;
+                ctx.beginPath(); ctx.arc(xScale(p.x), yScale(p.y), 4.5, 0, Math.PI*2); ctx.fill();
+            });
+            ctx.globalAlpha = 1;
+
+            ctx.strokeStyle = colors[1]; ctx.lineWidth = 2.5;
+            ctx.beginPath(); ctx.moveTo(xScale(5), yScale(5*0.16)); ctx.lineTo(xScale(50), yScale(50*0.16)); ctx.stroke();
+            if (insight) insight.textContent = '💡 Insight: Pearson Correlation r=0.68 indicating strong positive linear relationship between Total Bill and Tip Amount.';
+        } else if (type === 'hist') {
+            const bars = 10;
+            const freqs = [8, 18, 34, 48, 42, 32, 24, 18, 12, 8];
+            const maxF = Math.max(...freqs);
+            const ranges = ['3-8','8-13','13-18','18-23','23-28','28-33','33-38','38-43','43-48','48+'];
+            freqs.forEach((f,i) => {
+                const x = 30 + i * (W-50)/bars;
+                const bH = (f/maxF) * (H-60);
+                ctx.fillStyle = colors[i % colors.length];
+                ctx.fillRect(x, H-30-bH, (W-50)/bars - 3, bH);
+                ctx.fillStyle = '#94a3b8'; ctx.font = '10px Inter'; ctx.textAlign = 'center';
+                ctx.fillText(ranges[i], x + (W-50)/bars/2, H-12);
+            });
+            if (insight) insight.textContent = '💡 Insight: Total Bill distribution is unimodal & right-skewed with peak frequency in $18–$23 bin.';
+        } else if (type === 'box') {
+            const groups = [
+                {label:'Non-Smokers', q1:2.1, med:2.7, q3:3.6, min:1.0, max:5.2, color:colors[0]},
+                {label:'Smokers', q1:2.0, med:3.0, q3:3.9, min:1.0, max:6.5, color:colors[1]}
+            ];
+            const yScale = (v) => H - 30 - (v/7.5) * (H-50);
+            groups.forEach((g, i) => {
+                const cx = 160 + i * 260;
+                ctx.strokeStyle = g.color; ctx.lineWidth = 2.5;
+                ctx.beginPath(); ctx.moveTo(cx, yScale(g.min)); ctx.lineTo(cx, yScale(g.max)); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(cx-20,yScale(g.min)); ctx.lineTo(cx+20,yScale(g.min)); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(cx-20,yScale(g.max)); ctx.lineTo(cx+20,yScale(g.max)); ctx.stroke();
+                ctx.fillStyle = g.color + '33';
+                ctx.fillRect(cx-45, yScale(g.q3), 90, yScale(g.q1)-yScale(g.q3));
+                ctx.strokeRect(cx-45, yScale(g.q3), 90, yScale(g.q1)-yScale(g.q3));
+                ctx.strokeStyle = '#fff'; ctx.lineWidth = 3;
+                ctx.beginPath(); ctx.moveTo(cx-45, yScale(g.med)); ctx.lineTo(cx+45, yScale(g.med)); ctx.stroke();
+                ctx.fillStyle = g.color; ctx.font = 'bold 13px Inter'; ctx.textAlign = 'center';
+                ctx.fillText(g.label, cx, H-8);
+            });
+            if (insight) insight.textContent = '💡 Insight: Smokers show higher tip variance & higher upper extreme values than Non-Smokers.';
+        } else if (type === 'corr') {
+            const labels = ['total_bill', 'tip', 'size'];
+            const matrix = [[1.0, 0.68, 0.60], [0.68, 1.0, 0.49], [0.60, 0.49, 1.0]];
+            const cellW = (W - 100) / 3, cellH = (H - 60) / 3;
+            matrix.forEach((row, i) => {
+                row.forEach((val, j) => {
+                    const x = 80 + j * cellW, y = 15 + i * cellH;
+                    ctx.fillStyle = val === 1.0 ? '#06b6d4' : val > 0.5 ? '#10b981' : '#f59e0b';
+                    ctx.fillRect(x, y, cellW-3, cellH-3);
+                    ctx.fillStyle = '#fff'; ctx.font = 'bold 15px Inter'; ctx.textAlign = 'center';
+                    ctx.fillText(val.toFixed(2), x + cellW/2, y + cellH/2 + 5);
+                });
+                ctx.fillStyle = '#94a3b8'; ctx.font = '11px Inter'; ctx.textAlign = 'right';
+                ctx.fillText(labels[i], 72, 15 + i * cellH + cellH/2 + 4);
+                ctx.textAlign = 'center';
+                ctx.fillText(labels[i], 80 + i * cellW + cellW/2, H - 6);
+            });
+            if (insight) insight.textContent = '💡 Insight: Pairwise correlations confirm total_bill ↔ tip is the strongest linear association (r=0.68).';
+        }
+    };
+
+    // EXP 6 - Dashboard Engine
+    window.runExp6Dashboard = function() {
+        const canvas = document.getElementById('e6-canvas');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        const W = canvas.width, H = canvas.height;
+        const region = document.getElementById('e6-region')?.value || 'all';
+        const viewType = document.getElementById('e6-view')?.value || 'bar';
+
+        ctx.fillStyle = '#0b0f19'; ctx.fillRect(0, 0, W, H);
+
+        const monthlyData = {
+            East:    [154, 158, 162, 167, 171, 175, 179, 183, 186, 190, 195, 200],
+            West:    [305, 312, 320, 328, 335, 342, 350, 358, 365, 372, 382, 395],
+            Central: [182, 186, 190, 194, 198, 202, 206, 210, 214, 218, 223, 228],
+            North:   [225, 230, 234, 239, 244, 249, 253, 258, 263, 268, 274, 280]
+        };
+
+        const colors = { East: '#06b6d4', West: '#10b981', Central: '#f59e0b', North: '#8b5cf6' };
+        const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        const regions = region === 'all' ? ['East','West','Central','North'] : [region];
+        const maxVal = 420;
+
+        if (viewType === 'bar') {
+            const barW = (W - 80) / (months.length * regions.length + 2);
+            months.forEach((m, mi) => {
+                regions.forEach((r, ri) => {
+                    const val = monthlyData[r][mi];
+                    const x = 45 + mi * (barW * regions.length + 5) + ri * (barW + 1);
+                    const bH = (val / maxVal) * (H - 50);
+                    ctx.fillStyle = colors[r];
+                    ctx.fillRect(x, H - 25 - bH, barW, bH);
+                });
+                ctx.fillStyle = '#64748b'; ctx.font = '10px Inter'; ctx.textAlign = 'center';
+                ctx.fillText(m, 45 + mi * (barW * regions.length + 5) + (barW * regions.length)/2, H - 8);
+            });
+        } else {
+            regions.forEach(r => {
+                const vals = monthlyData[r];
+                ctx.strokeStyle = colors[r]; ctx.lineWidth = 2.5; ctx.beginPath();
+                vals.forEach((v, i) => {
+                    const x = 45 + i * (W - 90) / 11;
+                    const y = H - 25 - (v / maxVal) * (H - 50);
+                    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+                });
+                ctx.stroke();
+                if (viewType === 'area') {
+                    ctx.fillStyle = colors[r] + '22';
+                    ctx.lineTo(45 + 11 * (W - 90) / 11, H - 25);
+                    ctx.lineTo(45, H - 25);
+                    ctx.closePath(); ctx.fill();
+                }
+            });
+            months.forEach((m, i) => {
+                ctx.fillStyle = '#64748b'; ctx.font = '10px Inter'; ctx.textAlign = 'center';
+                ctx.fillText(m, 45 + i * (W - 90) / 11, H - 8);
+            });
+        }
+
+        const storyEl = document.getElementById('e6-story');
+        if (storyEl) {
+            const best = regions.reduce((a,b) => monthlyData[a][11] > monthlyData[b][11] ? a : b);
+            const worst = regions.reduce((a,b) => monthlyData[a][11] < monthlyData[b][11] ? a : b);
+            storyEl.innerHTML = `📌 <strong>DAX Measure & Story Narrative (${region.toUpperCase()}):</strong>\n` +
+                `• DAX: <code>Total Sales = SUM(Sales[Amount])</code> | <code>YoY Growth% = DIVIDE([CurrentYr] - [PriorYr], [PriorYr])</code>\n` +
+                `• Story: <em>"${best} Region leads with peak sales of $${monthlyData[best][11]}K in Dec. ${worst} Region lags at $${monthlyData[worst][11]}K ($${monthlyData[best][11]-monthlyData[worst][11]}K gap)."</em>`;
+        }
+    };
+
+    // EXP 7 - PCA Scree & Projection
+    window.runExp7PCA = function() {
+        const scatterCanvas = document.getElementById('e7-scatter');
+        const screeCanvas = document.getElementById('e7-scree');
+        if (!scatterCanvas || !screeCanvas) return;
+
+        const k = parseInt(document.getElementById('e7-k')?.value || 2);
+        const useStd = document.getElementById('e7-std')?.checked !== false;
+
+        const irisData = [
+            ...Array.from({length:50}, () => ({ x: -2.4 + Math.random()*1.1, y: 0.2 + Math.random()*0.7 - 0.35, cls: 0 })),
+            ...Array.from({length:50}, () => ({ x: 0.6 + Math.random()*1.4 - 0.7, y: -0.2 + Math.random()*0.9 - 0.45, cls: 1 })),
+            ...Array.from({length:50}, () => ({ x: 2.1 + Math.random()*1.1, y: 0.2 + Math.random()*0.7 - 0.35, cls: 2 }))
+        ];
+
+        const colors = ['#ef4444', '#10b981', '#8b5cf6'];
+        const labels = ['Setosa', 'Versicolor', 'Virginica'];
+        const expVar = useStd ? [0.7345, 0.2301, 0.0369, 0.0052] : [0.8124, 0.1531, 0.0289, 0.0056];
+
+        const sCtx = scatterCanvas.getContext('2d');
+        const SW = scatterCanvas.width, SH = scatterCanvas.height;
+        sCtx.fillStyle = '#0b0f19'; sCtx.fillRect(0,0,SW,SH);
+        const sxScale = v => SW/2 + v * 48;
+        const syScale = v => SH/2 - v * 55;
+
+        irisData.forEach(p => {
+            sCtx.fillStyle = colors[p.cls]; sCtx.beginPath();
+            sCtx.arc(sxScale(p.x), syScale(p.y), 4.5, 0, Math.PI*2); sCtx.fill();
+        });
+
+        labels.forEach((l, i) => {
+            sCtx.fillStyle = colors[i]; sCtx.fillRect(10, 10 + i*16, 9, 9);
+            sCtx.fillStyle = '#e2e8f0'; sCtx.font = '10px Inter'; sCtx.textAlign = 'left';
+            sCtx.fillText(l, 23, 18 + i*16);
+        });
+
+        const rCtx = screeCanvas.getContext('2d');
+        const RW = screeCanvas.width, RH = screeCanvas.height;
+        rCtx.fillStyle = '#0b0f19'; rCtx.fillRect(0,0,RW,RH);
+        expVar.forEach((v, i) => {
+            const x = 25 + i * 72;
+            const bH = v * (RH - 45);
+            rCtx.fillStyle = i < k ? '#06b6d4' : '#334155';
+            rCtx.fillRect(x, RH - 25 - bH, 50, bH);
+            rCtx.fillStyle = '#e2e8f0'; rCtx.font = '10px Inter'; rCtx.textAlign = 'center';
+            rCtx.fillText('PC'+(i+1), x + 25, RH - 8);
+            rCtx.fillText((v*100).toFixed(1)+'%', x + 25, RH - 30 - bH);
+        });
+
+        const cumVar = expVar.slice(0, k).reduce((a,b)=>a+b, 0);
+        const statsEl = document.getElementById('e7-stats');
+        if (statsEl) {
+            const kvStats = [
+                {label:'Selected $k$', val:k, color:'#06b6d4'},
+                {label:'Variance Retained', val:(cumVar*100).toFixed(1)+'%', color:'#10b981'},
+                {label:'Features Reduced', val:`4D → ${k}D`, color:'#f59e0b'},
+                {label:'Standardized', val:useStd?'Yes':'No', color:'#8b5cf6'}
+            ];
+            statsEl.innerHTML = kvStats.map(s => `<div class="theory-card" style="border-left:3px solid ${s.color}; padding:8px; text-align:center;"><div style="color:${s.color}; font-size:16px; font-weight:800;">${s.val}</div><div style="font-size:10px; color:var(--text-muted);">${s.label}</div></div>`).join('');
+        }
+    };
+
+    // EXP 8 - Preprocessing Steps
+    window.runExp8Step = function(step) {
+        const beforeEl = document.getElementById('e8-before');
+        const afterEl = document.getElementById('e8-after');
+        const noteEl = document.getElementById('e8-note');
+        if (!beforeEl || !afterEl) return;
+
+        document.querySelectorAll('.e8-step-btn').forEach((b,i) => {
+            b.style.background = i === step ? '#ef4444' : '#0f172a';
+            b.style.borderColor = i === step ? '#ef4444' : '#334155';
+        });
+
+        const steps = [
+            {
+                before: 'Row 1: Education = "High School"\nRow 2: Education = "Bachelor"\nRow 3: Education = "Master"\nRow 4: Education = "PhD"\nRow 5: Education = "Bachelor"',
+                after: 'Education_Encoded:\nRow 1 → 0\nRow 2 → 1\nRow 3 → 2\nRow 4 → 3\nRow 5 → 1',
+                note: '💡 Label Encoding for Ordinal Attribute: Preserves natural ordering (High School < Bachelor < Master < PhD).'
+            },
+            {
+                before: 'Row 1: Gender = "Male"\nRow 2: Gender = "Female"\nRow 3: Gender = "Other"',
+                after: 'Gender_Female  Gender_Male  Gender_Other\n     0            1            0  (Male)\n     1            0            0  (Female)\n     0            0            1  (Other)',
+                note: '💡 One-Hot Encoding for Nominal Attribute: Prevents false ordering between categories.'
+            },
+            {
+                before: 'SpendingScore Raw [1..100]:\n[25, 78, 43, 92, 15]',
+                after: 'MinMax Scaled x\' = (x - min)/(max - min):\n[0.2424, 0.7778, 0.4242, 0.9192, 0.1414]',
+                note: '💡 MinMax Scaler scales values strictly into interval [0, 1].'
+            },
+            {
+                before: 'AnnualIncome Raw (₹):\n[45000, 110000, 85000, 190000, 35000]',
+                after: 'Z-Score Standardized z = (x - μ)/σ:\n[-0.8421, 0.2982, -0.1404, 1.7018, -1.0175]\nMean = 0.0, Std = 1.0',
+                note: '💡 Z-Score Standardization rescales feature to Mean=0 and Variance=1.'
+            },
+            {
+                before: 'Age Raw:\n[24, 42, 35, 58, 19]\nBins: (17,30] (30,45] (45,60]',
+                after: 'AgeGroup (pd.cut):\nRow 1 → "Young"\nRow 2 → "Middle"\nRow 3 → "Middle"\nRow 4 → "Senior"\nRow 5 → "Young"',
+                note: '💡 pd.cut() performs equal-width interval discretization.'
+            },
+            {
+                before: 'SpendingScore Raw:\n[25, 78, 43, 92, 15]',
+                after: 'SpendingTier (pd.qcut):\nRow 1 → "Bronze"\nRow 2 → "Gold"\nRow 3 → "Silver"\nRow 4 → "Platinum"\nRow 5 → "Bronze"',
+                note: '💡 pd.qcut() performs equal-frequency quantile discretization.'
+            }
+        ];
+
+        const s = steps[step] || steps[0];
+        beforeEl.textContent = s.before;
+        afterEl.textContent = s.after;
+        if (noteEl) noteEl.textContent = s.note;
+    };
+
+    // EXP 9 - Regression Fit
+    window.runExp9Predict = function() {
+        const age = parseInt(document.getElementById('e9-age')?.value || 5);
+        const km = parseInt(document.getElementById('e9-km')?.value || 50);
+        const fuel = document.getElementById('e9-fuel')?.value || 'petrol';
+        const trans = document.getElementById('e9-trans')?.value || 'manual';
+
+        const fuelAdj = fuel === 'diesel' ? 2.1 : fuel === 'cng' ? -0.5 : 0;
+        const transAdj = trans === 'automatic' ? 1.8 : 0;
+        const price = Math.max(0.2, 12.5 - 0.55 * age - 0.000015 * km * 1000 + fuelAdj + transAdj).toFixed(2);
+
+        const predEl = document.getElementById('e9-pred');
+        if (predEl) predEl.textContent = `₹${price} Lakhs`;
+
+        const factors = document.getElementById('e9-factors');
+        if (factors) {
+            factors.innerHTML = `Intercept β₀ = +₹12.50L\n` +
+                `Age Penalty (${age}y) = -₹${(0.55*age).toFixed(2)}L\n` +
+                `KM Penalty (${km}K) = -₹${(0.000015*km*1000).toFixed(2)}L\n` +
+                `Fuel (${fuel}) = ${fuelAdj>=0?'+':''}₹${fuelAdj.toFixed(2)}L | Trans = ${transAdj>=0?'+':''}₹${transAdj.toFixed(2)}L`;
+        }
+
+        const canvas = document.getElementById('e9-canvas');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        const W = canvas.width, H = canvas.height;
+        ctx.fillStyle = '#0b0f19'; ctx.fillRect(0,0,W,H);
+
+        const points = Array.from({length:40}, () => {
+            const a = 1 + Math.random()*19;
+            const k = 10 + Math.random()*190;
+            const p = Math.max(0.2, 12.5 - 0.55*a - 0.000015*k*1000 + (Math.random()-0.5)*1.6);
+            return { x: a, y: p };
+        });
+        const xScale = v => 35 + (v/20) * (W-65);
+        const yScale = v => H - 25 - (v/15) * (H-45);
+
+        ctx.fillStyle = '#06b6d4';
+        points.forEach(p => {
+            ctx.globalAlpha = 0.5; ctx.beginPath(); ctx.arc(xScale(p.x), yScale(p.y), 4, 0, Math.PI*2); ctx.fill();
+        });
+        ctx.globalAlpha = 1;
+
+        ctx.strokeStyle = '#f59e0b'; ctx.lineWidth = 2.5; ctx.beginPath();
+        ctx.moveTo(xScale(1), yScale(Math.max(0, 12.5 - 0.55*1 - 0.000015*50*1000 + fuelAdj + transAdj)));
+        ctx.lineTo(xScale(20), yScale(Math.max(0, 12.5 - 0.55*20 - 0.000015*50*1000 + fuelAdj + transAdj)));
+        ctx.stroke();
+
+        ctx.fillStyle = '#ef4444';
+        ctx.beginPath(); ctx.arc(xScale(age), yScale(parseFloat(price)), 7, 0, Math.PI*2); ctx.fill();
+    };
+
+    // EXP 10 - Classifier Evaluation
+    window.runExp10KNN = function() {
+        const js = parseInt(document.getElementById('e10-js')?.value || 2);
+        const wlb = parseInt(document.getElementById('e10-wlb')?.value || 2);
+        const ot = parseInt(document.getElementById('e10-ot')?.value || 0);
+        const dist = parseInt(document.getElementById('e10-dist')?.value || 10);
+        const k = parseInt(document.getElementById('e10-k')?.value || 5);
+
+        const attritionScore = (0.32 - js*0.08 - wlb*0.06 + ot*0.28 + dist*0.008);
+        const prob = Math.min(0.95, Math.max(0.05, attritionScore));
+        const isAttrition = prob > 0.4;
+
+        const predLabel = document.getElementById('e10-pred-label');
+        const predProb = document.getElementById('e10-pred-prob');
+        if (predLabel) {
+            predLabel.textContent = isAttrition ? '⚠️ HIGH ATTRITION RISK' : '✅ LOW ATTRITION RISK';
+            predLabel.style.color = isAttrition ? '#ef4444' : '#10b981';
+        }
+        if (predProb) predProb.textContent = `Probability = ${(prob*100).toFixed(1)}% | K = ${k} Nearest Neighbors`;
+
+        const cmCanvas = document.getElementById('e10-cm-canvas');
+        if (cmCanvas) {
+            const ctx = cmCanvas.getContext('2d');
+            const W = cmCanvas.width, H = cmCanvas.height;
+            ctx.fillStyle = '#0b0f19'; ctx.fillRect(0,0,W,H);
+
+            const matrix = [[228, 18], [25, 23]];
+            const cellW = (W-75)/2, cellH = (H-55)/2;
+            matrix.forEach((row,i) => {
+                row.forEach((val,j) => {
+                    const x = 65 + j*cellW, y = 30 + i*cellH;
+                    ctx.fillStyle = i===j ? '#06b6d422' : '#ef444422';
+                    ctx.fillRect(x, y, cellW-3, cellH-3);
+                    ctx.strokeStyle = i===j ? '#06b6d4' : '#ef4444';
+                    ctx.lineWidth = 1.5; ctx.strokeRect(x, y, cellW-3, cellH-3);
+                    ctx.fillStyle = '#fff'; ctx.font = 'bold 15px Inter'; ctx.textAlign = 'center';
+                    ctx.fillText(val, x + cellW/2, y + cellH/2 + 5);
+                });
+            });
+        }
+
+        const metricsEl = document.getElementById('e10-metrics');
+        if (metricsEl) {
+            const metrics2 = [
+                {label:'Accuracy', val:'83.67%', color:'#10b981'},
+                {label:'Precision', val:'62.16%', color:'#06b6d4'},
+                {label:'Recall', val:'47.92%', color:'#f59e0b'},
+                {label:'F1-Score', val:'54.12%', color:'#8b5cf6'}
+            ];
+            metricsEl.innerHTML = metrics2.map(m => `<div class="theory-card" style="border-left:2px solid ${m.color}; padding:6px; text-align:center;"><div style="color:${m.color}; font-weight:800; font-size:13px;">${m.val}</div><div style="font-size:9px; color:var(--text-muted);">${m.label}</div></div>`).join('');
+        }
+
+        const kCanvas = document.getElementById('e10-k-canvas');
+        if (kCanvas) {
+            const ctx = kCanvas.getContext('2d');
+            const W = kCanvas.width, H = kCanvas.height;
+            ctx.fillStyle = '#0b0f19'; ctx.fillRect(0,0,W,H);
+            const kVals = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15];
+            const accVals = [79.1, 80.2, 81.5, 82.0, 82.5, 82.8, 83.0, 82.6, 82.3, 82.0, 81.8, 81.5, 81.2, 81.0, 80.8];
+            ctx.strokeStyle = '#06b6d4'; ctx.lineWidth = 2.5; ctx.beginPath();
+            kVals.forEach((kv,i) => {
+                const x = 30 + i * (W-60)/14;
+                const y = H-20 - ((accVals[i]-78)/6) * (H-40);
+                if (i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+            });
+            ctx.stroke();
+
+            kVals.forEach((kv,i) => {
+                const x = 30 + i * (W-60)/14;
+                const y = H-20 - ((accVals[i]-78)/6) * (H-40);
+                ctx.fillStyle = kv===k ? '#f59e0b' : '#06b6d4';
+                ctx.beginPath(); ctx.arc(x, y, kv===k?6:3.5, 0, Math.PI*2); ctx.fill();
+            });
+        }
+    };
+
+    setTimeout(() => {
+        const labSelect = document.getElementById('labSelect');
+        const curId = labSelect ? labSelect.value : null;
+        if (curId && curId.startsWith('idsl_exp') && parseInt(curId.replace('idsl_exp','')) >= 4) {
+            if (typeof window.initGenericIDSLSim === 'function') window.initGenericIDSLSim(curId);
+        }
+    }, 400);
 
     function _initExp4() {
         window.runExp4DiceTest = function() {
