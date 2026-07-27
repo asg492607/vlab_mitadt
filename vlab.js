@@ -21514,6 +21514,13 @@ const initRipSim = (container) => {
                 return;
             }
 
+            if (id === 'idsl_exp2' || (data && (data.simType === 'idsl_exp2' || data.id === 'idsl_exp2'))) {
+                if (typeof window.renderIDSL2Simulation === 'function') {
+                    container.innerHTML = window.renderIDSL2Simulation(data);
+                }
+                return;
+            }
+
             if (id === 'osi_tcpip' || id === 'osi_tcpip_sim' || id === 'communication_models' || (data && (data.simType === 'osi_tcpip_sim' || data.simType === 'osi_tcpip'))) { initOsiTcpipSim(container); return; }
             if (id === 'udp_tcp' || id === 'udp_tcp_sim' || (data && (data.simType === 'udp_tcp_sim' || data.simType === 'udp_tcp'))) { initUdpTcpSim(container); return; }
             if (id === 'dhcp_config' || id === 'dhcp_config_sim' || (data && (data.simType === 'dhcp_config_sim' || data.simType === 'dhcp_config'))) { initDhcpSim(container); return; }
@@ -21797,6 +21804,18 @@ const initRipSim = (container) => {
             if (!container) return;
 
             const currentSubject = localStorage.getItem('vlab_current_subject') || 'networking';
+            if (currentSubject === 'ds') {
+                const labData = window.VLAB_DATA[id] || window.VLAB_DATA['idsl_exp1'];
+                if (id === 'idsl_exp2' || (labData && labData.id === 'idsl_exp2')) {
+                    if (typeof window.renderIDSL2Sandbox === 'function') {
+                        container.innerHTML = window.renderIDSL2Sandbox(labData);
+                    }
+                } else if (typeof window.renderIDSLSandbox === 'function') {
+                    container.innerHTML = window.renderIDSLSandbox(labData);
+                }
+                return;
+            }
+
             if (currentSubject === 'os') {
                 container.innerHTML = `
                 <div class="terminal-workspace" style="height:100%; display:flex; flex-direction:column; background:#f8fafc; border-radius:12px; border:1px solid var(--border); overflow:hidden; font-family:'JetBrains Mono', monospace; color:#10b981; min-height:400px;">
