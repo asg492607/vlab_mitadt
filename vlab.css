@@ -1646,20 +1646,20 @@ body.sandbox-mode .topology-main {
 
 .global-ai-drawer {
     position: fixed;
-    bottom: 96px;
+    bottom: 90px;
     right: 24px;
-    width: 360px;
-    height: 520px;
-    background: var(--container-bg);
-    border: 1px solid var(--border);
+    width: 380px;
+    height: 540px;
+    background: rgba(15, 23, 42, 0.95);
+    border: 1px solid rgba(168, 85, 247, 0.35);
     border-radius: 16px;
-    box-shadow: var(--shadow-xl);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 0 0 20px rgba(168, 85, 247, 0.15);
     display: none;
     flex-direction: column;
     overflow: hidden;
     z-index: 9999;
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -1675,21 +1675,21 @@ body.sandbox-mode .topology-main {
 }
 
 .global-ai-header {
-    background: linear-gradient(90deg, rgba(168, 85, 247, 0.15) 0%, rgba(99, 102, 241, 0.15) 100%);
+    background: linear-gradient(135deg, rgba(30, 27, 75, 0.9), rgba(49, 27, 146, 0.9));
     padding: 14px 18px;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid rgba(168, 85, 247, 0.25);
     display: flex;
     justify-content: space-between;
     align-items: center;
     font-weight: 800;
-    color: var(--primary);
+    color: #e9d5ff;
     font-size: 14px;
 }
 
 .global-ai-close-btn {
     background: transparent;
     border: none;
-    color: var(--primary);
+    color: #a855f7;
     font-size: 20px;
     font-weight: bold;
     cursor: pointer;
@@ -1697,24 +1697,24 @@ body.sandbox-mode .topology-main {
 }
 
 .global-ai-close-btn:hover {
-    color: var(--danger);
+    color: #ef4444;
 }
 
 .global-ai-toolbar {
     display: flex;
     gap: 8px;
     padding: 10px 14px;
-    background: var(--bg-alt);
-    border-bottom: 1px solid var(--border);
+    background: #0b0f19;
+    border-bottom: 1px solid #1e293b;
 }
 
 .global-ai-tool-btn {
     flex: 1;
     padding: 6px 10px;
     border-radius: 6px;
-    border: 1px solid var(--border);
-    background: var(--bg-page);
-    color: var(--text-main);
+    border: 1px solid #334155;
+    background: #0f172a;
+    color: #cbd5e1;
     font-size: 11px;
     cursor: pointer;
     font-weight: 600;
@@ -1722,8 +1722,9 @@ body.sandbox-mode .topology-main {
 }
 
 .global-ai-tool-btn:hover {
-    border-color: var(--primary);
-    background: var(--bg-alt);
+    border-color: #a855f7;
+    background: #1e293b;
+    color: #ffffff;
 }
 
 .global-ai-chat-logs {
@@ -1733,61 +1734,93 @@ body.sandbox-mode .topology-main {
     display: flex;
     flex-direction: column;
     gap: 12px;
-    background: var(--bg-page);
+    background: #070a12;
 }
 
 .global-ai-chat-logs::-webkit-scrollbar {
     width: 5px;
 }
 .global-ai-chat-logs::-webkit-scrollbar-thumb {
-    background: rgba(168, 85, 247, 0.2);
+    background: rgba(168, 85, 247, 0.3);
     border-radius: 10px;
 }
 
 .global-ai-msg {
     padding: 10px 14px;
     border-radius: 12px;
-    max-width: 85%;
+    max-width: 88%;
     font-size: 13px;
-    line-height: 1.5;
+    line-height: 1.6;
     white-space: pre-wrap;
+    word-break: break-word;
 }
 
 .global-ai-msg.ai {
     align-self: flex-start;
-    background: var(--bg-alt);
-    color: var(--text-main);
+    background: #1e293b;
+    color: #f1f5f9;
+    border: 1px solid #334155;
     border-bottom-left-radius: 2px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .global-ai-msg.student {
     align-self: flex-end;
-    background: rgba(168, 85, 247, 0.1);
-    color: var(--text-main);
-    border: 1px solid var(--primary);
+    background: linear-gradient(135deg, #8b5cf6, #6366f1);
+    color: #ffffff;
     border-bottom-right-radius: 2px;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+}
+
+.global-ai-speak-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    background: #0b0f19;
+    border-top: 1px solid #1e293b;
+}
+
+.global-ai-speak-btn, .global-ai-quick-btn {
+    background: #1e293b;
+    border: 1px solid #334155;
+    color: #cbd5e1;
+    border-radius: 6px;
+    padding: 5px 10px;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.global-ai-speak-btn:hover, .global-ai-quick-btn:hover {
+    background: #334155;
+    color: #ffffff;
+    border-color: #a855f7;
 }
 
 .global-ai-input-area {
     padding: 12px;
-    border-top: 1px solid var(--border);
+    border-top: 1px solid #1e293b;
     display: flex;
     gap: 8px;
-    background: var(--bg-alt);
+    background: #0b0f19;
 }
 
 .global-ai-input-area input {
     flex: 1;
     padding: 8px 12px;
     border-radius: 8px;
-    border: 1px solid var(--border);
-    background: var(--bg-page);
-    color: var(--text-main);
+    border: 1px solid #334155;
+    background: #070a12;
+    color: #f8fafc;
     font-size: 13px;
     outline: none;
 }
 .global-ai-input-area input:focus {
-    border-color: var(--primary);
+    border-color: #a855f7;
+    box-shadow: 0 0 0 2px rgba(168, 85, 247, 0.25);
 }
 
 /* Isometric 3D View Transformations */

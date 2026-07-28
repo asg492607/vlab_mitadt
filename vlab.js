@@ -25255,6 +25255,8 @@ student@mitadt-os:~$ </div>
                     globalBubble.classList.remove('active');
                 } else {
                     globalBubble.classList.add('active');
+                    const labId = document.getElementById('labSelect') ? document.getElementById('labSelect').value : 'intro_tools';
+                    if (typeof loadChatHistory === 'function') loadChatHistory(labId);
                     globalAiInput.focus();
                 }
             });
@@ -25384,8 +25386,10 @@ student@mitadt-os:~$ </div>
 
             // Persistent Chat Logic
             const loadChatHistory = (labId) => {
-                globalChatLogs.innerHTML = `<div class="global-ai-msg ai">Hello! I am your MIT VLab Academic AI Tutor. I can help guide you through configurations, CLI logs, SQL queries, or CPU scheduling concepts. How can I assist you today?</div>`;
-                const savedChat = localStorage.getItem(`vlab_chat_${labId}`);
+                const effectiveId = labId || (document.getElementById('labSelect') ? document.getElementById('labSelect').value : 'intro_tools');
+                const subject = (localStorage.getItem('vlab_current_subject') || 'networking').toUpperCase();
+                globalChatLogs.innerHTML = `<div class="global-ai-msg ai">✨ Hello! I am your MIT VLab Academic AI Tutor for <b>${subject}</b>.<br><br>I can guide you through configurations, CLI command errors, Python code analysis, SQL queries, or theoretical concepts. How can I assist your learning today?</div>`;
+                const savedChat = localStorage.getItem(`vlab_chat_${effectiveId}`);
                 if (savedChat) {
                     try {
                         const messages = JSON.parse(savedChat);
@@ -25394,8 +25398,10 @@ student@mitadt-os:~$ </div>
                         });
                     } catch (e) { console.error("Error loading chat", e); }
                 }
+                globalChatLogs.scrollTop = globalChatLogs.scrollHeight;
             };
             window.loadChatHistory = loadChatHistory;
+            loadChatHistory();
 
             const saveChatHistory = (labId, sender, text) => {
                 const savedChat = localStorage.getItem(`vlab_chat_${labId}`);
