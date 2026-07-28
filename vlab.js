@@ -1244,6 +1244,21 @@ class TopologySimulation {
                             </tbody>
                         </table>
                     </div>
+                    <div id="contextMenu" class="context-menu" style="display:none;">
+                        <div class="menu-item" data-action="config-phys">🔌 Configure Physical Chassis</div>
+                        <div class="menu-item" data-action="config-settings">⚙️ Interface & IP Config</div>
+                        <div class="menu-item" data-action="config-cli">💻 Open CLI Console</div>
+                        <div class="menu-item" data-action="config-desktop">🖥️ Open Desktop Apps</div>
+                        <hr style="border:0; border-top:1px solid var(--border); margin:4px 0;">
+                        <div class="menu-item" data-action="delete" style="color:#f43f5e;">🗑️ Delete Device</div>
+                    </div>
+                    <div id="linkInspectorCard" class="link-inspector-card">
+                        <div class="link-inspector-header">
+                            <span>🔍 LINK INSPECTOR</span>
+                            <button onclick="document.getElementById('linkInspectorCard').style.display='none'" style="background:transparent; border:none; color:#94a3b8; cursor:pointer;">&times;</button>
+                        </div>
+                        <div id="linkInspectorBody">Select a link connection to inspect.</div>
+                    </div>
                     <div class="scanlines"></div>
                 </main>
             </div>
@@ -1416,10 +1431,28 @@ class TopologySimulation {
             const type = e.dataTransfer.getData('type');
             const rect = this.workspace.getBoundingClientRect();
             this.addNode(type, e.clientX - rect.left - 30, e.clientY - rect.top - 30);
-            this.validateTopology();
-        });
-
-
+        const contextMenu = document.getElementById('contextMenu');
+        if (contextMenu) {
+            contextMenu.querySelectorAll('.menu-item').forEach(item => {
+                item.onclick = (e) => {
+                    e.stopPropagation();
+                    contextMenu.style.display = 'none';
+                    if (!this.currentContextNode) return;
+                    const action = item.dataset.action;
+                    if (action === 'config-phys') {
+                        this.openConfig(this.currentContextNode, 'physical');
+                    } else if (action === 'config-settings') {
+                        this.openConfig(this.currentContextNode, 'config');
+                    } else if (action === 'config-cli') {
+                        this.openConfig(this.currentContextNode, 'cli');
+                    } else if (action === 'config-desktop') {
+                        this.openConfig(this.currentContextNode, 'desktop');
+                    } else if (action === 'delete') {
+                        this.deleteNode();
+                    }
+                };
+            });
+        }
     }
     resize() {
         if (!this.canvas || !this.workspace) return;
@@ -1966,32 +1999,472 @@ class TopologySimulation {
     }
 
     showProperties(node) {
-        const panel = document.getElementById('device-props');
-        const body = document.getElementById('props-body');
-        if (!panel || !body) return;
-        panel.style.display = 'block';
+        this.openConfig(node, 'physical');
+    }
 
-        const uptime = Math.floor(Math.random() * 500) + "m " + Math.floor(Math.random() * 60) + "s";
-        const mac = node.id.toString(16).padStart(12, '0').match(/.{2}/g).join(':').toUpperCase();
+    openConfig(node, initialTab = 'physical') {
+        let overlay = document.getElementById('cisco-modal-overlay');
+        if (!overlay) {
+            overlay = document.createElement('div');
+            overlay.id = 'cisco-modal-overlay';
+            overlay.className = 'cisco-modal-overlay';
+            document.body.appendChild(overlay);
+        }
 
-        body.innerHTML = `
-            <div class="prop-row"><span>Type</span><b>${node.type.toUpperCase()}</b></div>
-            <div class="prop-row"><span>Label</span><b>${node.label}</b></div>
-            <div class="prop-row"><span>Hardware ID</span><b>${mac}</b></div>
-            <div class="prop-row"><span>System Uptime</span><b>${uptime}</b></div>
-            <div class="prop-row"><span>Primary IP</span><b>${node.config?.ip || 'Unset'}</b></div>
-            <hr style="border:0; border-top:1px solid var(--border); margin:10px 0;">
-            <div style="font-size:10px; color:var(--text-muted); margin-bottom:10px;">OPERATIONAL INTERFACES</div>
-            ${Object.keys(node.config?.interfaces || {}).map(iface => `
-                <div class="prop-row"><span>${iface}</span><b style="color:var(--success)">UP</b></div>
-            `).join('')}
-            <button id="btnOpenCLI" class="btn-sim primary" style="width:100%; margin-top:15px;">Open CLI Terminal</button>
+        const isPowerOn = node.poweredOn !== false;
+        node.poweredOn = isPowerOn;
+
+        const isHost = ['pc', 'laptop', 'server', 'ip_phone', 'smart_tv', 'smartphone', 'printer', 'iot_gateway'].includes(this.getBaseType(node.type));
+
+        overlay.style.display = 'flex';
+        overlay.innerHTML = `
+            <div class="cisco-modal">
+                <div class="cisco-modal-header">
+                    <div class="cisco-modal-title">
+                        <span>${node.icon}</span>
+                        <span>${window.escapeHtml(node.label)} (${node.type.toUpperCase()})</span>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:12px;">
+                        <button id="ciscoPowerToggle" class="cisco-power-btn ${isPowerOn ? 'on' : ''}">
+                            <span class="power-led"></span>
+                            <span>POWER ${isPowerOn ? 'ON' : 'OFF'}</span>
+                        </button>
+                        <button class="cisco-modal-close" onclick="document.getElementById('cisco-modal-overlay').style.display='none'">&times;</button>
+                    </div>
+                </div>
+                <div class="cisco-modal-nav">
+                    <div class="cisco-nav-tab ${initialTab === 'physical' ? 'active' : ''}" data-tab="physical">🔌 Physical</div>
+                    <div class="cisco-nav-tab ${initialTab === 'config' ? 'active' : ''}" data-tab="config">⚙️ Config</div>
+                    <div class="cisco-nav-tab ${initialTab === 'cli' ? 'active' : ''}" data-tab="cli">💻 CLI Terminal</div>
+                    ${isHost ? `<div class="cisco-nav-tab ${initialTab === 'desktop' ? 'active' : ''}" data-tab="desktop">🖥️ Desktop</div>` : ''}
+                </div>
+                
+                <!-- TAB 1: PHYSICAL -->
+                <div id="cisco-tab-physical" class="cisco-tab-body ${initialTab === 'physical' ? 'active' : ''}">
+                    <div class="physical-container">
+                        <div class="physical-left-sidebar">
+                            <div style="font-size:11px; font-weight:800; color:#38bdf8; margin-bottom:10px;">MODULE LIBRARY</div>
+                            <div class="module-card" data-mod="HWIC-2T">
+                                <div class="m-title">HWIC-2T</div>
+                                <div class="m-desc">2-Port High Speed Serial WAN Interface</div>
+                            </div>
+                            <div class="module-card" data-mod="HWIC-4ESW">
+                                <div class="m-title">HWIC-4ESW</div>
+                                <div class="m-desc">4-Port FastEthernet Switch Module</div>
+                            </div>
+                            <div class="module-card" data-mod="WIC-1T">
+                                <div class="m-title">WIC-1T</div>
+                                <div class="m-desc">1-Port Serial WAN Interface</div>
+                            </div>
+                            <div class="module-card" data-mod="Cover-Plate">
+                                <div class="m-title">COVER PLATE</div>
+                                <div class="m-desc">Blank cover plate for unused slots</div>
+                            </div>
+                        </div>
+                        <div class="physical-chassis-view">
+                            <div style="color:#94a3b8; font-size:12px; margin-bottom:12px; font-weight:600;">REAR CHASSIS EXPANSION BAY</div>
+                            <div class="chassis-rack-unit">
+                                <div class="chassis-slot filled" style="flex:2;">
+                                    <div style="font-weight:700;">FIXED MAIN BOARD</div>
+                                    <div style="font-size:10px; opacity:0.8;">Built-in Ethernet & Console Ports</div>
+                                </div>
+                                <div class="chassis-slot ${node.slots?.slot1 ? 'filled' : ''}" id="chassisSlot1" data-slot="slot1">
+                                    <span>${node.slots?.slot1 || '[ SLOT 1 - EMPTY ]'}</span>
+                                    <span style="font-size:9px; color:#64748b; margin-top:4px;">Click to install module</span>
+                                </div>
+                                <div class="chassis-slot ${node.slots?.slot2 ? 'filled' : ''}" id="chassisSlot2" data-slot="slot2">
+                                    <span>${node.slots?.slot2 || '[ SLOT 2 - EMPTY ]'}</span>
+                                    <span style="font-size:9px; color:#64748b; margin-top:4px;">Click to install module</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 2: CONFIG -->
+                <div id="cisco-tab-config" class="cisco-tab-body ${initialTab === 'config' ? 'active' : ''}">
+                    <div class="config-container">
+                        <div class="config-sidebar">
+                            <div class="config-nav-group">GLOBAL</div>
+                            <div class="config-nav-item active" data-cfg="global">Settings</div>
+                            <div class="config-nav-group">INTERFACE</div>
+                            ${Object.keys(node.config?.interfaces || {}).map(iface => `
+                                <div class="config-nav-item" data-cfg="iface-${iface}">${iface}</div>
+                            `).join('')}
+                            <div class="config-nav-group">ROUTING / VLANS</div>
+                            <div class="config-nav-item" data-cfg="static-routes">Static Routes</div>
+                            <div class="config-nav-item" data-cfg="vlan-db">VLAN Database</div>
+                        </div>
+                        <div class="config-main-pane" id="configMainPane">
+                            <!-- Dynamic Content -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 3: CLI -->
+                <div id="cisco-tab-cli" class="cisco-tab-body ${initialTab === 'cli' ? 'active' : ''}">
+                    <div style="display:flex; flex-direction:column; width:100%; height:100%; padding:14px; background:#0b0f19;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                            <span style="font-size:12px; font-weight:700; color:#38bdf8;">CISCO IOS COMMAND LINE INTERFACE (CONSOLE RS232)</span>
+                            <button id="btnQuickShow" class="btn-sim" style="font-size:11px; padding:4px 8px; background:#1e293b; color:#cbd5e1; border:1px solid #475569; border-radius:4px; cursor:pointer;">show ip int brief</button>
+                        </div>
+                        <div id="ciscoCliTerminal" style="flex:1; background:#000; border:1px solid #334155; border-radius:6px; padding:12px; font-family:'JetBrains Mono', monospace; font-size:13px; color:#10b981; overflow-y:auto; white-space:pre-wrap;"></div>
+                        <div style="display:flex; gap:8px; margin-top:8px;">
+                            <input id="ciscoCliInput" type="text" placeholder="Type Cisco IOS command (e.g. enable, show ip route, conf t)..." style="flex:1; background:#1e293b; border:1px solid #475569; color:#f8fafc; padding:8px 12px; border-radius:6px; font-family:'JetBrains Mono', monospace; font-size:13px;">
+                            <button id="ciscoCliSend" class="btn-sim primary" style="background:#2563eb; color:white; border:none; padding:8px 16px; border-radius:6px; font-weight:700; cursor:pointer;">Send</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 4: DESKTOP (Hosts) -->
+                ${isHost ? `
+                <div id="cisco-tab-desktop" class="cisco-tab-body ${initialTab === 'desktop' ? 'active' : ''}">
+                    <div class="desktop-container">
+                        <div class="desktop-app-card" data-app="ipconfig">
+                            <div class="desktop-app-icon">⚙️</div>
+                            <div class="desktop-app-name">IP Configuration</div>
+                        </div>
+                        <div class="desktop-app-card" data-app="cmd">
+                            <div class="desktop-app-icon">💻</div>
+                            <div class="desktop-app-name">Command Prompt</div>
+                        </div>
+                        <div class="desktop-app-card" data-app="browser">
+                            <div class="desktop-app-icon">🌐</div>
+                            <div class="desktop-app-name">Web Browser</div>
+                        </div>
+                        <div class="desktop-app-card" data-app="wireless">
+                            <div class="desktop-app-icon">📶</div>
+                            <div class="desktop-app-name">Wireless Configuration</div>
+                        </div>
+                        <div class="desktop-app-card" data-app="iot">
+                            <div class="desktop-app-icon">📡</div>
+                            <div class="desktop-app-name">IoT Manager</div>
+                        </div>
+                    </div>
+                </div>
+                ` : ''}
+            </div>
         `;
 
-        document.getElementById('btnOpenCLI').onclick = () => {
-            this.openConfig(node);
-            panel.style.display = 'none';
+        // Tab Navigation Event Handlers
+        overlay.querySelectorAll('.cisco-nav-tab').forEach(tab => {
+            tab.onclick = () => {
+                overlay.querySelectorAll('.cisco-nav-tab').forEach(t => t.classList.remove('active'));
+                overlay.querySelectorAll('.cisco-tab-body').forEach(b => b.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById(`cisco-tab-${tab.dataset.tab}`).classList.add('active');
+                if (tab.dataset.tab === 'cli') {
+                    this.initCiscoCliTab(node);
+                } else if (tab.dataset.tab === 'config') {
+                    this.renderConfigPane(node, 'global');
+                }
+            };
+        });
+
+        // Power Toggle Button
+        document.getElementById('ciscoPowerToggle').onclick = () => {
+            node.poweredOn = !node.poweredOn;
+            const btn = document.getElementById('ciscoPowerToggle');
+            if (node.poweredOn) {
+                btn.classList.add('on');
+                btn.querySelector('span:last-child').textContent = 'POWER ON';
+                this.showHint(`${node.label} Powered ON.`);
+            } else {
+                btn.classList.remove('on');
+                btn.querySelector('span:last-child').textContent = 'POWER OFF';
+                this.showHint(`${node.label} Powered OFF.`);
+            }
+            this.render();
         };
+
+        // Module Selection & Installation
+        let selectedMod = 'HWIC-2T';
+        overlay.querySelectorAll('.module-card').forEach(m => {
+            m.onclick = () => {
+                overlay.querySelectorAll('.module-card').forEach(c => c.style.borderColor = '#334155');
+                m.style.borderColor = '#38bdf8';
+                selectedMod = m.dataset.mod;
+            };
+        });
+
+        ['slot1', 'slot2'].forEach(slotKey => {
+            const slotEl = document.getElementById(`chassisSlot${slotKey === 'slot1' ? '1' : '2'}`);
+            if (slotEl) {
+                slotEl.onclick = () => {
+                    if (node.poweredOn) {
+                        alert("⚠️ Safety Warning: Power device OFF before inserting or removing hardware modules!");
+                        return;
+                    }
+                    node.slots = node.slots || {};
+                    node.slots[slotKey] = selectedMod;
+                    slotEl.classList.add('filled');
+                    slotEl.querySelector('span:first-child').textContent = selectedMod;
+                    this.showHint(`Installed module ${selectedMod} into ${slotKey.toUpperCase()}`);
+                    
+                    // Dynamically add interfaces for HWIC-2T or HWIC-4ESW
+                    if (selectedMod === 'HWIC-2T') {
+                        node.config.interfaces['se0/1/0'] = { ip: 'unassigned', mask: 'unassigned', status: 'down', desc: 'Serial 0/1/0 HWIC' };
+                        node.config.interfaces['se0/1/1'] = { ip: 'unassigned', mask: 'unassigned', status: 'down', desc: 'Serial 0/1/1 HWIC' };
+                    } else if (selectedMod === 'HWIC-4ESW') {
+                        for (let i = 1; i <= 4; i++) {
+                            node.config.interfaces[`fa0/1/${i}`] = { ip: 'unassigned', mask: 'unassigned', status: 'up', desc: `FastEthernet 0/1/${i}` };
+                        }
+                    }
+                };
+            }
+        });
+
+        // Config Tab Sub-navigation
+        overlay.querySelectorAll('.config-nav-item').forEach(item => {
+            item.onclick = () => {
+                overlay.querySelectorAll('.config-nav-item').forEach(i => i.classList.remove('active'));
+                item.classList.add('active');
+                this.renderConfigPane(node, item.dataset.cfg);
+            };
+        });
+
+        // Desktop Apps
+        overlay.querySelectorAll('.desktop-app-card').forEach(app => {
+            app.onclick = () => {
+                const appType = app.dataset.app;
+                if (appType === 'ipconfig') {
+                    overlay.querySelector('.cisco-nav-tab[data-tab="config"]').click();
+                } else if (appType === 'cmd') {
+                    overlay.querySelector('.cisco-nav-tab[data-tab="cli"]').click();
+                } else if (appType === 'browser') {
+                    alert(`🌐 Web Browser: Enter http://192.168.1.1 or any Server IP to test HTTP server connectivity.`);
+                } else if (appType === 'wireless') {
+                    alert(`📶 Wireless Configuration: Connected to Wi-Fi Network SSID: VLab_Enterprise (Signal 100%)`);
+                } else if (appType === 'iot') {
+                    alert(`📡 IoT Command Center: 3 IoT devices connected (Smart Door, Fan, Light Switch).`);
+                }
+            };
+        });
+
+        if (initialTab === 'config') {
+            this.renderConfigPane(node, 'global');
+        } else if (initialTab === 'cli') {
+            this.initCiscoCliTab(node);
+        }
+    }
+
+    renderConfigPane(node, key) {
+        const pane = document.getElementById('configMainPane');
+        if (!pane) return;
+
+        if (key === 'global') {
+            pane.innerHTML = `
+                <h3 style="font-size:16px; color:#38bdf8; margin-bottom:16px;">Global Settings</h3>
+                <div class="config-form-group">
+                    <label>Hostname</label>
+                    <input id="cfgHostname" type="text" value="${node.config?.hostname || node.label}">
+                </div>
+                <div class="config-form-group">
+                    <label>Domain Name</label>
+                    <input type="text" value="cisco.local">
+                </div>
+                <div class="config-form-group">
+                    <label>Default Gateway</label>
+                    <input id="cfgGateway" type="text" value="${node.config?.gateway || '192.168.1.1'}">
+                </div>
+                <div class="config-form-group">
+                    <label>DNS Server</label>
+                    <input id="cfgDns" type="text" value="${node.config?.dns?.server || '8.8.8.8'}">
+                </div>
+                <button id="btnSaveCopyRun" class="btn-sim primary" style="background:#10b981; border:none; padding:10px 18px; border-radius:6px; color:white; font-weight:700; cursor:pointer; margin-top:10px;">💾 Save NVRAM (copy run start)</button>
+            `;
+
+            document.getElementById('cfgHostname').onchange = (e) => {
+                node.config.hostname = e.target.value;
+                node.label = e.target.value;
+                if (node.el) node.el.querySelector('.d-label').textContent = e.target.value;
+            };
+
+            document.getElementById('btnSaveCopyRun').onclick = () => {
+                this.showHint(`Building configuration... [OK]. Saved to NVRAM.`);
+            };
+        } else if (key.startsWith('iface-')) {
+            const iface = key.replace('iface-', '');
+            const ifData = node.config?.interfaces?.[iface] || { ip: 'unassigned', mask: 'unassigned', status: 'down' };
+
+            pane.innerHTML = `
+                <h3 style="font-size:16px; color:#38bdf8; margin-bottom:16px;">Interface Configuration: ${iface}</h3>
+                <div class="config-form-group" style="display:flex; align-items:center; gap:10px;">
+                    <input id="cfgPortStatus" type="checkbox" ${ifData.status === 'up' ? 'checked' : ''} style="width:18px; height:18px;">
+                    <label for="cfgPortStatus" style="margin:0; font-size:14px; color:#10b981;">Port Status (Power ON)</label>
+                </div>
+                <div class="config-form-group">
+                    <label>IP Address</label>
+                    <input id="cfgIp" type="text" value="${ifData.ip !== 'unassigned' ? ifData.ip : ''}" placeholder="192.168.1.1">
+                </div>
+                <div class="config-form-group">
+                    <label>Subnet Mask</label>
+                    <input id="cfgMask" type="text" value="${ifData.mask !== 'unassigned' ? ifData.mask : ''}" placeholder="255.255.255.0">
+                </div>
+                <div class="config-form-group">
+                    <label>Bandwidth / Speed</label>
+                    <select>
+                        <option>Auto</option>
+                        <option>10 Mbps</option>
+                        <option selected>100 Mbps</option>
+                        <option>1000 Mbps (Gigabit)</option>
+                    </select>
+                </div>
+                <div class="config-form-group">
+                    <label>Duplex</label>
+                    <select>
+                        <option selected>Auto</option>
+                        <option>Full Duplex</option>
+                        <option>Half Duplex</option>
+                    </select>
+                </div>
+            `;
+
+            document.getElementById('cfgPortStatus').onchange = (e) => {
+                ifData.status = e.target.checked ? 'up' : 'down';
+                this.computeTopologyRouting();
+                this.render();
+            };
+            document.getElementById('cfgIp').onchange = (e) => {
+                ifData.ip = e.target.value || 'unassigned';
+                node.ip = ifData.ip;
+                this.computeTopologyRouting();
+            };
+            document.getElementById('cfgMask').onchange = (e) => {
+                ifData.mask = e.target.value || 'unassigned';
+            };
+        } else if (key === 'static-routes') {
+            pane.innerHTML = `
+                <h3 style="font-size:16px; color:#38bdf8; margin-bottom:16px;">Static Routes Table</h3>
+                <div style="display:flex; gap:10px; margin-bottom:16px;">
+                    <input id="srNet" type="text" placeholder="Network (10.0.0.0)" style="flex:1; background:#1e293b; border:1px solid #475569; color:white; padding:8px; border-radius:6px;">
+                    <input id="srMask" type="text" placeholder="Mask (255.0.0.0)" style="flex:1; background:#1e293b; border:1px solid #475569; color:white; padding:8px; border-radius:6px;">
+                    <input id="srNext" type="text" placeholder="Next Hop (192.168.1.2)" style="flex:1; background:#1e293b; border:1px solid #475569; color:white; padding:8px; border-radius:6px;">
+                    <button id="btnAddRoute" class="btn-sim primary" style="background:#2563eb; border:none; padding:8px 14px; border-radius:6px; color:white; font-weight:700; cursor:pointer;">Add Route</button>
+                </div>
+                <table style="width:100%; border-collapse:collapse; color:#cbd5e1; font-size:12px;">
+                    <thead>
+                        <tr style="border-bottom:1px solid #334155; text-align:left; color:#94a3b8;">
+                            <th style="padding:6px;">Network</th>
+                            <th style="padding:6px;">Mask</th>
+                            <th style="padding:6px;">Next Hop</th>
+                        </tr>
+                    </thead>
+                    <tbody id="staticRouteRows">
+                        ${(node.config?.routes || []).map(r => `
+                            <tr style="border-bottom:1px solid #1e293b;">
+                                <td style="padding:6px;">${r.network || r.ip}</td>
+                                <td style="padding:6px;">${r.mask}</td>
+                                <td style="padding:6px;">${r.nextHop || r.via}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+
+            document.getElementById('btnAddRoute').onclick = () => {
+                const network = document.getElementById('srNet').value;
+                const mask = document.getElementById('srMask').value;
+                const nextHop = document.getElementById('srNext').value;
+                if (network && mask && nextHop) {
+                    node.config.routes = node.config.routes || [];
+                    node.config.routes.push({ network, mask, nextHop });
+                    this.computeTopologyRouting();
+                    this.renderConfigPane(node, 'static-routes');
+                }
+            };
+        } else if (key === 'vlan-db') {
+            pane.innerHTML = `
+                <h3 style="font-size:16px; color:#38bdf8; margin-bottom:16px;">VLAN Database</h3>
+                <div style="display:flex; gap:10px; margin-bottom:16px;">
+                    <input id="vlanNum" type="number" placeholder="VLAN Number (e.g. 10)" style="width:140px; background:#1e293b; border:1px solid #475569; color:white; padding:8px; border-radius:6px;">
+                    <input id="vlanName" type="text" placeholder="VLAN Name (e.g. SALES)" style="flex:1; background:#1e293b; border:1px solid #475569; color:white; padding:8px; border-radius:6px;">
+                    <button id="btnAddVlan" class="btn-sim primary" style="background:#10b981; border:none; padding:8px 14px; border-radius:6px; color:white; font-weight:700; cursor:pointer;">Add VLAN</button>
+                </div>
+                <table style="width:100%; border-collapse:collapse; color:#cbd5e1; font-size:12px;">
+                    <thead>
+                        <tr style="border-bottom:1px solid #334155; text-align:left; color:#94a3b8;">
+                            <th style="padding:6px;">VLAN ID</th>
+                            <th style="padding:6px;">VLAN Name</th>
+                            <th style="padding:6px;">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="vlanRows">
+                        ${Object.entries(node.config?.vlans || { '1': { name: 'default' } }).map(([id, v]) => `
+                            <tr style="border-bottom:1px solid #1e293b;">
+                                <td style="padding:6px;">${id}</td>
+                                <td style="padding:6px;">${v.name}</td>
+                                <td style="padding:6px; color:#10b981;">Active</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+
+            document.getElementById('btnAddVlan').onclick = () => {
+                const id = document.getElementById('vlanNum').value;
+                const name = document.getElementById('vlanName').value;
+                if (id && name) {
+                    node.config.vlans = node.config.vlans || {};
+                    node.config.vlans[id] = { name, ports: [] };
+                    this.renderConfigPane(node, 'vlan-db');
+                }
+            };
+        }
+    }
+
+    initCiscoCliTab(node) {
+        const term = document.getElementById('ciscoCliTerminal');
+        const input = document.getElementById('ciscoCliInput');
+        const sendBtn = document.getElementById('ciscoCliSend');
+        const showBtn = document.getElementById('btnQuickShow');
+        if (!term || !input) return;
+
+        const host = node.config?.hostname || node.label || node.type.toUpperCase();
+        node.cliMode = node.cliMode || 'user';
+
+        let promptSuffix = '>';
+        if (node.cliMode === 'privileged') promptSuffix = '#';
+        if (node.cliMode === 'config') promptSuffix = '(config)#';
+        if (node.cliMode === 'config-if') promptSuffix = '(config-if)#';
+
+        term.textContent = `Cisco IOS Software, ${node.type.toUpperCase()} Software, Version 15.2(4)M3\nCopyright (c) 1986-2026 by Cisco Systems, Inc.\n\nPress RETURN to get started!\n\n${host}${promptSuffix} `;
+
+        const execCommand = () => {
+            const cmd = input.value.trim();
+            if (!cmd) return;
+            input.value = '';
+            term.textContent += `${cmd}\n`;
+
+            if (this.handleCliInput) {
+                const dummyArea = {
+                    appendChild: (el) => { term.textContent += el.textContent + '\n'; },
+                    querySelector: () => null,
+                    scrollTop: 0,
+                    scrollHeight: 100000
+                };
+                this.handleCliInput(cmd, node, dummyArea, (text) => {
+                    term.textContent += `${text}\n`;
+                });
+            } else {
+                term.textContent += `% Command executed.\n`;
+            }
+
+            const newSuffix = node.cliMode === 'privileged' ? '#' : (node.cliMode === 'config' ? '(config)#' : '>');
+            term.textContent += `${node.config?.hostname || host}${newSuffix} `;
+            term.scrollTop = term.scrollHeight;
+        };
+
+        input.onkeydown = (e) => {
+            if (e.key === 'Enter') execCommand();
+        };
+        if (sendBtn) sendBtn.onclick = execCommand;
+        if (showBtn) {
+            showBtn.onclick = () => {
+                input.value = 'show ip interface brief';
+                execCommand();
+            };
+        }
     }
 
     startDrag(e, node, el, onMove) {
