@@ -25072,14 +25072,22 @@ const initRipSim = (container) => {
                 }
             }
 
-            if (!data) {
-                container.innerHTML = `
+            if (!data || (id && id.startsWith('kali_'))) {
+                const isKali = (id && id.startsWith('kali_')) || (localStorage.getItem('vlab_current_subject') === 'kali');
+                container.innerHTML = isKali ? `
+                <div class="sim-placeholder" style="text-align:center; padding:60px 40px; color:var(--text-muted); background:linear-gradient(135deg,#060911,#0f1f2e); border-radius:16px; border:1px solid #00f2fe44;">
+                    <div style="font-size:64px; margin-bottom:20px; filter:drop-shadow(0 0 20px #00f2fe);">🐉</div>
+                    <h2 style="color:#00f2fe; font-size:22px; margin-bottom:12px;">Kali Linux VM Terminal</h2>
+                    <p style="max-width:480px; margin:0 auto 20px; font-size:14px; line-height:1.7;">The interactive virtual machine for this lab is in the <b style="color:#00f2fe;">Experiment</b> tab. Switch to it to access the full Kali Linux terminal simulator with unlimited usage.</p>
+                    <button onclick="document.querySelector('.nav-item[data-section=experiment]').click()" style="padding:12px 28px; background:linear-gradient(135deg,#00f2fe,#00c6ff); color:#060911; border:none; border-radius:8px; font-weight:800; font-size:14px; cursor:pointer; font-family:inherit;">🐉 Open Kali Linux VM Terminal →</button>
+                </div>
+                ` : `
                 <div class="sim-placeholder" style="text-align:center; padding:100px; color:var(--text-muted);">
                     <div style="font-size:48px; margin-bottom:20px;">🛡️</div>
                     <h2>Standard Simulation Unavailable</h2>
                     <p>This is a free-form Practice Lab. Switch to the <b>Experiment</b> tab to build your network.</p>
                 </div>
-            `;
+                `;
                 return;
             }
 
@@ -25398,12 +25406,637 @@ const initRipSim = (container) => {
             outputEl.scrollTop = outputEl.scrollHeight;
         };
 
+        const initKaliVmSimulator = (container, labId) => {
+            if (!container) return;
+            const effectiveLab = labId || 'kali_exp1';
+            
+            const thmTasksMap = {
+                kali_exp1: [
+                    {
+                        title: "Task 1: Introduction to Kali Linux & System Info",
+                        desc: "Kali Linux is an advanced penetration testing distribution. Practice running basic system discovery commands.",
+                        questions: [
+                            { id: "q1_1", text: "Run `whoami`. What username is logged into the current shell?", answer: "kali", hint: "Type `whoami` in the terminal on the right." },
+                            { id: "q1_2", text: "Run `hostname`. What is the hostname of the virtual machine?", answer: "kali", hint: "Type `hostname`." },
+                            { id: "q1_3", text: "Run `uname -a`. What is the system architecture?", answer: "x86_64", altAnswers: ["Linux kali 6.8.0-kali1-amd64 #1 SMP PREEMPT_DYNAMIC x86_64 GNU/Linux"], hint: "Look at the end of the `uname -a` output." }
+                        ]
+                    },
+                    {
+                        title: "Task 2: Running Your First Commands & Reading Files",
+                        desc: "Commands follow the format `command [options] [arguments]`. Read hidden flags inside files.",
+                        questions: [
+                            { id: "q1_4", text: "Use `echo` to print 'Hello TryHackMe'. What command did you execute?", answer: "echo Hello TryHackMe", altAnswers: ["echo 'Hello TryHackMe'", 'echo "Hello TryHackMe"'], hint: "Type `echo Hello TryHackMe`" },
+                            { id: "q1_5", text: "Read the file `/home/kali/flag1.txt`. What is the flag?", answer: "THM{linux_basics_101}", hint: "Execute `cat /home/kali/flag1.txt` or `cat flag1.txt`." }
+                        ]
+                    }
+                ],
+                kali_exp2: [
+                    {
+                        title: "Task 1: Navigating the Linux Filesystem",
+                        desc: "Learn to use `pwd`, `ls`, `cd`, and inspect system directories.",
+                        questions: [
+                            { id: "q2_1", text: "What is your current working directory upon logging in?", answer: "/home/kali", hint: "Run `pwd`." },
+                            { id: "q2_2", text: "Navigate to `/var/log` and list the directory. What log file records user authentication?", answer: "auth.log", hint: "Run `cd /var/log` then `ls`." },
+                            { id: "q2_3", text: "Inspect `/home/kali/notes.txt`. What is the second word in the text note?", answer: "to", hint: "Run `cat /home/kali/notes.txt`." }
+                        ]
+                    }
+                ],
+                kali_exp3: [
+                    {
+                        title: "Task 1: File Search, Wildcards & Piping",
+                        desc: "Master `find`, `grep`, redirection (`>`), and piping (`|`).",
+                        questions: [
+                            { id: "q3_1", text: "Search for all `.txt` files in `/home/kali`. What file is inside `downloads`?", answer: "passwords.txt", altAnswers: ["/home/kali/downloads/passwords.txt", "downloads/passwords.txt"], hint: "Run `find /home/kali -name '*.txt'`" },
+                            { id: "q3_2", text: "Use `grep` to search for 'root' in `/etc/passwd`. What flag is in the comment line?", answer: "THM{grep_search_wizard}", hint: "Run `grep root /etc/passwd`" }
+                        ]
+                    }
+                ],
+                kali_exp4: [
+                    {
+                        title: "Task 1: File Operations, Chmod & Privilege Escalation",
+                        desc: "Create files (`touch`), directories (`mkdir`), change permissions (`chmod`), and use `sudo`.",
+                        questions: [
+                            { id: "q4_1", text: "Create a directory called `workspace`. What command did you run?", answer: "mkdir workspace", hint: "Type `mkdir workspace`." },
+                            { id: "q4_2", text: "Attempt to read `/root/root_flag.txt` without sudo. What error message appears?", answer: "Permission denied", hint: "Type `cat /root/root_flag.txt`." },
+                            { id: "q4_3", text: "Use `sudo cat /root/root_flag.txt` to read the root flag. What is the flag?", answer: "THM{permission_root_escalation}", hint: "Run `sudo cat /root/root_flag.txt`." }
+                        ]
+                    }
+                ],
+                kali_exp5: [
+                    {
+                        title: "Task 1: System Processes & Text Editing",
+                        desc: "Monitor system resources with `ps aux` and `top`, terminate processes with `kill -9`, and edit files.",
+                        questions: [
+                            { id: "q5_1", text: "Inspect processes with `ps aux`. What PID belongs to `unauthorized_miner`?", answer: "1337", hint: "Run `ps aux` and look for `unauthorized_miner`." },
+                            { id: "q5_2", text: "Kill the rogue process PID 1337 with `kill -9 1337`. What flag is returned upon termination?", answer: "THM{process_kill_9}", hint: "Run `kill -9 1337`." }
+                        ]
+                    }
+                ],
+                kali_exp6: [
+                    {
+                        title: "Task 1: Package Management & Network Utilities",
+                        desc: "Use `ifconfig`, `ip a`, `wget`, `curl`, and `apt` package manager.",
+                        questions: [
+                            { id: "q6_1", text: "What is your IP address on interface `eth0`?", answer: "10.10.14.5", hint: "Type `ifconfig` or `ip a`." },
+                            { id: "q6_2", text: "Fetch `http://10.10.14.1/flag6.txt` using `wget`. What is the flag inside?", answer: "THM{package_wget_curl_pro}", hint: "Run `wget http://10.10.14.1/flag6.txt` then `cat flag6.txt`." }
+                        ]
+                    }
+                ],
+                kali_exp7: [
+                    {
+                        title: "Task 1: TryHackMe CTF Challenge Room — Final Exam",
+                        desc: "Combine all Linux skills! Search logs, escalate to root, and capture the ultimate CTF flag.",
+                        questions: [
+                            { id: "q7_1", text: "Search `/home/kali/downloads/access.log` for 'THM'. What is the user flag?", answer: "THM{access_log_hacker_found}", hint: "Run `grep THM /home/kali/downloads/access.log`" },
+                            { id: "q7_2", text: "Escalate to root (`sudo cat`) and read `/root/root_flag.txt`. What is the root flag?", answer: "THM{ctf_ultimate_root_flag}", hint: "Run `sudo cat /root/root_flag.txt`" }
+                        ]
+                    }
+                ]
+            };
+
+            const taskGroup = thmTasksMap[effectiveLab] || thmTasksMap['kali_exp1'];
+
+            container.innerHTML = `
+                <div class="kali-vm-container" style="display:flex; flex-direction:column; height:100%; min-height:650px; background:#0b0f19; border:1px solid #1e293b; border-radius:16px; overflow:hidden; font-family:'Outfit', sans-serif;">
+                    <div style="background:#0f172a; padding:12px 20px; border-bottom:1px solid #334155; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+                        <div style="display:flex; align-items:center; gap:14px;">
+                            <div style="display:flex; align-items:center; gap:8px; background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.3); padding:4px 10px; border-radius:20px; font-size:12px; color:#10b981; font-weight:700;">
+                                <span style="width:8px; height:8px; background:#10b981; border-radius:50%; display:inline-block; box-shadow:0 0 8px #10b981;"></span> VM ONLINE
+                            </div>
+                            <div style="font-size:13px; font-weight:800; color:#00f2fe; display:flex; align-items:center; gap:6px;">
+                                🐉 Kali Linux 2026.1 (Rolling)
+                            </div>
+                            <span style="font-size:11px; background:#1e293b; color:#94a3b8; padding:3px 8px; border-radius:6px;">Spec: 4 CPU | 4096MB RAM</span>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:16px;">
+                            <div style="font-size:12px; color:#f59e0b; font-weight:700; background:rgba(245,158,11,0.1); border:1px solid rgba(245,158,11,0.3); padding:4px 10px; border-radius:20px;">
+                                ⏱️ Session: Unlimited ♾️ (No Time Limit)
+                            </div>
+                            <button id="btnVmReboot" class="btn-sim" style="padding:4px 10px; font-size:11px; border-color:#334155;">🔄 Reboot VM</button>
+                            <button id="btnVmClear" class="btn-sim" style="padding:4px 10px; font-size:11px; border-color:#334155;">🧹 Clear CLI</button>
+                        </div>
+                    </div>
+
+                    <div style="display:flex; flex:1; overflow:hidden; gap:1px; background:#1e293b;">
+                        <div style="flex:1; min-width:340px; max-width:440px; background:#0f172a; padding:18px; overflow-y:auto; display:flex; flex-direction:column; gap:16px;">
+                            <div style="background:linear-gradient(135deg, rgba(0,242,254,0.1), rgba(0,198,255,0.05)); border:1px solid rgba(0,242,254,0.3); border-radius:12px; padding:14px;">
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                                    <span style="font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:1px; color:#00f2fe;">TryHackMe Room</span>
+                                    <span id="thmScoreBadge" style="font-size:11px; font-weight:800; background:#00f2fe; color:#0b0f19; padding:2px 8px; border-radius:10px;">Progress: 0%</span>
+                                </div>
+                                <h3 style="font-size:15px; font-weight:800; color:#f8fafc; margin:0 0 4px 0;">Linux Fundamentals Course</h3>
+                                <p style="font-size:11px; color:#94a3b8; margin:0; line-height:1.4;">Official TryHackMe Linux terminal training room integrated with interactive verification.</p>
+                            </div>
+
+                            <div id="thmTaskContainer" style="display:flex; flex-direction:column; gap:14px;">
+                                ${taskGroup.map((task) => `
+                                    <div class="thm-task-card" style="background:#1e293b; border:1px solid #334155; border-radius:10px; padding:14px;">
+                                        <h4 style="font-size:13px; font-weight:800; color:#38bdf8; margin:0 0 6px 0;">${task.title}</h4>
+                                        <p style="font-size:11px; color:#cbd5e1; margin:0 0 12px 0; line-height:1.5;">${task.desc}</p>
+                                        
+                                        <div style="display:flex; flex-direction:column; gap:12px;">
+                                            ${task.questions.map((q, qIdx) => `
+                                                <div style="background:#0f172a; border:1px solid #334155; border-radius:8px; padding:10px;">
+                                                    <div style="font-size:11px; font-weight:700; color:#e2e8f0; margin-bottom:6px; line-height:1.4;">${qIdx + 1}. ${q.text}</div>
+                                                    <div style="display:flex; gap:8px; align-items:center;">
+                                                        <input type="text" id="ans_${q.id}" placeholder="Enter answer or THM{...}" style="flex:1; background:#1e293b; border:1px solid #475569; border-radius:6px; padding:6px 10px; font-family:'JetBrains Mono', monospace; font-size:11px; color:#00f2fe; outline:none;" autocomplete="off">
+                                                        <button class="btn-thm-submit" data-qid="${q.id}" data-answer="${q.answer}" data-alts='${JSON.stringify(q.altAnswers || [])}' style="background:#00f2fe; color:#0b0f19; border:none; border-radius:6px; padding:6px 12px; font-size:11px; font-weight:800; cursor:pointer; transition:all 0.2s;">Submit</button>
+                                                    </div>
+                                                    <div id="status_${q.id}" style="margin-top:6px; font-size:10px; display:none;"></div>
+                                                </div>
+                                            `).join('')}
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+
+                        <div style="flex:1.5; background:#090d16; display:flex; flex-direction:column; overflow:hidden;">
+                            <div style="background:#131824; padding:8px 14px; border-bottom:1px solid #1e293b; display:flex; justify-content:space-between; align-items:center;">
+                                <span style="font-family:'JetBrains Mono', monospace; font-size:11px; color:#94a3b8; font-weight:bold;" id="vmTerminalTitle">kali@kali: ~ (bash)</span>
+                                <div style="display:flex; gap:6px;">
+                                    <span style="width:8px; height:8px; background:#ef4444; border-radius:50%; display:inline-block;"></span>
+                                    <span style="width:8px; height:8px; background:#f59e0b; border-radius:50%; display:inline-block;"></span>
+                                    <span style="width:8px; height:8px; background:#10b981; border-radius:50%; display:inline-block;"></span>
+                                </div>
+                            </div>
+
+                            <div id="kaliTerminalOutput" style="flex:1; padding:16px; overflow-y:auto; font-family:'JetBrains Mono', monospace; font-size:12px; line-height:1.6; color:#00f2fe; white-space:pre-wrap; background:#060911;">Linux kali 6.8.0-kali1-amd64 #1 SMP PREEMPT_DYNAMIC x86_64 GNU/Linux
+┌──(kali㉿kali)-[~]
+└─$ </div>
+
+                            <div style="background:#0f172a; border-top:1px solid #1e293b; padding:10px 14px; display:flex; align-items:center; gap:8px;">
+                                <span id="kaliPromptLabel" style="font-family:'JetBrains Mono', monospace; font-size:12px; font-weight:800; color:#00f2fe;">kali@kali:~$</span>
+                                <input type="text" id="kaliTerminalInput" style="flex:1; background:transparent; border:none; color:#00f2fe; outline:none; font-family:'JetBrains Mono', monospace; font-size:12px;" placeholder="Type Linux command (e.g. ls, pwd, cat flag1.txt, sudo su) and press Enter..." autocomplete="off" spellcheck="false">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            let cwd = '/home/kali';
+            let currentUser = 'kali';
+            let cmdHistory = [];
+            let historyIdx = -1;
+
+            let vfs = {
+                '/': { type: 'dir', owner: 'root', group: 'root', perm: 'rwxr-xr-x' },
+                '/home': { type: 'dir', owner: 'root', group: 'root', perm: 'rwxr-xr-x' },
+                '/home/kali': { type: 'dir', owner: 'kali', group: 'kali', perm: 'rwxr-xr-x' },
+                '/home/kali/downloads': { type: 'dir', owner: 'kali', group: 'kali', perm: 'rwxr-xr-x' },
+                '/home/kali/flag1.txt': { type: 'file', owner: 'kali', group: 'kali', perm: 'rw-r--r--', content: 'THM{linux_basics_101}' },
+                '/home/kali/notes.txt': { type: 'file', owner: 'kali', group: 'kali', perm: 'rw-r--r--', content: 'Welcome to TryHackMe Linux Fundamentals! Practice navigation, file operations, permissions, and grep searching.' },
+                '/home/kali/script.sh': { type: 'file', owner: 'kali', group: 'kali', perm: 'rwxr-xr-x', content: '#!/bin/bash\necho "Kali Linux Security System Running..."' },
+                '/home/kali/downloads/access.log': { type: 'file', owner: 'kali', group: 'kali', perm: 'rw-r--r--', content: '192.168.1.10 - - [28/Jul/2026:09:00:01] "GET /index.html HTTP/1.1" 200\n10.10.14.5 - - [28/Jul/2026:09:05:12] "GET /flag HTTP/1.1" 200 THM{access_log_hacker_found}\n192.168.1.15 - - [28/Jul/2026:09:10:45] "POST /login HTTP/1.1" 401' },
+                '/home/kali/downloads/passwords.txt': { type: 'file', owner: 'kali', group: 'kali', perm: 'rw-r--r--', content: 'admin:admin123\nkali:kalilinux\nroot:toor' },
+                '/root': { type: 'dir', owner: 'root', group: 'root', perm: 'rwx------' },
+                '/root/root_flag.txt': { type: 'file', owner: 'root', group: 'root', perm: 'rw-------', content: 'THM{permission_root_escalation}' },
+                '/etc': { type: 'dir', owner: 'root', group: 'root', perm: 'rwxr-xr-x' },
+                '/etc/passwd': { type: 'file', owner: 'root', group: 'root', perm: 'rw-r--r--', content: 'root:x:0:0:root:/root:/bin/bash\nkali:x:1000:1000:Kali Linux User:/home/kali:/bin/bash\n# Comment: THM{grep_search_wizard}' },
+                '/etc/shadow': { type: 'file', owner: 'root', group: 'root', perm: 'rw-------', content: 'root:$6$vlab$hashedpass:19000:0:99999:7:::\nkali:$6$kali$hashedpass:19000:0:99999:7:::' },
+                '/var': { type: 'dir', owner: 'root', group: 'root', perm: 'rwxr-xr-x' },
+                '/var/log': { type: 'dir', owner: 'root', group: 'root', perm: 'rwxr-xr-x' },
+                '/var/log/auth.log': { type: 'file', owner: 'root', group: 'root', perm: 'rw-r--r--', content: 'Jul 28 09:00:01 kali sshd[1020]: Accepted password for kali from 10.10.14.5 port 54321 ssh2' },
+                '/tmp': { type: 'dir', owner: 'root', group: 'root', perm: 'rwxrwxrwx' }
+            };
+
+            let processes = [
+                { pid: 1, user: 'root', cpu: 0.1, mem: 0.2, time: '0:01', cmd: 'systemd' },
+                { pid: 102, user: 'root', cpu: 0.0, mem: 0.1, time: '0:00', cmd: 'sshd' },
+                { pid: 450, user: 'kali', cpu: 0.2, mem: 0.4, time: '0:02', cmd: '-bash' },
+                { pid: 1337, user: 'kali', cpu: 98.4, mem: 12.5, time: '14:20', cmd: './unauthorized_miner' },
+                { pid: 2048, user: 'kali', cpu: 0.1, mem: 0.3, time: '0:00', cmd: 'ps aux' }
+            ];
+
+            const resolvePath = (p) => {
+                if (!p || p === '.') return cwd;
+                if (p === '~') return currentUser === 'root' ? '/root' : '/home/kali';
+                if (p.startsWith('~/')) return (currentUser === 'root' ? '/root' : '/home/kali') + p.slice(1);
+                if (p.startsWith('/')) {
+                    const norm = p.replace(/\/+/g, '/').replace(/\/$/, '') || '/';
+                    return norm;
+                }
+                const combined = (cwd === '/' ? '' : cwd) + '/' + p;
+                const parts = combined.split('/').filter(Boolean);
+                const stack = [];
+                for (const pt of parts) {
+                    if (pt === '..') stack.pop();
+                    else if (pt !== '.') stack.push(pt);
+                }
+                return '/' + stack.join('');
+            };
+
+            const termInput = container.querySelector('#kaliTerminalInput');
+            const termOutput = container.querySelector('#kaliTerminalOutput');
+            const promptLabel = container.querySelector('#kaliPromptLabel');
+            const titleLabel = container.querySelector('#vmTerminalTitle');
+
+            const updatePrompt = () => {
+                const promptSymbol = currentUser === 'root' ? '#' : '$';
+                const dispPath = cwd.startsWith('/home/kali') ? cwd.replace('/home/kali', '~') : cwd;
+                if (promptLabel) promptLabel.textContent = `${currentUser}@kali:${dispPath}${promptSymbol}`;
+                if (titleLabel) titleLabel.textContent = `${currentUser}@kali: ${dispPath} (bash)`;
+                if (promptLabel) promptLabel.style.color = currentUser === 'root' ? '#ef4444' : '#00f2fe';
+            };
+
+            const executeCmd = (cmdStr) => {
+                cmdHistory.push(cmdStr);
+                historyIdx = cmdHistory.length;
+                let trimmed = cmdStr.trim();
+                if (!trimmed) return;
+
+                const isSudo = trimmed.startsWith('sudo ');
+                let effectiveUser = currentUser;
+                if (isSudo) {
+                    effectiveUser = 'root';
+                    trimmed = trimmed.substring(5).trim();
+                }
+
+                const parts = trimmed.split(/\s+/);
+                const base = parts[0].toLowerCase();
+                const args = parts.slice(1);
+
+                const promptSymbol = currentUser === 'root' ? '#' : '$';
+                const dispPath = cwd.startsWith('/home/kali') ? cwd.replace('/home/kali', '~') : cwd;
+                let output = `\n┌──(${currentUser}㉿kali)-[${dispPath}]\n└─${promptSymbol} ${cmdStr}\n`;
+
+                switch (base) {
+                    case 'pwd':
+                        output += `${cwd}`;
+                        break;
+                    case 'whoami':
+                        output += `${effectiveUser}`;
+                        break;
+                    case 'hostname':
+                        output += `kali`;
+                        break;
+                    case 'uname':
+                        if (args.includes('-a')) {
+                            output += `Linux kali 6.8.0-kali1-amd64 #1 SMP PREEMPT_DYNAMIC x86_64 GNU/Linux`;
+                        } else {
+                            output += `Linux`;
+                        }
+                        break;
+                    case 'date':
+                        output += new Date().toUTCString();
+                        break;
+                    case 'clear':
+                        termOutput.textContent = `Linux kali 6.8.0-kali1-amd64 #1 SMP PREEMPT_DYNAMIC x86_64 GNU/Linux\n`;
+                        updatePrompt();
+                        return;
+                    case 'help':
+                        output += `Kali Linux Virtual Machine Shell (GNU Bash 5.2)\nAvailable commands:\n` +
+                            `  ls [-la]              - List files and directory permissions\n` +
+                            `  cd [dir]              - Change current working directory\n` +
+                            `  pwd                   - Print working directory\n` +
+                            `  cat [file]            - View contents of a file\n` +
+                            `  echo [str] [> file]   - Output text or redirect to file\n` +
+                            `  touch [file]          - Create an empty file\n` +
+                            `  mkdir [-p] [dir]      - Create a new directory\n` +
+                            `  rm [-rf] [path]       - Remove file or directory\n` +
+                            `  cp / mv               - Copy or move files\n` +
+                            `  find [path] -name [p] - Search filesystem for files\n` +
+                            `  grep [str] [file]     - Search pattern inside text file\n` +
+                            `  chmod [perm] [file]   - Modify file access permissions\n` +
+                            `  whoami / hostname     - Display active user and system name\n` +
+                            `  sudo [command]        - Run command with root privileges\n` +
+                            `  su [-] [user]         - Switch active user (root/kali)\n` +
+                            `  ps aux / top / kill   - Process management utilities\n` +
+                            `  wget / curl           - Download files over HTTP\n` +
+                            `  ifconfig / ip a       - Display network interface specs\n` +
+                            `  clear / history       - Terminal screen & history tools`;
+                        break;
+                    case 'history':
+                        output += cmdHistory.map((c, i) => `  ${i + 1}  ${c}`).join('\n');
+                        break;
+                    case 'cd':
+                        const targetDir = resolvePath(args[0] || '~');
+                        if (vfs[targetDir] && vfs[targetDir].type === 'dir') {
+                            if (vfs[targetDir].perm.startsWith('rwx------') && effectiveUser !== 'root') {
+                                output += `bash: cd: ${args[0]}: Permission denied`;
+                            } else {
+                                cwd = targetDir;
+                            }
+                        } else {
+                            output += `bash: cd: ${args[0] || ''}: No such file or directory`;
+                        }
+                        break;
+                    case 'ls':
+                        const showAll = args.includes('-a') || args.includes('-la') || args.includes('-al');
+                        const showLong = args.includes('-l') || args.includes('-la') || args.includes('-al');
+                        const targetPath = resolvePath(args.find(a => !a.startsWith('-')) || '.');
+
+                        if (vfs[targetPath] && vfs[targetPath].type === 'dir') {
+                            const entries = Object.keys(vfs).filter(p => {
+                                const parent = p.substring(0, p.lastIndexOf('/')) || '/';
+                                return parent === targetPath && p !== targetPath;
+                            });
+
+                            let list = entries.map(p => {
+                                const name = p.substring(p.lastIndexOf('/') + 1);
+                                const item = vfs[p];
+                                if (!showAll && name.startsWith('.')) return null;
+                                if (showLong) {
+                                    const isDir = item.type === 'dir';
+                                    const pStr = (isDir ? 'd' : '-') + item.perm.substring(1);
+                                    const sz = isDir ? 4096 : (item.content ? item.content.length : 0);
+                                    return `${pStr} 1 ${item.owner} ${item.group} ${sz.toString().padStart(6)} Jul 28 09:15 ${name}`;
+                                }
+                                return name;
+                            }).filter(Boolean);
+
+                            output += list.join(showLong ? '\n' : '  ');
+                        } else if (vfs[targetPath]) {
+                            output += targetPath.substring(targetPath.lastIndexOf('/') + 1);
+                        } else {
+                            output += `ls: cannot access '${args[0] || '.'}': No such file or directory`;
+                        }
+                        break;
+                    case 'cat':
+                        if (!args[0]) {
+                            output += `cat: missing file operand`;
+                        } else {
+                            const targetFile = resolvePath(args[0]);
+                            const fileNode = vfs[targetFile];
+                            if (!fileNode) {
+                                output += `cat: ${args[0]}: No such file or directory`;
+                            } else if (fileNode.type === 'dir') {
+                                output += `cat: ${args[0]}: Is a directory`;
+                            } else if (fileNode.owner === 'root' && effectiveUser !== 'root' && fileNode.perm.includes('------')) {
+                                output += `cat: ${args[0]}: Permission denied`;
+                            } else {
+                                output += fileNode.content || '';
+                            }
+                        }
+                        break;
+                    case 'echo':
+                        const joinStr = args.join(' ');
+                        if (joinStr.includes('>')) {
+                            const isAppend = joinStr.includes('>>');
+                            const partsRedirect = joinStr.split(isAppend ? '>>' : '>');
+                            const textVal = partsRedirect[0].replace(/['"]/g, '').trim();
+                            const destFile = resolvePath(partsRedirect[1].trim());
+
+                            if (!vfs[destFile]) {
+                                vfs[destFile] = { type: 'file', owner: effectiveUser, group: effectiveUser, perm: 'rw-r--r--', content: '' };
+                            }
+                            if (isAppend) {
+                                vfs[destFile].content += '\n' + textVal;
+                            } else {
+                                vfs[destFile].content = textVal;
+                            }
+                            output += `Wrote output to file '${destFile}'`;
+                        } else {
+                            output += joinStr.replace(/['"]/g, '');
+                        }
+                        break;
+                    case 'touch':
+                        if (!args[0]) output += `touch: missing file operand`;
+                        else {
+                            const fPath = resolvePath(args[0]);
+                            vfs[fPath] = { type: 'file', owner: effectiveUser, group: effectiveUser, perm: 'rw-r--r--', content: '' };
+                            output += `File created: ${args[0]}`;
+                        }
+                        break;
+                    case 'mkdir':
+                        if (!args[0]) output += `mkdir: missing operand`;
+                        else {
+                            const dPath = resolvePath(args[0].replace('-p', '').trim());
+                            vfs[dPath] = { type: 'dir', owner: effectiveUser, group: effectiveUser, perm: 'rwxr-xr-x' };
+                            output += `Directory created: ${args[0]}`;
+                        }
+                        break;
+                    case 'rm':
+                        if (!args[0]) output += `rm: missing operand`;
+                        else {
+                            const targetR = resolvePath(args.find(a => !a.startsWith('-')) || '');
+                            if (vfs[targetR]) {
+                                delete vfs[targetR];
+                                output += `Removed '${args[0]}'`;
+                            } else {
+                                output += `rm: cannot remove '${args[0]}': No such file or directory`;
+                            }
+                        }
+                        break;
+                    case 'find':
+                        const pSearch = resolvePath(args[0] && !args[0].startsWith('-') ? args[0] : cwd);
+                        const nameIdx = args.indexOf('-name');
+                        const pat = nameIdx !== -1 ? args[nameIdx + 1].replace(/['"]/g, '') : null;
+
+                        const matches = Object.keys(vfs).filter(p => {
+                            if (!p.startsWith(pSearch)) return false;
+                            if (!pat) return true;
+                            const fname = p.substring(p.lastIndexOf('/') + 1);
+                            if (pat.startsWith('*')) return fname.endsWith(pat.slice(1));
+                            return fname === pat;
+                        });
+                        output += matches.join('\n');
+                        break;
+                    case 'grep':
+                        if (args.length < 2) {
+                            output += `Usage: grep [pattern] [file]`;
+                        } else {
+                            const patG = args[0].replace(/['"]/g, '');
+                            const fG = resolvePath(args[1]);
+                            const nodeG = vfs[fG];
+                            if (!nodeG) output += `grep: ${args[1]}: No such file or directory`;
+                            else if (nodeG.content) {
+                                const matchingLines = nodeG.content.split('\n').filter(l => l.includes(patG));
+                                output += matchingLines.join('\n');
+                            }
+                        }
+                        break;
+                    case 'chmod':
+                        if (args.length < 2) output += `Usage: chmod [mode] [file]`;
+                        else {
+                            const modeStr = args[0];
+                            const fileP = resolvePath(args[1]);
+                            if (vfs[fileP]) {
+                                vfs[fileP].perm = modeStr === '777' || modeStr === '+x' ? 'rwxrwxrwx' : 'rw-r--r--';
+                                output += `Changed permissions for '${args[1]}' to ${modeStr}`;
+                            } else {
+                                output += `chmod: cannot access '${args[1]}': No such file or directory`;
+                            }
+                        }
+                        break;
+                    case 'su':
+                        const targetUser = args[0] === '-' ? (args[1] || 'root') : (args[0] || 'root');
+                        currentUser = targetUser;
+                        cwd = targetUser === 'root' ? '/root' : '/home/' + targetUser;
+                        output += `Switched to user '${currentUser}'. Welcome to root shell!`;
+                        updatePrompt();
+                        break;
+                    case 'ps':
+                        output += `PID   TTY      TIME     CMD\n` + processes.map(p => `${p.pid.toString().padEnd(5)} tty1     ${p.time}   ${p.cmd}`).join('\n');
+                        break;
+                    case 'top':
+                        output += `top - 09:16:00 up 2:45,  1 user,  load average: 0.08, 0.04, 0.01\n` +
+                            `Tasks: ${processes.length} total,  1 running, ${processes.length - 1} sleeping\n` +
+                            `%Cpu(s):  2.5 us,  1.0 sy,  0.0 ni, 96.5 id\n` +
+                            `MiB Mem :   4096.0 total,   2150.4 free,   1200.2 used\n\n` +
+                            `PID   USER      PR  NI    VIRT    RES    SHR S  %CPU  %MEM     TIME+ COMMAND\n` +
+                            processes.map(p => `${p.pid.toString().padEnd(5)} ${p.user.padEnd(8)} 20   0    4200   1200   1000 S   ${p.cpu}   ${p.mem}   ${p.time} ${p.cmd}`).join('\n');
+                        break;
+                    case 'kill':
+                        const targetPid = parseInt(args.find(a => !a.startsWith('-')) || '0', 10);
+                        const pIdx = processes.findIndex(p => p.pid === targetPid);
+                        if (pIdx !== -1) {
+                            const killedProc = processes[pIdx];
+                            processes.splice(pIdx, 1);
+                            output += `[1]+ Terminated ${killedProc.cmd} (PID ${targetPid}).`;
+                            if (targetPid === 1337) {
+                                output += `\nRevealed Flag: THM{process_kill_9}`;
+                            }
+                        } else {
+                            output += `bash: kill: (${targetPid}) - No such process`;
+                        }
+                        break;
+                    case 'wget':
+                    case 'curl':
+                        const urlArg = args.find(a => a.startsWith('http')) || 'http://10.10.14.1/flag6.txt';
+                        vfs['/home/kali/flag6.txt'] = { type: 'file', owner: 'kali', group: 'kali', perm: 'rw-r--r--', content: 'THM{package_wget_curl_pro}' };
+                        output += `--2026-07-28 09:16:15--  ${urlArg}\n` +
+                            `Connecting to 10.10.14.1:80... connected.\n` +
+                            `HTTP request sent, awaiting response... 200 OK\n` +
+                            `Length: 28 [text/plain]\n` +
+                            `Saving to: 'flag6.txt'\n\n` +
+                            `flag6.txt           100%[===================>]      28  --.-KB/s    in 0.001s\n\n` +
+                            `2026-07-28 09:16:15 (28 KB/s) - 'flag6.txt' saved [28/28]`;
+                        break;
+                    case 'ifconfig':
+                    case 'ip':
+                        output += `eth0: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500\n` +
+                            `        inet 10.10.14.5  netmask 255.255.255.0  broadcast 10.10.14.255\n` +
+                            `        ether 00:50:56:b3:1a:89  txqueuelen 1000  (Ethernet)\n` +
+                            `        RX packets 1450  bytes 120450 (120.4 KB)\n` +
+                            `        TX packets 980  bytes 89200 (89.2 KB)\n\n` +
+                            `lo: flags=73<UP,LOOPBACK,RUNNING>  mtu 65536\n` +
+                            `        inet 127.0.0.1  netmask 255.0.0.0`;
+                        break;
+                    case 'ping':
+                        const targetHost = args.find(a => !a.startsWith('-')) || '10.10.14.1';
+                        output += `PING ${targetHost} (${targetHost}) 56(84) bytes of data.\n` +
+                            `64 bytes from ${targetHost}: icmp_seq=1 ttl=64 time=0.412 ms\n` +
+                            `64 bytes from ${targetHost}: icmp_seq=2 ttl=64 time=0.388 ms\n` +
+                            `64 bytes from ${targetHost}: icmp_seq=3 ttl=64 time=0.395 ms\n` +
+                            `--- ${targetHost} ping statistics ---\n` +
+                            `3 packets transmitted, 3 received, 0% packet loss, time 2004ms`;
+                        break;
+                    default:
+                        output += `bash: ${base}: command not found. Type 'help' to see valid commands.`;
+                }
+
+                termOutput.textContent += output;
+                termOutput.scrollTop = termOutput.scrollHeight;
+                updatePrompt();
+            };
+
+            if (termInput) {
+                termInput.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        const val = termInput.value;
+                        termInput.value = '';
+                        executeCmd(val);
+                    } else if (e.key === 'ArrowUp') {
+                        if (cmdHistory.length > 0 && historyIdx > 0) {
+                            historyIdx--;
+                            termInput.value = cmdHistory[historyIdx];
+                        }
+                    } else if (e.key === 'ArrowDown') {
+                        if (historyIdx < cmdHistory.length - 1) {
+                            historyIdx++;
+                            termInput.value = cmdHistory[historyIdx];
+                        } else {
+                            historyIdx = cmdHistory.length;
+                            termInput.value = '';
+                        }
+                    } else if (e.key === 'Tab') {
+                        e.preventDefault();
+                        const val = termInput.value.trim();
+                        if (val) {
+                            const parts = val.split(/\s+/);
+                            const lastPart = parts[parts.length - 1];
+                            const options = Object.keys(vfs).map(p => p.substring(p.lastIndexOf('/') + 1));
+                            const match = options.find(o => o.startsWith(lastPart));
+                            if (match) {
+                                parts[parts.length - 1] = match;
+                                termInput.value = parts.join(' ');
+                            }
+                        }
+                    }
+                });
+            }
+
+            const submitBtns = container.querySelectorAll('.btn-thm-submit');
+            let solvedCount = 0;
+            const totalQuestions = container.querySelectorAll('.btn-thm-submit').length;
+
+            submitBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const qid = btn.getAttribute('data-qid');
+                    const targetAns = btn.getAttribute('data-answer');
+                    const alts = JSON.parse(btn.getAttribute('data-alts') || '[]');
+                    const inputEl = container.querySelector(`#ans_${qid}`);
+                    const statusEl = container.querySelector(`#status_${qid}`);
+
+                    if (!inputEl || !statusEl) return;
+
+                    const userVal = inputEl.value.trim();
+                    const validAnswers = [targetAns, ...alts].map(a => a.toLowerCase().trim());
+
+                    if (validAnswers.includes(userVal.toLowerCase())) {
+                        statusEl.style.display = 'block';
+                        statusEl.style.color = '#10b981';
+                        statusEl.innerHTML = '✓ Correct Answer! Flag Validated (+100 PTS)';
+                        btn.disabled = true;
+                        btn.style.background = '#10b981';
+                        btn.textContent = '✓ Solved';
+                        inputEl.style.borderColor = '#10b981';
+                        inputEl.disabled = true;
+
+                        solvedCount++;
+                        const scorePct = Math.round((solvedCount / totalQuestions) * 100);
+                        const badgeEl = container.querySelector('#thmScoreBadge');
+                        if (badgeEl) badgeEl.textContent = `Progress: ${scorePct}%`;
+                    } else {
+                        statusEl.style.display = 'block';
+                        statusEl.style.color = '#ef4444';
+                        statusEl.innerHTML = '❌ Incorrect Answer or Flag. Execute commands in VM to discover correct value!';
+                        inputEl.style.borderColor = '#ef4444';
+                    }
+                });
+            });
+
+            const btnReboot = container.querySelector('#btnVmReboot');
+            if (btnReboot) {
+                btnReboot.addEventListener('click', () => {
+                    cwd = '/home/kali';
+                    currentUser = 'kali';
+                    termOutput.textContent = `[  0.000000] Linux version 6.8.0-kali1-amd64\n[  0.124500] Initializing system ram & virtual storage...\n[  0.450000] Systemd started. Network interface eth0 up (10.10.14.5).\n[  0.890000] Kali Linux 2026.1 Rolling Ready.\n\nLinux kali 6.8.0-kali1-amd64 #1 SMP PREEMPT_DYNAMIC x86_64 GNU/Linux\n┌──(kali㉿kali)-[~]\n└─$ `;
+                    updatePrompt();
+                });
+            }
+
+            const btnClear = container.querySelector('#btnVmClear');
+            if (btnClear) {
+                btnClear.addEventListener('click', () => {
+                    termOutput.textContent = `Linux kali 6.8.0-kali1-amd64 #1 SMP PREEMPT_DYNAMIC x86_64 GNU/Linux\n`;
+                    updatePrompt();
+                });
+            }
+        };
+        window.initKaliVmSimulator = initKaliVmSimulator;
+
         const initExperiment = (id) => {
             if (window.currentTopo) window.currentTopo.destroy();
             const container = document.getElementById('topology-builder-ui');
             if (!container) return;
 
             const currentSubject = localStorage.getItem('vlab_current_subject') || 'networking';
+            if (currentSubject === 'kali' || (id && id.startsWith('kali_'))) {
+                initKaliVmSimulator(container, id);
+                return;
+            }
             if (currentSubject === 'ds') {
                 const labData = window.VLAB_DATA[id] || window.VLAB_DATA['idsl_exp1'];
                 const _gExps = ['idsl_exp4','idsl_exp5','idsl_exp6','idsl_exp7','idsl_exp8','idsl_exp9','idsl_exp10'];
@@ -25750,16 +26383,16 @@ student@mitadt-os:~$ </div>
                 document.title = "MIT ADT VLAB - Cybersecurity";
             } else if (currentSubject === 'ds') {
                 optionsHtml = `
-                <option value="idsl_exp1">1. Data Science Lifecycle & Data Type Classification (Titanic Dataset)</option>
-                <option value="idsl_exp2">2. Exploratory Data Analysis & Data Preprocessing (Titanic Dataset)</option>
-                <option value="idsl_exp3">3. Statistical Analysis of Data (Central Tendency, Dispersion, Correlation & Simpson's Paradox)</option>
-                <option value="idsl_exp4">4. Probability & Statistical Distributions (CLT, Bayes, Normal Distribution)</option>
+                <option value="idsl_exp1">1. Data Science Lifecycle &amp; Data Type Classification (Titanic Dataset)</option>
+                <option value="idsl_exp2">2. Exploratory Data Analysis &amp; Data Preprocessing (Titanic Dataset)</option>
+                <option value="idsl_exp3">3. Statistical Analysis of Data (Central Tendency, Dispersion, Correlation &amp; Simpson's Paradox)</option>
+                <option value="idsl_exp4">4. Probability &amp; Statistical Distributions (CLT, Bayes, Normal Distribution)</option>
                 <option value="idsl_exp5">5. Data Visualization Techniques (Matplotlib, Seaborn — Tips Dataset)</option>
-                <option value="idsl_exp6">6. Interactive Dashboards — Power BI & Tableau (Sales Data)</option>
+                <option value="idsl_exp6">6. Interactive Dashboards — Power BI &amp; Tableau (Sales Data)</option>
                 <option value="idsl_exp7">7. PCA — Dimensionality Reduction (Iris Dataset)</option>
-                <option value="idsl_exp8">8. Data Preprocessing — Encoding, Scaling & Binning (Purchase Behavior)</option>
+                <option value="idsl_exp8">8. Data Preprocessing — Encoding, Scaling &amp; Binning (Purchase Behavior)</option>
                 <option value="idsl_exp9">9. Linear Regression — Used Car Price Prediction</option>
-                <option value="idsl_exp10">10. Logistic Regression & K-NN — Employee Attrition Prediction</option>
+                <option value="idsl_exp10">10. Logistic Regression &amp; K-NN — Employee Attrition Prediction</option>
             `;
                 const crumbs = document.querySelectorAll('.breadcrumb .crumb');
                 if (crumbs.length >= 2) {
@@ -25769,24 +26402,42 @@ student@mitadt-os:~$ </div>
                 document.documentElement.style.setProperty('--primary-rgb', '6, 182, 212');
                 document.documentElement.style.setProperty('--accent', '#22d3ee');
                 document.title = "MIT ADT VLAB - Data Science";
+            } else if (currentSubject === 'kali') {
+                optionsHtml = `
+                <option value="kali_exp1">THM 1. Linux Fundamentals Part 1 — Introduction &amp; First Commands</option>
+                <option value="kali_exp2">THM 2. Linux Fundamentals Part 1 — File System Navigation &amp; Inspection</option>
+                <option value="kali_exp3">THM 3. Linux Fundamentals Part 1 — File Searching &amp; Shell Operators</option>
+                <option value="kali_exp4">THM 4. Linux Fundamentals Part 2 — File Operations &amp; Permissions</option>
+                <option value="kali_exp5">THM 5. Linux Fundamentals Part 2 &amp; 3 — Processes, Services &amp; Text Editors</option>
+                <option value="kali_exp6">THM 6. Linux Fundamentals Part 3 — Package Management &amp; Networking Utilities</option>
+                <option value="kali_exp7">THM 7. TryHackMe CTF Challenge Room — Ultimate Linux Command Challenge</option>
+            `;
+                const crumbs = document.querySelectorAll('.breadcrumb .crumb');
+                if (crumbs.length >= 2) {
+                    crumbs[1].textContent = "Kali Linux Lab";
+                }
+                document.documentElement.style.setProperty('--primary', '#00f2fe');
+                document.documentElement.style.setProperty('--primary-rgb', '0, 242, 254');
+                document.documentElement.style.setProperty('--accent', '#00c6ff');
+                document.title = "MIT ADT VLAB - Kali Linux &amp; Cyber Security";
             } else {
                 optionsHtml = `
-                <option value="intro_tools">1. Introduction to Networking Tools, Devices & Media</option>
-                <option value="osi_tcpip">2. Network Communication Models (OSI & TCP/IP)</option>
-                <option value="net_commands">3. Network Commands & CLI Utilities</option>
+                <option value="intro_tools">1. Introduction to Networking Tools, Devices &amp; Media</option>
+                <option value="osi_tcpip">2. Network Communication Models (OSI &amp; TCP/IP)</option>
+                <option value="net_commands">3. Network Commands &amp; CLI Utilities</option>
                 <option value="topologies">4. Network Topologies (Bus, Star, Ring, Mesh, Tree)</option>
-                <option value="ip_class">5. IPv4 & IPv6 Address Classification</option>
-                <option value="lan_cables">6. LAN Setup & Cabling (Straight/Crossover)</option>
-                <option value="subnetting">7. Subnetting, VLSM & CIDR</option>
-                <option value="vlan">8. Virtual LANs (VLAN) & Trunking</option>
+                <option value="ip_class">5. IPv4 &amp; IPv6 Address Classification</option>
+                <option value="lan_cables">6. LAN Setup &amp; Cabling (Straight/Crossover)</option>
+                <option value="subnetting">7. Subnetting, VLSM &amp; CIDR</option>
+                <option value="vlan">8. Virtual LANs (VLAN) &amp; Trunking</option>
                 <option value="routing_rip">9. Distance Vector Routing Protocol (RIP)</option>
                 <option value="routing_ospf">10. Link State Routing Protocol (OSPF)</option>
                 <option value="routing_eigrp">11. Dynamic Routing Protocol (EIGRP)</option>
                 <option value="static_routing">12. Static Routing Configuration</option>
-                <option value="udp_tcp">13. UDP & TCP Transport Protocols</option>
-                <option value="dhcp_config">14. DHCP Configuration & IP Pools</option>
+                <option value="udp_tcp">13. UDP &amp; TCP Transport Protocols</option>
+                <option value="dhcp_config">14. DHCP Configuration &amp; IP Pools</option>
                 <option value="static_nat">15. Static Network Address Translation (NAT)</option>
-                <option value="dynamic_nat">16. Dynamic NAT & PAT Overload</option>
+                <option value="dynamic_nat">16. Dynamic NAT &amp; PAT Overload</option>
                 <option value="practice" style="display:none;">Practice Sandbox Lab</option>
             `;
                 const crumbs = document.querySelectorAll('.breadcrumb .crumb');
@@ -25833,13 +26484,21 @@ student@mitadt-os:~$ </div>
                 if (expSec) expSec.textContent = `💻 MIT ADT IDE Sandbox`;
                 if (tbSec) tbSec.textContent = `🐛 Code Debugging Challenge`;
             } else if (subject === 'cyber') {
-                if (toolsNav) toolsNav.innerHTML = `<span class="nav-icon">🛡️</span> Security & Crypto Tools`;
+                if (toolsNav) toolsNav.innerHTML = `<span class="nav-icon">🛡️</span> Security &amp; Crypto Tools`;
                 if (expNav) expNav.innerHTML = `<span class="nav-icon">🔐</span> Security Attack Sandbox`;
                 if (tbNav) tbNav.innerHTML = `<span class="nav-icon">🚨</span> Threat Mitigation Challenge`;
 
                 if (toolsSec) toolsSec.textContent = `🛡️ Security & Cryptography Tools`;
                 if (expSec) expSec.textContent = `🔐 Security Attack & Defence Sandbox`;
                 if (tbSec) tbSec.textContent = `🚨 Threat Mitigation Challenge`;
+            } else if (subject === 'kali') {
+                if (toolsNav) toolsNav.innerHTML = `<span class="nav-icon">🖥️</span> Virtual Machine Inspector`;
+                if (expNav) expNav.innerHTML = `<span class="nav-icon">🐉</span> Kali Linux VM Terminal`;
+                if (tbNav) tbNav.innerHTML = `<span class="nav-icon">🛡️</span> Linux CLI &amp; CTF Challenge`;
+
+                if (toolsSec) toolsSec.textContent = `🖥️ Kali Linux Virtual Machine Inspector`;
+                if (expSec) expSec.textContent = `🐉 Kali Linux VM Terminal (TryHackMe)`;
+                if (tbSec) tbSec.textContent = `🛡️ Linux CLI & Security CTF Challenge`;
             } else {
                 if (toolsNav) toolsNav.innerHTML = `<span class="nav-icon">🛠️</span> Hardware Tools Inspector`;
                 if (expNav) expNav.innerHTML = `<span class="nav-icon">🧪</span> Cisco Packet Tracer Lab`;
@@ -25861,11 +26520,17 @@ student@mitadt-os:~$ </div>
         const cloudLabs = ['cloud_virtualization', 'cloud_docker', 'cloud_loadbalancer', 'cloud_autoscaling', 'cloud_storage', 'cloud_cdn', 'cloud_iam', 'cloud_serverless', 'cloud_sla', 'cloud_mapreduce', 'cloud_kubernetes'];
         const cyberLabs = ['cyber_caesar', 'cyber_vigenere', 'cyber_rsa', 'cyber_aes', 'cyber_hashing', 'cyber_firewall', 'cyber_ids', 'cyber_sql_inject', 'cyber_xss', 'cyber_mitm', 'cyber_steganography', 'cyber_network_scan'];
         const dsLabs = ['idsl_exp1', 'idsl_exp2', 'idsl_exp3', 'idsl_exp4', 'idsl_exp5', 'idsl_exp6', 'idsl_exp7', 'idsl_exp8', 'idsl_exp9', 'idsl_exp10'];
+        const kaliLabs = ['kali_exp1', 'kali_exp2', 'kali_exp3', 'kali_exp4', 'kali_exp5', 'kali_exp6', 'kali_exp7'];
 
         const urlParams = new URLSearchParams(window.location.search);
         const urlLab = urlParams.get('lab');
         let initialLab = urlLab || localStorage.getItem('vlab_current_lab');
-        if (currentSubject === 'ds') {
+        if (currentSubject === 'kali') {
+            if (!kaliLabs.includes(initialLab)) {
+                initialLab = 'kali_exp1';
+                localStorage.setItem('vlab_current_lab', 'kali_exp1');
+            }
+        } else if (currentSubject === 'ds') {
             if (!dsLabs.includes(initialLab)) {
                 initialLab = 'idsl_exp1';
                 localStorage.setItem('vlab_current_lab', 'idsl_exp1');

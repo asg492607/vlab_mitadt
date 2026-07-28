@@ -554,6 +554,15 @@
                 { id: 'idsl_exp8', num: 'EXP 8', name: 'Data Preprocessing — Categorical Encoding, Feature Scaling & Binning (Purchase Behavior Dataset)', category: 'Feature Engineering' },
                 { id: 'idsl_exp9', num: 'EXP 9', name: 'Linear Regression — Predicting Used Car Selling Price (Kaggle Dataset)', category: 'Supervised Learning' },
                 { id: 'idsl_exp10', num: 'EXP 10', name: 'Logistic Regression & K-NN — Employee Attrition Prediction (IBM HR Analytics)', category: 'Classification' }
+            ],
+            kali: [
+                { id: 'kali_exp1', num: 'THM 1', name: 'Linux Fundamentals Part 1 — Introduction & First Commands', category: 'Linux CLI & Terminal Basics' },
+                { id: 'kali_exp2', num: 'THM 2', name: 'Linux Fundamentals Part 1 — File System Navigation & Inspection', category: 'Filesystem Architecture' },
+                { id: 'kali_exp3', num: 'THM 3', name: 'Linux Fundamentals Part 1 — File Searching & Shell Operators', category: 'Search, Wildcards & Piping' },
+                { id: 'kali_exp4', num: 'THM 4', name: 'Linux Fundamentals Part 2 — File Operations & Permissions', category: 'Permissions, Chmod & Sudo' },
+                { id: 'kali_exp5', num: 'THM 5', name: 'Linux Fundamentals Part 2 & 3 — Processes, Services & Text Editors', category: 'Process Control & Nano/Vim' },
+                { id: 'kali_exp6', num: 'THM 6', name: 'Linux Fundamentals Part 3 — Package Management & Networking Utilities', category: 'APT, Wget, Curl & Ifconfig' },
+                { id: 'kali_exp7', num: 'THM 7', name: 'TryHackMe CTF Challenge Room — Ultimate Linux Command Challenge', category: 'CTF Flag Capture Sandbox' }
             ]
         };
 
@@ -587,7 +596,7 @@
 
             // Practice lab mode is supported for Computer Networks topology building
             const practiceCard = document.getElementById('cardPractice');
-            if (subject === 'ds') {
+            if (subject === 'ds' || subject === 'kali') {
                 if (practiceCard) practiceCard.style.display = 'none';
                 setMainPath('vlab');
                 document.getElementById('mode-selection-container').style.display = 'none';
@@ -604,6 +613,9 @@
             if (subject === 'ds') {
                 accentColor = '#06b6d4';
                 accentHover = '#0891b2';
+            } else if (subject === 'kali') {
+                accentColor = '#00f2fe';
+                accentHover = '#00c6ff';
             }
             document.documentElement.style.setProperty('--primary-accent', accentColor);
             
@@ -830,7 +842,8 @@
 
             const defaultSubjects = [
                 { code: 'networking', icon: '🌐', name: 'Computer Networks (CN)', desc: '15 Practical Labs: Packet Tracer, Topologies, Subnetting, VLANs, RIP, OSPF, EIGRP, NAT & DHCP.' },
-                { code: 'ds', icon: '📊', name: 'Introduction to Data Science Lab (IDSL)', desc: 'Experiment 1: Titanic Data Science Lifecycle, Data Type Classification, Interactive Cleaners & Python Sandbox.' }
+                { code: 'ds', icon: '📊', name: 'Introduction to Data Science Lab (IDSL)', desc: 'Experiment 1: Titanic Data Science Lifecycle, Data Type Classification, Interactive Cleaners & Python Sandbox.' },
+                { code: 'kali', icon: '🐉', name: 'Kali Linux & Cyber Security (THM)', desc: 'TryHackMe Linux Fundamentals Course: Terminal Shell, Filesystem, Permissions, Process Control & Unlimited Virtual Machine.' }
             ];
 
             const mergedMap = new Map();

