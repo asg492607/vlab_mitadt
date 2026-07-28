@@ -5046,8 +5046,8 @@ import io
 sys.stdout = io.StringIO()
 sys.stderr = io.StringIO()
 
-_stdin_data = ${JSON.stringify(stdin)}
-_stdin_lines = _stdin_data.split('\\n')
+_stdin_data = ${JSON.stringify(stdin || "")}
+_stdin_lines = _stdin_data.split('\n')
 _stdin_idx = 0
 
 def mock_input(prompt=''):
@@ -25466,36 +25466,6 @@ student@mitadt-os:~$ </div>
                 }
             }
 
-            const executeGlobalChatQuery = async (queryText) => {
-                if (!queryText.trim()) return;
-                const labId = document.getElementById('labSelect').value;
-
-                appendGlobalMessage('student', queryText);
-                saveChatHistory(labId, 'student', queryText);
-
-                appendGlobalMessage('ai', 'AI Tutor is writing a response...');
-
-                const context = getActiveContext();
-                let responseText = "";
-
-                const key = getApiKey();
-                if (key) {
-                    const curriculumCorpus = getCurriculumDataCorpus();
-                    const systemPrompt = `You are the MIT VLab Academic AI Tutor. You are trained and data-driven on the entire curriculum of this virtual laboratory platform.
-Use the following Curriculum Reference Manual to guide the student correctly, referencing actual aims, procedures, and concepts from the platform:
-
-${curriculumCorpus}
-
-Current Student Context:
-${context}
-
-Student Question: ${queryText}
-
-Academic Rules:
-1. Provide clear, step-by-step guidance to help the student learn.
-2. Under no circumstances should you print raw solution code directly for the active programming/SQL exercises. Instead, explain the logical building blocks and let the student code it.
-3. Be highly informative, academic, and detailed. Show that you have full knowledge of the curriculum. Keep responses educational and relatively concise.`;
-                    responseText = await askGemini(systemPrompt);
             const queryLocalCurriculumEngine = (queryText, activeLabId, contextStr) => {
                 if (!queryText || !queryText.trim()) return "Please ask a question about any experiment, theory, or concept.";
 
@@ -25589,7 +25559,7 @@ Academic Rules:
                     }
 
                     if (best.item.practice_commands) {
-                        resp += `**Commands**: \`${best.item.practice_commands.join('`, `')}\``;
+                        resp += "**Commands**: " + best.item.practice_commands.map(cmd => "`" + cmd + "`").join(", ");
                     }
 
                     return resp;
@@ -26242,3 +26212,4 @@ Academic Rules:
                 window.addEventListener('resize', resize);
             })();
         }
+    });
