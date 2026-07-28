@@ -25320,66 +25320,45 @@ student@mitadt-os:~$ </div>
             };
 
             const getCurriculumDataCorpus = () => {
-                const subject = localStorage.getItem('vlab_current_subject') || 'networking';
-                let corpus = `=== MIT ADT VLAB CURRICULUM REFERENCE MANUAL - SUBJECT: ${subject.toUpperCase()} ===\n\n`;
+                let corpus = `=== MIT ADT VLAB COMPLETE PLATFORM CURRICULUM MANUAL ===\n\n`;
 
-                const osLabs = ['cpu_scheduling', 'process_sync', 'deadlock_avoidance', 'page_replacement', 'disk_scheduling'];
-                const netLabs = ['cables_devices', 'modulation', 'net_commands', 'ip_class', 'csma', 'csma_ca', 'subnet', 'vlan', 'routing_protocols', 'routing_dv', 'routing_ls', 'udp', 'tcp', 'dns', 'practice'];
-                const progLabs = ['c_prog', 'cpp_prog', 'java_prog', 'python_prog'];
-                const dbmsLabs = ['sql_queries', 'transactions', 'indexing'];
+                if (window.VLAB_DATA) {
+                    Object.keys(window.VLAB_DATA).forEach(key => {
+                        const data = window.VLAB_DATA[key];
+                        if (!data || typeof data !== 'object') return;
 
-                const tocLabs = ['dfa_sim', 'nfa_to_dfa', 'regex_thompson', 'cfg_parser', 'pda_stack', 'turing_machine', 'dfa_minimization'];
-                const aiLabs = ['ai_search', 'ai_heuristic', 'ai_csp', 'ai_minimax', 'ai_naive_bayes', 'ai_knn', 'ai_kmeans', 'ai_ann', 'ai_backprop', 'ai_fuzzy', 'ai_genetic', 'ai_expert'];
-                const cloudLabs = ['cloud_virtualization', 'cloud_docker', 'cloud_loadbalancer', 'cloud_autoscaling', 'cloud_storage', 'cloud_cdn', 'cloud_iam', 'cloud_serverless', 'cloud_sla', 'cloud_mapreduce', 'cloud_kubernetes'];
-                const cyberLabs = ['cyber_caesar', 'cyber_vigenere', 'cyber_rsa', 'cyber_aes', 'cyber_hashing', 'cyber_firewall', 'cyber_ids', 'cyber_sql_inject', 'cyber_xss', 'cyber_mitm', 'cyber_steganography', 'cyber_network_scan'];
-
-                let targetKeys = [];
-                if (subject === 'os') targetKeys = osLabs;
-                else if (subject === 'dbms') targetKeys = dbmsLabs;
-                else if (subject === 'programming') targetKeys = progLabs;
-                else if (subject === 'toc') targetKeys = tocLabs;
-                else if (subject === 'ai') targetKeys = aiLabs;
-                else if (subject === 'cloud') targetKeys = cloudLabs;
-                else if (subject === 'cyber') targetKeys = cyberLabs;
-                else targetKeys = netLabs;
-
-                targetKeys.forEach(key => {
-                    const data = window.VLAB_DATA[key];
-                    if (!data) return;
-
-                    corpus += `--- LAB ID: ${key} ---\n`;
-                    corpus += `Title: ${data.title}\n`;
-                    corpus += `Aim: ${data.aim}\n`;
-                    if (data.theory) {
-                        corpus += `Theory Intro: ${data.theory.intro || ''}\n`;
-                        if (data.theory.cards) {
-                            data.theory.cards.forEach((c, idx) => {
-                                corpus += `Theory Concept ${idx + 1}: ${c.title} - ${c.content}\n`;
+                        corpus += `--- LAB ID: ${key} ---\n`;
+                        if (data.title) corpus += `Title: ${data.title}\n`;
+                        if (data.aim) corpus += `Aim: ${data.aim}\n`;
+                        if (data.theory) {
+                            if (data.theory.intro) corpus += `Theory Intro: ${data.theory.intro}\n`;
+                            if (data.theory.cards) {
+                                data.theory.cards.forEach((c, idx) => {
+                                    corpus += `Concept ${idx + 1}: ${c.title || ''} - ${c.content || ''}\n`;
+                                });
+                            }
+                        }
+                        if (data.procedure && Array.isArray(data.procedure)) {
+                            corpus += `Procedure: ${data.procedure.join(' -> ')}\n`;
+                        }
+                        if (data.practice_commands) {
+                            corpus += `CLI Commands: ${data.practice_commands.join(', ')}\n`;
+                        }
+                        if (data.practice_questions) {
+                            corpus += `Review Questions: ${data.practice_questions.join(' | ')}\n`;
+                        }
+                        if (data.dataset_info) {
+                            corpus += `Dataset Info: ${JSON.stringify(data.dataset_info)}\n`;
+                        }
+                        if (data.isMultiModule && data.modules) {
+                            data.modules.forEach((mod, idx) => {
+                                corpus += `  Module ${idx + 1}: ${mod.title || ''} | Aim: ${mod.aim || ''}\n`;
+                                if (mod.defaultCode) corpus += `  Starter Code:\n${mod.defaultCode}\n`;
                             });
                         }
-                    }
-                    if (data.procedure) {
-                        corpus += `Procedure steps:\n${data.procedure.join('\n')}\n`;
-                    }
-                    if (data.practice_commands) {
-                        corpus += `Practice CLI commands: ${data.practice_commands.join(', ')}\n`;
-                    }
-                    if (data.practice_questions) {
-                        corpus += `Practice review tasks:\n${data.practice_questions.join('\n')}\n`;
-                    }
-                    if (data.isMultiModule && data.modules) {
-                        corpus += `This is a multi-module lab with ${data.modules.length} modules:\n`;
-                        data.modules.forEach((mod, idx) => {
-                            corpus += `  Module ${idx + 1}: ${mod.title}\n`;
-                            corpus += `    Module Aim: ${mod.aim}\n`;
-                            corpus += `    Module Procedure: ${mod.procedure ? mod.procedure.join(' -> ') : ''}\n`;
-                            if (mod.defaultCode) {
-                                corpus += `    Module Starter Code:\n${mod.defaultCode}\n`;
-                            }
-                        });
-                    }
-                    corpus += `\n`;
-                });
+                        corpus += `\n`;
+                    });
+                }
 
                 return corpus;
             };
