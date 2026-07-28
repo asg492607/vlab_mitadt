@@ -25496,81 +25496,180 @@ Academic Rules:
 2. Under no circumstances should you print raw solution code directly for the active programming/SQL exercises. Instead, explain the logical building blocks and let the student code it.
 3. Be highly informative, academic, and detailed. Show that you have full knowledge of the curriculum. Keep responses educational and relatively concise.`;
                     responseText = await askGemini(systemPrompt);
-                } else {
-                    // Heuristic Offline Evaluation
-                    const subject = localStorage.getItem('vlab_current_subject') || 'networking';
+            const queryLocalCurriculumEngine = (queryText, activeLabId, contextStr) => {
+                if (!queryText || !queryText.trim()) return "Please ask a question about any experiment, theory, or concept.";
 
-                    responseText = localAIEvaluator("", queryText, "");
+                const queryLower = queryText.toLowerCase().trim();
+                const activeData = window.VLAB_DATA ? window.VLAB_DATA[activeLabId] : null;
 
-                    // Subject-Specific Local Heuristics
-                    const queryLower = queryText.toLowerCase();
-                    if (responseText.includes("Currently in Local Mode")) {
-                        let subjectHelp = "";
-                        if (subject === 'os') {
-                            if (queryLower.includes('scheduling') || queryLower.includes('cpu')) {
-                                subjectHelp = "AI Tutor: CPU Scheduling algorithms decide which process in the ready queue is allocated the CPU. FCFS is non-preemptive and has a convoy effect. SJF (Shortest Job First) is optimal for minimizing average waiting time. Round Robin uses time-quanta slicing for fair CPU sharing.";
-                            } else if (queryLower.includes('deadlock') || queryLower.includes('banker')) {
-                                subjectHelp = "AI Tutor: Banker's algorithm is a deadlock avoidance method that simulates resource allocation for each process. It determines if an allocation is 'safe' by checking if a safe sequence exists where all processes can run to completion.";
-                            } else if (queryLower.includes('page') || queryLower.includes('replacement') || queryLower.includes('fifo') || queryLower.includes('lru')) {
-                                subjectHelp = "AI Tutor: Page replacement algorithms decide which memory page to swap out when a new page is needed. FIFO swaps the oldest page (can experience Belady's anomaly). LRU swaps the page that hasn't been accessed for the longest time.";
-                            } else {
-                                subjectHelp = "AI Tutor (OS Mode): How can I help you with operating system algorithms? Ask about CPU Scheduling, Process Semaphores, Deadlocks, Page Replacements, or Disk Head movements!";
-                            }
-                        } else if (subject === 'dbms') {
-                            if (queryLower.includes('sql') || queryLower.includes('select') || queryLower.includes('join')) {
-                                subjectHelp = "AI Tutor: SQL queries fetch relational data. Use SELECT to project columns, WHERE to filter rows, INNER JOIN to match keys, and GROUP BY with HAVING to filter aggregates.";
-                            } else if (queryLower.includes('acid') || queryLower.includes('transaction') || queryLower.includes('concurrency')) {
-                                subjectHelp = "AI Tutor: Database transactions must guarantee ACID properties: Atomicity (all-or-nothing), Consistency (integrity constraints), Isolation (independent concurrent execution), and Durability (permanent saves).";
-                            } else if (queryLower.includes('index') || queryLower.includes('b-tree')) {
-                                subjectHelp = "AI Tutor: A B-Tree index keeps records sorted and allows search, insertion, and deletion in O(log N) operations. Nodes split when capacity is exceeded to remain balanced.";
-                            } else {
-                                subjectHelp = "AI Tutor (DBMS Mode): How can I help you with database concepts? Ask about SQL joins, ACID properties, Transaction rollbacks, or B-Tree visualizers!";
-                            }
-                        } else if (subject === 'networking') {
-                            if (queryLower.includes('subnet') || queryLower.includes('cidr') || queryLower.includes('mask')) {
-                                subjectHelp = "AI Tutor: Subnetting divides a larger network into smaller, efficient subnets. A /24 CIDR prefix represents a 255.255.255.0 mask with 8 host bits, yielding 2^8 - 2 = 254 usable host addresses.";
-                            } else if (queryLower.includes('vlan')) {
-                                subjectHelp = "AI Tutor: A Virtual Local Area Network (VLAN) groups devices on separate physical networks into a single logical broadcast domain, improving security and reducing broadcast traffic.";
-                            } else if (queryLower.includes('dns')) {
-                                subjectHelp = "AI Tutor: The Domain Name System (DNS) translates human-readable domain names (e.g. google.com) to machine-readable IP addresses using a hierarchical distributed database of servers.";
-                            } else {
-                                subjectHelp = "AI Tutor (Networking Mode): How can I help you with networking topologies? Ask about subnet masking, VLAN tagging, Routing tables (OSPF/RIP), DNS resolution, or CSMA collision controls!";
-                            }
-                        } else if (subject === 'ai') {
-                            if (queryLower.includes('search') || queryLower.includes('bfs') || queryLower.includes('dfs') || queryLower.includes('a*')) {
-                                subjectHelp = "AI Tutor: State space search is fundamental in AI. BFS guarantees shortest path by exploring layer-by-layer (FIFO queue). DFS goes deep (LIFO stack) and is not optimal. A* search uses both path cost (g) and heuristic (h) to find the optimal path efficiently (f = g + h).";
-                            } else if (queryLower.includes('minimax') || queryLower.includes('alpha') || queryLower.includes('beta')) {
-                                subjectHelp = "AI Tutor: Minimax is used in game trees for zero-sum games. Max maximizes the score, Min minimizes it. Alpha-beta pruning cuts off branches that cannot influence the final decision, significantly improving performance.";
-                            } else if (queryLower.includes('neuron') || queryLower.includes('backprop') || queryLower.includes('neural')) {
-                                subjectHelp = "AI Tutor: Neural Networks model cognitive logic. A Perceptron is a single-layer classifier. Backpropagation calculates the gradient of the loss function using chain rule calculus, updating weights via Gradient Descent to minimize prediction error.";
-                            } else {
-                                subjectHelp = "AI Tutor (AI Mode): How can I help you with Artificial Intelligence? Ask about Search Algorithms, Game Trees (Minimax), Machine Learning (KNN/Bayes/K-Means), Neural Networks, Fuzzy Logic, or Genetic Algorithms!";
-                            }
-                        } else if (subject === 'cloud') {
-                            if (queryLower.includes('virtualization') || queryLower.includes('vm')) {
-                                subjectHelp = "AI Tutor: Virtualization uses a Hypervisor to run multiple virtual machines on a single physical host, slicing CPU, RAM, and storage into isolated virtual guest OS resources.";
-                            } else if (queryLower.includes('docker') || queryLower.includes('container') || queryLower.includes('kubernetes')) {
-                                subjectHelp = "AI Tutor: Containers isolate applications at the user-space level using OS kernel namespaces. Docker builds container images. Kubernetes orchestrates them across clusters, scaling and healing pods dynamically.";
-                            } else if (queryLower.includes('load') || queryLower.includes('scaling') || queryLower.includes('serverless')) {
-                                subjectHelp = "AI Tutor: Load Balancers distribute traffic across instances. Autoscaling dynamically adjusts cluster sizes based on metrics like CPU usage. Serverless/FaaS executes events on-demand without managing server nodes.";
-                            } else {
-                                subjectHelp = "AI Tutor (Cloud Mode): How can I help you with Cloud Computing? Ask about Virtualization, Containers (Docker/Kubernetes), Load Balancers, Cloud Object Storage, CDNs, IAM Policies, or Serverless functions!";
-                            }
-                        } else if (subject === 'cyber') {
-                            if (queryLower.includes('cipher') || queryLower.includes('caesar') || queryLower.includes('vigenere')) {
-                                subjectHelp = "AI Tutor: Classical cryptography relies on substitution and transposition. Caesar cipher is a simple monoalphabetic shift. Vigenère uses a polyalphabetic key word to vary the shifts dynamically, resisting frequency analysis.";
-                            } else if (queryLower.includes('rsa') || queryLower.includes('aes') || queryLower.includes('encrypt')) {
-                                subjectHelp = "AI Tutor: RSA is public-key (asymmetric) cryptography based on the mathematical difficulty of factoring large prime products. AES is symmetric block cipher using substitution-permutation networks for secure data transmission.";
-                            } else if (queryLower.includes('injection') || queryLower.includes('sql') || queryLower.includes('xss')) {
-                                subjectHelp = "AI Tutor: SQL Injection inserts malicious SQL payloads into input inputs to hijack database queries. Cross-Site Scripting (XSS) injects malicious client scripts to hijack user sessions. Prevent both by sanitizing and validating all inputs!";
-                            } else {
-                                subjectHelp = "AI Tutor (Cyber Mode): How can I help you with Cybersecurity? Ask about Encryptions (RSA/AES), Hashing algorithms, Network Firewalls, Web Attacks (SQLi/XSS), or ARP Poisoning MITM attacks!";
-                            }
+                // 1. Audit Request
+                if (queryLower.includes('audit') || queryLower.includes('check my work') || queryLower.includes('quality')) {
+                    let auditResp = `🔍 **Academic Audit Report for ${activeData ? activeData.title : 'Active Workspace'}**:\n\n`;
+                    if (activeData) {
+                        auditResp += `• **Aim**: ${activeData.aim || 'N/A'}\n`;
+                        if (activeData.theory && activeData.theory.cards) {
+                            auditResp += `• **Key Concepts Verified**: ${activeData.theory.cards.map(c => c.title).join(', ')}\n`;
                         }
-                        if (subjectHelp) {
-                            responseText = subjectHelp + "\n\n(Tip: Save a Gemini API Key in the programming settings (⚙️) to unlock premium live conversational queries across all labs!)";
+                        if (activeData.practice_commands) {
+                            auditResp += `• **CLI Commands Verified**: ${activeData.practice_commands.join(', ')}\n`;
                         }
                     }
+                    auditResp += `\n✅ Workspace parameters and setup have been audited against platform specifications. Proceed with laboratory execution!`;
+                    return auditResp;
+                }
+
+                // 2. Explain Theory Request
+                if (queryLower.includes('explain') && (queryLower.includes('theory') || queryLower.includes('objective') || queryLower.includes('simple terms') || queryLower.includes('analogies'))) {
+                    if (activeData) {
+                        let theoryResp = `🎓 **Theory & Learning Objectives — ${activeData.title}**:\n\n`;
+                        if (activeData.aim) theoryResp += `**Objective**: ${activeData.aim}\n\n`;
+                        if (activeData.theory) {
+                            if (activeData.theory.intro) theoryResp += `**Overview**: ${activeData.theory.intro}\n\n`;
+                            if (activeData.theory.cards && activeData.theory.cards.length > 0) {
+                                theoryResp += `**Core Concepts**:\n`;
+                                activeData.theory.cards.forEach((c, idx) => {
+                                    theoryResp += `${idx + 1}. **${c.title}**: ${c.content}\n\n`;
+                                });
+                            }
+                        }
+                        return theoryResp;
+                    }
+                }
+
+                // 3. Search whole VLAB_DATA for matching query terms (Title, Cards, Content, Aim)
+                const matches = [];
+                if (window.VLAB_DATA) {
+                    Object.keys(window.VLAB_DATA).forEach(key => {
+                        const item = window.VLAB_DATA[key];
+                        if (!item) return;
+
+                        let score = 0;
+                        const titleLower = (item.title || '').toLowerCase();
+                        const aimLower = (item.aim || '').toLowerCase();
+
+                        const words = queryLower.split(/\s+/).filter(w => w.length > 2);
+                        words.forEach(w => {
+                            if (titleLower.includes(w)) score += 5;
+                            if (aimLower.includes(w)) score += 3;
+                        });
+
+                        let matchingCard = null;
+                        if (item.theory && item.theory.cards) {
+                            item.theory.cards.forEach(c => {
+                                const cardTitle = (c.title || '').toLowerCase();
+                                const cardContent = (c.content || '').toLowerCase();
+                                words.forEach(w => {
+                                    if (cardTitle.includes(w)) { score += 4; matchingCard = c; }
+                                    else if (cardContent.includes(w)) { score += 2; if (!matchingCard) matchingCard = c; }
+                                });
+                            });
+                        }
+
+                        if (score > 0) {
+                            matches.push({ key, item, score, matchingCard });
+                        }
+                    });
+                }
+
+                matches.sort((a, b) => b.score - a.score);
+
+                if (matches.length > 0) {
+                    const best = matches[0];
+                    let resp = `💡 **Academic AI Tutor — ${best.item.title}**\n\n`;
+                    if (best.item.aim) resp += `**Aim**: ${best.item.aim}\n\n`;
+
+                    if (best.matchingCard) {
+                        resp += `**Key Concept (${best.matchingCard.title})**:\n${best.matchingCard.content}\n\n`;
+                    } else if (best.item.theory && best.item.theory.intro) {
+                        resp += `**Overview**:\n${best.item.theory.intro}\n\n`;
+                    }
+
+                    if (best.item.procedure && best.item.procedure.length > 0) {
+                        resp += `**Procedure Steps**:\n${best.item.procedure.slice(0, 3).map((p, i) => `${i + 1}. ${p}`).join('\n')}\n\n`;
+                    }
+
+                    if (best.item.practice_commands) {
+                        resp += `**Commands**: \`${best.item.practice_commands.join('`, `')}\``;
+                    }
+
+                    return resp;
+                }
+
+                // 4. Detailed Concept Heuristic Knowledge Base
+                if (queryLower.includes('regression') || queryLower.includes('linear')) {
+                    return `📈 **Linear Regression (Ordinary Least Squares)**:\nLinear Regression models the relationship between dependent target variable y and independent predictor variables X via line equation y = β₀ + β₁X₁ + ... + βₚXₚ. OLS minimizes the Sum of Squared Residuals (SSR): min Σ(yᵢ - ŷᵢ)².`;
+                }
+                if (queryLower.includes('pca') || queryLower.includes('principal component')) {
+                    return `🔍 **Principal Component Analysis (PCA)**:\nPCA is an unsupervised linear dimensionality reduction technique. It calculates the covariance matrix of features, computes Eigenvectors & Eigenvalues, and projects D-dimensional data onto top k orthogonal eigenvectors capturing maximum sample variance.`;
+                }
+                if (queryLower.includes('simpson') || queryLower.includes('paradox')) {
+                    return `📊 **Simpson's Paradox**:\nA statistical phenomenon where a trend appears in several groups of data but disappears or reverses when the groups are combined into an aggregate dataset. Caused by unobserved confounding variables.`;
+                }
+                if (queryLower.includes('bayes') || queryLower.includes('prior')) {
+                    return `🧮 **Bayes' Theorem**:\nCalculates conditional probability P(A|B) = [P(B|A) * P(A)] / P(B), updating the prior belief P(A) given new likelihood evidence P(B|A).`;
+                }
+                if (queryLower.includes('subnet') || queryLower.includes('cidr') || queryLower.includes('mask')) {
+                    return `🌐 **Subnetting & CIDR**:\nDivides an IP network into smaller subnet masks. A /24 CIDR prefix represents subnet mask 255.255.255.0 with 8 host bits (254 usable host addresses).`;
+                }
+                if (queryLower.includes('vlan')) {
+                    return `🏷️ **Virtual LAN (VLAN)**:\nPartitions physical switch networks into separate logical broadcast domains, enhancing security and isolating broadcast traffic using IEEE 802.1Q tagging.`;
+                }
+                if (queryLower.includes('routing') || queryLower.includes('ospf') || queryLower.includes('rip')) {
+                    return `🚀 **Dynamic Routing Protocols**:\n• **RIP**: Distance Vector protocol using Hop Count metric (max 15 hops) with Bellman-Ford algorithm.\n• **OSPF**: Link State protocol using Cost metric (Bandwidth) with Dijkstra's Shortest Path First algorithm.`;
+                }
+                if (queryLower.includes('sql') || queryLower.includes('join')) {
+                    return `🗄️ **Relational SQL Queries**:\n• **INNER JOIN**: Returns rows with matching keys in both tables.\n• **LEFT JOIN**: Returns all rows from left table and matched rows from right.\n• **GROUP BY**: Aggregates rows with functions like COUNT(), SUM(), AVG().`;
+                }
+                if (queryLower.includes('cpu') || queryLower.includes('scheduling')) {
+                    return `⚙️ **CPU Scheduling Algorithms**:\n• **FCFS**: First-Come First-Served (non-preemptive, convoy effect).\n• **SJF**: Shortest Job First (minimizes average waiting time).\n• **Round Robin**: Slices CPU time with fixed Time Quanta (q).`;
+                }
+
+                // Fallback for active experiment summary
+                if (activeData) {
+                    return `💡 **Academic AI Tutor Guidance for ${activeData.title}**:\n\n**Aim**: ${activeData.aim || 'Study experiment concepts.'}\n\nReview the active Theory cards and Procedure steps above to complete this laboratory experiment.`;
+                }
+
+                return `💡 **Academic AI Tutor**: How can I assist you with this experiment? Ask about theory concepts, calculations, code syntax, or CLI commands!`;
+            };
+
+            const executeGlobalChatQuery = async (queryText) => {
+                if (!queryText.trim()) return;
+                const labId = document.getElementById('labSelect') ? document.getElementById('labSelect').value : 'intro_tools';
+
+                appendGlobalMessage('student', queryText);
+                saveChatHistory(labId, 'student', queryText);
+
+                appendGlobalMessage('ai', 'AI Tutor is preparing response...');
+
+                const context = getActiveContext();
+                let responseText = "";
+
+                const key = getApiKey();
+                if (key) {
+                    try {
+                        const curriculumCorpus = getCurriculumDataCorpus();
+                        const systemPrompt = `You are the MIT VLab Academic AI Tutor. You are trained and data-driven on the entire curriculum of this virtual laboratory platform.
+Use the following Curriculum Reference Manual to guide the student correctly, referencing actual aims, procedures, and concepts from the platform:
+
+${curriculumCorpus}
+
+Current Student Context:
+${context}
+
+Student Question: ${queryText}
+
+Academic Rules:
+1. Provide clear, step-by-step guidance to help the student learn.
+2. Under no circumstances should you print raw solution code directly for the active programming/SQL exercises. Instead, explain the logical building blocks and let the student code it.
+3. Be highly informative, academic, and detailed. Show that you have full knowledge of the curriculum. Keep responses educational and relatively concise.`;
+                        responseText = await askGemini(systemPrompt);
+                    } catch (e) {
+                        responseText = queryLocalCurriculumEngine(queryText, labId, context);
+                    }
+                }
+
+                if (!responseText || responseText.includes("Currently in Local Mode")) {
+                    responseText = queryLocalCurriculumEngine(queryText, labId, context);
                 }
 
                 // Remove thinking message
