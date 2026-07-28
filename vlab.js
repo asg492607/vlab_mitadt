@@ -1431,6 +1431,8 @@ class TopologySimulation {
             const type = e.dataTransfer.getData('type');
             const rect = this.workspace.getBoundingClientRect();
             this.addNode(type, e.clientX - rect.left - 30, e.clientY - rect.top - 30);
+        });
+
         const contextMenu = document.getElementById('contextMenu');
         if (contextMenu) {
             contextMenu.querySelectorAll('.menu-item').forEach(item => {
@@ -9258,13 +9260,13 @@ max      891.000000    1.000000    3.000000   80.000000    8.000000    6.000000 
         if (!consoleEl) return;
 
         const code = editor ? editor.value : '';
-        consoleEl.textContent = "🐍 Initializing Python 3.11 Environment...\n";
+        consoleEl.textContent = "🐍 Initializing MIT ADT Python 3.11 Environment...\n";
 
         // Try Real Pyodide CPython 3.11 Kernel
         try {
             const py = await loadPyodideEngine();
             if (py) {
-                consoleEl.textContent = "🐍 Executing in Real Pyodide CPython 3.11 Kernel...\n\n";
+                consoleEl.textContent = "🐍 Executing in MIT ADT Real Pyodide CPython 3.11 Compiler...\n\n";
                 py.runPython(`
 import sys
 import io
@@ -9681,14 +9683,14 @@ sys.stderr = io.StringIO()
         if (!consoleEl) return;
 
         const code = editor ? editor.value : '';
-        consoleEl.textContent = "🐍 Initializing Python 3.11 WASM Engine...\n";
+        consoleEl.textContent = "🐍 Initializing MIT ADT Python 3.11 WASM Engine...\n";
 
         // Try Real Pyodide CPython 3.11 Kernel
         try {
             if (typeof loadPyodideEngine === 'function') {
                 const py = await loadPyodideEngine();
                 if (py) {
-                    consoleEl.textContent = "🐍 Executing in Real Pyodide CPython 3.11 Kernel...\n\n";
+                    consoleEl.textContent = "🐍 Executing in MIT ADT Real Pyodide CPython 3.11 Compiler...\n\n";
                     py.runPython(`
 import sys
 import io
@@ -9708,7 +9710,7 @@ sys.stderr = io.StringIO()
         }
 
         // Fallback Engine (Offline Fast Statistical Simulator)
-        consoleEl.textContent = "Executing in Python 3.11 Statistical Engine...\n\n";
+        consoleEl.textContent = "Executing in MIT ADT Python 3.11 Compiler (Statistical Engine)...\n\n";
         setTimeout(() => {
             let out = "";
             
@@ -25823,12 +25825,12 @@ student@mitadt-os:~$ </div>
                 if (expSec) expSec.textContent = `🖥️ Operating System Simulator`;
                 if (tbSec) tbSec.textContent = `🔧 Deadlock & Synchronization Challenge`;
             } else if (subject === 'programming') {
-                if (toolsNav) toolsNav.innerHTML = `<span class="nav-icon">🧰</span> Language Compiler & Tools`;
-                if (expNav) expNav.innerHTML = `<span class="nav-icon">💻</span> Interactive IDE Sandbox`;
+                if (toolsNav) toolsNav.innerHTML = `<span class="nav-icon">🧰</span> MIT ADT Compiler & Tools`;
+                if (expNav) expNav.innerHTML = `<span class="nav-icon">💻</span> MIT ADT IDE Sandbox`;
                 if (tbNav) tbNav.innerHTML = `<span class="nav-icon">🐛</span> Code Debugging Challenge`;
 
-                if (toolsSec) toolsSec.textContent = `🧰 Language Compilers & Tools Inspector`;
-                if (expSec) expSec.textContent = `💻 Interactive IDE Sandbox`;
+                if (toolsSec) toolsSec.textContent = `🧰 MIT ADT Compiler & Tools Inspector`;
+                if (expSec) expSec.textContent = `💻 MIT ADT IDE Sandbox`;
                 if (tbSec) tbSec.textContent = `🐛 Code Debugging Challenge`;
             } else if (subject === 'cyber') {
                 if (toolsNav) toolsNav.innerHTML = `<span class="nav-icon">🛡️</span> Security & Crypto Tools`;
