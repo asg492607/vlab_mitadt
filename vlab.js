@@ -8826,8 +8826,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             <div class="theory-card" style="border-left:4px solid #10b981; margin-bottom:24px;">
                 <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:12px;">
                     <div>
-                        <h3 style="color:#10b981; margin:0 0 4px 0; font-size:18px; font-weight:800;">🐍 Real Python 3.11 WASM Preprocessing Sandbox</h3>
-                        <p style="font-size:12px; color:var(--text-muted); margin:0;">Execute real pandas, numpy, and sklearn preprocessing pipeline code using CPython WASM compiler.</p>
+                        <h3 style="color:#10b981; margin:0 0 4px 0; font-size:18px; font-weight:800;">🐍 Real Python 3.11 Preprocessing Sandbox</h3>
+                        <p style="font-size:12px; color:var(--text-muted); margin:0;">Execute real pandas, numpy, and sklearn preprocessing pipeline code using MIT ADT Python Compiler.</p>
                     </div>
                     <div style="display:flex; gap:10px;">
                         <button class="btn-sim" style="background:#10b981; color:white; font-weight:800;" onclick="runIDSLPythonCode()">Run Python Code 🚀</button>
@@ -8842,7 +8842,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <div style="background:#0b0f19; border-radius:10px; border:1px solid #1e293b; overflow:hidden;">
                     <div style="padding:8px 14px; background:#1e293b; color:#94a3b8; font-size:11px; font-weight:800; display:flex; justify-content:space-between;">
                         <span>TERMINAL OUTPUT (sys.stdout)</span>
-                        <span style="color:#10b981;">CPython 3.11 Kernel Active</span>
+                        <span style="color:#10b981;">MIT ADT Python 3.11 Kernel Active</span>
                     </div>
                     <pre id="idsl-console-output" style="margin:0; padding:16px; background:#0b0f19; color:#34d399; font-family:'JetBrains Mono', monospace; font-size:12px; min-height:140px; max-height:300px; overflow-y:auto; white-space:pre-wrap;">Click 'Run Python Code 🚀' to execute the pandas dataset preprocessing pipeline...</pre>
                 </div>
@@ -9266,7 +9266,7 @@ max      891.000000    1.000000    3.000000   80.000000    8.000000    6.000000 
         try {
             const py = await loadPyodideEngine();
             if (py) {
-                consoleEl.textContent = "🐍 Executing in MIT ADT Real Pyodide CPython 3.11 Compiler...\n\n";
+                consoleEl.textContent = "🐍 Executing in MIT ADT Real Python 3.11 Compiler...\n\n";
                 py.runPython(`
 import sys
 import io
@@ -9655,7 +9655,7 @@ sys.stderr = io.StringIO()
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:12px;">
                     <div>
                         <h3 style="color:#8b5cf6; margin:0; font-size:17px; font-weight:800;">🐍 Python Code Sandbox — Experiment 3 Notebook</h3>
-                        <p style="font-size:12px; color:var(--text-muted); margin:4px 0 0 0;">Execute real Python CPython code using client-side Pyodide WASM. Computes Mean, Median, Mode, Variance, Std Dev, Pearson Correlation, and Simpson's Paradox breakdown.</p>
+                        <p style="font-size:12px; color:var(--text-muted); margin:4px 0 0 0;">Execute real Python code using client-side MIT ADT Python Compiler. Computes Mean, Median, Mode, Variance, Std Dev, Pearson Correlation, and Simpson's Paradox breakdown.</p>
                     </div>
                     <div style="display:flex; gap:10px;">
                         <button class="btn-action primary" onclick="runIDSL3PythonCode()">▶ Run Python Script</button>
@@ -9683,14 +9683,14 @@ sys.stderr = io.StringIO()
         if (!consoleEl) return;
 
         const code = editor ? editor.value : '';
-        consoleEl.textContent = "🐍 Initializing MIT ADT Python 3.11 WASM Engine...\n";
+        consoleEl.textContent = "🐍 Initializing MIT ADT Python 3.11 Engine...\n";
 
-        // Try Real Pyodide CPython 3.11 Kernel
+        // Try Real Python 3.11 Kernel
         try {
             if (typeof loadPyodideEngine === 'function') {
                 const py = await loadPyodideEngine();
                 if (py) {
-                    consoleEl.textContent = "🐍 Executing in MIT ADT Real Pyodide CPython 3.11 Compiler...\n\n";
+                    consoleEl.textContent = "🐍 Executing in MIT ADT Real Python 3.11 Compiler...\n\n";
                     py.runPython(`
 import sys
 import io

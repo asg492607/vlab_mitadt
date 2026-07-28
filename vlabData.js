@@ -14493,9 +14493,9 @@ window.VLAB_DATA['idsl_exp1'] = {
             </svg>`
         },
         {
-            name: "Pyodide WASM Kernel",
-            category: "Client-Side CPython 3.11 Runtime",
-            description: "Python 3.11 compiled to WebAssembly. Executes real Python, Pandas, and NumPy code 100% locally inside student web browsers without server latency.",
+            name: "MIT ADT Python Kernel",
+            category: "Client-Side Python 3.11 Runtime",
+            description: "Python 3.11 compiled for browser execution. Executes real Python, Pandas, and NumPy code 100% locally inside student web browsers without server latency.",
             svg: `<svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <rect width="100" height="100" rx="16" fill="#0f172a"/>
                 <path d="M48 20C32 20 33 27 33 27L33 34H49V36H27C27 36 20 36 20 52C20 68 25 67 25 67H30V60C30 52 38 52 38 52H54C54 52 61 52 61 44V28C61 28 62 20 48 20Z" fill="#38bdf8"/>
@@ -14801,9 +14801,9 @@ window.VLAB_DATA['idsl_exp2'] = {
             svg: `<svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="16" fill="#0f172a"/><rect x="25" y="55" width="10" height="25" rx="3" fill="#f43f5e"/><rect x="40" y="35" width="10" height="45" rx="3" fill="#10b981"/><rect x="55" y="45" width="10" height="35" rx="3" fill="#38bdf8"/><rect x="70" y="25" width="10" height="55" rx="3" fill="#f59e0b"/><path d="M20 78H80" stroke="#475569" stroke-width="2"/></svg>`
         },
         {
-            name: "Pyodide WASM Kernel (Python 3.11)",
+            name: "MIT ADT Python 3.11 Kernel",
             category: "Client-Side Execution Kernel",
-            description: "Executes real Python 3.11 CPython code locally inside the web browser with Pandas and NumPy preloaded.",
+            description: "Executes real Python 3.11 code locally inside the web browser with Pandas and NumPy preloaded.",
             svg: `<svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="16" fill="#0f172a"/><path d="M48 20C32 20 33 27 33 27L33 34H49V36H27C27 36 20 36 20 52C20 68 25 67 25 67H30V60C30 52 38 52 38 52H54C54 52 61 52 61 44V28C61 28 62 20 48 20Z" fill="#38bdf8"/><path d="M52 80C68 80 67 73 67 73L67 66H51V64H73C73 64 80 64 80 48C80 32 75 33 75 33H70V40C70 48 62 48 62 48H46C46 46 39 48 39 56V72C39 72 38 80 52 80Z" fill="#facc15"/><circle cx="42" cy="27" r="3" fill="#0f172a"/><circle cx="58" cy="73" r="3" fill="#0f172a"/></svg>`
         }
     ],
@@ -15088,7 +15088,7 @@ window.VLAB_DATA['idsl_exp3'] = {
             svg: `<svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="16" fill="#0f172a"/><rect x="25" y="55" width="10" height="25" rx="3" fill="#f43f5e"/><rect x="40" y="35" width="10" height="45" rx="3" fill="#10b981"/><rect x="55" y="45" width="10" height="35" rx="3" fill="#38bdf8"/><rect x="70" y="25" width="10" height="55" rx="3" fill="#f59e0b"/><path d="M20 78H80" stroke="#475569" stroke-width="2"/></svg>`
         },
         {
-            name: "Pyodide WASM Kernel (Python 3.11)",
+            name: "MIT ADT Python 3.11 Kernel",
             category: "Client-Side Python Engine",
             description: "Executes real Python 3.11 code directly in your browser with pre-installed Pandas, NumPy, Seaborn, and Matplotlib.",
             svg: `<svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="16" fill="#0f172a"/><path d="M48 20C32 20 33 27 33 27L33 34H49V36H27C27 36 20 36 20 52C20 68 25 67 25 67H30V60C30 52 38 52 38 52H54C54 52 61 52 61 44V28C61 28 62 20 48 20Z" fill="#38bdf8"/><path d="M52 80C68 80 67 73 67 73L67 66H51V64H73C73 64 80 64 80 48C80 32 75 33 75 33H70V40C70 48 62 48 62 48H46C46 46 39 48 39 56V72C39 72 38 80 52 80Z" fill="#facc15"/><circle cx="42" cy="27" r="3" fill="#0f172a"/><circle cx="58" cy="73" r="3" fill="#0f172a"/></svg>`
