@@ -26242,5 +26242,3 @@ Academic Rules:
                 window.addEventListener('resize', resize);
             })();
         }
-
-});
