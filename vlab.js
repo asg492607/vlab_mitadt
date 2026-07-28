@@ -1127,24 +1127,78 @@ class TopologySimulation {
             <div class="topology-workspace">
                 <aside class="topology-toolbox">
                     <div class="toolbox-tabs">
-                        <button class="tab-btn active" data-tab="devices" title="Network Devices">💻</button>
-                        <button class="tab-btn" data-tab="cables" title="Connections">⚡</button>
+                        <button class="tab-btn active" data-tab="routers" title="Routers (2911, 4331, 1941, 2901, PT)">🌐</button>
+                        <button class="tab-btn" data-tab="switches" title="Switches (2960, 3560 L3, 3650, IE2000, PT)">📟</button>
+                        <button class="tab-btn" data-tab="hubs" title="Hubs & Repeaters (PT-Hub, Repeater, Coaxial)">🎛️</button>
+                        <button class="tab-btn" data-tab="wireless" title="Wireless Devices (AP, WRT300N, WLC)">📶</button>
+                        <button class="tab-btn" data-tab="security" title="Security & Firewalls (ASA 5505, ASA 5506)">🧱</button>
+                        <button class="tab-btn" data-tab="end-devices" title="End Devices (PC, Laptop, Server, IP Phone, TV, Mobile, Printer, IoT)">🖥️</button>
+                        <button class="tab-btn" data-tab="cables" title="Connections & Cables">⚡</button>
                         <button class="tab-btn" data-tab="tools" title="Common Tools">🛠️</button>
                     </div>
                     <div class="toolbox-content">
-                        <div class="tool-category active" id="cat-devices">
-                            <div class="tool-item" draggable="true" data-type="router" title="Router">🌐</div>
-                            <div class="tool-item" draggable="true" data-type="switch" title="L2 Switch">📟</div>
-                            <div class="tool-item" draggable="true" data-type="hub" title="Hub">🧱</div>
-                            <div class="tool-item" draggable="true" data-type="pc" title="PC">🖥️</div>
-                            <div class="tool-item" draggable="true" data-type="laptop" title="Laptop">💻</div>
-                            <div class="tool-item" draggable="true" data-type="server" title="Server">🗄️</div>
+                        <!-- Routers -->
+                        <div class="tool-category active" id="cat-routers">
+                            <div class="tool-item" draggable="true" data-type="cisco_2911" title="Cisco 2911 ISR Router (3x GE, HWIC)"><span class="tool-icon">🌐</span><span class="tool-label">Cisco 2911</span></div>
+                            <div class="tool-item" draggable="true" data-type="cisco_4331" title="Cisco 4331 ISR Router (3x Modular GE)"><span class="tool-icon">🌐</span><span class="tool-label">Cisco 4331</span></div>
+                            <div class="tool-item" draggable="true" data-type="cisco_1941" title="Cisco 1941 ISR Router (2x GE)"><span class="tool-icon">🌐</span><span class="tool-label">Cisco 1941</span></div>
+                            <div class="tool-item" draggable="true" data-type="cisco_2901" title="Cisco 2901 ISR Router (2x GE Voice)"><span class="tool-icon">🌐</span><span class="tool-label">Cisco 2901</span></div>
+                            <div class="tool-item" draggable="true" data-type="generic_router" title="PT-Router (Generic Multiport)"><span class="tool-icon">🌐</span><span class="tool-label">PT-Router</span></div>
                         </div>
+
+                        <!-- Switches -->
+                        <div class="tool-category" id="cat-switches">
+                            <div class="tool-item" draggable="true" data-type="cisco_2960" title="Cisco Catalyst 2960 24-Port L2 Switch"><span class="tool-icon">📟</span><span class="tool-label">2960 24TT</span></div>
+                            <div class="tool-item" draggable="true" data-type="cisco_3560" title="Cisco Catalyst 3560 24-Port L3 Switch"><span class="tool-icon">📟</span><span class="tool-label">3560-24PS (L3)</span></div>
+                            <div class="tool-item" draggable="true" data-type="cisco_3650" title="Cisco Catalyst 3650 Multilayer Switch"><span class="tool-icon">📟</span><span class="tool-label">3650 L3</span></div>
+                            <div class="tool-item" draggable="true" data-type="cisco_ie2000" title="Cisco IE-2000 Industrial Switch"><span class="tool-icon">📟</span><span class="tool-label">IE-2000</span></div>
+                            <div class="tool-item" draggable="true" data-type="generic_switch" title="PT-Switch (Generic 24-Port)"><span class="tool-icon">📟</span><span class="tool-label">PT-Switch</span></div>
+                        </div>
+
+                        <!-- Hubs & Repeaters -->
+                        <div class="tool-category" id="cat-hubs">
+                            <div class="tool-item" draggable="true" data-type="cisco_hub" title="PT-Hub (4-Port Repeater)"><span class="tool-icon">🎛️</span><span class="tool-label">PT-Hub</span></div>
+                            <div class="tool-item" draggable="true" data-type="cisco_repeater" title="PT-Repeater (2-Port Amplifier)"><span class="tool-icon">🎛️</span><span class="tool-label">PT-Repeater</span></div>
+                            <div class="tool-item" draggable="true" data-type="coaxial_hub" title="Coaxial Concentrator (Passive BNC Hub)"><span class="tool-icon">🎛️</span><span class="tool-label">Coax Hub</span></div>
+                        </div>
+
+                        <!-- Wireless -->
+                        <div class="tool-category" id="cat-wireless">
+                            <div class="tool-item" draggable="true" data-type="wireless_ap" title="Cisco WAP321 Access Point"><span class="tool-icon">📶</span><span class="tool-label">WAP321 AP</span></div>
+                            <div class="tool-item" draggable="true" data-type="wireless_router" title="Linksys WRT300N Wireless Router"><span class="tool-icon">📡</span><span class="tool-label">WRT300N</span></div>
+                            <div class="tool-item" draggable="true" data-type="cisco_wlc" title="Cisco 3504 Wireless LAN Controller"><span class="tool-icon">🛜</span><span class="tool-label">WLC 3504</span></div>
+                        </div>
+
+                        <!-- Security / Firewalls -->
+                        <div class="tool-category" id="cat-security">
+                            <div class="tool-item" draggable="true" data-type="cisco_asa_5505" title="Cisco ASA 5505 Security Appliance"><span class="tool-icon">🧱</span><span class="tool-label">ASA 5505</span></div>
+                            <div class="tool-item" draggable="true" data-type="cisco_asa_5506" title="Cisco ASA 5506-X Next-Gen Firewall"><span class="tool-icon">🧱</span><span class="tool-label">ASA 5506-X</span></div>
+                        </div>
+
+                        <!-- End Devices -->
+                        <div class="tool-category" id="cat-end-devices">
+                            <div class="tool-item" draggable="true" data-type="pc" title="Desktop Workstation PC"><span class="tool-icon">🖥️</span><span class="tool-label">PC Desktop</span></div>
+                            <div class="tool-item" draggable="true" data-type="laptop" title="Mobile Laptop PC"><span class="tool-icon">💻</span><span class="tool-label">Laptop</span></div>
+                            <div class="tool-item" draggable="true" data-type="server" title="Enterprise Multi-Service Server"><span class="tool-icon">🗄️</span><span class="tool-label">Server</span></div>
+                            <div class="tool-item" draggable="true" data-type="ip_phone" title="Cisco 7960 IP Phone"><span class="tool-icon">📞</span><span class="tool-label">Cisco IP Phone</span></div>
+                            <div class="tool-item" draggable="true" data-type="smart_tv" title="Smart HD Network TV"><span class="tool-icon">📺</span><span class="tool-label">Smart TV</span></div>
+                            <div class="tool-item" draggable="true" data-type="smartphone" title="Smartphone / Mobile Device"><span class="tool-icon">📱</span><span class="tool-label">Smartphone</span></div>
+                            <div class="tool-item" draggable="true" data-type="printer" title="Network Laser Printer"><span class="tool-icon">🖨️</span><span class="tool-label">Printer</span></div>
+                            <div class="tool-item" draggable="true" data-type="iot_gateway" title="Smart IoT Gateway Hub"><span class="tool-icon">📡</span><span class="tool-label">IoT Gateway</span></div>
+                        </div>
+
+                        <!-- Cables / Connections -->
                         <div class="tool-category" id="cat-cables">
-                            <div class="tool-item cable-tool" data-cable="straight" title="Straight-Through">➖</div>
-                            <div class="tool-item cable-tool" data-cable="cross" title="Cross-Over">〰️</div>
-                            <div class="tool-item cable-tool" data-cable="fiber" title="Fiber Optic">✨</div>
+                            <div class="tool-item cable-tool" data-cable="auto" title="Automatically Choose Connection Type"><span class="tool-icon">⚡</span><span class="tool-label">Auto Choose</span></div>
+                            <div class="tool-item cable-tool" data-cable="straight" title="Copper Straight-Through (TIA-568B)"><span class="tool-icon">🔌</span><span class="tool-label">Straight-Thru</span></div>
+                            <div class="tool-item cable-tool" data-cable="cross" title="Copper Cross-Over (TIA-568A/B)"><span class="tool-icon">🔀</span><span class="tool-label">Cross-Over</span></div>
+                            <div class="tool-item cable-tool" data-cable="fiber" title="Fiber Optic Media Cable"><span class="tool-icon">✨</span><span class="tool-label">Fiber Optic</span></div>
+                            <div class="tool-item cable-tool" data-cable="serial" title="Serial DCE/DTE WAN Cable"><span class="tool-icon">🔴</span><span class="tool-label">Serial WAN</span></div>
+                            <div class="tool-item cable-tool" data-cable="console" title="Console Rollover Cable"><span class="tool-icon">🩵</span><span class="tool-label">Console</span></div>
+                            <div class="tool-item cable-tool" data-cable="coaxial" title="Coaxial Broadband Cable"><span class="tool-icon">🤎</span><span class="tool-label">Coaxial</span></div>
+                            <div class="tool-item cable-tool" data-cable="wireless" title="802.11 Wireless / RF Air Link"><span class="tool-icon">📶</span><span class="tool-label">Wireless Link</span></div>
                         </div>
+
                         <div class="tool-category" id="cat-tools">
                             <button id="btnSendPacket" class="btn-sim" style="width:100%; margin-bottom:8px; background:#eab308; color:#0b0f19; border:none; font-weight:700; cursor:pointer;">✉️ Send Packet</button>
                             <button id="btnSaveTopo" class="btn-sim" style="width:100%; margin-bottom:8px;">Save</button>
@@ -1321,7 +1375,12 @@ class TopologySimulation {
         });
 
         document.querySelectorAll('.tool-item[draggable="true"]').forEach(item => {
-            item.addEventListener('dragstart', (e) => e.dataTransfer.setData('type', e.target.dataset.type));
+            item.addEventListener('dragstart', (e) => {
+                const targetItem = e.target.closest('.tool-item');
+                if (targetItem && targetItem.dataset.type) {
+                    e.dataTransfer.setData('type', targetItem.dataset.type);
+                }
+            });
         });
 
         document.querySelectorAll('.cable-tool').forEach(btn => {
@@ -1496,35 +1555,191 @@ class TopologySimulation {
         this.syncCollabTopology();
     }
 
+    getBaseType(type) {
+        if (!type) return 'pc';
+        const t = type.toLowerCase();
+        if (t.includes('router') || t.includes('2911') || t.includes('4331') || t.includes('1941') || t.includes('2901')) return 'router';
+        if (t.includes('switch') || t.includes('2960') || t.includes('3560') || t.includes('3650') || t.includes('ie2000')) return 'switch';
+        if (t.includes('hub') || t.includes('repeater')) return 'hub';
+        if (t.includes('asa') || t.includes('firewall')) return 'firewall';
+        if (t.includes('ap') || t.includes('wireless') || t.includes('wlc')) return 'wireless';
+        if (t.includes('server')) return 'server';
+        if (t.includes('laptop')) return 'laptop';
+        return 'pc';
+    }
+
+    getDeviceDefaultConfig(type, label, nodesLength) {
+        const cleanType = type.toUpperCase().replace('CISCO_', '').replace('_', '-');
+        const defaultLabel = label || `${cleanType}_${nodesLength + 1}`;
+        const hostname = defaultLabel;
+        const interfaces = {};
+
+        if (type === 'cisco_2911') {
+            interfaces['gi0/0'] = { ip: 'unassigned', mask: 'unassigned', status: 'down', desc: 'GigabitEthernet 0/0' };
+            interfaces['gi0/1'] = { ip: 'unassigned', mask: 'unassigned', status: 'down', desc: 'GigabitEthernet 0/1' };
+            interfaces['gi0/2'] = { ip: 'unassigned', mask: 'unassigned', status: 'down', desc: 'GigabitEthernet 0/2' };
+            interfaces['se0/0/0'] = { ip: 'unassigned', mask: 'unassigned', status: 'down', desc: 'Serial 0/0/0 (DCE WAN)' };
+            interfaces['se0/0/1'] = { ip: 'unassigned', mask: 'unassigned', status: 'down', desc: 'Serial 0/0/1 (DTE WAN)' };
+            interfaces['console'] = { ip: 'unassigned', mask: 'unassigned', status: 'up', desc: 'Console RS232' };
+        } else if (type === 'cisco_4331') {
+            interfaces['gi0/0/0'] = { ip: 'unassigned', mask: 'unassigned', status: 'down', desc: 'GigabitEthernet 0/0/0' };
+            interfaces['gi0/0/1'] = { ip: 'unassigned', mask: 'unassigned', status: 'down', desc: 'GigabitEthernet 0/0/1' };
+            interfaces['gi0/0/2'] = { ip: 'unassigned', mask: 'unassigned', status: 'down', desc: 'GigabitEthernet 0/0/2' };
+            interfaces['se0/1/0'] = { ip: 'unassigned', mask: 'unassigned', status: 'down', desc: 'Serial 0/1/0 WAN' };
+            interfaces['console'] = { ip: 'unassigned', mask: 'unassigned', status: 'up', desc: 'Console Port' };
+        } else if (type === 'cisco_1941' || type === 'cisco_2901') {
+            interfaces['gi0/0'] = { ip: 'unassigned', mask: 'unassigned', status: 'down', desc: 'GigabitEthernet 0/0' };
+            interfaces['gi0/1'] = { ip: 'unassigned', mask: 'unassigned', status: 'down', desc: 'GigabitEthernet 0/1' };
+            interfaces['se0/0/0'] = { ip: 'unassigned', mask: 'unassigned', status: 'down', desc: 'Serial 0/0/0 WAN' };
+            interfaces['console'] = { ip: 'unassigned', mask: 'unassigned', status: 'up', desc: 'Console Port' };
+        } else if (type === 'generic_router' || type === 'router') {
+            interfaces['fa0/0'] = { ip: 'unassigned', mask: 'unassigned', status: 'down', desc: 'FastEthernet 0/0' };
+            interfaces['fa0/1'] = { ip: 'unassigned', mask: 'unassigned', status: 'down', desc: 'FastEthernet 0/1' };
+            interfaces['fa1/0'] = { ip: 'unassigned', mask: 'unassigned', status: 'down', desc: 'FastEthernet 1/0' };
+            interfaces['fa1/1'] = { ip: 'unassigned', mask: 'unassigned', status: 'down', desc: 'FastEthernet 1/1' };
+            interfaces['se0/0'] = { ip: 'unassigned', mask: 'unassigned', status: 'down', desc: 'Serial 0/0' };
+            interfaces['console'] = { ip: 'unassigned', mask: 'unassigned', status: 'up', desc: 'Console Port' };
+        } else if (type === 'cisco_2960' || type === 'cisco_3560' || type === 'cisco_3650' || type === 'generic_switch' || type === 'switch') {
+            for (let i = 1; i <= 24; i++) {
+                interfaces[`fa0/${i}`] = { ip: 'unassigned', mask: 'unassigned', status: 'up', desc: `FastEthernet 0/${i}` };
+            }
+            interfaces['gi0/1'] = { ip: 'unassigned', mask: 'unassigned', status: 'up', desc: 'GigabitEthernet 0/1 Uplink' };
+            interfaces['gi0/2'] = { ip: 'unassigned', mask: 'unassigned', status: 'up', desc: 'GigabitEthernet 0/2 Uplink' };
+        } else if (type === 'cisco_ie2000') {
+            for (let i = 1; i <= 8; i++) {
+                interfaces[`fa0/${i}`] = { ip: 'unassigned', mask: 'unassigned', status: 'up', desc: `FastEthernet 0/${i}` };
+            }
+            interfaces['gi0/1'] = { ip: 'unassigned', mask: 'unassigned', status: 'up', desc: 'Industrial Uplink 1' };
+        } else if (type === 'cisco_hub' || type === 'hub') {
+            interfaces['port1'] = { ip: 'unassigned', mask: 'unassigned', status: 'up', desc: 'Port 1' };
+            interfaces['port2'] = { ip: 'unassigned', mask: 'unassigned', status: 'up', desc: 'Port 2' };
+            interfaces['port3'] = { ip: 'unassigned', mask: 'unassigned', status: 'up', desc: 'Port 3' };
+            interfaces['port4'] = { ip: 'unassigned', mask: 'unassigned', status: 'up', desc: 'Port 4' };
+        } else if (type === 'cisco_repeater') {
+            interfaces['port1'] = { ip: 'unassigned', mask: 'unassigned', status: 'up', desc: 'Port 1 IN' };
+            interfaces['port2'] = { ip: 'unassigned', mask: 'unassigned', status: 'up', desc: 'Port 2 OUT' };
+        } else if (type === 'coaxial_hub') {
+            interfaces['bnc1'] = { ip: 'unassigned', mask: 'unassigned', status: 'up', desc: 'BNC 1' };
+            interfaces['bnc2'] = { ip: 'unassigned', mask: 'unassigned', status: 'up', desc: 'BNC 2' };
+            interfaces['bnc3'] = { ip: 'unassigned', mask: 'unassigned', status: 'up', desc: 'BNC 3' };
+            interfaces['bnc4'] = { ip: 'unassigned', mask: 'unassigned', status: 'up', desc: 'BNC 4' };
+        } else if (type === 'wireless_ap') {
+            interfaces['eth0'] = { ip: 'unassigned', mask: 'unassigned', status: 'up', desc: 'Ethernet Uplink' };
+            interfaces['radio0'] = { ip: 'unassigned', mask: 'unassigned', status: 'up', desc: '802.11 Wireless Radio' };
+        } else if (type === 'wireless_router') {
+            interfaces['internet'] = { ip: 'unassigned', mask: 'unassigned', status: 'up', desc: 'WAN / Internet Port' };
+            interfaces['eth1'] = { ip: '192.168.0.1', mask: '255.255.255.0', status: 'up', desc: 'LAN Port 1' };
+            interfaces['eth2'] = { ip: '192.168.0.1', mask: '255.255.255.0', status: 'up', desc: 'LAN Port 2' };
+            interfaces['eth3'] = { ip: '192.168.0.1', mask: '255.255.255.0', status: 'up', desc: 'LAN Port 3' };
+            interfaces['eth4'] = { ip: '192.168.0.1', mask: '255.255.255.0', status: 'up', desc: 'LAN Port 4' };
+            interfaces['wireless0'] = { ip: '192.168.0.1', mask: '255.255.255.0', status: 'up', desc: 'Wi-Fi 802.11n' };
+        } else if (type === 'cisco_wlc') {
+            interfaces['mgmt0'] = { ip: '192.168.1.1', mask: '255.255.255.0', status: 'up', desc: 'Management' };
+            interfaces['port1'] = { ip: 'unassigned', mask: 'unassigned', status: 'up', desc: 'Port 1 AP Link' };
+            interfaces['port2'] = { ip: 'unassigned', mask: 'unassigned', status: 'up', desc: 'Port 2' };
+            interfaces['port3'] = { ip: 'unassigned', mask: 'unassigned', status: 'up', desc: 'Port 3' };
+            interfaces['port4'] = { ip: 'unassigned', mask: 'unassigned', status: 'up', desc: 'Port 4' };
+        } else if (type === 'cisco_asa_5505' || type === 'cisco_asa_5506') {
+            interfaces['eth0/0'] = { ip: 'unassigned', mask: 'unassigned', status: 'down', desc: 'Outside (Security 0)' };
+            interfaces['eth0/1'] = { ip: 'unassigned', mask: 'unassigned', status: 'down', desc: 'Inside (Security 100)' };
+            interfaces['eth0/2'] = { ip: 'unassigned', mask: 'unassigned', status: 'down', desc: 'DMZ (Security 50)' };
+            interfaces['eth0/3'] = { ip: 'unassigned', mask: 'unassigned', status: 'down', desc: 'Management' };
+        } else if (type === 'laptop') {
+            interfaces['eth0'] = { ip: 'unassigned', mask: 'unassigned', status: 'up', desc: 'FastEthernet 0' };
+            interfaces['wlan0'] = { ip: 'unassigned', mask: 'unassigned', status: 'up', desc: 'Wireless 802.11' };
+        } else if (type === 'server') {
+            interfaces['eth0'] = { ip: 'unassigned', mask: 'unassigned', status: 'up', desc: 'Server NIC 1' };
+            interfaces['eth1'] = { ip: 'unassigned', mask: 'unassigned', status: 'up', desc: 'Server NIC 2' };
+        } else if (type === 'ip_phone') {
+            interfaces['sw-port'] = { ip: 'unassigned', mask: 'unassigned', status: 'up', desc: 'Switch Port (PoE)' };
+            interfaces['pc-port'] = { ip: 'unassigned', mask: 'unassigned', status: 'up', desc: 'PC Pass-Through Port' };
+        } else if (type === 'smart_tv' || type === 'smartphone') {
+            interfaces['wlan0'] = { ip: 'unassigned', mask: 'unassigned', status: 'up', desc: 'Wi-Fi Interface' };
+        } else if (type === 'iot_gateway') {
+            interfaces['eth0'] = { ip: 'unassigned', mask: 'unassigned', status: 'up', desc: 'Ethernet Gateway' };
+            interfaces['wlan0'] = { ip: 'unassigned', mask: 'unassigned', status: 'up', desc: 'Wi-Fi' };
+            interfaces['zigbee0'] = { ip: 'unassigned', mask: 'unassigned', status: 'up', desc: 'Zigbee Sensor Mesh' };
+        } else {
+            interfaces['eth0'] = { ip: 'unassigned', mask: 'unassigned', status: 'up', desc: 'FastEthernet 0' };
+        }
+
+        return {
+            hostname,
+            interfaces,
+            routes: [],
+            gateway: '',
+            dns: '',
+            vlans: { '1': { name: 'default', ports: [] } }
+        };
+    }
+
+    determineAutoCableType(n1, n2, p1, p2) {
+        if (!p1 || !p2) return 'straight';
+        if (p1.includes('se') || p2.includes('se')) return 'serial';
+        if (p1.includes('console') || p2.includes('console')) return 'console';
+        if (p1.includes('bnc') || p2.includes('bnc')) return 'coaxial';
+        if (p1.includes('radio') || p2.includes('radio') || p1.includes('wlan') || p2.includes('wlan') || p1.includes('wireless') || p2.includes('wireless')) return 'wireless';
+
+        const b1 = this.getBaseType(n1.type);
+        const b2 = this.getBaseType(n2.type);
+
+        // Same category devices (Router-Router, Switch-Switch, PC-PC, PC-Router) use Cross-Over
+        if (b1 === b2 || (b1 === 'pc' && b2 === 'router') || (b1 === 'router' && b2 === 'pc')) {
+            return 'cross';
+        }
+        return 'straight';
+    }
+
     addNode(type, x, y, label = null, config = null) {
         const iconMap = {
+            'cisco_2911': '🌐',
+            'cisco_4331': '🌐',
+            'cisco_1941': '🌐',
+            'cisco_2901': '🌐',
+            'generic_router': '🌐',
             'router': '🌐',
+            'cisco_2960': '📟',
+            'cisco_3560': '📟',
+            'cisco_3650': '📟',
+            'cisco_ie2000': '📟',
+            'generic_switch': '📟',
             'switch': '📟',
-            'hub': '🧱',
+            'cisco_hub': '🎛️',
+            'cisco_repeater': '🎛️',
+            'coaxial_hub': '🎛️',
+            'hub': '🎛️',
+            'wireless_ap': '📶',
+            'wireless_router': '📡',
+            'cisco_wlc': '🛜',
+            'cisco_asa_5505': '🧱',
+            'cisco_asa_5506': '🧱',
             'pc': '🖥️',
             'laptop': '💻',
-            'server': '🗄️'
+            'server': '🗄️',
+            'ip_phone': '📞',
+            'smart_tv': '📺',
+            'smartphone': '📱',
+            'printer': '🖨️',
+            'iot_gateway': '📡'
         };
+
+        const cleanType = type.toUpperCase().replace('CISCO_', '').replace('_', '-');
+        const defaultLabel = label || `${cleanType}_${this.nodes.length + 1}`;
+        const nodeConfig = config || this.getDeviceDefaultConfig(type, defaultLabel, this.nodes.length);
+
         const node = {
-            id: Date.now(),
-            type, x, y,
+            id: Date.now() + Math.floor(Math.random() * 1000),
+            type,
+            x,
+            y,
             icon: iconMap[type] || '📟',
-            label: label || `${type.toUpperCase()}_${this.nodes.length + 1}`,
-            config: config || {
-                hostname: label || `${type.toUpperCase()}_${this.nodes.length + 1}`,
-                interfaces: (type === 'router' || type === 'switch') ? {
-                    'fa0/0': { ip: 'unassigned', mask: 'unassigned', status: 'down', desc: '' },
-                    'fa0/1': { ip: 'unassigned', mask: 'unassigned', status: 'down', desc: '' }
-                } : {
-                    'eth0': { ip: 'unassigned', mask: 'unassigned', status: 'up', desc: '' }
-                },
-                routes: [],
-                vlans: { '1': { name: 'default', ports: [] } }
-            }
+            label: defaultLabel,
+            config: nodeConfig
         };
+
         this.nodes.push(node);
         this.addNodeElement(node);
-        this.updateStatus(`Added ${type.toUpperCase()}`);
+        this.updateStatus(`Added ${node.label}`);
         if (this.render) this.render();
         this.syncCollabTopology();
     }
@@ -1643,8 +1858,12 @@ class TopologySimulation {
                     const toPort = this.getNextAvailablePort(node);
 
                     if (fromPort && toPort) {
-                        this.links.push({ from: this.cableStartNode, to: node, type: this.selectedCable, fromPort, toPort });
-                        this.showHint(`Connected ${this.cableStartNode.label} to ${node.label}`);
+                        let cableType = this.selectedCable;
+                        if (cableType === 'auto') {
+                            cableType = this.determineAutoCableType(this.cableStartNode, node, fromPort, toPort);
+                        }
+                        this.links.push({ from: this.cableStartNode, to: node, type: cableType, fromPort, toPort });
+                        this.showHint(`Connected ${this.cableStartNode.label} [${fromPort}] to ${node.label} [${toPort}] (${cableType.toUpperCase()})`);
                         this.validateTopology();
                         this.syncCollabTopology();
                     } else {
@@ -3670,27 +3889,43 @@ nf.bind_listener(on_packet_receive)</textarea>
             if (link.type === 'straight') {
                 this.ctx.strokeStyle = isUp ? '#10b981' : '#f43f5e';
                 this.ctx.setLineDash([]);
+                this.ctx.lineWidth = 2.5;
             } else if (link.type === 'cross') {
-                this.ctx.strokeStyle = isUp ? '#fbbf24' : '#f43f5e';
+                this.ctx.strokeStyle = isUp ? '#16a34a' : '#f43f5e';
                 this.ctx.setLineDash([8, 5]);
+                this.ctx.lineWidth = 2.5;
             } else if (link.type === 'serial') {
-                this.ctx.strokeStyle = '#f43f5e';
+                this.ctx.strokeStyle = '#ef4444';
                 this.ctx.setLineDash([]);
+                this.ctx.lineWidth = 2;
                 this.drawZigzag(fx, fy, tx, ty);
                 this.ctx.stroke();
             } else if (link.type === 'fiber') {
-                this.ctx.strokeStyle = '#f97316';
-                this.ctx.setLineDash([15, 5]);
+                this.ctx.strokeStyle = '#f59e0b';
+                this.ctx.setLineDash([14, 4]);
+                this.ctx.lineWidth = 3;
+            } else if (link.type === 'console') {
+                this.ctx.strokeStyle = '#38bdf8';
+                this.ctx.setLineDash([]);
+                this.ctx.lineWidth = 2;
+            } else if (link.type === 'coaxial') {
+                this.ctx.strokeStyle = '#78350f';
+                this.ctx.setLineDash([]);
+                this.ctx.lineWidth = 4;
+            } else if (link.type === 'wireless') {
+                this.ctx.strokeStyle = '#06b6d4';
+                this.ctx.setLineDash([3, 6]);
+                this.ctx.lineWidth = 2;
             } else {
                 this.ctx.strokeStyle = isUp ? '#10b981' : '#f43f5e';
                 this.ctx.setLineDash([]);
+                this.ctx.lineWidth = 2.5;
             }
 
             if (link.type !== 'serial') {
-                this.ctx.lineWidth = 2.5;
                 this.ctx.moveTo(fx, fy);
                 const distance = Math.hypot(tx - fx, ty - fy);
-                const sag = distance * 0.15; // 15% physics sag based on distance
+                const sag = distance * 0.12; // 12% physics sag based on distance
                 const midX = (fx + tx) / 2;
                 const midY = (fy + ty) / 2 + sag;
                 this.ctx.quadraticCurveTo(midX, midY, tx, ty);
