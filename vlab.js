@@ -21,6 +21,40 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
+// Sync Firestore practical theory & title updates into VLAB_DATA for student view
+const syncFirestorePracticals = async () => {
+    try {
+        const snap = await getDocs(collection(db, "practicals"));
+        snap.forEach(d => {
+            const labId = d.id;
+            const custom = d.data();
+            if (!window.VLAB_DATA) window.VLAB_DATA = {};
+            if (!window.VLAB_DATA[labId]) {
+                window.VLAB_DATA[labId] = {
+                    title: custom.title || labId,
+                    aim: custom.aim || '',
+                    intro: custom.intro || {},
+                    theory: custom.theory || { intro: '', cards: [] },
+                    troubleshooting: custom.troubleshooting || {}
+                };
+            } else {
+                const existing = window.VLAB_DATA[labId];
+                window.VLAB_DATA[labId] = {
+                    ...existing,
+                    title: custom.title || existing.title,
+                    aim: custom.aim || existing.aim,
+                    intro: { ...(existing.intro || {}), ...(custom.intro || {}) },
+                    theory: custom.theory ? { ...(existing.theory || {}), ...custom.theory } : existing.theory,
+                    troubleshooting: custom.troubleshooting ? { ...(existing.troubleshooting || {}), ...custom.troubleshooting } : existing.troubleshooting
+                };
+            }
+        });
+    } catch(e) {
+        console.warn("Practicals sync note:", e);
+    }
+};
+syncFirestorePracticals();
+
 // Module-level timer tracking for lab cleanup
 const activeLabIntervals = [];
 const activeLabTimeouts = [];

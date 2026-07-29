@@ -122,9 +122,12 @@
             <div class="card">
                 <div class="card-title">
                     <span>✏️ Edit Practical Syllabus, Theory & Troubleshooting Data</span>
-                    <button class="btn-action btn-success" onclick="savePracticalDataToFirestore()">💾 Publish Changes to Students</button>
+                    <div style="display:flex; gap:8px;">
+                        <button class="btn-action btn-success" onclick="savePracticalDataToFirestore()">💾 Publish Changes to Students</button>
+                        <button class="btn-action" style="background:#ef4444; color:white; border:none;" onclick="deletePracticalDataFromFirestore()">🗑️ Delete Custom Theory</button>
+                    </div>
                 </div>
-                <p style="color:var(--text-muted); font-size:13px; margin-bottom:16px;">Teachers can customize the title, executive aim, technical theory sections, and troubleshooting scenarios for any practical lab. Changes update instantly for all students.</p>
+                <p style="color:var(--text-muted); font-size:13px; margin-bottom:16px;">Teachers can customize the title, executive aim, technical theory concepts/cards, and troubleshooting scenarios for any practical lab. Changes update instantly for all students.</p>
 
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px; margin-bottom:16px;">
                     <div>
@@ -159,6 +162,17 @@
 
                 <label style="font-weight:700; font-size:12px;">Executive Summary (Introduction):</label>
                 <textarea id="editLabSummary" class="eval-box" style="height:70px;"></textarea>
+
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:20px; margin-bottom:10px;">
+                    <label style="font-weight:700; font-size:14px; color:var(--primary);">📖 Technical Theory Content & Concept Cards:</label>
+                    <button type="button" class="btn-action btn-purple" onclick="addTheoryCardRow()" style="font-size:12px; padding:6px 14px;">➕ Add Theory Card / Concept</button>
+                </div>
+                <label style="font-weight:700; font-size:12px;">Theory Overview Introduction:</label>
+                <textarea id="editLabTheoryIntro" class="eval-box" style="height:70px;" placeholder="Core theoretical background overview..."></textarea>
+
+                <div id="editTheoryCardsContainer" style="display:flex; flex-direction:column; gap:12px; margin-bottom:20px;">
+                    <!-- Dynamically rendered theory concept cards -->
+                </div>
 
                 <label style="font-weight:700; font-size:12px;">Troubleshooting Fault Scenario Problem Description:</label>
                 <input id="editLabProblem" type="text" class="eval-box" placeholder="Fault scenario problem statement...">
@@ -267,7 +281,7 @@
     <!-- FIREBASE INITIALIZATION & WORKSPACE JS ENGINE -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
-        import { getFirestore, collection, getDocs, doc, getDoc, updateDoc, setDoc, query, where, writeBatch } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, doc, getDoc, updateDoc, setDoc, deleteDoc, query, where, writeBatch } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 
         const firebaseConfig = {
@@ -464,6 +478,25 @@
         };
 
         // --- TEACHER PRACTICAL SYLLABUS & CONTENT EDITOR ---
+        window.addTheoryCardRow = (title = '', content = '') => {
+            const container = document.getElementById('editTheoryCardsContainer');
+            if (!container) return;
+            const cardId = 'tcard_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4);
+            const cardDiv = document.createElement('div');
+            cardDiv.className = 'theory-card-editor-row';
+            cardDiv.id = cardId;
+            cardDiv.style.cssText = 'background:var(--bg-alt); border:1px solid var(--border); padding:14px; border-radius:12px; margin-top:8px;';
+            cardDiv.innerHTML = `
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                    <span style="font-weight:700; font-size:12px; color:var(--primary);">Concept / Theory Section</span>
+                    <button type="button" onclick="document.getElementById('${cardId}').remove()" style="background:#ef4444; color:white; border:none; padding:4px 10px; border-radius:6px; font-size:11px; cursor:pointer;">🗑️ Delete Card</button>
+                </div>
+                <input type="text" class="eval-box tcard-title" value="${(title || '').replace(/"/g, '&quot;')}" placeholder="Card Title (e.g. Chapter 1: Introduction to OSI Model)" style="margin-bottom:8px; font-weight:700;">
+                <textarea class="eval-box tcard-content" style="height:70px;" placeholder="Card detailed explanation / concept text...">${content || ''}</textarea>
+            `;
+            container.appendChild(cardDiv);
+        };
+
         window.loadPracticalDataForEditing = async () => {
             const labId = document.getElementById('editLabSelect').value;
             const data = window.VLAB_DATA ? window.VLAB_DATA[labId] : null;
@@ -475,6 +508,19 @@
             document.getElementById('editLabSummary').value = data.intro ? (data.intro.summary || '') : '';
             document.getElementById('editLabProblem').value = data.troubleshooting ? (data.troubleshooting.problem || '') : '';
             document.getElementById('editLabFix').value = data.troubleshooting ? (data.troubleshooting.fix || '') : '';
+            document.getElementById('editLabTheoryIntro').value = data.theory ? (data.theory.intro || '') : '';
+
+            const container = document.getElementById('editTheoryCardsContainer');
+            container.innerHTML = '';
+
+            let cards = [];
+            if (data.theory) {
+                if (data.theory.cards && Array.isArray(data.theory.cards)) {
+                    cards = data.theory.cards;
+                } else if (data.theory.sections && Array.isArray(data.theory.sections)) {
+                    cards = data.theory.sections.map(s => ({ title: s.heading, content: s.content }));
+                }
+            }
 
             try {
                 const docSnap = await getDoc(doc(db, "practicals", labId));
@@ -485,8 +531,18 @@
                     if (d.summary) document.getElementById('editLabSummary').value = d.summary;
                     if (d.problem) document.getElementById('editLabProblem').value = d.problem;
                     if (d.fix) document.getElementById('editLabFix').value = d.fix;
+                    if (d.theory && d.theory.intro) document.getElementById('editLabTheoryIntro').value = d.theory.intro;
+                    if (d.theory && d.theory.cards && Array.isArray(d.theory.cards)) {
+                        cards = d.theory.cards;
+                    }
                 }
             } catch(e) {}
+
+            if (cards && cards.length > 0) {
+                cards.forEach(c => addTheoryCardRow(c.title || '', c.content || ''));
+            } else {
+                addTheoryCardRow('', '');
+            }
         };
 
         window.savePracticalDataToFirestore = async () => {
@@ -496,11 +552,23 @@
             const summary = document.getElementById('editLabSummary').value.trim();
             const problem = document.getElementById('editLabProblem').value.trim();
             const fix = document.getElementById('editLabFix').value.trim();
+            const theoryIntro = document.getElementById('editLabTheoryIntro').value.trim();
+
+            const cardRows = document.querySelectorAll('#editTheoryCardsContainer .theory-card-editor-row');
+            const cards = [];
+            cardRows.forEach(row => {
+                const t = row.querySelector('.tcard-title').value.trim();
+                const c = row.querySelector('.tcard-content').value.trim();
+                if (t || c) {
+                    cards.push({ title: t, content: c });
+                }
+            });
 
             try {
                 const payload = {
                     title, aim,
                     intro: { summary },
+                    theory: { intro: theoryIntro, cards: cards },
                     troubleshooting: { problem, fix },
                     updatedAt: new Date().toISOString()
                 };
@@ -509,10 +577,26 @@
                 if (window.VLAB_DATA && window.VLAB_DATA[labId]) {
                     window.VLAB_DATA[labId].title = title;
                     window.VLAB_DATA[labId].aim = aim;
+                    if (!window.VLAB_DATA[labId].theory) window.VLAB_DATA[labId].theory = {};
+                    window.VLAB_DATA[labId].theory.intro = theoryIntro;
+                    window.VLAB_DATA[labId].theory.cards = cards;
                 }
                 alert(`Successfully saved and published practical updates for ${title} to Firestore!`);
             } catch(e) {
                 alert("Failed to publish practical data: " + e.message);
+            }
+        };
+
+        window.deletePracticalDataFromFirestore = async () => {
+            const labId = document.getElementById('editLabSelect').value;
+            if (!confirm(`Are you sure you want to delete custom theory overrides for ${labId}? This will reset the practical to default syllabus content.`)) return;
+
+            try {
+                await deleteDoc(doc(db, "practicals", labId));
+                alert(`Deleted custom theory overrides for ${labId}. Loaded default syllabus content.`);
+                loadPracticalDataForEditing();
+            } catch(e) {
+                alert("Failed to delete custom theory overrides: " + e.message);
             }
         };
 

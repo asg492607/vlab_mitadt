@@ -315,10 +315,11 @@
                                     <th>Code</th>
                                     <th>Subject Name</th>
                                     <th>Category</th>
+                                    <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody id="subjectTableBody">
-                                <tr><td colspan="3" style="text-align:center; padding:30px; color:var(--text-muted);">No custom subjects added yet. Click "+ Add Subject" to create one.</td></tr>
+                                <tr><td colspan="4" style="text-align:center; padding:30px; color:var(--text-muted);">No custom subjects added yet. Click "+ Add Subject" to create one.</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -337,10 +338,11 @@
                                     <th>Subject</th>
                                     <th>Practical Title</th>
                                     <th>Category</th>
+                                    <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody id="practicalTableBody">
-                                <tr><td colspan="3" style="text-align:center; padding:30px; color:var(--text-muted);">No custom practicals created yet. Click "+ Add Practical" to build one.</td></tr>
+                                <tr><td colspan="4" style="text-align:center; padding:30px; color:var(--text-muted);">No custom practicals created yet. Click "+ Add Practical" to build one.</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -601,6 +603,76 @@
             <div style="display:flex; gap:10px;">
                 <button class="btn-action" style="flex:1; padding:12px; background:#2563eb; color:white; border:none;" onclick="submitRoleChange()">Save Role Changes</button>
                 <button class="btn-action" style="flex:0.5; padding:12px;" onclick="closeModal('roleModal')">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 6: EDIT SUBJECT -->
+    <div id="editSubjectModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal('editSubjectModal')">&times;</span>
+            <h3>✏️ Edit Academic Subject Track</h3>
+            <p style="color:var(--text-muted); font-size:14px; margin-bottom:20px;">Modify subject track details in the institutional catalog.</p>
+            
+            <input type="hidden" id="editSubOriginalCode">
+            <div style="margin-bottom:12px;">
+                <label style="font-weight:700; font-size:12px;">Subject Code</label>
+                <input type="text" id="editSubCode" class="form-input" readonly style="opacity:0.7;">
+            </div>
+            <div style="margin-bottom:12px;">
+                <label style="font-weight:700; font-size:12px;">Subject Name</label>
+                <input type="text" id="editSubName" placeholder="Subject name..." class="form-input">
+            </div>
+            <div style="margin-bottom:20px;">
+                <label style="font-weight:700; font-size:12px;">Category</label>
+                <input type="text" id="editSubCategory" placeholder="Category..." class="form-input">
+            </div>
+
+            <div style="display:flex; gap:10px;">
+                <button class="btn-action" style="flex:1; padding:12px; background:#2563eb; color:white; border:none;" onclick="submitEditSubject()">Save Subject Changes</button>
+                <button class="btn-action" style="flex:0.5; padding:12px;" onclick="closeModal('editSubjectModal')">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 7: EDIT PRACTICAL EXPERIMENT -->
+    <div id="editPracticalModal" class="modal">
+        <div class="modal-content" style="max-width:650px;">
+            <span class="close-modal" onclick="closeModal('editPracticalModal')">&times;</span>
+            <h3>✏️ Edit Practical Experiment & Theory</h3>
+            <p style="color:var(--text-muted); font-size:14px; margin-bottom:20px;">Modify experiment title, objectives, and theory overview.</p>
+            
+            <input type="hidden" id="editPracId">
+            <div style="margin-bottom:12px;">
+                <label style="font-weight:700; font-size:12px;">Select Subject Track</label>
+                <select id="editPracSubjectSelect" class="form-input">
+                    <option value="networking">Computer Networks (CN)</option>
+                    <option value="os">Operating Systems (OS)</option>
+                    <option value="dbms">DBMS & SQL</option>
+                    <option value="programming">Programming</option>
+                    <option value="ds">Data Science (DS)</option>
+                </select>
+            </div>
+            <div style="margin-bottom:12px;">
+                <label style="font-weight:700; font-size:12px;">Practical Title</label>
+                <input type="text" id="editPracTitle" placeholder="Practical title..." class="form-input">
+            </div>
+            <div style="margin-bottom:12px;">
+                <label style="font-weight:700; font-size:12px;">Category / Tag</label>
+                <input type="text" id="editPracCategory" placeholder="Category..." class="form-input">
+            </div>
+            <div style="margin-bottom:12px;">
+                <label style="font-weight:700; font-size:12px;">Executive Aim & Objectives</label>
+                <textarea id="editPracAim" class="form-input" style="height:60px;" placeholder="Aim of the experiment..."></textarea>
+            </div>
+            <div style="margin-bottom:20px;">
+                <label style="font-weight:700; font-size:12px;">Executive Summary / Theory Overview</label>
+                <textarea id="editPracSummary" class="form-input" style="height:60px;" placeholder="Theory introduction summary..."></textarea>
+            </div>
+
+            <div style="display:flex; gap:10px;">
+                <button class="btn-action" style="flex:1; padding:12px; background:#10b981; color:white; border:none;" onclick="submitEditPractical()">Save Experiment Changes</button>
+                <button class="btn-action" style="flex:0.5; padding:12px;" onclick="closeModal('editPracticalModal')">Cancel</button>
             </div>
         </div>
     </div>
@@ -938,17 +1010,109 @@
             `).join('');
         }
 
+        window.openEditSubjectModal = (code, name, category) => {
+            document.getElementById('editSubOriginalCode').value = code;
+            document.getElementById('editSubCode').value = code;
+            document.getElementById('editSubName').value = name;
+            document.getElementById('editSubCategory').value = category;
+            document.getElementById('editSubjectModal').style.display = 'flex';
+        };
+
+        window.submitEditSubject = async () => {
+            const code = document.getElementById('editSubCode').value.trim();
+            const name = document.getElementById('editSubName').value.trim();
+            const category = document.getElementById('editSubCategory').value.trim();
+            if (!name) { alert("Subject Name is required."); return; }
+
+            const updated = { code, name, category: category || 'Institutional Curriculum Subject Track', updatedAt: new Date().toISOString() };
+            try {
+                await setDoc(doc(db, "subjects", code), updated, { merge: true });
+            } catch(e) { console.warn("Firestore save note:", e); }
+
+            const idx = allSubjects.findIndex(s => s.code === code);
+            if (idx !== -1) allSubjects[idx] = { ...allSubjects[idx], ...updated };
+            renderSubjectTable(allSubjects);
+            closeModal('editSubjectModal');
+            alert(`Subject "${name}" (${code}) updated successfully!`);
+        };
+
+        window.deleteSubjectRecord = async (code, name) => {
+            if (!confirm(`Are you sure you want to delete subject track "${name}" (${code})?`)) return;
+            try {
+                await deleteDoc(doc(db, "subjects", code));
+                alert(`Subject "${name}" deleted successfully!`);
+            } catch(e) {
+                alert("Failed to delete subject: " + e.message);
+            }
+            allSubjects = allSubjects.filter(s => s.code !== code);
+            renderSubjectTable(allSubjects);
+        };
+
+        window.openEditPracticalModal = (id) => {
+            const p = allPracticals.find(x => x.id === id) || { id, title: '', category: '', subjectId: 'networking' };
+            document.getElementById('editPracId').value = id;
+            document.getElementById('editPracTitle').value = p.title || '';
+            document.getElementById('editPracCategory').value = p.category || '';
+            document.getElementById('editPracSubjectSelect').value = p.subjectId || 'networking';
+            document.getElementById('editPracAim').value = p.aim || '';
+            document.getElementById('editPracSummary').value = p.intro ? (p.intro.summary || '') : (p.summary || '');
+            document.getElementById('editPracticalModal').style.display = 'flex';
+        };
+
+        window.submitEditPractical = async () => {
+            const id = document.getElementById('editPracId').value;
+            const subjectId = document.getElementById('editPracSubjectSelect').value;
+            const title = document.getElementById('editPracTitle').value.trim();
+            const category = document.getElementById('editPracCategory').value.trim();
+            const aim = document.getElementById('editPracAim').value.trim();
+            const summary = document.getElementById('editPracSummary').value.trim();
+
+            if (!title) { alert("Practical Title is required."); return; }
+
+            const updated = {
+                id, subjectId, title, category: category || 'Practical Simulation',
+                aim, intro: { summary }, updatedAt: new Date().toISOString()
+            };
+
+            try {
+                await setDoc(doc(db, "practicals", id), updated, { merge: true });
+            } catch(e) { console.warn("Firestore save note:", e); }
+
+            const idx = allPracticals.findIndex(x => x.id === id);
+            if (idx !== -1) allPracticals[idx] = { ...allPracticals[idx], ...updated };
+            else allPracticals.unshift(updated);
+            renderPracticalTable(allPracticals);
+            closeModal('editPracticalModal');
+            alert(`Practical experiment "${title}" updated successfully!`);
+        };
+
+        window.deletePracticalRecord = async (id, title) => {
+            if (!confirm(`Are you sure you want to delete practical experiment "${title}" (${id})?`)) return;
+            try {
+                await deleteDoc(doc(db, "practicals", id));
+                alert(`Practical experiment "${title}" deleted successfully!`);
+            } catch(e) {
+                alert("Failed to delete practical: " + e.message);
+            }
+            allPracticals = allPracticals.filter(x => x.id !== id);
+            renderPracticalTable(allPracticals);
+        };
+
         function renderSubjectTable(subjects) {
             const tbody = document.getElementById('subjectTableBody');
             if (!subjects.length) {
-                tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; padding:30px; color:var(--text-muted);">No custom subjects added yet. Click "+ Add Subject" to create one.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:30px; color:var(--text-muted);">No custom subjects added yet. Click "+ Add Subject" to create one.</td></tr>`;
                 return;
             }
             tbody.innerHTML = subjects.map(s => `
                 <tr>
                     <td><code>${s.code}</code></td>
                     <td><b>${s.name}</b></td>
-                    <td>${s.category}</td>
+                    <td>${s.category || 'Curriculum'}</td>
+                    <td style="white-space:nowrap;">
+                        <button class="btn-action" style="background:#2563eb; color:white; margin-right:6px; padding:4px 10px; font-size:12px;" onclick="openEditSubjectModal('${s.code}', '${(s.name || '').replace(/'/g, "\\'")}', '${(s.category || '').replace(/'/g, "\\'")}')">✏️ Edit</button>
+                        <button class="btn-action" style="background:#ef4444; color:white; padding:4px 10px; font-size:12px;" onclick="deleteSubjectRecord('${s.code}', '${(s.name || '').replace(/'/g, "\\'")}')">🗑️ Delete</button>
+                    </td>
                 </tr>
             `).join('');
         }
@@ -956,14 +1120,18 @@
         function renderPracticalTable(pracs) {
             const tbody = document.getElementById('practicalTableBody');
             if (!pracs.length) {
-                tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; padding:30px; color:var(--text-muted);">No custom practicals created yet. Click "+ Add Practical" to build one.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:30px; color:var(--text-muted);">No custom practicals created yet. Click "+ Add Practical" to build one.</td></tr>`;
                 return;
             }
             tbody.innerHTML = pracs.map(p => `
                 <tr>
-                    <td><code>${p.subjectId}</code></td>
+                    <td><code>${p.subjectId || 'general'}</code></td>
                     <td><b>${p.title}</b></td>
-                    <td>${p.category}</td>
+                    <td>${p.category || 'Experiment'}</td>
+                    <td style="white-space:nowrap;">
+                        <button class="btn-action" style="background:#10b981; color:white; margin-right:6px; padding:4px 10px; font-size:12px;" onclick="openEditPracticalModal('${p.id}')">✏️ Edit</button>
+                        <button class="btn-action" style="background:#ef4444; color:white; padding:4px 10px; font-size:12px;" onclick="deletePracticalRecord('${p.id}', '${(p.title || '').replace(/'/g, "\\'")}')">🗑️ Delete</button>
+                    </td>
                 </tr>
             `).join('');
         }
