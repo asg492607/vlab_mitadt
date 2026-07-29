@@ -852,6 +852,11 @@
             defaultSubjects.forEach(s => mergedMap.set(s.code, s));
             customSubs.forEach(c => {
                 const code = (c.code || c.id || '').toLowerCase();
+                // Kali Linux track disabled from dashboard
+                if (code === 'kali') {
+                    // mergedMap.set('kali', { ... });
+                    return;
+                }
                 if (code) {
                     mergedMap.set(code, {
                         code: code,
