@@ -1,1 +1,0 @@
-﻿I will write a PowerShell script `find_full_report.ps1` in the workspace scratch directory to search all subagent and main agent transcript logs for the complete, untruncated audit report message.
